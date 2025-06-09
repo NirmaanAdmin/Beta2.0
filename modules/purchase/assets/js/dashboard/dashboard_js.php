@@ -25,6 +25,7 @@ function get_purchase_order_dashboard() {
     $('.cost_to_complete').text(response.cost_to_complete);
     $('.rev_contract_value').text(response.rev_contract_value);
     $('.percentage_utilized').text(response.percentage_utilized+'%');
+    $('.budgeted_procurement_net_value').text(response.budgeted_procurement_net_value);
     $('.procurement_table_data').html(response.procurement_table_data);
 
     // DOUGHNUT CHART - Budget Utilization

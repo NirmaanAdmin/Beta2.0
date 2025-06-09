@@ -219,6 +219,7 @@ class Dashboard_model extends App_Model
 	    }
 	    $response['cost_to_complete_ratio'] = $response['percentage_utilized'];
 	    $response['rev_contract_value_ratio'] = 100 - $response['cost_to_complete_ratio'];
+	    $response['budgeted_procurement_net_value'] = app_format_money(($cost_to_complete - $rev_contract_value), $base_currency);
 
 	    $response['budgeted_actual_category_labels'] = array();
 	    $response['budgeted_category_value'] = array();

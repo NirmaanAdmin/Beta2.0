@@ -118,7 +118,21 @@
                 </div>          
               </div>
 
-              <div class="col-md-6">
+              <div class="quick-stats-invoices col-md-6 tw-mb-2 sm:tw-mb-0">    
+                <div class="top_stats_wrapper">                                  
+                  <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                    <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">                                                    
+                      <span class="tw-truncate dashboard_stat_title">Net Remaining</span>                 
+                    </div>                      
+                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>  
+                  </div>                    
+                  <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                    <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">                                                    
+                      <span class="tw-truncate dashboard_stat_value budgeted_procurement_net_value"></span>                 
+                    </div>                      
+                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>  
+                  </div>              
+                </div>          
               </div>
 
             </div>
