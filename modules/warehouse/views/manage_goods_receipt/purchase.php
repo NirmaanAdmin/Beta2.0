@@ -204,7 +204,7 @@
 							</div>
 						</div>
 					</div>
-					<!-- <div class="panel_s">
+					<div class="panel_s">
 						<div class="panel-body">
 							<label for="attachment"><?php echo _l('attachment'); ?></label>
 							<div class="attachments">
@@ -245,7 +245,7 @@
 								}
 							} ?>
 						</div>
-					</div> -->
+					</div>
 					<div class="panel-body mtop10 invoice-item">
 						<div class="row">
 							<!-- <div class="col-md-4">
