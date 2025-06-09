@@ -46,6 +46,7 @@
       $('.procurement_table_data').html(response.procurement_table_data);
       $('.on_time_deliveries_percentage').text(response.on_time_deliveries_percentage + '%');
       $('.delivery_table_data').html(response.delivery_table_data);
+      $('.average_delay').text(response.average_delay + ' Days');
 
       // DOUGHNUT CHART - Budget Utilization
       var budgetUtilizationCtx = document.getElementById('doughnutChartbudgetUtilization').getContext('2d');
