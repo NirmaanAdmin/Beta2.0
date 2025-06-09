@@ -20827,7 +20827,7 @@ class Warehouse_model extends App_Model
 	public function get_inventory_documents(){
 
 		$this->db->select('*');
-		$this->db->from(db_prefix() . 'goods_receipt_documentetion');
+		$this->db->from(db_prefix() . 'goods_receipt_documentation');
 		return $this->db->get()->result();
 	}
 }
