@@ -948,12 +948,12 @@ class warehouse extends AdminController
 		$this->load->model('currencies_model');
 		$base_currency = $this->currencies_model->get_base_currency();
 		$data['base_currency'] = $base_currency;
-		
+
 		$data['attachments'] = $this->warehouse_model->get_inventory_attachments('goods_receipt', $id);
-		
+
 		$data['attachments_new'] = $this->warehouse_model->get_inventory_attachments('goods_receipt_checkl', $id);
 		$data['goods_documentitions'] = $this->warehouse_model->get_inventory_documents($id);
-		
+
 		$this->load->view('manage_goods_receipt/view_purchase', $data);
 	}
 
@@ -9619,33 +9619,214 @@ class warehouse extends AdminController
 		}
 	}
 	public function view_goods_receipt_attachments()
-    {
-	
-        $input = $this->input->post(); 
-        $attachments = $this->warehouse_model->view_goods_receipt_attachments($input);
-        echo json_encode(['result' => $attachments]);
-        die();
-    }
+	{
+
+		$input = $this->input->post();
+		$attachments = $this->warehouse_model->view_goods_receipt_attachments($input);
+		echo json_encode(['result' => $attachments]);
+		die();
+	}
 
 	public function view_goods_receipt_file($id)
-    {
-        $data['file'] = $this->warehouse_model->get_goods_receipt_file($id);
-        if (!$data['file']) {
-            header('HTTP/1.0 404 Not Found');
-            die;
-        }
-        $this->load->view('manage_goods_receipt/preview_goods_receipt_file', $data);
-    }
+	{
+		$data['file'] = $this->warehouse_model->get_goods_receipt_file($id);
+		if (!$data['file']) {
+			header('HTTP/1.0 404 Not Found');
+			die;
+		}
+		$this->load->view('manage_goods_receipt/preview_goods_receipt_file', $data);
+	}
 
 	public function delete_goods_receipt_attachment($id)
-    {
-        $file = $this->warehouse_model->get_goods_receipt_file($id);
-        if ($file->staffid == get_staff_user_id() || is_admin()) {
-            echo pur_html_entity_decode($this->warehouse_model->delete_goods_receipt_attachment($id));
-        } else {
-            header('HTTP/1.0 400 Bad error');
-            echo _l('access_denied');
-            die;
-        }
-    }
+	{
+		$file = $this->warehouse_model->get_goods_receipt_file($id);
+		if ($file->staffid == get_staff_user_id() || is_admin()) {
+			echo pur_html_entity_decode($this->warehouse_model->delete_goods_receipt_attachment($id));
+		} else {
+			header('HTTP/1.0 400 Bad error');
+			echo _l('access_denied');
+			die;
+		}
+	}
+
+
+	/**
+	 * Manage stock reconciliation page
+	 *
+	 * @param string $id delivery id
+	 * @return void
+	 */
+	public function stock_reconciliation($id = '')
+	{
+		$data['delivery_id'] = $id;
+		$data['title'] = _l('stock_reconciliation');
+		$this->load->view('stock_reconciliation/manage_reconciliation', $data);
+	}
+
+	public function add_stock_reconciliation($id = '', $edit_approval = false)
+	{
+
+		$this->load->model('clients_model');
+		$this->load->model('taxes_model');
+		if ($this->input->post()) {
+			$message = '';
+			$data = $this->input->post();
+
+
+
+			if (!$this->input->post('id')) {
+				$mess = $this->warehouse_model->add_goods_delivery($data);
+				if ($mess) {
+
+					if ($data['save_and_send_request'] == 'true') {
+						$this->save_and_send_request_send_mail(['rel_id' => $mess, 'rel_type' => '2', 'addedfrom' => get_staff_user_id()]);
+					}
+
+					set_alert('success', _l('added_successfully'));
+				} else {
+					set_alert('warning', _l('Add_stock_delivery_docket_false'));
+				}
+				redirect(admin_url('warehouse/manage_delivery/' . $mess));
+			} else {
+				$id = $this->input->post('id');
+				$goods_delivery = $this->warehouse_model->get_goods_delivery($id);
+				if ($goods_delivery->approval == 0) {
+					$mess = $this->warehouse_model->update_goods_delivery($data);
+				} else {
+					$mess = $this->warehouse_model->update_goods_delivery_approval($data);
+				}
+
+				if ($data['save_and_send_request'] == 'true') {
+					$this->save_and_send_request_send_mail(['rel_id' => $id, 'rel_type' => '2', 'addedfrom' => get_staff_user_id()]);
+				}
+
+				if ($mess) {
+					set_alert('success', _l('updated_successfully'));
+				}
+				redirect(admin_url('warehouse/manage_delivery/' . $id));
+			}
+		}
+		//get vaule render dropdown select
+		$data['commodity_code_name'] = $this->warehouse_model->get_commodity_code_name();
+		$data['units_code_name'] = $this->warehouse_model->get_units_code_name();
+		$data['units_warehouse_name'] = $this->warehouse_model->get_warehouse_code_name();
+		// $data['taxes'] = $this->warehouse_model->get_taxes();
+
+		$data['title'] = _l('stock_reconciliation');
+
+		$data['commodity_codes'] = $this->warehouse_model->get_commodity();
+		$data['warehouses'] = $this->warehouse_model->get_warehouse();
+
+		$data['taxes'] = $this->taxes_model->get();
+		$data['ajaxItems'] = false;
+		if (total_rows(db_prefix() . 'items') <= wh_ajax_on_total_items()) {
+			$data['items'] = $this->warehouse_model->wh_get_grouped('can_be_inventory');
+		} else {
+			$data['items']     = [];
+			$data['ajaxItems'] = true;
+		}
+
+		$warehouse_data = $this->warehouse_model->get_warehouse();
+
+		//sample
+		$stock_reconciliation_row_template = '';
+		if (is_numeric($id)) {
+			$goods_delivery = $this->warehouse_model->get_goods_delivery($id);
+			if ($goods_delivery->approval == 0) {
+				$stock_reconciliation_row_template = $this->warehouse_model->create_stock_reconciliation_row_template();
+			}
+		} else {
+
+			$stock_reconciliation_row_template = $this->warehouse_model->create_stock_reconciliation_row_template();
+		}
+
+		if (get_status_modules_wh('purchase')) {
+			if ($this->db->field_exists('delivery_status', db_prefix() . 'pur_orders')) {
+				$this->load->model('purchase/purchase_model');
+				$this->load->model('departments_model');
+				$this->load->model('staff_model');
+				$this->load->model('projects_model');
+
+				$data['pr_orders'] = $this->warehouse_model->get_pr_order_delivered();
+				$data['pr_orders_status'] = true;
+
+				$data['vendors'] = $this->purchase_model->get_vendor();
+
+				$data['projects'] = $this->projects_model->get();
+				$data['staffs'] = $this->staff_model->get();
+				$data['departments'] = $this->departments_model->get();
+			} else {
+				$data['pr_orders'] = [];
+				$data['pr_orders_status'] = false;
+			}
+		} else {
+			$data['pr_orders'] = [];
+			$data['pr_orders_status'] = false;
+		}
+
+		$data['customer_code'] = $this->clients_model->get();
+		if ($edit_approval) {
+			$invoices_data = $this->db->query('select *, iv.id as id from ' . db_prefix() . 'invoices as iv left join ' . db_prefix() . 'projects as pj on pj.id = iv.project_id left join ' . db_prefix() . 'clients as cl on cl.userid = iv.clientid  order by iv.id desc')->result_array();
+			$data['invoices'] = $invoices_data;
+		} else {
+			$data['invoices'] = $this->warehouse_model->get_invoices();
+		}
+		$data['stock_reconciliation_code'] = $this->warehouse_model->create_stock_reconciliation_code();
+		$data['staff'] = $this->warehouse_model->get_staff();
+		$data['current_day'] = date('Y-m-d');
+
+		if ($id != '') {
+			$is_purchase_order = false;
+			$goods_delivery = $this->warehouse_model->get_goods_delivery($id);
+			if (!$goods_delivery) {
+				blank_page('Stock export Not Found', 'danger');
+			}
+			$data['goods_delivery_detail'] = $this->warehouse_model->get_goods_delivery_detail($id);
+			$data['goods_delivery'] = $goods_delivery;
+
+			if (isset($goods_delivery->pr_order_id) && (float)$goods_delivery->pr_order_id > 0) {
+				$is_purchase_order = true;
+			}
+			$data['attachments'] = $this->warehouse_model->get_inventory_attachments('goods_delivery', $id);
+
+			if (count($data['goods_delivery_detail']) > 0) {
+				$index_receipt = 0;
+				foreach ($data['goods_delivery_detail'] as $delivery_detail) {
+					if ($delivery_detail['commodity_code'] != null && is_numeric($delivery_detail['commodity_code'])) {
+						$index_receipt++;
+						$unit_name = wh_get_unit_name($delivery_detail['unit_id']);
+						$taxname = '';
+						$expiry_date = null;
+						$lot_number = $delivery_detail['lot_number'];
+						$commodity_name = $delivery_detail['commodity_name'];
+						$without_checking_warehouse = 0;
+
+						if (strlen($commodity_name) == 0) {
+							$commodity_name = wh_get_item_variatiom($delivery_detail['commodity_code']);
+						}
+
+						$get_commodity = $this->warehouse_model->get_commodity($delivery_detail['commodity_code']);
+						if ($get_commodity) {
+							$without_checking_warehouse = $get_commodity->without_checking_warehouse;
+						}
+
+						$stock_reconciliation_row_template .= $this->warehouse_model->create_stock_reconciliation_row_template($warehouse_data, 'items[' . $index_receipt . ']', $commodity_name, $delivery_detail['warehouse_id'], $delivery_detail['available_quantity'], $delivery_detail['quantities'], $unit_name, $delivery_detail['unit_price'], $taxname, $delivery_detail['commodity_code'], $delivery_detail['unit_id'], $delivery_detail['vendor_id'], $delivery_detail['tax_rate'], $delivery_detail['total_money'], $delivery_detail['discount'], $delivery_detail['discount_money'], $delivery_detail['total_after_discount'], $delivery_detail['guarantee_period'], $delivery_detail['issued_date'], $lot_number, $delivery_detail['note'], $delivery_detail['sub_total'], $delivery_detail['tax_name'], $delivery_detail['tax_id'], $delivery_detail['id'], true, $is_purchase_order, $delivery_detail['serial_number'], $without_checking_warehouse, $delivery_detail['description'], $delivery_detail['quantities_json'], $delivery_detail['area']);
+					}
+				}
+			}
+		}
+
+		//edit note after approval
+		$data['edit_approval'] = $edit_approval;
+		$data['stock_reconciliation_row_template'] = $stock_reconciliation_row_template;
+		$get_base_currency =  get_base_currency();
+		if ($get_base_currency) {
+			$data['base_currency_id'] = $get_base_currency->id;
+		} else {
+			$data['base_currency_id'] = 0;
+		}
+		$data['goods_receipt'] = $this->warehouse_model->get_all_approved_goods_receipt();
+		
+		$this->load->view('stock_reconciliation/reconciliation', $data);
+	}
 }

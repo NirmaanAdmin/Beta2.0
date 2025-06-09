@@ -20910,4 +20910,248 @@ class Warehouse_model extends App_Model
 
 		return $deleted;
 	}
+
+	public function create_stock_reconciliation_code()
+	{
+
+		$goods_code = get_warehouse_option('inventory_stock_reconciliation_number_prefix') . (get_warehouse_option('next_inventory_stock_reconciliation_mumber'));
+
+		return $goods_code;
+	}
+
+	public function create_stock_reconciliation_row_template($warehouse_data = [], $name = '', $commodity_name = '', $warehouse_id = '', $available_quantity = '', $quantities = '', $unit_name = '', $unit_price = '', $taxname = '',  $commodity_code = '', $unit_id = '', $vendor_id = '', $tax_rate = '', $total_money = '', $discount = '', $discount_money = '', $total_after_discount = '', $guarantee_period = '', $issued_date = '', $lot_number = '', $note = '',  $sub_total = '', $tax_name = '', $tax_id = '', $item_key = '', $is_edit = false, $is_purchase_order = false, $serial_number = '', $without_checking_warehouse = 0, $description = '', $quantities_json = '', $area = '')
+	{
+
+		$this->load->model('invoice_items_model');
+		$row = '';
+
+		$name_commodity_code = 'commodity_code';
+		$name_commodity_name = 'commodity_name';
+		$name_warehouse_id = 'warehouse_id';
+		$name_unit_id = 'unit_id';
+		$name_vendor = 'vendor_id';
+		$name_unit_name = 'unit_name';
+		$name_available_quantity = 'available_quantity';
+		$name_quantities = 'quantities';
+		$name_unit_price = 'unit_price';
+		$name_tax_id_select = 'tax_select';
+		$name_tax_id = 'tax_id';
+		$name_total_money = 'total_money';
+		$name_lot_number = 'lot_number';
+		$name_issued_date = 'issued_date';
+		$name_note = 'note';
+		$name_tax_rate = 'tax_rate';
+		$name_tax_name = 'tax_name';
+		$array_attr = [];
+		$array_attr_payment = ['data-payment' => 'invoice'];
+		$name_sub_total = 'sub_total';
+		$name_discount = 'discount';
+		$name_discount_money = 'discount_money';
+		$name_total_after_discount = 'total_after_discount';
+		$name_guarantee_period = 'guarantee_period';
+		$name_serial_number = 'serial_number';
+		$name_without_checking_warehouse = 'without_checking_warehouse';
+		$name_description = 'description';
+		$name_area = 'area';
+
+		$array_available_quantity_attr = ['min' => '0.0', 'step' => 'any', 'readonly' => true];
+		$array_qty_attr = ['min' => '0.0', 'step' => 'any'];
+		$array_rate_attr = ['min' => '0.0', 'step' => 'any'];
+		$array_discount_attr = ['min' => '0.0', 'step' => 'any'];
+		$str_rate_attr = 'min="0.0" step="any"';
+
+		if (count($warehouse_data) == 0) {
+			$warehouse_data = $this->get_warehouse();
+		}
+
+		if ($name == '') {
+			$row .= '<tr class="main">
+                  <td></td>';
+			$vehicles = [];
+			$array_attr = ['placeholder' => _l('unit_price')];
+			$warehouse_id_name_attr = [];
+			$manual             = true;
+			$invoice_item_taxes = '';
+			$amount = '';
+			$sub_total = 0;
+		} else {
+
+			$row .= '<tr class="sortable item">
+					<td class="dragger"><input type="hidden" class="order" name="' . $name . '[order]"><input type="hidden" class="ids" name="' . $name . '[id]" value="' . $item_key . '" data-id="' . $name . '"></td>';
+			$name_commodity_code = $name . '[commodity_code]';
+			$name_commodity_name = $name . '[commodity_name]';
+			$name_warehouse_id = $name . '[warehouse_id]';
+			$name_unit_id = $name . '[unit_id]';
+			$name_vendor = $name . '[vendor_id][]';
+			$name_unit_name = '[unit_name]';
+			$name_available_quantity = $name . '[available_quantity]';
+			$name_quantities = $name . '[quantities]';
+			$name_unit_price = $name . '[unit_price]';
+			$name_tax_id_select = $name . '[tax_select][]';
+			$name_tax_id = $name . '[tax_id]';
+			$name_total_money = $name . '[total_money]';
+			$name_lot_number = $name . '[lot_number]';
+			$name_issued_date = $name . '[issued_date]';
+			$name_note = $name . '[note]';
+			$name_tax_rate = $name . '[tax_rate]';
+			$name_tax_name = $name . '[tax_name]';
+			$name_sub_total = $name . '[sub_total]';
+			$name_discount = $name . '[discount]';
+			$name_discount_money = $name . '[discount_money]';
+			$name_total_after_discount = $name . '[total_after_discount]';
+			$name_guarantee_period = $name . '[guarantee_period]';
+			$name_serial_number = $name . '[serial_number]';
+			$name_without_checking_warehouse = $name . '[without_checking_warehouse]';
+			$name_description = $name . '[description]';
+			$name_area = $name . '[area][]';
+
+			$warehouse_id_name_attr = ["onchange" => "get_available_quantity('" . $name_commodity_code . "','" . $name_warehouse_id . "','" . $name_available_quantity . "');", "data-none-selected-text" => _l('warehouse_name'), 'data-from_stock_id' => 'invoice'];
+			$array_available_quantity_attr = ['onblur' => 'wh_calculate_total();', 'onchange' => 'wh_calculate_total();', 'min' => '0.0', 'step' => 'any',  'data-available_quantity' => (float)$available_quantity, 'readonly' => true];
+			if ($is_purchase_order) {
+				$array_qty_attr = ['onblur' => 'wh_calculate_total();', 'onchange' => 'wh_calculate_total();', 'min' => '0.0', 'step' => 'any',  'data-quantity' => (float)$quantities, 'readonly' => true];
+			} elseif (strlen($serial_number) > 0) {
+				$array_qty_attr = ['onblur' => 'wh_calculate_total();', 'onchange' => 'wh_calculate_total();', 'min' => '0.0', 'step' => 'any',  'data-quantity' => (float)$quantities, 'readonly' => true];
+			} else {
+				$array_qty_attr = ['onblur' => 'wh_calculate_total();', 'onchange' => 'wh_calculate_total();', 'min' => '0.0', 'step' => 'any',  'data-quantity' => (float)$quantities];
+			}
+
+			$array_rate_attr = ['onblur' => 'wh_calculate_total();', 'onchange' => 'wh_calculate_total();', 'min' => '0.0', 'step' => 'any', 'data-amount' => 'invoice', 'placeholder' => _l('rate')];
+			$array_discount_attr = ['onblur' => 'wh_calculate_total();', 'onchange' => 'wh_calculate_total();', 'min' => '0.0', 'step' => 'any', 'data-amount' => 'invoice', 'placeholder' => _l('discount')];
+
+
+			$manual             = false;
+
+			$tax_money = 0;
+			$tax_rate_value = 0;
+
+			if ($is_edit) {
+				$invoice_item_taxes = wh_convert_item_taxes($tax_id, $tax_rate, $tax_name);
+				$arr_tax_rate = explode('|', $tax_rate);
+				foreach ($arr_tax_rate as $key => $value) {
+					$tax_rate_value += (float)$value;
+				}
+			} else {
+				$invoice_item_taxes = $taxname;
+				$tax_rate_data = $this->wh_get_tax_rate($taxname);
+				$tax_rate_value = $tax_rate_data['tax_rate'];
+			}
+
+			if ((float)$tax_rate_value != 0) {
+				$tax_money = (float)$unit_price * (float)$quantities * (float)$tax_rate_value / 100;
+				$goods_money = (float)$unit_price * (float)$quantities + (float)$tax_money;
+				$amount = (float)$unit_price * (float)$quantities + (float)$tax_money;
+			} else {
+				$goods_money = (float)$unit_price * (float)$quantities;
+				$amount = (float)$unit_price * (float)$quantities;
+			}
+
+			$sub_total = (float)$unit_price * (float)$quantities;
+			$amount = app_format_number($amount);
+		}
+
+		$clients_attr = ["onchange" => "get_vehicle('" . $name_commodity_code . "','" . $name_unit_id . "','" . $name_warehouse_id . "');", "data-none-selected-text" => _l(''), 'data-customer_id' => 'invoice'];
+
+		$row .= '<td class="">' . render_textarea($name_commodity_name, '', $commodity_name, ['rows' => 2, 'placeholder' => _l('item_description_placeholder'), 'readonly' => true]) . '</td>';
+		$row .= '<td class="">' . render_textarea($name_description, '', $description, ['rows' => 2, 'placeholder' => _l('item_description'), 'readonly' => true]) . '</td>';
+		$row .= '<td class="area">' . get_inventory_area_list($name_area, $area) . '</td>';
+		$row .= '<td class="warehouse_select">' .
+			render_select($name_warehouse_id, $warehouse_data, array('warehouse_id', 'warehouse_name'), '', $warehouse_id, $warehouse_id_name_attr, ["data-none-selected-text" => _l('warehouse_name')], 'no-margin') .
+			render_input($name_note, '', $note, 'text', ['placeholder' => _l('commodity_notes')], [], 'no-margin', 'input-transparent text-left') .
+			'</td>';
+		$row .= '<td class="available_quantity">' .
+			render_input($name_available_quantity, '', $available_quantity, 'number', $array_available_quantity_attr, [], 'no-margin') .
+			render_input($name_unit_name, '', $unit_name, 'text', ['placeholder' => _l('unit'), 'readonly' => true], [], 'no-margin', 'input-transparent text-right wh_input_none') .
+			'</td>';
+		if ($is_edit == false) {
+			$row .= '<td class="quantities"></td>';
+			$row .= '<td class="lot_number"></td>';
+			$row .= '<td class="issued_date"></td>';
+		} else {
+			$quantities_html = '';
+			if (!empty($quantities_json)) {
+				$quantities_json = json_decode($quantities_json, true);
+				if (!empty($quantities_json)) {
+					foreach ($quantities_json as $qkey => $qvalue) {
+						$input = array();
+						$input['vendor'] = $qkey;
+						$input['item_key'] = $name;
+						$input['item_value'] = $qvalue;
+						$quantities_html .= $this->get_quantities_html($input);
+					}
+				}
+			}
+			$row .= '<td class="quantities">' . $quantities_html . '</td>';
+
+			$lot_number_html = '';
+			if (!empty($lot_number)) {
+				$lot_number = json_decode($lot_number, true);
+				if (!empty($lot_number)) {
+					foreach ($lot_number as $lkey => $lvalue) {
+						$input = array();
+						$input['vendor'] = $lkey;
+						$input['item_key'] = $name;
+						$input['item_value'] = $lvalue;
+						$lot_number_html .= $this->get_lot_number_html($input);
+					}
+				}
+			}
+			$row .= '<td class="lot_number">' . $lot_number_html . '</td>';
+
+			$issued_date_html = '';
+			if (!empty($issued_date)) {
+				$issued_date = json_decode($issued_date, true);
+				if (!empty($issued_date)) {
+					foreach ($issued_date as $ikey => $ivalue) {
+						$input = array();
+						$input['vendor'] = $ikey;
+						$input['item_key'] = $name;
+						$input['item_value'] = $ivalue;
+						$issued_date_html .= $this->get_issued_date_html($input);
+					}
+				}
+			}
+			$row .= '<td class="issued_date">' . $issued_date_html . '</td>';
+		}
+		// Vendor selection dropdown
+		$vendorDropdown = get_vendor_list($name_vendor, $vendor_id, $item_key);
+		if ($item_key == '') {
+			// "Apply to All" button
+			$applyButton = '<button type="button" class="btn btn-primary apply-to-all-btn" data-item-key="' . $item_key . '">Apply to All</button>';
+		} else {
+			$applyButton = '';
+		}
+
+
+		$row .= '<td class="vendor">' . $vendorDropdown . $applyButton . '</td>';
+		// $row .= '<td class="amount" align="right">' . $amount . '</td>';
+		$row .= '<td class="hide discount">' . render_input($name_discount, '', $discount, 'number', $array_discount_attr) . '</td>';
+		$row .= '<td class="hide label_discount_money" align="right">' . $amount . '</td>';
+		// $row .= '<td class="label_total_after_discount" align="right">' . $amount . '</td>';
+
+		$row .= '<td class="hide commodity_code">' . render_input($name_commodity_code, '', $commodity_code, 'text', ['placeholder' => _l('commodity_code')]) . '</td>';
+		$row .= '<td class="hide unit_id">' . render_input($name_unit_id, '', $unit_id, 'text', ['placeholder' => _l('unit_id')]) . '</td>';
+
+		$row .= '<td class="hide discount_money">' . render_input($name_discount_money, '', $discount_money, 'number', []) . '</td>';
+		$row .= '<td class="hide total_after_discount">' . render_input($name_total_after_discount, '', $total_after_discount, 'number', []) . '</td>';
+		$row .= '<td class="hide serial_number">' . render_input($name_serial_number, '', $serial_number, 'text', []) . '</td>';
+		$row .= '<td class="hide without_checking_warehouse">' . render_input($name_without_checking_warehouse, '', $without_checking_warehouse, 'text', []) . '</td>';
+
+		if ($name == '') {
+			// $row .= '<td></td>';
+			$row .= '<td><button type="button" onclick="wh_add_item_to_table(\'undefined\',\'undefined\'); return false;" class="btn pull-right btn-info"><i class="fa fa-check"></i></button></td>';
+		} else {
+			if (is_numeric($item_key) && strlen($serial_number) > 0 && is_admin() && get_option('wh_products_by_serial')) {
+				$row .= '<td><a href="#" class="btn btn-success pull-right" data-toggle="tooltip" data-original-title="' . _l('wh_change_serial_number') . '" onclick="wh_change_serial_number(\'' . $name_commodity_code . '\',\'' . $name_warehouse_id . '\',\'' . $name_serial_number . '\',\'' . $name_commodity_name . '\'); return false;"><i class="fa fa-refresh"></i></a></td>';
+			} else {
+				// $row .= '<td></td>';
+			}
+			if ($is_purchase_order) {
+				$row .= '<td></td>';
+			} else {
+				$row .= '<td><a href="#" class="btn btn-danger pull-right" onclick="wh_delete_item(this,' . $item_key . ',\'.invoice-item\'); return false;"><i class="fa fa-trash"></i></a></td>';
+			}
+		}
+		$row .= '</tr>';
+		return $row;
+	}
 }

@@ -231,6 +231,14 @@ function warehouse_module_init_menu_items()
         ]);
 
         $CI->app_menu->add_sidebar_children_item('warehouse', [
+            'slug'     => 'stock-reconciliation',
+            'name'     => _l('stock_reconciliation'),
+            'icon'     => 'fa fa-th-large',
+            'href'     => admin_url('warehouse/stock_reconciliation'),
+            'position' => 3,
+        ]);
+
+        $CI->app_menu->add_sidebar_children_item('warehouse', [
             'slug'     => 'wa_manage_packing_list',
             'name'     => _l('wh_packing_lists'),
             'icon'     => 'fa fa-inbox',
