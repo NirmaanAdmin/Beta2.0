@@ -100,3 +100,54 @@ function toggle_small_view_proposal(table, main_data) {
     $(window).trigger('resize');
 
 }
+
+function view_goods_receipt_attachments(file_id, rel_id, rel_type) {
+    "use strict";
+    $.post(admin_url + 'warehouse/view_goods_receipt_attachments', {
+        rel_id: rel_id,
+        rel_type: rel_type,
+        file_id : file_id
+    }).done(function (response) {
+        response = JSON.parse(response);
+        if (response.result) {
+            $('.view_goods_receipt_attachments').html(response.result);
+        } else {
+            $('.view_goods_receipt_attachments').html('');
+        }
+        $('#viewgoodsReceiptAttachmentModal').modal('show');
+    });
+}
+
+
+function preview_goods_receipt_btn(invoker) {
+    "use strict";
+    var id = $(invoker).attr('id');
+    view_goods_receipt_file(id);
+}
+
+function view_goods_receipt_file(id) {
+    "use strict";
+    $('#goods_receipt_file_data').empty();
+    $("#goods_receipt_file_data").load(admin_url + 'warehouse/view_goods_receipt_file/' + id, function (response, status, xhr) {
+        if (status == "error") {
+            alert_float('danger', xhr.statusText);
+        }
+    });
+}
+function close_modal_preview() {
+    "use strict";
+    $('._project_file').modal('hide');
+}
+
+function delete_goods_receipt_attachment(id) {
+    "use strict";
+    if (confirm_delete()) {
+        requestGet('warehouse/delete_goods_receipt_attachment/' + id).done(function (success) {
+            if (success == 1) {
+                $(".view_goods_receipt_attachments").find('[data-attachment-id="' + id + '"]').remove();
+            }
+        }).fail(function (error) {
+            alert_float('danger', error.responseText);
+        });
+    }
+}

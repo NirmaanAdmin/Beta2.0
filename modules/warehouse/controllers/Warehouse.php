@@ -9618,4 +9618,34 @@ class warehouse extends AdminController
 			redirect(admin_url('warehouse/manage_purchase/' . $goods_receipt_id));
 		}
 	}
+	public function view_goods_receipt_attachments()
+    {
+	
+        $input = $this->input->post(); 
+        $attachments = $this->warehouse_model->view_goods_receipt_attachments($input);
+        echo json_encode(['result' => $attachments]);
+        die();
+    }
+
+	public function view_goods_receipt_file($id)
+    {
+        $data['file'] = $this->warehouse_model->get_goods_receipt_file($id);
+        if (!$data['file']) {
+            header('HTTP/1.0 404 Not Found');
+            die;
+        }
+        $this->load->view('manage_goods_receipt/preview_goods_receipt_file', $data);
+    }
+
+	public function delete_goods_receipt_attachment($id)
+    {
+        $file = $this->warehouse_model->get_goods_receipt_file($id);
+        if ($file->staffid == get_staff_user_id() || is_admin()) {
+            echo pur_html_entity_decode($this->warehouse_model->delete_goods_receipt_attachment($id));
+        } else {
+            header('HTTP/1.0 400 Bad error');
+            echo _l('access_denied');
+            die;
+        }
+    }
 }

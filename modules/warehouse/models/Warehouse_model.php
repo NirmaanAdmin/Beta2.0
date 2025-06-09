@@ -20807,6 +20807,7 @@ class Warehouse_model extends App_Model
 						$file_data['attachment_key'] = app_generate_hash();
 						$file_data['file_name'] = $file['file_name'];
 						$file_data['filetype'] = $file['filetype'];
+						$file_data['file_id'] = $insert_id;
 
 						$file_insert = $this->db->insert(db_prefix() . 'invetory_files', $file_data);
 						$this->db->where('id', $insert_id);
@@ -20833,5 +20834,80 @@ class Warehouse_model extends App_Model
 		$this->db->select('*');
 		$this->db->from(db_prefix() . 'goods_receipt_documentation');
 		return $this->db->get()->result();
+	}
+
+	public function view_goods_receipt_attachments($input)
+	{
+		$file_html = '';
+		$file_id = $input['file_id'];
+		$rel_id = $input['rel_id'];
+		$rel_type = $input['rel_type'];
+		$attachments = $this->get_inventory_new_attachments($rel_type, $file_id);
+
+		if (count($attachments) > 0) {
+			$file_html .= '<p class="bold text-muted">' . _l('customer_attachments') . '</p>';
+			foreach ($attachments as $f) {
+				// $href_url = site_url(PURCHASE_PATH . 'pur_order_tracker/' . $f['rel_type'] . '/' . $f['rel_id'] . '/' . $f['file_name']) . '" download';
+
+				$href_url = get_upload_path_by_type('inventory')
+					. 'goods_receipt_checklist/'
+					. $rel_id  // the goods receipt ID
+					. '/' . $file_id        // your serial number / item index
+					. '/' . $f['file_name'];
+				$file_html .= '<div class="mbot15 row inline-block full-width" data-attachment-id="' . $f['id'] . '">
+              <div class="col-md-8">
+                 <a name="preview-purinv-btn" onclick="preview_goods_receipt_btn(this); return false;" id = "' . $f['id'] . '" href="Javascript:void(0);" class="mbot10 mright5 btn btn-success pull-left" data-toggle="tooltip" title data-original-title="' . _l('preview_file') . '"><i class="fa fa-eye"></i></a>
+                 <div class="pull-left"><i class="' . get_mime_class($f['filetype']) . '"></i></div>
+                 <a href=" ' . $href_url . '" target="_blank" download>' . $f['file_name'] . '</a>
+                 <br />
+                 <small class="text-muted">' . $f['filetype'] . '</small>
+              </div>
+              <div class="col-md-4 text-right">';
+				if ($f['staffid'] == get_staff_user_id() || is_admin()) {
+					$file_html .= '<a href="#" class="text-danger" onclick="delete_goods_receipt_attachment(' . $f['id'] . '); return false;"><i class="fa fa-times"></i></a>';
+				}
+				$file_html .= '</div></div>';
+			}
+			$file_html .= '<hr />';
+		}
+
+		return $file_html;
+	}
+
+	public function get_inventory_new_attachments($related, $id)
+	{
+		$this->db->where('file_id', $id);
+		$this->db->where('rel_type', $related);
+		$this->db->order_by('dateadded', 'desc');
+		$attachments = $this->db->get(db_prefix() . 'invetory_files')->result_array();
+		return $attachments;
+	}
+
+
+	public function get_goods_receipt_file($id)
+	{
+		$this->db->where('id', $id);
+		return $this->db->get(db_prefix() . 'invetory_files')->row();
+	}
+
+
+	public function delete_goods_receipt_attachment($id)
+	{
+		$attachment = $this->get_goods_receipt_file($id);
+		$deleted    = false;
+		if ($attachment) {
+			$file_path = 'uploads/inventory/goods_receipt_checklist/' . $attachment->rel_id . '/' . $attachment->file_id . '/' . $attachment->file_name;
+			if (file_exists($file_path)) {
+				unlink($file_path);
+			}
+			$this->db->where('id', $attachment->id);
+			$this->db->delete('tblinvetory_files');
+			if ($this->db->affected_rows() > 0) {
+				
+				$deleted = true;
+			}
+		}
+
+		return $deleted;
 	}
 }

@@ -467,6 +467,7 @@
                           $is_required = $doc->required;
                           $is_attachemnt = $doc->attachments;
                           $file_id = $doc->id;
+                          $rel_id = $doc->goods_receipt_id;
                         }
                       }
                     }
@@ -506,18 +507,21 @@
                         </div>
                       </td>
                       <td>
-                        <?php if ($is_attachemnt == 1 && !empty($attachments_new)) : ?>
+                        <?php if ($is_attachemnt == 1) : ?>
+                          <a href="javascript:void(0)" onclick="view_goods_receipt_attachments('<?= $file_id ?>','<?= $rel_id ?>','goods_receipt_checkl'); return false;" class="btn btn-info btn-icon">View Files</a>
+                        <?php endif; ?>
+                        <!-- <?php if ($is_attachemnt == 1 && !empty($attachments_new)) : ?>
                           <?php foreach ($attachments_new as $file) : ?>
                             <?php
-                            // Build the full server path to the file
-                            $checkPath = get_upload_path_by_type('inventory')
-                              . 'goods_receipt_checklist/'
-                              . $file['rel_id']  // the goods receipt ID
-                              . '/' . $file_id        // your serial number / item index
-                              . '/' . $file['file_name'];
-                            
-                            // Only show the name if the file actually exists
-                            if (file_exists($checkPath)) :
+                                  // Build the full server path to the file
+                                  $checkPath = get_upload_path_by_type('inventory')
+                                    . 'goods_receipt_checklist/'
+                                    . $file['rel_id']  // the goods receipt ID
+                                    . '/' . $file_id        // your serial number / item index
+                                    . '/' . $file['file_name'];
+
+                                  // Only show the name if the file actually exists
+                                  if (file_exists($checkPath)) :
                             ?>
                               <div style="padding-bottom:5px;">
                                 <?= htmlspecialchars($file['file_name'], ENT_QUOTES, 'UTF-8'); ?>
@@ -526,7 +530,7 @@
                           <?php endforeach; ?>
                         <?php else: ?>
                           <em>No attachments</em>
-                        <?php endif; ?>
+                        <?php endif; ?> -->
                       </td>
 
                     </tr>
@@ -665,6 +669,25 @@
   </div>
 </div>
 
+<div class="modal fade" id="viewgoodsReceiptAttachmentModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document" style="width: 70%;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title"><?php echo _l('attachment'); ?></h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="view_goods_receipt_attachments">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="goods_receipt_file_data"></div>
 <?php require 'modules/warehouse/assets/js/view_purchase_js.php'; ?>
 </body>
 
