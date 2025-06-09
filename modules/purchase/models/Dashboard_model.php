@@ -452,8 +452,8 @@ class Dashboard_model extends App_Model
 		          <table class="table items table-bordered">
 		            <thead>
 		              <tr>
-		                <th align="left" width="20%">' . _l('items') . '</th>
-		                <th align="left" width="35%">' . _l('description') . '</th>
+		                <th align="left" width="25%">PO Name</th>
+		                <th align="left" width="30%">' . _l('description') . '</th>
 		                <th align="right" width="15%">' . _l('est_delivery_date') . '</th>
 		                <th align="right" width="15%">' . _l('delivery_date') . '</th>
 		                <th align="right" width="15%">Delay (Days)</th>
@@ -465,8 +465,8 @@ class Dashboard_model extends App_Model
 		            foreach ($delay_delivery_data as $drow) {
 		                $response['delivery_table_data'] .= '
 		                  <tr>
+		                  	<td align="left">' . html_entity_decode($drow['pur_order_number']) . '</td>
 		                    <td align="left">' . html_entity_decode($drow['commodity_name']) . '</td>
-		                    <td align="left">' . html_entity_decode($drow['description']) . '</td>
 		                    <td align="right">' . date('d-m-Y', strtotime($drow['est_delivery_date'])) . '</td>
 		                    <td align="right">' . date('d-m-Y', strtotime($drow['delivery_date'])) . '</td>
 		                    <td align="right">' . html_entity_decode($drow['delay_days']) . '</td>
