@@ -952,7 +952,7 @@ class warehouse extends AdminController
 		$data['attachments'] = $this->warehouse_model->get_inventory_attachments('goods_receipt', $id);
 		
 		$data['attachments_new'] = $this->warehouse_model->get_inventory_attachments('goods_receipt_checkl', $id);
-		$data['goods_documentitions'] = $this->warehouse_model->get_inventory_documents();
+		$data['goods_documentitions'] = $this->warehouse_model->get_inventory_documents($id);
 		
 		$this->load->view('manage_goods_receipt/view_purchase', $data);
 	}

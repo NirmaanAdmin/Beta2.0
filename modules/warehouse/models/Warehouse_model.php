@@ -20828,10 +20828,10 @@ class Warehouse_model extends App_Model
 		return true;
 	}
 
-	public function get_inventory_documents()
+	public function get_inventory_documents($goods_id)
 	{
-
 		$this->db->select('*');
+		$this->db->where('goods_receipt_id', $goods_id);
 		$this->db->from(db_prefix() . 'goods_receipt_documentation');
 		return $this->db->get()->result();
 	}
@@ -20903,7 +20903,7 @@ class Warehouse_model extends App_Model
 			$this->db->where('id', $attachment->id);
 			$this->db->delete('tblinvetory_files');
 			if ($this->db->affected_rows() > 0) {
-				
+
 				$deleted = true;
 			}
 		}
