@@ -748,3 +748,5 @@ $lang['lead_time_updated'] = 'Lead time updated';
 $lang['advance_payment_updated'] = 'Advance payment updated';
 $lang['shop_submission_updated'] = 'Shop drawings submission updated';
 $lang['shop_approval_updated'] = 'Shop drawings approval updated';
+$lang['record_saved_successfully'] = 'Record Updated successfully';
+$lang['failed_to_save_record'] = 'Failed to save record';

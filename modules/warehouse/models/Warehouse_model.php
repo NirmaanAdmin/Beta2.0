@@ -20773,12 +20773,12 @@ class Warehouse_model extends App_Model
 				// Check if record exists
 				$this->db->where('goods_receipt_id', $goods_receipt_id);
 				$this->db->where('checklist_id', $checklist_id);
-				$existing_record = $this->db->get(db_prefix() . 'goods_receipt_documentetion')->row();
+				$existing_record = $this->db->get(db_prefix() . 'goods_receipt_documentation')->row();
 
 				if ($existing_record) {
 					// Update existing record
 					$this->db->where('id', $existing_record->id);
-					$update_result = $this->db->update(db_prefix() . 'goods_receipt_documentetion', $dt_data);
+					$update_result = $this->db->update(db_prefix() . 'goods_receipt_documentation', $dt_data);
 					$insert_id = $existing_record->id;
 
 					if (!$update_result) {
@@ -20786,7 +20786,7 @@ class Warehouse_model extends App_Model
 					}
 				} else {
 					// Insert new record
-					$insert_result = $this->db->insert(db_prefix() . 'goods_receipt_documentetion', $dt_data);
+					$insert_result = $this->db->insert(db_prefix() . 'goods_receipt_documentation', $dt_data);
 					$insert_id = $this->db->insert_id();
 
 					if (!$insert_result) {
@@ -20809,6 +20809,9 @@ class Warehouse_model extends App_Model
 						$file_data['filetype'] = $file['filetype'];
 
 						$file_insert = $this->db->insert(db_prefix() . 'invetory_files', $file_data);
+						$this->db->where('id', $insert_id);
+						$this->db->update(db_prefix() . 'goods_receipt_documentation', ['attachments' => 1]);
+
 						if (!$file_insert) {
 							return false;
 						}
@@ -20816,7 +20819,7 @@ class Warehouse_model extends App_Model
 				}
 			}
 
-			
+
 
 			return true;
 		}
@@ -20824,7 +20827,8 @@ class Warehouse_model extends App_Model
 		return true;
 	}
 
-	public function get_inventory_documents(){
+	public function get_inventory_documents()
+	{
 
 		$this->db->select('*');
 		$this->db->from(db_prefix() . 'goods_receipt_documentation');

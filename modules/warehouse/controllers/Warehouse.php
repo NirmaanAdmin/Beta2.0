@@ -9610,11 +9610,11 @@ class warehouse extends AdminController
 
 		if ($success) {
 			// Only redirect if the operation was successful
-			set_alert('success', _l('goods_receipt_documentation_saved_successfully'));
+			set_alert('success', _l('record_saved_successfully'));
 			redirect(admin_url('warehouse/manage_purchase/' . $goods_receipt_id));
 		} else {
 			// Show error message if the operation failed
-			set_alert('danger', _l('failed_to_save_goods_receipt_documentation'));
+			set_alert('danger', _l('failed_to_save_record'));
 			redirect(admin_url('warehouse/manage_purchase/' . $goods_receipt_id));
 		}
 	}
