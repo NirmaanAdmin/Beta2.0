@@ -186,30 +186,42 @@ class Dashboard_model extends App_Model
 	    update_module_filter($module_name, $from_date_filter_name, NULL);
 	    update_module_filter($module_name, $to_date_filter_name, NULL);
 	    if (!empty($vendors)) {
-	    	$conditions[] = "combined_orders.vendor_id = '" . $vendors . "'";
 	    	update_module_filter($module_name, $vendor_filter_name, $vendors);
 	    }
 	    if (!empty($projects)) {
-	    	$conditions[] = "combined_orders.project_id = '" . $projects . "'";
 	    	update_module_filter($module_name, $project_filter_name, $projects);
 	    }
 	    if (!empty($group_pur)) {
-		    $conditions[] = "combined_orders.group_pur = '" . $group_pur . "'";
 		    update_module_filter($module_name, $group_pur_filter_name, $group_pur);
 		}
 		if (!empty($kind)) {
-		    $conditions[] = "combined_orders.kind = '" . $kind . "'";
 		    update_module_filter($module_name, $kind_filter_name, $kind);
+		}
+		if (!empty($from_date)) {
+			update_module_filter($module_name, $from_date_filter_name, date('Y-m-d', strtotime($from_date)));
+		}
+		if (!empty($to_date)) {
+			update_module_filter($module_name, $to_date_filter_name, date('Y-m-d', strtotime($to_date)));
+		}
+	    if (!empty($vendors)) {
+	    	$conditions[] = "combined_orders.vendor_id = '" . $vendors . "'";
+	    }
+	    if (!empty($projects)) {
+	    	$conditions[] = "combined_orders.project_id = '" . $projects . "'";
+	    }
+	    if (!empty($group_pur)) {
+		    $conditions[] = "combined_orders.group_pur = '" . $group_pur . "'";
+		}
+		if (!empty($kind)) {
+		    $conditions[] = "combined_orders.kind = '" . $kind . "'";
 		}
 		if (!empty($from_date)) {
 			$from_date = date('Y-m-d', strtotime($from_date));
 			$conditions[] = "combined_orders.order_date >= '" . $from_date . "'";
-			update_module_filter($module_name, $from_date_filter_name, $from_date);
 		}
 		if (!empty($to_date)) {
 			$to_date = date('Y-m-d', strtotime($to_date));
 			$conditions[] = "combined_orders.order_date <= '" . $to_date . "'";
-			update_module_filter($module_name, $to_date_filter_name, $to_date);
 		}
 
 	    if (!empty($conditions)) {
