@@ -44,6 +44,8 @@
       $('.percentage_utilized').text(response.percentage_utilized + '%');
       $('.budgeted_procurement_net_value').text(response.budgeted_procurement_net_value);
       $('.procurement_table_data').html(response.procurement_table_data);
+      $('.on_time_deliveries_percentage').text(response.on_time_deliveries_percentage + '%');
+      $('.delivery_table_data').html(response.delivery_table_data);
 
       // DOUGHNUT CHART - Budget Utilization
       var budgetUtilizationCtx = document.getElementById('doughnutChartbudgetUtilization').getContext('2d');
@@ -140,6 +142,101 @@
           }
         });
       }
+
+      // BAR CHART
+      var deliveryDelayBarCtx = document.getElementById('barChartDeliveryDelay').getContext('2d');
+      var deliveryDelayLabels = response.delivery_delay_po;
+      var deliveryDelayData = response.delivery_delay_days;
+
+      if (window.barDeliveryDelayChart) {
+        barDeliveryDelayChart.data.labels = deliveryDelayLabels;
+        barDeliveryDelayChart.data.datasets[0].data = deliveryDelayData;
+        barDeliveryDelayChart.update();
+      } else {
+        window.barDeliveryDelayChart = new Chart(deliveryDelayBarCtx, {
+          type: 'bar',
+          data: {
+            labels: deliveryDelayLabels,
+            datasets: [{
+              label: 'PO',
+              data: deliveryDelayData,
+              backgroundColor: '#00008B',
+              borderColor: '#00008B',
+              borderWidth: 1
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false
+              }
+            },
+            scales: {
+              x: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Delivery Delays'
+                }
+              },
+              y: {
+                ticks: {
+                  autoSkip: false
+                },
+                title: {
+                  display: true,
+                  text: 'PO'
+                }
+              }
+            }
+          }
+        });
+      }
+
+      // PIE CHART
+      var deliveryPerformancePieCtx = document.getElementById('pieChartDeliveryPerformance').getContext('2d');
+      var deliveryPerformancePieLabels = response.delivery_performance_labels;
+      var deliveryPerformancePieData = response.delivery_performance_values;
+
+      if (window.deliveryPerformancePieChart) {
+        deliveryPerformancePieChart.data.labels = deliveryPerformancePieLabels;
+        deliveryPerformancePieChart.data.datasets[0].data = deliveryPerformancePieData;
+        deliveryPerformancePieChart.update();
+      } else {
+        window.deliveryPerformancePieChart = new Chart(deliveryPerformancePieCtx, {
+          type: 'pie',
+          data: {
+            labels: deliveryPerformancePieLabels,
+            datasets: [{
+              data: deliveryPerformancePieData,
+              backgroundColor: ['#00008B', '#1E90FF'],
+              borderColor: '#fff',
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                position: 'bottom'
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    var label = context.label || '';
+                    var value = context.formattedValue;
+                    return `${label}: ${value}%`;
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
+
     });
   }
 })(jQuery);

@@ -1,7 +1,7 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
 <?php init_head(); ?>
 <style type="text/css">
-  .budget_actual_procurement {
+  .main_head_title {
     font-size: 19px;
     font-weight: bold;
   }
@@ -81,7 +81,7 @@
     <div class="panel_s">
       <div class="panel-body dashboard-budget-summary">
           <div class="col-md-12">
-            <p class="no-margin budget_actual_procurement">Budget vs Actual Procurement</p>
+            <p class="no-margin main_head_title">Budget vs Actual Procurement</p>
             <hr class="mtop10">
           </div>
 
@@ -184,6 +184,86 @@
               <div class="col-md-5">
                 <p class="mbot15 dashboard_stat_title">Procurement Data</p>
                 <div class="procurement_table_data"></div>
+              </div>
+            </div>
+          </div>
+
+      </div>
+    </div>
+
+    <div class="panel_s">
+      <div class="panel-body dashboard-budget-summary">
+          <div class="col-md-12">
+            <p class="no-margin main_head_title">Delivery Schedules</p>
+            <hr class="mtop10">
+          </div>
+
+          <div class="col-md-5">
+            <div class="row">
+
+              <div class="quick-stats-invoices col-md-6 tw-mb-2 sm:tw-mb-0">    
+                <div class="top_stats_wrapper">                                  
+                  <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                    <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">                                                    
+                      <span class="tw-truncate dashboard_stat_title">On-Time Deliveries</span>                 
+                    </div>                      
+                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>  
+                  </div>                    
+                  <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                    <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">                                                    
+                      <span class="tw-truncate dashboard_stat_value on_time_deliveries_percentage"></span>                 
+                    </div>                      
+                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>  
+                  </div>              
+                </div>          
+              </div>
+
+            </div>
+
+            <br>
+
+            <div class="row">
+
+              <div class="quick-stats-invoices col-md-6 tw-mb-2 sm:tw-mb-0">    
+                <div class="top_stats_wrapper">                                  
+                  <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                    <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">                                                    
+                      <span class="tw-truncate dashboard_stat_title">Average Delay</span>                 
+                    </div>                      
+                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>  
+                  </div>                    
+                  <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                    <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">                                                    
+                      <span class="tw-truncate dashboard_stat_value average_delay"></span>        
+                    </div>                      
+                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>  
+                  </div>              
+                </div>          
+              </div>
+
+            </div>
+          </div>
+
+          <div class="col-md-7">
+            <div class="row">
+              <p class="mbot15 dashboard_stat_title">Delivery Delays in Days</p>
+              <div style="width: 100%; height: 400px;">
+                <canvas id="barChartDeliveryDelay"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-12 mtop20">
+            <div class="row">
+              <div class="col-md-5">
+                <p class="mbot15 dashboard_stat_title">Delivery Performance</p>
+                <div style="width: 100%; height: 450px;">
+                  <canvas id="pieChartDeliveryPerformance"></canvas>
+                </div>
+              </div>
+              <div class="col-md-7">
+                <p class="mbot15 dashboard_stat_title">Delivery Data</p>
+                <div class="delivery_table_data"></div>
               </div>
             </div>
           </div>

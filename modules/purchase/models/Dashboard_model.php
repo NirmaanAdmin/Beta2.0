@@ -216,12 +216,10 @@ class Dashboard_model extends App_Model
 		    $conditions[] = "combined_orders.kind = '" . $kind . "'";
 		}
 		if (!empty($from_date)) {
-			$from_date = date('Y-m-d', strtotime($from_date));
-			$conditions[] = "combined_orders.order_date >= '" . $from_date . "'";
+			$conditions[] = "combined_orders.order_date >= '" . date('Y-m-d', strtotime($from_date)) . "'";
 		}
 		if (!empty($to_date)) {
-			$to_date = date('Y-m-d', strtotime($to_date));
-			$conditions[] = "combined_orders.order_date <= '" . $to_date . "'";
+			$conditions[] = "combined_orders.order_date <= '" . date('Y-m-d', strtotime($to_date)) . "'";
 		}
 
 	    if (!empty($conditions)) {
@@ -329,6 +327,163 @@ class Dashboard_model extends App_Model
 			  </table>
 			</div>';
 
+		}
+
+		$response['on_time_deliveries_percentage'] = 0;
+		$response['delivery_delay_po'] = array();
+		$response['delivery_delay_days'] = array();
+		$response['delivery_performance_labels'] = array();
+		$response['delivery_performance_values'] = array();
+		$response['delivery_table_data'] = array();
+		$this->db->select(
+		    db_prefix() . 'goods_receipt.pr_order_id as po_id, ' .
+		    db_prefix() . 'pur_orders.pur_order_number as pur_order_number, ' .
+		    'CONCAT(' . db_prefix() . 'items.commodity_code, "_", ' . db_prefix() . 'items.description) as commodity_name, ' .
+		    db_prefix() . 'goods_receipt_detail.description as description, ' .
+		    db_prefix() . 'goods_receipt_detail.est_delivery_date as est_delivery_date, ' .
+		    db_prefix() . 'goods_receipt_detail.delivery_date as delivery_date'
+		);
+		$this->db->from(db_prefix() . 'goods_receipt_detail');
+		$this->db->join(db_prefix() . 'goods_receipt', db_prefix() . 'goods_receipt.id = ' . db_prefix() . 'goods_receipt_detail.goods_receipt_id', 'left');
+		$this->db->join(db_prefix() . 'pur_orders', db_prefix() . 'pur_orders.id = ' . db_prefix() . 'goods_receipt.pr_order_id', 'left');
+		$this->db->join(db_prefix() . 'items', db_prefix() . 'items.id = ' . db_prefix() . 'goods_receipt_detail.commodity_code', 'left');
+		$this->db->where(db_prefix() . 'goods_receipt_detail.est_delivery_date IS NOT NULL');
+		$this->db->where(db_prefix() . 'goods_receipt_detail.delivery_date IS NOT NULL');
+		if (!empty($vendors)) {
+			$this->db->where(db_prefix() . 'pur_orders.vendor', $vendors);
+		}
+		if (!empty($projects)) {
+			$this->db->where(db_prefix() . 'pur_orders.project', $projects);
+		}
+		if (!empty($group_pur)) {
+		    $this->db->where(db_prefix() . 'pur_orders.group_pur', $group_pur);
+		}
+		if (!empty($kind)) {
+		    $this->db->where(db_prefix() . 'pur_orders.kind', $kind);
+		}
+		if (!empty($from_date)) {
+		    $this->db->where(db_prefix() . 'pur_orders.order_date >=', date('Y-m-d', strtotime($from_date)));
+		}
+		if (!empty($to_date)) {
+		    $this->db->where(db_prefix() . 'pur_orders.order_date <=', date('Y-m-d', strtotime($to_date)));
+		}
+		$this->db->group_by(db_prefix() . 'goods_receipt_detail.id');
+		$goods_receipt_detail = $this->db->get()->result_array();
+		if(!empty($goods_receipt_detail)) {
+			$po_ids = array_column($goods_receipt_detail, 'po_id');
+			$this->db->select(
+			    db_prefix() . 'pur_orders.id as po_id, ' .
+			    db_prefix() . 'pur_orders.pur_order_number as pur_order_number, ' .
+			    'CONCAT(' . db_prefix() . 'items.commodity_code, "_", ' . db_prefix() . 'items.description) as commodity_name, ' .
+			    db_prefix() . 'pur_order_detail.description as description, ' .
+			    db_prefix() . 'pur_order_detail.est_delivery_date as est_delivery_date, ' .
+			    db_prefix() . 'pur_order_detail.delivery_date as delivery_date'
+			);
+			$this->db->from(db_prefix() . 'pur_order_detail');
+			$this->db->join(db_prefix() . 'pur_orders', db_prefix() . 'pur_orders.id = ' . db_prefix() . 'pur_order_detail.pur_order', 'left');
+			$this->db->join(db_prefix() . 'items', db_prefix() . 'items.id = ' . db_prefix() . 'pur_order_detail.item_code', 'left');
+			$this->db->where(db_prefix() . 'pur_order_detail.est_delivery_date IS NOT NULL');
+			$this->db->where(db_prefix() . 'pur_order_detail.delivery_date IS NOT NULL');
+			if (!empty($po_ids)) {
+			    $this->db->where_not_in(db_prefix() . 'pur_orders.id', $po_ids);
+			}
+			if (!empty($vendors)) {
+				$this->db->where(db_prefix() . 'pur_orders.vendor', $vendors);
+			}
+			if (!empty($projects)) {
+				$this->db->where(db_prefix() . 'pur_orders.project', $projects);
+			}
+			if (!empty($group_pur)) {
+			    $this->db->where(db_prefix() . 'pur_orders.group_pur', $group_pur);
+			}
+			if (!empty($kind)) {
+			    $this->db->where(db_prefix() . 'pur_orders.kind', $kind);
+			}
+			if (!empty($from_date)) {
+			    $this->db->where(db_prefix() . 'pur_orders.order_date >=', date('Y-m-d', strtotime($from_date)));
+			}
+			if (!empty($to_date)) {
+			    $this->db->where(db_prefix() . 'pur_orders.order_date <=', date('Y-m-d', strtotime($to_date)));
+			}
+			$this->db->group_by(db_prefix() . 'pur_order_detail.id');
+			$pur_order_detail = $this->db->get()->result_array();
+			$delivery_schedule = array_merge($goods_receipt_detail, $pur_order_detail);
+			$all_schedule_count = count($delivery_schedule);
+			$est_delivery_count = count(array_filter($delivery_schedule, function($item) {
+			    return strtotime($item['est_delivery_date']) >= strtotime($item['delivery_date']);
+			}));
+			if($all_schedule_count > 0) {
+		    	$response['on_time_deliveries_percentage'] = round(($est_delivery_count / $all_schedule_count) * 100);
+		    }
+		    $response['delivery_performance_labels'] = ['On-Time', 'Delayed'];
+		    $response['delivery_performance_values'] = [$response['on_time_deliveries_percentage'], round(100 - $response['on_time_deliveries_percentage'])];
+		    $delay_delivery_data = array_filter($delivery_schedule, function($item) {
+			    return strtotime($item['est_delivery_date']) < strtotime($item['delivery_date']);
+			});
+			if(!empty($delay_delivery_data)) {
+				$delay_delivery_data = array_values(array_filter(
+				    array_map(function($item) {
+				        $days = (strtotime($item['delivery_date']) - strtotime($item['est_delivery_date'])) / (60 * 60 * 24);
+				        if ($days > 0) {
+				            $item['delay_days'] = (int)$days;
+				            return $item;
+				        }
+				        return null;
+				    }, $delay_delivery_data),
+				    fn($item) => !is_null($item)
+				));
+				$response['delivery_table_data'] = '
+				<div class="table-responsive s_table">
+				  <table class="table items table-bordered">
+				    <thead>
+				      <tr>
+				        <th align="left" width="20%">'._l('items').'</th>
+				        <th align="left" width="35%">'._l('description').'</th>
+				        <th align="right" width="15%">'._l('est_delivery_date').'</th>
+				        <th align="right" width="15%">'._l('delivery_date').'</th>
+				        <th align="right" width="15%">Delay (Days)</th>
+				      </tr>
+				    </thead>
+				    <tbody>';
+					if (!empty($delay_delivery_data)) {
+					    foreach ($delay_delivery_data as $drow) {
+					        $response['delivery_table_data'] .= '
+					      <tr>
+					        <td align="left">' . html_entity_decode($drow['commodity_name']) . '</td>
+					        <td align="left">' . html_entity_decode($drow['description']) . '</td>
+					        <td align="right">' . date('d-m-Y', strtotime($drow['est_delivery_date'])) . '</td>
+					        <td align="right">' . date('d-m-Y', strtotime($drow['delivery_date'])) . '</td>
+					        <td align="right">' . html_entity_decode($drow['delay_days']) . '</td>
+					      </tr>';
+					    }
+					} else {
+				    $response['delivery_table_data'] .= '
+				      <tr>
+				        <td colspan="5" align="center">No data available</td>
+				      </tr>';
+					}
+					$response['delivery_table_data'] .= '
+					    </tbody>
+					  </table>
+					</div>';
+				if(!empty($delay_delivery_data)) {
+					$delay_delivery_data = array_values(array_reduce($delay_delivery_data, function($carry, $item) {
+					    $key = $item['po_id'];
+					    if (!isset($carry[$key])) {
+					        $carry[$key] = [
+					            'po_id' => $item['po_id'],
+					            'pur_order_number' => $item['pur_order_number'],
+					            'delay_days' => $item['delay_days']
+					        ];
+					    } else {
+					        $carry[$key]['delay_days'] += $item['delay_days'];
+					    }
+					    return $carry;
+					}, []));
+					$response['delivery_delay_po'] = array_column($delay_delivery_data, 'pur_order_number');
+					$response['delivery_delay_days'] = array_column($delay_delivery_data, 'delay_days');
+				}
+			}
 		}
 
 	    return $response;
