@@ -229,7 +229,7 @@
                            'invoice_number',
                            'vendor',                      
                            'invoice_date',
-                           'group_pur',
+                           'Billing Budget Head',
                            'description_of_services',
                            'ril_invoice',
                            'amount_without_tax',
@@ -237,6 +237,7 @@
                            'certified_amount',
                            'billing_status',
                            'vbt_order_name',
+                           'Order Budget Head',
                            'tag',
                            'attachment',
                            'adminnote',
@@ -263,7 +264,7 @@
                               <th><?php echo _l('invoice_number'); ?></th>
                               <th><?php echo _l('vendor'); ?></th>
                               <th><?php echo _l('invoice_date'); ?></th>
-                              <th><?php echo _l('group_pur'); ?></th>
+                              <th>Billing <?php echo _l('group_pur'); ?></th>
                               <th><?php echo _l('description_of_services'); ?></th>
                               <th><?php echo _l('ril_invoice'); ?></th>
                               <th><?php echo _l('amount_without_tax'); ?></th>
@@ -271,6 +272,7 @@
                               <th><?php echo _l('final_certified_amount'); ?></th>
                               <th><?php echo _l('billing_status'); ?></th>
                               <th><?php echo _l('vbt_order_name'); ?></th>
+                              <th>Order Budget Head</th>
                               <!-- <th><?php echo _l('vbt_order_amount'); ?></th> -->
                               <th><?php echo _l('tag'); ?></th>
                               <th><?php echo _l('attachment'); ?></th>
@@ -298,7 +300,7 @@
                               <td></td>
                               <td></td>
                               <td></td>
-                              <!-- <td></td> -->
+                              <td></td>
                            </tr>
                         </tfoot>
                      </table>

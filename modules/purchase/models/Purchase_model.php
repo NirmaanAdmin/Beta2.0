@@ -20374,7 +20374,7 @@ class Purchase_model extends App_Model
                 $this->db->where('id', $data['pur_invoice']);
                 $this->db->update(
                     db_prefix() . 'pur_invoices',
-                    ['vendor' => $pur_order->vendor, 'group_pur' => $pur_order->group_pur, 'project_id' => $pur_order->project, 'description_services' => $pur_order->pur_order_name, 'pur_order' => $data['pur_order']]
+                    ['vendor' => $pur_order->vendor, 'project_id' => $pur_order->project, 'description_services' => $pur_order->pur_order_name, 'pur_order' => $data['pur_order']]
                 );
             }
         }
@@ -20385,7 +20385,7 @@ class Purchase_model extends App_Model
                 $this->db->where('id', $data['pur_invoice']);
                 $this->db->update(
                     db_prefix() . 'pur_invoices',
-                    ['vendor' => $wo_order->vendor, 'group_pur' => $wo_order->group_pur, 'project_id' => $wo_order->project, 'description_services' => $wo_order->wo_order_name, 'wo_order' => $data['wo_order']]
+                    ['vendor' => $wo_order->vendor, 'project_id' => $wo_order->project, 'description_services' => $wo_order->wo_order_name, 'wo_order' => $data['wo_order']]
                 );
             }
         }
@@ -20396,7 +20396,7 @@ class Purchase_model extends App_Model
                 $this->db->where('id', $data['pur_invoice']);
                 $this->db->update(
                     db_prefix() . 'pur_invoices',
-                    ['vendor' => $order_tracker->vendor, 'group_pur' => $order_tracker->group_pur, 'order_tracker_id' => $data['order_tracker']]
+                    ['vendor' => $order_tracker->vendor, 'order_tracker_id' => $data['order_tracker']]
                 );
             }
         }

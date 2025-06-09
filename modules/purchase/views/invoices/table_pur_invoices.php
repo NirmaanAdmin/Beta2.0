@@ -30,7 +30,7 @@ $aColumns = [
     'final_certified_amount',
     'payment_status',
     3,
-    // 4,
+    4,
     'vendor_note',
     db_prefix() . 'pur_invoices.id as inv_id',
     'adminnote',
@@ -362,13 +362,13 @@ foreach ($rResult as $aRow) {
             $order_data = '';
             if (!empty($aRow['order_tracker_id'])) {
                 $order_tracker_detail = get_order_tracker_main_detail($aRow['order_tracker_id']);
-                $order_data = app_format_money($order_tracker_detail->total, $base_currency->symbol);
+                $order_data = get_group_name_item($order_tracker_detail->group_pur)->name;
             } else if (!empty($aRow['pur_order'])) {
                 $pur_order_detail = get_pur_order_main_detail($aRow['pur_order']);
-                $order_data = app_format_money($pur_order_detail->total, $base_currency->symbol);
+                $order_data = get_group_name_item($pur_order_detail->group_pur)->name;
             } else if (!empty($aRow['wo_order'])) {
                 $wo_order_detail = get_wo_order_main_detail($aRow['wo_order']);
-                $order_data = app_format_money($wo_order_detail->total, $base_currency->symbol);
+                $order_data = get_group_name_item($wo_order_detail->group_pur)->name;
             } else {
                 $order_data = '';
             }
