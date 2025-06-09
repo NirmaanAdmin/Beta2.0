@@ -13,39 +13,66 @@
     font-size: 19px;
   }
 </style>
+<?php $module_name = 'purchase_dashboard'; ?>
 <div id="wrapper">
   <div class="content">
 
     <div class="panel_s">
       <div class="panel-body">
           <div class="col-md-12">
-            <div class="row">
-              <div class="col-md-2">
-                    <?php echo render_select('vendors', $vendors, array('userid', 'company'), 'vendor'); ?>
-                  </div>
-                  <div class="col-md-2">
-                    <?php echo render_select('projects', $projects, array('id', 'name'), 'projects'); ?>
-                  </div>
-                  <div class="col-md-2">
-                    <?php echo render_select('group_pur', $commodity_groups_pur, array('id', 'name'), 'group_pur'); ?>
-                  </div>
-                  <div class="col-md-2 form-group">
-                    <label for="kind"><?php echo _l('cat'); ?></label>
-                  <select name="kind" id="kind" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
-                      <option value=""></option>
-                      <option value="Client Supply"><?php echo _l('client_supply'); ?></option>
-                      <option value="Bought out items"><?php echo _l('bought_out_items'); ?></option>
-                    </select>
+            <div class="row all_filters">
+                <div class="col-md-2">
+                  <?php 
+                  $vendor_type_filter = get_module_filter($module_name, 'vendor');
+                  $vendor_type_filter_val = !empty($vendor_type_filter) ? $vendor_type_filter->filter_value : '';
+                  echo render_select('vendors', $vendors, array('userid', 'company'), 'vendor', $vendor_type_filter_val); 
+                  ?>
                 </div>
-              <div class="col-md-2">
-                    <?php echo render_date_input('from_date','from_date', ''); ?>
-                  </div>
-                  <div class="col-md-2">
-                    <?php echo render_date_input('to_date','to_date', ''); ?>
-                  </div>
-                  <div class="col-md-1">
-                    <a href="#" onclick="get_purchase_order_dashboard(); return false;" class="btn btn-info"><?php echo _l('_filter'); ?></a>
-                  </div>
+                <div class="col-md-2">
+                  <?php 
+                  $project_type_filter = get_module_filter($module_name, 'project');
+                  $project_type_filter_val = !empty($project_type_filter) ? $project_type_filter->filter_value : '';
+                  echo render_select('projects', $projects, array('id', 'name'), 'projects', $project_type_filter_val); 
+                  ?>
+                </div>
+                <div class="col-md-2">
+                  <?php
+                  $group_pur_type_filter = get_module_filter($module_name, 'group_pur');
+                  $group_pur_type_filter_val = !empty($group_pur_type_filter) ? $group_pur_type_filter->filter_value : '';
+                  echo render_select('group_pur', $commodity_groups_pur, array('id', 'name'), 'group_pur', $group_pur_type_filter_val); 
+                  ?>
+                </div>
+                <div class="col-md-2 form-group">
+                  <?php
+                   $kind_filter = get_module_filter($module_name, 'kind');
+                   $kind_filter_val = !empty($kind_filter) ? $kind_filter->filter_value : '';
+                  ?>
+                  <label for="kind"><?php echo _l('cat'); ?></label>
+                  <select name="kind" id="kind" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
+                    <option value=""></option>
+                    <option value="Client Supply" <?php echo ($kind_filter_val == "Client Supply") ? 'selected' : ''; ?>><?php echo _l('client_supply'); ?></option>
+                    <option value="Bought out items" <?php echo ($kind_filter_val == "Bought out items") ? 'selected' : ''; ?>><?php echo _l('bought_out_items'); ?></option>
+                  </select>
+                </div>
+                <div class="col-md-2">
+                  <?php
+                  $from_date_type_filter = get_module_filter($module_name, 'from_date');
+                  $from_date_type_filter_val = !empty($from_date_type_filter) ?  $from_date_type_filter->filter_value : ''; 
+                  echo render_date_input('from_date','from_date', $from_date_type_filter_val); 
+                  ?>
+                </div>
+                <div class="col-md-2">
+                  <?php 
+                    $to_date_type_filter = get_module_filter($module_name, 'to_date');
+                    $to_date_type_filter_val = !empty($to_date_type_filter) ?  $to_date_type_filter->filter_value : '';
+                    echo render_date_input('to_date','to_date', $to_date_type_filter_val); 
+                  ?>
+                </div>
+                <div class="col-md-1">
+                  <a href="javascript:void(0)" class="btn btn-info btn-icon reset_all_filters">
+                    <?php echo _l('reset_filter'); ?>
+                  </a>
+                </div>
             </div>
           </div>
       </div>

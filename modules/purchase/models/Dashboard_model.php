@@ -171,26 +171,45 @@ class Dashboard_model extends App_Model
 	        ) AS combined_orders
 	        LEFT JOIN tblassets_group ON tblassets_group.group_id = combined_orders.group_pur";
 
+	    $module_name = 'purchase_dashboard';
+	    $vendor_filter_name = 'vendor';
+	    $project_filter_name = 'project';
+	    $group_pur_filter_name = 'group_pur';
+	    $kind_filter_name = 'kind';
+	    $from_date_filter_name = 'from_date';
+	    $to_date_filter_name = 'to_date';
 	    $conditions = [];
+	    update_module_filter($module_name, $vendor_filter_name, NULL);
+	    update_module_filter($module_name, $project_filter_name, NULL);
+	    update_module_filter($module_name, $group_pur_filter_name, NULL);
+	    update_module_filter($module_name, $kind_filter_name, NULL);
+	    update_module_filter($module_name, $from_date_filter_name, NULL);
+	    update_module_filter($module_name, $to_date_filter_name, NULL);
 	    if (!empty($vendors)) {
 	    	$conditions[] = "combined_orders.vendor_id = '" . $vendors . "'";
+	    	update_module_filter($module_name, $vendor_filter_name, $vendors);
 	    }
 	    if (!empty($projects)) {
 	    	$conditions[] = "combined_orders.project_id = '" . $projects . "'";
+	    	update_module_filter($module_name, $project_filter_name, $projects);
 	    }
 	    if (!empty($group_pur)) {
 		    $conditions[] = "combined_orders.group_pur = '" . $group_pur . "'";
+		    update_module_filter($module_name, $group_pur_filter_name, $group_pur);
 		}
 		if (!empty($kind)) {
 		    $conditions[] = "combined_orders.kind = '" . $kind . "'";
+		    update_module_filter($module_name, $kind_filter_name, $kind);
 		}
 		if (!empty($from_date)) {
 			$from_date = date('Y-m-d', strtotime($from_date));
 			$conditions[] = "combined_orders.order_date >= '" . $from_date . "'";
+			update_module_filter($module_name, $from_date_filter_name, $from_date);
 		}
 		if (!empty($to_date)) {
 			$to_date = date('Y-m-d', strtotime($to_date));
 			$conditions[] = "combined_orders.order_date <= '" . $to_date . "'";
+			update_module_filter($module_name, $to_date_filter_name, $to_date);
 		}
 
 	    if (!empty($conditions)) {
@@ -204,15 +223,15 @@ class Dashboard_model extends App_Model
 	    $cost_to_complete = 0;
 	    if(!empty($result)) {
 	    	$cost_to_complete = array_sum(array_column($result, 'cost_to_complete'));
-	    	$response['cost_to_complete'] = app_format_money($cost_to_complete, $base_currency);
 	    }
-
+	    $response['cost_to_complete'] = app_format_money($cost_to_complete, $base_currency);
 	    $response['rev_contract_value'] = 0;
 	    $rev_contract_value = 0;
 	    if(!empty($result)) {
 	    	$rev_contract_value = array_sum(array_column($result, 'total_rev_contract_value'));
-	    	$response['rev_contract_value'] = app_format_money($rev_contract_value, $base_currency);
 	    }
+	    $response['rev_contract_value'] = app_format_money($rev_contract_value, $base_currency);
+
 	    $response['percentage_utilized'] = 0;
 	    if($cost_to_complete > 0) {
 	    	$response['percentage_utilized'] = round(($rev_contract_value / $cost_to_complete) * 100);
