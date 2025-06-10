@@ -614,19 +614,18 @@ function data_tables_init_union_unawarded($aColumns, $sIndexColumn, $combinedTab
     }
 
     $sTable = "(
-        SELECT DISTINCT
+        SELECT 
             t.id,
-            t.pur_order_name AS order_name,
-            t.order_date,
-            t.completion_date,
-            t.budget,
-            t.group_pur,
-            t.rli_filter,
-            t.kind,
-            t.remarks AS remarks,
+            t.budget_head,
             pr.name as project,
-            pr.id as project_id,
-            'order_tracker' AS source_table
+            t.awarded_value,
+            t.unawarded_value,
+            t.unallocated_value,
+            t.secured_desposit,
+            (IFNULL(t.awarded_value, 0) + (t.unawarded_value + IFNULL(t.secured_desposit, 0))) AS cost_to_complete,
+            t.budget_health,
+            t.entity_table,
+            t.remarks
         FROM tblpur_unawarded_tracker t
         LEFT JOIN tblprojects pr ON pr.id = t.project
     ) AS combined_orders";
@@ -737,7 +736,6 @@ function data_tables_init_union_unawarded($aColumns, $sIndexColumn, $combinedTab
     $sOrder
     $sLimit
     ";
-    
     $rResult = hooks()->apply_filters(
         'datatables_sql_query_results',
         $CI->db->query($resultQuery)->result_array(),

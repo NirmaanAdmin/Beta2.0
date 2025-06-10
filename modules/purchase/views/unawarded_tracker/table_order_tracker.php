@@ -14,14 +14,15 @@ $aw_unw_order_status_filter_name = 'aw_unw_order_status';
 
 // Define common columns for both tables
 $aColumns = [
-   'order_name', // Will represent 'pur_order_name' or 'wo_order_name'
-   'order_date',
-   'completion_date',
-   'budget',
+   'budget_head', // Will represent 'pur_order_name' or 'wo_order_name'
    'project',
-   'rli_filter',
-   'kind',
-   'group_name',
+   'awarded_value',
+   'unawarded_value',
+   'unallocated_value',
+   'secured_desposit',
+   'cost_to_complete',
+   'budget_health',
+   'entity_table',
    'remarks',
 ];
 
@@ -49,7 +50,7 @@ $sTable = "(
 ) as combined_orders";
 
 $join = [
-   'LEFT JOIN ' . db_prefix() . 'assets_group ON ' . db_prefix() . 'assets_group.group_id = combined_orders.group_pur',
+   'LEFT JOIN ' . db_prefix() . 'assets_group ON ' . db_prefix() . 'assets_group.group_id = combined_orders.budget_head',
 ];
 
 $where = [];
@@ -180,9 +181,9 @@ if (isset($project)) {
    foreach ($project as $t) {
       if ($t != '') {
          if ($where_project == '') {
-            $where_project .= ' AND (project_id = "' . $t . '"';
+            $where_project .= ' AND (project = "' . $t . '"';
          } else {
-            $where_project .= ' or project_id = "' . $t . '"';
+            $where_project .= ' or project = "' . $t . '"';
          }
       }
    }
@@ -240,23 +241,13 @@ update_module_filter($module_name, $aw_unw_order_status_filter_name, $aw_unw_ord
 // Query and process data
 $result = data_tables_init_union_unawarded($aColumns, $sIndexColumn, $sTable, $join, $where, [
    'combined_orders.id as id',
-   'rli_filter',
-   'order_date',
-   'completion_date',
-   'budget',
-   'kind',
-   'group_name',
-   'remarks',
-   'group_pur',
-   'source_table',
-   'project',
 ]);
 
 $output  = $result['output'];
 $rResult = $result['rResult'];
 
 $footer_data = [
-   'total_budget_ro_projection' => 0,
+   
 ];
 $this->ci->load->model('purchase/purchase_model');
 $vendor_list  = $this->ci->purchase_model->get_vendor();
@@ -269,259 +260,42 @@ foreach ($rResult as $aRow) {
       $_data = isset($aRow[$column]) ? $aRow[$column] : '';
 
       // Process specific columns
-      if ($column == 'total') {
-         if ($aRow['source_table']  == "order_tracker") {
-            $base_currency = get_base_currency_pur();
-            $_data = app_format_money($aRow['total'], $base_currency->symbol);
+      if ($column == 'budget_head') {
+         // 1) Raw budget-head list
+         $raw_heads = get_group_name_item(); // e.g. [ ['id'=>5,'name'=>'Foo'], … ]
 
-            // Check if total exists in the database
-            if (!empty($aRow['total'])) {
-               // Display as plain text
-               $_data = '<span class="contract-amount-display" data-id="' . $aRow['id'] . '" data-type="' . $aRow['source_table'] . '">' .
-                  app_format_money($aRow['total'], '₹') .
-                  '</span>';
-            } else {
-               // Render as an editable input if no total exists
-               $_data = '<input type="number" class="form-control contract-amount-input" 
-                         placeholder="Enter Conatact Amount" 
-                         data-id="' . $aRow['id'] . '" 
-                         data-type="' . $aRow['source_table'] . '">';
-            }
-         } else {
-            $base_currency = get_base_currency_pur();
-            $_data = app_format_money($aRow['subtotal'], $base_currency->symbol);
-         }
-      } elseif ($column == 'order_name') {
-         if ($aRow['source_table'] == "pur_orders") {
-            $_data = '<a href="' . admin_url('purchase/pur_order/' . $aRow['id']) . '" target="_blank">' . $aRow['order_number'] . '-' . $aRow['order_name'] . '</a>';
-         } elseif ($aRow['source_table'] == "wo_orders") {
-            $_data = '<a href="' . admin_url('purchase/wo_order/' . $aRow['id']) . '" target="_blank">' . $aRow['order_number'] . '-' . $aRow['order_name'] . '</a>';
-         } elseif ($aRow['source_table'] == "order_tracker") {
-            $name = $aRow['order_name'];
-            $name .= '<div class="row-options">';
-            if ((has_permission('purchase-order', '', 'delete') || is_admin()) && ($aRow['source_table'] == "order_tracker")) {
-               $name .= '<a href="' . admin_url('purchase/delete_order_tracker/' . $aRow['id']) . '" class="text-danger _delete" >' . _l('delete') . '</a>';
-            }
-            $name .= '</div>';
-            $_data = $name;
-         }
-      } elseif ($column == 'vendor') {
 
-         if ($aRow['source_table'] == "order_tracker") {
-            $vendor_raw = trim($aRow['vendor_id']);
-            if ($vendor_raw !== '') {
-               // Vendor is already selected
-               $name = '';
-               if (isset($vendor_by_id[$vendor_raw])) {
-                  $u = $vendor_by_id[$vendor_raw];
-                  $name = $u['company'];
-               }
-               $_data = '<span class="vendor-display" 
-                           data-id="' . $aRow['id'] . '" 
-                           data-vendor="' . html_escape($vendor_raw) . '">'
-                  . html_escape($name) .
-                  '</span>';
-            } else {
-               // No vendor selected - show dropdown
-               $_data = '<select class="form-control vendor-input selectpicker" 
-                           data-live-search="true" 
-                           data-width="100%" 
-                           data-id="' . $aRow['id'] . '">
-                           <option value="">' . _l('') . '</option>';
-
-               foreach ($vendor_by_id as $vendor) {
-                  $_data .= '<option value="' . $vendor['userid'] . '">'
-                     . html_escape($vendor['company'])
-                     . '</option>';
-               }
-
-               $_data .= '</select>';
-
-               // Initialize selectpicker if it exists
-               $_data .= '<script>
-                           if($.fn.selectpicker) {
-                              $(".vendor-input").selectpicker();
-                           }
-                        </script>';
-            }
-         } else {
-            $_data = $aRow['vendor'];
-         }
-      } elseif ($column == 'order_date') {
-
-         if ($aRow['source_table'] == "order_tracker") {
-            // Inline editable input for Order Date
-            $_data = '<input type="date" class="form-control order-date-input" 
-                        value="' . $aRow['order_date'] . '" 
-                        data-id="' . $aRow['id'] . '" 
-                        data-type="' . $aRow['source_table'] . '">';
-         } else {
-            $_data = _d($aRow['order_date']);
-         }
-      } elseif ($column == 'completion_date') {
-         // Inline editable input for Completion Date
-         $_data = '<input type="date" class="form-control completion-date-input" 
-                        value="' . $aRow['completion_date'] . '" 
-                        data-id="' . $aRow['id'] . '" 
-                        data-type="' . $aRow['source_table'] . '">';
-      } elseif ($column == 'rli_filter') {
-         // Define an array of statuses with their corresponding labels and table attributes
-         $status_labels = [
-            0 => ['label' => 'danger', 'table' => 'provided_by_ril', 'text' => _l('provided_by_ril')],
-            1 => ['label' => 'success', 'table' => 'new_item_service_been_addded_as_per_instruction', 'text' => _l('new_item_service_been_addded_as_per_instruction')],
-            2 => ['label' => 'info', 'table' => 'due_to_spec_change_then_original_cost', 'text' => _l('due_to_spec_change_then_original_cost')],
-            3 => ['label' => 'warning', 'table' => 'deal_slip', 'text' => _l('deal_slip')],
-            4 => ['label' => 'primary', 'table' => 'to_be_provided_by_ril_but_managed_by_bil', 'text' => _l('to_be_provided_by_ril_but_managed_by_bil')],
-            5 => ['label' => 'secondary', 'table' => 'due_to_additional_item_as_per_apex_instrution', 'text' => _l('due_to_additional_item_as_per_apex_instrution')],
-            6 => ['label' => 'purple', 'table' => 'event_expense', 'text' => _l('event_expense')],
-            7 => ['label' => 'teal', 'table' => 'pending_procurements', 'text' => _l('pending_procurements')],
-            8 => ['label' => 'orange', 'table' => 'common_services_in_ghj_scope', 'text' => _l('common_services_in_ghj_scope')],
-            9 => ['label' => 'green', 'table' => 'common_services_in_ril_scope', 'text' => _l('common_services_in_ril_scope')],
-            10 => ['label' => 'default', 'table' => 'due_to_site_specfic_constraint', 'text' => _l('due_to_site_specfic_constraint')],
-         ];
-         // Start generating the HTML
-         $rli_filter = '';
-
-         if (isset($status_labels[$aRow['rli_filter']])) {
-            $status = $status_labels[$aRow['rli_filter']];
-            $rli_filter = '<span class="inline-block label label-' . $status['label'] . '" id="status_span_' . $aRow['id'] . '" task-status-table="' . $status['table'] . '">' . $status['text'];
-         } else {
-            $rli_filter = '<span class="inline-block label " id="status_span_' . $aRow['id'] . '" >';
+         // 3) Build status_labels_budget_head, cycling labels
+         $status_labels_budget_head = [];
+         $i = 0;
+         foreach ($raw_heads as $h) {
+            $label = $label_palette[$i % count($label_palette)];
+            $status_labels_budget_head[$h['id']] = [
+               'label' => $label,
+               'name'  => $h['name'],
+            ];
+            $i++;
          }
 
-         if (has_permission('order_tracker', '', 'edit') || is_admin()) {
-            $rli_filter .= '<div class="dropdown inline-block mleft5 table-export-exclude">';
-            $rli_filter .= '<a href="#" class="dropdown-toggle text-dark" id="tablePurOderStatus-' . $aRow['id'] . '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
-            $rli_filter .= '<span data-toggle="tooltip" title="' . _l('ticket_single_change_status') . '"><i class="fa fa-caret-down" aria-hidden="true"></i></span>';
-            $rli_filter .= '</a>';
-
-            $rli_filter .= '<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="tablePurOderStatus-' . $aRow['id'] . '">';
-
-            foreach ($status_labels as $key => $status) {
-               if ($key != $aRow['rli_filter']) {
-                  $rli_filter .= '<li>
-                       <a href="#" onclick="change_rli_filter_unawarded(' . $key . ', ' . $aRow['id'] . ', \'' . htmlspecialchars($aRow['source_table'], ENT_QUOTES) . '\'); return false;">
-                           ' . $status['text'] . '
-                       </a>
-                   </li>';
-               }
-            }
-
-
-            $rli_filter .= '</ul>';
-            $rli_filter .= '</div>';
-         }
-
-         $rli_filter .= '</span>';
-         $_data = $rli_filter;
-      } elseif ($column == 'budget') {
-         // Check if budget exists in the database
-         if (!empty($aRow['budget'])) {
-            // Display as plain text
-            $_data = '<span class="budget-display" data-id="' . $aRow['id'] . '" data-type="' . $aRow['source_table'] . '">' .
-               app_format_money($aRow['budget'], '₹') .
-               '</span>';
-         } else {
-            // Render as an editable input if no budget exists
-            $_data = '<input type="number" class="form-control budget-input" 
-                         placeholder="Enter budget" 
-                         data-id="' . $aRow['id'] . '" 
-                         data-type="' . $aRow['source_table'] . '">';
-         }
-      } elseif ($column == 'co_total') {
-         // $base_currency = get_base_currency_pur();
-         // $_data = app_format_money($aRow['co_total'], $base_currency->symbol);
-
-         // Check if anticipate_variation exists in the database
-         if (!empty($aRow['co_total'])) {
-            if ($aRow['source_table'] == "order_tracker") {
-               if (!empty($aRow['co_total'])) {
-                  // Display as plain text
-                  $_data = '<span class="co-total-display" data-id="' . $aRow['id'] . '" data-type="' . $aRow['source_table'] . '">' .
-                     app_format_money($aRow['co_total'], '₹') .
-                     '</span>';
-               } else {
-                  $_data = '<input type="number" class="form-control co-total-input"
-                           placeholder="Enter Change Order"
-                           data-id="' . $aRow['id'] . '"
-                           data-type="' . $aRow['source_table'] . '">';
-               }
-            } else {
-               // Display as plain text
-               $_data = '<span class="" data-id="' . $aRow['id'] . '" data-type="' . $aRow['source_table'] . '">' .
-                  app_format_money($aRow['co_total'], '₹') .
-                  '</span>';
-            }
-         } else {
-            // Render as an editable input if no value exists
-            // $_data = '<input type="number" class="form-control co-total-input"
-            //          placeholder="Enter Change Order"
-            //          data-id="' . $aRow['id'] . '"
-            //          data-type="' . $aRow['source_table'] . '">';
-            $_data = '<span style="font-style: italic;font-size: 12px;">Values will be fetched directly from the change order module</span>';
-         }
-      } elseif ($column == 'total_rev_contract_value') {
+         $_data = $status_labels_budget_head[$aRow['budget_head']];;
+      } elseif ($column == 'project') {
+         $_data = $aRow['project'];
+      } elseif ($column == 'awarded_value') {
          $base_currency = get_base_currency_pur();
-         $_data = app_format_money($aRow['total_rev_contract_value'], $base_currency->symbol);
-      } elseif ($column == 'anticipate_variation') {
-         // Check if anticipate_variation exists in the database
-         if (!empty($aRow['anticipate_variation'])) {
-            // Display as plain text
-            $_data = '<span class="anticipate-variation-display" data-id="' . $aRow['id'] . '" data-type="' . $aRow['source_table'] . '">' .
-               app_format_money($aRow['anticipate_variation'], '₹') .
-               '</span>';
-         } else {
-            // Render as an editable input if no value exists
-            $_data = '<input type="number" class="form-control anticipate-variation-input" 
-                     placeholder="Enter variation" 
-                     data-id="' . $aRow['id'] . '" 
-                     data-type="' . $aRow['source_table'] . '">';
-         }
-      } elseif ($column == 'cost_to_complete') {
+         $_data = app_format_money($aRow['awarded_value'], $base_currency->symbol);
+      } elseif ($column == 'unawarded_value') {
+         $base_currency = get_base_currency_pur();
+         $_data = app_format_money($aRow['unawarded_value'], $base_currency->symbol);
+      } elseif ($column == 'unallocated_value') {
+         $base_currency = get_base_currency_pur();
+         $_data = app_format_money($aRow['unallocated_value'], $base_currency->symbol);
+      } elseif ($column == 'secured_desposit') {
          $base_currency = get_base_currency_pur();
          $_data = app_format_money($aRow['cost_to_complete'], $base_currency->symbol);
-      } elseif ($column == 'vendor_submitted_amount_without_tax') {
-         // Format final_certified_amount to display as currency
-         // $_data = app_format_money($aRow['final_certified_amount'], '₹');
-
-         if (!empty($aRow['vendor_submitted_amount_without_tax']) && $aRow['vendor_submitted_amount_without_tax'] != 0) {
-
-            $_data = '<span class=  data-id="' . $aRow['id'] . '" data-type="' . $aRow['source_table'] . '">' .
-               app_format_money($aRow['vendor_submitted_amount_without_tax'], '₹') .
-               '</span>';
-         } else {
-            // Render as an editable input if no value exists
-            $_data = '<span style="font-style: italic;font-size: 12px;">Values will be fetched directly from the vendor billing tracker</span>';
-         }
-      } elseif ($column == 1) {
-         $_data = '
-            <div class="input-group" style="width: 100%;">
-               <input type="file" 
-                      name="attachments[]" 
-                      class="form-control upload_order_tracker_files" 
-                      data-id="' . $aRow['id'] . '" 
-                      data-source="' . $aRow['source_table'] . '" 
-                      multiple 
-                      style="min-width: 200px; width: 100%;">
-               <span class="input-group-btn">
-                  <button type="button" 
-                          class="btn btn-success upload_order_tracker_attachments" 
-                          data-id="' . $aRow['id'] . '" 
-                          data-source="' . $aRow['source_table'] . '" 
-                          title="Upload Attachments">
-                     <i class="fa fa-upload"></i>
-                  </button>
-               </span>
-            </div>
-         ';
-      } elseif ($column == 2) {
-         $this->ci->load->model('purchase/purchase_model');
-         $attachments = $this->ci->purchase_model->get_order_tracker_attachments($aRow['id'], $aRow['source_table']);
-         $file_html = '';
-         if (!empty($attachments)) {
-            $file_html = '<a href="javascript:void(0)" onclick="view_order_tracker_attachments(' . $aRow['id'] . ', \'' . $aRow['source_table'] . '\'); return false;" class="btn btn-info btn-icon">View Files</a>';
-         }
-         $_data = $file_html;
+      } elseif ($column == 'budget_health') {
+         $_data = $aRow['budget_health'];
+      } elseif ($column == 'entity_table') {
+         echo '<button type="button" class="btn btn-info pull-right" onclick="cost_control_sheet(4,2,"")" id="cost_control_sheet">Cost Control Sheet</button>';
       } elseif ($column == 'remarks') {
          // If remarks exist, display as plain text with an inline editing option
          $_data = '<span class="remarks-display" data-id="' . $aRow['id'] . '" data-type="' . $aRow['source_table'] . '">' .
@@ -532,141 +306,16 @@ foreach ($rResult as $aRow) {
             $_data = '<textarea class="form-control remarks-input" placeholder="Enter remarks" data-id="' . $aRow['id'] . '" data-type="' . $aRow['source_table'] . '"></textarea>';
          }
       }
-      //  elseif ($column == 'order_value') {
-      //    $base_currency = get_base_currency_pur();
-      //    $_data = '<span class="order-value-display" data-id="' . $aRow['id'] . '" data-type="' . $aRow['source_table'] . '">' . app_format_money($aRow['order_value'], $base_currency->symbol) . '</span>';
-      // }
-      elseif ($column == 'aw_unw_order_status') {
-         $status_labels_aw_uw = [
-            1 => ['label' => 'success', 'table' => 'awarded', 'text' => _l('Awarded')],
-            2 => ['label' => 'default', 'table' => 'unawarded', 'text' => _l('Unawarded')],
-            3 => ['label' => 'warning', 'table' => 'awarded_by_ril', 'text' => _l('Awarded by RIL')],
-         ];
-         // Start generating the HTML
-         $aw_uw = '';
-         if (isset($status_labels_aw_uw[$aRow['aw_unw_order_status']])) {
-            $status = $status_labels_aw_uw[$aRow['aw_unw_order_status']];
-            $aw_uw = '<span class="inline-block label label-' . $status['label'] . '" id="status_aw_uw_span_' . $aRow['id'] . '" task-status-table="' . $status['table'] . '">' . $status['text'];
-         } else {
-            $aw_uw = '<span class="inline-block label " id="status_aw_uw_span_' . $aRow['id'] . '" >';
-         }
-
-         if (has_permission('order_tracker', '', 'edit') || is_admin()) {
-            $aw_uw .= '<div class="dropdown inline-block mleft5 table-export-exclude">';
-            $aw_uw .= '<a href="#" class="dropdown-toggle text-dark" id="tablePurOderStatus-' . $aRow['id'] . '" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
-            $aw_uw .= '<span data-toggle="tooltip" title="' . _l('ticket_single_change_status') . '"><i class="fa fa-caret-down" aria-hidden="true"></i></span>';
-            $aw_uw .= '</a>';
-
-            $aw_uw .= '<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="tablePurOderStatus-' . $aRow['id'] . '">';
-
-            foreach ($status_labels_aw_uw as $key => $status) {
-               if ($key != $aRow['aw_unw_order_status']) {
-                  $aw_uw .= '<li>
-                       <a href="javascript:void(0);" onclick="change_aw_unw_order_status(' . $key . ', ' . $aRow['id'] . ', \'' . htmlspecialchars($aRow['source_table'], ENT_QUOTES) . '\'); return false;">
-                           ' . $status['text'] . '
-                       </a>
-                   </li>';
-               }
-            }
-
-
-            $aw_uw .= '</ul>';
-            $aw_uw .= '</div>';
-         }
-
-         $aw_uw .= '</span>';
-         $_data = $aw_uw;
-      } elseif ($column == 'project') {
-         $_data = $aRow['project'];
-      } elseif ($column == 'group_name') {
-         if ($aRow['source_table'] == "order_tracker") {
-            // 1) Raw budget-head list
-            $raw_heads = get_group_name_item(); // e.g. [ ['id'=>5,'name'=>'Foo'], … ]
-
-            // 2) Your 11-item label palette
-            $label_palette = [
-               'danger',
-               'success',
-               'info',
-               'warning',
-               'primary',
-               'secondary',
-               'purple',
-               'teal',
-               'orange',
-               'green',
-               'default',
-            ];
-
-            // 3) Build status_labels_budget_head, cycling labels
-            $status_labels_budget_head = [];
-            $i = 0;
-            foreach ($raw_heads as $h) {
-               $label = $label_palette[$i % count($label_palette)];
-               $status_labels_budget_head[$h['id']] = [
-                  'label' => $label,
-                  'name'  => $h['name'],
-               ];
-               $i++;
-            }
-
-            // 4) Render exactly like your aw_unw_order_status block but for group_pur
-            $budget_head_html = '';
-            if (isset($status_labels_budget_head[$aRow['group_pur']])) {
-               $bh = $status_labels_budget_head[$aRow['group_pur']];
-               $budget_head_html = '<span class="inline-block label label-' . $bh['label'] . '" '
-                  . 'id="budget_head_span_' . $aRow['id'] . '">'
-                  . $bh['name'];
-            } else {
-               $budget_head_html = '<span class="inline-block label " '
-                  . 'id="budget_head_span_' . $aRow['id'] . '">';
-            }
-
-            if (has_permission('order_tracker', '', 'edit') || is_admin()) {
-               $budget_head_html .= '<div class="dropdown inline-block mleft5 table-export-exclude">'
-                  . '<a href="#" class="dropdown-toggle text-dark" '
-                  .    'id="tableBudgetHead-' . $aRow['id'] . '" '
-                  .    'data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'
-                  .    '<span data-toggle="tooltip" title="' . _l('change_budget_head') . '">'
-                  .        '<i class="fa fa-caret-down"></i>'
-                  .    '</span>'
-                  . '</a>'
-                  . '<ul class="dropdown-menu dropdown-menu-right" '
-                  .     'aria-labelledby="tableBudgetHead-' . $aRow['id'] . '">';
-               foreach ($status_labels_budget_head as $id => $bh) {
-                  if ($id != $aRow['group_pur']) {
-                     $budget_head_html .= '<li>'
-                        .   '<a href="javascript:void(0);" '
-                        .      'onclick="update_budget_head_unawarded(' . $id . ', ' . $aRow['id']
-                        .      ', \'' . htmlspecialchars($aRow['source_table'], ENT_QUOTES)
-                        .      '\'); return false;">'
-                        .          $bh['name']
-                        .   '</a>'
-                        . '</li>';
-                  }
-               }
-               $budget_head_html .= '</ul>'
-                  . '</div>';
-            }
-
-            $budget_head_html .= '</span>';
-            $_data = $budget_head_html;
-         } else {
-            // For other source tables, just display the group name
-            $_data = $aRow['group_name'];
-         }
-      }
-
 
       $row[] = $_data;
    }
 
-   $footer_data['total_budget_ro_projection'] += $aRow['budget'];
+   // $footer_data['total_budget_ro_projection'] += [];
    $output['aaData'][] = $row;
    $sr++;
 }
 
-foreach ($footer_data as $key => $total) {
-   $footer_data[$key] = app_format_money($total, $base_currency->symbol);
-}
-$output['sums'] = $footer_data;
+// foreach ($footer_data as $key => $total) {
+//    $footer_data[$key] = app_format_money($total, $base_currency->symbol);
+// }
+// $output['sums'] = $footer_data;

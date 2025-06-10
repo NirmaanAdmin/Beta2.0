@@ -80,13 +80,13 @@
 
                <div class="row">
                   <div class="_buttons col-md-12">
-                     <button class="btn btn-info pull-left mright10 display-block" style="margin-right: 10px;" data-toggle="modal" data-target="#addNewRowModal">
+                     <!-- <button class="btn btn-info pull-left mright10 display-block" style="margin-right: 10px;" data-toggle="modal" data-target="#addNewRowModal">
                         <i class="fa fa-plus"></i> <?php echo _l('New'); ?>
-                     </button>
+                     </button> -->
 
                      <div class="all_ot_filters">
 
-                        <div class="col-md-3 form-group">
+                        <!-- <div class="col-md-3 form-group">
                            <?php
                            $rli_filter = get_module_filter($module_name, 'rli_filter');
                            $rli_filter_val = !empty($rli_filter) ? $rli_filter->filter_value : '';
@@ -98,20 +98,20 @@
                                  <option value="<?php echo $rli['id']; ?>" <?php echo ($rli_filter_val == $rli['id']) ? 'selected' : ''; ?>><?php echo $rli['name']; ?></option>
                               <?php } ?>
                            </select>
-                        </div>
+                        </div> -->
 
 
-                        <div class="col-md-2 form-group">
-                           <?php
-                           $order_tracker_kind_filter = get_module_filter($module_name, 'order_tracker_kind');
-                           $order_tracker_kind_filter_val = !empty($order_tracker_kind_filter) ? $order_tracker_kind_filter->filter_value : '';
-                           ?>
-                           <select name="kind" id="kind" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('cat'); ?>">
-                              <option value=""></option>
-                              <option value="Client Supply" <?php echo ($order_tracker_kind_filter_val == "Client Supply") ? 'selected' : ''; ?>><?php echo _l('client_supply'); ?></option>
-                              <option value="Bought out items" <?php echo ($order_tracker_kind_filter_val == "Bought out items") ? 'selected' : ''; ?>><?php echo _l('bought_out_items'); ?></option>
-                           </select>
-                        </div>
+                        <!-- <div class="col-md-2 form-group">
+                              <?php
+                              $order_tracker_kind_filter = get_module_filter($module_name, 'order_tracker_kind');
+                              $order_tracker_kind_filter_val = !empty($order_tracker_kind_filter) ? $order_tracker_kind_filter->filter_value : '';
+                              ?>
+                              <select name="kind" id="kind" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('cat'); ?>">
+                                 <option value=""></option>
+                                 <option value="Client Supply" <?php echo ($order_tracker_kind_filter_val == "Client Supply") ? 'selected' : ''; ?>><?php echo _l('client_supply'); ?></option>
+                                 <option value="Bought out items" <?php echo ($order_tracker_kind_filter_val == "Bought out items") ? 'selected' : ''; ?>><?php echo _l('bought_out_items'); ?></option>
+                              </select>
+                           </div> -->
 
                         <div class="col-md-2 form-group" style="padding-left: 0px;">
                            <?php
@@ -173,14 +173,14 @@
                            <!-- Column Checkboxes -->
                            <?php
                            $columns = [
-                              _l('order_scope'),                             
-                              _l('order_date'),
-                              _l('completion_date'),
-                              _l('budget_ro_projection'),
+                              _l('Budget Head'),
                               _l('project'),
-                              _l('rli_filter'),
-                              _l('category'),
-                              _l('group_pur'),
+                              _l('Awarded Value'),
+                              _l('Unawarded Value'),
+                              _l('Unallocated Value'),
+                              _l('Secured Desposit'),
+                              _l('Cost to Complete'),
+                              _l('Budget Health'),
                               _l('remarks')
                            ];
                            ?>
@@ -211,28 +211,22 @@
                         <table class="dt-table-loading table table-table_order_tracker">
                            <thead>
                               <tr>
-                                 <th><?php echo _l('order_scope'); ?></th>
-                                 <th><?php echo _l('order_date'); ?></th>
-                                 <th><?php echo _l('completion_date'); ?></th>
-                                 <th><?php echo _l('budget_ro_projection'); ?></th>
+                                 <th><?php echo _l('Budget Head'); ?></th>
                                  <th><?php echo _l('project'); ?></th>
-                                 <th><?php echo _l('rli_filter'); ?></th>
-                                 <th><?php echo _l('category'); ?></th>
-                                 <th><?php echo _l('group_pur'); ?></th>
+                                 <th><?php echo _l('Awarded Value'); ?></th>
+                                 <th><?php echo _l('Unawarded Value'); ?></th>
+                                 <th><?php echo _l('Unallocated Value'); ?></th>
+                                 <th><?php echo _l('Secured Desposit'); ?></th>
+                                 <th><?php echo _l('Cost to Complete'); ?></th>
+                                 <th><?php echo _l('Budget Health'); ?></th>
+                                 <th><?php echo _l('Entity Table'); ?></th>
                                  <th><?php echo _l('remarks'); ?></th>
                               </tr>
                            </thead>
                            <tbody>
                            </tbody>
                            <tfoot>
-                              <td></td>
-                              <td></td>
-                              <td></td>
-                              <td class="total_budget_ro_projection"></td>
-                              <td></td>
-                              <td></td>
-                              <td></td>
-                              <td></td>
+
                            </tfoot>
                         </table>
                      </div>
@@ -333,7 +327,30 @@
    </div>
 </div>
 <div id="order_tracker_file_data"></div>
+<div class="modal fade" id="cost_complete_modal" tabindex="-1" role="dialog">
+   <div class="modal-dialog" role="document" style="width: 98%;">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h4 class="modal-title">View Items</h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <div class="col-md-3" style="padding-left: 0px; padding-top: 5px;">
+               <?php
+               echo render_select('cost_sub_head', $sub_groups_pur, array('id', 'sub_group_name'), 'Sub Head');
+               ?>
+            </div>
+         </div>
 
+         <div class="modal-body">
+            <div class="row">
+               <div class="col-md-12">
+                  <div class="view_cost_control_sheet">
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
 <?php init_tail(); ?>
 <?php require 'modules/purchase/assets/js/import_excel_items_unawarded_tracker_js.php'; ?>
 <?php require 'modules/purchase/assets/js/unawarded_tracker_js.php'; ?>
