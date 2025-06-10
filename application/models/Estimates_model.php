@@ -2002,7 +2002,7 @@ class Estimates_model extends App_Model
             $conditions[] = "combined_orders.group_pur = '" . $group_pur . "'";
         }
         if (!empty($project_id)) {
-            $conditions[] = "combined_orders.project_id = '1'";
+            $conditions[] = "combined_orders.project_id = '" . $project_id . "'";
         }
         if (!empty($conditions)) {
             $sql .= " WHERE " . implode(" AND ", $conditions);
