@@ -2110,15 +2110,30 @@ class Estimates_model extends App_Model
         $total_unalloc_cost = isset($data['total_unalloc_cost']) ? $data['total_unalloc_cost'] : NULL;
         if(!empty($newitems)) {
             foreach ($newitems as $key => $value) {
-                $this->db->insert(db_prefix() . 'pur_unawarded_tracker', [
-                    'project' => $project,
-                    'estimate_id' => $estimate_id,
-                    'budget_head' => $value['budget_head'],
-                    'awarded_value' => $value['awarded_value'],
-                    'unawarded_value' => $value['unawarded_value'],
-                    'unallocated_value' => $value['unallocated_value'],
-                    'created_at' => date('Y-m-d H:i:s'),
-                ]);
+                $this->db->where('estimate_id', $estimate_id);
+                $this->db->where('budget_head', $value['budget_head']);
+                $pur_unawarded_tracker = $this->db->get(db_prefix() . 'pur_unawarded_tracker')->row();
+                if(!empty($pur_unawarded_tracker)) {
+                    $this->db->where('estimate_id', $estimate_id);
+                    $this->db->where('budget_head', $value['budget_head']);
+                    $this->db->update(db_prefix() . 'pur_unawarded_tracker', [
+                        'project' => $project,
+                        'awarded_value' => $value['awarded_value'],
+                        'unawarded_value' => $value['unawarded_value'],
+                        'unallocated_value' => $value['unallocated_value'],
+                        'updated_at' => date('Y-m-d H:i:s'),
+                    ]);
+                } else {
+                    $this->db->insert(db_prefix() . 'pur_unawarded_tracker', [
+                        'project' => $project,
+                        'estimate_id' => $estimate_id,
+                        'budget_head' => $value['budget_head'],
+                        'awarded_value' => $value['awarded_value'],
+                        'unawarded_value' => $value['unawarded_value'],
+                        'unallocated_value' => $value['unallocated_value'],
+                        'created_at' => date('Y-m-d H:i:s'),
+                    ]);
+                }
             }
         }
 
