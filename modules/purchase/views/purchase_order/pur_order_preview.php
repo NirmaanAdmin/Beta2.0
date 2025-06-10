@@ -1057,7 +1057,7 @@ if ($estimate->currency != 0) {
                                  <a href="<?php echo admin_url('purchase/edit_pur_bills/' . $bill['id']); ?>" class="btn btn-default btn-icon" data-toggle="tooltip" data-placement="top" title="<?php echo _l('edit'); ?>"><i class="fa fa-pencil-square "></i></a>
                               <?php } ?>
                               <?php if (has_permission('purchase_invoices', '', 'delete') || is_admin()) { ?>
-                                 <a href="<?php echo admin_url('purchase/delete_payment/' . $bill['id'] . '/' . $estimate->id); ?>" class="btn btn-danger btn-icon _delete"><i class="fa fa-remove"></i></a>
+                                 <a href="<?php echo admin_url('purchase/delete_bill/' . $bill['id'] . '/' . $estimate->id); ?>" class="btn btn-danger btn-icon _delete"><i class="fa fa-remove"></i></a>
                               <?php } ?>
                            </td>
                         </tr>
