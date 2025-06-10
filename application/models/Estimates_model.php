@@ -1972,16 +1972,28 @@ class Estimates_model extends App_Model
 
     public function find_awarded_capex($group_pur, $project_id)
     {
-    $sql = "SELECT combined_orders.total, combined_orders.project_id, combined_orders.group_pur FROM (
-            SELECT po.subtotal as total, pr.id AS project_id, po.group_pur 
+    $sql = "SELECT combined_orders.total_rev_contract_value, combined_orders.project_id, combined_orders.group_pur FROM (
+            SELECT (po.subtotal + IFNULL(co_sum.co_total, 0)) AS total_rev_contract_value, pr.id AS project_id, po.group_pur 
             FROM tblpur_orders po 
+            LEFT JOIN (
+                SELECT po_order_id, SUM(co_value) AS co_total
+                FROM tblco_orders
+                WHERE po_order_id IS NOT NULL
+                GROUP BY po_order_id
+            ) AS co_sum ON co_sum.po_order_id = po.id
             LEFT JOIN tblprojects pr ON pr.id = po.project
             UNION ALL
-            SELECT wo.subtotal as total, pr.id AS project_id, wo.group_pur 
+            SELECT (wo.subtotal + IFNULL(co_sum.co_total, 0)) AS total_rev_contract_value, pr.id AS project_id, wo.group_pur 
             FROM tblwo_orders wo 
+            LEFT JOIN (
+                SELECT wo_order_id, SUM(co_value) AS co_total
+                FROM tblco_orders
+                WHERE wo_order_id IS NOT NULL
+                GROUP BY wo_order_id
+            ) AS co_sum ON co_sum.wo_order_id = wo.id
             LEFT JOIN tblprojects pr ON pr.id = wo.project
             UNION ALL
-            SELECT t.total, pr.id AS project_id, t.group_pur 
+            SELECT (t.total + IFNULL(t.co_total, 0)) AS total_rev_contract_value, pr.id AS project_id, t.group_pur 
             FROM tblpur_order_tracker t 
             LEFT JOIN tblprojects pr ON pr.id = t.project
         ) AS combined_orders";
@@ -1990,7 +2002,7 @@ class Estimates_model extends App_Model
             $conditions[] = "combined_orders.group_pur = '" . $group_pur . "'";
         }
         if (!empty($project_id)) {
-            $conditions[] = "combined_orders.project_id = '" . $project_id . "'";
+            $conditions[] = "combined_orders.project_id = '1'";
         }
         if (!empty($conditions)) {
             $sql .= " WHERE " . implode(" AND ", $conditions);
@@ -1999,7 +2011,7 @@ class Estimates_model extends App_Model
         $result = $query->result_array();
         $awarded_capex = 0;
         if(!empty($result)) {
-            $awarded_capex = array_sum(array_column($result, 'total'));
+            $awarded_capex = array_sum(array_column($result, 'total_rev_contract_value'));
         }
         return $awarded_capex;
     }
