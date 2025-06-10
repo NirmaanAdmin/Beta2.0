@@ -134,11 +134,9 @@ foreach ($rResult as $aRow) {
     class="btn btn-info"
     onclick="cost_control_sheet_for_unawarded_tracker('
             . intval($aRow['estimate']) . ', '
-            . intval($aRow['budget_head']) . ', '
-            . '\'\''
-            . ')"
+            . intval($aRow['budget_head']) . ')"
     id="cost_control_sheet"
->Cost Control Sheet</button>';
+>Entity Table</button>';
       } elseif ($column == 'remarks') {
          // If remarks exist, display as plain text with an inline editing option
          $_data = '<span class="remarks-display" data-id="' . $aRow['id'] . '" data-type="' . $aRow['source_table'] . '">' .

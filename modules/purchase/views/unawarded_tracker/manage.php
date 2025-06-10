@@ -216,7 +216,7 @@
                                  <th><?php echo _l('Awarded Value'); ?></th>
                                  <th><?php echo _l('Unawarded Value'); ?></th>
                                  <th><?php echo _l('Unallocated Value'); ?></th>
-                                 <th><?php echo _l('Secured Desposit'); ?></th>
+                                 <th><?php echo _l('Secured Deposit'); ?></th>
                                  <th><?php echo _l('Cost to Complete'); ?></th>
                                  <th><?php echo _l('Budget Health'); ?></th>
                                  <th><?php echo _l('Entity Table'); ?></th>
@@ -330,11 +330,7 @@
          <div class="modal-header">
             <h4 class="modal-title">View Items</h4>
             <button type="button" class="close" data-dismiss="modal">&times;</button>
-            <div class="col-md-3" style="padding-left: 0px; padding-top: 5px;">
-               <?php
-               echo render_select('cost_sub_head', $sub_groups_pur, array('id', 'sub_group_name'), 'Sub Head');
-               ?>
-            </div>
+
          </div>
 
          <div class="modal-body">

@@ -16,7 +16,7 @@ var expenseDropzone;
         "aw_unw_order_status": "[name='aw_unw_order_status[]']"
     };
 
-    initDataTable('.table-table_order_tracker', admin_url + 'purchase/table_unawarded_tracker', [], [], Params, [1, 'desc']);
+    initDataTable('.table-table_order_tracker', admin_url + 'purchase/table_unawarded_tracker', [], [], Params, [0, 'desc']);
 
     $.each(Params, function (i, obj) {
         // console.log(obj);

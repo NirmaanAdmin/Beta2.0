@@ -21363,14 +21363,16 @@ class Purchase_model extends App_Model
             $response .= '<table class="table items">';
             $response .= '<thead>
                 <tr>
-                    <th width="15%" align="left">' . _l('estimate_table_item_heading') . '</th>
-                    <th width="15%" align="left">' . _l('estimate_table_item_description') . '</th>
+                    <th width="13%" align="left">' . _l('estimate_table_item_heading') . '</th>
+                    <th width="12%" align="left">' . _l('estimate_table_item_description') . '</th>
                     <th width="11%" align="left">' . _l('sub_groups_pur') . '</th>
-                    <th width="11%" class="qty" align="right">' . _l('budgeted_qty') . '</th>
-                    <th width="11%" class="qty" align="right">' . _l('remaining_qty') . '</th>
-                    <th width="11%" align="right">' . _l('budgeted_rate') . '</th>
-                    <th width="11%" align="right">' . _l('budgeted_amount') . '</th>
-                    <th width="14%" align="right">' . _l('control_remarks') . '</th>
+                    <th width="8%" align="left">' . _l('Projected Award Date') . '</th>
+                    <th width="11%" align="left">' . _l('Unawarded Amount') . '</th>
+                    <th width="11%" align="left">' . _l('Secured Deposit (%)') . '</th>
+                    <th width="11%" align="left">' . _l('Secured Deposit Value') . '</th>
+                    <th width="11%" align="left">' . _l('Awarded Value') . '</th>
+                    <th width="11%" align="left">' . _l('Tagged To') . '</th>
+                    <th width="10%" align="left">' . _l('control_remarks') . '</th>
                 </tr>
             </thead>';
             $response .= '<tbody style="border: 1px solid #ddd;">';
@@ -21392,23 +21394,18 @@ class Purchase_model extends App_Model
                 $response .= '<tr>';
                 $response .= '<td>
                         <span class="' . $budgeted_amount_class . '">' . get_purchase_items($item['item_code']) . '</span>
-                        <div>
-                            <a class="cost_fetch_pur_item" data-itemcode="' . $item['item_code'] . '" data-longdescription="' . $item['long_description'] . '" data-subhead="' . $item['sub_head'] . '">Fetch</a>
-                        </div>
+                        
                     </td>';
                 $response .= '<td class="' . $budgeted_amount_class . '">' . clear_textarea_breaks($item['long_description']) . '</td>';
                 $response .= '<td class="' . $budgeted_amount_class . '">' . get_sub_head_name_by_id($item['sub_head']) . '</td>';
-                $response .= '<td align="right" class="' . $budgeted_amount_class . '">
-                    <span>' . $item_qty . '</span>
-                    <span>' . $purchase_unit_name . '</span>
-                </td>';
-                $response .= '<td align="right" class="' . $budgeted_amount_class . '">
-                    <span>' . $remaining_qty . '</span>
-                    <span>' . $purchase_unit_name . '</span>
-                </td>';
-                $response .= '<td align="right" class="' . $budgeted_amount_class . '">' . app_format_money($item['rate'], $base_currency) . '</td>';
-                $response .= '<td align="right" class="' . $budgeted_amount_class . '">' . app_format_money($budgeted_amount, $base_currency) . '</td>';
+                $response .= '<td align=""><input type="date" name="projected_award_date" class="form-control"></td>';
+                $response .= '<td align="">Unawarded Amount</td>';
+                $response .= '<td align="">Secured Deposit (%)</td>';
+                $response .= '<td align="">Secured Deposit Value</td>';
+                $response .= '<td align="">Awarded Value</td>';
+                $response .= '<td align="">Tagged To</td>';
                 $response .= '<td align="right">' . render_textarea($cost_control_remarks_name, '', $item['cost_control_remarks']) . '</td>';
+                
                 $response .= '</tr>';
             }
             $response .= '</tbody>';
