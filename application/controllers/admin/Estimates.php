@@ -706,4 +706,27 @@ class Estimates extends AdminController
         echo json_encode(['new_revision_id' => $new_revision_id]);
         exit;
     }
+
+    public function assign_unawarded_capex()
+    {
+        $response = array();
+        $data = $this->input->post();
+        $html = $this->estimates_model->assign_unawarded_capex($data);
+        if (!empty($html)) {
+            $response['success'] = true;
+            $response['html'] = $html;
+        } else {
+            $response['success'] = false;
+            $response['html'] = '';
+        }
+        echo json_encode($response);
+    }
+
+    public function add_assign_unawarded_capex()
+    {
+        $data = $this->input->post();
+        $this->estimates_model->add_assign_unawarded_capex($data);
+        set_alert('success', 'Assign Unawarded Capex is updated successfully');
+        redirect(admin_url('estimates'));
+    }
 }

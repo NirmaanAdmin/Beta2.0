@@ -1,4 +1,10 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
+<style type="text/css">
+.unawarded-title {
+    text-align: center;
+    font-weight: bold;
+}
+</style>
 <?php echo form_hidden('_attachment_sale_id', $estimate->id); ?>
 <?php echo form_hidden('_attachment_sale_type', 'estimate'); ?>
 <div class="col-md-12 no-padding">
@@ -129,6 +135,7 @@
                                 <div class="mtop10"></div>
                             </div>
                             <div class="pull-right _buttons">
+                                <a href="#" class="btn btn-primary" onclick="assign_unawarded_capex(<?php echo $estimate->id; ?>); return false;"><i class="fa-regular fa-plus tw-mr-1"></i>Assign Unawarded Capex</a>
                                 <a href="#" class="btn btn-primary" onclick="create_new_revision(<?php echo $estimate->id; ?>); return false;"><i class="fa-regular fa-plus tw-mr-1"></i><?php echo _l('create_new_revision'); ?></a>
                                 <?php if (staff_can('edit', 'estimates')) { ?>
                                 <a href="<?php echo admin_url('estimates/estimate/' . $estimate->id); ?>"
@@ -354,6 +361,14 @@
                                 </address>
                             </div>
                             <div class="col-sm-6 text-right">
+                                <?php
+                                if($estimate->total_unalloc_cost != null) { 
+                                    if($estimate->total_unalloc_cost > 0) { ?>
+                                        <h4 class="bold text-warning">Budget is partially assigned.</h4>
+                                    <?php } else if($estimate->total_unalloc_cost == 0) { ?>
+                                        <h4 class="bold text-success">Budget is fully assigned.</h4>
+                                    <?php } else {}
+                                } ?>
                                 <span class="bold"><?php echo _l('estimate_to'); ?></span>
                                 <address class="tw-text-neutral-500">
                                     <?php echo format_customer_info($estimate, 'estimate', 'billing', true); ?>
@@ -1034,6 +1049,26 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="unawarded_capex_modal" tabindex="-1" role="dialog">
+   <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+         <?php echo form_open(admin_url('estimates/add_assign_unawarded_capex'), array('id' => 'unawarded_capex_form', 'class' => '')); ?>
+         <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title"><div class="unawarded_capex_title"></div></h4>
+         </div>
+         <div class="modal-body unawarded-capex-body">
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo _l('close'); ?></button>
+            <button type="submit" class="btn btn-info"><?php echo _l('submit'); ?></button>
+         </div>
+         <?php echo form_close(); ?>
+      </div>
+   </div>
+</div>
+
 <script>
 init_items_sortable(true);
 init_btn_with_tooltips();
