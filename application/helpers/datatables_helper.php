@@ -625,7 +625,8 @@ function data_tables_init_union_unawarded($aColumns, $sIndexColumn, $combinedTab
             (IFNULL(t.awarded_value, 0) + (t.unawarded_value + IFNULL(t.secured_desposit, 0))) AS cost_to_complete,
             t.budget_health,
             t.entity_table,
-            t.remarks
+            t.remarks,
+            t.estimate_id as estimate
         FROM tblpur_unawarded_tracker t
         LEFT JOIN tblprojects pr ON pr.id = t.project
     ) AS combined_orders";

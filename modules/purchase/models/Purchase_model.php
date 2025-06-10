@@ -21339,4 +21339,84 @@ class Purchase_model extends App_Model
 
         return true;
     }
+
+    public function get_cost_control_sheet_for_unawarded_tracker($data)
+    {
+        $this->load->model('currencies_model');
+        $response = '';
+        $estimate_id = $data['estimate_id'];
+        $budget_head_id = $data['budget_head_id'];
+        $cost_sub_head = isset($data['cost_sub_head']) ? $data['cost_sub_head'] : NULL;
+        $module = isset($data['module']) ? $data['module'] : NULL;
+        $base_currency = $this->currencies_model->get_base_currency();
+
+        $this->db->where('rel_id', $estimate_id);
+        $this->db->where('rel_type', 'estimate');
+        $this->db->where('annexure', $budget_head_id);
+        if (!empty($cost_sub_head)) {
+            $this->db->where('sub_head', $cost_sub_head);
+        }
+        $itemable = $this->db->get(db_prefix() . 'itemable')->result_array();
+
+        if (!empty($itemable)) {
+            $response .= '<div class="table-responsive s_table">';
+            $response .= '<table class="table items">';
+            $response .= '<thead>
+                <tr>
+                    <th width="15%" align="left">' . _l('estimate_table_item_heading') . '</th>
+                    <th width="15%" align="left">' . _l('estimate_table_item_description') . '</th>
+                    <th width="11%" align="left">' . _l('sub_groups_pur') . '</th>
+                    <th width="11%" class="qty" align="right">' . _l('budgeted_qty') . '</th>
+                    <th width="11%" class="qty" align="right">' . _l('remaining_qty') . '</th>
+                    <th width="11%" align="right">' . _l('budgeted_rate') . '</th>
+                    <th width="11%" align="right">' . _l('budgeted_amount') . '</th>
+                    <th width="14%" align="right">' . _l('control_remarks') . '</th>
+                </tr>
+            </thead>';
+            $response .= '<tbody style="border: 1px solid #ddd;">';
+            foreach ($itemable as $key => $item) {
+                $item_qty = number_format($item['qty'], 2);
+                $purchase_unit_name = get_purchase_unit($item['unit_id']);
+                $purchase_unit_name = !empty($purchase_unit_name) ? ' ' . $purchase_unit_name : '';
+                $cost_control_remarks_name = 'cost_control_remarks[' . $item['id'] . ']';
+                $budgeted_amount = $item['qty'] * $item['rate'];
+                $remaining_qty = 0;
+                $pur_detail_quantity = 0;
+                $pur_detail_amount = 0;
+                $budgeted_amount_class = '';
+
+                if ($pur_detail_amount > $budgeted_amount) {
+                    $budgeted_amount_class = 'remaining_qty_red_class';
+                }
+
+                $response .= '<tr>';
+                $response .= '<td>
+                        <span class="' . $budgeted_amount_class . '">' . get_purchase_items($item['item_code']) . '</span>
+                        <div>
+                            <a class="cost_fetch_pur_item" data-itemcode="' . $item['item_code'] . '" data-longdescription="' . $item['long_description'] . '" data-subhead="' . $item['sub_head'] . '">Fetch</a>
+                        </div>
+                    </td>';
+                $response .= '<td class="' . $budgeted_amount_class . '">' . clear_textarea_breaks($item['long_description']) . '</td>';
+                $response .= '<td class="' . $budgeted_amount_class . '">' . get_sub_head_name_by_id($item['sub_head']) . '</td>';
+                $response .= '<td align="right" class="' . $budgeted_amount_class . '">
+                    <span>' . $item_qty . '</span>
+                    <span>' . $purchase_unit_name . '</span>
+                </td>';
+                $response .= '<td align="right" class="' . $budgeted_amount_class . '">
+                    <span>' . $remaining_qty . '</span>
+                    <span>' . $purchase_unit_name . '</span>
+                </td>';
+                $response .= '<td align="right" class="' . $budgeted_amount_class . '">' . app_format_money($item['rate'], $base_currency) . '</td>';
+                $response .= '<td align="right" class="' . $budgeted_amount_class . '">' . app_format_money($budgeted_amount, $base_currency) . '</td>';
+                $response .= '<td align="right">' . render_textarea($cost_control_remarks_name, '', $item['cost_control_remarks']) . '</td>';
+                $response .= '</tr>';
+            }
+            $response .= '</tbody>';
+            $response .= '</table>';
+            $response .= '</div>';
+        }
+
+        return $response;
+    }
+
 }
