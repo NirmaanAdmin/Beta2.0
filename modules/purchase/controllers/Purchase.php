@@ -10975,7 +10975,7 @@ class purchase extends AdminController
         $data['order_tracker_row_template'] = $this->purchase_model->create_order_tracker_row_template();
         $data['budget_head'] = $this->purchase_model->get_commodity_group_add_commodity();
         $data['rli_filters'] = $this->purchase_model->get_all_rli_filters();
-
+        $data['sub_groups_pur'] = $this->purchase_model->get_sub_group();
         $this->load->view('order_tracker/manage', $data);
     }
     public function update_completion_date()
@@ -12427,7 +12427,7 @@ class purchase extends AdminController
                             $applied['expense_id'] = $id;
                             $invoiceid = $this->expenses_model->applied_to_invoice($applied);
                         }
-                    }
+                    } 
                 }
                 set_alert('success', _l('vendor_bills_converted_to_ril_invoices'));
             }
@@ -14669,5 +14669,15 @@ class purchase extends AdminController
 
         // Redirect to purchase order page
         redirect(admin_url('purchase/purchase_order/' . $pur_id));
+    }
+
+
+
+    public function get_cost_control_sheet_for_unawarded_tracker()
+    {
+        $data = $this->input->post();
+        $result = $this->purchase_model->get_cost_control_sheet_for_unawarded_tracker($data);
+        echo json_encode(['result' => $result]);
+        exit;
     }
 }

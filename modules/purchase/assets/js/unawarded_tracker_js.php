@@ -652,4 +652,32 @@
                 }, false);
             });
     });
+
+    // $("body").on('click', '#cost_control_sheet', function() {
+    //     cost_control_sheet();
+    // });
+
+    // $("body").on('change', 'select[name="cost_sub_head"]', function() {
+    //     cost_control_sheet();
+    // });
+
+    function cost_control_sheet_for_unawarded_tracker(estimate_id, budget_head_id) {
+        
+        if (estimate_id !== '' && budget_head_id !== '') {
+            $.post(admin_url + 'purchase/get_cost_control_sheet_for_unawarded_tracker', {
+                estimate_id: estimate_id,
+                budget_head_id: budget_head_id
+            }).done(function(response) {
+                response = JSON.parse(response);
+                if (response.result) {
+                    $('.view_cost_control_sheet').html('');
+                    $('.view_cost_control_sheet').html(response.result);
+                    $('#cost_complete_modal').modal('show');
+                } else {
+                    $('.view_cost_control_sheet').html('');
+                    alert_float('warning', "No any items have found");
+                }
+            });
+        }
+    }
 </script>
