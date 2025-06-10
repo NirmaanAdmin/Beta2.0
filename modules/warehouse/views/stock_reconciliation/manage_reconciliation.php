@@ -141,6 +141,6 @@
 
 <script>var hidden_columns = [3,4,5];</script>
 <?php init_tail(); ?>
-<?php require 'modules/warehouse/assets/js/manage_delivery_js.php';?>
+<?php require 'modules/warehouse/assets/js/manage_stock_reconciliation_js.php';?>
 </body>
 </html>

@@ -12,7 +12,7 @@
 
             <div class="row">
               <div class="col-md-12">
-                <h4 class="no-margin font-bold "><i class="fa fa-object-ungroup menu-icon" aria-hidden="true"></i> <?php echo _l($title); ?></h4>
+                <h4 class="no-margin font-bold "><i class="fa fa-th-large menu-icon" aria-hidden="true"></i> <?php echo _l($title); ?></h4>
                 <hr>
               </div>
             </div>
@@ -41,7 +41,7 @@
                 <div class="row">
 
                   <div class="col-md-6">
-                    <?php $goods_delivery_code = isset($goods_delivery) ? $goods_delivery->goods_delivery_code : (isset($stock_reconciliation_code) ? $stock_reconciliation_code : ''); ?>
+                    <?php  $goods_delivery_code = isset($goods_delivery) ? $goods_delivery->goods_delivery_code : (isset($stock_reconciliation_code) ? $stock_reconciliation_code : ''); ?>
                     <?php echo render_input('goods_reconciliation_code', 'document_number', $goods_delivery_code, '', array('disabled' => 'true')) ?>
                   </div>
 
@@ -75,55 +75,6 @@
                       </select>
                     </div>
                   </div>
-
-                  <?php /*
-                  <div class="col-md-6 <?php if ($pr_orders_status == true && get_warehouse_option('goods_delivery_required_po') == 1) {
-                                          echo 'hide';
-                                        }; ?> ">
-                    <div class="form-group">
-                      <label for="stock_import"><?php echo _l('stock_import'); ?></label>
-                      <select onchange="stock_import_change(this); return false;" name="goods_receipt_id" id="goods_receipt_id" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>" <?php if ($edit_approval == 'true') {
-                                                                                                                                                                                                                                                                              echo 'disabled';
-                                                                                                                                                                                                                                                                            }; ?>>
-                        <option value=""></option>
-
-                        <?php foreach ($goods_receipt as $value) { ?>
-                          <option value="<?php echo html_entity_decode($value['id']); ?>" <?php if (isset($goods_delivery) && $goods_delivery->goods_receipt_id == $value['id']) {
-                                                                                            echo 'selected';
-                                                                                          } ?>><?php echo $value['goods_receipt_code'] . ' - ' . $value['pur_order_details']; ?></option>
-                        <?php } ?>
-                      </select>
-                    </div>
-                  </div>
-                  */ ?>
-
-                  <!--                  <div class="col-md-3">
-
-                    <div class="form-group">
-                      <label for="customer_code"><?php echo _l('customer_name'); ?></label>
-                      <select name="customer_code" id="vendor" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>" <?php if ($edit_approval == 'true') {
-                                                                                                                                                                                                              echo 'disabled';
-                                                                                                                                                                                                            }; ?>>
-                        <option value=""></option>
-                        <?php foreach ($customer_code as $s) { ?>
-                          <option value="<?php echo html_entity_decode($s['userid']); ?>" <?php if (isset($goods_delivery) && $goods_delivery->customer_code == $s['userid']) {
-                                                                                            echo 'selected';
-                                                                                          } ?>><?php echo html_entity_decode($s['company']); ?></option>
-                        <?php } ?>
-                      </select>
-                    </div>
-
-                  </div>-->
-
-
-                  <!--                  <div class=" col-md-3">
-                    <?php $to = (isset($goods_delivery) ? $goods_delivery->to_ : '');
-                    echo render_input('to_', 'receiver', $to, '', $disabled) ?>
-                  </div>
-                  <div class=" col-md-6">
-                    <?php $address = (isset($goods_delivery) ? $goods_delivery->address : '');
-                    echo render_input('address', 'address', $address, '', $disabled) ?>
-                  </div>-->
 
                   <?php if (ACTIVE_PROPOSAL == true) { ?>
 
@@ -327,37 +278,6 @@
                 </tbody>
               </table>
             </div>
-            <!-- <div class="col-md-8 col-md-offset-4">
-              <table class="table text-right">
-                <tbody>
-                  <tr id="subtotal">
-                    <td><span class="bold"><?php echo _l('subtotal'); ?> :</span>
-                    </td>
-                    <td class="wh-subtotal">
-                    </td>
-                  </tr>
-                  <tr id="total_discount">
-                    <td><span class="bold"><?php echo _l('total_discount'); ?> :</span>
-                    </td>
-                    <td class="wh-total_discount">
-                    </td>
-                  </tr>
-                  <tr id="wh_shipping_fee">
-                    <td><span class="bold"><?php echo _l('wh_shipping_fee'); ?> :</span>
-                    </td>
-                    <td class="wh-shipping_fee" width="30%">
-                      <?php echo render_input('shipping_fee', '', $shipping_fee, 'number', $shipping_fee_number_attr); ?>
-                    </td>
-                  </tr>
-                  <tr id="totalmoney">
-                    <td><span class="bold"><?php echo _l('total_money'); ?> :</span>
-                    </td>
-                    <td class="wh-total">
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div> -->
             <div id="removed-items"></div>
           </div>
 
@@ -415,7 +335,7 @@
 <div id="change_serial_modal_wrapper"></div>
 <input type="hidden" id="apply_to_all_value" value="0">
 <?php init_tail(); ?>
-<?php require 'modules/warehouse/assets/js/goods_delivery_js.php'; ?>
+<?php require 'modules/warehouse/assets/js/goods_reconciliation_js.php'; ?>
 </body>
 <script>
   let userSelectedVendorOptions = {}; // Store user-selected vendor options per item key
@@ -427,7 +347,7 @@
     userSelectedVendorOptions[itemKey] = selectedValues;
   }
 
-  $(document).ready(function() { 
+  $(document).ready(function() {
     let selectedVendorOptions = {}; // Store user-selected vendors
 
     // Capture vendor selection changes
@@ -437,7 +357,7 @@
 
       // Store selection for the specific itemKey
       selectedVendorOptions[itemKey] = selectedValues;
-      
+
     });
 
     // Handle "Apply to All" button click

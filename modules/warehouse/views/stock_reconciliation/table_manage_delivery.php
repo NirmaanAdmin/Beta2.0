@@ -12,7 +12,7 @@ $aColumns = [
 ];
 
 $sIndexColumn = 'id';
-$sTable       = db_prefix() . 'goods_delivery';
+$sTable       = db_prefix() . 'stock_reconciliation';
 $join         = [];
 
 $where = [];
@@ -103,7 +103,7 @@ foreach ($rResult as $aRow) {
                 break;
 
             case 'goods_delivery_code':
-                $name = '<a href="' . admin_url('warehouse/view_delivery/' . $aRow['id']) . '" onclick="init_goods_delivery(' . $aRow['id'] . '); small_table_full_view(); return false;">' . $aRow['goods_delivery_code'] . '</a>';
+                $name = '<a href="' . admin_url('warehouse/view_stock_reconciliation/' . $aRow['id']) . '" onclick="init_goods_delivery(' . $aRow['id'] . '); small_table_full_view(); return false;">' . $aRow['goods_delivery_code'] . '</a>';
                 $name .= '<div class="row-options">';
                 $name .= '<a href="' . admin_url('warehouse/edit_delivery/' . $aRow['id']) . '">' . _l('view') . '</a>';
                 if ((has_permission('warehouse', '', 'edit') || is_admin()) && ($aRow['approval'] == 0)) {

@@ -9671,11 +9671,11 @@ class warehouse extends AdminController
 		if ($this->input->post()) {
 			$message = '';
 			$data = $this->input->post();
-
+			
 
 
 			if (!$this->input->post('id')) {
-				$mess = $this->warehouse_model->add_goods_delivery($data);
+				$mess = $this->warehouse_model->add_stock_reconciliation($data);
 				if ($mess) {
 
 					if ($data['save_and_send_request'] == 'true') {
@@ -9686,7 +9686,7 @@ class warehouse extends AdminController
 				} else {
 					set_alert('warning', _l('Add_stock_delivery_docket_false'));
 				}
-				redirect(admin_url('warehouse/manage_delivery/' . $mess));
+				redirect(admin_url('warehouse/stock_reconciliation/' . $mess));
 			} else {
 				$id = $this->input->post('id');
 				$goods_delivery = $this->warehouse_model->get_goods_delivery($id);
@@ -9777,11 +9777,11 @@ class warehouse extends AdminController
 
 		if ($id != '') {
 			$is_purchase_order = false;
-			$goods_delivery = $this->warehouse_model->get_goods_delivery($id);
+			$goods_delivery = $this->warehouse_model->get_stock_reconciliation($id);
 			if (!$goods_delivery) {
 				blank_page('Stock export Not Found', 'danger');
 			}
-			$data['goods_delivery_detail'] = $this->warehouse_model->get_goods_delivery_detail($id);
+			$data['goods_delivery_detail'] = $this->warehouse_model->get_stock_reconciliation_detail($id);
 			$data['goods_delivery'] = $goods_delivery;
 
 			if (isset($goods_delivery->pr_order_id) && (float)$goods_delivery->pr_order_id > 0) {
@@ -9828,5 +9828,50 @@ class warehouse extends AdminController
 		$data['goods_receipt'] = $this->warehouse_model->get_all_approved_goods_receipt();
 		
 		$this->load->view('stock_reconciliation/reconciliation', $data);
+	}
+
+
+	public function table_stock_reconciliation()
+	{
+		$this->app->get_table_data(module_views_path('warehouse', 'stock_reconciliation/table_manage_delivery'));
+	}
+
+	public function view_stock_reconciliation($id)
+	{
+		//approval
+		$send_mail_approve = $this->session->userdata("send_mail_approve");
+		if ((isset($send_mail_approve)) && $send_mail_approve != '') {
+			$data['send_mail_approve'] = $send_mail_approve;
+			$this->session->unset_userdata("send_mail_approve");
+		}
+
+		$data['get_staff_sign'] = $this->warehouse_model->get_staff_sign($id, 2);
+
+		$data['check_approve_status'] = $this->warehouse_model->check_approval_details($id, 2);
+		$data['list_approve_status'] = $this->warehouse_model->get_list_approval_details($id, 2);
+		$data['payslip_log'] = $this->warehouse_model->get_activity_log($id, 2);
+
+		//get vaule render dropdown select
+		$data['commodity_code_name'] = $this->warehouse_model->get_commodity_code_name();
+		$data['units_code_name'] = $this->warehouse_model->get_units_code_name();
+		$data['units_warehouse_name'] = $this->warehouse_model->get_warehouse_code_name();
+
+		$data['goods_delivery_detail'] = $this->warehouse_model->get_stock_reconciliation_detail($id);
+
+		$data['goods_delivery'] = $this->warehouse_model->get_stock_reconciliation($id);
+		$data['activity_log'] = $this->warehouse_model->wh_get_activity_log($id, 'delivery');
+		$data['packing_lists'] = $this->warehouse_model->get_packing_list_by_deivery_note($id);
+
+		$data['title'] = _l('stock_export_info');
+		$check_appr = $this->warehouse_model->get_approve_setting('2');
+		$data['check_appr'] = $check_appr;
+		$data['tax_data'] = $this->warehouse_model->get_html_tax_delivery($id);
+		$this->load->model('currencies_model');
+		$base_currency = $this->currencies_model->get_base_currency();
+		$data['base_currency'] = $base_currency;
+		$data['attachments'] = $this->warehouse_model->get_inventory_attachments('goods_delivery', $id);
+
+
+		$this->load->view('stock_reconciliation/view_delivery', $data);
 	}
 }

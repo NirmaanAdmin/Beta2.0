@@ -21154,4 +21154,194 @@ class Warehouse_model extends App_Model
 		$row .= '</tr>';
 		return $row;
 	}
-}
+
+	public function add_stock_reconciliation($data, $id = false)
+	{
+
+		$goods_deliveries = [];
+		if (isset($data['newitems'])) {
+			$goods_deliveries = $data['newitems'];
+			unset($data['newitems']);
+		}
+		unset($data['item_select']);
+		unset($data['commodity_name']);
+		unset($data['warehouse_id']);
+		unset($data['available_quantity']);
+		unset($data['quantities']);
+		unset($data['unit_price']);
+		unset($data['note']);
+		unset($data['unit_name']);
+		unset($data['commodity_code']);
+		unset($data['unit_id']);
+		unset($data['discount']);
+		unset($data['guarantee_period']);
+		unset($data['tax_rate']);
+		unset($data['tax_name']);
+		unset($data['discount_money']);
+		unset($data['total_after_discount']);
+		unset($data['serial_number']);
+		unset($data['without_checking_warehouse']);
+		unset($data['vendor_id']);
+		unset($data['lot_number']);
+		unset($data['issued_date']);
+		unset($data['area']);
+		if (isset($data['onoffswitch'])) {
+			if ($data['onoffswitch'] == 'on') {
+				$switch_barcode_scanners = true;
+				unset($data['onoffswitch']);
+			}
+		}
+		$check_appr = $this->check_approval_setting($data['project'], '2', 0);
+		$data['approval'] = ($check_appr == true) ? 1 : 0;
+		// $check_appr = $this->get_approve_setting('2');
+		// $data['approval'] = 0;
+		// if ($check_appr && $check_appr != false) {
+		// 	$data['approval'] = 0;
+		// } else {
+		// 	$data['approval'] = 1;
+		// }
+		if (isset($data['edit_approval'])) {
+			unset($data['edit_approval']);
+		}
+		if (isset($data['save_and_send_request'])) {
+			$save_and_send_request = $data['save_and_send_request'];
+			unset($data['save_and_send_request']);
+		}
+		if (isset($data['hot_purchase'])) {
+			$hot_purchase = $data['hot_purchase'];
+			unset($data['hot_purchase']);
+		}
+		$data['goods_delivery_code'] = $this->create_stock_reconciliation_code();
+		if (!$this->check_format_date($data['date_c'])) {
+			$data['date_c'] = to_sql_date($data['date_c']);
+		} else {
+			$data['date_c'] = $data['date_c'];
+		}
+		if (!$this->check_format_date($data['date_add'])) {
+			$data['date_add'] = to_sql_date($data['date_add']);
+		} else {
+			$data['date_add'] = $data['date_add'];
+		}
+		$data['total_money'] 	= reformat_currency_j($data['total_money']);
+		$data['total_discount'] = reformat_currency_j($data['total_discount']);
+		$data['after_discount'] = reformat_currency_j($data['after_discount']);
+		$data['addedfrom'] = get_staff_user_id();
+		$data['delivery_status'] = 'delivered';
+
+		$this->db->insert(db_prefix() . 'stock_reconciliation', $data);
+		$insert_id = $this->db->insert_id();
+		$this->save_invetory_files('stock_reconciliation', $insert_id);
+		/*update save note*/
+		if (isset($insert_id)) {
+			foreach ($goods_deliveries as $goods_delivery) {
+				$goods_delivery['goods_delivery_id'] = $insert_id;
+				$tax_money = 0;
+				$tax_rate_value = 0;
+				$tax_rate = null;
+				$tax_id = null;
+				$tax_name = null;
+				$quantities = 0;
+				if (!empty($goods_delivery['quantities'])) {
+					$goods_delivery['quantities_json'] = json_encode($goods_delivery['quantities']);
+					$goods_delivery['quantities'] = array_sum($goods_delivery['quantities']);
+				}
+				if (!empty($goods_delivery['lot_number'])) {
+					$goods_delivery['lot_number'] = json_encode($goods_delivery['lot_number']);
+				}
+				if (!empty($goods_delivery['issued_date'])) {
+					$goods_delivery['issued_date'] = json_encode($goods_delivery['issued_date']);
+				}
+				if (isset($goods_delivery['tax_select'])) {
+					$tax_rate_data = $this->wh_get_tax_rate($goods_delivery['tax_select']);
+					$tax_rate_value = $tax_rate_data['tax_rate'];
+					$tax_rate = $tax_rate_data['tax_rate_str'];
+					$tax_id = $tax_rate_data['tax_id_str'];
+					$tax_name = $tax_rate_data['tax_name_str'];
+				}
+				if ((float)$tax_rate_value != 0) {
+					$tax_money = (float)$goods_delivery['unit_price'] * (float)$goods_delivery['quantities'] * (float)$tax_rate_value / 100;
+					$total_money = (float)$goods_delivery['unit_price'] * (float)$goods_delivery['quantities'] + (float)$tax_money;
+					$amount = (float)$goods_delivery['unit_price'] * (float)$goods_delivery['quantities'] + (float)$tax_money;
+				} else {
+					$total_money = (float)$goods_delivery['unit_price'] * (float)$goods_delivery['quantities'];
+					$amount = (float)$goods_delivery['unit_price'] * (float)$goods_delivery['quantities'];
+				}
+				$sub_total = (float)$goods_delivery['unit_price'] * (float)$goods_delivery['quantities'];
+				$goods_delivery['tax_id'] = $tax_id;
+				$goods_delivery['total_money'] = $total_money;
+				$goods_delivery['tax_rate'] = $tax_rate;
+				$goods_delivery['sub_total'] = $sub_total;
+				$goods_delivery['tax_name'] = $tax_name;
+				$goods_delivery['vendor_id'] = !empty($goods_delivery['vendor_id']) ? implode(',', $goods_delivery['vendor_id']) : NULL;
+				unset($goods_delivery['order']);
+				unset($goods_delivery['id']);
+				unset($goods_delivery['tax_select']);
+				unset($goods_delivery['unit_name']);
+				if (isset($goods_delivery['without_checking_warehouse'])) {
+					unset($goods_delivery['without_checking_warehouse']);
+				}
+				$goods_delivery['area'] = !empty($goods_delivery['area']) ? implode(',', $goods_delivery['area']) : NULL;
+				$this->db->insert(db_prefix() . 'stock_reconciliation_detail', $goods_delivery);
+			}
+
+			/*write log*/
+			$data_log = [];
+			$data_log['rel_id'] = $insert_id;
+			$data_log['rel_type'] = 'stock_reconciliation';
+			$data_log['staffid'] = get_staff_user_id();
+			$data_log['date'] = date('Y-m-d H:i:s');
+			$data_log['note'] = "stock_reconciliation";
+
+			$this->add_activity_log($data_log);
+
+			/*update next number setting*/
+			$this->update_inventory_setting(['next_inventory_stock_reconciliation_mumber' =>  get_warehouse_option('next_inventory_stock_reconciliation_mumber') + 1]);
+
+			//send request approval
+			if ($save_and_send_request == 'true') {
+				/*check send request with type =2 , inventory delivery voucher*/
+				$check_r = $this->check_inventory_delivery_voucher(['rel_id' => $insert_id, 'rel_type' => '2']);
+
+				if ($check_r['flag_export_warehouse'] == 1) {
+					$this->send_request_approve(['rel_id' => $insert_id, 'rel_type' => '2', 'addedfrom' => $data['addedfrom']]);
+				}
+			}
+		}
+
+		//approval if not approval setting
+		if (isset($insert_id)) {
+			if ($data['approval'] == 1) {
+				$this->update_approve_request($insert_id, 2, 1);
+			}
+
+			hooks()->do_action('after_wh_goods_delivery_added', $insert_id);
+		}
+
+		return $insert_id > 0 ? $insert_id : false;
+	}
+
+	public function get_stock_reconciliation($id)
+	{
+		if (is_numeric($id)) {
+			$this->db->where('id', $id);
+
+			return $this->db->get(db_prefix() . 'stock_reconciliation')->row();
+		}
+		if ($id == false) {
+			return $this->db->query('select * from tblstock_reconciliation order by id desc')->result_array();
+		}
+	}
+
+
+	public function get_stock_reconciliation_detail($id)
+	{
+		if (is_numeric($id)) {
+			$this->db->where('goods_delivery_id', $id);
+
+			return $this->db->get(db_prefix() . 'stock_reconciliation_detail')->result_array();
+		}
+		if ($id == false) {
+			return $this->db->query('select * from tblstock_reconciliation_detail')->result_array();
+		}
+	}
+}	
