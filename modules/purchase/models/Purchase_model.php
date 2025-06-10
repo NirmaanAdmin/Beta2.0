@@ -21363,15 +21363,15 @@ class Purchase_model extends App_Model
             $response .= '<table class="table items">';
             $response .= '<thead>
                 <tr>
-                    <th width="13%" align="left">' . _l('estimate_table_item_heading') . '</th>
+                    <th width="10%" align="left">' . _l('estimate_table_item_heading') . '</th>
                     <th width="12%" align="left">' . _l('estimate_table_item_description') . '</th>
-                    <th width="11%" align="left">' . _l('sub_groups_pur') . '</th>
+                    <th width="10%" align="left">' . _l('sub_groups_pur') . '</th>
                     <th width="8%" align="left">' . _l('Projected Award Date') . '</th>
-                    <th width="11%" align="left">' . _l('Unawarded Amount') . '</th>
-                    <th width="11%" align="left">' . _l('Secured Deposit (%)') . '</th>
-                    <th width="11%" align="left">' . _l('Secured Deposit Value') . '</th>
-                    <th width="11%" align="left">' . _l('Awarded Value') . '</th>
-                    <th width="11%" align="left">' . _l('Tagged To') . '</th>
+                    <th width="10%" align="left">' . _l('Unawarded Amount') . '</th>
+                    <th width="10%" align="left">' . _l('Secured Deposit (%)') . '</th>
+                    <th width="10%" align="left">' . _l('Secured Deposit Value') . '</th>
+                    <th width="10%" align="left">' . _l('Awarded Value') . '</th>
+                    <th width="10%" align="left">' . _l('Tagged To') . '</th>
                     <th width="10%" align="left">' . _l('control_remarks') . '</th>
                 </tr>
             </thead>';
