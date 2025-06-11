@@ -2164,13 +2164,16 @@ class Estimates_model extends App_Model
     {
         $newitems = isset($data['newitems']) ? $data['newitems'] : array();
         $estimate_id = isset($data['estimate_id']) ? $data['estimate_id'] : 0;
+        $budget_head = isset($data['unawarded_budget_head']) ? $data['unawarded_budget_head'] : NULL;
         if(!empty($newitems)) {
             foreach ($newitems as $key => $value) {
                 $this->db->where('estimate_id', $estimate_id);
+                $this->db->where('budget_head', $budget_head);
                 $this->db->where('item_id', $value['item_id']);
                 $unawarded_budget_info = $this->db->get(db_prefix() . 'unawarded_budget_info')->row();
                 if(!empty($unawarded_budget_info)) {
                     $this->db->where('estimate_id', $estimate_id);
+                    $this->db->where('budget_head', $budget_head);
                     $this->db->where('item_id', $value['item_id']);
                     $this->db->update(db_prefix() . 'unawarded_budget_info', [
                         'unawarded_qty' => $value['unawarded_qty'],
@@ -2179,6 +2182,7 @@ class Estimates_model extends App_Model
                 } else {
                     $this->db->insert(db_prefix() . 'unawarded_budget_info', [
                         'estimate_id' => $estimate_id,
+                        'budget_head' => $budget_head,
                         'item_id' => $value['item_id'],
                         'unawarded_qty' => $value['unawarded_qty'],
                         'unawarded_rate' => $value['unawarded_rate'],
