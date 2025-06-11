@@ -709,16 +709,8 @@ class Estimates extends AdminController
 
     public function assign_unawarded_capex()
     {
-        $response = array();
         $data = $this->input->post();
-        $html = $this->estimates_model->assign_unawarded_capex($data);
-        if (!empty($html)) {
-            $response['success'] = true;
-            $response['html'] = $html;
-        } else {
-            $response['success'] = false;
-            $response['html'] = '';
-        }
+        $response = $this->estimates_model->assign_unawarded_capex($data);
         echo json_encode($response);
     }
 

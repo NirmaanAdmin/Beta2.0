@@ -1051,14 +1051,22 @@
 </div>
 
 <div class="modal fade" id="unawarded_capex_modal" tabindex="-1" role="dialog">
-   <div class="modal-dialog modal-xl">
+   <div class="modal-dialog" role="document" style="width: 98%;">
       <div class="modal-content">
          <?php echo form_open(admin_url('estimates/add_assign_unawarded_capex'), array('id' => 'unawarded_capex_form', 'class' => '')); ?>
          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             <h4 class="modal-title"><div class="unawarded_capex_title"></div></h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <div class="col-md-3 unawarded-budget-head" style="padding-left: 0px; padding-top: 5px;">
+            </div>
          </div>
-         <div class="modal-body unawarded-capex-body">
+         <div class="modal-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="unawarded-capex-body">
+                    </div>
+                </div>
+            </div>
          </div>
          <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo _l('close'); ?></button>

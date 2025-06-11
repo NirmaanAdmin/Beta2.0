@@ -2018,16 +2018,13 @@ class Estimates_model extends App_Model
 
     public function assign_unawarded_capex($data)
     {
-        $html = '';
-        $html .= '<div class="row">
-            <div class="col-md-3 unawarded-title">Budget Head</div>
-            <div class="col-md-2 unawarded-title">Budgeted Cost</div>
-            <div class="col-md-2 unawarded-title">Awarded Capex</div>
-            <div class="col-md-2 unawarded-title">Unawarded Capex</div>
-            <div class="col-md-2 unawarded-title">Unallocated Cost</div>
-        </div><br/>';
-
+        $this->load->model('currencies_model');
+        $response = array();
+        $budgetsummary = '';
+        $itemhtml = '';
         $estimate_id = $data['id'];
+        $unawarded_budget = isset($data['unawarded_budget']) ? $data['unawarded_budget'] : '';
+        $base_currency = $this->currencies_model->get_base_currency();
         $this->db->where('id', $estimate_id);
         $estimates = $this->db->get(db_prefix() . 'estimates')->row();
         $this->db->select(db_prefix() . 'itemable.id as id, ' .
@@ -2042,7 +2039,7 @@ class Estimates_model extends App_Model
         $this->db->where('rel_type', 'estimate');
         $itemable = $this->db->get()->result_array();
         if(!empty($itemable)) {
-            $budget_summary = array_values(array_reduce($itemable, function ($carry, $item) {
+            $unawarded_budget_head = array_values(array_reduce($itemable, function ($carry, $item) {
                 $annexure = $item['annexure'];
                 if (!isset($carry[$annexure])) {
                     $carry[$annexure] = $item;
@@ -2051,56 +2048,120 @@ class Estimates_model extends App_Model
                 }
                 return $carry;
             }, []));
-
-            $html .= form_hidden('project', $estimates->project_id);
-            $html .= form_hidden('estimate_id', $estimates->id);
-
-            if(!empty($budget_summary)) {
-                foreach ($budget_summary as $key => $value) {
-                    $budget_head = $value['annexure'];
-                    $budgeted_cost = is_numeric($value['total']) ? sprintf('%.2f', (float)$value['total']) : $value['total'];
-                    $budget_head_name_attr = "newitems[$key][budget_head]";
-                    $budgeted_cost_name_attr = "newitems[$key][budgeted_cost]";
-                    $awarded_capex_name_attr = "newitems[$key][awarded_value]";
-                    $unawarded_capex_name_attr = "newitems[$key][unawarded_value]";
-                    $unallocated_cost_name_attr = "newitems[$key][unallocated_value]";
-
-                    $awarded_capex = $this->find_awarded_capex($budget_head, $estimates->project_id);
-
-                    $html .= '<div class="row">';
-                    $html .= '<div class="col-md-3 all_budget_head">' .
-                    render_select($budget_head_name_attr, get_group_name_item(), array('id', 'name'), '', $budget_head, ['disabled' => true]) .
-                    '<input type="hidden" name="' . $budget_head_name_attr . '" value="' . html_escape($budget_head) . '">' .
-                    '</div>';
-                    $html .= '<div class="col-md-2 all_budgeted_cost">' . render_input($budgeted_cost_name_attr, '', $budgeted_cost, 'number', ['readonly' => true]) . '</div>';
-                    $html .= '<div class="col-md-2 all_awarded_capex">' . render_input($awarded_capex_name_attr, '', $awarded_capex, 'number', ['readonly' => true]) . '</div>';
-                    $html .= '<div class="col-md-2 all_unawarded_capex">' .
-                    render_input($unawarded_capex_name_attr, '', '', 'number', ['onchange' => 'calculate_unawarded_capex()']) .
-                    '</div>';
-                    $html .= '<div class="col-md-2 all_unallocated_cost">' . render_input($unallocated_cost_name_attr, '', '', 'number', ['readonly' => true]) . '</div>';
-                    $html .= '</div><br/>';
-
+            usort($unawarded_budget_head, function($a, $b) {
+                return $a['annexure'] <=> $b['annexure'];
+            });
+            if(empty($unawarded_budget)) {
+                $unawarded_budget = isset($unawarded_budget_head[0]) ? $unawarded_budget_head[0]['annexure'] : '';
+                $budgetsummaryhtml = '<div class="form-group">';
+                $budgetsummaryhtml .= '<label for="unawarded_budget_head" class="control-label">' . _l('Budget Head') . '</label>';
+                $budgetsummaryhtml .= '<select name="unawarded_budget_head" class="selectpicker" data-width="100%" data-none-selected-text="' . _l('dropdown_non_selected_tex') . '" data-live-search="true">';
+                foreach ($unawarded_budget_head as $item) {
+                    $selected = ($unawarded_budget == $item['annexure']) ? 'selected' : '';
+                    $budgetsummaryhtml .= '<option value="' . $item['annexure'] . '" data-estimateid="' . $estimates->id . '" ' . $selected . '>' . $item['budget_head'] . '</option>';
                 }
+                $budgetsummaryhtml .= '</select>';
+                $budgetsummaryhtml .= '</div>';
+
+            }
+
+            $this->db->where('rel_id', $estimates->id);
+            $this->db->where('rel_type', 'estimate');
+            $this->db->where('annexure', $unawarded_budget);
+            $unawarded_budget_itemable = $this->db->get(db_prefix() . 'itemable')->result_array();
+
+            if (!empty($unawarded_budget_itemable)) {
+                $itemhtml .= '<div class="table-responsive s_table">';
+                $itemhtml .= '<table class="table items">';
+                $itemhtml .= '<thead>
+                    <tr>
+                        <th width="12%" align="left">' . _l('estimate_table_item_heading') . '</th>
+                        <th width="13%" align="left">' . _l('estimate_table_item_description') . '</th>
+                        <th width="10%" align="right">' . _l('budgeted_qty') . '</th>
+                        <th width="10%" align="right">' . _l('budgeted_rate') . '</th>
+                        <th width="10%" align="right">' . _l('budgeted_amount') . '</th>
+                        <th width="10%" align="right">Unawarded Quantity</th>
+                        <th width="10%" align="right">Unawarded Rate</th>
+                        <th width="10%" align="right">Unawarded Capex</th>
+                        <th width="10%" align="right">Unallocated Cost</th>
+                    </tr>
+                </thead>';
+                $itemhtml .= '<tbody style="border: 1px solid #ddd;">';
+                $itemhtml .= form_hidden('estimate_id', $estimates->id);
+                foreach ($unawarded_budget_itemable as $key => $item) {
+                    $this->db->where('estimate_id', $estimates->id);
+                    $this->db->where('item_id', $item['id']);
+                    $unawarded_budget_info = $this->db->get(db_prefix() . 'unawarded_budget_info')->row();
+                    $budgeted_qty = number_format($item['qty'], 2, '.', '');
+                    $budgeted_rate = number_format($item['rate'], 2, '.', '');
+                    $budgeted_amount = number_format($budgeted_qty * $budgeted_rate, 2, '.', '');
+                    $unawarded_qty = !empty($unawarded_budget_info) ? $unawarded_budget_info->unawarded_qty : $budgeted_qty;
+                    $unawarded_qty = number_format($unawarded_qty, 2, '.', '');
+                    $unawarded_rate = !empty($unawarded_budget_info) ? $unawarded_budget_info->unawarded_rate : $budgeted_rate;
+                    $unawarded_rate = number_format($unawarded_rate, 2, '.', '');
+                    $unawarded_amount = number_format($unawarded_qty * $unawarded_rate, 2, '.', '');
+                    $unallocated_cost = $budgeted_amount - $unawarded_amount;
+                    $unallocated_cost = number_format($unallocated_cost, 2, '.', '');
+                    $item_id_name_attr = "newitems[$key][item_id]";
+                    $budgeted_qty_name_attr = "newitems[$key][budgeted_qty]";
+                    $budgeted_rate_name_attr = "newitems[$key][budgeted_rate]";
+                    $budgeted_amount_name_attr = "newitems[$key][budgeted_amount]";
+                    $unawarded_qty_name_attr = "newitems[$key][unawarded_qty]";
+                    $unawarded_rate_name_attr = "newitems[$key][unawarded_rate]";
+                    $unawarded_amount_name_attr = "newitems[$key][unawarded_amount]";
+                    $unallocated_cost_name_attr = "newitems[$key][unallocated_cost]";
+
+                    $itemhtml .= form_hidden($item_id_name_attr, $item['id']);
+                    $itemhtml .= '<tr>';
+                    $itemhtml .= '<td align="left">' . get_purchase_items($item['item_code']) . '</td>';
+                    $itemhtml .= '<td align="left">' . clear_textarea_breaks($item['long_description']) . '</td>';
+                    $itemhtml .= '<td align="align" class="all_budgeted_qty">' . render_input($budgeted_qty_name_attr, '', $budgeted_qty, 'number', ['readonly' => true]) . '</td>';
+                    $itemhtml .= '<td align="align" class="all_budgeted_rate">' . render_input($budgeted_rate_name_attr, '', $budgeted_rate, 'number', ['readonly' => true]) . '</td>';
+                    $itemhtml .= '<td align="align" class="all_budgeted_amount">' . render_input($budgeted_amount_name_attr, '', $budgeted_amount, 'number', ['readonly' => true]) . '</td>';
+                    $itemhtml .= '<td align="align" class="all_unawarded_qty">' . render_input($unawarded_qty_name_attr, '', $unawarded_qty, 'number', ['onchange' => 'calculate_unawarded_capex()']) . '</td>';
+                    $itemhtml .= '<td align="align" class="all_unawarded_rate">' . render_input($unawarded_rate_name_attr, '', $unawarded_rate, 'number', ['onchange' => 'calculate_unawarded_capex()']) . '</td>';
+                    $itemhtml .= '<td align="align" class="all_unawarded_amount">' . render_input($unawarded_amount_name_attr, '', $unawarded_amount, 'number', ['readonly' => true]) . '</td>';
+                    $itemhtml .= '<td align="align" class="all_unallocated_cost">' . render_input($unallocated_cost_name_attr, '', $unallocated_cost, 'number', ['readonly' => true]) . '</td>';
+                    $itemhtml .= '</tr>';
+                }
+                $itemhtml .= '</tbody>';
+                $itemhtml .= '</table>';
+                $itemhtml .= '</div>';
             }
         }
 
-        $html .= '<div class="col-md-8 col-md-offset-4">
+        $itemhtml .= '<div class="col-md-8 col-md-offset-4">
             <table class="table text-right">
                 <tbody>
                     <tr>
-                        <td><span class="bold tw-text-neutral-700">Total Budgeted Cost :</span>
+                        <td><span class="bold tw-text-neutral-700">Total Budgeted Quantity :</span>
                         </td>
-                        <td class="total_budgeted_cost"></td>
+                        <td class="total_budgeted_qty"></td>
                     </tr>
                     <tr>
-                        <td><span class="bold tw-text-neutral-700">Total Awarded Capex :</span>
+                        <td><span class="bold tw-text-neutral-700">Total Budgeted Rate :</span>
                         </td>
-                        <td class="total_awarded_capex"></td>
+                        <td class="total_budgeted_rate"></td>
+                    </tr>
+                    <tr>
+                        <td><span class="bold tw-text-neutral-700">Total Budgeted Amount :</span>
+                        </td>
+                        <td class="total_budgeted_amount"></td>
+                    </tr>
+                    <tr>
+                        <td><span class="bold tw-text-neutral-700">Total Unawarded Quantity :</span>
+                        </td>
+                        <td class="total_unawarded_qty"></td>
+                    </tr>
+                    <tr>
+                        <td><span class="bold tw-text-neutral-700">Total Unawarded Rate :</span>
+                        </td>
+                        <td class="total_unawarded_rate"></td>
                     </tr>
                     <tr>
                         <td><span class="bold tw-text-neutral-700">Total Unawarded Capex :</span>
                         </td>
-                        <td class="total_unawarded_capex"></td>
+                        <td class="total_unawarded_amount"></td>
                     </tr>
                     <tr>
                         <td><span class="bold tw-text-neutral-700">Total Unallocated Cost :</span>
@@ -2111,46 +2172,36 @@ class Estimates_model extends App_Model
             </table>
         </div>';
 
-        return $html;
+        $response = ['budgetsummaryhtml' => $budgetsummaryhtml, 'itemhtml' => $itemhtml];
+        return $response;
     }
 
     public function add_assign_unawarded_capex($data)
     {
         $newitems = isset($data['newitems']) ? $data['newitems'] : array();
-        $project = isset($data['project']) ? $data['project'] : NULL;
         $estimate_id = isset($data['estimate_id']) ? $data['estimate_id'] : 0;
-        $total_unalloc_cost = isset($data['total_unalloc_cost']) ? $data['total_unalloc_cost'] : NULL;
         if(!empty($newitems)) {
             foreach ($newitems as $key => $value) {
                 $this->db->where('estimate_id', $estimate_id);
-                $this->db->where('budget_head', $value['budget_head']);
-                $pur_unawarded_tracker = $this->db->get(db_prefix() . 'pur_unawarded_tracker')->row();
-                if(!empty($pur_unawarded_tracker)) {
+                $this->db->where('item_id', $value['item_id']);
+                $unawarded_budget_info = $this->db->get(db_prefix() . 'unawarded_budget_info')->row();
+                if(!empty($unawarded_budget_info)) {
                     $this->db->where('estimate_id', $estimate_id);
-                    $this->db->where('budget_head', $value['budget_head']);
-                    $this->db->update(db_prefix() . 'pur_unawarded_tracker', [
-                        'project' => $project,
-                        'awarded_value' => $value['awarded_value'],
-                        'unawarded_value' => $value['unawarded_value'],
-                        'unallocated_value' => $value['unallocated_value'],
-                        'updated_at' => date('Y-m-d H:i:s'),
+                    $this->db->where('item_id', $value['item_id']);
+                    $this->db->update(db_prefix() . 'unawarded_budget_info', [
+                        'unawarded_qty' => $value['unawarded_qty'],
+                        'unawarded_rate' => $value['unawarded_rate'],
                     ]);
                 } else {
-                    $this->db->insert(db_prefix() . 'pur_unawarded_tracker', [
-                        'project' => $project,
+                    $this->db->insert(db_prefix() . 'unawarded_budget_info', [
                         'estimate_id' => $estimate_id,
-                        'budget_head' => $value['budget_head'],
-                        'awarded_value' => $value['awarded_value'],
-                        'unawarded_value' => $value['unawarded_value'],
-                        'unallocated_value' => $value['unallocated_value'],
-                        'created_at' => date('Y-m-d H:i:s'),
+                        'item_id' => $value['item_id'],
+                        'unawarded_qty' => $value['unawarded_qty'],
+                        'unawarded_rate' => $value['unawarded_rate'],
                     ]);
                 }
             }
         }
-
-        $this->db->where('id', $estimate_id);
-        $this->db->update(db_prefix() . 'estimates', ['total_unalloc_cost' => $total_unalloc_cost]);
 
         return true;
     }
