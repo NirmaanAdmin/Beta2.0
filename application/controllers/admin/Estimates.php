@@ -721,4 +721,19 @@ class Estimates extends AdminController
         set_alert('success', 'Assign Unawarded Capex is updated successfully');
         redirect(admin_url('estimates'));
     }
+
+    public function add_new_package()
+    {
+        $data = $this->input->post();
+        $response = $this->estimates_model->add_new_package($data);
+        echo json_encode($response);
+    }
+
+    public function save_package()
+    {
+        $data = $this->input->post();
+        $this->estimates_model->save_package($data);
+        set_alert('success', 'Assign Unawarded Capex is updated successfully');
+        redirect(admin_url('estimates'));
+    }
 }

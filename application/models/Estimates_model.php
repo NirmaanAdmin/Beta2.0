@@ -2138,29 +2138,9 @@ class Estimates_model extends App_Model
             <table class="table text-right">
                 <tbody>
                     <tr>
-                        <td><span class="bold tw-text-neutral-700">Total Budgeted Quantity :</span>
-                        </td>
-                        <td class="total_budgeted_qty"></td>
-                    </tr>
-                    <tr>
-                        <td><span class="bold tw-text-neutral-700">Total Budgeted Rate :</span>
-                        </td>
-                        <td class="total_budgeted_rate"></td>
-                    </tr>
-                    <tr>
                         <td><span class="bold tw-text-neutral-700">Total Budgeted Amount :</span>
                         </td>
                         <td class="total_budgeted_amount"></td>
-                    </tr>
-                    <tr>
-                        <td><span class="bold tw-text-neutral-700">Total Unawarded Quantity :</span>
-                        </td>
-                        <td class="total_unawarded_qty"></td>
-                    </tr>
-                    <tr>
-                        <td><span class="bold tw-text-neutral-700">Total Unawarded Rate :</span>
-                        </td>
-                        <td class="total_unawarded_rate"></td>
                     </tr>
                     <tr>
                         <td><span class="bold tw-text-neutral-700">Total Unawarded Capex :</span>
@@ -2208,5 +2188,150 @@ class Estimates_model extends App_Model
         }
 
         return true;
+    }
+
+    public function add_new_package($data)
+    {
+        $this->load->model('currencies_model');
+        $response = array();
+        $budgetsummary = '';
+        $itemhtml = '';
+        $estimate_id = $data['id'];
+        $package_budget = isset($data['package_budget']) ? $data['package_budget'] : '';
+        $base_currency = $this->currencies_model->get_base_currency();
+        $this->db->where('id', $estimate_id);
+        $estimates = $this->db->get(db_prefix() . 'estimates')->row();
+        $this->db->select(db_prefix() . 'itemable.id as id, ' .
+            db_prefix() . 'itemable.annexure as annexure, ' .
+            db_prefix() . 'items_groups.name as budget_head, ' .
+            db_prefix() . 'itemable.qty as qty, ' .
+            db_prefix() . 'itemable.rate as rate, ' .
+            '(' . db_prefix() . 'itemable.qty * ' . db_prefix() . 'itemable.rate) AS total');
+        $this->db->from(db_prefix() . 'itemable');
+        $this->db->join(db_prefix() . 'items_groups', db_prefix() . 'items_groups.id = ' . db_prefix() . 'itemable.annexure', 'left');
+        $this->db->where('rel_id', $estimate_id);
+        $this->db->where('rel_type', 'estimate');
+        $itemable = $this->db->get()->result_array();
+        if(!empty($itemable)) {
+            $package_budget_head = array_values(array_reduce($itemable, function ($carry, $item) {
+                $annexure = $item['annexure'];
+                if (!isset($carry[$annexure])) {
+                    $carry[$annexure] = $item;
+                } else {
+                    $carry[$annexure]['total'] += $item['total'];
+                }
+                return $carry;
+            }, []));
+            usort($package_budget_head, function($a, $b) {
+                return $a['annexure'] <=> $b['annexure'];
+            });
+            if(empty($package_budget)) {
+                $package_budget = isset($package_budget_head[0]) ? $package_budget_head[0]['annexure'] : '';
+                $budgetsummaryhtml .= '<div class="row">';
+                $budgetsummaryhtml .= '<div class="col-md-12" style="padding-left:0px;">';
+                $budgetsummaryhtml .= '<div class="col-md-3 form-group">';
+                $budgetsummaryhtml .= '<label for="package_budget_head" class="control-label">' . _l('Budget Head') . '</label>';
+                $budgetsummaryhtml .= '<select name="package_budget_head" class="selectpicker" data-width="100%" data-none-selected-text="' . _l('dropdown_non_selected_tex') . '" data-live-search="true">';
+                foreach ($package_budget_head as $item) {
+                    $selected = ($package_budget == $item['annexure']) ? 'selected' : '';
+                    $budgetsummaryhtml .= '<option value="' . $item['annexure'] . '" data-estimateid="' . $estimates->id . '" ' . $selected . '>' . $item['budget_head'] . '</option>';
+                }
+                $budgetsummaryhtml .= '</select>';
+                $budgetsummaryhtml .= '</div>';
+                $budgetsummaryhtml .= '<div class="col-md-3 form-group">';
+                $budgetsummaryhtml .= render_date_input('project_awarded_date', 'Project Awarded Date', '');
+                $budgetsummaryhtml .= '</div>';
+                $budgetsummaryhtml .= '<div class="col-md-3 form-group">';
+                $budgetsummaryhtml .= render_input('package_name', 'Package Name', '');
+                $budgetsummaryhtml .= '</div>';
+                $budgetsummaryhtml .= '</div>';
+                $budgetsummaryhtml .= '</div>';
+            }
+
+            $this->db->select(
+                db_prefix() . 'itemable.*,' .
+                db_prefix() . 'unawarded_budget_info.unawarded_qty,' .
+                db_prefix() . 'unawarded_budget_info.unawarded_rate'
+            );
+            $this->db->from(db_prefix() . 'itemable');
+            $this->db->join(db_prefix() . 'unawarded_budget_info', db_prefix() . 'unawarded_budget_info.item_id = ' . db_prefix() . 'itemable.id', 'left');
+            $this->db->where('rel_id', $estimates->id);
+            $this->db->where('rel_type', 'estimate');
+            $this->db->where('annexure', $package_budget);
+            $unawarded_budget_itemable = $this->db->get()->result_array();
+
+            if (!empty($unawarded_budget_itemable)) {
+                $itemhtml .= '<div class="table-responsive s_table">';
+                $itemhtml .= '<table class="table items">';
+                $itemhtml .= '<thead>
+                    <tr>
+                        <th align="left">' . _l('estimate_table_item_heading') . '</th>
+                        <th align="left">' . _l('estimate_table_item_description') . '</th>
+                        <th align="right">Unawarded Quantity</th>
+                        <th align="right">Unawarded Rate</th>
+                        <th align="right">Unawarded Amount</th>
+                        <th align="right">Package Quantity</th>
+                        <th align="right">Package Rate</th>
+                        <th align="right">Package Amount</th>
+                    </tr>
+                </thead>';
+                $itemhtml .= '<tbody style="border: 1px solid #ddd;">';
+                $itemhtml .= form_hidden('estimate_id', $estimates->id);
+                foreach ($unawarded_budget_itemable as $key => $item) {
+                    $unawarded_qty = !empty($item['unawarded_qty']) ? number_format($item['unawarded_qty'], 2, '.', '') : 0.00;
+                    $unawarded_rate = !empty($item['unawarded_rate']) ? number_format($item['unawarded_rate'], 2, '.', '') : 0.00;
+                    $unawarded_amount = number_format($unawarded_qty * $unawarded_rate, 2, '.', '');
+                    $item_id_name_attr = "items[$key][item_id]";
+                    $unawarded_qty_name_attr = "items[$key][unawarded_qty]";
+                    $unawarded_rate_name_attr = "items[$key][unawarded_rate]";
+                    $unawarded_amount_name_attr = "items[$key][unawarded_amount]";
+                    $package_qty_name_attr = "items[$key][package_qty]";
+                    $package_rate_name_attr = "items[$key][package_rate]";
+                    $package_amount_name_attr = "items[$key][package_amount]";
+
+                    $itemhtml .= form_hidden($item_id_name_attr, $item['id']);
+                    $itemhtml .= '<tr>';
+                    $itemhtml .= '<td align="left">' . get_purchase_items($item['item_code']) . '</td>';
+                    $itemhtml .= '<td align="left">' . clear_textarea_breaks($item['long_description']) . '</td>';
+                    $itemhtml .= '<td align="align" class="all_unawarded_qty">' . render_input($unawarded_qty_name_attr, '', $unawarded_qty, 'number', ['readonly' => true]) . '</td>';
+                    $itemhtml .= '<td align="align" class="all_unawarded_rate">' . render_input($unawarded_rate_name_attr, '', $unawarded_rate, 'number', ['readonly' => true]) . '</td>';
+                    $itemhtml .= '<td align="align" class="all_unawarded_amount">' . render_input($unawarded_amount_name_attr, '', $unawarded_amount, 'number', ['readonly' => true]) . '</td>';
+                    $itemhtml .= '<td align="align" class="all_package_qty">' . render_input($package_qty_name_attr, '', 0.00, 'number', ['onchange' => 'calculate_package()']) . '</td>';
+                    $itemhtml .= '<td align="align" class="all_package_rate">' . render_input($package_rate_name_attr, '', 0.00, 'number', ['onchange' => 'calculate_package()']) . '</td>';
+                    $itemhtml .= '<td align="align" class="all_package_amount">' . render_input($package_amount_name_attr, '', 0.00, 'number', ['readonly' => true]) . '</td>';
+                    $itemhtml .= '</tr>';
+                }
+                $itemhtml .= '</tbody>';
+                $itemhtml .= '</table>';
+                $itemhtml .= '</div>';
+            }
+        }
+
+        $itemhtml .= '<div class="col-md-8 col-md-offset-4">
+            <table class="table text-right">
+                <tbody>
+                    <tr>
+                        <td><span class="bold tw-text-neutral-700">Total Unawarded Amount :</span>
+                        </td>
+                        <td class="total_unawarded_amount"></td>
+                    </tr>
+                    <tr>
+                        <td><span class="bold tw-text-neutral-700">Total Package Amount :</span>
+                        </td>
+                        <td class="total_package_amount"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>';
+
+        $response = ['budgetsummaryhtml' => $budgetsummaryhtml, 'itemhtml' => $itemhtml];
+        return $response;
+    }
+
+    public function save_package($data)
+    {
+        echo "<pre>";
+        print_r($data);
+        die();
     }
 }

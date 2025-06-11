@@ -886,7 +886,7 @@
                 <div role="tabpanel" class="tab-pane" id="tender_strategy">
                     <div class="row">
                         <div class="col-md-12">
-                            <a href="#" class="btn btn-primary" onclick="add_package(<?php echo $estimate->id; ?>); return false;"><i class="fa-regular fa-plus tw-mr-1"></i>Add Package</a>
+                            <a href="#" class="btn btn-primary" onclick="add_new_package(<?php echo $estimate->id; ?>); return false;"><i class="fa-regular fa-plus tw-mr-1"></i>Add Package</a>
                         </div>
                     </div>
                 </div>
@@ -1077,6 +1077,32 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="unawarded-capex-body">
+                    </div>
+                </div>
+            </div>
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo _l('close'); ?></button>
+            <button type="submit" class="btn btn-info"><?php echo _l('submit'); ?></button>
+         </div>
+         <?php echo form_close(); ?>
+      </div>
+   </div>
+</div>
+
+<div class="modal fade" id="package_modal" tabindex="-1" role="dialog">
+   <div class="modal-dialog" role="document" style="width: 98%;">
+      <div class="modal-content">
+         <?php echo form_open(admin_url('estimates/save_package'), array('id' => 'unawarded_capex_form', 'class' => '')); ?>
+         <div class="modal-header">
+            <h4 class="modal-title"><div class="package_title"></div></h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <div class="package-head"></div>
+         </div>
+         <div class="modal-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="package-body">
                     </div>
                 </div>
             </div>
