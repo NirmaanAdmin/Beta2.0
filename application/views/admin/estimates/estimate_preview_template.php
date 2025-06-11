@@ -20,6 +20,11 @@
                                 <?php echo _l('estimate'); ?>
                             </a>
                         </li>
+                        <li role="presentation">
+                            <a href="#tender_strategy" aria-controls="tender_strategy" role="tab" data-toggle="tab">
+                                Tender Strategy
+                            </a>
+                        </li>
 
                         <?php
                         $revisions = get_estimate_revision_chain($estimate->id);
@@ -875,6 +880,14 @@
                           </div>
                         </div>
                       </div>
+                    </div>
+                </div>
+
+                <div role="tabpanel" class="tab-pane" id="tender_strategy">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <a href="#" class="btn btn-primary" onclick="add_package(<?php echo $estimate->id; ?>); return false;"><i class="fa-regular fa-plus tw-mr-1"></i>Add Package</a>
+                        </div>
                     </div>
                 </div>
 

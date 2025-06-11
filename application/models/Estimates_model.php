@@ -2065,10 +2065,17 @@ class Estimates_model extends App_Model
 
             }
 
+            $this->db->select(
+                db_prefix() . 'itemable.*,' .
+                db_prefix() . 'unawarded_budget_info.unawarded_qty,' .
+                db_prefix() . 'unawarded_budget_info.unawarded_rate'
+            );
+            $this->db->from(db_prefix() . 'itemable');
+            $this->db->join(db_prefix() . 'unawarded_budget_info', db_prefix() . 'unawarded_budget_info.item_id = ' . db_prefix() . 'itemable.id', 'left');
             $this->db->where('rel_id', $estimates->id);
             $this->db->where('rel_type', 'estimate');
             $this->db->where('annexure', $unawarded_budget);
-            $unawarded_budget_itemable = $this->db->get(db_prefix() . 'itemable')->result_array();
+            $unawarded_budget_itemable = $this->db->get()->result_array();
 
             if (!empty($unawarded_budget_itemable)) {
                 $itemhtml .= '<div class="table-responsive s_table">';
@@ -2089,15 +2096,12 @@ class Estimates_model extends App_Model
                 $itemhtml .= '<tbody style="border: 1px solid #ddd;">';
                 $itemhtml .= form_hidden('estimate_id', $estimates->id);
                 foreach ($unawarded_budget_itemable as $key => $item) {
-                    $this->db->where('estimate_id', $estimates->id);
-                    $this->db->where('item_id', $item['id']);
-                    $unawarded_budget_info = $this->db->get(db_prefix() . 'unawarded_budget_info')->row();
                     $budgeted_qty = number_format($item['qty'], 2, '.', '');
                     $budgeted_rate = number_format($item['rate'], 2, '.', '');
                     $budgeted_amount = number_format($budgeted_qty * $budgeted_rate, 2, '.', '');
-                    $unawarded_qty = !empty($unawarded_budget_info) ? $unawarded_budget_info->unawarded_qty : $budgeted_qty;
+                    $unawarded_qty = !empty($item['unawarded_qty']) ? $item['unawarded_qty'] : $budgeted_qty;
                     $unawarded_qty = number_format($unawarded_qty, 2, '.', '');
-                    $unawarded_rate = !empty($unawarded_budget_info) ? $unawarded_budget_info->unawarded_rate : $budgeted_rate;
+                    $unawarded_rate = !empty($item['unawarded_rate']) ? $item['unawarded_rate'] : $budgeted_rate;
                     $unawarded_rate = number_format($unawarded_rate, 2, '.', '');
                     $unawarded_amount = number_format($unawarded_qty * $unawarded_rate, 2, '.', '');
                     $unallocated_cost = $budgeted_amount - $unawarded_amount;
