@@ -310,15 +310,17 @@
                 <thead>
                   <tr>
                     <th width="1%"></th>
-                    <th width="13%" align="left"><i class="fa fa-exclamation-circle" aria-hidden="true" data-toggle="tooltip" data-title="<?php echo _l('item_description_new_lines_notice'); ?>"></i> <?php echo _l('Uniclass Code'); ?></th>
-                    <th width="13%" align="left"><?php echo _l('item_description'); ?></th>
-                    <th width="10%" align="left"><?php echo _l('area'); ?></th>
-                    <th width="12%" align="left"><?php echo _l('warehouse_name'); ?></th>
-                    <th width="10%" align="right" class="available_quantity"><?php echo _l('available_quantity'); ?></th>
-                    <th width="10%" align="right" class="qty"><?php echo _l('quantity'); ?></th>
-                    <th width="10%" align="right"><?php echo _l('lot_number'); ?></th>
-                    <th width="10%" align="right"><?php echo _l('issued_date'); ?></th>
-                    <th width="10%" align="right"><?php echo _l('wh_vendor'); ?></th>
+                    <th width="10%" align="left"><i class="fa fa-exclamation-circle" aria-hidden="true" data-toggle="tooltip" data-title="<?php echo _l('item_description_new_lines_notice'); ?>"></i> <?php echo _l('Uniclass Code'); ?></th>
+                    <th width="10%" align="left"><?php echo _l('item_description'); ?></th>
+                    <th width="9%" align="left"><?php echo _l('area'); ?></th>
+                    <th width="6%" align="left"><?php echo _l('warehouse_name'); ?></th>
+                    <th width="8%" align="right" class="available_quantity"><?php echo _l('available_quantity'); ?></th>
+                    <th width="5%" align="left"><?php echo _l('Return able?'); ?></th>
+                    <th width="12.5%" align="left"><?php echo _l('Return Date'); ?></th>
+                    <th width="9%" align="right" class="qty"><?php echo _l('quantity'); ?></th>
+                    <th width="9%" align="right"><?php echo _l('lot_number'); ?></th>
+                    <th width="12.5%" align="right"><?php echo _l('issued_date'); ?></th>
+                    <th width="9%" align="right"><?php echo _l('wh_vendor'); ?></th>
                     <th align="center" width='1%'><i class="fa fa-cog"></i></th>
                   </tr>
                 </thead>
@@ -427,7 +429,7 @@
     userSelectedVendorOptions[itemKey] = selectedValues;
   }
 
-  $(document).ready(function() { 
+  $(document).ready(function() {
     let selectedVendorOptions = {}; // Store user-selected vendors
 
     // Capture vendor selection changes
@@ -437,7 +439,7 @@
 
       // Store selection for the specific itemKey
       selectedVendorOptions[itemKey] = selectedValues;
-      
+
     });
 
     // Handle "Apply to All" button click

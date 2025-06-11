@@ -1673,7 +1673,7 @@ class warehouse extends AdminController
 							$without_checking_warehouse = $get_commodity->without_checking_warehouse;
 						}
 
-						$goods_delivery_row_template .= $this->warehouse_model->create_goods_delivery_row_template($warehouse_data, 'items[' . $index_receipt . ']', $commodity_name, $delivery_detail['warehouse_id'], $delivery_detail['available_quantity'], $delivery_detail['quantities'], $unit_name, $delivery_detail['unit_price'], $taxname, $delivery_detail['commodity_code'], $delivery_detail['unit_id'], $delivery_detail['vendor_id'], $delivery_detail['tax_rate'], $delivery_detail['total_money'], $delivery_detail['discount'], $delivery_detail['discount_money'], $delivery_detail['total_after_discount'], $delivery_detail['guarantee_period'], $delivery_detail['issued_date'], $lot_number, $delivery_detail['note'], $delivery_detail['sub_total'], $delivery_detail['tax_name'], $delivery_detail['tax_id'], $delivery_detail['id'], true, $is_purchase_order, $delivery_detail['serial_number'], $without_checking_warehouse, $delivery_detail['description'], $delivery_detail['quantities_json'], $delivery_detail['area']);
+						$goods_delivery_row_template .= $this->warehouse_model->create_goods_delivery_row_template($warehouse_data, 'items[' . $index_receipt . ']', $commodity_name, $delivery_detail['warehouse_id'], $delivery_detail['available_quantity'], $delivery_detail['quantities'], $unit_name, $delivery_detail['unit_price'], $taxname, $delivery_detail['commodity_code'], $delivery_detail['unit_id'], $delivery_detail['vendor_id'], $delivery_detail['tax_rate'], $delivery_detail['total_money'], $delivery_detail['discount'], $delivery_detail['discount_money'], $delivery_detail['total_after_discount'], $delivery_detail['guarantee_period'], $delivery_detail['issued_date'], $lot_number, $delivery_detail['note'], $delivery_detail['sub_total'], $delivery_detail['tax_name'], $delivery_detail['tax_id'], $delivery_detail['id'], true, $is_purchase_order, $delivery_detail['serial_number'], $without_checking_warehouse, $delivery_detail['description'], $delivery_detail['quantities_json'], $delivery_detail['area'], $delivery_detail['returnable'],$delivery_detail['returnable_date']);
 					}
 				}
 			}
@@ -1757,7 +1757,7 @@ class warehouse extends AdminController
 		$data['units_code_name'] = $this->warehouse_model->get_units_code_name();
 		$data['units_warehouse_name'] = $this->warehouse_model->get_warehouse_code_name();
 
-		$data['goods_delivery_detail'] = json_encode($this->warehouse_model->get_goods_delivery_detail($id));
+		$data['goods_delivery_detail'] = $this->warehouse_model->get_goods_delivery_detail($id);
 
 		$data['goods_delivery'] = $goods_delivery;
 		$data['taxes'] = $this->warehouse_model->get_taxes();
@@ -9689,9 +9689,9 @@ class warehouse extends AdminController
 				redirect(admin_url('warehouse/stock_reconciliation/' . $mess));
 			} else {
 				$id = $this->input->post('id');
-				$goods_delivery = $this->warehouse_model->get_goods_delivery($id);
+				$goods_delivery = $this->warehouse_model->get_stock_reconciliation($id);
 				if ($goods_delivery->approval == 0) {
-					$mess = $this->warehouse_model->update_goods_delivery($data);
+					$mess = $this->warehouse_model->update_stock_reconciliation($data);
 				} else {
 					$mess = $this->warehouse_model->update_goods_delivery_approval($data);
 				}
@@ -9703,7 +9703,7 @@ class warehouse extends AdminController
 				if ($mess) {
 					set_alert('success', _l('updated_successfully'));
 				}
-				redirect(admin_url('warehouse/manage_delivery/' . $id));
+				redirect(admin_url('warehouse/stock_reconciliation/' . $id));
 			}
 		}
 		//get vaule render dropdown select
@@ -9731,7 +9731,7 @@ class warehouse extends AdminController
 		//sample
 		$stock_reconciliation_row_template = '';
 		if (is_numeric($id)) {
-			$goods_delivery = $this->warehouse_model->get_goods_delivery($id);
+			$goods_delivery = $this->warehouse_model->get_stock_reconciliation($id);
 			if ($goods_delivery->approval == 0) {
 				$stock_reconciliation_row_template = $this->warehouse_model->create_stock_reconciliation_row_template();
 			}
@@ -9873,5 +9873,15 @@ class warehouse extends AdminController
 
 
 		$this->load->view('stock_reconciliation/view_delivery', $data);
+	}
+	public function reconciliation_delivery_copy_pur_order($pur_order = '')
+	{
+
+		$pur_request_detail = $this->warehouse_model->reconciliation_delivery_get_pur_order($pur_order);
+
+		echo json_encode([
+			'result' => $pur_request_detail['result'] ? $pur_request_detail['result'] : '',
+			'additional_discount' => $pur_request_detail['additional_discount'] ? $pur_request_detail['additional_discount'] : '',
+		]);
 	}
 }

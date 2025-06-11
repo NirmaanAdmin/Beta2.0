@@ -133,6 +133,7 @@
             try {
               response = JSON.parse(response);
               if (row.find('.vendor-' + vendor).length == 0) {
+                row.find("td.returnable_date").append(response.returnable_html);
                 row.find("td.quantities").append(response.quantities_html);
                 row.find("td.lot_number").append(response.lot_number_html);
                 row.find("td.issued_date").append(response.issued_date_html);

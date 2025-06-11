@@ -265,11 +265,9 @@
                     <th width="13%" align="left"><?php echo _l('item_description'); ?></th>
                     <th width="10%" align="left"><?php echo _l('area'); ?></th>
                     <th width="12%" align="left"><?php echo _l('warehouse_name'); ?></th>
-                    <th width="10%" align="right" class="available_quantity"><?php echo _l('available_quantity'); ?></th>
-                    <th width="10%" align="right" class="qty"><?php echo _l('quantity'); ?></th>
-                    <th width="10%" align="right"><?php echo _l('lot_number'); ?></th>
-                    <th width="10%" align="right"><?php echo _l('issued_date'); ?></th>
-                    <th width="10%" align="right"><?php echo _l('wh_vendor'); ?></th>
+                    <th width="10%" align="left" class="available_quantity"><?php echo _l('Issued Quantity'); ?></th>
+                   
+                    <th width="10%" align="left"><?php echo _l('Return Date'); ?></th>
                     <th align="center" width='1%'><i class="fa fa-cog"></i></th>
                   </tr>
                 </thead>

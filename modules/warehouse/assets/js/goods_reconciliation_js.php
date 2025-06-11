@@ -556,7 +556,7 @@
     "use strict";
     var pr_order_id = $('select[name="pr_order_id"]').val();
 
-    $.post(admin_url + 'warehouse/goods_delivery_copy_pur_order/' + pr_order_id).done(function(response) {
+    $.post(admin_url + 'warehouse/reconciliation_delivery_copy_pur_order/' + pr_order_id).done(function(response) {
       response = JSON.parse(response);
       $('input[name="additional_discount"]').val((response.additional_discount));
       $('.invoice-item table.invoice-items-table.items tbody').html('');

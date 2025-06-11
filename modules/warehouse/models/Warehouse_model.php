@@ -3631,6 +3631,8 @@ class Warehouse_model extends App_Model
 		unset($data['lot_number']);
 		unset($data['issued_date']);
 		unset($data['area']);
+		unset($data['returnable']);
+		unset($data['returnable_date']);
 		if (isset($data['onoffswitch'])) {
 			if ($data['onoffswitch'] == 'on') {
 				$switch_barcode_scanners = true;
@@ -3679,6 +3681,7 @@ class Warehouse_model extends App_Model
 		$this->save_invetory_files('goods_delivery', $insert_id);
 		/*update save note*/
 		if (isset($insert_id)) {
+
 			foreach ($goods_deliveries as $goods_delivery) {
 				$goods_delivery['goods_delivery_id'] = $insert_id;
 				$tax_money = 0;
@@ -3697,6 +3700,9 @@ class Warehouse_model extends App_Model
 				if (!empty($goods_delivery['issued_date'])) {
 					$goods_delivery['issued_date'] = json_encode($goods_delivery['issued_date']);
 				}
+				if (!empty($goods_delivery['returnable_date'])) {
+					$goods_delivery['returnable_date'] = json_encode($goods_delivery['returnable_date']);
+				}
 				if (isset($goods_delivery['tax_select'])) {
 					$tax_rate_data = $this->wh_get_tax_rate($goods_delivery['tax_select']);
 					$tax_rate_value = $tax_rate_data['tax_rate'];
@@ -3704,6 +3710,7 @@ class Warehouse_model extends App_Model
 					$tax_id = $tax_rate_data['tax_id_str'];
 					$tax_name = $tax_rate_data['tax_name_str'];
 				}
+
 				if ((float)$tax_rate_value != 0) {
 					$tax_money = (float)$goods_delivery['unit_price'] * (float)$goods_delivery['quantities'] * (float)$tax_rate_value / 100;
 					$total_money = (float)$goods_delivery['unit_price'] * (float)$goods_delivery['quantities'] + (float)$tax_money;
@@ -3719,6 +3726,7 @@ class Warehouse_model extends App_Model
 				$goods_delivery['sub_total'] = $sub_total;
 				$goods_delivery['tax_name'] = $tax_name;
 				$goods_delivery['vendor_id'] = !empty($goods_delivery['vendor_id']) ? implode(',', $goods_delivery['vendor_id']) : NULL;
+
 				unset($goods_delivery['order']);
 				unset($goods_delivery['id']);
 				unset($goods_delivery['tax_select']);
@@ -3727,9 +3735,13 @@ class Warehouse_model extends App_Model
 					unset($goods_delivery['without_checking_warehouse']);
 				}
 				$goods_delivery['area'] = !empty($goods_delivery['area']) ? implode(',', $goods_delivery['area']) : NULL;
+
+				$goods_delivery['returnable'] = !empty($goods_delivery['returnable']) ? $goods_delivery['returnable'] : NULL;
+
+
+
 				$this->db->insert(db_prefix() . 'goods_delivery_detail', $goods_delivery);
 			}
-
 			/*write log*/
 			$data_log = [];
 			$data_log['rel_id'] = $insert_id;
@@ -4094,6 +4106,8 @@ class Warehouse_model extends App_Model
 		if (get_warehouse_option('goods_delivery_pdf_display_outstanding') == 1) {
 			$html .= '<th  class=" thead-dark">' . _l('outstanding') . '</th>';
 		}
+		$html .= '<th  class=" thead-dark">' . _l('Returnable') . '</th>';
+		$html .= '<th  class=" thead-dark">' . _l('Returnable Date') . '</th>';
 		// $html .= '<th  class=" thead-dark">' . _l('unit_price') . '</th>';
 		$html .= '<th  class=" thead-dark">' . _l('wh_vendor') . '</th>';
 		$html .= '<th  class=" thead-dark">' . _l('issued_date') . '</th>';
@@ -4127,7 +4141,13 @@ class Warehouse_model extends App_Model
 			$subtotal += (float)$delivery_value['quantities'] * (float)$delivery_value['unit_price'];
 			$item_subtotal = (float)$delivery_value['quantities'] * (float)$delivery_value['unit_price'];
 			$warehouse_name = '';
-
+			$returnable_value = (isset($delivery_value) ? $delivery_value['returnable'] : '');
+			if ($returnable_value == 1) {
+				$returnable = 'Yes';
+			} else {
+				$returnable = 'No';
+			}
+			$returnable_date = (isset($delivery_value) ? date('d M, Y', strtotime($delivery_value['returnable_date'])) : '');
 			if (isset($delivery_value['warehouse_id']) && ($delivery_value['warehouse_id'] != '')) {
 				$arr_warehouse = explode(',', $delivery_value['warehouse_id']);
 
@@ -4211,6 +4231,14 @@ class Warehouse_model extends App_Model
 				}
 				$issue_all_dates = rtrim($issue_all_dates, ', ');
 			}
+			$returnable_date_all = '';
+			if (!empty($delivery_value['returnable_date'])) {
+				$returnable_date = json_decode($delivery_value['returnable_date'], true);
+				foreach ($returnable_date as $key => $value) {
+					$returnable_date_all .= get_vendor_name($key) . ": " . date('d M, Y', strtotime($value)) . ",\n ";
+				}
+				$returnable_date_all = rtrim($returnable_date_all, ', ');
+			}
 			$all_lot_number = '';
 			if (!empty($delivery_value['lot_number'])) {
 				$lot_number = json_decode($delivery_value['lot_number'], true);
@@ -4230,6 +4258,8 @@ class Warehouse_model extends App_Model
 			if (get_warehouse_option('goods_delivery_pdf_display_outstanding') == 1) {
 				$html .= '<td class="td_style_r_ep_l"><b>0.0</b></td>';
 			}
+			$html .= ' <td ><b>' . $returnable . '</b></td>';
+			$html .= ' <td ><b>' . $returnable_date_all . '</b></td>';
 			$html .= ' <td class="small_rows"><b>' . $vendor_all_name . '</b></td>';
 			$html .= ' <td class="small_rows"><b>' . $issue_all_dates . '</b></td>';
 			$html .= ' <td class="small_rows"><b>' . $all_lot_number . '</b></td>';
@@ -7565,7 +7595,8 @@ class Warehouse_model extends App_Model
 		unset($data['vendor_id']);
 		unset($data['issued_date']);
 		unset($data['area']);
-
+		unset($data['returnable']);
+		unset($data['returnable_date']);
 		$check_appr = $this->get_approve_setting('2');
 		$data['approval'] = 0;
 		if ($check_appr && $check_appr != false) {
@@ -7635,6 +7666,9 @@ class Warehouse_model extends App_Model
 			if (!empty($goods_delivery['issued_date'])) {
 				$goods_delivery['issued_date'] = json_encode($goods_delivery['issued_date']);
 			}
+			if (!empty($goods_delivery['returnable_date'])) {
+				$goods_delivery['returnable_date'] = json_encode($goods_delivery['returnable_date']);
+			}
 			if (isset($goods_delivery['tax_select'])) {
 				$tax_rate_data = $this->wh_get_tax_rate($goods_delivery['tax_select']);
 				$tax_rate_value = $tax_rate_data['tax_rate'];
@@ -7668,6 +7702,7 @@ class Warehouse_model extends App_Model
 				unset($goods_delivery['without_checking_warehouse']);
 			}
 			$goods_delivery['area'] = !empty($goods_delivery['area']) ? implode(',', $goods_delivery['area']) : NULL;
+			$goods_delivery['returnable'] = !empty($goods_delivery['returnable']) ? $goods_delivery['returnable'] : NULL;
 
 			$this->db->where('id', $goods_delivery['id']);
 			if ($this->db->update(db_prefix() . 'goods_delivery_detail', $goods_delivery)) {
@@ -15378,7 +15413,7 @@ class Warehouse_model extends App_Model
 	 * @param  boolean $is_edit              
 	 * @return [type]                        
 	 */
-	public function create_goods_delivery_row_template($warehouse_data = [], $name = '', $commodity_name = '', $warehouse_id = '', $available_quantity = '', $quantities = '', $unit_name = '', $unit_price = '', $taxname = '',  $commodity_code = '', $unit_id = '', $vendor_id = '', $tax_rate = '', $total_money = '', $discount = '', $discount_money = '', $total_after_discount = '', $guarantee_period = '', $issued_date = '', $lot_number = '', $note = '',  $sub_total = '', $tax_name = '', $tax_id = '', $item_key = '', $is_edit = false, $is_purchase_order = false, $serial_number = '', $without_checking_warehouse = 0, $description = '', $quantities_json = '', $area = '')
+	public function create_goods_delivery_row_template($warehouse_data = [], $name = '', $commodity_name = '', $warehouse_id = '', $available_quantity = '', $quantities = '', $unit_name = '', $unit_price = '', $taxname = '',  $commodity_code = '', $unit_id = '', $vendor_id = '', $tax_rate = '', $total_money = '', $discount = '', $discount_money = '', $total_after_discount = '', $guarantee_period = '', $issued_date = '', $lot_number = '', $note = '',  $sub_total = '', $tax_name = '', $tax_id = '', $item_key = '', $is_edit = false, $is_purchase_order = false, $serial_number = '', $without_checking_warehouse = 0, $description = '', $quantities_json = '', $area = '', $returnable = '', $returnable_date = '')
 	{
 
 		$this->load->model('invoice_items_model');
@@ -15412,6 +15447,8 @@ class Warehouse_model extends App_Model
 		$name_without_checking_warehouse = 'without_checking_warehouse';
 		$name_description = 'description';
 		$name_area = 'area';
+		$name_returnable = 'returnable';
+		$name_returnable_date = 'returnable_date';
 
 		$array_available_quantity_attr = ['min' => '0.0', 'step' => 'any', 'readonly' => true];
 		$array_qty_attr = ['min' => '0.0', 'step' => 'any'];
@@ -15463,6 +15500,8 @@ class Warehouse_model extends App_Model
 			$name_without_checking_warehouse = $name . '[without_checking_warehouse]';
 			$name_description = $name . '[description]';
 			$name_area = $name . '[area][]';
+			$name_returnable = $name . '[returnable]';
+			$name_returnable_date = $name . '[returnable_date]';
 
 			$warehouse_id_name_attr = ["onchange" => "get_available_quantity('" . $name_commodity_code . "','" . $name_warehouse_id . "','" . $name_available_quantity . "');", "data-none-selected-text" => _l('warehouse_name'), 'data-from_stock_id' => 'invoice'];
 			$array_available_quantity_attr = ['onblur' => 'wh_calculate_total();', 'onchange' => 'wh_calculate_total();', 'min' => '0.0', 'step' => 'any',  'data-available_quantity' => (float)$available_quantity, 'readonly' => true];
@@ -15521,11 +15560,49 @@ class Warehouse_model extends App_Model
 			render_input($name_available_quantity, '', $available_quantity, 'number', $array_available_quantity_attr, [], 'no-margin') .
 			render_input($name_unit_name, '', $unit_name, 'text', ['placeholder' => _l('unit'), 'readonly' => true], [], 'no-margin', 'input-transparent text-right wh_input_none') .
 			'</td>';
+		$is_new_row = ($returnable === '');
+
+		// decide our checked state
+		$checked = $is_new_row
+			? 'checked'                       // always check new rows
+			: ((int)$returnable === 1         // otherwise only if returnable==1
+				? 'checked'
+				: ''
+			);
+
+		// now render
+		$row .= '<td style="text-align: center;">
+		 		<input type="hidden" name="' . $name_returnable . '" value="0">
+				<input 
+				type="checkbox" 
+				name="' . $name_returnable . '" 
+				value="1" 
+				' . $checked . '
+				>
+			</td>';
+
 		if ($is_edit == false) {
+			$row .= '<td class="returnable_date"></td>';
 			$row .= '<td class="quantities"></td>';
 			$row .= '<td class="lot_number"></td>';
 			$row .= '<td class="issued_date"></td>';
 		} else {
+			$returnable_date_html = '';
+			if (!empty($returnable_date)) {
+
+				$returnable_date = json_decode($returnable_date, true);
+
+				if (!empty($returnable_date)) {
+					foreach ($returnable_date as $qkey => $qvalue) {
+						$input = array();
+						$input['vendor'] = $qkey;
+						$input['item_key'] = $name;
+						$input['item_value'] = $qvalue;
+						$returnable_date_html .= $this->get_returnable_date_html($input);
+					}
+				}
+			}
+			$row .= '<td class="returnable_date">' . $returnable_date_html . '</td>';
 			$quantities_html = '';
 			if (!empty($quantities_json)) {
 				$quantities_json = json_decode($quantities_json, true);
@@ -20020,26 +20097,30 @@ class Warehouse_model extends App_Model
 		$response = array();
 		$options = isset($data['options']) ? $data['options'] : array();
 		// / Generate quantities HTML for each vendor in options
-		$quantities_html = $lot_number_html = $issued_date_html = '';
+		$quantities_html = $lot_number_html = $issued_date_html = $returnable_html = '';
 		foreach ($options as $vendor) {
 
 			if ($data['vendor'] == $vendor && $data['apply_to_all'] == 0) {
 				$data['vendor'] = $vendor;
+				$returnable_html .= $this->get_returnable_date_html($data);
 				$quantities_html .= $this->get_quantities_html($data);
 				$lot_number_html .= $this->get_lot_number_html($data);
 				$issued_date_html .= $this->get_issued_date_html($data);
 			} elseif ($data['apply_to_all'] == 1) {
 				$data['vendor'] = $vendor;
+				$returnable_html .= $this->get_returnable_date_html($data);
 				$quantities_html .= $this->get_quantities_html($data);
 				$lot_number_html .= $this->get_lot_number_html($data);
 				$issued_date_html .= $this->get_issued_date_html($data);
 			}
 		}
+		$response['returnable_html'] = $returnable_html;
 		$response['quantities_html'] = $quantities_html;
 		$response['lot_number_html'] = $lot_number_html;
 		$response['issued_date_html'] = $issued_date_html;
 		echo json_encode($response);
 	}
+
 
 	public function get_quantities_html($data)
 	{
@@ -20054,6 +20135,23 @@ class Warehouse_model extends App_Model
 		if (mb_strlen($vendor_name) > 15) {
 			$vendor_name = mb_substr($vendor_name, 0, 15) . '...';
 		}
+		$quantities_html .= $vendor_name;
+		$quantities_html .= '</div>';
+		return $quantities_html;
+	}
+	public function get_issued_quantities_html($data)
+	{
+		// For quantities
+		$vendor = $data['vendor'];
+		$item_name = $data['item_key'];
+		$item_value = isset($data['item_value']) ? $data['item_value'] : 0;
+		$quantities_html = '';
+		$quantities_html .= '<div class="vendor-' . $vendor . '">';
+		$quantities_html .= '<span>' . $item_value . ' ' . $data['unit_name'] . '</span>';
+		// $vendor_name = wh_get_vendor_company_name($vendor);
+		// if (mb_strlen($vendor_name) > 15) {
+		// 	$vendor_name = mb_substr($vendor_name, 0, 15) . '...';
+		// }
 		$quantities_html .= $vendor_name;
 		$quantities_html .= '</div>';
 		return $quantities_html;
@@ -20094,7 +20192,23 @@ class Warehouse_model extends App_Model
 		$issued_date_html .= '</div>';
 		return $issued_date_html;
 	}
-
+	public function get_returnable_date_html($data)
+	{
+		// For quantities
+		$vendor = $data['vendor'];
+		$item_name = $data['item_key'];
+		$item_value = isset($data['item_value']) ? $data['item_value'] : date('d-m-Y', strtotime('+2 weeks'));
+		$returnable_date_html = '';
+		$returnable_date_html .= '<div class="vendor-' . $vendor . '">';
+		$returnable_date_html .= render_date_input('' . $item_name . '[returnable_date][' . $vendor . ']', '', $item_value, ['placeholder' => _l('Returnable Date')], [], 'no-margin');
+		$vendor_name = wh_get_vendor_company_name($vendor);
+		if (mb_strlen($vendor_name) > 15) {
+			$vendor_name = mb_substr($vendor_name, 0, 15) . '...';
+		}
+		$returnable_date_html .= $vendor_name;
+		$returnable_date_html .= '</div>';
+		return $returnable_date_html;
+	}
 	/**
 	 * get purchase request
 	 * @param  integer $pur_order
@@ -20919,7 +21033,7 @@ class Warehouse_model extends App_Model
 		return $goods_code;
 	}
 
-	public function create_stock_reconciliation_row_template($warehouse_data = [], $name = '', $commodity_name = '', $warehouse_id = '', $available_quantity = '', $quantities = '', $unit_name = '', $unit_price = '', $taxname = '',  $commodity_code = '', $unit_id = '', $vendor_id = '', $tax_rate = '', $total_money = '', $discount = '', $discount_money = '', $total_after_discount = '', $guarantee_period = '', $issued_date = '', $lot_number = '', $note = '',  $sub_total = '', $tax_name = '', $tax_id = '', $item_key = '', $is_edit = false, $is_purchase_order = false, $serial_number = '', $without_checking_warehouse = 0, $description = '', $quantities_json = '', $area = '')
+	public function create_stock_reconciliation_row_template($warehouse_data = [], $name = '', $commodity_name = '', $warehouse_id = '', $vendor_quantity = [], $quantities = '', $unit_name = '', $unit_price = '', $taxname = '',  $commodity_code = '', $unit_id = '', $vendor_id = '', $tax_rate = '', $total_money = '', $discount = '', $discount_money = '', $total_after_discount = '', $guarantee_period = '', $issued_date = '', $lot_number = '', $note = '',  $sub_total = '', $tax_name = '', $tax_id = '', $item_key = '', $is_edit = false, $is_purchase_order = false, $serial_number = '', $without_checking_warehouse = 0, $description = '', $quantities_json = '', $area = '', $returnable = '', $returnable_date = '')
 	{
 
 		$this->load->model('invoice_items_model');
@@ -20953,13 +21067,14 @@ class Warehouse_model extends App_Model
 		$name_without_checking_warehouse = 'without_checking_warehouse';
 		$name_description = 'description';
 		$name_area = 'area';
-
+		$name_returnable = 'returnable';
+		$name_returnable_date = 'returnable_date';
 		$array_available_quantity_attr = ['min' => '0.0', 'step' => 'any', 'readonly' => true];
 		$array_qty_attr = ['min' => '0.0', 'step' => 'any'];
 		$array_rate_attr = ['min' => '0.0', 'step' => 'any'];
 		$array_discount_attr = ['min' => '0.0', 'step' => 'any'];
 		$str_rate_attr = 'min="0.0" step="any"';
-
+		$two_weeks_later = '';
 		if (count($warehouse_data) == 0) {
 			$warehouse_data = $this->get_warehouse();
 		}
@@ -21004,7 +21119,8 @@ class Warehouse_model extends App_Model
 			$name_without_checking_warehouse = $name . '[without_checking_warehouse]';
 			$name_description = $name . '[description]';
 			$name_area = $name . '[area][]';
-
+			$name_returnable = $name . '[returnable][]';
+			$name_returnable_date = $name . '[returnable_date][]';
 			$warehouse_id_name_attr = ["onchange" => "get_available_quantity('" . $name_commodity_code . "','" . $name_warehouse_id . "','" . $name_available_quantity . "');", "data-none-selected-text" => _l('warehouse_name'), 'data-from_stock_id' => 'invoice'];
 			$array_available_quantity_attr = ['onblur' => 'wh_calculate_total();', 'onchange' => 'wh_calculate_total();', 'min' => '0.0', 'step' => 'any',  'data-available_quantity' => (float)$available_quantity, 'readonly' => true];
 			if ($is_purchase_order) {
@@ -21058,71 +21174,23 @@ class Warehouse_model extends App_Model
 			render_select($name_warehouse_id, $warehouse_data, array('warehouse_id', 'warehouse_name'), '', $warehouse_id, $warehouse_id_name_attr, ["data-none-selected-text" => _l('warehouse_name')], 'no-margin') .
 			render_input($name_note, '', $note, 'text', ['placeholder' => _l('commodity_notes')], [], 'no-margin', 'input-transparent text-left') .
 			'</td>';
+
+		$all_quantities = '';
+		if (!empty($vendor_quantity)) {
+			$quantities_json = $vendor_quantity;
+			foreach ($quantities_json as $key => $value) {
+				$all_quantities .= get_vendor_name($key) . ": <strong style='font-weight: 700;'>" . _d($value) . "</strong>,</br> ";
+			}
+			$all_quantities = rtrim($all_quantities, ',</br> ');
+		}
 		$row .= '<td class="available_quantity">' .
-			render_input($name_available_quantity, '', $available_quantity, 'number', $array_available_quantity_attr, [], 'no-margin') .
-			render_input($name_unit_name, '', $unit_name, 'text', ['placeholder' => _l('unit'), 'readonly' => true], [], 'no-margin', 'input-transparent text-right wh_input_none') .
+			$all_quantities .
 			'</td>';
-		if ($is_edit == false) {
-			$row .= '<td class="quantities"></td>';
-			$row .= '<td class="lot_number"></td>';
-			$row .= '<td class="issued_date"></td>';
-		} else {
-			$quantities_html = '';
-			if (!empty($quantities_json)) {
-				$quantities_json = json_decode($quantities_json, true);
-				if (!empty($quantities_json)) {
-					foreach ($quantities_json as $qkey => $qvalue) {
-						$input = array();
-						$input['vendor'] = $qkey;
-						$input['item_key'] = $name;
-						$input['item_value'] = $qvalue;
-						$quantities_html .= $this->get_quantities_html($input);
-					}
-				}
-			}
-			$row .= '<td class="quantities">' . $quantities_html . '</td>';
-
-			$lot_number_html = '';
-			if (!empty($lot_number)) {
-				$lot_number = json_decode($lot_number, true);
-				if (!empty($lot_number)) {
-					foreach ($lot_number as $lkey => $lvalue) {
-						$input = array();
-						$input['vendor'] = $lkey;
-						$input['item_key'] = $name;
-						$input['item_value'] = $lvalue;
-						$lot_number_html .= $this->get_lot_number_html($input);
-					}
-				}
-			}
-			$row .= '<td class="lot_number">' . $lot_number_html . '</td>';
-
-			$issued_date_html = '';
-			if (!empty($issued_date)) {
-				$issued_date = json_decode($issued_date, true);
-				if (!empty($issued_date)) {
-					foreach ($issued_date as $ikey => $ivalue) {
-						$input = array();
-						$input['vendor'] = $ikey;
-						$input['item_key'] = $name;
-						$input['item_value'] = $ivalue;
-						$issued_date_html .= $this->get_issued_date_html($input);
-					}
-				}
-			}
-			$row .= '<td class="issued_date">' . $issued_date_html . '</td>';
-		}
-		// Vendor selection dropdown
-		$vendorDropdown = get_vendor_list($name_vendor, $vendor_id, $item_key);
-		if ($item_key == '') {
-			// "Apply to All" button
-			$applyButton = '<button type="button" class="btn btn-primary apply-to-all-btn" data-item-key="' . $item_key . '">Apply to All</button>';
-		} else {
-			$applyButton = '';
-		}
+		
+		$two_weeks_later = date('Y-m-d', strtotime('+2 weeks'));
+		$row .= '<td>' . render_date_input($name_returnable_date, '', $two_weeks_later) . '</td>';
 
 
-		$row .= '<td class="vendor">' . $vendorDropdown . $applyButton . '</td>';
 		// $row .= '<td class="amount" align="right">' . $amount . '</td>';
 		$row .= '<td class="hide discount">' . render_input($name_discount, '', $discount, 'number', $array_discount_attr) . '</td>';
 		$row .= '<td class="hide label_discount_money" align="right">' . $amount . '</td>';
@@ -21138,7 +21206,7 @@ class Warehouse_model extends App_Model
 
 		if ($name == '') {
 			// $row .= '<td></td>';
-			$row .= '<td><button type="button" onclick="wh_add_item_to_table(\'undefined\',\'undefined\'); return false;" class="btn pull-right btn-info"><i class="fa fa-check"></i></button></td>';
+			$row .= '<td></td>';
 		} else {
 			if (is_numeric($item_key) && strlen($serial_number) > 0 && is_admin() && get_option('wh_products_by_serial')) {
 				$row .= '<td><a href="#" class="btn btn-success pull-right" data-toggle="tooltip" data-original-title="' . _l('wh_change_serial_number') . '" onclick="wh_change_serial_number(\'' . $name_commodity_code . '\',\'' . $name_warehouse_id . '\',\'' . $name_serial_number . '\',\'' . $name_commodity_name . '\'); return false;"><i class="fa fa-refresh"></i></a></td>';
@@ -21314,7 +21382,7 @@ class Warehouse_model extends App_Model
 				$this->update_approve_request($insert_id, 2, 1);
 			}
 
-			hooks()->do_action('after_wh_goods_delivery_added', $insert_id);
+			// hooks()->do_action('after_wh_goods_delivery_added', $insert_id);
 		}
 
 		return $insert_id > 0 ? $insert_id : false;
@@ -21344,4 +21412,365 @@ class Warehouse_model extends App_Model
 			return $this->db->query('select * from tblstock_reconciliation_detail')->result_array();
 		}
 	}
-}	
+
+	public function update_stock_reconciliation($data, $id = false)
+	{
+		$results = 0;
+
+		$goods_deliveries = [];
+		$update_goods_deliveries = [];
+		$remove_goods_deliveries = [];
+		if (isset($data['isedit'])) {
+			unset($data['isedit']);
+		}
+
+		if (isset($data['newitems'])) {
+			$goods_deliveries = $data['newitems'];
+			unset($data['newitems']);
+		}
+
+		if (isset($data['items'])) {
+			$update_goods_deliveries = $data['items'];
+			unset($data['items']);
+		}
+		if (isset($data['removed_items'])) {
+			$remove_goods_deliveries = $data['removed_items'];
+			unset($data['removed_items']);
+		}
+
+		unset($data['item_select']);
+		unset($data['commodity_name']);
+		unset($data['warehouse_id']);
+		unset($data['pr_order_id']);
+		unset($data['available_quantity']);
+		unset($data['quantities']);
+		unset($data['unit_price']);
+		unset($data['note']);
+		unset($data['unit_name']);
+		unset($data['commodity_code']);
+		unset($data['unit_id']);
+		unset($data['discount']);
+		unset($data['guarantee_period']);
+		unset($data['tax_rate']);
+		unset($data['tax_name']);
+		unset($data['discount_money']);
+		unset($data['total_after_discount']);
+		unset($data['serial_number']);
+		unset($data['without_checking_warehouse']);
+		unset($data['lot_number']);
+		unset($data['vendor_id']);
+		unset($data['issued_date']);
+		unset($data['area']);
+
+		$check_appr = $this->get_approve_setting('2');
+		$data['approval'] = 0;
+		if ($check_appr && $check_appr != false) {
+			$data['approval'] = 0;
+		} else {
+			$data['approval'] = 1;
+		}
+
+		if (isset($data['hot_purchase'])) {
+			$hot_purchase = $data['hot_purchase'];
+			unset($data['hot_purchase']);
+		}
+
+		if (isset($data['edit_approval'])) {
+			unset($data['edit_approval']);
+		}
+
+		if (isset($data['save_and_send_request'])) {
+			$save_and_send_request = $data['save_and_send_request'];
+			unset($data['save_and_send_request']);
+		}
+
+		if (!$this->check_format_date($data['date_c'])) {
+			$data['date_c'] = to_sql_date($data['date_c']);
+		} else {
+			$data['date_c'] = $data['date_c'];
+		}
+
+
+		if (!$this->check_format_date($data['date_add'])) {
+			$data['date_add'] = to_sql_date($data['date_add']);
+		} else {
+			$data['date_add'] = $data['date_add'];
+		}
+
+		$data['total_money'] 	= reformat_currency_j($data['total_money']);
+		$data['total_discount'] = reformat_currency_j($data['total_discount']);
+		$data['after_discount'] = reformat_currency_j($data['after_discount']);
+
+		$data['addedfrom'] = get_staff_user_id();
+
+		$goods_delivery_id = $data['id'];
+		unset($data['id']);
+
+		$this->db->where('id', $goods_delivery_id);
+		$this->db->update(db_prefix() . 'stock_reconciliation', $data);
+		if ($this->db->affected_rows() > 0) {
+			$results++;
+		}
+
+		/*update googs delivery*/
+
+		foreach ($update_goods_deliveries as $goods_delivery) {
+			$tax_money = 0;
+			$tax_rate_value = 0;
+			$tax_rate = null;
+			$tax_id = null;
+			$tax_name = null;
+			$quantities = 0;
+			if (!empty($goods_delivery['quantities'])) {
+				$goods_delivery['quantities_json'] = json_encode($goods_delivery['quantities']);
+				$goods_delivery['quantities'] = array_sum($goods_delivery['quantities']);
+			}
+			if (!empty($goods_delivery['lot_number'])) {
+				$goods_delivery['lot_number'] = json_encode($goods_delivery['lot_number']);
+			}
+			if (!empty($goods_delivery['issued_date'])) {
+				$goods_delivery['issued_date'] = json_encode($goods_delivery['issued_date']);
+			}
+			if (isset($goods_delivery['tax_select'])) {
+				$tax_rate_data = $this->wh_get_tax_rate($goods_delivery['tax_select']);
+				$tax_rate_value = $tax_rate_data['tax_rate'];
+				$tax_rate = $tax_rate_data['tax_rate_str'];
+				$tax_id = $tax_rate_data['tax_id_str'];
+				$tax_name = $tax_rate_data['tax_name_str'];
+			}
+
+			if ((float)$tax_rate_value != 0) {
+				$tax_money = (float)$goods_delivery['unit_price'] * (float)$goods_delivery['quantities'] * (float)$tax_rate_value / 100;
+				$total_money = (float)$goods_delivery['unit_price'] * (float)$goods_delivery['quantities'] + (float)$tax_money;
+				$amount = (float)$goods_delivery['unit_price'] * (float)$goods_delivery['quantities'] + (float)$tax_money;
+			} else {
+				$total_money = (float)$goods_delivery['unit_price'] * (float)$goods_delivery['quantities'];
+				$amount = (float)$goods_delivery['unit_price'] * (float)$goods_delivery['quantities'];
+			}
+
+			$sub_total = (float)$goods_delivery['unit_price'] * (float)$goods_delivery['quantities'];
+
+			$goods_delivery['tax_id'] = $tax_id;
+			$goods_delivery['total_money'] = $total_money;
+			$goods_delivery['tax_rate'] = $tax_rate;
+			$goods_delivery['sub_total'] = $sub_total;
+			$goods_delivery['tax_name'] = $tax_name;
+			$goods_delivery['vendor_id'] = !empty($goods_delivery['vendor_id']) ? implode(',', $goods_delivery['vendor_id']) : NULL;
+
+			unset($goods_delivery['order']);
+			unset($goods_delivery['tax_select']);
+			unset($goods_delivery['unit_name']);
+			if (isset($goods_delivery['without_checking_warehouse'])) {
+				unset($goods_delivery['without_checking_warehouse']);
+			}
+			$goods_delivery['area'] = !empty($goods_delivery['area']) ? implode(',', $goods_delivery['area']) : NULL;
+
+			$this->db->where('id', $goods_delivery['id']);
+			if ($this->db->update(db_prefix() . 'stock_reconciliation_detail', $goods_delivery)) {
+				$results++;
+			}
+		}
+
+		// delete receipt note
+		foreach ($remove_goods_deliveries as $goods_deliver_id) {
+			$this->db->where('id', $goods_deliver_id);
+			if ($this->db->delete(db_prefix() . 'stock_reconciliation_detail')) {
+				$results++;
+			}
+		}
+
+		// Add goods deliveries
+		foreach ($goods_deliveries as $goods_delivery) {
+			$goods_delivery['goods_delivery_id'] = $goods_delivery_id;
+			$tax_money = 0;
+			$tax_rate_value = 0;
+			$tax_rate = null;
+			$tax_id = null;
+			$tax_name = null;
+			$quantities = 0;
+			if (!empty($goods_delivery['quantities'])) {
+				$goods_delivery['quantities_json'] = json_encode($goods_delivery['quantities']);
+				$goods_delivery['quantities'] = array_sum($goods_delivery['quantities']);
+			}
+			if (!empty($goods_delivery['lot_number'])) {
+				$goods_delivery['lot_number'] = json_encode($goods_delivery['lot_number']);
+			}
+			if (!empty($goods_delivery['issued_date'])) {
+				$goods_delivery['issued_date'] = json_encode($goods_delivery['issued_date']);
+			}
+			if (isset($goods_delivery['tax_select'])) {
+				$tax_rate_data = $this->wh_get_tax_rate($goods_delivery['tax_select']);
+				$tax_rate_value = $tax_rate_data['tax_rate'];
+				$tax_rate = $tax_rate_data['tax_rate_str'];
+				$tax_id = $tax_rate_data['tax_id_str'];
+				$tax_name = $tax_rate_data['tax_name_str'];
+			}
+
+			if ((float)$tax_rate_value != 0) {
+				$tax_money = (float)$goods_delivery['unit_price'] * (float)$goods_delivery['quantities'] * (float)$tax_rate_value / 100;
+				$total_money = (float)$goods_delivery['unit_price'] * (float)$goods_delivery['quantities'] + (float)$tax_money;
+				$amount = (float)$goods_delivery['unit_price'] * (float)$goods_delivery['quantities'] + (float)$tax_money;
+			} else {
+				$total_money = (float)$goods_delivery['unit_price'] * (float)$goods_delivery['quantities'];
+				$amount = (float)$goods_delivery['unit_price'] * (float)$goods_delivery['quantities'];
+			}
+
+			$sub_total = (float)$goods_delivery['unit_price'] * (float)$goods_delivery['quantities'];
+
+			$goods_delivery['tax_id'] = $tax_id;
+			$goods_delivery['total_money'] = $total_money;
+			$goods_delivery['tax_rate'] = $tax_rate;
+			$goods_delivery['sub_total'] = $sub_total;
+			$goods_delivery['tax_name'] = $tax_name;
+			$goods_delivery['vendor_id'] = !empty($goods_delivery['vendor_id']) ? implode(',', $goods_delivery['vendor_id']) : NULL;
+
+			unset($goods_delivery['order']);
+			unset($goods_delivery['id']);
+			unset($goods_delivery['tax_select']);
+			unset($goods_delivery['unit_name']);
+			if (isset($goods_delivery['without_checking_warehouse'])) {
+				unset($goods_delivery['without_checking_warehouse']);
+			}
+			$goods_delivery['area'] = !empty($goods_delivery['area']) ? implode(',', $goods_delivery['area']) : NULL;
+
+			$this->db->insert(db_prefix() . 'stock_reconciliation_detail', $goods_delivery);
+			if ($this->db->insert_id()) {
+				$results++;
+			}
+		}
+
+
+		//send request approval
+		if ($save_and_send_request == 'true') {
+			/*check send request with type =2 , inventory delivery voucher*/
+			$check_r = $this->check_inventory_delivery_voucher(['rel_id' => $goods_delivery_id, 'rel_type' => '2']);
+
+			if ($check_r['flag_export_warehouse'] == 1) {
+				$this->send_request_approve(['rel_id' => $goods_delivery_id, 'rel_type' => '2', 'addedfrom' => $data['addedfrom']]);
+			}
+		}
+
+
+		//approval if not approval setting
+		if (isset($goods_delivery_id)) {
+			if ($data['approval'] == 1) {
+				$this->update_approve_request($goods_delivery_id, 2, 1);
+			}
+		}
+
+		// hooks()->do_action('after_wh_goods_delivery_updated', $goods_delivery_id);
+
+		return $results > 0 ? true : false;
+	}
+
+
+	public function reconciliation_delivery_get_pur_order($pur_order)
+	{
+		$stock_reconciliation_row_template = '';
+		// 1. Select the field(s) you need
+		$this->db->select('*');
+
+		// 2. Set goods_delivery as the FROM table
+		$this->db->from(db_prefix() . 'goods_delivery');
+
+		// 3. LEFT JOIN goods_delivery_detail on the delivery_id
+		$this->db->join(
+			db_prefix() . 'goods_delivery_detail',
+			db_prefix() . 'goods_delivery_detail.goods_delivery_id = '
+				. db_prefix() . 'goods_delivery.id',
+			'left'
+		);
+
+		// 4. Add your filters
+		$this->db->like(
+			db_prefix() . 'goods_delivery_detail.description',
+			$non_break_description
+		);
+		$this->db->where(
+			db_prefix() . 'goods_delivery.approval',
+			1
+		);
+		$this->db->where(
+			db_prefix() . 'goods_delivery.pr_order_id',
+			$pur_order
+		);
+		$this->db->where(
+			db_prefix() . 'goods_delivery_detail.returnable',
+			1
+		);
+
+		// 5. Execute
+		$goods_delivery_description = $this->db->get()->result_array();
+
+		$groupedItems = [];
+
+		foreach ($goods_delivery_description as $delivery) {
+			$commodityCode = $delivery['commodity_code'];
+
+			// Skip if commodity_code is empty
+			if (empty($commodityCode)) {
+				continue;
+			}
+
+			// Initialize group if not exists
+			if (!isset($groupedItems[$commodityCode])) {
+				$groupedItems[$commodityCode] = [
+					'commodity_name' => $delivery['commodity_name'],
+					'description'   => $delivery['description'],
+					'area'          => $delivery['area'],
+					'warehouse_id'  => $delivery['warehouse_id'],
+					'vendor_quantities' => [], // Stores summed quantities per vendor
+					'returnable'     => $delivery['returnable'],
+					'returnable_date' => $delivery['returnable_date'],
+					// Add other fields you need...
+				];
+			}
+
+			// Process quantities_json if exists
+			$quantitiesJson = $delivery['quantities_json'];
+			if (!empty($quantitiesJson)) {
+				$quantities = json_decode($quantitiesJson, true);
+
+				foreach ($quantities as $vendorId => $quantity) {
+					if (isset($groupedItems[$commodityCode]['vendor_quantities'][$vendorId])) {
+						$groupedItems[$commodityCode]['vendor_quantities'][$vendorId] += (int)$quantity;
+					} else {
+						$groupedItems[$commodityCode]['vendor_quantities'][$vendorId] = (int)$quantity;
+					}
+				}
+			}
+		}
+		$warehouse_data = $this->warehouse_model->get_warehouse();
+		// Convert to indexed array if needed
+		$result = array_values($groupedItems);
+		$index_receipt = 0;
+		// echo '<pre>';
+		// print_r($result);
+		// die;
+		foreach ($result as $key => $delivery_detail) {
+			$unit_name = wh_get_unit_name($delivery_detail['unit_id']);
+			$taxname = '';
+			$expiry_date = null;
+			$lot_number = $delivery_detail['lot_number'];
+			$commodity_name = $delivery_detail['commodity_name'];
+			$without_checking_warehouse = 0;
+
+			if (strlen($commodity_name) == 0) {
+				$commodity_name = wh_get_item_variatiom($delivery_detail['commodity_code']);
+			}
+
+			$get_commodity = $this->warehouse_model->get_commodity($delivery_detail['commodity_code']);
+			if ($get_commodity) {
+				$without_checking_warehouse = $get_commodity->without_checking_warehouse;
+			}
+			$stock_reconciliation_row_template .= $this->create_stock_reconciliation_row_template($warehouse_data, 'items[' . $index_receipt . ']', $commodity_name, $delivery_detail['warehouse_id'], $delivery_detail['vendor_quantities'], $delivery_detail['quantities'], $unit_name, $delivery_detail['unit_price'], $taxname, $delivery_detail['commodity_code'], $delivery_detail['unit_id'], $delivery_detail['vendor_id'], $delivery_detail['tax_rate'], $delivery_detail['total_money'], $delivery_detail['discount'], $delivery_detail['discount_money'], $delivery_detail['total_after_discount'], $delivery_detail['guarantee_period'], $delivery_detail['issued_date'], $lot_number, $delivery_detail['note'], $delivery_detail['sub_total'], $delivery_detail['tax_name'], $delivery_detail['tax_id'], $delivery_detail['id'], true, $is_purchase_order, $delivery_detail['serial_number'], $without_checking_warehouse, $delivery_detail['description'], $delivery_detail['quantities_json'], $delivery_detail['area']);
+			$index_receipt++;
+		}
+
+		$arr_pur_resquest['result'] = $stock_reconciliation_row_template;
+		$arr_pur_resquest['additional_discount'] = $additional_discount;
+		$arr_pur_resquest['goods_delivery_exist'] = $goods_delivery_exist;
+
+		return $arr_pur_resquest;
+	}
+}
