@@ -13919,9 +13919,9 @@ class purchase extends AdminController
         $this->load->view('admin/chartjs_common_view', $data);
     }
 
-    public function table_unawarded_tracker()
+    public function table_unawarded_tracker($estimate_id = 0)
     {
-        $this->app->get_table_data(module_views_path('purchase', 'unawarded_tracker/table_order_tracker'));
+        $this->app->get_table_data(module_views_path('purchase', 'unawarded_tracker/table_unawarded_tracker'), ['estimate_id' => $estimate_id]);
     }
 
 

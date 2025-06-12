@@ -3,7 +3,7 @@ Dropzone.autoDiscover = false;
 var expenseDropzone;
 (function ($) {
     "use strict";
-    table_rec_campaign = $('.table-table_order_tracker');
+    table_rec_campaign = $('.table-table_unawarded_tracker');
 
     var Params = {
         "type": "[name='type[]']",
@@ -16,7 +16,7 @@ var expenseDropzone;
         "aw_unw_order_status": "[name='aw_unw_order_status[]']"
     };
 
-    initDataTable('.table-table_order_tracker', admin_url + 'purchase/table_unawarded_tracker', [], [], Params, [0, 'desc']);
+    initDataTable('.table-table_unawarded_tracker', admin_url + 'purchase/table_unawarded_tracker', [], [], Params, [0, 'desc']);
 
     $.each(Params, function (i, obj) {
         // console.log(obj);
@@ -99,7 +99,7 @@ var expenseDropzone;
        });
     });
 
-    // $('.table-table_order_tracker').on('draw.dt', function () {
+    // $('.table-table_unawarded_tracker').on('draw.dt', function () {
     //     var reportsTable = $(this).DataTable();
     //     var sums = reportsTable.ajax.json().sums;
     //     $(this).find('tfoot').addClass('bold');
@@ -145,7 +145,7 @@ function change_rli_filter_unawarded(status, id, table_name) {
                         // console.log('After:', $statusSpan.attr('class'));
 
                         // Display success message
-                        // $(".table-table_order_tracker").DataTable().ajax.reload();
+                        // $(".table-table_unawarded_tracker").DataTable().ajax.reload();
                         alert_float('success', response.mess);
                     } else {
                         // Display warning message if the operation fails
@@ -192,7 +192,7 @@ function change_aw_unw_order_status(status, id, table_name) {
                         // console.log('After:', $statusSpan.attr('class'));
 
                         // Display success message
-                        // var table_critical_tracker = $(".table-table_order_tracker");
+                        // var table_critical_tracker = $(".table-table_unawarded_tracker");
                         // table_critical_tracker.DataTable().ajax.reload();
                         alert_float('success', response.mess);
                     } else {
@@ -240,7 +240,7 @@ function update_budget_head_unawarded(status, id, table_name) {
                         // console.log('After:', $statusSpan.attr('class'));
 
                         // Display success message
-                        // var table_critical_tracker = $(".table-table_order_tracker");
+                        // var table_critical_tracker = $(".table-table_unawarded_tracker");
                         // table_critical_tracker.DataTable().ajax.reload();
                         alert_float('success', response.mess);
                     } else {

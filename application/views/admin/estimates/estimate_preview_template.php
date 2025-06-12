@@ -886,7 +886,24 @@
                 <div role="tabpanel" class="tab-pane" id="tender_strategy">
                     <div class="row">
                         <div class="col-md-12">
-                            <a href="#" class="btn btn-primary" onclick="add_new_package(<?php echo $estimate->id; ?>); return false;"><i class="fa-regular fa-plus tw-mr-1"></i>Add Package</a>
+                            <a href="#" class="btn btn-primary" onclick="view_package(<?php echo $estimate->id; ?>); return false;"><i class="fa-regular fa-plus tw-mr-1"></i>Add Package</a>
+                            <hr />
+                            <table class="dt-table-loading table table-table_unawarded_tracker">
+                               <thead>
+                                  <tr>
+                                     <th><?php echo _l('Package Name'); ?></th>
+                                     <th><?php echo _l('Preview'); ?></th>
+                                     <th><?php echo _l('Budget Head'); ?></th>
+                                     <th><?php echo _l('Package Value'); ?></th>
+                                     <th><?php echo _l('Awarded Value'); ?></th>
+                                     <th><?php echo _l('Secured Deposit Value'); ?></th>
+                                     <th><?php echo _l('Pending Value In Package'); ?></th>
+                                     <th><?php echo _l('Book Order'); ?></th>
+                                  </tr>
+                               </thead>
+                               <tbody>
+                               </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -1165,6 +1182,186 @@ function cost_control_sheet(el) {
       }
     });
   }
+}
+
+function assign_unawarded_capex(id) {
+  $.post(admin_url + "estimates/assign_unawarded_capex", {
+    id: id,
+  }).done(function (res) {
+    var response = JSON.parse(res);
+    if (response.budgetsummaryhtml) {
+      $('.unawarded-budget-head').html('');
+      $('.unawarded-budget-head').html(response.budgetsummaryhtml);
+      $('.unawarded-capex-body').html('');
+      $('.unawarded-capex-body').html(response.itemhtml);
+      $('.unawarded_capex_title').html('Assign Unawarded Capex');
+      init_selectpicker();
+      calculate_unawarded_capex();
+      $('#unawarded_capex_modal').modal('show');
+    }
+  });
+}
+
+$("body").on("change", "select[name='unawarded_budget_head']", function (e) {
+  var id = $(this).find('option:selected').data('estimateid');
+  var unawarded_budget = $(this).val();
+  if(unawarded_budget != '') {
+    $.post(admin_url + "estimates/assign_unawarded_capex", {
+      id: id,
+      unawarded_budget: unawarded_budget,
+    }).done(function (res) {
+      var response = JSON.parse(res);
+      if (response.itemhtml) {
+        $('.unawarded-capex-body').html('');
+        $('.unawarded-capex-body').html(response.itemhtml);
+        init_selectpicker();
+        calculate_unawarded_capex();
+      }
+    });
+  } else {
+    $('.unawarded-capex-body').html('');
+    init_selectpicker();
+  }
+});
+
+function calculate_unawarded_capex() {
+  var total_budgeted_amount = 0,
+  total_unawarded_amount = 0,
+  total_unallocated_cost = 0;
+  var rows = $(".unawarded-capex-body tbody tr");
+  $.each(rows, function () {
+    var row = $(this);
+    var budgeted_qty = parseFloat(row.find(".all_budgeted_qty input").val()) || 0;
+    var budgeted_rate = parseFloat(row.find(".all_budgeted_rate input").val()) || 0;
+    var budgeted_amount = parseFloat(row.find(".all_budgeted_amount input").val()) || 0;
+    var unawarded_qty = parseFloat(row.find(".all_unawarded_qty input").val()) || 0;
+    var unawarded_rate = parseFloat(row.find(".all_unawarded_rate input").val()) || 0;
+    var unawarded_amount = unawarded_qty * unawarded_rate;
+    var unallocated_cost = budgeted_amount - unawarded_amount;
+    if (Math.abs(unallocated_cost) < 0.01) {
+      unallocated_cost = 0;
+    }
+    row.find(".all_unawarded_amount input").val(unawarded_amount.toFixed(2));
+    row.find(".all_unallocated_cost input").val(unallocated_cost.toFixed(2));
+    total_budgeted_amount += budgeted_amount;
+    total_unawarded_amount += unawarded_amount;
+    total_unallocated_cost += unallocated_cost;
+  });
+  $(".total_budgeted_amount").html(format_money(total_budgeted_amount));
+  $(".total_unawarded_amount").html(format_money(total_unawarded_amount));
+  $(".total_unallocated_cost").html(format_money(total_unallocated_cost));
+  $(document).trigger("sales-total-calculated");
+}
+
+function view_package(id) {
+  $.post(admin_url + "estimates/view_package", {
+    id: id,
+  }).done(function (res) {
+    var response = JSON.parse(res);
+    if (response.budgetsummaryhtml) {
+      $('.package-head').html('');
+      $('.package-head').html(response.budgetsummaryhtml);
+      $('.package-body').html('');
+      $('.package-body').html(response.itemhtml);
+      $('.package_title').html('Add Package');
+      init_selectpicker();
+      init_datepicker();
+      calculate_package();
+      $('#package_modal').modal('show');
+    }
+  });
+}
+
+$("body").on("change", "select[name='package_budget_head']", function (e) {
+  var id = $(this).find('option:selected').data('estimateid');
+  var package_budget = $(this).val();
+  if(package_budget != '') {
+    $.post(admin_url + "estimates/view_package", {
+      id: id,
+      package_budget: package_budget,
+    }).done(function (res) {
+      var response = JSON.parse(res);
+      if (response.itemhtml) {
+        $('.package-body').html('');
+        $('.package-body').html(response.itemhtml);
+        init_selectpicker();
+        init_datepicker();
+        calculate_package();
+      }
+    });
+  } else {
+    $('.package-body').html('');
+    init_selectpicker();
+  }
+});
+
+function calculate_package() {
+  var total_unawarded_amount = 0,
+  total_package_amount = 0;
+  var rows = $(".package-body tbody tr");
+  $.each(rows, function () {
+    var row = $(this);
+    var unawarded_qty = parseFloat(row.find(".all_unawarded_qty input").val()) || 0;
+    var unawarded_rate = parseFloat(row.find(".all_unawarded_rate input").val()) || 0;
+    var package_qty = parseFloat(row.find(".all_package_qty input").val()) || 0;
+    var package_rate = parseFloat(row.find(".all_package_rate input").val()) || 0;
+    var percentage_of_capex_used = 0;
+    var unawarded_amount = unawarded_qty * unawarded_rate;
+    var package_amount = package_qty * package_rate;
+    row.find(".all_unawarded_amount input").val(unawarded_amount.toFixed(2));
+    row.find(".all_package_amount input").val(package_amount.toFixed(2));
+    total_unawarded_amount += unawarded_amount;
+    total_package_amount += package_amount;
+    if(package_amount > 0) {
+      percentage_of_capex_used = (package_amount / unawarded_amount) * 100;
+      percentage_of_capex_used = Math.round(percentage_of_capex_used);
+    }
+    row.find(".all_percentage_of_capex_used").html(percentage_of_capex_used+'%');
+  });
+  var sdeposit_percent = parseFloat($("input[name='sdeposit_percent']").val()) || 0;
+  var sdeposit_value = 0;
+  if (sdeposit_percent > 0) {
+    var package_without_secured = total_package_amount;
+    total_package_amount += (total_package_amount * sdeposit_percent) / 100;
+    sdeposit_value = total_package_amount - package_without_secured;
+  }
+  $(".total_unawarded_amount").html(format_money(total_unawarded_amount));
+  $(".total_package").html(
+    format_money(total_package_amount) +
+    hidden_input("total_package", total_package_amount)
+  );
+  $(".sdeposit_value").html(
+    hidden_input("sdeposit_value", sdeposit_value)
+  );
+  $(document).trigger("sales-total-calculated");
+}
+
+var table_unawarded_tracker;
+var estimate_id = <?php echo e($estimate->id); ?>;
+table_unawarded_tracker = $('.table-table_unawarded_tracker');
+var Params = {};
+initDataTable('.table-table_unawarded_tracker', admin_url + 'purchase/table_unawarded_tracker/' + estimate_id, [], [], Params, [0, 'desc']);
+
+function get_package_info(package_id, estimate_id, package_budget) {
+    if(package_id != '' && estimate_id != '' && package_budget != '') {
+      $.post(admin_url + "estimates/view_package", {
+        id: estimate_id,
+        package_id: package_id,
+      }).done(function (res) {
+        var response = JSON.parse(res);
+        if (response.budgetsummaryhtml) {
+          $('.package-head').html('');
+          $('.package-head').html(response.budgetsummaryhtml);
+          $('.package-body').html('');
+          $('.package-body').html(response.itemhtml);
+          $('.package_title').html('Add Package');
+          init_selectpicker();
+          init_datepicker();
+          calculate_package();
+          $('#package_modal').modal('show');
+        }
+      });
+    }
 }
 </script>
 <?php $this->load->view('admin/estimates/estimate_send_to_client'); ?>

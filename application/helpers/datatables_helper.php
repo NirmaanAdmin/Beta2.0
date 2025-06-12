@@ -615,22 +615,30 @@ function data_tables_init_union_unawarded($aColumns, $sIndexColumn, $combinedTab
 
     $sTable = "(
         SELECT 
-            t.id,
-            t.budget_head,
+            p.id,
             pr.name as project,
-            t.awarded_value,
-            t.unawarded_value,
-            t.unallocated_value,
-            t.secured_desposit,
-            (IFNULL(t.awarded_value, 0) + (t.unawarded_value + IFNULL(t.secured_desposit, 0))) AS cost_to_complete,
-            t.budget_health,
-            t.entity_table,
-            t.remarks,
-            t.estimate_id as estimate
-        FROM tblpur_unawarded_tracker t
-        LEFT JOIN tblprojects pr ON pr.id = t.project
+            p.estimate_id,
+            budget_head,
+            ig.name as budget_head_name,
+            p.project_awarded_date,
+            p.package_name,
+            p.sdeposit_percent,
+            p.sdeposit_value,
+            p.total_package,
+            p.awarded_value,
+            (
+                (
+                    SELECT SUM(unawarded_qty * unawarded_rate) 
+                    FROM tblunawarded_budget_info 
+                    WHERE tblunawarded_budget_info.estimate_id = p.estimate_id 
+                      AND tblunawarded_budget_info.budget_head = p.budget_head
+                ) - p.awarded_value + p.sdeposit_value
+            ) AS pending_value_in_package
+        FROM tblestimate_package_info p
+        LEFT JOIN tblestimates est ON est.id = p.estimate_id
+        LEFT JOIN tblprojects pr ON pr.id = est.project_id
+        LEFT JOIN tblitems_groups ig ON ig.id = p.budget_head
     ) AS combined_orders";
-
 
     $allColumns = [];
     foreach ($aColumns as $column) {

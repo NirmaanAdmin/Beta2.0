@@ -2194,15 +2194,21 @@ class Estimates_model extends App_Model
         return true;
     }
 
-    public function add_new_package($data)
+    public function view_package($data)
     {
         $this->load->model('currencies_model');
         $response = array();
+        $package_info = array();
         $budgetsummary = '';
         $itemhtml = '';
         $estimate_id = $data['id'];
         $package_budget = isset($data['package_budget']) ? $data['package_budget'] : '';
+        $package_id = isset($data['package_id']) ? $data['package_id'] : '';
         $base_currency = $this->currencies_model->get_base_currency();
+        if(!empty($package_id)) {
+            $this->db->where('id', $package_id);
+            $package_info = $this->db->get(db_prefix() . 'estimate_package_info')->row();
+        }
         $this->db->where('id', $estimate_id);
         $estimates = $this->db->get(db_prefix() . 'estimates')->row();
         $this->db->select(db_prefix() . 'itemable.id as id, ' .
@@ -2231,6 +2237,9 @@ class Estimates_model extends App_Model
             });
             if(empty($package_budget)) {
                 $package_budget = isset($package_budget_head[0]) ? $package_budget_head[0]['annexure'] : '';
+                if(!empty($package_info)) {
+                    $package_budget = $package_info->budget_head;
+                }
                 $budgetsummaryhtml .= '<div class="row">';
                 $budgetsummaryhtml .= '<div class="col-md-12" style="padding-left:0px;">';
                 $budgetsummaryhtml .= '<div class="col-md-3 form-group">';
@@ -2243,10 +2252,10 @@ class Estimates_model extends App_Model
                 $budgetsummaryhtml .= '</select>';
                 $budgetsummaryhtml .= '</div>';
                 $budgetsummaryhtml .= '<div class="col-md-3 form-group">';
-                $budgetsummaryhtml .= render_date_input('project_awarded_date', 'Project Awarded Date', '');
+                $budgetsummaryhtml .= render_date_input('project_awarded_date', 'Project Awarded Date', !empty($package_info) ? $package_info->project_awarded_date : '');
                 $budgetsummaryhtml .= '</div>';
                 $budgetsummaryhtml .= '<div class="col-md-3 form-group">';
-                $budgetsummaryhtml .= render_input('package_name', 'Package Name', '');
+                $budgetsummaryhtml .= render_input('package_name', 'Package Name', !empty($package_info) ? $package_info->package_name : '');
                 $budgetsummaryhtml .= '</div>';
                 $budgetsummaryhtml .= '</div>';
                 $budgetsummaryhtml .= '</div>';
@@ -2269,19 +2278,27 @@ class Estimates_model extends App_Model
                 $itemhtml .= '<table class="table items">';
                 $itemhtml .= '<thead>
                     <tr>
-                        <th align="left">' . _l('estimate_table_item_heading') . '</th>
-                        <th align="left">' . _l('estimate_table_item_description') . '</th>
-                        <th align="right">Unawarded Quantity</th>
-                        <th align="right">Unawarded Rate</th>
-                        <th align="right">Unawarded Amount</th>
-                        <th align="right">Package Quantity</th>
-                        <th align="right">Package Rate</th>
-                        <th align="right">Package Amount</th>
+                        <th width="12%" align="left">' . _l('estimate_table_item_heading') . '</th>
+                        <th width="15%" align="left">' . _l('estimate_table_item_description') . '</th>
+                        <th width="10%" align="right">Unawarded Quantity</th>
+                        <th width="10%" align="right">Unawarded Rate</th>
+                        <th width="10%" align="right">Unawarded Amount</th>
+                        <th width="10%" align="right">Package Quantity</th>
+                        <th width="10%" align="right">Package Rate</th>
+                        <th width="10%" align="right">Package Amount</th>
+                        <th width="10%" align="right">Percentage of Capex Used</th>
                     </tr>
                 </thead>';
                 $itemhtml .= '<tbody style="border: 1px solid #ddd;">';
                 $itemhtml .= form_hidden('estimate_id', $estimates->id);
+                $itemhtml .= form_hidden('package_id', $package_id);
                 foreach ($unawarded_budget_itemable as $key => $item) {
+                    $package_items_info = array();
+                    if(!empty($package_id)) {
+                        $this->db->where('package_id', $package_id);
+                        $this->db->where('item_id', $item['id']);
+                        $package_items_info = $this->db->get(db_prefix() . 'estimate_package_items_info')->row();
+                    }
                     $unawarded_qty = !empty($item['unawarded_qty']) ? number_format($item['unawarded_qty'], 2, '.', '') : 0.00;
                     $unawarded_rate = !empty($item['unawarded_rate']) ? number_format($item['unawarded_rate'], 2, '.', '') : 0.00;
                     $unawarded_amount = number_format($unawarded_qty * $unawarded_rate, 2, '.', '');
@@ -2300,9 +2317,10 @@ class Estimates_model extends App_Model
                     $itemhtml .= '<td align="align" class="all_unawarded_qty">' . render_input($unawarded_qty_name_attr, '', $unawarded_qty, 'number', ['readonly' => true]) . '</td>';
                     $itemhtml .= '<td align="align" class="all_unawarded_rate">' . render_input($unawarded_rate_name_attr, '', $unawarded_rate, 'number', ['readonly' => true]) . '</td>';
                     $itemhtml .= '<td align="align" class="all_unawarded_amount">' . render_input($unawarded_amount_name_attr, '', $unawarded_amount, 'number', ['readonly' => true]) . '</td>';
-                    $itemhtml .= '<td align="align" class="all_package_qty">' . render_input($package_qty_name_attr, '', 0.00, 'number', ['onchange' => 'calculate_package()']) . '</td>';
-                    $itemhtml .= '<td align="align" class="all_package_rate">' . render_input($package_rate_name_attr, '', 0.00, 'number', ['onchange' => 'calculate_package()']) . '</td>';
+                    $itemhtml .= '<td align="align" class="all_package_qty">' . render_input($package_qty_name_attr, '', !empty($package_items_info) ? $package_items_info->package_qty : 0.00, 'number', ['onchange' => 'calculate_package()']) . '</td>';
+                    $itemhtml .= '<td align="align" class="all_package_rate">' . render_input($package_rate_name_attr, '', !empty($package_items_info) ? $package_items_info->package_rate : 0.00, 'number', ['onchange' => 'calculate_package()']) . '</td>';
                     $itemhtml .= '<td align="align" class="all_package_amount">' . render_input($package_amount_name_attr, '', 0.00, 'number', ['readonly' => true]) . '</td>';
+                    $itemhtml .= '<td align="align" class="all_percentage_of_capex_used" style="text-align:center;"></td>';
                     $itemhtml .= '</tr>';
                 }
                 $itemhtml .= '</tbody>';
@@ -2315,14 +2333,27 @@ class Estimates_model extends App_Model
             <table class="table text-right">
                 <tbody>
                     <tr>
-                        <td><span class="bold tw-text-neutral-700">Total Unawarded Amount :</span>
+                        <td width="75%"><span class="bold tw-text-neutral-700">Total Unawarded Amount :</span>
                         </td>
-                        <td class="total_unawarded_amount"></td>
+                        <td width="25%" class="total_unawarded_amount"></td>
                     </tr>
                     <tr>
-                        <td><span class="bold tw-text-neutral-700">Total Package Amount :</span>
+                        <td width="75%"><span class="bold tw-text-neutral-700">Secured Deposit :</span>
                         </td>
-                        <td class="total_package_amount"></td>
+                        <td width="25%">
+                            <div class="input-group date">
+                                <input type="number" id="sdeposit_percent" name="sdeposit_percent" class="form-control" value="' . (!empty($package_info) ? $package_info->sdeposit_percent : 0) . '" autocomplete="off" min="0" max="100" onchange="calculate_package()">
+                                <div class="input-group-addon">
+                                    %
+                                </div>
+                            </div>
+                            <div class="sdeposit_value"></div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="75%"><span class="bold tw-text-neutral-700">Total Package Amount :</span>
+                        </td>
+                        <td width="25%" class="total_package"></td>
                     </tr>
                 </tbody>
             </table>
@@ -2334,8 +2365,81 @@ class Estimates_model extends App_Model
 
     public function save_package($data)
     {
-        echo "<pre>";
-        print_r($data);
-        die();
+        $items = isset($data['items']) ? $data['items'] : array();
+        $package_id = isset($data['package_id']) ? $data['package_id'] : NULL;
+        $estimate_id = isset($data['estimate_id']) ? $data['estimate_id'] : NULL;
+        $budget_head = isset($data['package_budget_head']) ? $data['package_budget_head'] : NULL;
+        $project_awarded_date = isset($data['project_awarded_date']) ? $data['project_awarded_date'] : NULL;
+        $package_name = isset($data['package_name']) ? $data['package_name'] : NULL;
+        $sdeposit_percent = isset($data['sdeposit_percent']) ? $data['sdeposit_percent'] : NULL;
+        $sdeposit_value = isset($data['sdeposit_value']) ? $data['sdeposit_value'] : NULL;
+        $total_package = isset($data['total_package']) ? $data['total_package'] : NULL;
+
+        if(!empty($package_id)) {
+            $this->db->where('id', $package_id);
+            $this->db->update(db_prefix() . 'estimate_package_info', [
+                'estimate_id' => $estimate_id,
+                'budget_head' => $budget_head,
+                'project_awarded_date' => date('Y-m-d', strtotime($project_awarded_date)),
+                'package_name' => $package_name,
+                'sdeposit_percent' => $sdeposit_percent,
+                'sdeposit_value' => $sdeposit_value,
+                'total_package' => $total_package,
+            ]);
+            if(!empty($items)) {
+                foreach ($items as $key => $value) {
+                    $this->db->where('package_id', $package_id);
+                    $this->db->where('item_id', $value['item_id']);
+                    $this->db->update(db_prefix() . 'estimate_package_items_info', [
+                        'package_qty' => $value['package_qty'],
+                        'package_rate' => $value['package_rate'],
+                    ]);
+                }
+            }
+        } else {
+            $this->db->insert(db_prefix() . 'estimate_package_info', [
+                'estimate_id' => $estimate_id,
+                'budget_head' => $budget_head,
+                'project_awarded_date' => date('Y-m-d', strtotime($project_awarded_date)),
+                'package_name' => $package_name,
+                'sdeposit_percent' => $sdeposit_percent,
+                'sdeposit_value' => $sdeposit_value,
+                'total_package' => $total_package,
+            ]);
+            $insert_id = $this->db->insert_id();
+            if(!empty($items)) {
+                foreach ($items as $key => $value) {
+                    $this->db->insert(db_prefix() . 'estimate_package_items_info', [
+                        'package_id' => $insert_id,
+                        'item_id' => $value['item_id'],
+                        'package_qty' => $value['package_qty'],
+                        'package_rate' => $value['package_rate'],
+                    ]);
+                }
+            }
+        }
+
+        return true;
+    }
+
+    public function delete_package($id)
+    {
+        $affectedRows = 0;
+        $this->db->where('id', $id);
+        $this->db->delete(db_prefix() . 'estimate_package_info');
+        if ($this->db->affected_rows() > 0) {
+            $affectedRows++;
+        }
+
+        $this->db->where('package_id', $id);
+        $this->db->delete(db_prefix() . 'estimate_package_items_info');
+        if ($this->db->affected_rows() > 0) {
+            $affectedRows++;
+        }
+
+        if ($affectedRows > 0) {
+            return true;
+        }
+        return false;
     }
 }

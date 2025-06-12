@@ -173,15 +173,15 @@
                            <!-- Column Checkboxes -->
                            <?php
                            $columns = [
-                              _l('Budget Head'),
                               _l('project'),
+                              _l('Package Name'),
+                              _l('Preview'),
+                              _l('Budget Head'),
+                              _l('Package Value'),
                               _l('Awarded Value'),
-                              _l('Unawarded Value'),
-                              _l('Unallocated Value'),
-                              _l('Secured Desposit'),
-                              _l('Cost to Complete'),
-                              _l('Budget Health'),
-                              _l('remarks')
+                              _l('Secured Deposit Value'),
+                              _l('Pending Value In Package'),
+                              _l('Book Order')
                            ];
                            ?>
                            <div>
@@ -208,19 +208,18 @@
                      </div> -->
 
                      <div class="">
-                        <table class="dt-table-loading table table-table_order_tracker">
+                        <table class="dt-table-loading table table-table_unawarded_tracker">
                            <thead>
                               <tr>
-                                 <th><?php echo _l('Budget Head'); ?></th>
                                  <th><?php echo _l('project'); ?></th>
+                                 <th><?php echo _l('Package Name'); ?></th>
+                                 <th><?php echo _l('Preview'); ?></th>
+                                 <th><?php echo _l('Budget Head'); ?></th>
+                                 <th><?php echo _l('Package Value'); ?></th>
                                  <th><?php echo _l('Awarded Value'); ?></th>
-                                 <th><?php echo _l('Unawarded Value'); ?></th>
-                                 <th><?php echo _l('Unallocated Value'); ?></th>
-                                 <th><?php echo _l('Secured Deposit'); ?></th>
-                                 <th><?php echo _l('Cost to Complete'); ?></th>
-                                 <th><?php echo _l('Budget Health'); ?></th>
-                                 <th><?php echo _l('Entity Table'); ?></th>
-                                 <th><?php echo _l('remarks'); ?></th>
+                                 <th><?php echo _l('Secured Deposit Value'); ?></th>
+                                 <th><?php echo _l('Pending Value In Package'); ?></th>
+                                 <th><?php echo _l('Book Order'); ?></th>
                               </tr>
                            </thead>
                            <tbody>
@@ -344,9 +343,99 @@
       </div>
    </div>
 </div>
+
+<div class="modal fade" id="package_modal" tabindex="-1" role="dialog">
+   <div class="modal-dialog" role="document" style="width: 98%;">
+      <div class="modal-content">
+         <?php echo form_open(admin_url('estimates/save_package'), array('id' => 'unawarded_capex_form', 'class' => '')); ?>
+         <div class="modal-header">
+            <h4 class="modal-title"><div class="package_title"></div></h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <div class="package-head"></div>
+         </div>
+         <div class="modal-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="package-body">
+                    </div>
+                </div>
+            </div>
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo _l('close'); ?></button>
+            <button type="submit" class="btn btn-info"><?php echo _l('submit'); ?></button>
+         </div>
+         <?php echo form_close(); ?>
+      </div>
+   </div>
+</div>
+
 <?php init_tail(); ?>
 <?php require 'modules/purchase/assets/js/import_excel_items_unawarded_tracker_js.php'; ?>
-<?php require 'modules/purchase/assets/js/unawarded_tracker_js.php'; ?>
+<script>
+function get_package_info(package_id, estimate_id, package_budget) {
+ if(package_id != '' && estimate_id != '' && package_budget != '') {
+   $.post(admin_url + "estimates/view_package", {
+     id: estimate_id,
+     package_id: package_id,
+   }).done(function (res) {
+     var response = JSON.parse(res);
+     if (response.budgetsummaryhtml) {
+       $('.package-head').html('');
+       $('.package-head').html(response.budgetsummaryhtml);
+       $('.package-body').html('');
+       $('.package-body').html(response.itemhtml);
+       $('.package_title').html('Add Package');
+       init_selectpicker();
+       init_datepicker();
+       calculate_package();
+       $('#package_modal').modal('show');
+     }
+   });
+ }
+}
+
+function calculate_package() {
+  var total_unawarded_amount = 0,
+  total_package_amount = 0;
+  var rows = $(".package-body tbody tr");
+  $.each(rows, function () {
+    var row = $(this);
+    var unawarded_qty = parseFloat(row.find(".all_unawarded_qty input").val()) || 0;
+    var unawarded_rate = parseFloat(row.find(".all_unawarded_rate input").val()) || 0;
+    var package_qty = parseFloat(row.find(".all_package_qty input").val()) || 0;
+    var package_rate = parseFloat(row.find(".all_package_rate input").val()) || 0;
+    var percentage_of_capex_used = 0;
+    var unawarded_amount = unawarded_qty * unawarded_rate;
+    var package_amount = package_qty * package_rate;
+    row.find(".all_unawarded_amount input").val(unawarded_amount.toFixed(2));
+    row.find(".all_package_amount input").val(package_amount.toFixed(2));
+    total_unawarded_amount += unawarded_amount;
+    total_package_amount += package_amount;
+    if(package_amount > 0) {
+      percentage_of_capex_used = (package_amount / unawarded_amount) * 100;
+      percentage_of_capex_used = Math.round(percentage_of_capex_used);
+    }
+    row.find(".all_percentage_of_capex_used").html(percentage_of_capex_used+'%');
+  });
+  var sdeposit_percent = parseFloat($("input[name='sdeposit_percent']").val()) || 0;
+  var sdeposit_value = 0;
+  if (sdeposit_percent > 0) {
+    var package_without_secured = total_package_amount;
+    total_package_amount += (total_package_amount * sdeposit_percent) / 100;
+    sdeposit_value = total_package_amount - package_without_secured;
+  }
+  $(".total_unawarded_amount").html(format_money(total_unawarded_amount));
+  $(".total_package").html(
+    format_money(total_package_amount) +
+    hidden_input("total_package", total_package_amount)
+  );
+  $(".sdeposit_value").html(
+    hidden_input("sdeposit_value", sdeposit_value)
+  );
+  $(document).trigger("sales-total-calculated");
+}
+</script>
 </body>
 
 </html>

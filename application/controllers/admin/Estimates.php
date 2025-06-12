@@ -722,18 +722,37 @@ class Estimates extends AdminController
         redirect(admin_url('estimates'));
     }
 
-    public function add_new_package()
+    public function view_package()
     {
         $data = $this->input->post();
-        $response = $this->estimates_model->add_new_package($data);
+        $response = $this->estimates_model->view_package($data);
         echo json_encode($response);
     }
 
     public function save_package()
     {
         $data = $this->input->post();
+        $package_id = isset($data['package_id']) ? $data['package_id'] : NULL;
         $this->estimates_model->save_package($data);
-        set_alert('success', 'Assign Unawarded Capex is updated successfully');
+        if(!empty($package_id)) {
+            set_alert('success', 'Package is updated successfully');
+        } else {
+            set_alert('success', 'Package is added successfully');
+        }
         redirect(admin_url('estimates'));
+    }
+
+    public function delete_package($id)
+    {
+        if (!$id) {
+            redirect(admin_url('purchase/unawarded_tracker'));
+        }
+        $response = $this->estimates_model->delete_package($id);
+        if ($response == true) {
+            set_alert('success', 'Package is deleted successfully');
+        } else {
+            set_alert('warning', 'Something went wrong');
+        }
+        redirect(admin_url('purchase/unawarded_tracker'));
     }
 }
