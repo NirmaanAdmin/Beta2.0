@@ -11586,7 +11586,7 @@ class purchase extends AdminController
             'mess' => $message,
             'html' => $html,
         ]);
-    }
+    } 
 
     /**
      * manage purchase

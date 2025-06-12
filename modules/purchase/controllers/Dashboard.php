@@ -29,7 +29,7 @@ class Dashboard extends AdminController
         $result = $this->dashboard_model->get_purchase_order_dashboard($data);
         echo json_encode($result);
         die;
-    }
+    } 
 }
 
 ?>
