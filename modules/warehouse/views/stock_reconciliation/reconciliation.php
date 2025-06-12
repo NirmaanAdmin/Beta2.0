@@ -263,12 +263,15 @@
                     <th width="1%"></th>
                     <th width="13%" align="left"><i class="fa fa-exclamation-circle" aria-hidden="true" data-toggle="tooltip" data-title="<?php echo _l('item_description_new_lines_notice'); ?>"></i> <?php echo _l('Uniclass Code'); ?></th>
                     <th width="13%" align="left"><?php echo _l('item_description'); ?></th>
-                    <th width="10%" align="left"><?php echo _l('area'); ?></th>
-                    <th width="12%" align="left"><?php echo _l('warehouse_name'); ?></th>
-                    <th width="10%" align="left" class="available_quantity"><?php echo _l('Issued Quantity'); ?></th>
-                   
-                    <th width="10%" align="left"><?php echo _l('Return Date'); ?></th>
-                    <th align="center" width='1%'><i class="fa fa-cog"></i></th>
+                    <th width="9%" align="left"><?php echo _l('area'); ?></th>
+                    <th width="10%" align="left"><?php echo _l('warehouse_name'); ?></th>
+                    <th width="9%" align="left" class="available_quantity"><?php echo _l('Issued Quantity'); ?></th>
+                    <th width="9%" align="left"><?php echo _l('Return Date'); ?></th>
+                    <th width="11%" align="left"><?php echo _l('Reconciliation Date'); ?></th>
+                    <th width="8%" align="left" ><?php echo _l('Return Quantity'); ?></th>
+                    <th width="8%" align="left" ><?php echo _l('Used Quantity'); ?></th>
+                    <th width="8%" align="left" ><?php echo _l('Location'); ?></th>
+                    <!-- <th align="center" width='1%'><i class="fa fa-cog"></i></th> -->
                   </tr>
                 </thead>
                 <tbody>

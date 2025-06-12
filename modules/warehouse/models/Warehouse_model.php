@@ -20139,23 +20139,7 @@ class Warehouse_model extends App_Model
 		$quantities_html .= '</div>';
 		return $quantities_html;
 	}
-	public function get_issued_quantities_html($data)
-	{
-		// For quantities
-		$vendor = $data['vendor'];
-		$item_name = $data['item_key'];
-		$item_value = isset($data['item_value']) ? $data['item_value'] : 0;
-		$quantities_html = '';
-		$quantities_html .= '<div class="vendor-' . $vendor . '">';
-		$quantities_html .= '<span>' . $item_value . ' ' . $data['unit_name'] . '</span>';
-		// $vendor_name = wh_get_vendor_company_name($vendor);
-		// if (mb_strlen($vendor_name) > 15) {
-		// 	$vendor_name = mb_substr($vendor_name, 0, 15) . '...';
-		// }
-		$quantities_html .= $vendor_name;
-		$quantities_html .= '</div>';
-		return $quantities_html;
-	}
+
 
 	public function get_lot_number_html($data)
 	{
@@ -20208,6 +20192,83 @@ class Warehouse_model extends App_Model
 		$returnable_date_html .= $vendor_name;
 		$returnable_date_html .= '</div>';
 		return $returnable_date_html;
+	}
+
+
+	public function get_reconciliation_date_html($data)
+	{
+		// For quantities
+		$vendor = $data['vendor'];
+		$item_name = $data['item_key'];
+		$item_value = isset($data['item_value']) ? $data['item_value'] : date('d-m-Y', strtotime('+2 weeks'));
+		$reconciliation_date_html = '';
+		$reconciliation_date_html .= '<div class="vendor-' . $vendor . '" style="margin-bottom: 10px;">';
+		$reconciliation_date_html .= render_date_input('' . $item_name . '[reconciliation_date][' . $vendor . ']', '', $item_value, ['placeholder' => wh_get_vendor_company_name($vendor)], [], 'no-margin');
+		$reconciliation_date_html .= '</div>';
+		return $reconciliation_date_html;
+	}
+
+
+	public function get_return_quantity_html($data)
+	{
+		// For lot number
+		$vendor = $data['vendor'];
+		$item_name = $data['item_key'];
+		$item_value = isset($data['item_value']) ? $data['item_value'] : '';
+		$return_quantity_html = '';
+		$return_quantity_html .= '<div class="vendor-' . $vendor . '" style="margin-bottom: 10px;">';
+		$return_quantity_html .= render_input('' . $item_name . '[return_quantity][' . $vendor . ']', '', $item_value, 'number', ['placeholder' => wh_get_vendor_company_name($vendor), ''], [], 'no-margin');
+		$return_quantity_html .= '</div>';
+		return $return_quantity_html;
+	}
+	public function get_used_quantity_html($data)
+	{
+		// For lot number
+		$vendor = $data['vendor'];
+		$item_name = $data['item_key'];
+		$item_value = isset($data['item_value']) ? $data['item_value'] : 0;
+		$used_quantity_html = '';
+		$used_quantity_html .= '<div class="vendor-' . $vendor . '" style="margin-bottom: 10px;">';
+		$used_quantity_html .= render_input('' . $item_name . '[used_quantity][' . $vendor . ']', '', $item_value, 'text', ['readonly' => true, ''], [], 'no-margin');
+		$used_quantity_html .= '</div>';
+		return $used_quantity_html;
+	}
+	public function get_loction_html($data)
+	{
+		// For lot number
+		$vendor = $data['vendor'];
+		$item_name = $data['item_key'];
+		$item_value = isset($data['item_value']) ? $data['item_value'] : 0;
+		$location_html = '';
+		$location_html .= '<div class="vendor-' . $vendor . '" style="margin-bottom: 10px;">';
+		$location_html .= render_input('' . $item_name . '[location][' . $vendor . ']', '', $item_value, 'text', ['placeholder' => wh_get_vendor_company_name($vendor), ''], [], 'no-margin');
+		$location_html .= '</div>';
+		return $location_html;
+	}
+
+	public function get_issued_quantities_html($data)
+	{
+		// For lot number
+		$vendor = $data['vendor'];
+		$item_name = $data['item_key'];
+		$item_value = isset($data['item_value']) ? $data['item_value'] : 0;
+		$issued_quantities_html = '';
+		$issued_quantities_html .= '<div class="vendor-' . $vendor . '" style="margin-bottom: 10px;">';
+		$issued_quantities_html .= render_input('' . $item_name . '[issued_quantities][' . $vendor . ']', '', $item_value, 'hidden');
+		$issued_quantities_html .= '</div>';
+		return $issued_quantities_html;
+	}
+	public function get_reconciliation_returnable_date_html($data)
+	{
+		// For quantities
+		$vendor = $data['vendor'];
+		$item_name = $data['item_key'];
+		$item_value = isset($data['item_value']) ? $data['item_value'] : '';
+		$reconciliation_returnable_date_html = '';
+		$reconciliation_returnable_date_html .= '<div class="vendor-' . $vendor . '">';
+		$reconciliation_returnable_date_html .= render_input('' . $item_name . '[returnable_date][' . $vendor . ']', '', $item_value, 'hidden');
+		$reconciliation_returnable_date_html .= '</div>';
+		return $reconciliation_returnable_date_html;
 	}
 	/**
 	 * get purchase request
@@ -21033,8 +21094,9 @@ class Warehouse_model extends App_Model
 		return $goods_code;
 	}
 
-	public function create_stock_reconciliation_row_template($warehouse_data = [], $name = '', $commodity_name = '', $warehouse_id = '', $vendor_quantity = [], $quantities = '', $unit_name = '', $unit_price = '', $taxname = '',  $commodity_code = '', $unit_id = '', $vendor_id = '', $tax_rate = '', $total_money = '', $discount = '', $discount_money = '', $total_after_discount = '', $guarantee_period = '', $issued_date = '', $lot_number = '', $note = '',  $sub_total = '', $tax_name = '', $tax_id = '', $item_key = '', $is_edit = false, $is_purchase_order = false, $serial_number = '', $without_checking_warehouse = 0, $description = '', $quantities_json = '', $area = '', $returnable = '', $returnable_date = '')
+	public function create_stock_reconciliation_row_template($warehouse_data = [], $name = '', $commodity_name = '', $warehouse_id = '', $vendor_quantity = '', $quantities = '', $unit_name = '', $unit_price = '', $taxname = '',  $commodity_code = '', $unit_id = '', $vendor_id = '', $tax_rate = '', $total_money = '', $discount = '', $discount_money = '', $total_after_discount = '', $guarantee_period = '', $issued_date = '', $lot_number = '', $note = '',  $sub_total = '', $tax_name = '', $tax_id = '', $item_key = '', $is_edit = false, $is_purchase_order = false, $serial_number = '', $without_checking_warehouse = 0, $description = '', $quantities_json = '', $area = '', $returnable = '', $returnable_date = '', $return_quantity = '', $location = '', $reconciliation_date = '')
 	{
+
 
 		$this->load->model('invoice_items_model');
 		$row = '';
@@ -21069,6 +21131,10 @@ class Warehouse_model extends App_Model
 		$name_area = 'area';
 		$name_returnable = 'returnable';
 		$name_returnable_date = 'returnable_date';
+		$name_return_quantity = 'return_quantity';
+		$name_used_quantity = 'used_quantity';
+		$name_location = 'location';
+		$name_reconciliation_date = 'reconciliation_date';
 		$array_available_quantity_attr = ['min' => '0.0', 'step' => 'any', 'readonly' => true];
 		$array_qty_attr = ['min' => '0.0', 'step' => 'any'];
 		$array_rate_attr = ['min' => '0.0', 'step' => 'any'];
@@ -21119,8 +21185,12 @@ class Warehouse_model extends App_Model
 			$name_without_checking_warehouse = $name . '[without_checking_warehouse]';
 			$name_description = $name . '[description]';
 			$name_area = $name . '[area][]';
-			$name_returnable = $name . '[returnable][]';
-			$name_returnable_date = $name . '[returnable_date][]';
+			$name_returnable = $name . '[returnable]';
+			$name_returnable_date = $name . '[returnable_date]';
+			$name_return_quantity = $name . '[return_quantity]';
+			$name_used_quantity = $name . '[used_quantity]';
+			$name_location = $name . '[location]';
+			$name_reconciliation_date = $name . '[reconciliation_date]';
 			$warehouse_id_name_attr = ["onchange" => "get_available_quantity('" . $name_commodity_code . "','" . $name_warehouse_id . "','" . $name_available_quantity . "');", "data-none-selected-text" => _l('warehouse_name'), 'data-from_stock_id' => 'invoice'];
 			$array_available_quantity_attr = ['onblur' => 'wh_calculate_total();', 'onchange' => 'wh_calculate_total();', 'min' => '0.0', 'step' => 'any',  'data-available_quantity' => (float)$available_quantity, 'readonly' => true];
 			if ($is_purchase_order) {
@@ -21175,22 +21245,211 @@ class Warehouse_model extends App_Model
 			render_input($name_note, '', $note, 'text', ['placeholder' => _l('commodity_notes')], [], 'no-margin', 'input-transparent text-left') .
 			'</td>';
 
-		$all_quantities = '';
-		if (!empty($vendor_quantity)) {
-			$quantities_json = $vendor_quantity;
-			foreach ($quantities_json as $key => $value) {
-				$all_quantities .= get_vendor_name($key) . ": <strong style='font-weight: 700;'>" . _d($value) . "</strong>,</br> ";
+		if ($is_edit == false) {
+			$all_quantities = '';
+			if (!empty($vendor_quantity)) {
+				$vendor_quantity = $vendor_quantity;
+				foreach ($vendor_quantity as $key => $value) {
+					$input = array();
+					$input['vendor'] = $key;
+					$input['item_key'] = $name;
+					$input['item_value'] = $value;
+					$all_quantities .= get_vendor_name($key) . ": <strong style='font-weight: 700;'>" . _d($value) . "</strong>,</br> ";
+					$all_quantities .= $this->get_issued_quantities_html($input);
+				}
+				$all_quantities = rtrim($all_quantities, ',</br> ');
 			}
-			$all_quantities = rtrim($all_quantities, ',</br> ');
+			$row .= '<td class="available_quantity">' .
+				$all_quantities .
+				'</td>';
+			$all_dates = "";
+			if (!empty($returnable_date)) {
+				$returnable_date = $returnable_date;
+				foreach ($returnable_date as $key => $value) {
+					$input = array();
+					$input['vendor'] = $key;
+					$input['item_key'] = $name;
+					$input['item_value'] = $value;
+					$all_dates .=   get_vendor_name($key) . ": <strong style='font-weight: 700;'>" . date('d M, Y', strtotime($value)) . "</strong></br> ";
+					$all_dates .= $this->get_reconciliation_returnable_date_html($input);
+				}
+				$all_dates = rtrim($all_dates, '</br> ');
+			}
+
+			$row .= '<td>' . $all_dates . '</td>';
+			$reconciliation_date_html = '';
+			if (!empty($vendor_quantity)) {
+				$reconciliation_date_arr = $vendor_quantity;
+				$reconciliation_date = json_decode($reconciliation_date, true);
+				if (!empty($reconciliation_date_arr)) {
+					foreach ($reconciliation_date_arr as $ikey => $ivalue) {
+						$input = array();
+						$input['vendor'] = $ikey;
+						$input['item_key'] = $name;
+						$input['item_value'] = !empty($reconciliation_date[$ikey]) ? $reconciliation_date[$ikey] : date('d-m-Y');
+						$reconciliation_date_html .= $this->get_reconciliation_date_html($input);
+					}
+				}
+			}
+			$row .= '<td class="reconciliation_date">' . $reconciliation_date_html . '</td>';
+
+			$return_quantity_input = '';
+			if (!empty($vendor_quantity)) {
+				$return_quantity_arr = $vendor_quantity;
+				$return_quantity = json_decode($return_quantity, true);
+				if (!empty($return_quantity_arr)) {
+					foreach ($return_quantity_arr as $ikey => $ivalue) {
+						$input = array();
+						$input['vendor'] = $ikey;
+						$input['item_key'] = $name;
+						$input['item_value'] = !empty($return_quantity[$ikey]) ? $return_quantity[$ikey] : 0;
+						$return_quantity_input .= $this->get_return_quantity_html($input);
+					}
+				}
+			}
+
+			$row .= '<td>' . $return_quantity_input . '</td>';
+			$used_quantity_input = '';
+			if (!empty($vendor_quantity)) {
+				$used_quantity_arr = $vendor_quantity;
+				$used_quantity = json_decode($used_quantity, true);
+				if (!empty($used_quantity_arr)) {
+					foreach ($used_quantity_arr as $ikey => $ivalue) {
+						$input = array();
+						$input['vendor'] = $ikey;
+						$input['item_key'] = $name;
+						$input['item_value'] = !empty($used_quantity[$ikey]) ? $used_quantity[$ikey] : 0;
+						$used_quantity_input .= $this->get_used_quantity_html($input);
+					}
+				}
+			}
+			$row .= '<td>' . $used_quantity_input . '</td>';
+			$loction_input = '';
+			if (!empty($vendor_quantity)) {
+				$loction_arr = $vendor_quantity;
+				$location = json_decode($location, true);
+				if (!empty($loction_arr)) {
+					foreach ($loction_arr as $ikey => $ivalue) {
+						$input = array();
+						$input['vendor'] = $ikey;
+						$input['item_key'] = $name;
+						$input['item_value'] = !empty($location[$ikey]) ? $location[$ikey] : '';
+						$loction_input .= $this->get_loction_html($input);
+					}
+				}
+			}
+
+
+			$row .= '<td>' . $loction_input . '</td>';
+		} else {
+
+			$all_quantities = '';
+			if (!empty($vendor_quantity)) {
+				$vendor_quantity = json_decode($vendor_quantity, true);
+				foreach ($vendor_quantity as $key => $value) {
+					$input = array();
+					$input['vendor'] = $key;
+					$input['item_key'] = $name;
+					$input['item_value'] = $value;
+					$all_quantities .= get_vendor_name($key) . ": <strong style='font-weight: 700;'>" . _d($value) . "</strong>,</br> ";
+					$all_quantities .= $this->get_issued_quantities_html($input);
+				}
+				$all_quantities = rtrim($all_quantities, ',</br> ');
+			}
+
+			$row .= '<td class="available_quantity">' .
+				$all_quantities .
+				'</td>';
+
+			$all_dates = "";
+			if (!empty($returnable_date)) {
+				$returnable_date = json_decode($returnable_date, true);
+				if (is_array($returnable_date)) {  // Check if decoding was successful
+					foreach ($returnable_date as $key => $value) {
+						$input = array(
+							'vendor' => $key,
+							'item_key' => $name,
+							'item_value' => $value
+						);
+
+						$formatted_date = date('d M, Y', strtotime($value));
+						$all_dates .= get_vendor_name($key) . ": <strong style='font-weight: 700;'>" . $formatted_date . "</strong><br>";
+						$all_dates .= $this->get_reconciliation_returnable_date_html($input);
+					}
+					$all_dates = rtrim($all_dates, '<br>');
+				}
+			}
+
+			$row .= '<td>' . $all_dates . '</td>';
+			$reconciliation_date_html = '';
+			if (!empty($vendor_quantity)) {
+				$reconciliation_date_arr = $vendor_quantity;
+
+				$reconciliation_date = !empty($reconciliation_date) ? json_decode($reconciliation_date, true) : [];
+
+				if (is_array($reconciliation_date_arr) && !empty($reconciliation_date_arr)) {
+					foreach ($reconciliation_date_arr as $ikey => $ivalue) {
+						$input = [
+							'vendor'     => $ikey,
+							'item_key'   => $name,
+							'item_value' => $reconciliation_date[$ikey] ?? date('d-m-Y')
+						];
+
+						$reconciliation_date_html .= $this->get_reconciliation_date_html($input);
+					}
+				}
+			}
+
+			$row .= '<td class="reconciliation_date">' . $reconciliation_date_html . '</td>';
+
+			$return_quantity_input = '';
+			if (!empty($vendor_quantity)) {
+				$return_quantity_arr = $vendor_quantity;
+				$return_quantity = json_decode($return_quantity, true);
+				if (!empty($return_quantity_arr)) {
+					foreach ($return_quantity_arr as $ikey => $ivalue) {
+						$input = array();
+						$input['vendor'] = $ikey;
+						$input['item_key'] = $name;
+						$input['item_value'] = !empty($return_quantity[$ikey]) ? $return_quantity[$ikey] : 0;
+						$return_quantity_input .= $this->get_return_quantity_html($input);
+					}
+				}
+			}
+
+			$row .= '<td>' . $return_quantity_input . '</td>';
+			$used_quantity_input = '';
+			if (!empty($vendor_quantity)) {
+				$used_quantity_arr = $vendor_quantity;
+				$used_quantity = json_decode($used_quantity, true);
+				if (!empty($used_quantity_arr)) {
+					foreach ($used_quantity_arr as $ikey => $ivalue) {
+						$input = array();
+						$input['vendor'] = $ikey;
+						$input['item_key'] = $name;
+						$input['item_value'] = !empty($used_quantity[$ikey]) ? $used_quantity[$ikey] : 0;
+						$used_quantity_input .= $this->get_used_quantity_html($input);
+					}
+				}
+			}
+			$row .= '<td>' . $used_quantity_input . '</td>';
+			$loction_input = '';
+			if (!empty($vendor_quantity)) {
+				$loction_arr = $vendor_quantity;
+				$location = json_decode($location, true);
+				if (!empty($loction_arr)) {
+					foreach ($loction_arr as $ikey => $ivalue) {
+						$input = array();
+						$input['vendor'] = $ikey;
+						$input['item_key'] = $name;
+						$input['item_value'] = !empty($location[$ikey]) ? $location[$ikey] : '';
+						$loction_input .= $this->get_loction_html($input);
+					}
+				}
+			}
+
+			$row .= '<td>' . $loction_input . '</td>';
 		}
-		$row .= '<td class="available_quantity">' .
-			$all_quantities .
-			'</td>';
-		
-		$two_weeks_later = date('Y-m-d', strtotime('+2 weeks'));
-		$row .= '<td>' . render_date_input($name_returnable_date, '', $two_weeks_later) . '</td>';
-
-
 		// $row .= '<td class="amount" align="right">' . $amount . '</td>';
 		$row .= '<td class="hide discount">' . render_input($name_discount, '', $discount, 'number', $array_discount_attr) . '</td>';
 		$row .= '<td class="hide label_discount_money" align="right">' . $amount . '</td>';
@@ -21204,21 +21463,21 @@ class Warehouse_model extends App_Model
 		$row .= '<td class="hide serial_number">' . render_input($name_serial_number, '', $serial_number, 'text', []) . '</td>';
 		$row .= '<td class="hide without_checking_warehouse">' . render_input($name_without_checking_warehouse, '', $without_checking_warehouse, 'text', []) . '</td>';
 
-		if ($name == '') {
-			// $row .= '<td></td>';
-			$row .= '<td></td>';
-		} else {
-			if (is_numeric($item_key) && strlen($serial_number) > 0 && is_admin() && get_option('wh_products_by_serial')) {
-				$row .= '<td><a href="#" class="btn btn-success pull-right" data-toggle="tooltip" data-original-title="' . _l('wh_change_serial_number') . '" onclick="wh_change_serial_number(\'' . $name_commodity_code . '\',\'' . $name_warehouse_id . '\',\'' . $name_serial_number . '\',\'' . $name_commodity_name . '\'); return false;"><i class="fa fa-refresh"></i></a></td>';
-			} else {
-				// $row .= '<td></td>';
-			}
-			if ($is_purchase_order) {
-				$row .= '<td></td>';
-			} else {
-				$row .= '<td><a href="#" class="btn btn-danger pull-right" onclick="wh_delete_item(this,' . $item_key . ',\'.invoice-item\'); return false;"><i class="fa fa-trash"></i></a></td>';
-			}
-		}
+		// if ($name == '') {
+		// 	// $row .= '<td></td>';
+		// 	$row .= '<td></td>';
+		// } else {
+		// 	if (is_numeric($item_key) && strlen($serial_number) > 0 && is_admin() && get_option('wh_products_by_serial')) {
+		// 		$row .= '<td><a href="#" class="btn btn-success pull-right" data-toggle="tooltip" data-original-title="' . _l('wh_change_serial_number') . '" onclick="wh_change_serial_number(\'' . $name_commodity_code . '\',\'' . $name_warehouse_id . '\',\'' . $name_serial_number . '\',\'' . $name_commodity_name . '\'); return false;"><i class="fa fa-refresh"></i></a></td>';
+		// 	} else {
+		// 		// $row .= '<td></td>';
+		// 	}
+		// 	if ($is_purchase_order) {
+		// 		$row .= '<td></td>';
+		// 	} else {
+		// 		$row .= '<td><a href="#" class="btn btn-danger pull-right" onclick="wh_delete_item(this,' . $item_key . ',\'.invoice-item\'); return false;"><i class="fa fa-trash"></i></a></td>';
+		// 	}
+		// }
 		$row .= '</tr>';
 		return $row;
 	}
@@ -21230,6 +21489,10 @@ class Warehouse_model extends App_Model
 		if (isset($data['newitems'])) {
 			$goods_deliveries = $data['newitems'];
 			unset($data['newitems']);
+		}
+
+		if (isset($data['vendor_quantity_val'])) {
+			unset($data['vendor_quantity_val']);
 		}
 		unset($data['item_select']);
 		unset($data['commodity_name']);
@@ -21319,6 +21582,25 @@ class Warehouse_model extends App_Model
 				if (!empty($goods_delivery['issued_date'])) {
 					$goods_delivery['issued_date'] = json_encode($goods_delivery['issued_date']);
 				}
+				if (!empty($goods_delivery['reconciliation_date'])) {
+					$goods_delivery['reconciliation_date'] = json_encode($goods_delivery['reconciliation_date']);
+				}
+				if (!empty($goods_delivery['used_quantity'])) {
+					$goods_delivery['used_quantity'] = json_encode($goods_delivery['used_quantity']);
+				}
+				if (!empty($goods_delivery['return_quantity'])) {
+					$goods_delivery['return_quantity'] = json_encode($goods_delivery['return_quantity']);
+				}
+				if (!empty($goods_delivery['location'])) {
+					$goods_delivery['location'] = json_encode($goods_delivery['location']);
+				}
+				if (!empty($goods_delivery['issued_quantities'])) {
+					$goods_delivery['issued_quantities'] = json_encode($goods_delivery['issued_quantities']);
+				}
+				if (!empty($goods_delivery['returnable_date'])) {
+					$goods_delivery['returnable_date'] = json_encode($goods_delivery['returnable_date']);
+				}
+
 				if (isset($goods_delivery['tax_select'])) {
 					$tax_rate_data = $this->wh_get_tax_rate($goods_delivery['tax_select']);
 					$tax_rate_value = $tax_rate_data['tax_rate'];
@@ -21422,6 +21704,10 @@ class Warehouse_model extends App_Model
 		$remove_goods_deliveries = [];
 		if (isset($data['isedit'])) {
 			unset($data['isedit']);
+		}
+
+		if (isset($data['vendor_quantity_val'])) {
+			unset($data['vendor_quantity_val']);
 		}
 
 		if (isset($data['newitems'])) {
@@ -21531,6 +21817,25 @@ class Warehouse_model extends App_Model
 			if (!empty($goods_delivery['issued_date'])) {
 				$goods_delivery['issued_date'] = json_encode($goods_delivery['issued_date']);
 			}
+			if (!empty($goods_delivery['reconciliation_date'])) {
+				$goods_delivery['reconciliation_date'] = json_encode($goods_delivery['reconciliation_date']);
+			}
+			if (!empty($goods_delivery['used_quantity'])) {
+				$goods_delivery['used_quantity'] = json_encode($goods_delivery['used_quantity']);
+			}
+			if (!empty($goods_delivery['return_quantity'])) {
+				$goods_delivery['return_quantity'] = json_encode($goods_delivery['return_quantity']);
+			}
+			if (!empty($goods_delivery['location'])) {
+				$goods_delivery['location'] = json_encode($goods_delivery['location']);
+			}
+			if (!empty($goods_delivery['issued_quantities'])) {
+				$goods_delivery['issued_quantities'] = json_encode($goods_delivery['issued_quantities']);
+			}
+			if (!empty($goods_delivery['returnable_date'])) {
+				$goods_delivery['returnable_date'] = json_encode($goods_delivery['returnable_date']);
+			}
+
 			if (isset($goods_delivery['tax_select'])) {
 				$tax_rate_data = $this->wh_get_tax_rate($goods_delivery['tax_select']);
 				$tax_rate_value = $tax_rate_data['tax_rate'];
@@ -21715,13 +22020,14 @@ class Warehouse_model extends App_Model
 			// Initialize group if not exists
 			if (!isset($groupedItems[$commodityCode])) {
 				$groupedItems[$commodityCode] = [
+					'commodity_code' => $delivery['commodity_code'],
 					'commodity_name' => $delivery['commodity_name'],
 					'description'   => $delivery['description'],
 					'area'          => $delivery['area'],
 					'warehouse_id'  => $delivery['warehouse_id'],
 					'vendor_quantities' => [], // Stores summed quantities per vendor
 					'returnable'     => $delivery['returnable'],
-					'returnable_date' => $delivery['returnable_date'],
+					'vendor_dates' => [],
 					// Add other fields you need...
 				];
 			}
@@ -21736,6 +22042,22 @@ class Warehouse_model extends App_Model
 						$groupedItems[$commodityCode]['vendor_quantities'][$vendorId] += (int)$quantity;
 					} else {
 						$groupedItems[$commodityCode]['vendor_quantities'][$vendorId] = (int)$quantity;
+					}
+				}
+			}
+
+			// Process returnable_date if exists
+			$returnableDateJson = $delivery['returnable_date'];
+			if (!empty($returnableDateJson)) {
+				$returnableDates = json_decode($returnableDateJson, true);
+
+				foreach ($returnableDates as $vendorId => $date) {
+
+
+					if (isset($groupedItems[$commodityCode]['vendor_dates'][$vendorId])) {
+						$groupedItems[$commodityCode]['vendor_dates'][$vendorId] = $date;
+					} else {
+						$groupedItems[$commodityCode]['vendor_dates'][$vendorId] = $date;
 					}
 				}
 			}
@@ -21763,7 +22085,7 @@ class Warehouse_model extends App_Model
 			if ($get_commodity) {
 				$without_checking_warehouse = $get_commodity->without_checking_warehouse;
 			}
-			$stock_reconciliation_row_template .= $this->create_stock_reconciliation_row_template($warehouse_data, 'items[' . $index_receipt . ']', $commodity_name, $delivery_detail['warehouse_id'], $delivery_detail['vendor_quantities'], $delivery_detail['quantities'], $unit_name, $delivery_detail['unit_price'], $taxname, $delivery_detail['commodity_code'], $delivery_detail['unit_id'], $delivery_detail['vendor_id'], $delivery_detail['tax_rate'], $delivery_detail['total_money'], $delivery_detail['discount'], $delivery_detail['discount_money'], $delivery_detail['total_after_discount'], $delivery_detail['guarantee_period'], $delivery_detail['issued_date'], $lot_number, $delivery_detail['note'], $delivery_detail['sub_total'], $delivery_detail['tax_name'], $delivery_detail['tax_id'], $delivery_detail['id'], true, $is_purchase_order, $delivery_detail['serial_number'], $without_checking_warehouse, $delivery_detail['description'], $delivery_detail['quantities_json'], $delivery_detail['area']);
+			$stock_reconciliation_row_template .= $this->create_stock_reconciliation_row_template($warehouse_data, 'newitems[' . $index_receipt . ']', $commodity_name, $delivery_detail['warehouse_id'], $delivery_detail['vendor_quantities'], $delivery_detail['quantities'], $unit_name, $delivery_detail['unit_price'], $taxname, $delivery_detail['commodity_code'], $delivery_detail['unit_id'], $delivery_detail['vendor_id'], $delivery_detail['tax_rate'], $delivery_detail['total_money'], $delivery_detail['discount'], $delivery_detail['discount_money'], $delivery_detail['total_after_discount'], $delivery_detail['guarantee_period'], $delivery_detail['issued_date'], $lot_number, $delivery_detail['note'], $delivery_detail['sub_total'], $delivery_detail['tax_name'], $delivery_detail['tax_id'], $delivery_detail['id'], false, $is_purchase_order, $delivery_detail['serial_number'], $without_checking_warehouse, $delivery_detail['description'], $delivery_detail['quantities_json'], $delivery_detail['area'], '', $delivery_detail['vendor_dates'], '', '', '');
 			$index_receipt++;
 		}
 
