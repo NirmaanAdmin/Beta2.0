@@ -299,6 +299,7 @@ class Estimates extends AdminController
         }
         $this->load->model('purchase/purchase_model');
         $data['sub_groups_pur'] = $this->purchase_model->get_sub_group();
+        $data['estimate_budget_listing'] = $this->estimates_model->get_estimate_budget_listing($id);
 
         if ($to_return == false) {
             $this->load->view('admin/estimates/estimate_preview_template', $data);

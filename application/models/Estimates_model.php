@@ -2027,30 +2027,8 @@ class Estimates_model extends App_Model
         $base_currency = $this->currencies_model->get_base_currency();
         $this->db->where('id', $estimate_id);
         $estimates = $this->db->get(db_prefix() . 'estimates')->row();
-        $this->db->select(db_prefix() . 'itemable.id as id, ' .
-            db_prefix() . 'itemable.annexure as annexure, ' .
-            db_prefix() . 'items_groups.name as budget_head, ' .
-            db_prefix() . 'itemable.qty as qty, ' .
-            db_prefix() . 'itemable.rate as rate, ' .
-            '(' . db_prefix() . 'itemable.qty * ' . db_prefix() . 'itemable.rate) AS total');
-        $this->db->from(db_prefix() . 'itemable');
-        $this->db->join(db_prefix() . 'items_groups', db_prefix() . 'items_groups.id = ' . db_prefix() . 'itemable.annexure', 'left');
-        $this->db->where('rel_id', $estimate_id);
-        $this->db->where('rel_type', 'estimate');
-        $itemable = $this->db->get()->result_array();
-        if(!empty($itemable)) {
-            $unawarded_budget_head = array_values(array_reduce($itemable, function ($carry, $item) {
-                $annexure = $item['annexure'];
-                if (!isset($carry[$annexure])) {
-                    $carry[$annexure] = $item;
-                } else {
-                    $carry[$annexure]['total'] += $item['total'];
-                }
-                return $carry;
-            }, []));
-            usort($unawarded_budget_head, function($a, $b) {
-                return $a['annexure'] <=> $b['annexure'];
-            });
+        $unawarded_budget_head = $this->get_estimate_budget_listing($estimates->id);
+        if(!empty($unawarded_budget_head)) {
             if(empty($unawarded_budget)) {
                 $unawarded_budget = isset($unawarded_budget_head[0]) ? $unawarded_budget_head[0]['annexure'] : '';
                 $budgetsummaryhtml = '<div class="form-group">';
@@ -2211,30 +2189,8 @@ class Estimates_model extends App_Model
         }
         $this->db->where('id', $estimate_id);
         $estimates = $this->db->get(db_prefix() . 'estimates')->row();
-        $this->db->select(db_prefix() . 'itemable.id as id, ' .
-            db_prefix() . 'itemable.annexure as annexure, ' .
-            db_prefix() . 'items_groups.name as budget_head, ' .
-            db_prefix() . 'itemable.qty as qty, ' .
-            db_prefix() . 'itemable.rate as rate, ' .
-            '(' . db_prefix() . 'itemable.qty * ' . db_prefix() . 'itemable.rate) AS total');
-        $this->db->from(db_prefix() . 'itemable');
-        $this->db->join(db_prefix() . 'items_groups', db_prefix() . 'items_groups.id = ' . db_prefix() . 'itemable.annexure', 'left');
-        $this->db->where('rel_id', $estimate_id);
-        $this->db->where('rel_type', 'estimate');
-        $itemable = $this->db->get()->result_array();
-        if(!empty($itemable)) {
-            $package_budget_head = array_values(array_reduce($itemable, function ($carry, $item) {
-                $annexure = $item['annexure'];
-                if (!isset($carry[$annexure])) {
-                    $carry[$annexure] = $item;
-                } else {
-                    $carry[$annexure]['total'] += $item['total'];
-                }
-                return $carry;
-            }, []));
-            usort($package_budget_head, function($a, $b) {
-                return $a['annexure'] <=> $b['annexure'];
-            });
+        $package_budget_head = $this->get_estimate_budget_listing($estimates->id);
+        if(!empty($package_budget_head)) {
             if(empty($package_budget)) {
                 $package_budget = isset($package_budget_head[0]) ? $package_budget_head[0]['annexure'] : '';
                 if(!empty($package_info)) {
@@ -2441,5 +2397,32 @@ class Estimates_model extends App_Model
             return true;
         }
         return false;
+    }
+
+    public function get_estimate_budget_listing($estimate_id)
+    {
+        $budget_listing = array();
+        $budget_listing = $this->db->select(
+            db_prefix() . 'itemable.id as id, ' .
+            db_prefix() . 'itemable.annexure as annexure, ' .
+            db_prefix() . 'items_groups.name as budget_head'
+        )
+        ->from(db_prefix() . 'itemable')
+        ->join(
+            db_prefix() . 'items_groups', 
+            db_prefix() . 'items_groups.id = ' . db_prefix() . 'itemable.annexure', 
+            'left'
+        )
+        ->where('rel_id', $estimate_id)
+        ->where('rel_type', 'estimate')
+        ->group_by(db_prefix() . 'itemable.annexure')
+        ->get()
+        ->result_array();
+        if(!empty($budget_listing)) {
+            usort($budget_listing, function($a, $b) {
+                return $a['annexure'] <=> $b['annexure'];
+            });
+        }
+        return $budget_listing;
     }
 }

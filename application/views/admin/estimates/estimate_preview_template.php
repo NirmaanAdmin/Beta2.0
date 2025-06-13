@@ -888,6 +888,16 @@
                         <div class="col-md-12">
                             <a href="#" class="btn btn-primary" onclick="view_package(<?php echo $estimate->id; ?>); return false;"><i class="fa-regular fa-plus tw-mr-1"></i>Add Package</a>
                             <hr />
+
+                            <div class="col-md-2 form-group" style="padding-left: 0px;">
+                               <select name="package_budget_head" class="selectpicker" data-width="100%" data-none-selected-text="<?php echo _l('group_pur'); ?>" data-actions-box="true">
+                                  <option value=""></option>
+                                  <?php foreach ($estimate_budget_listing as $head) { ?>
+                                     <option value="<?php echo $head['annexure']; ?>"><?php echo $head['budget_head']; ?></option>
+                                  <?php } ?>
+                               </select>
+                            </div>
+
                             <table class="dt-table-loading table table-table_unawarded_tracker">
                                <thead>
                                   <tr>
@@ -1257,8 +1267,14 @@ function calculate_unawarded_capex() {
 var table_unawarded_tracker;
 var estimate_id = <?php echo e($estimate->id); ?>;
 table_unawarded_tracker = $('.table-table_unawarded_tracker');
-var Params = {};
+var Params = {
+    "budget_head": "[name='package_budget_head']"
+};
 initDataTable('.table-table_unawarded_tracker', admin_url + 'purchase/table_unawarded_tracker/' + estimate_id, [], [], Params, [0, 'desc']);
+$(document).on('change', 'select[name="package_budget_head"]', function () {
+    $('select[name="package_budget_head"]').selectpicker('refresh');
+    table_unawarded_tracker.DataTable().ajax.reload();
+});
 </script>
 <?php require 'modules/purchase/assets/js/cost_planning_js.php'; ?>
 <?php $this->load->view('admin/estimates/estimate_send_to_client'); ?>
