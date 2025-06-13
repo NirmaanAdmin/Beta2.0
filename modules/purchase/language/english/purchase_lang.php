@@ -951,3 +951,5 @@ $lang['bill_for_pur_order'] = 'Bill for purchase order';
 $lang['update_purchase_bill_fail'] = 'Update purchase bill fail';
 $lang['bill_deleted_successfully'] = 'Bill deleted successfully';
 $lang['bill_deletion_failed'] = 'Bill deletion failed';
+$lang['shop_drawings_upload'] = 'Shop Drawings Upload';
+$lang['shop_drawings_download'] = 'Shop Drawings Download';

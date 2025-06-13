@@ -142,17 +142,21 @@
                   <ul class="nav nav-tabs nav-tabs-horizontal mbot15" role="tablist">
                     <li role="presentation" class="active">
                       <a href="#general_information" aria-controls="general_information" role="tab" id="tab_general_information" data-toggle="tab">
-                          General Information
+                        General Information
                       </a>
                     </li>
                     <?php
-                    if(empty($goods_receipt->goods_receipt_code)) { ?>
-                      <li role="presentation">
-                        <a href="#actual" aria-controls="actual" role="tab" id="tab_actual" data-toggle="tab">
-                            Actual
-                        </a>
-                      </li>
-                    <?php } ?>
+                    // if (empty($goods_receipt->goods_receipt_code)) { 
+
+                    ?>
+                    <li role="presentation">
+                      <a href="#actual" aria-controls="actual" role="tab" id="tab_actual" data-toggle="tab">
+                        Actual
+                      </a>
+                    </li>
+                    <?php
+                    // } 
+                    ?>
                   </ul>
                 </div>
               </div>
@@ -341,8 +345,8 @@
                               <td><?php echo html_entity_decode($commodity_name) ?></td>
                               <td><?php echo html_entity_decode($description) ?></td>
                               <td><?php echo get_area_name_by_id($receipt_value['area']); ?></td>
-                              <td><?php echo html_entity_decode($po_quantities).' '.html_entity_decode($unit_name) ?></td>
-                              <td><?php echo html_entity_decode($quantities).' '.html_entity_decode($unit_name) ?></td>
+                              <td><?php echo html_entity_decode($po_quantities) . ' ' . html_entity_decode($unit_name) ?></td>
+                              <td><?php echo html_entity_decode($quantities) . ' ' . html_entity_decode($unit_name) ?></td>
                               <td><?php echo $imp_local_status ?></td>
                               <td><?php echo $tracker_status ?></td>
                               <td><?php echo $production_status ?></td>
@@ -461,69 +465,107 @@
                 </div>
 
                 <?php
-                if(empty($goods_receipt->goods_receipt_code)) { ?>
-                  <div role="tabpanel" class="tab-pane" id="actual">
-                    <div class="col-md-12">
-                      <div class="table-responsive">
-                        <table class="table items items-preview estimate-items-preview" data-type="estimate">
-                          <thead class="purchase-head">
+                // if (empty($goods_receipt->goods_receipt_code)) { 
+                ?>
+                <div role="tabpanel" class="tab-pane" id="actual">
+                  <div class="col-md-12">
+                    <div class="table-responsive">
+                      <table class="table items items-preview estimate-items-preview" data-type="estimate">
+                        <thead class="purchase-head">
+                          <tr>
+                            <th align="center">#</th>
+                            <th><?php echo _l('commodity_code') ?></th>
+                            <th><?php echo _l('description') ?></th>
+                            <th><?php echo _l('lead_time_days') ?></th>
+                            <th><?php echo _l('advance_payment') ?></th>
+                            <th><?php echo _l('shop_drawings_upload') ?></th>
+                            <th><?php echo _l('shop_drawings_download') ?></th>
+                            <th><?php echo _l('shop_drawings_submission') ?></th>
+                            <th><?php echo _l('shop_drawings_approval') ?></th>
+                            <th><?php echo _l('remarks') ?></th>
+                          </tr>
+                        </thead>
+                        <tbody class="ui-sortable purchase-body">
+                          <?php
+                          foreach ($goods_receipt_detail as $receipt_key => $receipt_value) {
+                            $receipt_key++;
+                            $commodity_name = $receipt_value['commodity_name'];
+                            $description = $receipt_value['description'];
+                            if (strlen($commodity_name) == 0) {
+                              $commodity_name = wh_get_item_variatiom($receipt_value['commodity_code']);
+                            }
+                            $lead_time_days = $receipt_value['lead_time_days'];
+                            $advance_payment = $receipt_value['advance_payment'];
+                            $shop_submission = $receipt_value['shop_submission'];
+                            $shop_approval = $receipt_value['shop_approval'];
+                            $actual_remarks = $receipt_value['actual_remarks'];
+                          ?>
                             <tr>
-                              <th align="center">#</th>
-                              <th><?php echo _l('commodity_code') ?></th>
-                              <th><?php echo _l('description') ?></th>
-                              <th><?php echo _l('lead_time_days') ?></th>
-                              <th><?php echo _l('advance_payment') ?></th>
-                              <th><?php echo _l('shop_drawings_submission') ?></th>
-                              <th><?php echo _l('shop_drawings_approval') ?></th>
-                              <th><?php echo _l('remarks') ?></th>
+                              <td><?php echo html_entity_decode($receipt_key) ?></td>
+                              <td><?php echo html_entity_decode($commodity_name) ?></td>
+                              <td><?php echo html_entity_decode($description) ?></td>
+                              <td>
+                                <div class="form-group">
+                                  <input type="number" id="lead_time_days" name="lead_time_days" class="form-control" min="0" max="100" value="<?php echo $lead_time_days; ?>" data-id="<?php echo $receipt_value['id']; ?>">
+                                </div>
+                              </td>
+                              <td>
+                                <div class="form-group">
+                                  <input type="number" id="advance_payment" name="advance_payment" class="form-control" min="0" max="100" value="<?php echo $advance_payment; ?>" data-id="<?php echo $receipt_value['id']; ?>">
+                                </div>
+                              </td>
+                              <td>
+                                <div class="input-group" style="width: 100%;">
+                                  <input type="file"
+                                    name="attachments[]"
+                                    class="form-control upload_shop_drawings_files"
+                                    data-id="<?php echo $receipt_value['id']; ?>"
+                                    multiple
+                                    style="min-width: 20px; width: 100%;">
+                                  <span class="input-group-btn">
+                                    <button type="button"
+                                      class="btn btn-success upload_shop_drawings_attachments"
+                                      data-id="<?php echo $receipt_value['id']; ?>"
+                                      title="Upload Attachments">
+                                      <i class="fa fa-upload"></i>
+                                    </button>
+                                  </span>
+                                </div>
+                              </td>
+                              <td>
+                                <?php
+                                $this->load->model('warehouse/warehouse_model');
+                                $attachments = $this->warehouse_model->get_inventory_shop_drawing_attachments('goods_receipt_shop_d', $receipt_value['id']);
+                                $file_html = '';
+                                if (!empty($attachments)) {
+                                 $file_html = '<a href="javascript:void(0)" onclick="view_purchase_tracker_attachments(' . $receipt_value['id'] . '); return false;" class="btn btn-info btn-icon">View Files</a>';
+                                }else{
+                                  $file_html = '';
+                                }
+                              
+                                echo $file_html;  
+
+                                ?>
+                              </td>
+                              <td>
+                                <input type="date" id="shop_submission" name="shop_submission" class="form-control" value="<?php echo $shop_submission; ?>" data-id="<?php echo $receipt_value['id']; ?>">
+                              </td>
+                              <td>
+                                <input type="date" id="shop_approval" name="shop_approval" class="form-control" value="<?php echo $shop_approval; ?>" data-id="<?php echo $receipt_value['id']; ?>">
+                              </td>
+                              <td>
+                                <textarea style="width: 154px;height: 50px;" class="form-control" name="actual_remarks" data-id="<?php echo $receipt_value['id']; ?>"><?php echo $actual_remarks; ?></textarea>
+                              </td>
                             </tr>
-                          </thead>
-                          <tbody class="ui-sortable purchase-body">
-                            <?php
-                            foreach ($goods_receipt_detail as $receipt_key => $receipt_value) {
-                              $receipt_key++;
-                              $commodity_name = $receipt_value['commodity_name'];
-                              $description = $receipt_value['description'];
-                              if (strlen($commodity_name) == 0) {
-                                $commodity_name = wh_get_item_variatiom($receipt_value['commodity_code']);
-                              }
-                              $lead_time_days = $receipt_value['lead_time_days'];
-                              $advance_payment = $receipt_value['advance_payment'];
-                              $shop_submission = $receipt_value['shop_submission'];
-                              $shop_approval = $receipt_value['shop_approval'];
-                              $actual_remarks = $receipt_value['actual_remarks'];
-                            ?>
-                              <tr>
-                                <td><?php echo html_entity_decode($receipt_key) ?></td>
-                                <td><?php echo html_entity_decode($commodity_name) ?></td>
-                                <td><?php echo html_entity_decode($description) ?></td>
-                                <td>
-                                  <div class="form-group">
-                                    <input type="number" id="lead_time_days" name="lead_time_days" class="form-control" min="0" max="100" value="<?php echo $lead_time_days; ?>" data-id="<?php echo $receipt_value['id']; ?>">
-                                  </div>
-                                </td>
-                                <td>
-                                  <div class="form-group">
-                                    <input type="number" id="advance_payment" name="advance_payment" class="form-control" min="0" max="100" value="<?php echo $advance_payment; ?>" data-id="<?php echo $receipt_value['id']; ?>">
-                                  </div>
-                                </td>
-                                <td>
-                                  <input type="date" id="shop_submission" name="shop_submission" class="form-control" value="<?php echo $shop_submission; ?>" data-id="<?php echo $receipt_value['id']; ?>">
-                                </td>
-                                <td>
-                                  <input type="date" id="shop_approval" name="shop_approval" class="form-control" value="<?php echo $shop_approval; ?>" data-id="<?php echo $receipt_value['id']; ?>">
-                                </td>
-                                <td>
-                                  <textarea style="width: 154px;height: 50px;" class="form-control" name="actual_remarks" data-id="<?php echo $receipt_value['id']; ?>"><?php echo $actual_remarks; ?></textarea>
-                                </td>
-                              </tr>
-                            <?php  } ?>
-                          </tbody>
-                        </table>
-                      </div>
+                          <?php  } ?>
+                        </tbody>
+                      </table>
                     </div>
                   </div>
-                <?php } ?>
+                </div>
+                <?php
+                //  }
+                ?>
               </div>
 
             </div>
@@ -589,7 +631,25 @@
     </div>
   </div>
 </div>
-
+<div class="modal fade" id="viewpurchaseorderAttachmentModal" tabindex="-1" role="dialog">
+   <div class="modal-dialog" role="document" style="width: 70%;">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h4 class="modal-title"><?php echo _l('attachment'); ?></h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+         </div>
+         <div class="modal-body">
+            <div class="row">
+               <div class="col-md-12">
+                  <div class="view_purchase_attachment_modal">
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+<div id="purchase_tracker_file_data"></div>
 <?php require 'modules/warehouse/assets/js/view_purchase_js.php'; ?>
 </body>
 
@@ -970,4 +1030,44 @@
       });
     });
   });
+  $(document).off('click', '.upload_shop_drawings_attachments')
+    .on('click', '.upload_shop_drawings_attachments', function(e) {
+      e.preventDefault();
+
+      // *** Log once, at handler entry ***
+      console.log('upload clicked');
+
+      var rowId = $(this).data('id');
+      var input = $(this).closest('.input-group').find('.upload_shop_drawings_files')[0];
+
+      if (!input.files.length) {
+        alert_float('warning', "Please select at least one file to upload.");
+        return;
+      }
+
+      var formData = new FormData();
+      // now loop only to append, no logging inside here
+      for (var i = 0; i < input.files.length; i++) {
+        formData.append('attachments[]', input.files[i]);
+      }
+      formData.append('id', rowId);
+      formData.append("csrf_token_name", $('input[name="csrf_token_name"]').val());
+
+      $.ajax({
+        url: admin_url + 'warehouse/upload_purchase_tracker_attachments',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false
+      }).done(function(response) {
+        var res = JSON.parse(response);
+        if (res.status) {
+          alert_float('success', "Attachments are uploaded successfully.");
+        } else {
+          alert_float('warning', "Upload failed.");
+        }
+      }).fail(function() {
+        alert_float('warning', "Upload failed.");
+      });
+    });
 </script>

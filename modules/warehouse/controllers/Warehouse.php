@@ -9543,6 +9543,33 @@ class warehouse extends AdminController
 		}
 	}
 
+	public function upload_purchase_tracker_attachments()
+	{
+		$input = $this->input->post();
+		$related_to = '';
+		
+		$related_to = 'goods_receipt_shop_drawings';
+		
+		// $uploaded_files = $this->purchase_model->upload_order_tracker_attachments($input);
+		$uploadedFiles = handle_purchase_tracker_attachments_array($related_to, $input['id']);
+		if ($uploadedFiles && is_array($uploadedFiles)) {
+			foreach ($uploadedFiles as $file) {
+				$data = array();
+				$data['dateadded'] = date('Y-m-d H:i:s');
+				$data['rel_type'] = $related_to;
+				$data['rel_id'] = $input['id'];
+				$data['staffid'] = get_staff_user_id();
+				$data['attachment_key'] = app_generate_hash();
+				$data['file_name'] = $file['file_name'];
+				$data['filetype']  = $file['filetype'];
+				$this->db->insert(db_prefix() . 'invetory_files', $data);
+			}
+		}
+		
+		echo json_encode(['status' => !empty($uploadedFiles)]);
+		die();
+	}
+
 	public function update_shop_approval()
 	{
 		$id = $this->input->post('id');
@@ -9737,6 +9764,7 @@ class warehouse extends AdminController
 		// 	$stock_reconciliation_row_template = $this->warehouse_model->create_stock_reconciliation_row_template();
 		// }
 
+
 		if (get_status_modules_wh('purchase')) {
 			if ($this->db->field_exists('delivery_status', db_prefix() . 'pur_orders')) {
 				$this->load->model('purchase/purchase_model');
@@ -9761,6 +9789,7 @@ class warehouse extends AdminController
 			$data['pr_orders_status'] = false;
 		}
 
+
 		$data['customer_code'] = $this->clients_model->get();
 		if ($edit_approval) {
 			$invoices_data = $this->db->query('select *, iv.id as id from ' . db_prefix() . 'invoices as iv left join ' . db_prefix() . 'projects as pj on pj.id = iv.project_id left join ' . db_prefix() . 'clients as cl on cl.userid = iv.clientid  order by iv.id desc')->result_array();
@@ -9773,7 +9802,7 @@ class warehouse extends AdminController
 		$data['current_day'] = date('Y-m-d');
 
 		if ($id != '') {
-			
+
 			$is_purchase_order = false;
 			$goods_delivery = $this->warehouse_model->get_stock_reconciliation($id);
 			if (!$goods_delivery) {

@@ -21405,7 +21405,7 @@ class Purchase_model extends App_Model
                 $response .= '<td align="">Awarded Value</td>';
                 $response .= '<td align="">Tagged To</td>';
                 $response .= '<td align="right">' . render_textarea($cost_control_remarks_name, '', $item['cost_control_remarks']) . '</td>';
-                
+
                 $response .= '</tr>';
             }
             $response .= '</tbody>';
@@ -21416,4 +21416,55 @@ class Purchase_model extends App_Model
         return $response;
     }
 
+
+    public function view_purchase_tracker_attachments($input)
+    {
+        $file_html = '';
+        $rel_id = $input['rel_id'];
+        $this->load->model('warehouse/warehouse_model');
+        $attachments = $this->warehouse_model->get_inventory_shop_drawing_attachments('goods_receipt_shop_d', $rel_id);
+
+        if (count($attachments) > 0) {
+            $file_html .= '<p class="bold text-muted">' . _l('customer_attachments') . '</p>';
+            foreach ($attachments as $f) {
+                $href_url = site_url('modules/warehouse/uploads/purchase_tracker/goods_receipt_shop_drawings/' . $f['rel_id'] . '/' . $f['file_name']) . '" download';
+                $file_html .= '<div class="mbot15 row inline-block full-width" data-attachment-id="' . $f['id'] . '">
+              <div class="col-md-8">
+                 <a name="preview-purinv-btn" onclick="preview_purchase_tracker_btn(this); return false;" id = "' . $f['id'] . '" href="Javascript:void(0);" class="mbot10 mright5 btn btn-success pull-left" data-toggle="tooltip" title data-original-title="' . _l('preview_file') . '"><i class="fa fa-eye"></i></a>
+                 <div class="pull-left"><i class="' . get_mime_class($f['filetype']) . '"></i></div>
+                 <a href=" ' . $href_url . '" target="_blank" download>' . $f['file_name'] . '</a>
+                 <br />
+                 <small class="text-muted">' . $f['filetype'] . '</small>
+              </div>
+              <div class="col-md-4 text-right">';
+                if ($f['staffid'] == get_staff_user_id() || is_admin()) {
+                    $file_html .= '<a href="#" class="text-danger" onclick="delete_purchase_tracker_attachment(' . $f['id'] . '); return false;"><i class="fa fa-times"></i></a>';
+                }
+                $file_html .= '</div></div>';
+            }
+            $file_html .= '<hr />';
+        }
+
+        return $file_html;
+    }
+
+    public function delete_purchase_tracker_attachment($id)
+    {
+        $this->load->model('warehouse/warehouse_model');
+        $attachment = $this->warehouse_model->get_goods_receipt_file($id);
+
+        $deleted    = false;
+        if ($attachment) {
+            $file_path = 'modules/warehouse/uploads/purchase_tracker/goods_receipt_shop_drawings/' . $attachment->rel_id . '/' . $attachment->file_name;
+            if (file_exists($file_path)) {
+                unlink($file_path);
+            }
+            $this->db->where('id', $attachment->id);
+            $this->db->delete('tblinvetory_files');
+            if ($this->db->affected_rows() > 0) {
+                $deleted = true;
+            }
+        }
+        return $deleted;
+    }
 }

@@ -2239,3 +2239,61 @@ function get_inventory_area_list($name_area, $area)
     }
     return render_select($name_area, $get_area, array('id', 'area_name'), '', $selected, array('multiple' => true), array('id' => 'project_area'), '', '', false);
 }
+
+
+function handle_purchase_tracker_attachments_array($related, $id)
+{
+
+    $path = WAREHOUSE_MODULE_UPLOAD_FOLDER . '/purchase_tracker/' . $related . '/' . $id . '/';
+
+    $uploaded_files = [];
+    if (!is_dir($path)) {
+        mkdir($path, 0755, true);
+    }
+
+    if (
+        isset($_FILES['attachments']['name'])
+        && ($_FILES['attachments']['name'] != '' || is_array($_FILES['attachments']['name']) && count($_FILES['attachments']['name']) > 0)
+    ) {
+        if (!is_array($_FILES['attachments']['name'])) {
+            $_FILES['attachments']['name'] = [$_FILES['attachments']['name']];
+            $_FILES['attachments']['type'] = [$_FILES['attachments']['type']];
+            $_FILES['attachments']['tmp_name'] = [$_FILES['attachments']['tmp_name']];
+            $_FILES['attachments']['error'] = [$_FILES['attachments']['error']];
+            $_FILES['attachments']['size'] = [$_FILES['attachments']['size']];
+        }
+
+        _file_attachments_index_fix('attachments');
+        for ($i = 0; $i < count($_FILES['attachments']['name']); $i++) {
+
+            // Get the temp file path
+            $tmpFilePath = $_FILES['attachments']['tmp_name'][$i];
+            // Make sure we have a filepath
+            if (!empty($tmpFilePath) && $tmpFilePath != '') {
+                if (
+                    _perfex_upload_error($_FILES['attachments']['error'][$i])
+                    || !_upload_extension_allowed($_FILES['attachments']['name'][$i])
+                ) {
+                    continue;
+                }
+
+                _maybe_create_upload_path($path);
+                $filename = unique_filename($path, $_FILES['attachments']['name'][$i]);
+                $newFilePath = $path . $filename;
+                // Upload the file into the temp dir
+                if (move_uploaded_file($tmpFilePath, $newFilePath)) {
+                    array_push($uploaded_files, [
+                        'file_name' => $filename,
+                        'filetype'  => $_FILES['attachments']['type'][$i],
+                    ]);
+                }
+            }
+        }
+    }
+
+    if (count($uploaded_files) > 0) {
+        return $uploaded_files;
+    }
+
+    return false;
+}

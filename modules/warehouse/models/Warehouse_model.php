@@ -21057,7 +21057,14 @@ class Warehouse_model extends App_Model
 		$attachments = $this->db->get(db_prefix() . 'invetory_files')->result_array();
 		return $attachments;
 	}
-
+	public function get_inventory_shop_drawing_attachments($related, $id)
+	{
+		$this->db->where('rel_id', $id);
+		$this->db->where('rel_type', $related);
+		$this->db->order_by('dateadded', 'desc');
+		$attachments = $this->db->get(db_prefix() . 'invetory_files')->result_array();
+		return $attachments;
+	}
 
 	public function get_goods_receipt_file($id)
 	{

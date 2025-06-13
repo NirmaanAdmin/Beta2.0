@@ -107,3 +107,53 @@ function toggle_small_view_proposal(table, main_data) {
     $(window).trigger('resize');
 
 }
+
+function view_purchase_tracker_attachments(rel_id) {
+    "use strict";
+    $.post(admin_url + 'purchase/view_purchase_tracker_attachments', {
+        rel_id: rel_id
+    }).done(function (response) { 
+        response = JSON.parse(response);
+        if (response.result) {
+            $('.view_purchase_attachment_modal').html(response.result);
+        } else {
+            $('.view_purchase_attachment_modal').html('');
+        }
+        $('#viewpurchaseorderAttachmentModal').modal('show');
+    });
+}
+
+function preview_purchase_tracker_btn(invoker) {
+    "use strict";
+    var id = $(invoker).attr('id');
+    view_purchase_tracker_file(id);
+}
+
+function view_purchase_tracker_file(id) {
+    "use strict";
+    $('#purchase_tracker_file_data').empty();
+    $("#purchase_tracker_file_data").load(admin_url + 'purchase/view_purchase_tracker_file/' + id, function (response, status, xhr) {
+        if (status == "error") {
+            alert_float('danger', xhr.statusText);
+        }
+    });
+}
+
+function close_modal_preview() {
+    "use strict";
+    $('._project_file').modal('hide');
+}
+
+
+function delete_purchase_tracker_attachment(id) {
+    "use strict";
+    if (confirm_delete()) {
+        requestGet('purchase/delete_purchase_tracker_attachment/' + id).done(function (success) {
+            if (success == 1) {
+                $(".view_purchase_attachment_modal").find('[data-attachment-id="' + id + '"]').remove();
+            }
+        }).fail(function (error) {
+            alert_float('danger', error.responseText);
+        });
+    }
+}

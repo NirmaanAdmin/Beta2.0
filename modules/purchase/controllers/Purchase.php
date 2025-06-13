@@ -14852,7 +14852,7 @@ class purchase extends AdminController
 
                 $row[] = app_format_number($remaining_quantities);
 
-               
+
                 $row[] = !empty($aRow['est_delivery_date']) ? date('d M, Y', strtotime($aRow['est_delivery_date'])) : '-';
                 $row[] = !empty($aRow['delivery_date']) ? date('d M, Y', strtotime($aRow['delivery_date'])) : '-';
 
@@ -14891,6 +14891,40 @@ class purchase extends AdminController
 
             echo json_encode($output);
             die();
+        }
+    }
+
+    public function view_purchase_tracker_attachments()
+    {
+        $input = $this->input->post();
+        $attachments = $this->purchase_model->view_purchase_tracker_attachments($input);
+        echo json_encode(['result' => $attachments]);
+        die();
+    }
+
+     public function view_purchase_tracker_file($id)
+    {
+        $data['discussion_user_profile_image_url'] = staff_profile_image_url(get_staff_user_id());
+        $data['current_user_is_admin']             = is_admin();
+        $this->load->model('warehouse/warehouse_model');
+        $data['file'] = $this->warehouse_model->get_goods_receipt_file($id);
+        if (!$data['file']) {
+            header('HTTP/1.0 404 Not Found');
+            die;
+        }
+        $this->load->view('manage_goods_receipt/preview_purchase_tracker_file', $data);
+    }
+
+    public function delete_purchase_tracker_attachment($id)
+    {
+        $this->load->model('warehouse/warehouse_model');
+        $file = $this->warehouse_model->get_goods_receipt_file($id);
+        if ($file->staffid == get_staff_user_id() || is_admin()) {
+            echo pur_html_entity_decode($this->purchase_model->delete_purchase_tracker_attachment($id));
+        } else {
+            header('HTTP/1.0 400 Bad error');
+            echo _l('access_denied');
+            die;
         }
     }
 }
