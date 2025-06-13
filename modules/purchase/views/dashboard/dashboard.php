@@ -379,7 +379,7 @@
             <p class="mbot15 dashboard_stat_title">Procurement Data</p>
 
             <!-- scroll-wrapper gives vertical scroll -->
-            <div class="scroll-wrapper" style="max-height: 777px; overflow-y: auto;">
+            <div class="scroll-wrapper" style="max-height: 750px; overflow-y: auto;">
               <table class="table table-item-tracker-report">
                 <thead>
                   <tr>
