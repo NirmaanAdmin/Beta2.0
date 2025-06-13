@@ -53,18 +53,12 @@
 	    var unawarded_rate = parseFloat(row.find(".all_unawarded_rate input").val()) || 0;
 	    var package_qty = parseFloat(row.find(".all_package_qty input").val()) || 0;
 	    var package_rate = parseFloat(row.find(".all_package_rate input").val()) || 0;
-	    var percentage_of_capex_used = 0;
 	    var unawarded_amount = unawarded_qty * unawarded_rate;
 	    var package_amount = package_qty * package_rate;
 	    row.find(".all_unawarded_amount input").val(unawarded_amount.toFixed(2));
 	    row.find(".all_package_amount input").val(package_amount.toFixed(2));
 	    total_unawarded_amount += unawarded_amount;
 	    total_package_amount += package_amount;
-	    if(package_amount > 0) {
-	      percentage_of_capex_used = (package_amount / unawarded_amount) * 100;
-	      percentage_of_capex_used = Math.round(percentage_of_capex_used);
-	    }
-	    row.find(".all_percentage_of_capex_used").html(percentage_of_capex_used+'%');
 	  });
 	  var sdeposit_percent = parseFloat($("input[name='sdeposit_percent']").val()) || 0;
 	  var sdeposit_value = 0;
@@ -73,6 +67,12 @@
 	    total_package_amount += (total_package_amount * sdeposit_percent) / 100;
 	    sdeposit_value = total_package_amount - package_without_secured;
 	  }
+	  var percentage_of_capex_used = 0;
+	  if(total_unawarded_amount > 0) {
+	    percentage_of_capex_used = (total_package_amount / total_unawarded_amount) * 100;
+	    percentage_of_capex_used = Math.round(percentage_of_capex_used);
+	  }
+	  $(".percentage_of_capex_used").html(percentage_of_capex_used+'%');
 	  $(".total_unawarded_amount").html(format_money(total_unawarded_amount));
 	  $(".total_package").html(
 	    format_money(total_package_amount) +

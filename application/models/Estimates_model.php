@@ -2242,7 +2242,7 @@ class Estimates_model extends App_Model
                         <th width="10%" align="right">Package Quantity</th>
                         <th width="10%" align="right">Package Rate</th>
                         <th width="10%" align="right">Package Amount</th>
-                        <th width="10%" align="right">Percentage of Capex Used</th>
+                        <th width="10%" align="right">Remarks</th>
                     </tr>
                 </thead>';
                 $itemhtml .= '<tbody style="border: 1px solid #ddd;">';
@@ -2265,6 +2265,7 @@ class Estimates_model extends App_Model
                     $package_qty_name_attr = "items[$key][package_qty]";
                     $package_rate_name_attr = "items[$key][package_rate]";
                     $package_amount_name_attr = "items[$key][package_amount]";
+                    $package_remarks_name_attr = "items[$key][remarks]";
 
                     $itemhtml .= form_hidden($item_id_name_attr, $item['id']);
                     $itemhtml .= '<tr>';
@@ -2276,7 +2277,7 @@ class Estimates_model extends App_Model
                     $itemhtml .= '<td align="align" class="all_package_qty">' . render_input($package_qty_name_attr, '', !empty($package_items_info) ? $package_items_info->package_qty : 0.00, 'number', ['onchange' => 'calculate_package()']) . '</td>';
                     $itemhtml .= '<td align="align" class="all_package_rate">' . render_input($package_rate_name_attr, '', !empty($package_items_info) ? $package_items_info->package_rate : 0.00, 'number', ['onchange' => 'calculate_package()']) . '</td>';
                     $itemhtml .= '<td align="align" class="all_package_amount">' . render_input($package_amount_name_attr, '', 0.00, 'number', ['readonly' => true]) . '</td>';
-                    $itemhtml .= '<td align="align" class="all_percentage_of_capex_used" style="text-align:center;"></td>';
+                    $itemhtml .= '<td align="align">' . render_textarea($package_remarks_name_attr, '', !empty($package_items_info) ? $package_items_info->remarks : '') . '</td>';
                     $itemhtml .= '</tr>';
                 }
                 $itemhtml .= '</tbody>';
@@ -2310,6 +2311,11 @@ class Estimates_model extends App_Model
                         <td width="75%"><span class="bold tw-text-neutral-700">Total Package Amount :</span>
                         </td>
                         <td width="25%" class="total_package"></td>
+                    </tr>
+                    <tr>
+                        <td width="75%"><span class="bold tw-text-neutral-700">Percentage of Capex Used :</span>
+                        </td>
+                        <td width="25%" class="percentage_of_capex_used"></td>
                     </tr>
                 </tbody>
             </table>
@@ -2349,6 +2355,7 @@ class Estimates_model extends App_Model
                     $this->db->update(db_prefix() . 'estimate_package_items_info', [
                         'package_qty' => $value['package_qty'],
                         'package_rate' => $value['package_rate'],
+                        'remarks' => $value['remarks'],
                     ]);
                 }
             }
@@ -2370,6 +2377,7 @@ class Estimates_model extends App_Model
                         'item_id' => $value['item_id'],
                         'package_qty' => $value['package_qty'],
                         'package_rate' => $value['package_rate'],
+                        'remarks' => $value['remarks'],
                     ]);
                 }
             }
