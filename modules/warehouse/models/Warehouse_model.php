@@ -1487,23 +1487,43 @@ class Warehouse_model extends App_Model
 				return $item['commodity_code'] == $commodity_code;
 			});
 			if (count($duplicates) > 1) {
-				$non_break_description = $value['description'];
+				$non_break_description = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $value['description']));
 				$this->db->select(db_prefix() . 'pur_order_detail.quantity');
-				$this->db->like(db_prefix() . 'pur_order_detail.description', $non_break_description);
+				$this->db->select("
+				    REPLACE(
+				        REPLACE(
+				            REPLACE(
+				                REPLACE(" . db_prefix() . "pur_order_detail.description, '\r', ''),
+				            '\n', ''),
+				        '<br />', ''),
+				    '<br/>', '') AS non_break_description
+				");
 				$this->db->where(db_prefix() . 'pur_orders.approve_status', 2);
 				$this->db->where('pur_order', $pur_order);
 				$this->db->join(db_prefix() . 'pur_orders', db_prefix() . 'pur_orders.id = ' . db_prefix() . 'pur_order_detail.pur_order', 'left');
+				$this->db->group_by(db_prefix() . 'pur_order_detail.id');
+				$this->db->having('non_break_description', $non_break_description);
 				$pur_order_description = $this->db->get(db_prefix() . 'pur_order_detail')->result_array();
 				if (!empty($pur_order_description)) {
 					$available_quantity = array_sum(array_column($pur_order_description, 'quantity'));
 				}
 
-				$non_break_description = str_replace("<br />", "", $value['description']);
+				$non_break_description = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $value['description']));
 				$this->db->select(db_prefix() . 'goods_receipt_detail.quantities');
-				$this->db->like(db_prefix() . 'goods_receipt_detail.description', $non_break_description);
+				$this->db->select("
+				    REPLACE(
+				        REPLACE(
+				            REPLACE(
+				                REPLACE(" . db_prefix() . "goods_receipt_detail.description, '\r', ''),
+				            '\n', ''),
+				        '<br />', ''),
+				    '<br/>', '') AS non_break_description
+				");
 				$this->db->where(db_prefix() . 'goods_receipt.approval', 1);
 				$this->db->where('pr_order_id', $pur_order);
 				$this->db->join(db_prefix() . 'goods_receipt', db_prefix() . 'goods_receipt.id = ' . db_prefix() . 'goods_receipt_detail.goods_receipt_id', 'left');
+				$this->db->group_by(db_prefix() . 'goods_receipt_detail.id');
+				$this->db->having('non_break_description', $non_break_description);
 				$goods_receipt_description = $this->db->get(db_prefix() . 'goods_receipt_detail')->result_array();
 				if (!empty($goods_receipt_description)) {
 					$total_quantity = 0;
@@ -1512,6 +1532,7 @@ class Warehouse_model extends App_Model
 					}
 					$available_quantity = $available_quantity - $total_quantity;
 				}
+				$available_quantity = round($available_quantity, 2);
 			}
 			// $available_quantity = app_format_number($available_quantity, true);
 			if ($available_quantity > 0) {
