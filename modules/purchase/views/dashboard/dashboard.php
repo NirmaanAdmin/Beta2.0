@@ -373,20 +373,27 @@
           </div>
         </div>
 
-        <!-- <div class="col-md-12 mtop20">
+        <div class="col-md-12 mtop20">
           <div class="row">
-            <div class="col-md-7">
-              <p class="mbot15 dashboard_stat_title">Budgeted vs Actual Procurement by Category</p>
-              <div style="width: 100%; height: 450px;">
-                <canvas id="budgetedVsActualCategory"></canvas>
-              </div>
-            </div>
-            <div class="col-md-5">
-              <p class="mbot15 dashboard_stat_title">Procurement Data</p>
-              <div class="procurement_table_data"></div>
-            </div>
+
+            <p class="mbot15 dashboard_stat_title">Procurement Data</p>
+            <table class="table table-item-tracker-report scroll-responsive">
+              <thead>
+                <tr>
+                  <th><?php echo _l('Uniclass Code'); ?></th>
+                  <th><?php echo _l('decription'); ?></th>
+                  <th><?php echo _l('po_quantity'); ?></th>
+                  <th><?php echo _l('received_quantity'); ?></th>
+                  <th><?php echo _l('remaining'); ?></th>
+                  <th><?php echo _l('est_delivery_date'); ?></th>
+                  <th><?php echo _l('delivery_date'); ?></th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+
           </div>
-        </div> -->
+        </div>
 
       </div>
     </div>
