@@ -373,27 +373,33 @@
           </div>
         </div>
 
+
         <div class="col-md-12 mtop20">
           <div class="row">
-
             <p class="mbot15 dashboard_stat_title">Procurement Data</p>
-            <table class="table table-item-tracker-report scroll-responsive">
-              <thead>
-                <tr>
-                  <th><?php echo _l('Uniclass Code'); ?></th>
-                  <th><?php echo _l('decription'); ?></th>
-                  <th><?php echo _l('po_quantity'); ?></th>
-                  <th><?php echo _l('received_quantity'); ?></th>
-                  <th><?php echo _l('remaining'); ?></th>
-                  <th><?php echo _l('est_delivery_date'); ?></th>
-                  <th><?php echo _l('delivery_date'); ?></th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
+
+            <!-- scroll-wrapper gives vertical scroll -->
+            <div class="scroll-wrapper" style="max-height: 777px; overflow-y: auto;">
+              <table class="table table-item-tracker-report">
+                <thead>
+                  <tr>
+                    <th><?php echo _l('Uniclass Code'); ?></th>
+                    <th><?php echo _l('description'); ?></th>
+                    <th><?php echo _l('po_quantity'); ?></th>
+                    <th><?php echo _l('received_quantity'); ?></th>
+                    <th><?php echo _l('remaining'); ?></th>
+                    <th><?php echo _l('est_delivery_date'); ?></th>
+                    <th><?php echo _l('delivery_date'); ?></th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
 
           </div>
         </div>
+
+
 
       </div>
     </div>
