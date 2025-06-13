@@ -2243,11 +2243,40 @@ class Estimates_model extends App_Model
                         <th width="10%" align="right">Package Rate</th>
                         <th width="10%" align="right">Package Amount</th>
                         <th width="10%" align="right">Remarks</th>
+                        <th align="center"><i class="fa fa-cog"></i></th>
                     </tr>
                 </thead>';
                 $itemhtml .= '<tbody style="border: 1px solid #ddd;">';
                 $itemhtml .= form_hidden('estimate_id', $estimates->id);
                 $itemhtml .= form_hidden('package_id', $package_id);
+                $itemhtml .= '<tr>';
+                $itemhtml .= '<td align="left">
+                    <select id="item_name" name="item_name" data-selected-id="" class="form-control selectpicker item-select" data-live-search="true" >
+                        <option value="">Type at least 3 letters...</option>
+                    </select>
+                </td>';
+                $itemhtml .= '<td class="hide commodity_code">
+                    <div class="form-group" app-field-wrapper="item_code">
+                        <input type="text" id="item_code" name="item_code" class="form-control" placeholder="Commodity Code" value="">
+                    </div>
+                </td>';
+                $itemhtml .= '<td align="left">
+                    <textarea name="long_description" rows="4" class="form-control" placeholder="'._l('item_long_description_placeholder').'">
+                    </textarea>
+                </td>';
+                $itemhtml .= '<td align="right">' . render_input('unawarded_qty', '', 0.00, 'number', ['readonly' => true]) . '</td>';
+                $itemhtml .= '<td align="right">' . render_input('unawarded_rate', '', 0.00, 'number', ['readonly' => true]) . '</td>';
+                $itemhtml .= '<td align="right">' . render_input('unawarded_amount', '', 0.00, 'number', ['readonly' => true]) . '</td>';
+                $itemhtml .= '<td align="right">' . render_input('package_qty', '', 0.00, 'number') . '</td>';
+                $itemhtml .= '<td align="right">' . render_input('package_rate', '', 0.00, 'number') . '</td>';
+                $itemhtml .= '<td align="right">' . render_input('package_amount', '', 0.00, 'number', ['readonly' => true]) . '</td>';
+                $itemhtml .= '<td align="right">' . render_textarea('remarks', '', '') . '</td>';
+                $itemhtml .= '<td align="center">
+                    <button type="button" onclick="add_package_item_to_table(\'undefined\',\'undefined\'); return false;"
+                        class="btn pull-right btn-primary"><i class="fa fa-check"></i>
+                    </button>
+                </td>';
+                $itemhtml .= '</tr>';
                 foreach ($unawarded_budget_itemable as $key => $item) {
                     $package_items_info = array();
                     if(!empty($package_id)) {
@@ -2268,16 +2297,17 @@ class Estimates_model extends App_Model
                     $package_remarks_name_attr = "items[$key][remarks]";
 
                     $itemhtml .= form_hidden($item_id_name_attr, $item['id']);
-                    $itemhtml .= '<tr>';
+                    $itemhtml .= '<tr class="items">';
                     $itemhtml .= '<td align="left">' . get_purchase_items($item['item_code']) . '</td>';
                     $itemhtml .= '<td align="left">' . clear_textarea_breaks($item['long_description']) . '</td>';
-                    $itemhtml .= '<td align="align" class="all_unawarded_qty">' . render_input($unawarded_qty_name_attr, '', $unawarded_qty, 'number', ['readonly' => true]) . '</td>';
-                    $itemhtml .= '<td align="align" class="all_unawarded_rate">' . render_input($unawarded_rate_name_attr, '', $unawarded_rate, 'number', ['readonly' => true]) . '</td>';
-                    $itemhtml .= '<td align="align" class="all_unawarded_amount">' . render_input($unawarded_amount_name_attr, '', $unawarded_amount, 'number', ['readonly' => true]) . '</td>';
-                    $itemhtml .= '<td align="align" class="all_package_qty">' . render_input($package_qty_name_attr, '', !empty($package_items_info) ? $package_items_info->package_qty : 0.00, 'number', ['onchange' => 'calculate_package()']) . '</td>';
-                    $itemhtml .= '<td align="align" class="all_package_rate">' . render_input($package_rate_name_attr, '', !empty($package_items_info) ? $package_items_info->package_rate : 0.00, 'number', ['onchange' => 'calculate_package()']) . '</td>';
-                    $itemhtml .= '<td align="align" class="all_package_amount">' . render_input($package_amount_name_attr, '', 0.00, 'number', ['readonly' => true]) . '</td>';
-                    $itemhtml .= '<td align="align">' . render_textarea($package_remarks_name_attr, '', !empty($package_items_info) ? $package_items_info->remarks : '') . '</td>';
+                    $itemhtml .= '<td align="right" class="all_unawarded_qty">' . render_input($unawarded_qty_name_attr, '', $unawarded_qty, 'number', ['readonly' => true]) . '</td>';
+                    $itemhtml .= '<td align="right" class="all_unawarded_rate">' . render_input($unawarded_rate_name_attr, '', $unawarded_rate, 'number', ['readonly' => true]) . '</td>';
+                    $itemhtml .= '<td align="right" class="all_unawarded_amount">' . render_input($unawarded_amount_name_attr, '', $unawarded_amount, 'number', ['readonly' => true]) . '</td>';
+                    $itemhtml .= '<td align="right" class="all_package_qty">' . render_input($package_qty_name_attr, '', !empty($package_items_info) ? $package_items_info->package_qty : 0.00, 'number', ['onchange' => 'calculate_package()']) . '</td>';
+                    $itemhtml .= '<td align="right" class="all_package_rate">' . render_input($package_rate_name_attr, '', !empty($package_items_info) ? $package_items_info->package_rate : 0.00, 'number', ['onchange' => 'calculate_package()']) . '</td>';
+                    $itemhtml .= '<td align="right" class="all_package_amount">' . render_input($package_amount_name_attr, '', 0.00, 'number', ['readonly' => true]) . '</td>';
+                    $itemhtml .= '<td align="right">' . render_textarea($package_remarks_name_attr, '', !empty($package_items_info) ? $package_items_info->remarks : '') . '</td>';
+                    $itemhtml .= '<td align="center"></td>';
                     $itemhtml .= '</tr>';
                 }
                 $itemhtml .= '</tbody>';
@@ -2336,6 +2366,7 @@ class Estimates_model extends App_Model
         $sdeposit_percent = isset($data['sdeposit_percent']) ? $data['sdeposit_percent'] : NULL;
         $sdeposit_value = isset($data['sdeposit_value']) ? $data['sdeposit_value'] : NULL;
         $total_package = isset($data['total_package']) ? $data['total_package'] : NULL;
+        $newpackageitems = isset($data['newpackageitems']) ? $data['newpackageitems'] : array();
 
         if(!empty($package_id)) {
             $this->db->where('id', $package_id);
@@ -2369,17 +2400,42 @@ class Estimates_model extends App_Model
                 'sdeposit_value' => $sdeposit_value,
                 'total_package' => $total_package,
             ]);
-            $insert_id = $this->db->insert_id();
+            $package_id = $this->db->insert_id();
             if(!empty($items)) {
                 foreach ($items as $key => $value) {
                     $this->db->insert(db_prefix() . 'estimate_package_items_info', [
-                        'package_id' => $insert_id,
+                        'package_id' => $package_id,
                         'item_id' => $value['item_id'],
                         'package_qty' => $value['package_qty'],
                         'package_rate' => $value['package_rate'],
                         'remarks' => $value['remarks'],
                     ]);
                 }
+            }
+        }
+
+        if(!empty($newpackageitems)) {
+            foreach ($newpackageitems as $key => $value) {
+                $this->db->insert(db_prefix() . 'itemable', [
+                    'rel_id' => $estimate_id,
+                    'rel_type' => 'estimate',
+                    'long_description' => $value['long_description'],
+                    'annexure' => $budget_head,
+                    'item_code' => $value['item_name'],
+                ]);
+                $itemable_id = $this->db->insert_id();
+                $this->db->insert(db_prefix() . 'unawarded_budget_info', [
+                    'estimate_id' => $estimate_id,
+                    'budget_head' => $budget_head,
+                    'item_id' => $itemable_id,
+                ]);
+                $this->db->insert(db_prefix() . 'estimate_package_items_info', [
+                    'package_id' => $package_id,
+                    'item_id' => $itemable_id,
+                    'package_qty' => $value['package_qty'],
+                    'package_rate' => $value['package_rate'],
+                    'remarks' => $value['remarks'],
+                ]);
             }
         }
 
