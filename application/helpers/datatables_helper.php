@@ -633,7 +633,26 @@ function data_tables_init_union_unawarded($aColumns, $sIndexColumn, $combinedTab
                     WHERE tblunawarded_budget_info.estimate_id = p.estimate_id 
                       AND tblunawarded_budget_info.budget_head = p.budget_head
                 ) - p.awarded_value + p.sdeposit_value
-            ) AS pending_value_in_package
+            ) AS pending_value_in_package,
+            (
+                CASE 
+                    WHEN (
+                        SELECT SUM(unawarded_qty * unawarded_rate) 
+                        FROM tblunawarded_budget_info 
+                        WHERE tblunawarded_budget_info.estimate_id = p.estimate_id 
+                          AND tblunawarded_budget_info.budget_head = p.budget_head
+                    ) > 0 
+                    THEN 
+                        (p.total_package / 
+                            (
+                                SELECT SUM(unawarded_qty * unawarded_rate) 
+                                FROM tblunawarded_budget_info 
+                                WHERE tblunawarded_budget_info.estimate_id = p.estimate_id 
+                                  AND tblunawarded_budget_info.budget_head = p.budget_head
+                            ) * 100)
+                    ELSE 0
+                END
+            ) AS percentage_of_capex_used
         FROM tblestimate_package_info p
         LEFT JOIN tblestimates est ON est.id = p.estimate_id
         LEFT JOIN tblprojects pr ON pr.id = est.project_id

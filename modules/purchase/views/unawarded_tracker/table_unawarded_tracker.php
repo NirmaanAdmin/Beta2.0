@@ -15,6 +15,7 @@ $aColumns = [
    'awarded_value',
    'sdeposit_value',
    'pending_value_in_package',
+   'percentage_of_capex_used',
    2,
 ];
 
@@ -27,6 +28,7 @@ if($estimate_id != 0) {
       'awarded_value',
       'sdeposit_value',
       'pending_value_in_package',
+      'percentage_of_capex_used',
       2,
    ];
 }
@@ -113,7 +115,9 @@ foreach ($rResult as $aRow) {
          $_data = app_format_money($aRow['awarded_value'], $base_currency->symbol);
       } elseif ($column == 'pending_value_in_package') {
          $_data = app_format_money($aRow['pending_value_in_package'], $base_currency->symbol);
-      } elseif ($column == 1) {
+      } elseif ($column == 'percentage_of_capex_used') {
+         $_data = round($aRow['percentage_of_capex_used']).'%';
+      }  elseif ($column == 1) {
          $_data = '';
          $preview = '<a href="javascript:void(0);" onclick="get_package_info(\'' . $aRow['id'] . '\', \'' . $aRow['estimate_id'] . '\', \'' . $aRow['budget_head'] . '\'); return false;" class="btn btn-info btn-sm">'
          . _l('Preview') . '</a>';
