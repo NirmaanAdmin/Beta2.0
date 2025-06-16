@@ -600,7 +600,7 @@ function get_items_by_type($type, $id, $ignore_management_fess = false)
     // if($ignore_management_fess) {
     //     $CI->db->where('annexure !=', 17);
     // }
-    $CI->db->order_by('item_order', 'asc');
+    $CI->db->order_by('id', 'asc');
 
     return $CI->db->get()->result_array();
 }
