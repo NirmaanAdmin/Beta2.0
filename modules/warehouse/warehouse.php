@@ -202,7 +202,7 @@ function warehouse_module_init_menu_items()
             'slug' => 'warehouse-dashboard',
             'name' => _l('dashboard'),
             'icon' => 'fa fa-home menu-icon',
-            'href' => admin_url('warehouse/warehouse_dashboard'),
+            'href' => admin_url('warehouse/dashboard/index'),
             'position' => 1,
         ]);
 
