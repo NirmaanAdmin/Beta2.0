@@ -79,47 +79,45 @@ function google_workspace_init_menu_items()
             ]);
         }
 
-        if (get_option('google_workspace_client_id') && get_option('google_workspace_client_secret')) {
-            $CI->app_menu->add_sidebar_children_item('google-drive', [
-                'slug'     => 'google-drive-google-docs',
-                'name'     => _l('google_workspace_google_docs'),
-                'href'     => admin_url('google_workspace/docs'),
-                'position' => 20,
-                'badge'    => [],
-            ]);
+        $CI->app_menu->add_sidebar_children_item('google-drive', [
+            'slug'     => 'google-drive-google-docs',
+            'name'     => _l('google_workspace_google_docs'),
+            'href'     => admin_url('google_workspace/docs'),
+            'position' => 20,
+            'badge'    => [],
+        ]);
 
-            $CI->app_menu->add_sidebar_children_item('google-drive', [
-                'slug'     => 'google-drive-google-spreadsheets',
-                'name'     => _l('google_workspace_google_sheets'),
-                'href'     => admin_url('google_workspace/sheets'),
-                'position' => 30,
-                'badge'    => [],
-            ]);
+        $CI->app_menu->add_sidebar_children_item('google-drive', [
+            'slug'     => 'google-drive-google-spreadsheets',
+            'name'     => _l('google_workspace_google_sheets'),
+            'href'     => admin_url('google_workspace/sheets'),
+            'position' => 30,
+            'badge'    => [],
+        ]);
 
-            $CI->app_menu->add_sidebar_children_item('google-drive', [
-                'slug'     => 'google-drive-google-slides',
-                'name'     => _l('google_workspace_google_slides'),
-                'href'     => admin_url('google_workspace/slides'),
-                'position' => 40,
-                'badge'    => [],
-            ]);
+        $CI->app_menu->add_sidebar_children_item('google-drive', [
+            'slug'     => 'google-drive-google-slides',
+            'name'     => _l('google_workspace_google_slides'),
+            'href'     => admin_url('google_workspace/slides'),
+            'position' => 40,
+            'badge'    => [],
+        ]);
 
-            $CI->app_menu->add_sidebar_children_item('google-drive', [
-                'slug'     => 'google-drive-google-forms',
-                'name'     => _l('google_workspace_google_forms'),
-                'href'     => admin_url('google_workspace/forms'),
-                'position' => 50,
-                'badge'    => [],
-            ]);
+        $CI->app_menu->add_sidebar_children_item('google-drive', [
+            'slug'     => 'google-drive-google-forms',
+            'name'     => _l('google_workspace_google_forms'),
+            'href'     => admin_url('google_workspace/forms'),
+            'position' => 50,
+            'badge'    => [],
+        ]);
 
-            $CI->app_menu->add_sidebar_children_item('google-drive', [
-                'slug'     => 'google-drive-google-drives',
-                'name'     => _l('google_workspace_google_drive'),
-                'href'     => admin_url('google_workspace/drives'),
-                'position' => 60,
-                'badge'    => [],
-            ]);
-        }
+        $CI->app_menu->add_sidebar_children_item('google-drive', [
+            'slug'     => 'google-drive-google-drives',
+            'name'     => _l('google_workspace_google_drive'),
+            'href'     => admin_url('google_workspace/drives'),
+            'position' => 60,
+            'badge'    => [],
+        ]);
     }
 }
 
