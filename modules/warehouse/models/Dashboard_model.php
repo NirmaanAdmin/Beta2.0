@@ -81,12 +81,16 @@ class Dashboard_model extends App_Model
 
 		$this->db->select('COUNT(i.id) as total_missing_security_count');
 		$this->db->from(db_prefix() . 'goods_receipt_documentation i');
-		$this->db->where('i.checklist_id  ', 2);
-		$this->db->where('i.required   >', 0);
+		$this->db->where('i.checklist_id', 2);
+		$this->db->where('i.required >', 0);
+		$this->db->where('i.attachments', 0); // 🔹 fix: looking for missing attachments
 
 		$get_missing_security = $this->db->get()->row_array();
 
-		$response['missing_security_signature'] = isset($get_missing_security['total_missing_security_count']) ? (int)$get_missing_security['total_missing_security_count'] : 0;
+		$response['missing_security_signature'] = isset($get_missing_security['total_missing_security_count'])
+			? (int)$get_missing_security['total_missing_security_count']
+			: 0;
+
 
 
 		$response['missing_production_certificate'] = 0;
@@ -95,6 +99,7 @@ class Dashboard_model extends App_Model
 		$this->db->from(db_prefix() . 'goods_receipt_documentation i');
 		$this->db->where('i.checklist_id  ', 4);
 		$this->db->where('i.required   >', 0);
+		$this->db->where('i.attachments', 0);
 
 		$get_production_certificate_count = $this->db->get()->row_array();
 
@@ -108,46 +113,45 @@ class Dashboard_model extends App_Model
 		$this->db->from(db_prefix() . 'goods_receipt_documentation i');
 		$this->db->where('i.checklist_id  ', 3);
 		$this->db->where('i.required   >', 0);
-
+		$this->db->where('i.attachments', 0);
+		
 		$get_transport_document_count = $this->db->get()->row_array();
 
 		$response['missing_transport_document'] = isset($get_transport_document_count['transport_document_count']) ? (int)$get_transport_document_count['transport_document_count'] : 0;
 
-		$this->db->select('COUNT(id) as total_recived');
-		$this->db->from(db_prefix() . 'goods_receipt');
-		$get_total_recived = $this->db->get()->row_array();
-
-		$get_total_recived = isset($get_total_recived['total_recived']) ? (int)$get_total_recived['total_recived'] : 0;
-
 		$response['fully_documented'] = 0;
-
-		$subquery = '(SELECT goods_receipt_id
-              FROM ' . db_prefix() . 'goods_receipt_documentation
-              GROUP BY goods_receipt_id
-              HAVING MIN(required) = 1 AND MAX(required) = 1) as filtered';
-
-		$this->db->select('COUNT(*) AS documented_receipt_count');
-		$this->db->from($subquery, null, false); // false to prevent escaping table alias
-
-		$fully_documented = $this->db->get()->row_array();
-		$response['fully_documented'] = isset($fully_documented['documented_receipt_count']) ? round(($fully_documented['documented_receipt_count'] / $get_total_recived) * 100)  : 0;
-
-		$response['fully_documented_new'] = $fully_documented['documented_receipt_count'];
-
 		$response['incompleted'] = 0;
 
-		$subquery = '(SELECT gr.id
-              FROM ' . db_prefix() . 'goods_receipt gr
-              LEFT JOIN ' . db_prefix() . 'goods_receipt_documentation grd 
-              ON grd.goods_receipt_id = gr.id
-              GROUP BY gr.id
-              HAVING COUNT(grd.id) = 0 OR SUM(CASE WHEN grd.required = 0 THEN 1 ELSE 0 END) > 0) AS filtered';
+		// Get total distinct goods_receipt_id from documentation table
+		$this->db->select('COUNT(*) as total_received');
+		$this->db->from(db_prefix() . 'goods_receipt_documentation');
+		$total_received_row = $this->db->get()->row_array();
+		$total_received = isset($total_received_row['total_received']) ? (int)$total_received_row['total_received'] : 0;
 
-		$this->db->select('COUNT(*) AS affected_receipt_count');
-		$this->db->from($subquery, null, false); // important to avoid escaping
+		if ($total_received > 0) {
 
-		$incomplete = $this->db->get()->row_array();
-		$response['incompleted'] = isset($incomplete['affected_receipt_count']) ? round(($incomplete['affected_receipt_count'] / $get_total_recived) * 100) : 0;
+			$this->db->select('COUNT(*) as attached_rows');
+			$this->db->from(db_prefix() . 'goods_receipt_documentation');
+			$this->db->where('attachments', 1);
+			$attached_rows_result = $this->db->get()->row_array();
+			$attached_rows = isset($attached_rows_result['attached_rows']) ? (int)$attached_rows_result['attached_rows'] : 0;
+
+			$response['fully_documented'] = ($total_received > 0 && $total_received === $attached_rows) ? 100 : round(($attached_rows / $total_received) * 100);
+
+
+			$subquery_incomplete = '(SELECT goods_receipt_id
+				FROM ' . db_prefix() . 'goods_receipt_documentation
+				WHERE required = 1 AND attachments = 0
+				
+			) AS incomplete_gr';
+
+			$this->db->select('COUNT(*) AS incomplete_count');
+			$this->db->from($subquery_incomplete, null, false);
+			$incomplete_result = $this->db->get()->row_array();
+			$incomplete_count = isset($incomplete_result['incomplete_count']) ? (int)$incomplete_result['incomplete_count'] : 0;
+			$response['incompleted'] = round(($incomplete_count / $total_received) * 100);
+		}
+
 
 		$response['getconsumption_months'] = $response['getconsumption_data'] = [];
 
@@ -157,10 +161,11 @@ class Dashboard_model extends App_Model
 		$this->db->group_by(['month_number', 'month_name']);
 		$this->db->order_by('month_number', 'ASC');
 
+
 		$get_getconsumption_data = $this->db->get()->result_array();
 
 		$response['getconsumption_months'] = array_column($get_getconsumption_data, 'month_name');
-		$response['getconsumption_data'] = array_column($get_getconsumption_data, 'total_quantity'); 
+		$response['getconsumption_data'] = array_column($get_getconsumption_data, 'total_quantity');
 
 		return $response;
 	}
