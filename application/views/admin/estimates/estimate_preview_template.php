@@ -904,6 +904,8 @@
                                      <th><?php echo _l('Package Name'); ?></th>
                                      <th><?php echo _l('Preview'); ?></th>
                                      <th><?php echo _l('Budget Head'); ?></th>
+                                     <th><?php echo _l('cat'); ?></th>
+                                     <th><?php echo _l('rli_filter'); ?></th>
                                      <th><?php echo _l('Package Value'); ?></th>
                                      <th><?php echo _l('Awarded Value'); ?></th>
                                      <th><?php echo _l('Secured Deposit Value'); ?></th>

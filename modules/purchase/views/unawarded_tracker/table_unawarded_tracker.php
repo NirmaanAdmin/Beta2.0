@@ -11,6 +11,8 @@ $aColumns = [
    'package_name',
    1,
    'budget_head_name',
+   'kind',
+   'rli_filter',
    'total_package',
    'awarded_value',
    'sdeposit_value',
@@ -24,6 +26,8 @@ if($estimate_id != 0) {
       'package_name',
       1,
       'budget_head_name',
+      'kind',
+      'rli_filter',
       'total_package',
       'awarded_value',
       'sdeposit_value',
@@ -111,13 +115,35 @@ foreach ($rResult as $aRow) {
          $_data = app_format_money($aRow['total_package'], $base_currency->symbol);
       } elseif ($column == 'sdeposit_value') {
          $_data = app_format_money($aRow['sdeposit_value'], $base_currency->symbol);
-      }  elseif ($column == 'awarded_value') {
+      } elseif ($column == 'awarded_value') {
          $_data = app_format_money($aRow['awarded_value'], $base_currency->symbol);
       } elseif ($column == 'pending_value_in_package') {
          $_data = app_format_money($aRow['pending_value_in_package'], $base_currency->symbol);
       } elseif ($column == 'percentage_of_capex_used') {
          $_data = round($aRow['percentage_of_capex_used']).'%';
-      }  elseif ($column == 1) {
+      } elseif ($column == 'kind') {
+         $_data = $aRow['kind'];
+      } elseif ($column == 'rli_filter') {
+         $rli_filter_text = '';
+         $rli_filter_key = $aRow['rli_filter'];
+         $status_labels = [
+            0 => ['label' => 'danger', 'table' => 'provided_by_ril', 'text' => _l('provided_by_ril')],
+            1 => ['label' => 'success', 'table' => 'new_item_service_been_addded_as_per_instruction', 'text' => _l('new_item_service_been_addded_as_per_instruction')],
+            2 => ['label' => 'info', 'table' => 'due_to_spec_change_then_original_cost', 'text' => _l('due_to_spec_change_then_original_cost')],
+            3 => ['label' => 'warning', 'table' => 'deal_slip', 'text' => _l('deal_slip')],
+            4 => ['label' => 'primary', 'table' => 'to_be_provided_by_ril_but_managed_by_bil', 'text' => _l('to_be_provided_by_ril_but_managed_by_bil')],
+            5 => ['label' => 'secondary', 'table' => 'due_to_additional_item_as_per_apex_instrution', 'text' => _l('due_to_additional_item_as_per_apex_instrution')],
+            6 => ['label' => 'purple', 'table' => 'event_expense', 'text' => _l('event_expense')],
+            7 => ['label' => 'teal', 'table' => 'pending_procurements', 'text' => _l('pending_procurements')],
+            8 => ['label' => 'orange', 'table' => 'common_services_in_ghj_scope', 'text' => _l('common_services_in_ghj_scope')],
+            9 => ['label' => 'green', 'table' => 'common_services_in_ril_scope', 'text' => _l('common_services_in_ril_scope')],
+            10 => ['label' => 'default', 'table' => 'due_to_site_specfic_constraint', 'text' => _l('due_to_site_specfic_constraint')],
+         ];
+         if (isset($status_labels[$rli_filter_key])) {
+            $rli_filter_text = $status_labels[$rli_filter_key]['text'];
+         }
+         $_data = $rli_filter_text;
+      } elseif ($column == 1) {
          $_data = '';
          $preview = '<a href="javascript:void(0);" onclick="get_package_info(\'' . $aRow['id'] . '\', \'' . $aRow['estimate_id'] . '\', \'' . $aRow['budget_head'] . '\'); return false;" class="btn btn-info btn-sm">'
          . _l('Preview') . '</a>';

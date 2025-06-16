@@ -2201,7 +2201,7 @@ class Estimates_model extends App_Model
                 }
                 $budgetsummaryhtml .= '<div class="row">';
                 $budgetsummaryhtml .= '<div class="col-md-12" style="padding-left:0px;">';
-                $budgetsummaryhtml .= '<div class="col-md-3 form-group">';
+                $budgetsummaryhtml .= '<div class="col-md-2 form-group">';
                 $budgetsummaryhtml .= '<label for="package_budget_head" class="control-label">' . _l('Budget Head') . '</label>';
                 $budgetsummaryhtml .= '<select name="package_budget_head" class="selectpicker" data-width="100%" data-none-selected-text="' . _l('dropdown_non_selected_tex') . '" data-live-search="true">';
                 foreach ($package_budget_head as $item) {
@@ -2210,11 +2210,38 @@ class Estimates_model extends App_Model
                 }
                 $budgetsummaryhtml .= '</select>';
                 $budgetsummaryhtml .= '</div>';
-                $budgetsummaryhtml .= '<div class="col-md-3 form-group">';
+                $budgetsummaryhtml .= '<div class="col-md-2 form-group">';
                 $budgetsummaryhtml .= render_date_input('project_awarded_date', 'Project Awarded Date', !empty($package_info) ? $package_info->project_awarded_date : '');
                 $budgetsummaryhtml .= '</div>';
-                $budgetsummaryhtml .= '<div class="col-md-3 form-group">';
+                $budgetsummaryhtml .= '<div class="col-md-2 form-group">';
                 $budgetsummaryhtml .= render_input('package_name', 'Package Name', !empty($package_info) ? $package_info->package_name : '');
+                $budgetsummaryhtml .= '</div>';
+                $budgetsummaryhtml .= '<div class="col-md-2 form-group">';
+                $options = [
+                    ['id' => 'Client Supply', 'name' => _l('client_supply')],
+                    ['id' => 'Bought out items', 'name' => _l('bought_out_items')]
+                ];
+                $budgetsummaryhtml .= render_select('kind', $options, ['id', 'name'], 'cat', !empty($package_info) ? $package_info->kind : '', ['data-live-search' => 'true', 'data-width' => '100%', 'data-none-selected-text' => _l('ticket_settings_none_assigned')], [], 'selectpicker');
+                $budgetsummaryhtml .= '</div>';
+                $budgetsummaryhtml .= '<div class="col-md-2 form-group">';
+                $status_labels = [
+                    0 => ['label' => 'danger', 'table' => 'provided_by_ril', 'text' => _l('provided_by_ril')],
+                    1 => ['label' => 'success', 'table' => 'new_item_service_been_addded_as_per_instruction', 'text' => _l('new_item_service_been_addded_as_per_instruction')],
+                    2 => ['label' => 'info', 'table' => 'due_to_spec_change_then_original_cost', 'text' => _l('due_to_spec_change_then_original_cost')],
+                    3 => ['label' => 'warning', 'table' => 'deal_slip', 'text' => _l('deal_slip')],
+                    4 => ['label' => 'primary', 'table' => 'to_be_provided_by_ril_but_managed_by_bil', 'text' => _l('to_be_provided_by_ril_but_managed_by_bil')],
+                    5 => ['label' => 'secondary', 'table' => 'due_to_additional_item_as_per_apex_instrution', 'text' => _l('due_to_additional_item_as_per_apex_instrution')],
+                    6 => ['label' => 'purple', 'table' => 'event_expense', 'text' => _l('event_expense')],
+                    7 => ['label' => 'teal', 'table' => 'pending_procurements', 'text' => _l('pending_procurements')],
+                    8 => ['label' => 'orange', 'table' => 'common_services_in_ghj_scope', 'text' => _l('common_services_in_ghj_scope')],
+                    9 => ['label' => 'green', 'table' => 'common_services_in_ril_scope', 'text' => _l('common_services_in_ril_scope')],
+                    10 => ['label' => 'default', 'table' => 'due_to_site_specfic_constraint', 'text' => _l('due_to_site_specfic_constraint')],
+                ];
+                $rli_filter_options = [];
+                foreach ($status_labels as $key => $status) {
+                    $rli_filter_options[] = ['id' => $key, 'name' => $status['text']];
+                }
+                $budgetsummaryhtml .= render_select('rli_filter', $rli_filter_options, ['id', 'name'], 'rli_filter', !empty($package_info) ? $package_info->rli_filter : '', ['data-width' => '100%', 'data-none-selected-text' => _l('ticket_settings_none_assigned')], [], 'selectpicker');
                 $budgetsummaryhtml .= '</div>';
                 $budgetsummaryhtml .= '</div>';
                 $budgetsummaryhtml .= '</div>';
@@ -2385,6 +2412,8 @@ class Estimates_model extends App_Model
         $sdeposit_value = isset($data['sdeposit_value']) ? $data['sdeposit_value'] : NULL;
         $total_package = isset($data['total_package']) ? $data['total_package'] : NULL;
         $newpackageitems = isset($data['newpackageitems']) ? $data['newpackageitems'] : array();
+        $kind = isset($data['kind']) ? $data['kind'] : NULL;
+        $rli_filter = isset($data['rli_filter']) ? $data['rli_filter'] : NULL;
 
         if(!empty($package_id)) {
             $this->db->where('id', $package_id);
@@ -2396,6 +2425,8 @@ class Estimates_model extends App_Model
                 'sdeposit_percent' => $sdeposit_percent,
                 'sdeposit_value' => $sdeposit_value,
                 'total_package' => $total_package,
+                'kind' => $kind,
+                'rli_filter' => $rli_filter,
             ]);
             if(!empty($items)) {
                 foreach ($items as $key => $value) {
@@ -2417,6 +2448,8 @@ class Estimates_model extends App_Model
                 'sdeposit_percent' => $sdeposit_percent,
                 'sdeposit_value' => $sdeposit_value,
                 'total_package' => $total_package,
+                'kind' => $kind,
+                'rli_filter' => $rli_filter,
             ]);
             $package_id = $this->db->insert_id();
             if(!empty($items)) {

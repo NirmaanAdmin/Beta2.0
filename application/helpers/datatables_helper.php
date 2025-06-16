@@ -626,6 +626,8 @@ function data_tables_init_union_unawarded($aColumns, $sIndexColumn, $combinedTab
             p.sdeposit_value,
             p.total_package,
             p.awarded_value,
+            p.kind,
+            p.rli_filter,
             (
                 (
                     SELECT SUM(unawarded_qty * unawarded_rate) 

@@ -177,10 +177,13 @@
                               _l('Package Name'),
                               _l('Preview'),
                               _l('Budget Head'),
+                              _l('cat'),
+                              _l('rli_filter'),
                               _l('Package Value'),
                               _l('Awarded Value'),
                               _l('Secured Deposit Value'),
                               _l('Pending Value In Package'),
+                              _l('Percentage of Capex Used'),
                               _l('Book Order')
                            ];
                            ?>
@@ -215,6 +218,8 @@
                                  <th><?php echo _l('Package Name'); ?></th>
                                  <th><?php echo _l('Preview'); ?></th>
                                  <th><?php echo _l('Budget Head'); ?></th>
+                                 <th><?php echo _l('cat'); ?></th>
+                                 <th><?php echo _l('rli_filter'); ?></th>
                                  <th><?php echo _l('Package Value'); ?></th>
                                  <th><?php echo _l('Awarded Value'); ?></th>
                                  <th><?php echo _l('Secured Deposit Value'); ?></th>
