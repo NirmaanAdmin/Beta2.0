@@ -2305,6 +2305,7 @@ function get_documentation_yes_or_no($id, $checklist_id)
     $CI->db->from(db_prefix() . 'goods_receipt_documentation');
     $CI->db->where('goods_receipt_id', $id);
     $CI->db->where('checklist_id', $checklist_id);
+    $CI->db->where('attachments', 1);
     $row = $CI->db->get()->row();
 
     return $row ? 'Yes' : 'No';
