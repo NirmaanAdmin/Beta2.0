@@ -9547,9 +9547,9 @@ class warehouse extends AdminController
 	{
 		$input = $this->input->post();
 		$related_to = '';
-		
+
 		$related_to = 'goods_receipt_shop_drawings';
-		
+
 		// $uploaded_files = $this->purchase_model->upload_order_tracker_attachments($input);
 		$uploadedFiles = handle_purchase_tracker_attachments_array($related_to, $input['id']);
 		if ($uploadedFiles && is_array($uploadedFiles)) {
@@ -9565,7 +9565,7 @@ class warehouse extends AdminController
 				$this->db->insert(db_prefix() . 'invetory_files', $data);
 			}
 		}
-		
+
 		echo json_encode(['status' => !empty($uploadedFiles)]);
 		die();
 	}
