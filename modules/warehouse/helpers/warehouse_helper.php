@@ -163,12 +163,12 @@ function get_pr_order($id = false)
         $result = array();
         $CI->load->model('warehouse_model');
         $pur_orders = $CI->db->query('select * from tblpur_orders where approve_status = 2 AND status_goods = 0')->result_array();
-        if(!empty($pur_orders)) {
+        if (!empty($pur_orders)) {
             foreach ($pur_orders as $key => $value) {
                 $po_id = $value['id'];
                 $get_pur_order = $CI->warehouse_model->get_pur_request($po_id);
                 $pur_order_detail = $get_pur_order[0] ? $get_pur_order[0] : '';
-                if(!empty($pur_order_detail)) {
+                if (!empty($pur_order_detail)) {
                     $result[] = $value;
                 }
             }
@@ -682,7 +682,7 @@ function get_pur_order_name($id)
         $name .= $trimmed_order_number;
 
         if (!empty($pur_order->vendor_name)) {
-            $name .= '-' . $pur_order->vendor_name . ' - '. $pur_order->pur_order_name;
+            $name .= '-' . $pur_order->vendor_name . ' - ' . $pur_order->pur_order_name;
         }
     }
 
@@ -717,7 +717,7 @@ function get_pur_order_project_name($id)
 
 function get_all_po_details_in_warehouse($id)
 {
-    
+
     $CI = &get_instance();
     $CI->db->where('id', $id);
     $pur_orders = $CI->db->get(db_prefix() . 'pur_orders')->row();
@@ -2296,4 +2296,16 @@ function handle_purchase_tracker_attachments_array($related, $id)
     }
 
     return false;
+}
+
+function get_documentation_yes_or_no($id, $checklist_id)
+{
+    $CI = &get_instance();
+    $CI->db->select('*');
+    $CI->db->from(db_prefix() . 'goods_receipt_documentation');
+    $CI->db->where('goods_receipt_id', $id);
+    $CI->db->where('checklist_id', $checklist_id);
+    $row = $CI->db->get()->row();
+
+    return $row ? 'Yes' : 'No';
 }

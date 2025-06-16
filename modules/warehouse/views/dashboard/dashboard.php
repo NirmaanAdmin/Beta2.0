@@ -15,7 +15,7 @@
     font-size: 19px;
   }
 
-  .n_width{
+  .n_width {
     width: 20% !important;
   }
 </style>
@@ -179,17 +179,48 @@
 
           </div>
 
- 
+
         </div>
-        
-        <div class="col-md-6" style="margin-top: 2%;">
+
+        <div class="col-md-4" style="margin-top: 2%;">
           <div class="row">
             <p class="mbot15 dashboard_stat_title">Documentation Status</p>
-            <div style="width: 100%; height: 450px; display: flex; justify-content: center;">
+            <div style="width: 100%; height: 450px; display: flex; ">
               <canvas id="doughnutChartDocumentationStatus"></canvas>
             </div>
           </div>
         </div>
+
+
+        <div class="col-md-8 mtop20">
+          <div class="row">
+            <p class="mbot15 dashboard_stat_title">Receipt Status</p>
+
+  
+            <div class="scroll-wrapper" style="max-height: 461px; overflow-y: auto;">
+              <table class="table table-receipt-status">
+                <thead>
+                  <tr>
+                    <th><?php echo _l('PO ID'); ?></th>
+                    <th><?php echo _l('Scurity Signed'); ?></th>
+                    <th><?php echo _l('Transport Document'); ?></th>
+                    <th><?php echo _l('Production Certificate'); ?></th>
+                    <th><?php echo _l('Voucher Date'); ?></th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel_s">
+      <div class="panel-body dashboard-budget-summary">
+
+
 
         <div class="col-md-6" style="margin-top: 2%;">
           <div class="row">
@@ -204,8 +235,6 @@
 
       </div>
     </div>
-
-
 
 
   </div>

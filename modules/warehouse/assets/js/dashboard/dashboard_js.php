@@ -105,7 +105,7 @@
           type: 'line',
           data: {
             labels: labels, // e.g. ['Jan', 'Feb', 'Mar']
-            
+
             datasets: [{
               label: '',
               data: data,
@@ -120,25 +120,61 @@
             responsive: true,
             plugins: {
               legend: {
-                display: false,  //hide legend
+                display: false, //hide legend
               }
             },
             scales: {
               y: {
-                beginAtZero: true
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Quantities count',
+                  font: {
+                    size: 14
+                  },
+                  color: '#333'
+                },
+                grid: {
+                  display: false
+                }
               },
               x: {
                 grid: {
                   display: false
-                }
+                },
+                title: {
+                  display: true,
+                  text: 'Months',
+                  font: {
+                    size: 14
+                  },
+                  color: '#333'
+                },
               }
             }
           }
         });
 
       });
+      receipt_status_charts();
     }
 
+    var fnServerParams;
 
+    function receipt_status_charts() {
+      "use strict";
+      var table_rec_campaign = $('.table-receipt-status');
+      if ($.fn.DataTable.isDataTable('.table-receipt-status')) {
+        $('.table-receipt-status').DataTable().destroy();
+      }
+      initDataTable('.table-receipt-status', admin_url + 'warehouse/dashboard/receipt_status_charts', false, false, fnServerParams, [4, 'desc'], true);
+      $.each(fnServerParams, function(i, obj) {
+        $('select' + obj).on('change', function() {
+          table_rec_campaign.DataTable().ajax.reload()
+            .columns.adjust()
+            .responsive.recalc();
+        });
+      });
+    }
   })(jQuery);
 </script>
