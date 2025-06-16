@@ -249,6 +249,9 @@
 	      "</textarea></td>";
 
 	    table_row +=
+	      '<td></td>';
+
+	    table_row +=
 	      '<td class="all_unawarded_qty"><input type="number" name="newpackageitems[' +
 	      item_key +
 	      '][unawarded_qty]" value="' +

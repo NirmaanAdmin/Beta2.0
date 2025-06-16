@@ -2061,15 +2061,16 @@ class Estimates_model extends App_Model
                 $itemhtml .= '<table class="table items">';
                 $itemhtml .= '<thead>
                     <tr>
-                        <th width="12%" align="left">' . _l('estimate_table_item_heading') . '</th>
-                        <th width="13%" align="left">' . _l('estimate_table_item_description') . '</th>
-                        <th width="10%" align="right">' . _l('budgeted_qty') . '</th>
-                        <th width="10%" align="right">' . _l('budgeted_rate') . '</th>
-                        <th width="10%" align="right">' . _l('budgeted_amount') . '</th>
-                        <th width="10%" align="right">Unawarded Quantity</th>
-                        <th width="10%" align="right">Unawarded Rate</th>
-                        <th width="10%" align="right">Unawarded Capex</th>
-                        <th width="10%" align="right">Unallocated Cost</th>
+                        <th width="11%" align="left">' . _l('estimate_table_item_heading') . '</th>
+                        <th width="12%" align="left">' . _l('estimate_table_item_description') . '</th>
+                        <th width="9%" align="left">' . _l('sub_groups_pur') . '</th>
+                        <th width="9%" align="right">' . _l('budgeted_qty') . '</th>
+                        <th width="9%" align="right">' . _l('budgeted_rate') . '</th>
+                        <th width="9%" align="right">' . _l('budgeted_amount') . '</th>
+                        <th width="9%" align="right">Unawarded Quantity</th>
+                        <th width="9%" align="right">Unawarded Rate</th>
+                        <th width="9%" align="right">Unawarded Capex</th>
+                        <th width="9%" align="right">Unallocated Cost</th>
                     </tr>
                 </thead>';
                 $itemhtml .= '<tbody style="border: 1px solid #ddd;">';
@@ -2098,6 +2099,7 @@ class Estimates_model extends App_Model
                     $itemhtml .= '<tr>';
                     $itemhtml .= '<td align="left">' . get_purchase_items($item['item_code']) . '</td>';
                     $itemhtml .= '<td align="left">' . clear_textarea_breaks($item['long_description']) . '</td>';
+                    $itemhtml .= '<td align="left">' . get_sub_head_name_by_id($item['sub_head']) . '</td>';
                     $itemhtml .= '<td align="align" class="all_budgeted_qty">' . render_input($budgeted_qty_name_attr, '', $budgeted_qty, 'number', ['readonly' => true]) . '</td>';
                     $itemhtml .= '<td align="align" class="all_budgeted_rate">' . render_input($budgeted_rate_name_attr, '', $budgeted_rate, 'number', ['readonly' => true]) . '</td>';
                     $itemhtml .= '<td align="align" class="all_budgeted_amount">' . render_input($budgeted_amount_name_attr, '', $budgeted_amount, 'number', ['readonly' => true]) . '</td>';
@@ -2242,15 +2244,16 @@ class Estimates_model extends App_Model
                 $itemhtml .= '<table class="table items">';
                 $itemhtml .= '<thead>
                     <tr>
-                        <th width="12%" align="left">' . _l('estimate_table_item_heading') . '</th>
-                        <th width="15%" align="left">' . _l('estimate_table_item_description') . '</th>
-                        <th width="10%" align="right">Unawarded Quantity</th>
-                        <th width="10%" align="right">Unawarded Rate</th>
-                        <th width="10%" align="right">Unawarded Amount</th>
-                        <th width="10%" align="right">Package Quantity</th>
-                        <th width="10%" align="right">Package Rate</th>
-                        <th width="10%" align="right">Package Amount</th>
-                        <th width="10%" align="right">Remarks</th>
+                        <th width="11%" align="left">' . _l('estimate_table_item_heading') . '</th>
+                        <th width="14%" align="left">' . _l('estimate_table_item_description') . '</th>
+                        <th width="9%" align="left">' . _l('sub_groups_pur') . '</th>
+                        <th width="9%" align="right">Unawarded Quantity</th>
+                        <th width="9%" align="right">Unawarded Rate</th>
+                        <th width="9%" align="right">Unawarded Amount</th>
+                        <th width="9%" align="right">Package Quantity</th>
+                        <th width="9%" align="right">Package Rate</th>
+                        <th width="9%" align="right">Package Amount</th>
+                        <th width="9%" align="right">Remarks</th>
                         <th align="center"><i class="fa fa-cog"></i></th>
                     </tr>
                 </thead>';
@@ -2272,6 +2275,7 @@ class Estimates_model extends App_Model
                     <textarea name="long_description" rows="4" class="form-control" placeholder="'._l('item_long_description_placeholder').'">
                     </textarea>
                 </td>';
+                $itemhtml .= '<td align="left"></td>';
                 $itemhtml .= '<td align="right">' . render_input('unawarded_qty', '', 0.00, 'number', ['readonly' => true]) . '</td>';
                 $itemhtml .= '<td align="right">' . render_input('unawarded_rate', '', 0.00, 'number', ['readonly' => true]) . '</td>';
                 $itemhtml .= '<td align="right">' . render_input('unawarded_amount', '', 0.00, 'number', ['readonly' => true]) . '</td>';
@@ -2308,6 +2312,7 @@ class Estimates_model extends App_Model
                     $itemhtml .= '<tr class="items">';
                     $itemhtml .= '<td align="left">' . get_purchase_items($item['item_code']) . '</td>';
                     $itemhtml .= '<td align="left">' . clear_textarea_breaks($item['long_description']) . '</td>';
+                    $itemhtml .= '<td align="left">' . get_sub_head_name_by_id($item['sub_head']) . '</td>';
                     $itemhtml .= '<td align="right" class="all_unawarded_qty">' . render_input($unawarded_qty_name_attr, '', $unawarded_qty, 'number', ['readonly' => true]) . '</td>';
                     $itemhtml .= '<td align="right" class="all_unawarded_rate">' . render_input($unawarded_rate_name_attr, '', $unawarded_rate, 'number', ['readonly' => true]) . '</td>';
                     $itemhtml .= '<td align="right" class="all_unawarded_amount">' . render_input($unawarded_amount_name_attr, '', $unawarded_amount, 'number', ['readonly' => true]) . '</td>';
