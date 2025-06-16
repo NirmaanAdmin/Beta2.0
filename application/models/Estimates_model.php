@@ -2053,6 +2053,7 @@ class Estimates_model extends App_Model
             $this->db->where('rel_id', $estimates->id);
             $this->db->where('rel_type', 'estimate');
             $this->db->where('annexure', $unawarded_budget);
+            $this->db->group_by(db_prefix() . 'itemable.id');
             $unawarded_budget_itemable = $this->db->get()->result_array();
 
             if (!empty($unawarded_budget_itemable)) {
@@ -2227,7 +2228,14 @@ class Estimates_model extends App_Model
             $this->db->where('rel_id', $estimates->id);
             $this->db->where('rel_type', 'estimate');
             $this->db->where('annexure', $package_budget);
+            $this->db->group_by(db_prefix() . 'itemable.id');
             $unawarded_budget_itemable = $this->db->get()->result_array();
+            $total_budgeted_amount = 0;
+            if(!empty($unawarded_budget_itemable)) {
+                $total_budgeted_amount = array_reduce($unawarded_budget_itemable, function ($carry, $item) {
+                    return $carry + ($item['qty'] * $item['rate']);
+                }, 0);
+            }
 
             if (!empty($unawarded_budget_itemable)) {
                 $itemhtml .= '<div class="table-responsive s_table">';
@@ -2319,6 +2327,11 @@ class Estimates_model extends App_Model
         $itemhtml .= '<div class="col-md-8 col-md-offset-4">
             <table class="table text-right">
                 <tbody>
+                    <tr>
+                        <td><span class="bold tw-text-neutral-700">Total Budgeted Amount :</span>
+                        </td>
+                        <td>'.app_format_money($total_budgeted_amount, $base_currency).'</td>
+                    </tr>
                     <tr>
                         <td width="75%"><span class="bold tw-text-neutral-700">Total Unawarded Amount :</span>
                         </td>
