@@ -1,0 +1,7 @@
+{
+    "require": {
+        "google/apiclient": "^2.17",
+        "spatie/dropbox-api": "^1.23",
+        "rmccue/requests": "^2.0"
+    }
+}
