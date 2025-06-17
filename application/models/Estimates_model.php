@@ -2110,10 +2110,10 @@ class Estimates_model extends App_Model
                     $itemhtml .= '<td align="align" class="all_budgeted_rate">' . render_input($budgeted_rate_name_attr, '', $budgeted_rate, 'number', ['readonly' => true]) . '</td>';
                     $itemhtml .= '<td align="align" class="all_budgeted_amount">' . render_input($budgeted_amount_name_attr, '', $budgeted_amount, 'number', ['readonly' => true]) . '</td>';
                     $itemhtml .= '<td align="align" class="all_unawarded_qty">
-                        ' . render_input($unawarded_qty_name_attr, '', $unawarded_qty, 'number', ['onchange' => 'calculate_unawarded_capex()']) . '
+                        ' . render_input($unawarded_qty_name_attr, '', $unawarded_qty, 'number', ['onchange' => 'calculate_unawarded_capex()', 'step' => 'any']) . '
                         ' . render_select($unawarded_unit_name_attr, $units, ['unit_type_id', 'unit_name'], '', $item['unit_id'], ['disabled' => true]) . '
                         </td>';
-                    $itemhtml .= '<td align="align" class="all_unawarded_rate">' . render_input($unawarded_rate_name_attr, '', $unawarded_rate, 'number', ['onchange' => 'calculate_unawarded_capex()']) . '</td>';
+                    $itemhtml .= '<td align="align" class="all_unawarded_rate">' . render_input($unawarded_rate_name_attr, '', $unawarded_rate, 'number', ['onchange' => 'calculate_unawarded_capex()', 'step' => 'any']) . '</td>';
                     $itemhtml .= '<td align="align" class="all_unawarded_amount">' . render_input($unawarded_amount_name_attr, '', $unawarded_amount, 'number', ['readonly' => true]) . '</td>';
                     $itemhtml .= '<td align="align" class="all_unallocated_cost">' . render_input($unallocated_cost_name_attr, '', $unallocated_cost, 'number', ['readonly' => true]) . '</td>';
                     $itemhtml .= '</tr>';
@@ -2359,10 +2359,10 @@ class Estimates_model extends App_Model
                     $itemhtml .= '<td align="right" class="all_unawarded_rate">' . render_input($unawarded_rate_name_attr, '', $unawarded_rate, 'number', ['readonly' => true]) . '</td>';
                     $itemhtml .= '<td align="right" class="all_unawarded_amount">' . render_input($unawarded_amount_name_attr, '', $unawarded_amount, 'number', ['readonly' => true]) . '</td>';
                     $itemhtml .= '<td align="right" class="all_package_qty">
-                        ' . render_input($package_qty_name_attr, '', !empty($package_items_info) ? $package_items_info->package_qty : 0.00, 'number', ['onchange' => 'calculate_package()']) . '
+                        ' . render_input($package_qty_name_attr, '', !empty($package_items_info) ? $package_items_info->package_qty : 0.00, 'number', ['onchange' => 'calculate_package()', 'step' => 'any']) . '
                         ' . render_select($package_unit_name_attr, $units, ['unit_type_id', 'unit_name'], '', $item['unit_id'], ['disabled' => true]) . '
                         </td>';
-                    $itemhtml .= '<td align="right" class="all_package_rate">' . render_input($package_rate_name_attr, '', !empty($package_items_info) ? $package_items_info->package_rate : 0.00, 'number', ['onchange' => 'calculate_package()']) . '</td>';
+                    $itemhtml .= '<td align="right" class="all_package_rate">' . render_input($package_rate_name_attr, '', !empty($package_items_info) ? $package_items_info->package_rate : 0.00, 'number', ['onchange' => 'calculate_package()', 'step' => 'any']) . '</td>';
                     $itemhtml .= '<td align="right" class="all_package_amount">' . render_input($package_amount_name_attr, '', 0.00, 'number', ['readonly' => true]) . '</td>';
                     $itemhtml .= '<td align="right">' . render_textarea($package_remarks_name_attr, '', !empty($package_items_info) ? $package_items_info->remarks : '') . '</td>';
                     $itemhtml .= '<td align="center"></td>';
