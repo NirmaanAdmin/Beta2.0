@@ -2025,6 +2025,7 @@ class Estimates_model extends App_Model
         $estimate_id = $data['id'];
         $unawarded_budget = isset($data['unawarded_budget']) ? $data['unawarded_budget'] : '';
         $base_currency = $this->currencies_model->get_base_currency();
+        $units = $this->get_units();
         $this->db->where('id', $estimate_id);
         $estimates = $this->db->get(db_prefix() . 'estimates')->row();
         $unawarded_budget_head = $this->get_estimate_budget_listing($estimates->id);
@@ -2088,9 +2089,11 @@ class Estimates_model extends App_Model
                     $unallocated_cost = number_format($unallocated_cost, 2, '.', '');
                     $item_id_name_attr = "newitems[$key][item_id]";
                     $budgeted_qty_name_attr = "newitems[$key][budgeted_qty]";
+                    $budgeted_unit_name_attr = "newitems[$key][budgeted_unit]";
                     $budgeted_rate_name_attr = "newitems[$key][budgeted_rate]";
                     $budgeted_amount_name_attr = "newitems[$key][budgeted_amount]";
                     $unawarded_qty_name_attr = "newitems[$key][unawarded_qty]";
+                    $unawarded_unit_name_attr = "newitems[$key][unawarded_unit]";
                     $unawarded_rate_name_attr = "newitems[$key][unawarded_rate]";
                     $unawarded_amount_name_attr = "newitems[$key][unawarded_amount]";
                     $unallocated_cost_name_attr = "newitems[$key][unallocated_cost]";
@@ -2100,10 +2103,16 @@ class Estimates_model extends App_Model
                     $itemhtml .= '<td align="left">' . get_purchase_items($item['item_code']) . '</td>';
                     $itemhtml .= '<td align="left">' . clear_textarea_breaks($item['long_description']) . '</td>';
                     $itemhtml .= '<td align="left">' . get_sub_head_name_by_id($item['sub_head']) . '</td>';
-                    $itemhtml .= '<td align="align" class="all_budgeted_qty">' . render_input($budgeted_qty_name_attr, '', $budgeted_qty, 'number', ['readonly' => true]) . '</td>';
+                    $itemhtml .= '<td align="align" class="all_budgeted_qty">
+                        ' . render_input($budgeted_qty_name_attr, '', $budgeted_qty, 'number', ['readonly' => true]) . '
+                        ' . render_select($budgeted_unit_name_attr, $units, ['unit_type_id', 'unit_name'], '', $item['unit_id'], ['disabled' => true]) . '
+                        </td>';
                     $itemhtml .= '<td align="align" class="all_budgeted_rate">' . render_input($budgeted_rate_name_attr, '', $budgeted_rate, 'number', ['readonly' => true]) . '</td>';
                     $itemhtml .= '<td align="align" class="all_budgeted_amount">' . render_input($budgeted_amount_name_attr, '', $budgeted_amount, 'number', ['readonly' => true]) . '</td>';
-                    $itemhtml .= '<td align="align" class="all_unawarded_qty">' . render_input($unawarded_qty_name_attr, '', $unawarded_qty, 'number', ['onchange' => 'calculate_unawarded_capex()']) . '</td>';
+                    $itemhtml .= '<td align="align" class="all_unawarded_qty">
+                        ' . render_input($unawarded_qty_name_attr, '', $unawarded_qty, 'number', ['onchange' => 'calculate_unawarded_capex()']) . '
+                        ' . render_select($unawarded_unit_name_attr, $units, ['unit_type_id', 'unit_name'], '', $item['unit_id'], ['disabled' => true]) . '
+                        </td>';
                     $itemhtml .= '<td align="align" class="all_unawarded_rate">' . render_input($unawarded_rate_name_attr, '', $unawarded_rate, 'number', ['onchange' => 'calculate_unawarded_capex()']) . '</td>';
                     $itemhtml .= '<td align="align" class="all_unawarded_amount">' . render_input($unawarded_amount_name_attr, '', $unawarded_amount, 'number', ['readonly' => true]) . '</td>';
                     $itemhtml .= '<td align="align" class="all_unallocated_cost">' . render_input($unallocated_cost_name_attr, '', $unallocated_cost, 'number', ['readonly' => true]) . '</td>';
@@ -2539,5 +2548,15 @@ class Estimates_model extends App_Model
             });
         }
         return $budget_listing;
+    }
+
+    public function get_units($id = '')
+    {
+        if ($id != '') {
+            $this->db->where('unit_type_id', $id);
+            return $this->db->get(db_prefix() . 'ware_unit_type')->row();
+        } else {
+            return $this->db->get(db_prefix() . 'ware_unit_type')->result_array();
+        }
     }
 }
