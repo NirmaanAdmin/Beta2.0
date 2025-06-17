@@ -2195,6 +2195,7 @@ class Estimates_model extends App_Model
         $package_budget = isset($data['package_budget']) ? $data['package_budget'] : '';
         $package_id = isset($data['package_id']) ? $data['package_id'] : '';
         $base_currency = $this->currencies_model->get_base_currency();
+        $units = $this->get_units();
         if(!empty($package_id)) {
             $this->db->where('id', $package_id);
             $package_info = $this->db->get(db_prefix() . 'estimate_package_info')->row();
@@ -2337,9 +2338,11 @@ class Estimates_model extends App_Model
                     $unawarded_amount = number_format($unawarded_qty * $unawarded_rate, 2, '.', '');
                     $item_id_name_attr = "items[$key][item_id]";
                     $unawarded_qty_name_attr = "items[$key][unawarded_qty]";
+                    $unawarded_unit_name_attr = "items[$key][unawarded_unit]";
                     $unawarded_rate_name_attr = "items[$key][unawarded_rate]";
                     $unawarded_amount_name_attr = "items[$key][unawarded_amount]";
                     $package_qty_name_attr = "items[$key][package_qty]";
+                    $package_unit_name_attr = "items[$key][package_unit]";
                     $package_rate_name_attr = "items[$key][package_rate]";
                     $package_amount_name_attr = "items[$key][package_amount]";
                     $package_remarks_name_attr = "items[$key][remarks]";
@@ -2349,10 +2352,16 @@ class Estimates_model extends App_Model
                     $itemhtml .= '<td align="left">' . get_purchase_items($item['item_code']) . '</td>';
                     $itemhtml .= '<td align="left">' . clear_textarea_breaks($item['long_description']) . '</td>';
                     $itemhtml .= '<td align="left">' . get_sub_head_name_by_id($item['sub_head']) . '</td>';
-                    $itemhtml .= '<td align="right" class="all_unawarded_qty">' . render_input($unawarded_qty_name_attr, '', $unawarded_qty, 'number', ['readonly' => true]) . '</td>';
+                    $itemhtml .= '<td align="right" class="all_unawarded_qty">
+                        ' . render_input($unawarded_qty_name_attr, '', $unawarded_qty, 'number', ['readonly' => true]) . '
+                        ' . render_select($unawarded_unit_name_attr, $units, ['unit_type_id', 'unit_name'], '', $item['unit_id'], ['disabled' => true]) . '
+                        </td>';
                     $itemhtml .= '<td align="right" class="all_unawarded_rate">' . render_input($unawarded_rate_name_attr, '', $unawarded_rate, 'number', ['readonly' => true]) . '</td>';
                     $itemhtml .= '<td align="right" class="all_unawarded_amount">' . render_input($unawarded_amount_name_attr, '', $unawarded_amount, 'number', ['readonly' => true]) . '</td>';
-                    $itemhtml .= '<td align="right" class="all_package_qty">' . render_input($package_qty_name_attr, '', !empty($package_items_info) ? $package_items_info->package_qty : 0.00, 'number', ['onchange' => 'calculate_package()']) . '</td>';
+                    $itemhtml .= '<td align="right" class="all_package_qty">
+                        ' . render_input($package_qty_name_attr, '', !empty($package_items_info) ? $package_items_info->package_qty : 0.00, 'number', ['onchange' => 'calculate_package()']) . '
+                        ' . render_select($package_unit_name_attr, $units, ['unit_type_id', 'unit_name'], '', $item['unit_id'], ['disabled' => true]) . '
+                        </td>';
                     $itemhtml .= '<td align="right" class="all_package_rate">' . render_input($package_rate_name_attr, '', !empty($package_items_info) ? $package_items_info->package_rate : 0.00, 'number', ['onchange' => 'calculate_package()']) . '</td>';
                     $itemhtml .= '<td align="right" class="all_package_amount">' . render_input($package_amount_name_attr, '', 0.00, 'number', ['readonly' => true]) . '</td>';
                     $itemhtml .= '<td align="right">' . render_textarea($package_remarks_name_attr, '', !empty($package_items_info) ? $package_items_info->remarks : '') . '</td>';
