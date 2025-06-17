@@ -114,7 +114,7 @@ class Dashboard_model extends App_Model
 		$this->db->where('i.checklist_id  ', 3);
 		$this->db->where('i.required   >', 0);
 		$this->db->where('i.attachments', 0);
-		
+
 		$get_transport_document_count = $this->db->get()->row_array();
 
 		$response['missing_transport_document'] = isset($get_transport_document_count['transport_document_count']) ? (int)$get_transport_document_count['transport_document_count'] : 0;
@@ -131,16 +131,15 @@ class Dashboard_model extends App_Model
 		if ($total_received > 0) {
 
 			$this->db->select('COUNT(*) as attached_rows');
-$this->db->from(db_prefix() . 'goods_receipt_documentation');
-$this->db->where("(`attachments` = 1 OR (`required` = 0 AND `attachments` = 0))", null, false);
-$attached_rows_result = $this->db->get()->row_array();
+			$this->db->from(db_prefix() . 'goods_receipt_documentation');
+			$this->db->where("(`attachments` = 1 OR (`required` = 0 AND `attachments` = 0))", null, false);
+			$attached_rows_result = $this->db->get()->row_array();
 
-$attached_rows = isset($attached_rows_result['attached_rows']) ? (int)$attached_rows_result['attached_rows'] : 0;
+			$attached_rows = isset($attached_rows_result['attached_rows']) ? (int)$attached_rows_result['attached_rows'] : 0;
 
-$response['fully_documented'] = ($total_received > 0 && $total_received === $attached_rows) 
-    ? 100 
-    : round(($attached_rows / $total_received) * 100);
-
+			$response['fully_documented'] = ($total_received > 0 && $total_received === $attached_rows)
+				? 100
+				: round(($attached_rows / $total_received) * 100);
 
 
 			$subquery_incomplete = '(SELECT goods_receipt_id
@@ -169,6 +168,85 @@ $response['fully_documented'] = ($total_received > 0 && $total_received === $att
 
 		$response['getconsumption_months'] = array_column($get_getconsumption_data, 'month_name');
 		$response['getconsumption_data'] = array_column($get_getconsumption_data, 'total_quantity');
+
+		$response['total_materials_issued'] = 0;
+
+		// Step 1: Get distinct pr_order_id counts and ids
+		$sql = "SELECT COUNT(*) AS total_unique_count, GROUP_CONCAT(id) AS ids 
+        FROM (
+            SELECT MIN(id) AS id 
+            FROM tblgoods_delivery 
+            WHERE pr_order_id IS NOT NULL AND approval = 1
+            GROUP BY pr_order_id
+        ) AS unique_deliveries";
+
+		$get_total_issued_unique_count = $this->db->query($sql)->row_array();
+
+		// Step 2: Get count from goods_delivery_detail for those goods_delivery_id
+		if (!empty($get_total_issued_unique_count['ids'])) {
+			$final_records = "SELECT COUNT(*) AS final_unique_count 
+                      FROM `tblgoods_delivery_detail` 
+                      WHERE `goods_delivery_id` IN (" . $get_total_issued_unique_count['ids'] . ")";
+
+			$get_total_issued_final_unique_count = $this->db->query($final_records)->row_array();
+
+			$response['total_materials_issued'] = isset($get_total_issued_final_unique_count['final_unique_count'])
+				? (int)$get_total_issued_final_unique_count['final_unique_count']
+				: 0;
+		}
+
+
+		$response['total_material_return'] = 0;
+
+		$sql_new = "SELECT COUNT(*) AS total_unique_count, GROUP_CONCAT(id) AS ids 
+        FROM (
+            SELECT MIN(id) AS id 
+            FROM tblstock_reconciliation 
+            WHERE pr_order_id IS NOT NULL 
+            GROUP BY pr_order_id
+        ) AS unique_deliveries";
+
+		$get_total_issued_reconcilied_unique_count = $this->db->query($sql_new)->row_array();
+
+
+		if (!empty($get_total_issued_reconcilied_unique_count['ids'])) {
+			$final_records = "SELECT COUNT(*) AS final_unique_count 
+                      FROM `tblstock_reconciliation_detail` 
+                      WHERE `goods_delivery_id` IN (" . $get_total_issued_reconcilied_unique_count['ids'] . ")";
+
+			$get_total_issued_final_reconcilied_unique_count = $this->db->query($final_records)->row_array();
+
+			$response['total_material_return'] = isset($get_total_issued_final_reconcilied_unique_count['final_unique_count'])
+				? (int)$get_total_issued_final_reconcilied_unique_count['final_unique_count']
+				: 0;
+		}
+
+
+		$response['returnable_past_dates'] = 0;
+
+		$this->db->select('returnable_date,returnable')
+			->from('tblgoods_delivery_detail')
+			->where('returnable', 1)
+			->where('returnable_date IS NOT NULL')
+			->where("returnable_date != ''");
+		$get_all_records_with_returnable_date = $this->db->get()->result_array();
+
+		$passed_count = 0;
+		$current_date = strtotime(date('d-m-Y')); // today's date for comparison
+
+		foreach ($get_all_records_with_returnable_date as $item) {
+			if ($item['returnable'] == 1) {
+				$dates = json_decode($item['returnable_date'], true);
+				
+				foreach ($dates as $date) {
+					if (strtotime($date) < $current_date) {
+						$passed_count++;
+						break; // only count once per entry
+					}
+				}
+			}
+		}
+		$response['returnable_past_dates'] = $passed_count;
 
 		return $response;
 	}

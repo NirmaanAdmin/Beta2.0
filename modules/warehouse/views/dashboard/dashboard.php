@@ -196,7 +196,7 @@
           <div class="row">
             <p class="mbot15 dashboard_stat_title">Receipt Status</p>
 
-  
+
             <div class="scroll-wrapper" style="max-height: 461px; overflow-y: auto;">
               <table class="table table-receipt-status">
                 <thead>
@@ -220,7 +220,74 @@
     <div class="panel_s">
       <div class="panel-body dashboard-budget-summary">
 
+        <div class="col-md-12">
+          <p class="no-margin main_head_title">Client Supply Material Issue</p>
+          <hr class="mtop10">
+        </div>
 
+        <div class="col-md-12">
+          <div class="row">
+
+            <div class="quick-stats-invoices col-md-4 tw-mb-2 sm:tw-mb-0 ">
+              <div class="top_stats_wrapper">
+                <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                  <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                    <span class="tw-truncate dashboard_stat_title">Total Materials Issued</span>
+                  </div>
+                  <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                </div>
+                <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                  <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                    <span class="tw-truncate dashboard_stat_value total_materials_issued"></span>
+                  </div>
+                  <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="quick-stats-invoices col-md-4 tw-mb-2 sm:tw-mb-0">
+              <div class="top_stats_wrapper">
+                <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                  <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                    <span class="tw-truncate dashboard_stat_title">Total Material Return</span>
+                  </div>
+                  <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                </div>
+                <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                  <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                    <span class="tw-truncate dashboard_stat_value total_material_return"></span>
+                  </div>
+                  <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="quick-stats-invoices col-md-4 tw-mb-2 sm:tw-mb-0">
+              <div class="top_stats_wrapper">
+                <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                  <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                    <span class="tw-truncate dashboard_stat_title">Returnable Past Dates</span>
+                  </div>
+                  <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                </div>
+                <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                  <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                    <span class="tw-truncate dashboard_stat_value returnable_past_dates"></span>
+                  </div>
+                  <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                </div>
+              </div>
+
+
+            </div>
+
+
+          </div>
+
+
+
+
+        </div>
 
         <div class="col-md-6" style="margin-top: 2%;">
           <div class="row">
@@ -236,15 +303,14 @@
       </div>
     </div>
 
-
+    
   </div>
-</div>
-<?php init_tail(); ?>
-</body>
+  <?php init_tail(); ?>
+  </body>
 
-</html>
+  </html>
 
-<?php
-require 'modules/warehouse/assets/js/dashboard/dashboard_js.php';
-echo '<script src="' . module_dir_url(WAREHOUSE_MODULE_NAME, 'assets/js/dashboard/chart.js') . '"></script>';
-?>
+  <?php
+  require 'modules/warehouse/assets/js/dashboard/dashboard_js.php';
+  echo '<script src="' . module_dir_url(WAREHOUSE_MODULE_NAME, 'assets/js/dashboard/chart.js') . '"></script>';
+  ?>

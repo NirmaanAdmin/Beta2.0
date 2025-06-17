@@ -43,17 +43,11 @@
         $('.fully_po_material_receipt').text(response.fully_po_material_receipt);
         $('.missing_security_signature').text(response.missing_security_signature);
         $('.missing_production_certificate').text(response.missing_production_certificate);
-        $('.missing_transport_document').html(response.missing_transport_document);
+        $('.missing_transport_document').text(response.missing_transport_document);
+        $('.total_materials_issued').text(response.total_materials_issued);
+        $('.total_material_return').text(response.total_material_return);
+        $('.returnable_past_dates').text(response.returnable_past_dates);
 
-        $('.on_time_deliveries_percentage').text(response.on_time_deliveries_percentage + '%');
-        $('.delivery_table_data').html(response.delivery_table_data);
-        $('.average_delay').text(response.average_delay + ' Days');
-
-        $('.total_procurement_items').text(response.total_procurement_items);
-        $('.late_deliveries').text(response.late_deliveries);
-        $('.shop_drawing_approved').text(response.shop_drawing_approved);
-        $('.shop_drawing_pending_approval').text(response.shop_drawing_pending_approval)
-        $('.procurement_table_data_secound').html(response.procurement_table_data_secound);
         // DOUGHNUT CHART - Budget Utilization
         var budgetUtilizationCtx = document.getElementById('doughnutChartDocumentationStatus').getContext('2d');
         var budgetUtilizationLabels = ['Fully Documented', 'Incomplete'];
