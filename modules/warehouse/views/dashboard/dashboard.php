@@ -185,7 +185,7 @@
         <div class="col-md-4" style="margin-top: 2%;">
           <div class="row">
             <p class="mbot15 dashboard_stat_title">Documentation Status</p>
-            <div style="width: 100%; height: 450px; display: flex; ">
+            <div style="width: 95%; height: 450px; display: flex; ">
               <canvas id="doughnutChartDocumentationStatus"></canvas>
             </div>
           </div>
@@ -193,11 +193,11 @@
 
 
         <div class="col-md-8 mtop20">
-          <div class="row">
+          
             <p class="mbot15 dashboard_stat_title">Receipt Status</p>
 
 
-            <div class="scroll-wrapper" style="max-height: 461px; overflow-y: auto;">
+            <div class="scroll-wrapper" style="max-height: 461px; overflow-y: auto;overflow-x: clip;">
               <table class="table table-receipt-status">
                 <thead>
                   <tr>
@@ -212,7 +212,7 @@
               </table>
             </div>
 
-          </div>
+          
         </div>
       </div>
     </div>
@@ -277,16 +277,8 @@
                   <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
                 </div>
               </div>
-
-
             </div>
-
-
           </div>
-
-
-
-
         </div>
 
         <div class="col-md-6" style="margin-top: 2%;">
@@ -298,12 +290,35 @@
           </div>
         </div>
 
+        <div class="col-md-6" style="margin-top: 2%;">
+          <div class="row">
+            <p class="mbot15 dashboard_stat_title">Material Return Details</p>
+
+            <div class="scroll-wrapper" style="max-height: 461px; overflow-y: auto;overflow-x: clip;">
+              <table class="table table-return-details">
+                <thead>
+                  <tr>
+                    <th><?php echo _l('Issue Voucher Code'); ?></th>
+                    <th><?php echo _l('Product Code'); ?></th>
+                    <th><?php echo _l('Product Description'); ?></th>
+                    <th><?php echo _l('Vendor'); ?></th>
+                    <th><?php echo _l('Return Date'); ?></th>
+                    <th><?php echo _l('Status'); ?></th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+
+          </div>
+        </div>
+
 
 
       </div>
     </div>
 
-    
+
   </div>
   <?php init_tail(); ?>
   </body>

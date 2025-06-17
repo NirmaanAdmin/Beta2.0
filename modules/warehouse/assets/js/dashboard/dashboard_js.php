@@ -151,9 +151,10 @@
 
       });
       receipt_status_charts();
+      return_details_charts();
     }
 
-    var fnServerParams;
+    var fnServerParams,fnServerParams2;
 
     function receipt_status_charts() {
       "use strict";
@@ -162,6 +163,22 @@
         $('.table-receipt-status').DataTable().destroy();
       }
       initDataTable('.table-receipt-status', admin_url + 'warehouse/dashboard/receipt_status_charts', false, false, fnServerParams, [4, 'desc'], true);
+      $.each(fnServerParams, function(i, obj) {
+        $('select' + obj).on('change', function() {
+          table_rec_campaign.DataTable().ajax.reload()
+            .columns.adjust()
+            .responsive.recalc();
+        });
+      });
+    }
+
+    function return_details_charts() {
+      "use strict";
+      var table_rec_campaign = $('.table-return-details');
+      if ($.fn.DataTable.isDataTable('.table-return-details')) {
+        $('.table-return-details').DataTable().destroy();
+      }
+      initDataTable('.table-return-details', admin_url + 'warehouse/dashboard/return_details_charts', false, false, fnServerParams2, [4, 'desc'], true);
       $.each(fnServerParams, function(i, obj) {
         $('select' + obj).on('change', function() {
           table_rec_campaign.DataTable().ajax.reload()

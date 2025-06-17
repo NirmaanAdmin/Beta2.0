@@ -2310,3 +2310,48 @@ function get_documentation_yes_or_no($id, $checklist_id)
 
     return $row ? 'Yes' : 'No';
 }
+
+function get_issued_code($issued_id){
+    $CI = &get_instance();
+    $CI->db->select('goods_delivery_code');
+    $CI->db->from(db_prefix() . 'goods_delivery');
+    $CI->db->where('id', $issued_id);
+    $row = $CI->db->get()->row();
+    if ($row) {
+        return $row->goods_delivery_code;
+    }
+    return '';
+}
+
+function get_return_details_status($goods_delivery_id,$past_date_count) {
+    $CI = &get_instance();
+
+    // Step 1: Get the pr_order_id using goods_delivery_id
+    $CI->db->select('pr_order_id');
+    $CI->db->from(db_prefix() . 'goods_delivery');
+    $CI->db->where('id', $goods_delivery_id);
+    $row = $CI->db->get()->row();
+
+    if ($row && !empty($row->pr_order_id)) {
+        $pur_order_id = $row->pr_order_id;
+
+        // Step 2: Check if reconciliation exists for this pr_order_id and goods_delivery_id
+        $CI->db->select('srd.*');
+        $CI->db->from(db_prefix() . 'stock_reconciliation_detail as srd');
+        $CI->db->join(db_prefix() . 'stock_reconciliation as sr', 'sr.id = srd.goods_delivery_id', 'left');
+        $CI->db->where('sr.pr_order_id', $pur_order_id);
+
+        $data = $CI->db->get()->result_array();
+
+        // Optional: Return array or status
+        if (!empty($data)) {
+            return 'Returned'; // or return $data;
+        }elseif ($past_date_count > 0 && empty($data)) {
+           return 'Delayed';
+        } else {
+            return 'To Be Returned';
+        }
+    }
+
+    return 'Not Found';
+}

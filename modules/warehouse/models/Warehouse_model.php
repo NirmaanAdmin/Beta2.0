@@ -20445,7 +20445,7 @@ class Warehouse_model extends App_Model
 									$this->db->select(db_prefix() . 'goods_receipt_detail.quantities');
 									$this->db->like(db_prefix() . 'goods_receipt_detail.description', $non_break_description);
 									$this->db->where(db_prefix() . 'goods_receipt.approval', 1);
-									$this->db->where('pr_order_id', $pur_order);
+									$this->db->where('pr_order_id', $pur_order); 
 									$this->db->join(db_prefix() . 'goods_receipt', db_prefix() . 'goods_receipt.id = ' . db_prefix() . 'goods_receipt_detail.goods_receipt_id', 'left');
 									$goods_receipt_description = $this->db->get(db_prefix() . 'goods_receipt_detail')->result_array();
 									if (!empty($goods_receipt_description)) {

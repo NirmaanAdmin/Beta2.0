@@ -90,4 +90,108 @@ class Dashboard extends AdminController
         echo json_encode($output);
         die();
     }
+
+    public function return_details_charts()
+    {
+        $aColumns = [
+            1,
+            'commodity_name',
+            'description',
+            2,
+            'returnable_date',
+            3,
+        ];
+        $sIndexColumn = 'id';
+        $sTable       = db_prefix() . 'goods_delivery_detail';
+        $join         = [];
+        $where = [];
+
+        array_push($where, 'AND returnable = 1');
+        array_push($where, 'AND returnable_date != ""');
+
+        $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, ['id', 'goods_delivery_id',]);
+
+
+        $output  = $result['output'];
+        $rResult = $result['rResult'];
+
+
+        foreach ($rResult as $aRow) {
+            $row = [];
+
+            for ($i = 0; $i < count($aColumns); $i++) {
+
+                $_data = $aRow[$aColumns[$i]];
+                if ($aColumns[$i] == 'commodity_name') {
+                    $_data = $aRow['commodity_name'];
+                } elseif ($aColumns[$i] == 1) {
+                    $_data = get_issued_code($aRow['goods_delivery_id']);
+                } elseif ($aColumns[$i] == 'description') {
+                    $_data = $aRow['description'];
+                } elseif ($aColumns[$i] == 2) {
+                    $raw_json = !empty($aRow['returnable_date']) ? $aRow['returnable_date'] : '';
+                    $names_output = [];
+                    if (!empty($raw_json)) {
+                        $decoded = json_decode($raw_json, true);
+                        if (is_array($decoded)) {
+                            $vendor_ids = array_keys($decoded);
+
+                            foreach ($vendor_ids as $vendor_id) {
+                                $company_name = wh_get_vendor_company_name($vendor_id);
+                                if (!empty($company_name)) {
+                                    $names_output[] = $company_name;
+                                }
+                            }
+                        }
+                    }
+
+                    $_data = implode(',<br>', $names_output);
+                } elseif ($aColumns[$i] == 'returnable_date') {
+                    $raw_json = !empty($aRow['returnable_date']) ? $aRow['returnable_date'] : '';
+                    $date_output = [];
+
+                    if (!empty($raw_json)) {
+                        $decoded = json_decode($raw_json, true);
+                        if (is_array($decoded)) {
+                            foreach ($decoded as $date) {
+                                if (!empty($date)) {
+                                    $date_output[] = date('d M, Y', strtotime($date));
+                                }
+                            }
+                        }
+                    }
+
+                    $_data = implode(',<br>', $date_output);
+                } elseif ($aColumns[$i] == 3) {
+                    $raw_json = !empty($aRow['returnable_date']) ? $aRow['returnable_date'] : '';
+                    $date_output = [];
+                    $past_date_count = 0;
+
+                    if (!empty($raw_json)) {
+                        $decoded = json_decode($raw_json, true);
+                        if (is_array($decoded)) {
+                            foreach ($decoded as $date) {
+                                if (!empty($date)) {
+                                    $date_output[] = $date;
+
+                                    // Compare date with today
+                                    $timestamp = strtotime(str_replace('/', '-', $date)); // safe for any format
+                                    if ($timestamp < strtotime(date('d-m-Y'))) {
+                                        $past_date_count++;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    $_data = get_return_details_status($aRow['goods_delivery_id'],$past_date_count);
+                }
+
+                $row[] = $_data;
+            }
+            $output['aaData'][] = $row;
+        }
+        echo json_encode($output);
+        die();
+    }
 }
