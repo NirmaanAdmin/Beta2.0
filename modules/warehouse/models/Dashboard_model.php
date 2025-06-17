@@ -131,18 +131,21 @@ class Dashboard_model extends App_Model
 		if ($total_received > 0) {
 
 			$this->db->select('COUNT(*) as attached_rows');
-			$this->db->from(db_prefix() . 'goods_receipt_documentation');
-			$this->db->where('attachments', 1);
-			$attached_rows_result = $this->db->get()->row_array();
-			$attached_rows = isset($attached_rows_result['attached_rows']) ? (int)$attached_rows_result['attached_rows'] : 0;
+$this->db->from(db_prefix() . 'goods_receipt_documentation');
+$this->db->where("(`attachments` = 1 OR (`required` = 0 AND `attachments` = 0))", null, false);
+$attached_rows_result = $this->db->get()->row_array();
 
-			$response['fully_documented'] = ($total_received > 0 && $total_received === $attached_rows) ? 100 : round(($attached_rows / $total_received) * 100);
+$attached_rows = isset($attached_rows_result['attached_rows']) ? (int)$attached_rows_result['attached_rows'] : 0;
+
+$response['fully_documented'] = ($total_received > 0 && $total_received === $attached_rows) 
+    ? 100 
+    : round(($attached_rows / $total_received) * 100);
+
 
 
 			$subquery_incomplete = '(SELECT goods_receipt_id
 				FROM ' . db_prefix() . 'goods_receipt_documentation
 				WHERE required = 1 AND attachments = 0
-				
 			) AS incomplete_gr';
 
 			$this->db->select('COUNT(*) AS incomplete_count');
