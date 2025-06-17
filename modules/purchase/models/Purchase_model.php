@@ -20205,13 +20205,36 @@ class Purchase_model extends App_Model
         $module = isset($data['module']) ? $data['module'] : NULL;
         $base_currency = $this->currencies_model->get_base_currency();
 
-        $this->db->where('rel_id', $estimate_id);
-        $this->db->where('rel_type', 'estimate');
-        $this->db->where('annexure', $budget_head_id);
+        $this->db->select(
+            db_prefix() . 'itemable.*, ' .
+            'epi_items.package_qty, ' .
+            'epi_items.package_rate'
+        );
+        $this->db->from(db_prefix() . 'itemable');
+        $this->db->join(
+            db_prefix() . 'estimate_package_info',
+            db_prefix() . 'estimate_package_info.estimate_id = ' . db_prefix() . 'itemable.rel_id' .
+            ' AND ' . db_prefix() . 'estimate_package_info.budget_head = ' . db_prefix() . 'itemable.annexure',
+            'left'
+        );
+        $this->db->join(
+            db_prefix() . 'estimate_package_items_info AS epi_items',
+            'epi_items.package_id = ' . db_prefix() . 'estimate_package_info.id' .
+            ' AND epi_items.item_id = ' . db_prefix() . 'itemable.id',
+            'left'
+        );
+        $this->db->where(db_prefix() . 'itemable.rel_id', $estimate_id);
+        $this->db->where(db_prefix() . 'itemable.rel_type', 'estimate');
+        $this->db->where(db_prefix() . 'itemable.annexure', $budget_head_id);
+        $this->db->where(db_prefix() . 'estimate_package_info.estimate_id', $estimate_id);
+        $this->db->where(db_prefix() . 'estimate_package_info.budget_head', $budget_head_id);
+        $this->db->where('epi_items.package_qty >', 0, false);
+        $this->db->where('epi_items.package_rate >', 0, false);
         if (!empty($cost_sub_head)) {
-            $this->db->where('sub_head', $cost_sub_head);
+            $this->db->where(db_prefix() . 'itemable.sub_head', $cost_sub_head);
         }
-        $itemable = $this->db->get(db_prefix() . 'itemable')->result_array();
+        $this->db->group_by(db_prefix() . 'itemable.id');
+        $itemable = $this->db->get()->result_array();
 
         if (!empty($itemable)) {
             $response .= '<div class="table-responsive s_table">';
