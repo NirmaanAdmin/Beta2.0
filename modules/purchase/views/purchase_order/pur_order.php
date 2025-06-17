@@ -797,6 +797,10 @@
               <div id="removed-items"></div>
             </div>
           </div>
+          <?php
+          if ($book_order) {
+            unset($pur_order);
+          } ?>
           <div class="row">
             <div class="col-md-12 mtop15">
               <div class="panel-body bottom-transaction">
