@@ -1763,7 +1763,7 @@ class purchase extends AdminController
                     foreach ($package_items_info as $order_detail) {
                         $index_order++;
                         $package_item_total = $order_detail['package_qty'] * $order_detail['package_rate'];
-                        $pur_order_row_template .= $this->purchase_model->create_purchase_order_row_template('items[' . $index_order . ']',  $order_detail['item_code'], $order_detail['long_description'], '', '', $order_detail['package_qty'], '', $order_detail['package_rate'], '', $order_detail['item_code'], '', '',  $package_item_total, '', '', $package_item_total, $package_item_total, '', '', '', false, 1, $data['base_currency']->name, array(), false, $order_detail['sub_head'], '', 0);
+                        $pur_order_row_template .= $this->purchase_model->create_purchase_order_row_template('items[' . $index_order . ']',  $order_detail['item_code'], $order_detail['long_description'], '', '', $order_detail['package_qty'], $order_detail['unit_id'], $order_detail['package_rate'], '', $order_detail['item_code'], $order_detail['unit_id'], '',  $package_item_total, '', '', $package_item_total, $package_item_total, '', '', '', false, 1, $data['base_currency']->name, array(), false, $order_detail['sub_head'], '', 0);
                     }
                     $data['pur_order_row_template'] = $pur_order_row_template;
                 }

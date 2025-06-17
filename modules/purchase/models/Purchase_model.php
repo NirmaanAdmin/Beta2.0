@@ -21491,7 +21491,8 @@ class Purchase_model extends App_Model
             db_prefix() . 'estimate_package_items_info.*',
             db_prefix() . 'itemable.item_code',
             db_prefix() . 'itemable.long_description',
-            db_prefix() . 'itemable.sub_head'
+            db_prefix() . 'itemable.sub_head',
+            db_prefix() . 'itemable.unit_id'
         ]);
         $this->db->from(db_prefix() . 'estimate_package_items_info');
         $this->db->join(db_prefix() . 'itemable', db_prefix() . 'itemable.id = ' . db_prefix() . 'estimate_package_items_info.item_id', 'left');
