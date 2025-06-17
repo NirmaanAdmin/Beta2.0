@@ -178,7 +178,7 @@
       if ($.fn.DataTable.isDataTable('.table-return-details')) {
         $('.table-return-details').DataTable().destroy();
       }
-      initDataTable('.table-return-details', admin_url + 'warehouse/dashboard/return_details_charts', false, false, fnServerParams2, [4, 'desc'], true);
+      initDataTable('.table-return-details', admin_url + 'warehouse/dashboard/return_details_charts', false, false, fnServerParams2, undefined, true);
       $.each(fnServerParams, function(i, obj) {
         $('select' + obj).on('change', function() {
           table_rec_campaign.DataTable().ajax.reload()
