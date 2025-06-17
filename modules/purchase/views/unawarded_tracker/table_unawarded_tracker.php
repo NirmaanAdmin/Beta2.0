@@ -154,7 +154,7 @@ foreach ($rResult as $aRow) {
                Book Order <span class="caret"></span>
             </a>
             <ul class="dropdown-menu dropdown-menu-right">
-               <li class="hidden-xs"><a href="' . admin_url('purchase/pur_order') . '" target="_blank">Purchase Order</a></li>
+               <li class="hidden-xs"><a href="' . admin_url('purchase/pur_order?package='.$aRow['id'].'') . '" target="_blank">Purchase Order</a></li>
                <li class="hidden-xs"><a href="' . admin_url('purchase/wo_order') . '" target="_blank">Work Order</a></li>
                <li class="hidden-xs"><a href="' . admin_url('changee/pur_order') . '" target="_blank">Change Order</a></li>
             </ul>

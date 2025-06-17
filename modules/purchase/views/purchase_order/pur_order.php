@@ -52,6 +52,28 @@
         echo form_hidden('isedit');
       }
       ?>
+      <?php
+      if ($book_order) {
+        $prefix = get_purchase_option('pur_order_prefix');
+        $next_number = get_purchase_option('next_po_number');
+        $pur_order_number = $prefix . '-' . str_pad($next_number, 5, '0', STR_PAD_LEFT) . '-' . date('M-Y');
+        if (get_option('po_only_prefix_and_number') == 1) {
+          $pur_order_number = $prefix . '-' . str_pad($next_number, 5, '0', STR_PAD_LEFT);
+        }
+        $pur_order['pur_order_name'] = $cost_package_detail->package_name;
+        $pur_order['pur_order_number'] = $pur_order_number;
+        $pur_order['number'] = $next_number;
+        $pur_order['estimate'] = $cost_package_detail->estimate_id;
+        $pur_order['group_pur'] = $cost_package_detail->budget_head;
+        $pur_order['project'] = $cost_package_detail->project_id;
+        $pur_order['kind'] = $cost_package_detail->kind;
+        $pur_order['budget'] = $cost_package_detail->total_package;
+        $pur_order['order_date'] = _d(date('Y-m-d'));
+        $pur_order['buyer'] = get_staff_user_id();
+        $pur_order = (object) $pur_order;
+        echo form_hidden('package_id', $cost_package_detail->id);
+      }
+      ?>
       <div class="col-md-12">
         <div class="panel_s accounting-template estimate">
           <div class="panel-body">
@@ -172,7 +194,7 @@
                       <div class="col-md-6 form-group">
                         <label for="department"><?php echo _l('department'); ?></label>
                         <select name="department" id="department" class="selectpicker" <?php if (isset($pur_order)) {
-                          echo 'disabled';
+                          
                         } ?> data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
                         <option value=""></option>
                         <?php foreach ($departments as $s) { ?>

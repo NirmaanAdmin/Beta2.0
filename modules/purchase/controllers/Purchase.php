@@ -1748,6 +1748,28 @@ class purchase extends AdminController
             }
         }
 
+        $data['book_order'] = false;
+        $package = $this->input->get('package', TRUE);
+        if (!empty($package)) {
+            $cost_package_detail = $this->purchase_model->get_cost_package_detail($package);
+            if (!empty($cost_package_detail)) {
+                $data['book_order'] = true;
+                $data['cost_package_detail'] = $cost_package_detail;
+                $package_items_info = $this->purchase_model->get_package_items_info($package);
+                if (!empty($package_items_info)) {
+                    $index_order = 0;
+                    $pur_order_row_template = '';
+                    $pur_order_row_template .= $this->purchase_model->create_purchase_order_row_template();
+                    foreach ($package_items_info as $order_detail) {
+                        $index_order++;
+                        $package_item_total = $order_detail['package_qty'] * $order_detail['package_rate'];
+                        $pur_order_row_template .= $this->purchase_model->create_purchase_order_row_template('items[' . $index_order . ']',  $order_detail['item_code'], $order_detail['long_description'], '', '', $order_detail['package_qty'], '', $order_detail['package_rate'], '', $order_detail['item_code'], '', '',  $package_item_total, '', '', $package_item_total, $package_item_total, '', '', '', false, 1, $data['base_currency']->name, array(), false, $order_detail['sub_head'], '', 0);
+                    }
+                    $data['pur_order_row_template'] = $pur_order_row_template;
+                }
+            }
+        }
+
         $data['title'] = $title;
 
         $this->load->view('purchase_order/pur_order', $data);

@@ -2654,6 +2654,10 @@ class Purchase_model extends App_Model
             $order_detail = $data['newitems'];
             unset($data['newitems']);
         }
+        if (isset($data['items'])) {
+            $order_detail = $data['items'];
+            unset($data['items']);
+        }
 
         $prefix = get_purchase_option('pur_order_prefix');
 
@@ -21466,5 +21470,36 @@ class Purchase_model extends App_Model
             }
         }
         return $deleted;
+    }
+
+    public function get_cost_package_detail($id)
+    {
+        $this->db->select(
+            db_prefix() . 'estimate_package_info.*,' .
+            db_prefix() . 'estimates.project_id'
+        );
+        $this->db->from(db_prefix() . 'estimate_package_info');
+        $this->db->join(db_prefix() . 'estimates', db_prefix() . 'estimates.id = ' . db_prefix() . 'estimate_package_info.estimate_id', 'left');
+        $this->db->where(db_prefix() . 'estimate_package_info.id', $id);
+        $this->db->group_by(db_prefix() . 'estimate_package_info.id');
+        return $this->db->get()->row();
+    }
+
+    public function get_package_items_info($id)
+    {
+        $this->db->select([
+            db_prefix() . 'estimate_package_items_info.*',
+            db_prefix() . 'itemable.item_code',
+            db_prefix() . 'itemable.long_description',
+            db_prefix() . 'itemable.sub_head'
+        ]);
+        $this->db->from(db_prefix() . 'estimate_package_items_info');
+        $this->db->join(db_prefix() . 'itemable', db_prefix() . 'itemable.id = ' . db_prefix() . 'estimate_package_items_info.item_id', 'left');
+        $this->db->where(db_prefix() . 'estimate_package_items_info.package_id', $id);
+        $this->db->where(db_prefix() . 'estimate_package_items_info.package_qty' . ' >', 0, false);
+        $this->db->where(db_prefix() . 'estimate_package_items_info.package_rate' . ' >', 0, false);
+        $this->db->group_by(db_prefix() . 'estimate_package_items_info.id');
+        return $this->db->get()->result_array();
+
     }
 }
