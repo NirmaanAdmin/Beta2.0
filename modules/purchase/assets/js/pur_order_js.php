@@ -352,28 +352,37 @@
     });
 
     $("body").on('click', '.cost_fetch_pur_item', function() {
-      var itemcode = $(this).data('itemcode');
-      var longdescription = $(this).data('longdescription');
-      var subhead = $(this).data('subhead');
-      if(empty(subhead) || subhead == 0) {
-        subhead = '';
+      var itemableid = $(this).data('itemableid');
+      var package_id = $(this).data('package');
+      if (package_id) {
+        $.post(admin_url + 'purchase/cost_fetch_pur_item', {
+          package_id: package_id,
+          itemableid: itemableid,
+        }).done(function (res) {
+          var response = JSON.parse(res);
+          if (response.result && Array.isArray(response.result) && response.result.length > 0) {
+            var item = response.result[0];
+            var itemData = {
+              area: [],
+              description: item.long_description,
+              discount: undefined,
+              item_code: item.item_code,
+              item_name: undefined,
+              quantity: item.package_qty,
+              sub_groups_pur: item.sub_head,
+              tax_rate: undefined,
+              taxname: [],
+              unit_id: item.unit_id,
+              unit_name: item.unit_id,
+              unit_price: item.package_rate
+            };
+            pur_add_item_to_table(itemData, 'undefined', '0');
+            alert_float('success', "Cost item has been added to the table");
+          } else {
+            alert_float('warning', "No item found for the selected package.");
+          }
+        });
       }
-      var itemData = {
-        area: [],
-        description: longdescription,
-        discount: undefined,
-        item_code: itemcode,
-        item_name: undefined,
-        quantity: "",
-        sub_groups_pur: subhead,
-        tax_rate: undefined,
-        taxname: [],
-        unit_id: "",
-        unit_name: "",
-        unit_price: ""
-      };
-      pur_add_item_to_table(itemData, 'undefined', '0');
-      alert_float('success', "Cost item have added in below table");
     });
 
     $("body").on('click', '.enable_item_select', function() {

@@ -14949,4 +14949,12 @@ class purchase extends AdminController
             die;
         }
     }
+
+    public function cost_fetch_pur_item()
+    {
+        $data = $this->input->post();
+        $result = $this->purchase_model->get_package_items_info($data['package_id'], $data['itemableid']);
+        echo json_encode(['result' => $result]);
+        exit;
+    }
 }
