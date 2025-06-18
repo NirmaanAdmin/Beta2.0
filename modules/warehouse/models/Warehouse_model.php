@@ -1543,6 +1543,7 @@ class Warehouse_model extends App_Model
 		left join ' . db_prefix() . 'items on ' . db_prefix() . 'pur_order_detail.item_code =  ' . db_prefix() . 'items.id
 		left join ' . db_prefix() . 'taxes on ' . db_prefix() . 'taxes.id = ' . db_prefix() . 'pur_order_detail.tax where ' . db_prefix() . 'pur_order_detail.pur_order = ' . $pur_order;
 		$results = $this->db->query($sql)->result_array();
+		$co_exist = $this->purchase_model->get_po_changes($pur_order);
 
 		$currency_rate = 1;
 		$this->load->model('purchase/purchase_model');
@@ -1609,6 +1610,11 @@ class Warehouse_model extends App_Model
 					}
 					$available_quantity = $available_quantity - $total_quantity;
 				}
+				$available_quantity = round($available_quantity, 2);
+			}
+			if(!empty($co_exist)) {
+				$updated_co_quantity = $this->get_changee_order_quantity($value['commodity_code'], $value['description'], $pur_order, 'pur_orders');
+				$available_quantity = $available_quantity + $updated_co_quantity;
 				$available_quantity = round($available_quantity, 2);
 			}
 			// $available_quantity = app_format_number($available_quantity, true);
@@ -22279,4 +22285,41 @@ class Warehouse_model extends App_Model
 
 		return $arr_pur_resquest;
 	}
+
+	public function get_changee_order_quantity($item_code, $description, $order_id, $type)
+    {
+        $updated_co_quantity = 0;
+        $non_break_description = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $description));
+        $this->db->select(db_prefix() . 'co_order_detail.*, 
+		    (
+		        ' . db_prefix() . 'co_order_detail.quantity - ' . db_prefix() . 'co_order_detail.original_quantity
+		    ) AS quantity_difference'
+		);
+        $this->db->select("
+            REPLACE(
+                REPLACE(
+                    REPLACE(
+                        REPLACE(" . db_prefix() . "co_order_detail.description, '\r', ''),
+                    '\n', ''),
+                '<br />', ''),
+            '<br/>', '') AS non_break_description
+        ");
+        $this->db->join(db_prefix() . 'co_orders', db_prefix() . 'co_orders.id = ' . db_prefix() . 'co_order_detail.pur_order', 'left');
+        if($type == "pur_orders") {
+            $this->db->where(db_prefix() . 'co_orders.po_order_id', $order_id);
+        }
+        if($type == "wo_orders") {
+            $this->db->where(db_prefix() . 'co_orders.wo_order_id', $order_id);
+        }
+        $this->db->where(db_prefix() . 'co_orders.approve_status', 2);
+        $this->db->where(db_prefix() . 'co_order_detail.item_code', $item_code);
+        $this->db->group_by(db_prefix() . 'co_order_detail.id');
+        $this->db->having('non_break_description', $non_break_description);
+        $co_order_detail = $this->db->get(db_prefix() . 'co_order_detail')->result_array();
+        if(!empty($co_order_detail)) {
+            $updated_co_quantity = array_sum(array_column($co_order_detail, 'quantity_difference'));
+        }
+
+        return $updated_co_quantity;
+    }
 }
