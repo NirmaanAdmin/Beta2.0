@@ -588,10 +588,22 @@ if ($estimate->currency != 0) {
                                           <td align="left">
                                              <div style="width: 120px"><?php echo $full_item_image; ?></div>
                                           </td>
-                                          <td align="right" width="12%"><?php
-                                                                        $unit_name = pur_get_unit_name($es['unit_id']);
-                                                                        echo pur_html_entity_decode($es['quantity']) . ' ' . $unit_name; ?></td>
-                                          <td align="right"><?php echo app_format_money($es['unit_price'], $base_currency->symbol); ?></td>
+                                          <td align="right" width="12%">
+                                             <?php
+                                             $unit_name = pur_get_unit_name($es['unit_id']);
+                                             echo pur_html_entity_decode($es['quantity']) . ' ' . $unit_name; ?>
+                                             <?php
+                                             if ($es['is_co']) { ?>
+                                                <br><span style="display: block;">Amendment: <?php echo $es['amendment_qty']; ?>
+                                             <?php } ?>
+                                          </td>
+                                          <td align="right">
+                                             <?php echo app_format_money($es['unit_price'], $base_currency->symbol); ?>
+                                             <?php
+                                             if ($es['is_co']) { ?>
+                                                <br><span style="display: block;">Amendment: <?php echo $es['amendment_rate']; ?>
+                                             <?php } ?>
+                                          </td>
                                           <td align="right"><?php echo app_format_money($es['into_money'], $base_currency->symbol); ?></td>
                                           <?php if (get_option('show_purchase_tax_column') == 1) { ?>
                                              <td align="right"><?php echo app_format_money(($es['total'] - $es['into_money']), $base_currency->symbol); ?></td>

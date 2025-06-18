@@ -21542,4 +21542,72 @@ class Purchase_model extends App_Model
         return $this->db->get()->result_array();
 
     }
+
+    public function get_changee_pur_order_detail($data)
+    {
+        $result = array();
+        foreach ($data as $key => $value) {
+            $changee_pur_order_item = $this->get_changee_order_item($value['item_code'], $value['description'], $value['pur_order'], 'pur_orders', $value['quantity'], $value['unit_price']);
+            $value['is_co'] = $changee_pur_order_item['is_co'];
+            $value['amendment_qty'] = $changee_pur_order_item['amendment_qty'];
+            $value['amendment_rate'] = $changee_pur_order_item['amendment_rate'];
+            $result[] = $value;
+        }
+
+        return $result;
+    }
+
+    public function get_changee_wo_order_detail($data)
+    {
+        $result = array();
+        foreach ($data as $key => $value) {
+            $changee_wo_order_item = $this->get_changee_order_item($value['item_code'], $value['description'], $value['wo_order'], 'wo_orders', $value['quantity'], $value['unit_price']);
+            $value['is_co'] = $changee_wo_order_item['is_co'];
+            $value['amendment_qty'] = $changee_wo_order_item['amendment_qty'];
+            $value['amendment_rate'] = $changee_wo_order_item['amendment_rate'];
+            $result[] = $value;
+        }
+
+        return $result;
+    }
+
+    public function get_changee_order_item($item_code, $description, $order_id, $type, $original_quantity, $original_unit_price)
+    {
+        $result = array();
+        $result['is_co'] = false;
+        $result['amendment_qty'] = 0;
+        $result['amendment_rate'] = 0;
+        $non_break_description = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $description));
+        $this->db->select(db_prefix() . 'co_order_detail.*');
+        $this->db->select("
+            REPLACE(
+                REPLACE(
+                    REPLACE(
+                        REPLACE(" . db_prefix() . "co_order_detail.description, '\r', ''),
+                    '\n', ''),
+                '<br />', ''),
+            '<br/>', '') AS non_break_description
+        ");
+        $this->db->join(db_prefix() . 'co_orders', db_prefix() . 'co_orders.id = ' . db_prefix() . 'co_order_detail.pur_order', 'left');
+        if($type == "pur_orders") {
+            $this->db->where(db_prefix() . 'co_orders.po_order_id', $order_id);
+        }
+        if($type == "wo_orders") {
+            $this->db->where(db_prefix() . 'co_orders.wo_order_id', $order_id);
+        }
+        $this->db->where(db_prefix() . 'co_orders.approve_status', 2);
+        $this->db->where(db_prefix() . 'co_order_detail.item_code', $item_code);
+        $this->db->group_by(db_prefix() . 'co_order_detail.id');
+        $this->db->having('non_break_description', $non_break_description);
+        $co_order_detail = $this->db->get(db_prefix() . 'co_order_detail')->result_array();
+        if(!empty($co_order_detail)) {
+            $result['is_co'] = true;
+            $updated_quantity = array_sum(array_column($co_order_detail, 'quantity'));
+            $updated_unit_price = array_sum(array_column($co_order_detail, 'unit_price'));
+            $result['amendment_qty'] = $original_quantity - $updated_quantity;
+            $result['amendment_rate'] = $original_unit_price - $updated_unit_price;
+        }
+
+        return $result;
+    }
 }
