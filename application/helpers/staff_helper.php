@@ -152,6 +152,14 @@ function get_available_staff_permissions($data = [])
             'name'         => _l('estimate_request'),
             'capabilities' => $allPermissionsArray,
         ],
+        'critical_agenda' => [
+            'name'         => _l('Critical Agenda'),
+            'capabilities' => [
+                'create' => _l('permission_create'),
+                'view_own' => _l('permission_view_own'),
+                'edit' => _l('permission_edit'),
+            ],
+        ],
     ];
 
     $addLeadsPermission = true;

@@ -43,10 +43,13 @@ $module_name = 'critical_mom'; ?>
         <div class="row" style="margin-bottom: 16px;">
 
             <div class="col-md-1">
-                <button class="btn btn-info pull-left mright10 display-block" data-toggle="modal" data-target="#addNewRowModal">
-                    <i class="fa fa-plus"></i> <?php echo _l('New'); ?>
-                </button>
+                <?php if (has_permission('critical_agenda', '', 'create') || is_admin()) { ?>
+                    <button class="btn btn-info pull-left mright10 display-block" data-toggle="modal" data-target="#addNewRowModal">
+                        <i class="fa fa-plus"></i> <?php echo _l('New'); ?>
+                    </button>
+                <?php } ?>
             </div>
+
             <div class="row all_ot_filters">
                 <div class="col-md-2 form-group">
                     <?php
