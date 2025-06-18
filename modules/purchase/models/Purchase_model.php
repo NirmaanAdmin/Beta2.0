@@ -2887,6 +2887,11 @@ class Purchase_model extends App_Model
             // warehouse module hook after purchase order add
             hooks()->do_action('after_purchase_order_add', $insert_id);
 
+            if(isset($data['package_id'])) {
+                $this->db->where('id', $data['package_id']);
+                $this->db->update(db_prefix() . 'estimate_package_info', ['awarded_value' => $data['total']]);
+            }
+
             return $insert_id;
         }
 
@@ -3188,6 +3193,13 @@ class Purchase_model extends App_Model
         $this->db->update(db_prefix() . 'pur_orders', $total);
         if ($this->db->affected_rows() > 0) {
             $affectedRows++;
+        }
+
+        $this->db->where('id', $id);
+        $po = $this->db->get(db_prefix() . 'pur_orders')->row();
+        if(!empty($po->package_id)) {
+            $this->db->where('id', $po->package_id);
+            $this->db->update(db_prefix() . 'estimate_package_info', ['awarded_value' => $data['total']]);
         }
 
         if ($affectedRows > 0) {
