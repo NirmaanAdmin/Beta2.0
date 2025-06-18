@@ -1592,7 +1592,7 @@ class purchase extends AdminController
         $data['pur_order_attachments'] = $this->purchase_model->get_purchase_order_attachments($id);
         $data['estimate_detail'] = $this->purchase_model->get_pur_order_detail($id);
         if(!empty($data['estimate_detail'])) {
-            $data['estimate_detail'] = $this->purchase_model->get_changee_pur_order_detail($data['estimate_detail']);
+            $data['estimate_detail'] = $this->purchase_model->get_changee_pur_order_detail($data['estimate_detail'], $id);
         }
         $data['estimate']          = $estimate;
         $data['members']           = $this->staff_model->get('', ['active' => 1]);
@@ -9945,7 +9945,7 @@ class purchase extends AdminController
         // $data['pur_order_attachments'] = $this->purchase_model->get_purchase_order_attachments($id);
         $data['estimate_detail'] = $this->purchase_model->get_wo_order_detail($id);
         if(!empty($data['estimate_detail'])) {
-            $data['estimate_detail'] = $this->purchase_model->get_changee_wo_order_detail($data['estimate_detail']);
+            $data['estimate_detail'] = $this->purchase_model->get_changee_wo_order_detail($data['estimate_detail'], $id);
         }
         $data['estimate']          = $estimate;
         $data['members']           = $this->staff_model->get('', ['active' => 1]);

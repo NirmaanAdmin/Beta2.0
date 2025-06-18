@@ -21543,7 +21543,7 @@ class Purchase_model extends App_Model
 
     }
 
-    public function get_changee_pur_order_detail($data)
+    public function get_changee_pur_order_detail($data, $pur_order)
     {
         $result = array();
         foreach ($data as $key => $value) {
@@ -21554,10 +21554,15 @@ class Purchase_model extends App_Model
             $result[] = $value;
         }
 
+        $co_order_detail = $this->get_changee_non_tender_item('pur_orders', $pur_order);
+        if(!empty($co_order_detail)) {
+            $result = array_merge($result, $co_order_detail);
+        }
+
         return $result;
     }
 
-    public function get_changee_wo_order_detail($data)
+    public function get_changee_wo_order_detail($data, $wo_order)
     {
         $result = array();
         foreach ($data as $key => $value) {
@@ -21568,7 +21573,52 @@ class Purchase_model extends App_Model
             $result[] = $value;
         }
 
+        $co_order_detail = $this->get_changee_non_tender_item('wo_orders', $wo_order);
+        if(!empty($co_order_detail)) {
+            $result = array_merge($result, $co_order_detail);
+        }
+
         return $result;
+    }
+
+    public function get_changee_non_tender_item($type, $order_id)
+    {
+        $this->db->select(
+            db_prefix() . 'co_order_detail.serial_no, ' . 
+            db_prefix() . 'co_order_detail.item_code, ' . 
+            db_prefix() . 'co_order_detail.tender_item as non_budget_item, ' . 
+            db_prefix() . 'co_order_detail.description, ' . 
+            db_prefix() . 'co_order_detail.unit_id, ' . 
+            db_prefix() . 'co_order_detail.area as area, ' . 
+            db_prefix() . 'co_order_detail.original_quantity as quantity, ' . 
+            db_prefix() . 'co_order_detail.quantity as amendment_qty, ' . 
+            db_prefix() . 'co_order_detail.original_unit_price as unit_price, ' . 
+            db_prefix() . 'co_order_detail.unit_price as amendment_rate, ' . 
+            db_prefix() . 'co_order_detail.into_money_updated as into_money, ' . 
+            db_prefix() . 'co_order_detail.total as total, ' . 
+            db_prefix() . 'co_order_detail.total as total_money, ' . 
+            "'' as sub_groups_pur, " .
+            "'' as image, " .
+            "'1' as is_co, " .
+            "'0' as discount_money, " .
+            "'' as discount_percent"
+        );
+        $this->db->from(db_prefix() . 'co_order_detail');
+        $this->db->join(
+            db_prefix() . 'co_orders',
+            db_prefix() . 'co_orders.id = ' . db_prefix() . 'co_order_detail.pur_order',
+            'left'
+        );
+        $this->db->where(db_prefix() . 'co_orders.approve_status', 2);
+        if($type == "pur_orders") {
+            $this->db->where(db_prefix() . 'co_orders.po_order_id', $order_id);
+        }
+        if($type == "wo_orders") {
+            $this->db->where(db_prefix() . 'co_orders.wo_order_id', $order_id);
+        }
+        $this->db->where(db_prefix() . 'co_order_detail.tender_item', 1);
+        $this->db->group_by(db_prefix() . 'co_order_detail.id');
+        return $this->db->get()->result_array();
     }
 
     public function get_changee_order_item($item_code, $description, $order_id, $type, $original_quantity, $original_unit_price)
