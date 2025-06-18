@@ -17,8 +17,9 @@ $aColumns = [
    'awarded_value',
    'sdeposit_value',
    'pending_value_in_package',
-   'percentage_of_capex_used',
    2,
+   'percentage_of_capex_used',
+   3,
 ];
 
 if($estimate_id != 0) {
@@ -32,8 +33,9 @@ if($estimate_id != 0) {
       'awarded_value',
       'sdeposit_value',
       'pending_value_in_package',
-      'percentage_of_capex_used',
       2,
+      'percentage_of_capex_used',
+      3,
    ];
 }
 
@@ -149,6 +151,17 @@ foreach ($rResult as $aRow) {
          . _l('Preview') . '</a>';
          $_data = $preview;
       } elseif ($column == 2) {
+         $_data = '';
+         if($aRow['awarded_value'] == 0) {
+            $_data = '<span class="inline-block label label-danger">Not Booked</span>';
+         } elseif ($aRow['pending_value_in_package'] == 0) {
+            $_data = '<span class="inline-block label label-success">Fully Booked</span>';
+         } elseif ($aRow['pending_value_in_package'] > 0) {
+            $_data = '<span class="inline-block label label-warning">Partially Booked</span>';
+         } else {
+            $_data = '';
+         }
+      } elseif ($column == 3) {
          $_data = '<div class="btn-group mright5">
             <a href="#" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" >
                Book Order <span class="caret"></span>
