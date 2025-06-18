@@ -21654,8 +21654,8 @@ class Purchase_model extends App_Model
             $result['is_co'] = true;
             $updated_quantity = array_sum(array_column($co_order_detail, 'quantity'));
             $updated_unit_price = array_sum(array_column($co_order_detail, 'unit_price'));
-            $result['amendment_qty'] = $original_quantity - $updated_quantity;
-            $result['amendment_rate'] = $original_unit_price - $updated_unit_price;
+            $result['amendment_qty'] =  $updated_quantity - $original_quantity;
+            $result['amendment_rate'] = $updated_unit_price - $original_unit_price;
         }
 
         return $result;
