@@ -204,7 +204,7 @@
 							</div>
 						</div>
 					</div>
-					<div class="panel_s">
+					<div class="panel_s" style="margin: 0px;">
 						<div class="panel-body">
 							<label for="attachment"><?php echo _l('attachment'); ?></label>
 							<div class="attachments">
@@ -244,6 +244,92 @@
 							<?php echo '</div>';
 								}
 							} ?>
+						</div>
+					</div>
+					<div class="panel_s">
+						<div class="panel-body">
+							<!-- <a href="#" id="show_documentation" class="btn btn-info pull-left mright10 display-block" data-toggle="modal" data-target="#documentationModal">
+								Documentation
+							</a> -->
+							<h4 class="modal-title" id="documentationModalLabel">Documentation</h4>
+							<table class="table items items-preview">
+								<thead>
+									<tr>
+										<th style="width: 7%;">Sr. No</th>
+										<th><?php echo _l('Checklist') ?></th>
+										<th><?php echo _l('Required') ?></th>
+										<th><?php echo _l('Attachments') ?></th>
+										<th><?php echo _l('Download') ?></th>
+									</tr>
+								</thead>
+								<tbody>
+									<?php
+									$checklist_items = [
+										'1' => 'Stock Import Images',
+										'2' => 'Technical/Security Staff sign',
+										'3' => 'Transport Document',
+										'4' => 'Production Certificate',
+									];
+
+									$sr = 1;
+									foreach ($checklist_items as $key => $value) {
+										$is_required = 1;
+										$is_attachemnt = $file_id = 0;
+										if (!empty($goods_documentitions)) {
+											foreach ($goods_documentitions as $doc) {
+												if ($doc->checklist_id == $key) {
+													$is_required = $doc->required;
+													$is_attachemnt = $doc->attachments;
+													$file_id = $doc->id;
+													$rel_id = $doc->goods_receipt_id;
+												}
+											}
+										}
+									?>
+										<input type="hidden" name="checklist_id[<?= $key ?>]" value="<?= $key ?>">
+										<tr>
+											<td><?= $sr ?></td>
+											<td><?= $value ?></td>
+											<td style="text-align: center;">
+												<div class="checkbox">
+													<input type="hidden" name="required[<?= $key ?>]" value="0">
+													<input type="checkbox" name="required[<?= $key ?>]" value="1"
+														<?= $is_required ? 'checked="checked"' : '' ?> style="opacity: unset;">
+												</div>
+											</td>
+											<td>
+												<div class="attachment_new">
+													<div class="col-md-12">
+														<div class="form-group">
+															<div class="input-group">
+																<input type="file"
+																	class="form-control"
+																	name="doc_attachments[<?= $sr ?>][attachments_new][]"
+																	accept="<?php echo get_form_form_accepted_mimes(); ?>">
+																<span class="input-group-btn">
+																	<button class="btn btn-default add_more_attachments_goods" data-item="<?= $sr ?>"
+																		data-max="<?php echo get_option('maximum_allowed_form_attachments'); ?>" type="button">
+																		<i class="fa fa-plus"></i>
+																	</button>
+																</span>
+															</div>
+														</div>
+													</div>
+												</div>
+
+											</td>
+											<td>
+												<?php if ($is_attachemnt == 1) : ?>
+													<a href="javascript:void(0)" onclick="view_goods_receipt_attachments('<?= $file_id ?>','<?= $rel_id ?>','goods_receipt_checkl'); return false;" class="btn btn-info btn-icon">View Files</a>
+												<?php endif; ?>
+											</td>
+										</tr>
+									<?php
+										$sr++;
+									}
+									?>
+								</tbody>
+							</table>
 						</div>
 					</div>
 					<div class="panel-body mtop10 invoice-item">
@@ -375,12 +461,50 @@
 					</div>
 
 				</div>
+				<!-- Documentation Modal -->
+				<div class="modal fade" id="documentationModal" tabindex="-1" role="dialog" aria-labelledby="documentationModalLabel">
+					<div class="modal-dialog modal-lg" role="document">
+						<div class="modal-content">
+							<div class="modal-header">
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+									<span aria-hidden="true">&times;</span>
+								</button>
+								<h4 class="modal-title" id="documentationModalLabel">Documentation Checklist</h4>
+							</div>
+							<div class="modal-body">
 
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+							</div>
+						</div>
+					</div>
+				</div>
 				<?php echo form_close(); ?>
 
 			</div>
 		</div>
 	</div>
+	<div class="modal fade" id="viewgoodsReceiptAttachmentModal" tabindex="-1" role="dialog">
+		<div class="modal-dialog" role="document" style="width: 70%;">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title"><?php echo _l('attachment'); ?></h4>
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+				</div>
+				<div class="modal-body">
+					<div class="row">
+						<div class="col-md-12">
+							<div class="view_goods_receipt_attachments">
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="goods_receipt_file_data"></div>
+
 </div>
 </div>
 </div>
@@ -392,3 +516,31 @@
 </body>
 
 </html>
+<script>
+	$("body").on("click", ".add_more_attachments_goods", function() {
+		const itemIndex = $(this).data("item");
+
+		const html = `
+		<div class="attachment_new mt-2">
+			<div class="col-md-12">
+				<div class="form-group">
+					<div class="input-group">
+						<input type="file" class="form-control"
+							name="doc_attachments[${itemIndex}][attachments_new][]" 
+							accept="<?php echo get_form_form_accepted_mimes(); ?>">
+						<span class="input-group-btn">
+							<button class="btn btn-danger remove_attachment" type="button">
+								<i class="fa fa-minus"></i>
+							</button>
+						</span>
+					</div>
+				</div>
+			</div>
+		</div>`;
+
+		$(this).closest(".attachment_new").after(html);
+	});
+	$("body").on("click", ".remove_attachment", function() {
+		$(this).closest(".attachment_new").remove();
+	});
+</script>

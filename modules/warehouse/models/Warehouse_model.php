@@ -1156,11 +1156,21 @@ class Warehouse_model extends App_Model
 	public function add_goods_receipt($data, $id = false)
 	{
 
-		$inventory_receipts = $production_approval = [];
+		$inventory_receipts = $production_approval = $checklist_id_arr = $required_arr = [];
 
 		if (isset($data['newitems'])) {
 			$inventory_receipts = $data['newitems'];
 			unset($data['newitems']);
+		}
+
+		if (isset($data['checklist_id'])) {
+			$checklist_id_arr = $data['checklist_id'];
+			unset($data['checklist_id']);
+		}
+
+		if (isset($data['required'])) {
+			$required_arr = $data['required'];
+			unset($data['required']);
 		}
 
 		unset($data['item_select']);
@@ -1263,7 +1273,7 @@ class Warehouse_model extends App_Model
 		$data['total_goods_money'] = reformat_currency_j($data['total_goods_money']);
 		$data['value_of_inventory'] = reformat_currency_j($data['value_of_inventory']);
 		$data['total_money'] = reformat_currency_j($data['total_money']);
-		// echo '<pre>'; print_r($data); die();
+
 		$this->db->insert(db_prefix() . 'goods_receipt', $data);
 		$insert_id = $this->db->insert_id();
 		$this->save_invetory_files('goods_receipt', $insert_id);
@@ -1346,6 +1356,73 @@ class Warehouse_model extends App_Model
 				$inventory_receipt['area'] = !empty($inventory_receipt['area']) ? implode(',', $inventory_receipt['area']) : NULL;
 
 				$this->db->insert(db_prefix() . 'goods_receipt_detail', $inventory_receipt);
+			}
+
+			if (isset($checklist_id_arr) && !empty($checklist_id_arr)) {
+				// Loop through checklist_ids (they should match the required array keys)
+				foreach ($checklist_id_arr as $key => $checklist_id) {
+					$dt_data = [];
+					$dt_data['goods_receipt_id'] = $insert_id;
+					$dt_data['checklist_id'] = $checklist_id;
+
+					// Properly handle checkbox value (1 if checked, 0 if not)
+					$dt_data['required'] = (isset($required_arr[$checklist_id]) && $required_arr[$checklist_id] == '1') ? 1 : 0;
+
+					// Initialize attachments as 0 (will update later if files are uploaded)
+					$dt_data['attachments'] = 0;
+
+					// Check if record exists
+					$this->db->where('goods_receipt_id', $insert_id);
+					$this->db->where('checklist_id', $checklist_id);
+					$existing_record = $this->db->get(db_prefix() . 'goods_receipt_documentation')->row();
+
+					if ($existing_record) {
+						// Update existing record
+						$this->db->where('id', $existing_record->id);
+						$update_result = $this->db->update(db_prefix() . 'goods_receipt_documentation', $dt_data);
+						$insert_new_id = $existing_record->id;
+
+						if (!$update_result) {
+							return false;
+						}
+					} else {
+						// Insert new record
+						$insert_result = $this->db->insert(db_prefix() . 'goods_receipt_documentation', $dt_data);
+						$insert_new_id = $this->db->insert_id();
+
+						if (!$insert_result) {
+							return false;
+						}
+					}
+
+					// Handle file attachments
+					$iuploadedFiles = handle_goods_receipt_ckecklist_item_attachment_array('goods_receipt_checklist', $insert_id, $insert_new_id, 'doc_attachments', $key);
+
+					if ($iuploadedFiles && is_array($iuploadedFiles)) {
+						foreach ($iuploadedFiles as $file) {
+							$file_data = array();
+							$file_data['dateadded'] = date('Y-m-d H:i:s');
+							$file_data['rel_type'] = 'goods_receipt_checkl';
+							$file_data['rel_id'] = $insert_id; // Changed from $goods_receipt_id to $insert_id
+							$file_data['staffid'] = get_staff_user_id();
+							$file_data['attachment_key'] = app_generate_hash();
+							$file_data['file_name'] = $file['file_name'];
+							$file_data['filetype'] = $file['filetype'];
+							$file_data['file_id'] = $insert_new_id;
+
+							$file_insert = $this->db->insert(db_prefix() . 'invetory_files', $file_data);
+
+							// Update attachments flag only if file was successfully inserted
+							if ($file_insert) {
+								$this->db->where('id', $insert_new_id);
+								$this->db->update(db_prefix() . 'goods_receipt_documentation', ['attachments' => 1]);
+							} else {
+								// Log error if file insertion fails
+								log_activity('Failed to insert attachment for goods receipt documentation ID: ' . $insert_new_id);
+							}
+						}
+					}
+				}
 			}
 		}
 
@@ -7856,6 +7933,16 @@ class Warehouse_model extends App_Model
 			$remove_inventory_receipts = $data['removed_items'];
 			unset($data['removed_items']);
 		}
+		if (isset($data['checklist_id'])) {
+			$checklist_id_arr = $data['checklist_id'];
+			unset($data['checklist_id']);
+		}
+
+		if (isset($data['required'])) {
+			$required_arr = $data['required'];
+			unset($data['required']);
+		}
+
 		unset($data['item_select']);
 		unset($data['commodity_name']);
 		unset($data['warehouse_id']);
@@ -8046,6 +8133,73 @@ class Warehouse_model extends App_Model
 			}
 		}
 
+		if (isset($checklist_id_arr) && !empty($checklist_id_arr)) {
+			// Loop through checklist_ids (they should match the required array keys)
+			foreach ($checklist_id_arr as $key => $checklist_id) {
+				$dt_data = [];
+				$dt_data['goods_receipt_id'] = $goods_receipt_id;
+				$dt_data['checklist_id'] = $checklist_id;
+
+				// Properly handle checkbox value (1 if checked, 0 if not)
+				$dt_data['required'] = (isset($required_arr[$checklist_id]) && $required_arr[$checklist_id] == '1') ? 1 : 0;
+
+
+
+				// Check if record exists
+				$this->db->where('goods_receipt_id', $goods_receipt_id);
+				$this->db->where('checklist_id', $checklist_id);
+				$existing_record = $this->db->get(db_prefix() . 'goods_receipt_documentation')->row();
+
+				if ($existing_record) {
+
+					// Update existing record
+					$this->db->where('id', $existing_record->id);
+					$update_result = $this->db->update(db_prefix() . 'goods_receipt_documentation', $dt_data);
+					$insert_new_id = $existing_record->id;
+
+					if (!$update_result) {
+						return false;
+					}
+				} else {
+					// Insert new record
+					$insert_result = $this->db->insert(db_prefix() . 'goods_receipt_documentation', $dt_data);
+					$insert_new_id = $this->db->insert_id();
+
+					if (!$insert_result) {
+						return false;
+					}
+				}
+
+				// Handle file attachments
+				$iuploadedFiles = handle_goods_receipt_ckecklist_item_attachment_array('goods_receipt_checklist', $goods_receipt_id, $insert_new_id, 'doc_attachments', $key);
+
+				if ($iuploadedFiles && is_array($iuploadedFiles)) {
+					foreach ($iuploadedFiles as $file) {
+						$file_data = array();
+						$file_data['dateadded'] = date('Y-m-d H:i:s');
+						$file_data['rel_type'] = 'goods_receipt_checkl';
+						$file_data['rel_id'] = $goods_receipt_id; // Changed from $goods_receipt_id to $insert_id
+						$file_data['staffid'] = get_staff_user_id();
+						$file_data['attachment_key'] = app_generate_hash();
+						$file_data['file_name'] = $file['file_name'];
+						$file_data['filetype'] = $file['filetype'];
+						$file_data['file_id'] = $insert_new_id;
+
+						$file_insert = $this->db->insert(db_prefix() . 'invetory_files', $file_data);
+
+						// Update attachments flag only if file was successfully inserted
+						if ($file_insert) {
+							$this->db->where('id', $insert_new_id);
+							$this->db->update(db_prefix() . 'goods_receipt_documentation', ['attachments' => 1]);
+						} else {
+							// Log error if file insertion fails
+							log_activity('Failed to insert attachment for goods receipt documentation ID: ' . $insert_new_id);
+						}
+					}
+				}
+			}
+		}
+
 		// delete receipt note
 		foreach ($remove_inventory_receipts as $receipt_detail_id) {
 			$this->db->where('id', $receipt_detail_id);
@@ -8121,10 +8275,12 @@ class Warehouse_model extends App_Model
 			$inventory_receipt['area'] = !empty($inventory_receipt['area']) ? implode(',', $inventory_receipt['area']) : NULL;
 
 			$this->db->insert(db_prefix() . 'goods_receipt_detail', $inventory_receipt);
-			if ($this->db->insert_id()) {
+			$insert_id = $this->db->insert_id();
+			if ($insert_id) {
 				$results++;
 			}
 		}
+
 
 		if (isset($goods_receipt_id)) {
 			//send request approval
@@ -20445,7 +20601,7 @@ class Warehouse_model extends App_Model
 									$this->db->select(db_prefix() . 'goods_receipt_detail.quantities');
 									$this->db->like(db_prefix() . 'goods_receipt_detail.description', $non_break_description);
 									$this->db->where(db_prefix() . 'goods_receipt.approval', 1);
-									$this->db->where('pr_order_id', $pur_order); 
+									$this->db->where('pr_order_id', $pur_order);
 									$this->db->join(db_prefix() . 'goods_receipt', db_prefix() . 'goods_receipt.id = ' . db_prefix() . 'goods_receipt_detail.goods_receipt_id', 'left');
 									$goods_receipt_description = $this->db->get(db_prefix() . 'goods_receipt_detail')->result_array();
 									if (!empty($goods_receipt_description)) {

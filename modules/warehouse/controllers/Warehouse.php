@@ -698,7 +698,6 @@ class warehouse extends AdminController
 		if ($this->input->post()) {
 			$message = '';
 			$data = $this->input->post();
-
 			if (!$this->input->post('id')) {
 
 				$mess = $this->warehouse_model->add_goods_receipt($data);
@@ -715,7 +714,7 @@ class warehouse extends AdminController
 				}
 				redirect(admin_url('warehouse/manage_purchase/' . $mess));
 			} else {
-
+				
 				$id = $this->input->post('id');
 				$mess = $this->warehouse_model->update_goods_receipt($data);
 
@@ -731,15 +730,16 @@ class warehouse extends AdminController
 				redirect(admin_url('warehouse/manage_purchase/' . $id));
 			}
 		}
+		
 		//get vaule render dropdown select
 		$data['commodity_code_name'] = $this->warehouse_model->get_commodity_code_name();
 		$data['units_code_name'] = $this->warehouse_model->get_units_code_name();
 		$data['units_warehouse_name'] = $this->warehouse_model->get_warehouse_code_name();
-
+		$data['goods_documentitions'] = $this->warehouse_model->get_inventory_documents($id);
 		$data['title'] = 'Stock Received';
 
 		$data['commodity_codes'] = $this->warehouse_model->get_commodity();
-
+		
 		$data['warehouses'] = $this->warehouse_model->get_warehouse();
 		if (get_status_modules_wh('purchase')) {
 			$this->load->model('purchase/purchase_model');
@@ -759,7 +759,6 @@ class warehouse extends AdminController
 			$data['pr_orders'] = [];
 			$data['pr_orders_status'] = false;
 		}
-
 
 		// $data['taxes'] = $this->warehouse_model->get_taxes();
 		$data['goods_code'] = $this->warehouse_model->create_goods_code();
@@ -9629,7 +9628,7 @@ class warehouse extends AdminController
 
 	public function goods_receipt_documentetion($goods_receipt_id)
 	{
-		$data = $this->input->post();
+		$data = $this->input->post(); 
 
 		// Call the model function and check its return value
 		$success = $this->warehouse_model->add_goods_documentetion($data, $goods_receipt_id);

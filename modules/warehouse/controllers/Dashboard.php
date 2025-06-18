@@ -100,7 +100,7 @@ class Dashboard extends AdminController
             2,
             'returnable_date',
             3,
-        ];
+        ]; 
         $sIndexColumn = 'id';
         $sTable       = db_prefix() . 'goods_delivery_detail';
         $join         = [];

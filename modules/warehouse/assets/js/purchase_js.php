@@ -82,17 +82,17 @@
 			"use strict";
 
 
-		$('select[name="warehouse_id_m"]').on('change', function() {
-			"use strict";
-			var warehouse_id = $(this).val();
-			if(warehouse_id) {
-				$('.warehouse_select select').each(function(index) {
-				    if (index !== 0) {  // Skip the first row
-				        $(this).val(warehouse_id).trigger('change');
-				    }
-				});
-			}
-		});
+			$('select[name="warehouse_id_m"]').on('change', function() {
+				"use strict";
+				var warehouse_id = $(this).val();
+				if (warehouse_id) {
+					$('.warehouse_select select').each(function(index) {
+						if (index !== 0) { // Skip the first row
+							$(this).val(warehouse_id).trigger('change');
+						}
+					});
+				}
+			});
 
 			var pr_order_id = $('select[name="pr_order_id"]').val();
 			$.get(admin_url + 'warehouse/coppy_pur_request/' + pr_order_id).done(function(response) {
@@ -105,11 +105,11 @@
 					// $('.invoice-item table.invoice-production-approvals-table.items tbody').append(response.production_approval_item);
 
 					var warehouse_id = $('#warehouse_id_m').val();
-					if(warehouse_id) {
+					if (warehouse_id) {
 						$('.warehouse_select select').each(function(index) {
-						    if (index !== 0) {  // Skip the first row
-						        $(this).val(warehouse_id).trigger('change');
-						    }
+							if (index !== 0) { // Skip the first row
+								$(this).val(warehouse_id).trigger('change');
+							}
 						});
 					}
 
@@ -504,6 +504,45 @@
 			return false;
 		}
 
+
+		// Check for required items without attachments
+		var hasMissingAttachments = false;
+		var $checklistTable = $('.table.items-preview');
+
+		$checklistTable.find('tbody tr').each(function() {
+			var $row = $(this);
+			var $checkbox = $row.find('input[type="checkbox"]');
+			var isRequired = $checkbox.is(':checked');
+			var hasAttachment = $row.find('input[type="file"]').val() || $row.find('.btn-info').length > 0;
+
+			if (isRequired && !hasAttachment) {
+				hasMissingAttachments = true;
+				$row.addClass('has-error'); // Highlight the row
+				return false; // Break out of the loop
+			}
+		});
+
+		if (hasMissingAttachments) {
+			// Show modal if not already visible
+			// $('#documentationModal').modal('show');
+
+			// Scroll to the first error
+			$('html, body').animate({
+				scrollTop: $('.has-error').first().offset().top - 100
+			}, 500);
+
+			alert_float('danger', '<?php echo _l("Required items must have attachments"); ?>', 5000);
+			return false;
+		}
+
+		// Convert all checkboxes to 1/0 values before submission
+		$('input[type="checkbox"][name^="required"]').each(function() {
+			var $hidden = $(this).prev('input[type="hidden"]');
+			$hidden.val($(this).is(':checked') ? '1' : '0');
+			$(this).prop('disabled', true); // Disable checkbox so only hidden input is submitted
+		});
+
+
 		$('input[name="save_and_send_request"]').val(save_and_send_request);
 
 		var rows = $('.table.has-calculations tbody tr.item');
@@ -526,12 +565,12 @@
 			$(this).find('.add_goods_receipt').prop('disabled', true);
 			$('#add_goods_receipt').submit();
 		} else {
-			if(check_warehouse_status == false){
+			if (check_warehouse_status == false) {
 				alert_float('warning', '<?php echo _l('please_select_a_warehouse') ?>');
-			}else{
+			} else {
 				alert_float('warning', '<?php echo _l('inventory_quantity_is_not_enough') ?>');
 			}
-			
+
 		}
 
 		return true;
@@ -635,6 +674,57 @@
 						callback();
 					}
 				});
+		}
+	}
+
+	function view_goods_receipt_attachments(file_id, rel_id, rel_type) {
+		"use strict";
+		$.post(admin_url + 'warehouse/view_goods_receipt_attachments', {
+			rel_id: rel_id,
+			rel_type: rel_type,
+			file_id: file_id
+		}).done(function(response) {
+			response = JSON.parse(response);
+			if (response.result) {
+				$('.view_goods_receipt_attachments').html(response.result);
+			} else {
+				$('.view_goods_receipt_attachments').html('');
+			}
+			$('#viewgoodsReceiptAttachmentModal').modal('show');
+		});
+	}
+
+	function preview_goods_receipt_btn(invoker) {
+		"use strict";
+		var id = $(invoker).attr('id');
+		view_goods_receipt_file(id);
+	}
+
+	function view_goods_receipt_file(id) {
+		"use strict";
+		$('#goods_receipt_file_data').empty();
+		$("#goods_receipt_file_data").load(admin_url + 'warehouse/view_goods_receipt_file/' + id, function(response, status, xhr) {
+			if (status == "error") {
+				alert_float('danger', xhr.statusText);
+			}
+		});
+	}
+
+	function close_modal_preview() {
+		"use strict";
+		$('._project_file').modal('hide');
+	}
+
+	function delete_goods_receipt_attachment(id) {
+		"use strict";
+		if (confirm_delete()) {
+			requestGet('warehouse/delete_goods_receipt_attachment/' + id).done(function(success) {
+				if (success == 1) {
+					$(".view_goods_receipt_attachments").find('[data-attachment-id="' + id + '"]').remove();
+				}
+			}).fail(function(error) {
+				alert_float('danger', error.responseText);
+			});
 		}
 	}
 </script>

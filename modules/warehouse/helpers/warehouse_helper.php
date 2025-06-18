@@ -170,7 +170,7 @@ function get_pr_order($id = false)
                 $pur_order_detail = $get_pur_order[0] ? $get_pur_order[0] : '';
                 if (!empty($pur_order_detail)) {
                     $result[] = $value;
-                }
+                } 
             }
         }
         $result = !empty($result) ? array_values($result) : array();

@@ -523,7 +523,7 @@
                 </tbody>
               </table>
               <div class="col-md-12">
-                <button id="obgy_btn2" type="submit" class="btn btn-info pull-right"><?php echo _l('submit'); ?></button>
+                <button id="obgy_btn2" type="submit" class="btn btn-info pull-right"><?php echo _l('update'); ?></button>
               </div>
               <?php echo form_close(); ?>
             </div>
