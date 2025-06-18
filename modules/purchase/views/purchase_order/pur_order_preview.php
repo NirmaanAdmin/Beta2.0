@@ -173,11 +173,6 @@ if ($estimate->currency != 0) {
                                                                                  echo $group['name'];
                                                                               }
                                                                            } ?> </p>
-               <!--               <p class="bold p_mar"><?php echo _l('sub_groups_pur') . ': ' ?> <?php foreach ($sub_groups as $group) {
-                                                                                                      if ($group['id'] == $pur_order->sub_groups_pur) {
-                                                                                                         echo $group['sub_group_name'];
-                                                                                                      }
-                                                                                                   } ?> </p>-->
                <p class="bold p_mar"><?php echo _l('hsn_sac') . ': ' ?> <?php echo get_hsn_sac_name_by_id($pur_order->hsn_sac); ?></p>
                <p class="bold p_mar"><?php echo _l('purchase_requestor') . ': ' ?> <?php echo get_staff_full_name($pur_order->buyer); ?></p>
                <p class="bold p_mar"><?php echo _l('project') . ': ' ?> <?php echo get_project_name_by_id($pur_order->project); ?></p>
@@ -186,8 +181,8 @@ if ($estimate->currency != 0) {
             <div class="col-md-8">
                <div class="btn-group pull-right">
                   <a href="javascript:void(0)" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-file-pdf"></i><?php if (is_mobile()) {
-                                                                                                                                                                                          echo ' PDF';
-                                                                                                                                                                                       } ?> <span class="caret"></span></a>
+                     echo ' PDF';
+                  } ?> <span class="caret"></span></a>
                   <ul class="dropdown-menu dropdown-menu-right">
                      <li class="hidden-xs"><a href="<?php echo admin_url('purchase/purorder_pdf/' . $estimate->id . '?output_type=I'); ?>"><?php echo _l('view_pdf'); ?></a></li>
                      <li class="hidden-xs"><a href="<?php echo admin_url('purchase/purorder_pdf/' . $estimate->id . '?output_type=I'); ?>" target="_blank"><?php echo _l('view_pdf_in_new_window'); ?></a></li>
@@ -267,41 +262,42 @@ if ($estimate->currency != 0) {
                   <select name="status" id="status" class="selectpicker pull-right mright10" onchange="change_status_pur_order(this,<?php echo ($estimate->id); ?>); return false;" data-live-search="true" data-width="35%" data-none-selected-text="<?php echo _l('pur_change_status_to'); ?>">
                      <option value=""></option>
                      <option value="1" class="<?php if ($estimate->approve_status == 1) {
-                                                   echo 'hide';
-                                                } ?>"><?php echo _l('purchase_draft'); ?></option>
+                        echo 'hide';
+                     } ?>"><?php echo _l('purchase_draft'); ?></option>
                      <option value="2" class="<?php if ($estimate->approve_status == 2) {
-                                                   echo 'hide';
-                                                } ?>"><?php echo _l('purchase_approved'); ?></option>
+                        echo 'hide';
+                     } ?>"><?php echo _l('purchase_approved'); ?></option>
                      <option value="3" class="<?php if ($estimate->approve_status == 3) {
-                                                   echo 'hide';
-                                                } ?>"><?php echo _l('pur_rejected'); ?></option>
+                        echo 'hide';
+                     } ?>"><?php echo _l('pur_rejected'); ?></option>
                      <option value="4" class="<?php if ($estimate->approve_status == 4) {
-                                                   echo 'hide';
-                                                } ?>"><?php echo _l('pur_canceled'); ?></option>
+                        echo 'hide';
+                     } ?>"><?php echo _l('pur_canceled'); ?></option>
                   </select>
                <?php } ?>
                <div class="pull-right" style="margin-right: 10px;font-size: 18px;margin-top: 4px;">
                   <a href="#" onclick="small_table_full_view(); return false;">
                      <i class="fa fa-expand" style="color: #000000 !important;"></i></a>
-               </div>
-               <div class="col-md-12 padr_div_0">
-                  <br>
-                  <div class="pull-right _buttons  ">
-                     <a href="javascript:void(0)" onclick="copy_public_link(<?php echo pur_html_entity_decode($estimate->id); ?>); return false;" class="btn btn-warning btn-with-tooltip mleft10" data-toggle="tooltip" title="<?php if ($estimate->hash == '') {
-                                                                                                                                                                                                                                    echo _l('create_public_link');
-                                                                                                                                                                                                                                 } else {
-                                                                                                                                                                                                                                    echo _l('copy_public_link');
-                                                                                                                                                                                                                                 } ?>" data-placement="bottom"><i class="fa fa-clone "></i></a>
                   </div>
-                  <div class="pull-right col-md-6">
-                     <?php if ($estimate->hash != '' && $estimate->hash != null) {
-                        echo render_input('link_public', '', site_url('purchase/vendors_portal/pur_order/' . $estimate->id . '/' . $estimate->hash));
-                     } else {
-                        echo render_input('link_public', '', '');
-                     } ?>
+                  <div class="col-md-12 padr_div_0">
+                     <br>
+                     <div class="pull-right _buttons  ">
+                        <a href="javascript:void(0)" onclick="copy_public_link(<?php echo pur_html_entity_decode($estimate->id); ?>); return false;" class="btn btn-warning btn-with-tooltip mleft10" data-toggle="tooltip" title="<?php if ($estimate->hash == '') {
+                           echo _l('create_public_link');
+                        } else {
+                           echo _l('copy_public_link');
+                        } ?>" data-placement="bottom"><i class="fa fa-clone "></i></a>
+                     </div>
+                     <div class="pull-right col-md-6">
+                        <?php if ($estimate->hash != '' && $estimate->hash != null) {
+                           echo render_input('link_public', '', site_url('purchase/vendors_portal/pur_order/' . $estimate->id . '/' . $estimate->hash));
+                        } else {
+                           echo render_input('link_public', '', '');
+                        } ?>
+                     </div>
                   </div>
-               </div>
             </div>
+
          </div>
 
          <div class="clearfix"></div>
@@ -560,18 +556,18 @@ if ($estimate->currency != 0) {
                                           </td>
                                           <td class="description" align="left">
                                              <div style="width: 250px"><span><strong><?php
-                                                                                       $item = get_item_hp($es['item_code']);
-                                                                                       if (isset($item) && isset($item->commodity_code) && isset($item->description)) {
-                                                                                          echo pur_html_entity_decode($item->commodity_code . ' - ' . $item->description);
-                                                                                       } else {
-                                                                                          echo pur_html_entity_decode($es['item_name']);
-                                                                                       }
-                                                                                       ?></strong>
-                                                </span>
-                                                <?php
-                                                if ($es['non_budget_item'] == 1) { ?>
-                                                   <br><span style="display: block;font-size: 10px;font-style: italic;"><?php echo _l('this_is_non_budgeted_item'); ?></span>
-                                                <?php } ?>
+                                             $item = get_item_hp($es['item_code']);
+                                             if (isset($item) && isset($item->commodity_code) && isset($item->description)) {
+                                                echo pur_html_entity_decode($item->commodity_code . ' - ' . $item->description);
+                                             } else {
+                                                echo pur_html_entity_decode($es['item_name']);
+                                             }
+                                             ?></strong>
+                                             </span>
+                                             <?php
+                                             if ($es['non_budget_item'] == 1) { ?>
+                                                <br><span style="display: block;font-size: 10px;font-style: italic;"><?php echo _l('this_is_non_budgeted_item'); ?></span>
+                                             <?php } ?>
                                              </div>
                                           </td>
                                           <td align="left">
