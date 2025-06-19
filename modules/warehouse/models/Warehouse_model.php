@@ -3220,7 +3220,12 @@ class Warehouse_model extends App_Model
 		$this->load->model('projects_model');
 		$this->load->model('staff_model');
 		$project_name = get_pur_order_project_name($get_project_id);
-		$get_all_po_details = get_all_po_details_in_warehouse($goods_receipt->pr_order_id);
+		if(!empty($goods_receipt->pr_order_id)) {
+			$get_all_order_details = get_all_po_details_in_warehouse($goods_receipt->pr_order_id);
+		}
+		if(!empty($goods_receipt->wo_order_id)) {
+			$get_all_order_details = get_all_wo_details_in_warehouse($goods_receipt->wo_order_id);
+		}
 		$department_name = get_department_by_id($goods_receipt->department);
 
 		$tax_data = $this->get_html_tax_receip($goods_receipt_id);
@@ -3228,8 +3233,8 @@ class Warehouse_model extends App_Model
 		$day = date('d', strtotime($goods_receipt->date_add));
 		$month = date('m', strtotime($goods_receipt->date_add));
 		$year = date('Y', strtotime($goods_receipt->date_add));
-		$budget_head = get_group_name_item($get_all_po_details->group_pur);
-		$staff_name = $this->staff_model->get($get_all_po_details->buyer);
+		$budget_head = get_group_name_item($get_all_order_details->group_pur);
+		$staff_name = $this->staff_model->get($get_all_order_details->buyer);
 
 		$warehouse_lotnumber_bottom_infor_option = get_warehouse_option('goods_delivery_pdf_display_warehouse_lotnumber_bottom_infor');
 		$serial_number_html = '';
@@ -3257,8 +3262,12 @@ class Warehouse_model extends App_Model
 		$organization_info .= '<b>Project : </b>' . $project_name . '<br>';
 		$organization_info .= '<b>Department : </b>' . $department_name . '<br>';
 
-		$organization_info .= '<b>PO Name : </b>' . $get_all_po_details->pur_order_number . '-' . $get_all_po_details->pur_order_name  . '<br>';
-
+		if(!empty($goods_receipt->pr_order_id)) {
+			$organization_info .= '<b>PO Name : </b>' . $get_all_order_details->pur_order_number . '-' . $get_all_order_details->pur_order_name  . '<br>';
+		}
+		if(!empty($goods_receipt->wo_order_id)) {
+			$organization_info .= '<b>WO Name : </b>' . $get_all_order_details->wo_order_number . '-' . $get_all_order_details->wo_order_name  . '<br>';
+		}
 
 		$organization_info .= '</div>';
 
@@ -3320,7 +3329,7 @@ class Warehouse_model extends App_Model
 
 		//invoice_data_date
 		$invoice_date = '<br /><b>' . _l('invoice_data_date') . ' ' . _d($goods_receipt->date_add) . '</b><br />';
-		$kind = '<b>Category : </b>' . $get_all_po_details->kind  . '<br>';
+		$kind = '<b>Category : </b>' . $get_all_order_details->kind  . '<br>';
 		$budget_head = '<b>Budget Head : </b>' . $budget_head->name  . '<br>';
 		$requseter = '<b>Requester : </b>' . $staff_name->firstname . ' ' . $staff_name->lastname  . '<br>';
 		$html .= '<table class="table">
@@ -22365,4 +22374,237 @@ class Warehouse_model extends App_Model
 
         return $updated_co_quantity;
     }
+
+    /**
+	 * get vendor ajax
+	 * @param  integer $wo_orders_id
+	 * @return object
+	 */
+	public function get_wo_vendor_ajax($wo_orders_id)
+	{
+		$data = [];
+		$sql = 'SELECT *, ' . db_prefix() . 'wo_orders.project, ' . db_prefix() . 'wo_orders.kind, ' . db_prefix() . 'wo_orders.type, ' . db_prefix() . 'wo_orders.department, ' . db_prefix() . 'pur_request.requester FROM ' . db_prefix() . 'pur_vendor
+		left join ' . db_prefix() . 'wo_orders on ' . db_prefix() . 'pur_vendor.userid = ' . db_prefix() . 'wo_orders.vendor
+		left join ' . db_prefix() . 'pur_request on ' . db_prefix() . 'wo_orders.pur_request = ' . db_prefix() . 'pur_request.id
+		where ' . db_prefix() . 'wo_orders.id = ' . $wo_orders_id;
+		$result_array = $this->db->query($sql)->row();
+		$data['id'] 		= $result_array->userid;
+		$data['buyer'] 		= $result_array->buyer;
+		$data['project'] 	= '';
+		$data['type']      	= '';
+		$data['department'] = '';
+		$data['requester'] 	= '';
+		if (get_status_modules_wh('purchase')) {
+			if (isset($result_array->project)) {
+				$data['project'] .= $result_array->project;
+			}
+			if (isset($result_array->type)) {
+				$data['type'] .= $result_array->type;
+			}
+			if (isset($result_array->department)) {
+				$data['department'] .= $result_array->department;
+			}
+			if (isset($result_array->requester)) {
+				$data['requester'] .= $result_array->requester;
+			}
+			if (isset($result_array->kind)) {
+				$data['kind'] .= $result_array->kind;
+			}
+		}
+		return $data;
+	}
+
+	public function copy_wo_order_items($wo_order)
+	{
+		$arr_wo_order = [];
+		$total_goods_money = 0;
+		$total_money = 0;
+		$total_tax_money = 0;
+		$value_of_inventory = 0;
+		$list_item = $production_approval_item = '';
+		$list_item = $this->warehouse_model->create_goods_receipt_row_template();
+		$production_approval_item = $this->warehouse_model->create_goods_receipt_production_approvals_template();
+		$sql = 'select item_code as commodity_code, ' . db_prefix() . 'wo_order_detail.description, ' . db_prefix() . 'wo_order_detail.unit_id, unit_price, quantity as quantities, ' . db_prefix() . 'wo_order_detail.tax as tax, into_money, (' . db_prefix() . 'wo_order_detail.total-' . db_prefix() . 'wo_order_detail.into_money) as tax_money, total as goods_money, wh_quantity_received, tax_rate, tax_value, ' . db_prefix() . 'wo_order_detail.id as id, ' . db_prefix() . 'wo_order_detail.area as area from ' . db_prefix() . 'wo_order_detail
+		left join ' . db_prefix() . 'items on ' . db_prefix() . 'wo_order_detail.item_code =  ' . db_prefix() . 'items.id
+		left join ' . db_prefix() . 'taxes on ' . db_prefix() . 'taxes.id = ' . db_prefix() . 'wo_order_detail.tax where ' . db_prefix() . 'wo_order_detail.wo_order = ' . $wo_order . '
+		GROUP BY ' . db_prefix() . 'wo_order_detail.id';
+		$results = $this->db->query($sql)->result_array();
+		$co_exist = $this->purchase_model->get_change_wo_order($wo_order);
+
+		$currency_rate = 1;
+		$this->load->model('purchase/purchase_model');
+		$get_wo_order = $this->purchase_model->get_wo_order($wo_order);
+		if ($get_wo_order) {
+			if ($get_wo_order->currency_rate != null) {
+				$currency_rate = $get_wo_order->currency_rate;
+			}
+		}
+
+		$arr_results = [];
+		$index = 0;
+		$last_index = 0;
+		$warehouse_data = $this->warehouse_model->get_warehouse();
+		foreach ($results as $key => $value) {
+			$available_quantity = (float)$value['quantities'];
+			$non_break_description = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $value['description']));
+			$this->db->select(db_prefix() . 'goods_receipt_detail.quantities');
+			$this->db->select("
+			    REPLACE(
+			        REPLACE(
+			            REPLACE(
+			                REPLACE(" . db_prefix() . "goods_receipt_detail.description, '\r', ''),
+			            '\n', ''),
+			        '<br />', ''),
+			    '<br/>', '') AS non_break_description
+			");
+			$this->db->where(db_prefix() . 'goods_receipt.approval', 1);
+			$this->db->where('wo_order_id', $wo_order);
+			$this->db->join(db_prefix() . 'goods_receipt', db_prefix() . 'goods_receipt.id = ' . db_prefix() . 'goods_receipt_detail.goods_receipt_id', 'left');
+			$this->db->group_by(db_prefix() . 'goods_receipt_detail.id');
+			$this->db->having('non_break_description', $non_break_description);
+			$goods_receipt_description = $this->db->get(db_prefix() . 'goods_receipt_detail')->result_array();
+			if (!empty($goods_receipt_description)) {
+				$total_quantity = 0;
+				foreach ($goods_receipt_description as $qitem) {
+					$total_quantity += $qitem['quantities'];
+				}
+				$available_quantity = $available_quantity - $total_quantity;
+			}
+			$available_quantity = round($available_quantity, 2);
+
+			if(!empty($co_exist)) {
+				$updated_co_quantity = $this->get_changee_order_quantity($value['commodity_code'], $value['description'], $wo_order, 'wo_orders');
+				$available_quantity = $available_quantity + $updated_co_quantity;
+				$available_quantity = round($available_quantity, 2);
+			}
+			if ($available_quantity > 0) {
+				$unit_price = round((float)$value['unit_price'] / $currency_rate, 5);
+				$index++;
+				$unit_name = wh_get_unit_name($value['unit_id']);
+				$taxname = '';
+				$date_manufacture = null;
+				$expiry_date = null;
+				$lot_number = null;
+				$vendor_id = null;
+				$delivery_date = '';
+				$payment_date = '';
+				$est_delivery_date = '';
+				$production_status = '';
+				$note = null;
+				$commodity_name = wh_get_item_variatiom($value['commodity_code']);
+				$quantities = $available_quantity;
+				$sub_total = 0;
+				$list_item .= $this->create_goods_receipt_row_template($warehouse_data, 'newitems[' . $index . ']', $commodity_name, '', $quantities, 0, $unit_name, $unit_price, $taxname, $lot_number, $vendor_id, $delivery_date, $date_manufacture, $expiry_date, $value['commodity_code'], $value['unit_id'], $value['tax_rate'], $value['tax_value'], $value['goods_money'], $note, $value['id'], $sub_total, '', $value['tax'], true, '', $value['description'], $payment_date, $est_delivery_date, $production_status, $value['area']);
+				$production_approval_item .= $this->create_goods_receipt_production_approvals_template('approvalsitems[' . $index . ']', $value['description'], $commodity_name, '', '', '', '', $value['commodity_code']);
+				$total_goods_money_temp = $available_quantity * (float)$unit_price;
+				$total_goods_money += $total_goods_money_temp;
+				$arr_results[$index]['quantities'] = $available_quantity;
+				$arr_results[$index]['goods_money'] = $available_quantity * (float)$unit_price;
+				//get tax value
+				$tax_rate = 0;
+				if ($value['tax'] != null && $value['tax'] != '') {
+					$arr_tax = explode('|', $value['tax']);
+					foreach ($arr_tax as $tax_id) {
+						$tax = $this->get_taxe_value($tax_id);
+						if ($tax) {
+							$tax_rate += (float)$tax->taxrate;
+						}
+					}
+				}
+				$arr_results[$index]['tax_money'] = $total_goods_money_temp * (float)$tax_rate / 100;
+				$total_tax_money += (float)$total_goods_money_temp * (float)$tax_rate / 100;
+				$last_index = $index;
+			}
+		}
+
+		if(!empty($co_exist)) {
+			$sql = 'select item_code as commodity_code, ' . db_prefix() . 'co_order_detail.description, ' . db_prefix() . 'co_order_detail.unit_id, unit_price, quantity as quantities, ' . db_prefix() . 'co_order_detail.tax as tax, into_money, (' . db_prefix() . 'co_order_detail.total-' . db_prefix() . 'co_order_detail.into_money) as tax_money, ' . db_prefix() . 'co_order_detail.total as goods_money, tax_rate, tax_value, ' . db_prefix() . 'co_order_detail.id as id, delivery_date, ' . db_prefix() . 'co_order_detail.area as area from ' . db_prefix() . 'co_order_detail
+			left join ' . db_prefix() . 'co_orders on ' . db_prefix() . 'co_orders.id =  ' . db_prefix() . 'co_order_detail.pur_order
+			left join ' . db_prefix() . 'items on ' . db_prefix() . 'co_order_detail.item_code =  ' . db_prefix() . 'items.id
+			left join ' . db_prefix() . 'taxes on ' . db_prefix() . 'taxes.id = ' . db_prefix() . 'co_order_detail.tax where ' . db_prefix() . 'co_orders.wo_order_id = ' . $wo_order . ' and ' . db_prefix() . 'co_order_detail.tender_item = 1
+			GROUP BY ' . db_prefix() . 'co_order_detail.id';
+			$co_results = $this->db->query($sql)->result_array();
+			if(!empty($co_results)) {
+				foreach ($co_results as $key => $value) {
+					$available_quantity = $value['quantities'];
+					$non_break_description = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $value['description']));
+					$this->db->select(db_prefix() . 'goods_receipt_detail.quantities');
+					$this->db->select("
+					    REPLACE(
+					        REPLACE(
+					            REPLACE(
+					                REPLACE(" . db_prefix() . "goods_receipt_detail.description, '\r', ''),
+					            '\n', ''),
+					        '<br />', ''),
+					    '<br/>', '') AS non_break_description
+					");
+					$this->db->where(db_prefix() . 'goods_receipt.approval', 1);
+					$this->db->where('wo_order_id', $wo_order);
+					$this->db->join(db_prefix() . 'goods_receipt', db_prefix() . 'goods_receipt.id = ' . db_prefix() . 'goods_receipt_detail.goods_receipt_id', 'left');
+					$this->db->group_by(db_prefix() . 'goods_receipt_detail.id');
+					$this->db->having('non_break_description', $non_break_description);
+					$goods_receipt_description = $this->db->get(db_prefix() . 'goods_receipt_detail')->result_array();
+					if (!empty($goods_receipt_description)) {
+						$total_quantity = 0;
+						foreach ($goods_receipt_description as $qitem) {
+							$total_quantity += $qitem['quantities'];
+						}
+						$available_quantity = $available_quantity - $total_quantity;
+					}
+					$available_quantity = round($available_quantity, 2);
+					if ($available_quantity > 0) {
+						$unit_price = round((float)$value['unit_price'] / $currency_rate, 5);
+						$last_index++;
+						$unit_name = wh_get_unit_name($value['unit_id']);
+						$taxname = '';
+						$date_manufacture = null;
+						$expiry_date = null;
+						$lot_number = null;
+						$vendor_id = null;
+						$delivery_date = $value['delivery_date'];
+						$payment_date = '';
+						$est_delivery_date = '';
+						$production_status = '';
+						$note = null;
+						$commodity_name = wh_get_item_variatiom($value['commodity_code']);
+						$quantities = $available_quantity;
+						$sub_total = 0;
+						$list_item .= $this->create_goods_receipt_row_template($warehouse_data, 'newitems[' . $last_index . ']', $commodity_name, '', $quantities, 0, $unit_name, $unit_price, $taxname, $lot_number, $vendor_id, $delivery_date, $date_manufacture, $expiry_date, $value['commodity_code'], $value['unit_id'], $value['tax_rate'], $value['tax_value'], $value['goods_money'], $note, '', $sub_total, '', $value['tax'], true, '', $value['description'], $payment_date, $est_delivery_date, $production_status, $value['area']);
+						$production_approval_item .= $this->create_goods_receipt_production_approvals_template('approvalsitems[' . $last_index . ']', $value['description'], $commodity_name, '', '', '', '', $value['commodity_code']);
+						$total_goods_money_temp = $available_quantity * (float)$unit_price;
+						$total_goods_money += $total_goods_money_temp;
+						$arr_results[$last_index]['quantities'] = $available_quantity;
+						$arr_results[$last_index]['goods_money'] = $available_quantity * (float)$unit_price;
+						//get tax value
+						$tax_rate = 0;
+						if ($value['tax'] != null && $value['tax'] != '') {
+							$arr_tax = explode('|', $value['tax']);
+							foreach ($arr_tax as $tax_id) {
+								$tax = $this->get_taxe_value($tax_id);
+								if ($tax) {
+									$tax_rate += (float)$tax->taxrate;
+								}
+							}
+						}
+						$arr_results[$last_index]['tax_money'] = $total_goods_money_temp * (float)$tax_rate / 100;
+						$total_tax_money += (float)$total_goods_money_temp * (float)$tax_rate / 100;
+					}
+				}
+			}
+		}
+
+		$total_money = $total_goods_money + $total_tax_money;
+		$value_of_inventory = $total_goods_money;
+
+		$arr_wo_order[] = $arr_results;
+		$arr_wo_order[] = $total_tax_money;
+		$arr_wo_order[] = $total_goods_money;
+		$arr_wo_order[] = $value_of_inventory;
+		$arr_wo_order[] = $total_money;
+		$arr_wo_order[] = count($arr_results);
+		$arr_wo_order[] = $list_item;
+		$arr_wo_order[] = $production_approval_item;
+
+		return $arr_wo_order;
+	}
 }

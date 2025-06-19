@@ -67,6 +67,22 @@
 								echo 'hide';
 								}; ?>">
 								<div class="form-group">
+									<label for="wo_order_id"><?php echo _l('reference_work_order'); ?></label>
+									<select name="wo_order_id" id="wo_order_id" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
+										<option value=""></option>
+										<?php foreach ($wo_orders as $wo_order) { ?>
+											<option value="<?php echo html_entity_decode($wo_order['id']); ?>" <?php if (isset($goods_receipt) && ($goods_receipt->wo_order_id == $wo_order['id'])) {
+												echo 'selected';
+											} ?>><?php echo html_entity_decode($wo_order['wo_order_number'] . ' - ' . $wo_order['wo_order_name'] . ' - ' . get_vendor_name($wo_order['vendor'])); ?></option>
+										<?php } ?>
+									</select>
+								</div>
+							</div>
+
+							<div class="col-md-6 <?php if ($pr_orders_status == false) {
+								echo 'hide';
+								}; ?>">
+								<div class="form-group">
 									<label for="supplier_code"><?php echo _l('supplier_name'); ?></label>
 									<select name="supplier_code" id="supplier_code" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
 										<option value=""></option>

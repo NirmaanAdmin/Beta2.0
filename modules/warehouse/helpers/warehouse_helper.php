@@ -153,28 +153,14 @@ function get_model_name($id = false)
  */
 function get_pr_order($id = false)
 {
-    $CI           = &get_instance();
+    $CI = &get_instance();
 
     if (is_numeric($id)) {
         $CI->db->where('id', $id);
         return $CI->db->get(db_prefix() . 'pur_orders')->row();
     }
     if ($id == false) {
-        $result = array();
-        $CI->load->model('warehouse_model');
-        $pur_orders = $CI->db->query('select * from tblpur_orders where approve_status = 2 AND status_goods = 0')->result_array();
-        if (!empty($pur_orders)) {
-            foreach ($pur_orders as $key => $value) {
-                $po_id = $value['id'];
-                $get_pur_order = $CI->warehouse_model->get_pur_request($po_id);
-                $pur_order_detail = $get_pur_order[0] ? $get_pur_order[0] : '';
-                if (!empty($pur_order_detail)) {
-                    $result[] = $value;
-                } 
-            }
-        }
-        $result = !empty($result) ? array_values($result) : array();
-        return $result;
+        return $CI->db->query('select * from tblpur_orders where approve_status = 2 AND status_goods = 0')->result_array();
     }
 }
 
@@ -2354,4 +2340,46 @@ function get_return_details_status($goods_delivery_id,$past_date_count) {
     }
 
     return 'Not Found';
+}
+
+function get_wo_order_name($id)
+{
+    $name = '';
+    $CI = &get_instance();
+
+    $CI->db->select('wo.wo_order_number, wo.wo_order_name, v.company as vendor_name');
+    $CI->db->from(db_prefix() . 'wo_orders AS wo');
+    $CI->db->join(db_prefix() . 'pur_vendor AS v', 'v.userid = wo.vendor', 'left');
+    $CI->db->where('wo.id', $id);
+
+    $wo_order = $CI->db->get()->row();
+
+    if ($wo_order) {
+        // Extract only up to the 3rd dash (remove trailing -CONT-XXXX)
+        $parts = explode('-', $wo_order->wo_order_number);
+
+        // Combine first 3 parts only if they exist
+        if (count($parts) >= 3) {
+            $trimmed_order_number = implode('-', array_slice($parts, 0, 3));
+        } else {
+            $trimmed_order_number = $wo_order->wo_order_number;
+        }
+
+        // Final output format: #PO-00001-Nov-2024 (Vendor Name)
+        $name .= $trimmed_order_number;
+
+        if (!empty($wo_order->vendor_name)) {
+            $name .= '-' . $wo_order->vendor_name . ' - ' . $wo_order->wo_order_name;
+        }
+    }
+
+    return $name;
+}
+
+function get_all_wo_details_in_warehouse($id)
+{
+    $CI = &get_instance();
+    $CI->db->where('id', $id);
+    $wo_orders = $CI->db->get(db_prefix() . 'wo_orders')->row();
+    return $wo_orders;
 }

@@ -81,7 +81,8 @@
 		$('select[name="pr_order_id"]').on('change', function() {
 			"use strict";
 
-
+			$('select[name="wo_order_id"]').val('').selectpicker('refresh');
+			$('select[name="wo_order_id"]').prop('disabled', true).selectpicker('refresh');
 			$('select[name="warehouse_id_m"]').on('change', function() {
 				"use strict";
 				var warehouse_id = $(this).val();
@@ -164,6 +165,82 @@
 
 		});
 
+		$('select[name="wo_order_id"]').on('change', function() {
+			"use strict";
+			$('select[name="pr_order_id"]').val('').selectpicker('refresh');
+			$('select[name="pr_order_id"]').prop('disabled', true).selectpicker('refresh');
+			$('select[name="warehouse_id_m"]').on('change', function() {
+				"use strict";
+				var warehouse_id = $(this).val();
+				if (warehouse_id) {
+					$('.warehouse_select select').each(function(index) {
+						if (index !== 0) {
+							$(this).val(warehouse_id).trigger('change');
+						}
+					});
+				}
+			});
+			var wo_order_id = $('select[name="wo_order_id"]').val();
+			$.get(admin_url + 'warehouse/copy_wo_order_items/' + wo_order_id).done(function(response) {
+				response = JSON.parse(response);
+				if (response) {
+					$('.invoice-item table.invoice-items-table.items tbody').html('');
+					$('.invoice-item table.invoice-items-table.items tbody').append(response.list_item);
+					var warehouse_id = $('#warehouse_id_m').val();
+					if (warehouse_id) {
+						$('.warehouse_select select').each(function(index) {
+							if (index !== 0) {
+								$(this).val(warehouse_id).trigger('change');
+							}
+						});
+					}
+					setTimeout(function() {
+						wh_calculate_total();
+					}, 15);
+					init_selectpicker();
+					init_datepicker();
+					wh_reorder_items('.invoice-item');
+					wh_clear_item_preview_values('.invoice-item');
+					$('body').find('#items-warning').remove();
+					$("body").find('.dt-loader').remove();
+					$('#item_select').selectpicker('val', '');
+				}
+			}).fail(function(error) {
+			});
+			if (wo_order_id != '') {
+				$.post(admin_url + 'warehouse/copy_wo_vender/' + wo_order_id).done(function(response) {
+					var response_vendor = JSON.parse(response);
+					$('select[name="supplier_code"]').val(response_vendor.userid).change();
+					$('select[name="buyer_id"]').val(response_vendor.buyer).change();
+					$('select[name="project"]').val(response_vendor.project).change();
+					$('select[name="type"]').val(response_vendor.type).change();
+					$('select[name="department"]').val(response_vendor.department).change();
+					$('select[name="requester"]').val(response_vendor.requester).change();
+					$('input[name="kind"]').val(response_vendor.kind);
+					if (response_vendor.kind === 'Bought out items') {
+						$('#tab_production_approvals').removeClass('hide');
+					} else {
+						$('#tab_production_approvals').addClass('hide');
+					}
+				});
+			} else {
+				$('select[name="supplier_code"]').val('').change();
+				$('select[name="buyer_id"]').val('').change();
+				$('select[name="project"]').val('').change();
+				$('select[name="type"]').val('').change();
+				$('select[name="department"]').val('').change();
+				$('select[name="requester"]').val('').change();
+			}
+		});
+
+		var pur_order_value = $('select[name="pr_order_id"]').val();
+		var wo_order_value = $('select[name="wo_order_id"]').val();
+		if(!empty(pur_order_value)) {
+			$('select[name="wo_order_id"]').prop('disabled', true).selectpicker('refresh');
+		}
+		if(!empty(wo_order_value)) {
+			$('select[name="pr_order_id"]').prop('disabled', true).selectpicker('refresh');
+		}
 	})(jQuery);
 
 	// Add item to preview

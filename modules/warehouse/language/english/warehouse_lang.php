@@ -751,3 +751,5 @@ $lang['shop_approval_updated'] = 'Shop drawings approval updated';
 $lang['record_saved_successfully'] = 'Record Updated successfully';
 $lang['failed_to_save_record'] = 'Failed to save record';
 $lang['stock_reconciliation'] = 'Stock Reconciliation';
+$lang['reference_work_order']  = 'Choose from a Work order';
+$lang['reference_order']  = 'Choose from an order';

@@ -85,7 +85,7 @@
                             _l('supplier_name'),
                             _l('Prepared By'),
                             _l('category'),
-                            _l('reference_purchase_order'),
+                            _l('reference_order'),
                             _l('Receive Date'),
 
                             // _l('total_tax_money'),

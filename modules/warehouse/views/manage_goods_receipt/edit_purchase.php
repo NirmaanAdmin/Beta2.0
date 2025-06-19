@@ -83,20 +83,20 @@
 												</tr>
 
 												<?php
-												if (get_status_modules_wh('purchase')) {
-													if (($goods_receipt->pr_order_id != '') && ($goods_receipt->pr_order_id != 0)) { ?>
+								                  if (get_status_modules_wh('purchase')) { ?>
+								                    <tr class="project-overview">
+								                      <td class="bold"><?php echo _l('reference_order'); ?></td>
+								                      <td>
+								                        <?php 
+								                        if(!empty($goods_receipt->pr_order_id)) { ?>
+								                          <a href="<?php echo admin_url('purchase/purchase_order/' . $goods_receipt->pr_order_id) ?>"><?php echo get_pur_order_name($goods_receipt->pr_order_id) ?></a>
+								                        <?php } if(!empty($goods_receipt->wo_order_id)) { ?>
+								                          <a href="<?php echo admin_url('purchase/work_order/' . $goods_receipt->wo_order_id) ?>"><?php echo get_wo_order_name($goods_receipt->wo_order_id) ?></a>
+								                        <?php } ?>
 
-														<tr class="project-overview">
-															<td class="bold"><?php echo _l('reference_purchase_order'); ?></td>
-															<td>
-																<a href="<?php echo admin_url('purchase/purchase_order/' . $goods_receipt->pr_order_id) ?>"><?php echo get_pur_order_name($goods_receipt->pr_order_id) ?></a>
-
-															</td>
-														</tr>
-
-												<?php   }
-												}
-												?>
+								                      </td>
+								                    </tr>
+								                <?php } ?>
 
 												<tr class="project-overview">
 													<td class="bold"><?php echo _l('note_'); ?></td>

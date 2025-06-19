@@ -748,6 +748,7 @@ class warehouse extends AdminController
 			$this->load->model('projects_model');
 
 			$data['pr_orders'] = get_pr_order();
+			$data['wo_orders'] = get_wo_order();
 			$data['pr_orders_status'] = true;
 
 			$data['vendors'] = $this->purchase_model->get_vendor();
@@ -9910,5 +9911,53 @@ class warehouse extends AdminController
 			'result' => $pur_request_detail['result'] ? $pur_request_detail['result'] : '',
 			'additional_discount' => $pur_request_detail['additional_discount'] ? $pur_request_detail['additional_discount'] : '',
 		]);
+	}
+
+	/**
+	 * copy pur vender
+	 * @param  integer $pủ request
+	 * @return json encode
+	 */
+	public function copy_wo_vender($wo_orders_id)
+	{
+		$wo_vendor = $this->warehouse_model->get_wo_vendor_ajax($wo_orders_id);
+		echo json_encode([
+			'userid'  	 => $wo_vendor['id'] ? $wo_vendor['id'] : '',
+			'buyer'   	 => $wo_vendor['buyer'] ? $wo_vendor['buyer'] : '',
+			'project' 	 => $wo_vendor['project'] ? $wo_vendor['project'] : '',
+			'type'    	 => $wo_vendor['type'] ? $wo_vendor['type'] : '',
+			'department' => $wo_vendor['department'] ? $wo_vendor['department'] : '',
+			'requester'  => $wo_vendor['requester'] ? $wo_vendor['requester'] : '',
+			'kind'       => $wo_vendor['kind'] ? $wo_vendor['kind'] : '',
+		]);
+	}
+
+	/**
+	 * copy wo order items
+	 * @param  integer $pur request
+	 * @return json encode
+	 */
+	public function copy_wo_order_items($wo_order = '')
+	{
+		if (is_numeric($wo_order)) {
+			$wo_order_detail = $this->warehouse_model->copy_wo_order_items($wo_order);
+			echo json_encode([
+				'result' => $wo_order_detail[0] ? $wo_order_detail[0] : '',
+				'total_tax_money' => $wo_order_detail[1] ? $wo_order_detail[1] : '',
+				'total_goods_money' => $wo_order_detail[2] ? $wo_order_detail[2] : '',
+				'value_of_inventory' => $wo_order_detail[3] ? $wo_order_detail[3] : '',
+				'total_money' => $wo_order_detail[4] ? $wo_order_detail[4] : '',
+				'total_row' => $wo_order_detail[5] ? $wo_order_detail[5] : '',
+				'list_item' => $wo_order_detail[6] ? $wo_order_detail[6] : '',
+				'production_approval_item' => $wo_order_detail[7] ? $wo_order_detail[7] : '',
+			]);
+		} else {
+			$list_item = $this->warehouse_model->create_goods_receipt_row_template();
+			$production_approval_item = $this->warehouse_model->create_goods_receipt_production_approvals_template();
+			echo json_encode([
+				'list_item' => $list_item,
+				'production_approval_item' => $production_approval_item,
+			]);
+		}
 	}
 }
