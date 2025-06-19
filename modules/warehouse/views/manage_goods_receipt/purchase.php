@@ -48,24 +48,24 @@
 							</div>
 
 							<div class="col-md-6 <?php if ($pr_orders_status == false) {
-														echo 'hide';
-													}; ?>">
+								echo 'hide';
+								}; ?>">
 								<div class="form-group">
 									<label for="pr_order_id"><?php echo _l('reference_purchase_order'); ?></label>
 									<select name="pr_order_id" id="pr_order_id" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
 										<option value=""></option>
 										<?php foreach ($pr_orders as $pr_order) { ?>
 											<option value="<?php echo html_entity_decode($pr_order['id']); ?>" <?php if (isset($goods_receipt) && ($goods_receipt->pr_order_id == $pr_order['id'])) {
-																													echo 'selected';
-																												} ?>><?php echo html_entity_decode($pr_order['pur_order_number'] . ' - ' . $pr_order['pur_order_name'] . ' - ' . get_vendor_name($pr_order['vendor'])); ?></option>
+												echo 'selected';
+											} ?>><?php echo html_entity_decode($pr_order['pur_order_number'] . ' - ' . $pr_order['pur_order_name'] . ' - ' . get_vendor_name($pr_order['vendor'])); ?></option>
 										<?php } ?>
 									</select>
 								</div>
 							</div>
 
 							<div class="col-md-6 <?php if ($pr_orders_status == false) {
-														echo 'hide';
-													}; ?>">
+								echo 'hide';
+								}; ?>">
 								<div class="form-group">
 									<label for="supplier_code"><?php echo _l('supplier_name'); ?></label>
 									<select name="supplier_code" id="supplier_code" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
@@ -74,8 +74,8 @@
 										<?php if (isset($vendors)) { ?>
 											<?php foreach ($vendors as $s) { ?>
 												<option value="<?php echo html_entity_decode($s['userid']); ?>" <?php if (isset($goods_receipt) && $goods_receipt->supplier_code == $s['userid']) {
-																													echo 'selected';
-																												} ?>><?php echo html_entity_decode($s['company']); ?></option>
+													echo 'selected';
+												} ?>><?php echo html_entity_decode($s['company']); ?></option>
 											<?php } ?>
 										<?php } ?>
 
@@ -84,9 +84,8 @@
 							</div>
 
 							<div class="col-md-6 <?php if ($pr_orders_status == true) {
-														echo 'hide';
-													}; ?>">
-
+								echo 'hide';
+								}; ?>">
 								<?php $supplier_name =  isset($goods_receipt) ? $goods_receipt->supplier_name : '' ?>
 								<?php
 								echo render_input('supplier_name', 'supplier_name', $supplier_name) ?>
@@ -99,8 +98,8 @@
 										<option value=""></option>
 										<?php foreach ($staff as $s) { ?>
 											<option value="<?php echo html_entity_decode($s['staffid']); ?>" <?php if (isset($goods_receipt) && ($goods_receipt->buyer_id == $s['staffid'])) {
-																													echo 'selected';
-																												} ?>> <?php echo html_entity_decode($s['firstname'] . '' . $s['lastname']); ?></option>
+												echo 'selected';
+											} ?>> <?php echo html_entity_decode($s['firstname'] . '' . $s['lastname']); ?></option>
 										<?php } ?>
 									</select>
 								</div>
@@ -108,8 +107,8 @@
 
 							<?php if (ACTIVE_PROPOSAL == true) { ?>
 								<div class="col-md-3 form-group <?php if ($pr_orders_status == false) {
-																	echo 'hide';
-																}; ?>">
+									echo 'hide';
+									}; ?>">
 									<label for="project"><?php echo _l('project'); ?></label>
 									<select name="project" id="project" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
 										<option value=""></option>
@@ -117,39 +116,41 @@
 										<?php if (isset($projects)) { ?>
 											<?php foreach ($projects as $s) { ?>
 												<option value="<?php echo html_entity_decode($s['id']); ?>" <?php if (isset($goods_receipt) && $s['id'] == $goods_receipt->project) {
-																												echo 'selected';
-																											} ?>><?php echo html_entity_decode($s['name']); ?></option>
+													echo 'selected';
+												} ?>><?php echo html_entity_decode($s['name']); ?></option>
 											<?php } ?>
 										<?php } ?>
 									</select>
 								</div>
 
 								<div class="col-md-3 form-group <?php if ($pr_orders_status == false) {
-																	echo 'hide';
-																}; ?>">
+									echo 'hide';
+									}; ?>">
 									<label for="type"><?php echo _l('type_label'); ?></label>
 									<select name="type" id="type" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
 										<option value=""></option>
 										<option value="capex" <?php if (isset($goods_receipt) && $goods_receipt->type == 'capex') {
-																	echo 'selected';
-																} ?>><?php echo _l('capex'); ?></option>
+											echo 'selected';
+											} ?>><?php echo _l('capex'); ?>
+									    </option>
 										<option value="opex" <?php if (isset($goods_receipt) && $goods_receipt->type == 'opex') {
-																	echo 'selected';
-																} ?>><?php echo _l('opex'); ?></option>
+											echo 'selected';
+											} ?>><?php echo _l('opex'); ?>
+										</option>
 									</select>
 								</div>
 
 								<div class="col-md-3 form-group <?php if ($pr_orders_status == false) {
-																	echo 'hide';
-																}; ?>">
+										echo 'hide';
+									}; ?>">
 									<label for="department"><?php echo _l('department'); ?></label>
 									<select name="department" id="department" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
 										<option value=""></option>
 										<?php if (isset($departments)) { ?>
 											<?php foreach ($departments as $s) { ?>
 												<option value="<?php echo html_entity_decode($s['departmentid']); ?>" <?php if (isset($goods_receipt) && $s['departmentid'] == $goods_receipt->department) {
-																															echo 'selected';
-																														} ?>><?php echo html_entity_decode($s['name']); ?></option>
+													echo 'selected';
+												} ?>><?php echo html_entity_decode($s['name']); ?></option>
 											<?php } ?>
 
 										<?php } ?>
@@ -158,16 +159,16 @@
 								</div>
 
 								<div class="col-md-3 form-group <?php if ($pr_orders_status == false) {
-																	echo 'hide';
-																}; ?>">
+										echo 'hide';
+									}; ?>">
 									<label for="requester"><?php echo _l('requester'); ?></label>
 									<select name="requester" id="requester" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
 										<option value=""></option>
 										<?php if (isset($staffs)) { ?>
 											<?php foreach ($staffs as $s) { ?>
 												<option value="<?php echo html_entity_decode($s['staffid']); ?>" <?php if (isset($goods_receipt) && $s['staffid'] == $goods_receipt->requester) {
-																														echo 'selected';
-																													} ?>><?php echo html_entity_decode($s['lastname'] . ' ' . $s['firstname']); ?></option>
+													echo 'selected';
+												} ?>><?php echo html_entity_decode($s['lastname'] . ' ' . $s['firstname']); ?></option>
 											<?php } ?>
 										<?php } ?>
 									</select>
