@@ -64,7 +64,7 @@
                         _l('id'),
                         _l('goods_delivery_code_new'),
                         _l('reference_purchase_order'),
-                        _l('day_vouchers'),
+                        _l('Reconciliation Date'),
                         // _l('invoices'),
                         // _l('staff_id'),
                         _l('status_label'),

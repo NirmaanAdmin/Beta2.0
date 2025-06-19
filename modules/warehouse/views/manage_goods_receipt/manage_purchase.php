@@ -83,10 +83,10 @@
                             _l('id'),
                             _l('stock_received_docket_code'),
                             _l('supplier_name'),
-                            _l('Buyer'),
+                            _l('Prepared By'),
                             _l('category'),
                             _l('reference_purchase_order'),
-                            _l('day_vouchers'),
+                            _l('Receive Date'),
 
                             // _l('total_tax_money'),
                             // _l('total_goods_money'),

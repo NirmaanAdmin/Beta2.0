@@ -45,7 +45,7 @@
                     <?php echo render_input('goods_delivery_code', 'document_number', $goods_delivery_code, '', array('disabled' => 'true')) ?>
                   </div>
 
-                  <div class="col-md-3">
+                  <!-- <div class="col-md-3">
                     <?php $date_c = isset($goods_delivery) ? $goods_delivery->date_c : $current_day; ?>
                     <?php $disabled = []; ?>
 
@@ -54,12 +54,29 @@
                     } ?>
                     <?php echo render_date_input('date_c', 'accounting_date', _d($date_c), $disabled) ?>
 
-                  </div>
+                  </div> -->
                   <div class="col-md-3">
                     <?php $date_add = isset($goods_delivery) ? $goods_delivery->date_add : $current_day; ?>
-                    <?php echo render_date_input('date_add', 'day_vouchers', _d($date_add), $disabled) ?>
+                    <?php echo render_date_input('date_add', 'Issue Date', _d($date_add), $disabled) ?>
                   </div>
+                  <?php if (ACTIVE_PROPOSAL == true) { ?>
+                    <div class="col-md-3 form-group <?php if ($pr_orders_status == false) {
+                                                      echo 'hide';
+                                                    }; ?>">
+                      <label for="project"><?php echo _l('project'); ?></label>
+                      <select name="project" id="project" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
+                        <option value=""></option>
 
+                        <?php if (isset($projects)) { ?>
+                          <?php foreach ($projects as $s) { ?>
+                            <option value="<?php echo html_entity_decode($s['id']); ?>" <?php if (isset($goods_delivery) && $s['id'] == $goods_delivery->project) {
+                                                                                          echo 'selected';
+                                                                                        } ?>><?php echo html_entity_decode($s['name']); ?></option>
+                          <?php } ?>
+                        <?php } ?>
+                      </select>
+                    </div>
+                  <?php } ?>
                   <div class="col-md-6">
                     <div class="form-group">
                       <label for="pr_order_id"><?php echo _l('reference_purchase_order'); ?></label>
@@ -127,22 +144,7 @@
 
                   <?php if (ACTIVE_PROPOSAL == true) { ?>
 
-                    <div class="col-md-3 form-group <?php if ($pr_orders_status == false) {
-                                                      echo 'hide';
-                                                    }; ?>">
-                      <label for="project"><?php echo _l('project'); ?></label>
-                      <select name="project" id="project" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
-                        <option value=""></option>
 
-                        <?php if (isset($projects)) { ?>
-                          <?php foreach ($projects as $s) { ?>
-                            <option value="<?php echo html_entity_decode($s['id']); ?>" <?php if (isset($goods_delivery) && $s['id'] == $goods_delivery->project) {
-                                                                                          echo 'selected';
-                                                                                        } ?>><?php echo html_entity_decode($s['name']); ?></option>
-                          <?php } ?>
-                        <?php } ?>
-                      </select>
-                    </div>
 
                     <div class="col-md-3 form-group <?php if ($pr_orders_status == false) {
                                                       echo 'hide';
@@ -180,7 +182,7 @@
                     <div class="col-md-3 form-group <?php if ($pr_orders_status == false) {
                                                       echo 'hide';
                                                     }; ?>">
-                      <label for="requester"><?php echo _l('requester'); ?></label>
+                      <label for="requester"><?php echo _l('Prepared By'); ?></label>
                       <select name="requester" id="requester" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
                         <option value=""></option>
                         <?php if (isset($staffs)) { ?>
@@ -220,7 +222,7 @@
 
 
 
-                  <div class=" col-md-6">
+                  <!-- <div class=" col-md-6">
                     <div class="form-group">
                       <label for="staff_id" class="control-label"><?php echo _l('salesman'); ?></label>
                       <select name="staff_id" class="selectpicker" id="staff_id" data-width="100%" data-none-selected-text="<?php echo _l('dropdown_non_selected_tex'); ?>" <?php if ($edit_approval == 'true') {
@@ -235,7 +237,7 @@
                       </select>
 
                     </div>
-                  </div>
+                  </div> -->
 
 
                   <div class="col-md-3 form-group">

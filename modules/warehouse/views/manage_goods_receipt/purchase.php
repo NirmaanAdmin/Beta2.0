@@ -38,13 +38,13 @@
 								<?php $goods_receipt_code = isset($goods_receipt) ? $goods_receipt->goods_receipt_code : (isset($goods_code) ? $goods_code : ''); ?>
 								<?php echo render_input('goods_receipt_code', 'stock_received_docket_number', $goods_receipt_code, '', array('disabled' => 'true')) ?>
 							</div>
-							<div class="col-md-3">
+							<!-- <div class="col-md-3">
 								<?php $date_c =  isset($goods_receipt) ? $goods_receipt->date_c : $current_day ?>
 								<?php echo render_date_input('date_c', 'accounting_date', _d($date_c)) ?>
-							</div>
+							</div> -->
 							<div class="col-md-3">
 								<?php $date_add =  isset($goods_receipt) ? $goods_receipt->date_add : $current_day ?>
-								<?php echo render_date_input('date_add', 'day_vouchers', _d($date_add)) ?>
+								<?php echo render_date_input('date_add', 'Receive Date', _d($date_add)) ?>
 							</div>
 
 							<div class="col-md-6 <?php if ($pr_orders_status == false) {
@@ -94,7 +94,7 @@
 
 							<div class=" col-md-3">
 								<div class="form-group">
-									<label for="buyer_id" class="control-label"><?php echo _l('Buyer'); ?></label>
+									<label for="buyer_id" class="control-label"><?php echo _l('Prepared By'); ?></label>
 									<select name="buyer_id" class="selectpicker" id="buyer_id" data-width="100%" data-none-selected-text="<?php echo _l('dropdown_non_selected_tex'); ?>">
 										<option value=""></option>
 										<?php foreach ($staff as $s) { ?>
