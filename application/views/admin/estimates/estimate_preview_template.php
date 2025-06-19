@@ -22,7 +22,7 @@
                         </li>
                         <li role="presentation">
                             <a href="#tender_strategy" aria-controls="tender_strategy" role="tab" data-toggle="tab">
-                                Tender Strategy
+                                Unawarded Tender
                             </a>
                         </li>
 
