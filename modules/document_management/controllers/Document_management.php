@@ -227,7 +227,7 @@ class document_management extends AdminController
 					$related_file = implode(',', $data['related_file']);
 				}
 				$data['custom_field'] = $custom_field;
-				$data['related_file'] = $related_file;
+				$data['related_file'] = $related_file; 
 				$res = $this->document_management_model->update_item($data);
 				if ($res) {
 					set_alert('success', _l('dmg_updated_successfully'));
@@ -1378,4 +1378,16 @@ class document_management extends AdminController
 			echo "<p>Report saved to: <a href='$csvFile' download>$csvFile</a></p>";
 		}
 	}	
+
+	public function delete_pdf_attachment($id){
+		
+		$result =  $this->document_management_model->delete_pdf_attachment($id);
+		if ($result) {
+			set_alert('success', _l('Attachment deleted successfully'));
+		} else {
+			set_alert('danger', _l('Attachment deleted failed'));
+		}
+		
+		redirect($_SERVER['HTTP_REFERER']);
+	}
 }

@@ -122,6 +122,40 @@ class document_management_model extends app_model
 			if (isset($data['parent_id'])) {
 				$data['master_id'] = $this->get_master_id($data['parent_id']);
 			}
+
+			if (!empty($_FILES['pdf_attachment']['name'])) {
+				$uploadDir = DOCUMENT_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/pdf_attachments/' . $id . '/';
+
+				// Create directory if it doesn't exist
+				if (!file_exists($uploadDir)) {
+					mkdir($uploadDir, 0755, true);
+				}
+
+				$allowedExtensions = ['dwg', 'xref'];
+				$fileExtension = pathinfo($_FILES['pdf_attachment']['name'], PATHINFO_EXTENSION);
+				$originalFileName = basename($_FILES['pdf_attachment']['name']);
+
+				// Validate file type
+
+				$targetPath = $uploadDir . $originalFileName;
+
+				// Check if file already exists and handle accordingly
+				if (file_exists($targetPath)) {
+					// Option 1: Append timestamp to filename to avoid overwriting
+					$fileNameParts = pathinfo($originalFileName);
+					$targetPath = $uploadDir . $fileNameParts['filename'] . '.' . $fileNameParts['extension'];
+
+					// Option 2: Uncomment below to simply overwrite existing file
+					// unlink($targetPath);
+				}
+
+				if (move_uploaded_file($_FILES['pdf_attachment']['tmp_name'], $targetPath)) {
+					// Save relative path in database (including the subfolder structure)
+					$data['pdf_attachment'] =  basename($targetPath);
+				} else {
+					// set_alert('warning', _l('file_upload_failed'));
+				}
+			}
 			$this->db->where('id', $id);
 			$this->db->update(db_prefix() . 'dmg_items', $data);
 			if ($this->db->affected_rows() > 0) {
@@ -2094,5 +2128,26 @@ class document_management_model extends app_model
 		}
 
 		return $all_ids;
+	}
+
+	public function delete_pdf_attachment($id)
+	{
+
+		$get_pdf_attachment = $this->get_item($id);
+		if ($get_pdf_attachment->pdf_attachment != '') {
+
+			$path = DOCUMENT_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/pdf_attachments/' . $id . '/' . $get_pdf_attachment->pdf_attachment;
+
+			if (file_exists($path)) {
+
+				unlink($path);
+			}
+
+			$this->db->where('id', $id);
+			$this->db->update(db_prefix() . 'dmg_items', ['pdf_attachment' => '']);
+			if ($this->db->affected_rows() > 0) {
+				return true;
+			}
+		}
 	}
 }
