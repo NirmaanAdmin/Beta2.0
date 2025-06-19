@@ -1541,7 +1541,8 @@ class Warehouse_model extends App_Model
 		$production_approval_item = $this->warehouse_model->create_goods_receipt_production_approvals_template();
 		$sql = 'select item_code as commodity_code, ' . db_prefix() . 'pur_order_detail.description, ' . db_prefix() . 'pur_order_detail.unit_id, unit_price, quantity as quantities, ' . db_prefix() . 'pur_order_detail.tax as tax, into_money, (' . db_prefix() . 'pur_order_detail.total-' . db_prefix() . 'pur_order_detail.into_money) as tax_money, total as goods_money, wh_quantity_received, tax_rate, tax_value, ' . db_prefix() . 'pur_order_detail.id as id, delivery_date, payment_date, est_delivery_date, production_status, ' . db_prefix() . 'pur_order_detail.area as area from ' . db_prefix() . 'pur_order_detail
 		left join ' . db_prefix() . 'items on ' . db_prefix() . 'pur_order_detail.item_code =  ' . db_prefix() . 'items.id
-		left join ' . db_prefix() . 'taxes on ' . db_prefix() . 'taxes.id = ' . db_prefix() . 'pur_order_detail.tax where ' . db_prefix() . 'pur_order_detail.pur_order = ' . $pur_order;
+		left join ' . db_prefix() . 'taxes on ' . db_prefix() . 'taxes.id = ' . db_prefix() . 'pur_order_detail.tax where ' . db_prefix() . 'pur_order_detail.pur_order = ' . $pur_order . '
+		GROUP BY ' . db_prefix() . 'pur_order_detail.id';
 		$results = $this->db->query($sql)->result_array();
 		$co_exist = $this->purchase_model->get_po_changes($pur_order);
 
@@ -1559,70 +1560,40 @@ class Warehouse_model extends App_Model
 		$last_index = 0;
 		$warehouse_data = $this->warehouse_model->get_warehouse();
 		foreach ($results as $key => $value) {
-
-			$available_quantity = (float)$value['quantities'] - (float)$value['wh_quantity_received'];
-			$commodity_code = $value['commodity_code'];
-			$duplicates = array_filter($results, function ($item) use ($commodity_code) {
-				return $item['commodity_code'] == $commodity_code;
-			});
-			if (count($duplicates) > 1) {
-				$non_break_description = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $value['description']));
-				$this->db->select(db_prefix() . 'pur_order_detail.quantity');
-				$this->db->select("
-				    REPLACE(
-				        REPLACE(
-				            REPLACE(
-				                REPLACE(" . db_prefix() . "pur_order_detail.description, '\r', ''),
-				            '\n', ''),
-				        '<br />', ''),
-				    '<br/>', '') AS non_break_description
-				");
-				$this->db->where(db_prefix() . 'pur_orders.approve_status', 2);
-				$this->db->where('pur_order', $pur_order);
-				$this->db->join(db_prefix() . 'pur_orders', db_prefix() . 'pur_orders.id = ' . db_prefix() . 'pur_order_detail.pur_order', 'left');
-				$this->db->group_by(db_prefix() . 'pur_order_detail.id');
-				$this->db->having('non_break_description', $non_break_description);
-				$pur_order_description = $this->db->get(db_prefix() . 'pur_order_detail')->result_array();
-				if (!empty($pur_order_description)) {
-					$available_quantity = array_sum(array_column($pur_order_description, 'quantity'));
+			$available_quantity = (float)$value['quantities'];
+			$non_break_description = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $value['description']));
+			$this->db->select(db_prefix() . 'goods_receipt_detail.quantities');
+			$this->db->select("
+			    REPLACE(
+			        REPLACE(
+			            REPLACE(
+			                REPLACE(" . db_prefix() . "goods_receipt_detail.description, '\r', ''),
+			            '\n', ''),
+			        '<br />', ''),
+			    '<br/>', '') AS non_break_description
+			");
+			$this->db->where(db_prefix() . 'goods_receipt.approval', 1);
+			$this->db->where('pr_order_id', $pur_order);
+			$this->db->join(db_prefix() . 'goods_receipt', db_prefix() . 'goods_receipt.id = ' . db_prefix() . 'goods_receipt_detail.goods_receipt_id', 'left');
+			$this->db->group_by(db_prefix() . 'goods_receipt_detail.id');
+			$this->db->having('non_break_description', $non_break_description);
+			$goods_receipt_description = $this->db->get(db_prefix() . 'goods_receipt_detail')->result_array();
+			if (!empty($goods_receipt_description)) {
+				$total_quantity = 0;
+				foreach ($goods_receipt_description as $qitem) {
+					$total_quantity += $qitem['quantities'];
 				}
-
-				$non_break_description = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $value['description']));
-				$this->db->select(db_prefix() . 'goods_receipt_detail.quantities');
-				$this->db->select("
-				    REPLACE(
-				        REPLACE(
-				            REPLACE(
-				                REPLACE(" . db_prefix() . "goods_receipt_detail.description, '\r', ''),
-				            '\n', ''),
-				        '<br />', ''),
-				    '<br/>', '') AS non_break_description
-				");
-				$this->db->where(db_prefix() . 'goods_receipt.approval', 1);
-				$this->db->where('pr_order_id', $pur_order);
-				$this->db->join(db_prefix() . 'goods_receipt', db_prefix() . 'goods_receipt.id = ' . db_prefix() . 'goods_receipt_detail.goods_receipt_id', 'left');
-				$this->db->group_by(db_prefix() . 'goods_receipt_detail.id');
-				$this->db->having('non_break_description', $non_break_description);
-				$goods_receipt_description = $this->db->get(db_prefix() . 'goods_receipt_detail')->result_array();
-				if (!empty($goods_receipt_description)) {
-					$total_quantity = 0;
-					foreach ($goods_receipt_description as $qitem) {
-						$total_quantity += $qitem['quantities'];
-					}
-					$available_quantity = $available_quantity - $total_quantity;
-				}
-				$available_quantity = round($available_quantity, 2);
+				$available_quantity = $available_quantity - $total_quantity;
 			}
+			$available_quantity = round($available_quantity, 2);
+
 			if(!empty($co_exist)) {
 				$updated_co_quantity = $this->get_changee_order_quantity($value['commodity_code'], $value['description'], $pur_order, 'pur_orders');
 				$available_quantity = $available_quantity + $updated_co_quantity;
 				$available_quantity = round($available_quantity, 2);
 			}
-			// $available_quantity = app_format_number($available_quantity, true);
 			if ($available_quantity > 0) {
-
 				$unit_price = round((float)$value['unit_price'] / $currency_rate, 5);
-
 				$index++;
 				$unit_name = wh_get_unit_name($value['unit_id']);
 				$taxname = '';
@@ -1638,28 +1609,23 @@ class Warehouse_model extends App_Model
 				$commodity_name = wh_get_item_variatiom($value['commodity_code']);
 				$quantities = $available_quantity;
 				$sub_total = 0;
-
 				$list_item .= $this->create_goods_receipt_row_template($warehouse_data, 'newitems[' . $index . ']', $commodity_name, '', $quantities, 0, $unit_name, $unit_price, $taxname, $lot_number, $vendor_id, $delivery_date, $date_manufacture, $expiry_date, $value['commodity_code'], $value['unit_id'], $value['tax_rate'], $value['tax_value'], $value['goods_money'], $note, $value['id'], $sub_total, '', $value['tax'], true, '', $value['description'], $payment_date, $est_delivery_date, $production_status, $value['area']);
 				$production_approval_item .= $this->create_goods_receipt_production_approvals_template('approvalsitems[' . $index . ']', $value['description'], $commodity_name, '', '', '', '', $value['commodity_code']);
 				$total_goods_money_temp = $available_quantity * (float)$unit_price;
 				$total_goods_money += $total_goods_money_temp;
 				$arr_results[$index]['quantities'] = $available_quantity;
 				$arr_results[$index]['goods_money'] = $available_quantity * (float)$unit_price;
-
-
 				//get tax value
 				$tax_rate = 0;
 				if ($value['tax'] != null && $value['tax'] != '') {
 					$arr_tax = explode('|', $value['tax']);
 					foreach ($arr_tax as $tax_id) {
-
 						$tax = $this->get_taxe_value($tax_id);
 						if ($tax) {
 							$tax_rate += (float)$tax->taxrate;
 						}
 					}
 				}
-
 				$arr_results[$index]['tax_money'] = $total_goods_money_temp * (float)$tax_rate / 100;
 				$total_tax_money += (float)$total_goods_money_temp * (float)$tax_rate / 100;
 				$last_index = $index;
