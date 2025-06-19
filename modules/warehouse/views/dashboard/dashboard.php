@@ -298,7 +298,7 @@
           <div class="row">
             <p class="mbot15 dashboard_stat_title">Material Return Details</p>
 
-            <div class="scroll-wrapper" style="max-height: 461px; overflow-y: auto;overflow-x: clip;">
+            <div class="scroll-wrapper" style="max-height: 750px; overflow-y: auto;overflow-x: clip;">
               <table class="table table-return-details">
                 <thead>
                   <tr>
