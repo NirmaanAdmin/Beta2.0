@@ -193,26 +193,26 @@
 
 
         <div class="col-md-8 mtop20">
-          
-            <p class="mbot15 dashboard_stat_title">Receipt Status</p>
+
+          <p class="mbot15 dashboard_stat_title">Receipt Status</p>
 
 
-            <div class="scroll-wrapper" style="max-height: 461px; overflow-y: auto;overflow-x: clip;">
-              <table class="table table-receipt-status">
-                <thead>
-                  <tr>
-                    <th><?php echo _l('PO ID'); ?></th>
-                    <th><?php echo _l('Scurity Signed'); ?></th>
-                    <th><?php echo _l('Transport Document'); ?></th>
-                    <th><?php echo _l('Production Certificate'); ?></th>
-                    <th><?php echo _l('Voucher Date'); ?></th>
-                  </tr>
-                </thead>
-                <tbody></tbody>
-              </table>
-            </div>
+          <div class="scroll-wrapper" style="max-height: 461px; overflow-y: auto;overflow-x: clip;">
+            <table class="table table-receipt-status">
+              <thead>
+                <tr>
+                  <th><?php echo _l('PO ID'); ?></th>
+                  <th><?php echo _l('Scurity Signed'); ?></th>
+                  <th><?php echo _l('Transport Document'); ?></th>
+                  <th><?php echo _l('Production Certificate'); ?></th>
+                  <th><?php echo _l('Voucher Date'); ?></th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
 
-          
+
         </div>
       </div>
     </div>
@@ -225,10 +225,10 @@
           <hr class="mtop10">
         </div>
 
-        <div class="col-md-12">
+        <div class="col-md-5">
           <div class="row">
 
-            <div class="quick-stats-invoices col-md-4 tw-mb-2 sm:tw-mb-0 ">
+            <div class="quick-stats-invoices col-md-7 tw-mb-2 sm:tw-mb-0 ">
               <div class="top_stats_wrapper">
                 <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
                   <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
@@ -244,8 +244,10 @@
                 </div>
               </div>
             </div>
-
-            <div class="quick-stats-invoices col-md-4 tw-mb-2 sm:tw-mb-0">
+          </div>
+          <br>
+          <div class="row">
+            <div class="quick-stats-invoices col-md-7 tw-mb-2 sm:tw-mb-0">
               <div class="top_stats_wrapper">
                 <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
                   <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
@@ -261,8 +263,10 @@
                 </div>
               </div>
             </div>
-
-            <div class="quick-stats-invoices col-md-4 tw-mb-2 sm:tw-mb-0">
+          </div>
+          <br>
+          <div class="row">
+            <div class="quick-stats-invoices col-md-7 tw-mb-2 sm:tw-mb-0">
               <div class="top_stats_wrapper">
                 <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
                   <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
@@ -281,7 +285,7 @@
           </div>
         </div>
 
-        <div class="col-md-6" style="margin-top: 2%;">
+        <div class="col-md-7" >
           <div class="row">
             <p class="mbot15 dashboard_stat_title">Consumption Over Time</p>
             <div style="width: 100%; height: 450px; display: flex; justify-content: center;">
@@ -290,7 +294,7 @@
           </div>
         </div>
 
-        <div class="col-md-6" style="margin-top: 2%;">
+        <div class="col-md-12" style="margin-top: 2%;">
           <div class="row">
             <p class="mbot15 dashboard_stat_title">Material Return Details</p>
 
