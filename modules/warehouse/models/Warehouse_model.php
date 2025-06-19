@@ -1636,10 +1636,12 @@ class Warehouse_model extends App_Model
 			$sql = 'select item_code as commodity_code, ' . db_prefix() . 'co_order_detail.description, ' . db_prefix() . 'co_order_detail.unit_id, unit_price, quantity as quantities, ' . db_prefix() . 'co_order_detail.tax as tax, into_money, (' . db_prefix() . 'co_order_detail.total-' . db_prefix() . 'co_order_detail.into_money) as tax_money, ' . db_prefix() . 'co_order_detail.total as goods_money, tax_rate, tax_value, ' . db_prefix() . 'co_order_detail.id as id, delivery_date, ' . db_prefix() . 'co_order_detail.area as area from ' . db_prefix() . 'co_order_detail
 			left join ' . db_prefix() . 'co_orders on ' . db_prefix() . 'co_orders.id =  ' . db_prefix() . 'co_order_detail.pur_order
 			left join ' . db_prefix() . 'items on ' . db_prefix() . 'co_order_detail.item_code =  ' . db_prefix() . 'items.id
-			left join ' . db_prefix() . 'taxes on ' . db_prefix() . 'taxes.id = ' . db_prefix() . 'co_order_detail.tax where ' . db_prefix() . 'co_orders.po_order_id = ' . $pur_order . ' and ' . db_prefix() . 'co_order_detail.tender_item = 1';
+			left join ' . db_prefix() . 'taxes on ' . db_prefix() . 'taxes.id = ' . db_prefix() . 'co_order_detail.tax where ' . db_prefix() . 'co_orders.po_order_id = ' . $pur_order . ' and ' . db_prefix() . 'co_order_detail.tender_item = 1
+			GROUP BY ' . db_prefix() . 'co_order_detail.id';
 			$co_results = $this->db->query($sql)->result_array();
 			if(!empty($co_results)) {
 				foreach ($co_results as $key => $value) {
+					$available_quantity = $value['quantities'];
 					$non_break_description = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $value['description']));
 					$this->db->select(db_prefix() . 'goods_receipt_detail.quantities');
 					$this->db->select("
@@ -1657,7 +1659,6 @@ class Warehouse_model extends App_Model
 					$this->db->group_by(db_prefix() . 'goods_receipt_detail.id');
 					$this->db->having('non_break_description', $non_break_description);
 					$goods_receipt_description = $this->db->get(db_prefix() . 'goods_receipt_detail')->result_array();
-					$available_quantity = $value['quantities'];
 					if (!empty($goods_receipt_description)) {
 						$total_quantity = 0;
 						foreach ($goods_receipt_description as $qitem) {
