@@ -20,7 +20,7 @@ class Projects extends AdminController
     {
         close_setup_menu();
         $data['statuses'] = $this->projects_model->get_project_statuses();
-        $this->app_scripts->add('circle-progress-js','assets/plugins/jquery-circle-progress/circle-progress.min.js');
+        $this->app_scripts->add('circle-progress-js', 'assets/plugins/jquery-circle-progress/circle-progress.min.js');
         $data['title']    = _l('projects');
         $data['table'] = App_table::find('projects');
         $this->load->view('admin/projects/manage', $data);
@@ -29,7 +29,7 @@ class Projects extends AdminController
     public function table($clientid = '')
     {
         App_table::find('projects')->output([
-            'clientid'=>$clientid
+            'clientid' => $clientid
         ]);
     }
 
@@ -354,6 +354,10 @@ class Projects extends AdminController
                 // Completed tasks are excluded from this list because you can't add timesheet on completed task.
                 $data['tasks']                = $this->projects_model->get_tasks($id, 'status != ' . Tasks_model::STATUS_COMPLETE . ' AND billed=0');
                 $data['timesheets_staff_ids'] = $this->projects_model->get_distinct_tasks_timesheets_staff($id);
+            } elseif ($group == 'project_directory') {
+                $project_directory_row_template = $this->projects_model->create_project_directory_row_template();
+
+                $data['project_directory_row'] = $project_directory_row_template;
             }
 
             // Discussions
@@ -1137,7 +1141,8 @@ class Projects extends AdminController
                     'name',
                 ], 'task_milestone', $selected_milestone),
                 'assignees' => render_select('assignees[]', $this->projects_model->get_project_members($id, true), [
-                    'staff_id', ['firstname', 'lastname'],
+                    'staff_id',
+                    ['firstname', 'lastname'],
                 ], 'task_single_assignees', $assigned, ['multiple' => true], [], '', '', false),
             ]);
         }
@@ -1183,5 +1188,120 @@ class Projects extends AdminController
 
             echo json_encode($members);
         }
+    }
+
+
+    public function project_dir_get_item_row_template()
+    {
+        $name = $this->input->post('name');
+        $postion = $this->input->post('postion');
+        $staff = $this->input->post('staff');
+        $vendor = $this->input->post('vendor');
+        $fullname = $this->input->post('fullname');
+        $item_key = $this->input->post('item_key');
+        $contact = $this->input->post('contact');
+        $email_account = $this->input->post('email_account');
+
+        echo $this->projects_model->create_project_directory_row_template($name, $postion, $staff, $vendor, $fullname, $contact, $email_account, $item_key);
+    }
+
+
+    public function add_project_directory()
+    {
+        $data = $this->input->post();
+
+        if ($data) {
+            $id = $this->projects_model->add_project_directory($data);
+            if ($id) {
+                set_alert('success', _l('added_successfully'));
+                redirect(admin_url('projects/view/' . $data['project_id'] . '?group=project_directory'));
+            } else {
+                set_alert('warning', _l('failed_to_add'));
+                redirect(admin_url('projects/view/' . $data['project_id'] . '?group=project_directory'));
+            }
+        } else {
+            set_alert('warning', _l('no_data_received'));
+            redirect(admin_url('projects/view/' . $data['project_id'] . '?group=project_directory'));
+        }
+        exit; // Stop further execution
+    }
+
+
+    public function projectdirectory($project_id)
+    {
+        if ($this->projects_model->is_member($project_id) || staff_can('view', 'projects')) {
+            if ($this->input->is_ajax_request()) {
+                $this->app->get_table_data('projectdirectory', [
+                    'project_id' => $project_id,
+                ]);
+            }
+        }
+    }
+
+    public function project_directory_pdf($project_id)
+    {
+        $project_directory = $this->projects_model->get_project_directory_pdf_html($project_id);
+
+        try {
+            $pdf = $this->projects_model->project_directory_pdf($project_directory);
+            $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+        } catch (Exception $e) {
+            echo pur_html_entity_decode($e->getMessage());
+            die;
+        }
+
+        $type = 'D';
+
+        if ($this->input->get('output_type')) {
+            $type = $this->input->get('output_type');
+        }
+
+        if ($this->input->get('print')) {
+            $type = 'I';
+        }
+        $pdf_name = 'project_directory.pdf';
+        $pdf->Output($pdf_name, $type);
+    }
+
+    public function project_directory_excel($project_id)
+    {
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="Project_Directory_Export.csv"');
+
+        // Open output stream
+        $output = fopen('php://output', 'w');
+        $get_project_directory = $this->projects_model->get_project_directory_pdf($project_id);
+        // CSV Headers (same as PDF table columns)
+        $headers = [
+            'Position',
+            'Staff',
+            'Vendors',
+            'Name',
+            'Contact',
+            'Email Account',
+        ];
+
+        // Write headers to CSV
+        fputcsv($output, $headers);
+
+        // Data rows
+
+        foreach ($get_project_directory as $row) {
+            $staff_name = get_staff_namebyId($row['staff']) ?? '';
+            $vendor_name = get_vendor_company_name($row['vendor']) ?? '';
+            // Write row data
+            fputcsv($output, [
+                $row['postion'] ?? '',
+                $staff_name,
+                $vendor_name,
+                $row['fullname'] ?? '',
+                $row['contact'] ?? '',
+                $row['email_account'] ?? ''
+            ]);
+        }
+
+        // Close output stream
+        fclose($output);
+        exit;
     }
 }

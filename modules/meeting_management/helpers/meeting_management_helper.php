@@ -25,11 +25,19 @@ function getstafflist()
         $staff_list[] = [
             'staffid'  => $staff['staffid'],
             'fullname' => $fullname,
+            'email'    => $staff['email'],
+            'phonenumber' => $staff['phonenumber'],
+            'attributes' => [
+                'data-email' => $staff['email'],
+                'data-phonenumber' => $staff['phonenumber']
+            ]
         ];
     }
 
     return $staff_list;
 }
+
+
 /**
  * Takes a comma separated string of staff IDs and returns a comma separated string of the
  * corresponding staff full names.
@@ -203,8 +211,6 @@ function get_critical_tracker_pdf()
             case 'department':
                 $whereClauses[] = "cm.department = '{$val}'";
                 break;
-
-
         }
     }
 

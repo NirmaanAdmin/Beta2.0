@@ -1936,7 +1936,7 @@ $lang['settings_group_misc']                                            = 'Misc'
 $lang['show_projects_on_calendar']                                      = 'Projects';
 $lang['settings_media_max_file_size_upload']                            = 'Max file size upload in Media (MB)';
 $lang['settings_client_staff_add_edit_delete_task_comments_first_hour'] = 'Allow customer/staff to add/edit task comments only in the first hour (administrators not applied)';
-
+$lang['project_directory'] = 'Project Directory';
 # Email templates
 $lang['email_template_only_domain_email'] = 'Only domain email';
 

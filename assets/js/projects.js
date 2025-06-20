@@ -271,6 +271,7 @@ $(function () {
   );
 
   var Timesheets_ServerParams = {};
+  var ProjectDirectory_ServerParams = {}
   $.each($("._hidden_inputs._filters.timesheets_filters input"), function () {
     Timesheets_ServerParams[$(this).attr("name")] =
       '[name="' + $(this).attr("name") + '"]';
@@ -284,6 +285,14 @@ $(function () {
     Timesheets_ServerParams,
     [3, "desc"]
   );
+  initDataTable(
+    ".table-projectdirectory",
+    admin_url + "projects/projectdirectory/" + project_id,
+    [],
+    [],
+    ProjectDirectory_ServerParams
+  );
+  $('.buttons-collection').hide();
   initDataTable(
     ".table-project-discussions",
     admin_url + "projects/discussions/" + project_id,

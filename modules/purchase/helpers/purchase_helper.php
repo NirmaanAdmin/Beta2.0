@@ -100,6 +100,24 @@ function get_vendor_company_name($userid, $prevent_empty_company = false)
     return '';
 }
 
+function get_staff_namebyId($staff)
+{
+    if ($staff !== '') {
+        $staff = $staff;
+    }
+    $CI = &get_instance();
+
+    $client = $CI->db->select('concat(firstname, " ", lastname) as fullstaffname')
+        ->where('staffid', $staff)
+        ->from(db_prefix() . 'staff')
+        ->get()
+        ->row();
+    if ($client) {
+        return $client->fullstaffname;
+    }
+
+    return '';
+}
 /**
  * Gets the status approve.
  *

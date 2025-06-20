@@ -465,6 +465,32 @@
       $('#apply_to_all_value').val('0');
     });
   });
+
+  $(document).ready(function() {
+    $('body').on('change', 'input[type="checkbox"][name*="[returnable]"]', function() {
+      let isChecked = $(this).is(':checked');
+
+      // Extract index (e.g., 0, 1, 2...) from name attribute
+      let nameAttr = $(this).attr('name');
+      let match = nameAttr.match(/\[(\d+)\]\[returnable\]/);
+      if (!match) return;
+      let index = match[1];
+
+      // Match all inputs like [returnable_date][228], [returnable_date][291] inside same row
+      // Look for either 'items[index]' or 'newitems[index]'
+      let prefix = nameAttr.includes('newitems') ? 'newitems' : 'items';
+
+      let dateInputs = $(`input[name^="${prefix}[${index}][returnable_date]"]`);
+
+      if (!isChecked) {
+        dateInputs.val(''); // Clear all date fields for this row
+      }else{
+        dateInputs.val('<?php echo date('Y-m-d'); ?>');
+      }
+    });
+  });
 </script>
+
+
 
 </html>

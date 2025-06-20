@@ -261,7 +261,7 @@ function data_tables_init($aColumns, $sIndexColumn, $sTable, $join = [], $where 
         $havingSet = 'HAVING ' . $having;
     }
 
-    $resultQuery = '
+   $resultQuery = '
     SELECT ' . str_replace(' , ', ' ', implode(', ', $allColumns)) . ' ' . $additionalColumns . "
     FROM $sTable
     " . $join . "

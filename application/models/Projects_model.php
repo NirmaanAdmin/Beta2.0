@@ -2777,4 +2777,174 @@ class Projects_model extends App_Model
 
         return $result;
     }
+
+    public function create_project_directory_row_template($name = '', $postion = '', $staff = '', $vendors = '', $fullname = '', $contact = '', $email_account = '', $item_key = '')
+    {
+        $row = '';
+        $is_template = ($name == '');
+
+        if ($is_template) {
+            $row .= '<tr class="main"><td></td>';
+        } else {
+            $row .= '<tr class="sortable item">
+        <td class="dragger">
+            <input type="hidden" class="order" name="' . $name . '[order]">
+            <input type="hidden" class="ids" name="' . $name . '[id]" value="' . $item_key . '">
+        </td>';
+        }
+
+        // Field names
+        $name_postion = $is_template ? 'postion' : $name . '[postion]';
+        $name_staff = $is_template ? 'staff' : $name . '[staff]';
+        $name_vendor = $is_template ? 'vendor' : $name . '[vendor]';
+        $name_fullname = $is_template ? 'fullname' : $name . '[fullname]';
+        $name_contact = $is_template ? 'contact' : $name . '[contact]';
+        $name_email_account = $is_template ? 'email_account' : $name . '[email_account]';
+
+        // Get lists
+        $getstaff = getstafflist();
+        $getvendors = getvendorlist();
+
+        $selectedstaff = !empty($staff) ? (is_array($staff) ? $staff : explode(",", $staff)) : [];
+        $selectedvendors = !empty($vendors) ? (is_array($vendors) ? $vendors : explode(",", $vendors)) : [];
+
+        // Position
+        $row .= '<td class="postion">' . render_input($name_postion, '', $postion, '', ['placeholder' => 'Position']) . '</td>';
+
+        // Staff select (manual render)
+        $row .= '<td class="staff"><select name="' . $name_staff . '" class="form-control selectpicker staff-select" data-live-search="true" data-none-selected-text="Staff" onchange="handleDirectoryChange(this)">';
+        $row .= '<option value=""></option>';
+        foreach ($getstaff as $staff_option) {
+            $selected = in_array($staff_option['staffid'], $selectedstaff) ? ' selected' : '';
+            $row .= '<option value="' . $staff_option['staffid'] . '" ' . $selected .
+                ' data-email="' . htmlspecialchars($staff_option['email']) . '"' .
+                ' data-phonenumber="' . htmlspecialchars($staff_option['phonenumber']) . '">' .
+                htmlspecialchars($staff_option['fullname']) . '</option>';
+        }
+        $row .= '</select></td>';
+
+        // Vendor select (manual render)
+        $row .= '<td class="vendor"><select name="' . $name_vendor . '" class="form-control selectpicker vendor-select" data-live-search="true" data-none-selected-text="Vendor" onchange="handleDirectoryChange(this)">';
+        $row .= '<option value=""></option>';
+        foreach ($getvendors as $vendor) {
+            $selected = in_array($vendor['userid'], $selectedvendors) ? ' selected' : '';
+            $row .= '<option value="' . $vendor['userid'] . '" ' . $selected .
+                ' data-email="' . htmlspecialchars($vendor['email']) . '"' .
+                ' data-phonenumber="' . htmlspecialchars($vendor['phonenumber']) . '">' .
+                htmlspecialchars($vendor['company']) . '</option>';
+        }
+        $row .= '</select></td>';
+
+        // Fullname, Contact, Email
+        $row .= '<td class="fullname">' . render_input($name_fullname, '', $fullname, '', ['placeholder' => 'Name']) . '</td>';
+        $row .= '<td class="contact">' . render_input($name_contact, '', $contact, 'number', ['placeholder' => 'Contact']) . '</td>';
+        $row .= '<td class="email">' . render_input($name_email_account, '', $email_account, 'email', ['placeholder' => 'Email']) . '</td>';
+
+        // Actions
+        if ($is_template) {
+            $row .= '<td><button type="button" class="btn pull-right btn-info project-dir-add-item-to-table"><i class="fa fa-check"></i></button></td>';
+        } else {
+            $row .= '<td><a href="#" class="btn btn-danger pull-right" onclick="project_dir_delete_item(this,' . $item_key . ',\'.mom-items\'); return false;"><i class="fa fa-trash"></i></a></td>';
+        }
+
+        $row .= '</tr>';
+
+        return $row;
+    }
+
+
+
+
+    public function add_project_directory($data)
+    {
+
+        unset($data['postion']);
+        unset($data['staff']);
+        unset($data['vendor']);
+        unset($data['fullname']);
+        unset($data['contact']);
+        unset($data['email_account']);
+        $project_dir_arr = [];
+        if (isset($data['newitems'])) {
+            $project_dir_arr = $data['newitems'];
+            unset($data['newitems']);
+        }
+
+        $last_insert_id = [];
+        if (count($project_dir_arr) > 0) {
+            foreach ($project_dir_arr as $key => $rqd) {
+
+                $dt_data = [
+                    'postion' => $rqd['postion'],
+                    'staff' => $rqd['staff'],
+                    'vendor' => $rqd['vendor'],
+                    'fullname' => $rqd['fullname'],
+                    'contact' => $rqd['contact'],
+                    'email_account' => $rqd['email_account'],
+                    'project_id' => $data['project_id'],
+                ];
+
+                $this->db->insert(db_prefix() . 'project_directory', $dt_data);
+                $last_insert_id[] = $this->db->insert_id();
+            }
+            return $last_insert_id;
+        }
+        return false;
+    }
+
+    public function get_project_directory_pdf_html($project_id)
+    {
+        $get_project_directory = $this->get_project_directory_pdf($project_id);
+        $project_name = $this->get($project_id);
+        $html = '';
+        $html .= '<p style="text-align: left;font-size: 12px">' . $project_name->name . '</p>';
+        $html .= '<h3 style="text-align: center;">' . _l('PROJECT TEAM & COMMUNICATION CHANNELS') . '</h3>';
+        $html .=  '<table class="table purorder-item" style="width: 100%">
+        <thead>
+          <tr>
+            <th class="thead-dark" align="left" style="width: 3%">' . _l('#') . '</th>
+            <th class="thead-dark" align="left" style="width: 14%">' . _l('Position') . '</th>
+            <th class="thead-dark" align="left" style="width: 19.5%">' . _l('Staff') . '</th>
+            <th class="thead-dark" align="left" style="width: 19.5%">' . _l('Vendors') . '</th>
+            <th class="thead-dark" align="left" style="width: 14%">' . _l('Name') . '</th>
+            <th class="thead-dark" align="left" style="width: 14%">' . _l('Contact') . '</th>
+            <th class="thead-dark" align="left" style="width: 14%">' . _l('Email Account') . '</th>            
+          </tr>
+          </thead>
+          <tbody>';
+        $serial_no = 1;
+        foreach ($get_project_directory as $row) {
+
+            $html .= '<tr>
+                <td  style="width: 3%" >' . $serial_no . '</td>
+                <td  style="width: 14%">' . $row['postion'] . '</td>';
+            $html .= '<td  style="width: 19.5%">' . get_staff_namebyId($row['staff']) . '</td>
+                <td  style="width: 19.5%">' . get_vendor_company_name($row['vendor']) . '</td>
+                <td  style="width: 14%">' . $row['fullname'] . '</td>';
+            $html .= '<td >' . $row['contact'] . '</td>
+                <td  style="width: 14%">' . $row['email_account'] . '</td>
+            </tr>';
+            $serial_no++;
+        }
+        $html .=  '</tbody>
+      </table>';
+        $html .= '<link href="' . base_url() . 'assets/css/project_dir_pdf.css' . '"  rel="stylesheet" type="text/css" />';
+
+        return $html;
+    }
+
+    public function get_project_directory_pdf($project_id)
+    {
+        $this->db->select('*');
+        $this->db->from(db_prefix() . 'project_directory');
+        $this->db->where('project_id', $project_id);
+        $this->db->order_by('id', 'DESC');
+
+        return $this->db->get()->result_array();
+    }
+
+    public function project_directory_pdf($project_directory)
+    {
+        return app_pdf('project_directory', LIBSPATH . 'pdf/Project_directory_pdf', $project_directory);
+    }
 }
