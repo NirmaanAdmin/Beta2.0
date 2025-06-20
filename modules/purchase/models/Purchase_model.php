@@ -20277,14 +20277,27 @@ class Purchase_model extends App_Model
                 $package_amount_class = '';
 
                 if ($module == 'pur_orders') {
+                    $non_break_description = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $item['long_description']));
                     $this->db->select(db_prefix() . 'pur_order_detail.id as id, ' . db_prefix() . 'pur_order_detail.quantity as quantity, ' . db_prefix() . 'pur_order_detail.total as total');
+                    $this->db->select("
+                        REPLACE(
+                            REPLACE(
+                                REPLACE(
+                                    REPLACE(" . db_prefix() . "pur_order_detail.description, '\r', ''),
+                                '\n', ''),
+                            '<br />', ''),
+                        '<br/>', '') AS non_break_description
+                    ");
                     $this->db->from(db_prefix() . 'pur_order_detail');
                     $this->db->join(db_prefix() . 'pur_orders', db_prefix() . 'pur_orders.id = ' . db_prefix() . 'pur_order_detail.pur_order', 'left');
                     $this->db->where(db_prefix() . 'pur_order_detail.item_code', $item['item_code']);
-                    $this->db->where(db_prefix() . 'pur_order_detail.description', $item['long_description']);
                     $this->db->where(db_prefix() . 'pur_orders.estimate', $estimate_id);
                     $this->db->where(db_prefix() . 'pur_orders.group_pur', $budget_head_id);
                     $this->db->where(db_prefix() . 'pur_orders.approve_status', 2);
+                    $this->db->where(db_prefix() . 'pur_order_detail.quantity' . ' >', 0, false);
+                    $this->db->where(db_prefix() . 'pur_order_detail.total' . ' >', 0, false);
+                    $this->db->group_by(db_prefix() . 'pur_order_detail.id');
+                    $this->db->having('non_break_description', $non_break_description);
                     $pur_order_detail_qty_total = $this->db->get()->result_array();
                     if (!empty($pur_order_detail_qty_total)) {
                         foreach ($pur_order_detail_qty_total as $srow) {
