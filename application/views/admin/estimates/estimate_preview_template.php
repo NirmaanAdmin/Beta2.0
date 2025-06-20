@@ -1177,25 +1177,22 @@ $("body").on('click', '#download_historical_data', function() {
 function cost_control_sheet(el) {
   var estimate_id = <?php echo e($estimate->id); ?>;
   var budget_head_id = $(el).closest('.detailed-costing-tab').data('id');
-  var cost_sub_head = $('select[name="cost_sub_head"]').val();
-  if (estimate_id !== '' && budget_head_id !== '') {
-    $.post(admin_url + 'purchase/get_cost_control_sheet', {
-      estimate_id: estimate_id,
-      budget_head_id: budget_head_id,
-      cost_sub_head: cost_sub_head,
-      module: 'pur_orders'
-    }).done(function (response) {
-      response = JSON.parse(response);
-      if (response.result) {
-        $('.view_cost_control_sheet').html('');
-        $('.view_cost_control_sheet').html(response.result);
-        $('#cost_complete_modal').modal('show');
-      } else {
-        $('.view_cost_control_sheet').html('');
-        alert_float('warning', "No any items have found");
-      }
-    });
-  }
+  $.post(admin_url + "estimates/assign_unawarded_capex", {
+    id: estimate_id,
+    unawarded_budget: budget_head_id,
+  }).done(function (res) {
+    var response = JSON.parse(res);
+    if (response.itemhtml) {
+      $('.unawarded-capex-body').html('');
+      $('.unawarded-capex-body').html(response.itemhtml);
+      $('.unawarded-capex-body table input').prop('disabled', true);
+      $('.unawarded_capex_title').html('View Items');
+      $('#unawarded_capex_modal button[type="submit"]').hide();
+      init_selectpicker();
+      calculate_unawarded_capex();
+      $('#unawarded_capex_modal').modal('show');
+    }
+  });
 }
 
 function assign_unawarded_capex(id) {
@@ -1209,6 +1206,7 @@ function assign_unawarded_capex(id) {
       $('.unawarded-capex-body').html('');
       $('.unawarded-capex-body').html(response.itemhtml);
       $('.unawarded_capex_title').html('Assign Unawarded Capex');
+      $('#unawarded_capex_modal button[type="submit"]').show();
       init_selectpicker();
       calculate_unawarded_capex();
       $('#unawarded_capex_modal').modal('show');
@@ -1228,6 +1226,7 @@ $("body").on("change", "select[name='unawarded_budget_head']", function (e) {
       if (response.itemhtml) {
         $('.unawarded-capex-body').html('');
         $('.unawarded-capex-body').html(response.itemhtml);
+        $('#unawarded_capex_modal button[type="submit"]').show();
         init_selectpicker();
         calculate_unawarded_capex();
       }
