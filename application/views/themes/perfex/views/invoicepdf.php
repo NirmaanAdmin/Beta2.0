@@ -82,7 +82,7 @@ $tblinvoicehtml .= '
     <td>'._l('suppliers_vendors_gst').' :</td>
     <td>'.get_option('company_vat').'</td>
 </tr>';
-
+ 
 $tblinvoicehtml .= '
 <tr style="font-size:13px">
     <td>'._l('hsn_sac_sescription').' :</td>
@@ -92,7 +92,7 @@ $tblinvoicehtml .= '
 $tblinvoicehtml .= '
 <tr style="font-size:13px">
     <td>'._l('place_of_supply_of_services').' :</td>
-    <td>Jamnagar - Gujarat</td>
+    <td>'.$invoice->place_of_supply_of_services.'</td>
 </tr>';
 
 $tblinvoicehtml .= '
@@ -104,13 +104,13 @@ $tblinvoicehtml .= '
 $tblinvoicehtml .= '
 <tr style="font-size:13px">
     <td>'._l('services_provided_location').' :</td>
-    <td>Jamnagar - Gujarat</td>
+    <td>'.$invoice->services_provided_location.'</td>
 </tr>';
 
 $tblinvoicehtml .= '
 <tr style="font-size:13px">
     <td>'._l('state_name_code').' :</td>
-    <td>Gujarat - 24</td>
+    <td>'.$invoice->state_name_code.'</td>
 </tr>';
 
 $tblinvoicehtml .= '
@@ -186,10 +186,10 @@ $tblinvoicehtml .= '
      <td width="50%;" align="left">
         <div style="padding-top:20px;">
             <strong>' . _l('bank_detail') . '</strong>
-            <br>
+            <br> 
             '.$bank_details.'
             <br><br><br>
-            <strong>Principles Place of Business :</strong> Vadodara Gujarat
+            <strong>Principles Place of Business :</strong> '.$invoice->principles_place_of_business.'
             <br><br><br>
             <strong>Regd Address :</strong>
             <br>
