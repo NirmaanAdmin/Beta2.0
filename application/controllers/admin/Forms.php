@@ -1497,7 +1497,16 @@ class Forms extends AdminController
 
     public function dpr_dashboard()
     {
-        $data = $this->forms_model->dpr_dashboard();
+        $data = array();
+        $data['projects'] = $this->forms_model->get_dpr_projects();
         $this->load->view('admin/progress_reports/dpr/dpr_dashboard', $data);
+    }
+
+    public function get_dpr_dashboard()
+    {
+        $data = $this->input->post();
+        $result = $this->forms_model->get_dpr_dashboard($data);
+        echo json_encode($result);
+        die;
     }
 }

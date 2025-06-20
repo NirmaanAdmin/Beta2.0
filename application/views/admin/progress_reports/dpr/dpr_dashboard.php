@@ -14,48 +14,19 @@
           </div>
 
           <div class="row">
-            <div class="col-md-12">
-              <div class="table-responsive s_table">
-                <table class="table items no-mtop" style="border: 1px solid #dee2e6;">
-                    <tbody>
-                        <tr style="font-weight: bold; background: #f1f5f9; color: #1e293b;">
-                          <td align="left">Row Labels</td>
-                          <?php 
-                          if (!empty($progress_report_sub_type)) {
-                            foreach ($progress_report_sub_type as $pkey => $pvalue) { ?>
-                              <td align="right">
-                                <?php echo $pvalue['name']; ?>
-                              </td>
-                            <?php }
-                          } ?>
-                        </tr>
-                        <?php 
-                        if (!empty($forms) && !empty($progress_report_sub_type) && !empty($sub_type_array)) {
-                            foreach ($forms as $key => $value) {
-                                $formid = $value['formid'];
-                                ?>
-                                <tr>
-                                    <td align="left"><?php echo date('d-m-Y', strtotime($value['date'])); ?></td>
-                                    <?php
-                                    foreach ($progress_report_sub_type as $pkey => $pvalue) {
-                                        $sub_type_id = $pvalue['id'];
-                                        $sub_type_filtered = array_filter($sub_type_array, function ($item) use ($formid, $sub_type_id) {
-                                            return $item['formid'] == $formid && $item['sub_type'] == $sub_type_id;
-                                        });
+             <div class="col-md-12">
+                <div class="col-md-2 pull-right" style="padding-right: 0px;">
+                  <?php
+                  $default_project = !empty($projects) ? $projects[0]['id'] : '';
+                  echo render_select('projects', $projects, array('id', 'name'), 'projects', $default_project);
+                  ?>
+                </div>
+             </div>
+          </div>
 
-                                        $sub_type_filtered = array_values($sub_type_filtered);
-                                        ?>
-                                        <td align="right">
-                                            <?php echo !empty($sub_type_filtered) ? $sub_type_filtered[0]['total'] : 0; ?>
-                                        </td>
-                                    <?php } ?>
-                                </tr>
-                                <?php
-                            }
-                        }
-                        ?>
-                    </tbody>
-                </table>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="preport_sub_type_html">
               </div>
             </div>
           </div>
@@ -64,47 +35,7 @@
 
           <div class="row">
             <div class="col-md-12">
-              <div class="table-responsive s_table">
-                <table class="table items no-mtop" style="border: 1px solid #dee2e6;">
-                    <tbody>
-                        <tr style="font-weight: bold; background: #f1f5f9; color: #1e293b;">
-                          <td align="left">Row Labels</td>
-                          <?php 
-                          if (!empty($progress_report_type)) {
-                            foreach ($progress_report_type as $pkey => $pvalue) { ?>
-                              <td align="right">
-                                <?php echo $pvalue['name']; ?>
-                              </td>
-                            <?php }
-                          } ?>
-                        </tr>
-                        <?php 
-                        if (!empty($forms) && !empty($progress_report_type) && !empty($type_array)) {
-                            foreach ($forms as $key => $value) {
-                                $formid = $value['formid'];
-                                ?>
-                                <tr>
-                                    <td align="left"><?php echo date('d-m-Y', strtotime($value['date'])); ?></td>
-                                    <?php
-                                    foreach ($progress_report_type as $pkey => $pvalue) {
-                                        $type_id = $pvalue['id'];
-                                        $type_filtered = array_filter($type_array, function ($item) use ($formid, $type_id) {
-                                            return $item['formid'] == $formid && $item['type'] == $type_id;
-                                        });
-
-                                        $type_filtered = array_values($type_filtered);
-                                        ?>
-                                        <td align="right">
-                                            <?php echo !empty($type_filtered) ? $type_filtered[0]['total'] : 0; ?>
-                                        </td>
-                                    <?php } ?>
-                                </tr>
-                                <?php
-                            }
-                        }
-                        ?>
-                    </tbody>
-                </table>
+              <div class="preport_type_html">
               </div>
             </div>
           </div>
@@ -136,96 +67,108 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  const totalWorkforceChart = document.getElementById('totalWorkforceChart').getContext('2d');
-  const chart = new Chart(totalWorkforceChart, {
-      type: 'bar',
-      data: {
-        labels: <?= json_encode($total_workforce_labels['labels']); ?>,
-        datasets: [
-          <?php
-          $i = 0;
-          $count = count($total_workforce_values);
-          foreach ($total_workforce_values as $label => $data) {
-              $hue = ($i * (360 / $count)) % 360;
-              $bgColor = "hsl($hue, 70%, 60%)";
-              $type = 'bar';
+  $('select[name="projects"]').on('change', function() {
+    get_dpr_dashboard();
+  });
 
-              echo '{';
-              echo "label: '$label',";
-              echo 'data: ' . json_encode($data) . ',';
-              echo "type: '$type',";
-              echo "backgroundColor: '$bgColor',";
-              echo "borderColor: '$bgColor',";
-              echo 'borderWidth: 1';
-              echo '}';
-              if (++$i < $count) echo ',';
-          }
-          ?>
-        ]
-      },
-      options: {
+  get_dpr_dashboard();
+
+  function get_dpr_dashboard() {
+    "use strict";
+    var data = {
+      projects: $('select[name="projects"]').val(),
+    };
+    $.post(admin_url + 'forms/get_dpr_dashboard', data).done(function(res) {
+      var response = JSON.parse(res);
+      $('.preport_sub_type_html').html(response.preport_sub_type_html);
+      $('.preport_type_html').html(response.preport_type_html);
+
+      // === Total Workforce Chart ===
+      if (window.totalWorkforceChartInstance) {
+        window.totalWorkforceChartInstance.destroy();
+      }
+      const ctx = document.getElementById('totalWorkforceChart').getContext('2d');
+      const totalDatasets = response.total_workforce_values.map(function(ds, i, arr) {
+        var hue = (i * 360 / arr.length) % 360;
+        var bg = 'hsl(' + hue + ', 70%, 60%)';
+        return {
+          label: ds.label,
+          data: ds.data,
+          backgroundColor: bg,
+          borderColor: bg,
+          borderWidth: 1
+        };
+      });
+      window.totalWorkforceChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: response.total_workforce_labels,
+          datasets: totalDatasets
+        },
+        options: {
           responsive: true,
           plugins: {
-              title: {
-                  display: true,
-                  text: 'Total Workforce'
-              }
+            title: {
+              display: true,
+              text: 'Total Workforce'
+            }
           },
           scales: {
-              y: {
-                  beginAtZero: true
-              }
+            y: {
+              beginAtZero: true
+            }
           }
-      }
-  });
-</script>
-<script>
-  const stackedLaborChart = document.getElementById('stackedLaborChart').getContext('2d');
-  const datasets = [
-  <?php
-    $total = count($stacked_labor_values);
-    $index = 0;
-    foreach ($stacked_labor_values as $label => $values) {
-        $hue = ($index * (360 / $total)) % 360;
-        $bgColor = "hsl($hue, 70%, 60%)";
-        echo "{";
-        echo "label: '" . htmlspecialchars($label, ENT_QUOTES) . "',";
-        echo "data: " . json_encode($values) . ",";
-        echo "backgroundColor: '$bgColor',";
-        echo "borderWidth: 1";
-        echo "}";
-        if (++$index < $total) echo ",";
-    }
-    ?>
-  ];
+        }
+      });
 
-  const stackedChart = new Chart(stackedLaborChart, {
-      type: 'bar',
-      data: {
-          labels: <?= json_encode($stacked_labor_labels['labels']); ?>,
-          datasets: datasets
-      },
-      options: {
+      // === Stacked Labor Chart ===
+      if (window.stackedLaborChartInstance) {
+        window.stackedLaborChartInstance.destroy();
+      }
+      const stackedLaborCtx = document.getElementById('stackedLaborChart').getContext('2d');
+      const stackedDatasets = Object.keys(response.stacked_labor_values).map(function(label, i, arr) {
+        var hue = (i * 360 / arr.length) % 360;
+        var bg = 'hsl(' + hue + ', 70%, 60%)';
+        return {
+          label: label,
+          data: response.stacked_labor_values[label],
+          backgroundColor: bg,
+          borderWidth: 1
+        };
+      });
+      window.stackedLaborChartInstance = new Chart(stackedLaborCtx, {
+        type: 'bar',
+        data: {
+          labels: response.stacked_labor_labels,
+          datasets: stackedDatasets
+        },
+        options: {
           responsive: true,
           plugins: {
-              title: {
-                  display: true,
-                  text: 'Stacked Workforce by Category'
-              },
-              tooltip: {
-                  mode: 'index',
-                  intersect: false
-              }
+            title: {
+              display: true,
+              text: 'Stacked Workforce by Category'
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false
+            }
           },
           scales: {
-              x: {
-                  stacked: true
-              },
-              y: {
-                  stacked: true,
-                  beginAtZero: true
-              }
+            x: {
+              stacked: true
+            },
+            y: {
+              stacked: true,
+              beginAtZero: true
+            }
           }
-      }
-  });
+        }
+      });
+
+    }).fail(function(xhr) {
+      console.error("Error loading dashboard data:", xhr.responseText);
+    });
+  }
 </script>
+

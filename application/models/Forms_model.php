@@ -4591,99 +4591,164 @@ class Forms_model extends App_Model
         return $result;
     }
 
-    public function dpr_dashboard()
+    public function get_dpr_dashboard($data)
     {
-        $result = array();
-        $total_workforce_labels = array();
-        $total_workforce_values = array();
-        $stacked_labor_labels = array();
-        $stacked_labor_values = array();
+        $projects = isset($data['projects']) ? $data['projects'] : null;
 
-        $this->db->where("form_type", "dpr");
-        $result['forms'] = $this->db->get(db_prefix() . 'forms')->result_array();
+        $total_workforce_labels = [];
+        $total_workforce_values = [];
+        $stacked_labor_labels = [];
+        $stacked_labor_values = [];
 
-        $result['progress_report_sub_type'] = $this->db->get(db_prefix() . 'progress_report_sub_type')->result_array();
+        // 1. Fetch distinct form dates
+        $this->db->select('DATE(date) as date');
+        $this->db->from(db_prefix() . 'forms');
+        $this->db->where('form_type', 'dpr');
+        if (!empty($projects)) {
+            $this->db->where('project_id', $projects);
+        }
+        $this->db->group_by('DATE(date)');
+        $this->db->order_by('date', 'ASC');
+        $forms = $this->db->get()->result_array();
 
-        $this->db->select(
-            db_prefix() . 'dpr_form_detail.id as id, ' .
-            db_prefix() . 'forms.formid as formid, ' .
-            db_prefix() . 'forms.date as date, ' .
-            db_prefix() . 'dpr_form_detail.sub_type as sub_type, ' .
-            'SUM(' . db_prefix() . 'dpr_form_detail.total) as total, ' .
-            'CONCAT(' . db_prefix() . 'forms.formid, "-", ' . db_prefix() . 'dpr_form_detail.sub_type) as sub_form_key'
-        );
+        // 2. Fetch sub_type totals grouped by date and sub_type
+        $this->db->select('DATE(' . db_prefix() . 'forms.date) as date, sub_type, SUM(' . db_prefix() . 'dpr_form_detail.total) as total');
         $this->db->from(db_prefix() . 'dpr_form_detail');
         $this->db->join(db_prefix() . 'forms', db_prefix() . 'forms.formid = ' . db_prefix() . 'dpr_form_detail.form_id');
         $this->db->where("sub_type != ''", NULL, FALSE);
-        $this->db->group_by('sub_form_key');
-        $result['sub_type_array'] = $this->db->get()->result_array();
+        if (!empty($projects)) {
+            $this->db->where(db_prefix() . 'forms.project_id', $projects);
+        }
+        $this->db->group_by(['DATE(' . db_prefix() . 'forms.date)', 'sub_type']);
+        $sub_type_array = $this->db->get()->result_array();
 
-        $result['progress_report_type'] = $this->db->get(db_prefix() . 'progress_report_type')->result_array();
-
-        $this->db->select(
-            db_prefix() . 'dpr_form_detail.id as id, ' .
-            db_prefix() . 'forms.formid as formid, ' .
-            db_prefix() . 'forms.date as date, ' .
-            db_prefix() . 'dpr_form_detail.type as type, ' .
-            'SUM(' . db_prefix() . 'dpr_form_detail.total) as total, ' .
-            'CONCAT(' . db_prefix() . 'forms.formid, "-", ' . db_prefix() . 'dpr_form_detail.type) as type_form_key'
-        );
+        // 3. Fetch type totals grouped by date and type
+        $this->db->select('DATE(' . db_prefix() . 'forms.date) as date, type, SUM(' . db_prefix() . 'dpr_form_detail.total) as total');
         $this->db->from(db_prefix() . 'dpr_form_detail');
         $this->db->join(db_prefix() . 'forms', db_prefix() . 'forms.formid = ' . db_prefix() . 'dpr_form_detail.form_id');
         $this->db->where("type != ''", NULL, FALSE);
-        $this->db->group_by('type_form_key');
-        $result['type_array'] = $this->db->get()->result_array();
+        if (!empty($projects)) {
+            $this->db->where(db_prefix() . 'forms.project_id', $projects);
+        }
+        $this->db->group_by(['DATE(' . db_prefix() . 'forms.date)', 'type']);
+        $type_array = $this->db->get()->result_array();
 
-        if (!empty($result['forms']) && !empty($result['progress_report_sub_type']) && !empty($result['sub_type_array'])) {
-            foreach ($result['forms'] as $key => $value) {
-                $formid = $value['formid'];
-                $total_workforce_labels['labels'][] = date('d-m-Y', strtotime($value['date']));
-                
-                foreach ($result['progress_report_sub_type'] as $pkey => $pvalue) {
-                    $sub_type_id = $pvalue['id'];
-                    $sub_type_name = $pvalue['name']; // directly use the name instead of querying DB
+        // 4. Reference lists
+        $progress_report_sub_type = $this->db->get(db_prefix() . 'progress_report_sub_type')->result_array();
+        $progress_report_type = $this->db->get(db_prefix() . 'progress_report_type')->result_array();
 
-                    $sub_type_filtered = array_filter($result['sub_type_array'], function ($item) use ($formid, $sub_type_id) {
-                        return $item['formid'] == $formid && $item['sub_type'] == $sub_type_id;
-                    });
+        // 5. Process each unique form date
+        foreach ($forms as $form) {
+            $date = $form['date'];
+            $total_workforce_labels[] = $date;
+            $stacked_labor_labels[] = $date;
 
-                    $sub_type_filtered = array_values($sub_type_filtered);
-                    $total_workforce_values[$sub_type_name][] = !empty($sub_type_filtered) ? $sub_type_filtered[0]['total'] : 0;
-                }
+            foreach ($progress_report_sub_type as $sub) {
+                $match = array_values(array_filter($sub_type_array, function ($x) use ($date, $sub) {
+                    return $x['date'] == $date && $x['sub_type'] == $sub['id'];
+                }));
+                $total = !empty($match) ? $match[0]['total'] : 0;
+                $total_workforce_values[$sub['name']][] = $total;
+            }
+
+            foreach ($progress_report_type as $type) {
+                $match = array_values(array_filter($type_array, function ($x) use ($date, $type) {
+                    return $x['date'] == $date && $x['type'] == $type['id'];
+                }));
+                $total = !empty($match) ? $match[0]['total'] : 0;
+                $stacked_labor_values[$type['name']][] = $total;
             }
         }
 
-        $result['total_workforce_labels'] = $total_workforce_labels;
-        $result['total_workforce_values'] = $total_workforce_values;
+        // 6. Convert values to Chart.js compatible datasets
+        $total_workforce_datasets = array_map(function($label) use ($total_workforce_values) {
+            return ['label' => $label, 'data' => array_values($total_workforce_values[$label])];
+        }, array_keys($total_workforce_values));
 
-        if (!empty($result['forms']) && !empty($result['progress_report_type']) && !empty($result['type_array'])) {
-            foreach ($result['forms'] as $key => $value) {
-                $formid = $value['formid'];
-                $stacked_labor_labels['labels'][] = date('d-m-Y', strtotime($value['date']));
-                
-                foreach ($result['progress_report_type'] as $pkey => $pvalue) {
-                    $type_id = $pvalue['id'];
-                    $type_name = $pvalue['name']; // directly use the name instead of querying DB
+        $stacked_labor_datasets = array_map(function($label) use ($stacked_labor_values) {
+            return ['label' => $label, 'data' => array_values($stacked_labor_values[$label])];
+        }, array_keys($stacked_labor_values));
 
-                    $type_filtered = array_filter($result['type_array'], function ($item) use ($formid, $type_id) {
-                        return $item['formid'] == $formid && $item['type'] == $type_id;
-                    });
-
-                    $type_filtered = array_values($type_filtered);
-                    $stacked_labor_values[$type_name][] = !empty($type_filtered) ? $type_filtered[0]['total'] : 0;
-                }
-            }
+        // 7. Build HTML tables
+        $preport_sub_type_html = '<div class="table-responsive s_table"><table class="table items no-mtop" style="border: 1px solid #dee2e6;"><tbody>';
+        $preport_sub_type_html .= '<tr style="font-weight: bold; background: #f1f5f9; color: #1e293b;"><td align="left">Row Labels</td>';
+        foreach ($progress_report_sub_type as $sub) {
+            $preport_sub_type_html .= '<td align="right">' . $sub['name'] . '</td>';
         }
+        $preport_sub_type_html .= '</tr>';
 
-        $result['stacked_labor_labels'] = $stacked_labor_labels;
-        $result['stacked_labor_values'] = $stacked_labor_values;
+        if (!empty($forms)) {
+            foreach ($forms as $form) {
+                $date = $form['date'];
+                $preport_sub_type_html .= '<tr><td>' . $date . '</td>';
+                foreach ($progress_report_sub_type as $sub) {
+                    $match = array_values(array_filter($sub_type_array, function ($x) use ($date, $sub) {
+                        return $x['date'] == $date && $x['sub_type'] == $sub['id'];
+                    }));
+                    $total = !empty($match) ? $match[0]['total'] : 0;
+                    $preport_sub_type_html .= '<td align="right">' . $total . '</td>';
+                }
+                $preport_sub_type_html .= '</tr>';
+            }
+        } else {
+            $preport_sub_type_html .= '<tr><td colspan="' . (count($progress_report_sub_type) + 1) . '" align="center">No records found</td></tr>';
+        }
+        $preport_sub_type_html .= '</tbody></table></div>';
 
-        return $result;
+        // Type Table
+        $preport_type_html = '<div class="table-responsive s_table"><table class="table items no-mtop" style="border: 1px solid #dee2e6;"><tbody>';
+        $preport_type_html .= '<tr style="font-weight: bold; background: #f1f5f9; color: #1e293b;"><td align="left">Row Labels</td>';
+        foreach ($progress_report_type as $type) {
+            $preport_type_html .= '<td align="right">' . $type['name'] . '</td>';
+        }
+        $preport_type_html .= '</tr>';
+
+        if (!empty($forms)) {
+            foreach ($forms as $form) {
+                $date = $form['date'];
+                $preport_type_html .= '<tr><td>' . $date . '</td>';
+                foreach ($progress_report_type as $type) {
+                    $match = array_values(array_filter($type_array, function ($x) use ($date, $type) {
+                        return $x['date'] == $date && $x['type'] == $type['id'];
+                    }));
+                    $total = !empty($match) ? $match[0]['total'] : 0;
+                    $preport_type_html .= '<td align="right">' . $total . '</td>';
+                }
+                $preport_type_html .= '</tr>';
+            }
+        } else {
+            $preport_type_html .= '<tr><td colspan="' . (count($progress_report_type) + 1) . '" align="center">No records found</td></tr>';
+        }
+        $preport_type_html .= '</tbody></table></div>';
+
+        // Final response
+        return [
+            'preport_sub_type_html' => $preport_sub_type_html,
+            'preport_type_html' => $preport_type_html,
+            'total_workforce_labels' => $total_workforce_labels,
+            'total_workforce_values' => $total_workforce_datasets,
+            'stacked_labor_labels' => $stacked_labor_labels,
+            'stacked_labor_values' => $stacked_labor_values
+        ];
     }
 
     public function get_form($form_id)
     {
         $this->db->where('formid', $form_id);
         return $this->db->get(db_prefix() . 'forms')->row();
+    }
+
+    public function get_dpr_projects()
+    {
+        $this->db->select([
+            db_prefix() . 'forms.project_id as id',
+            db_prefix() . 'projects.name'
+        ]);
+        $this->db->from(db_prefix() . 'forms');
+        $this->db->join(db_prefix() . 'projects', db_prefix() . 'projects.id = ' . db_prefix() . 'forms.project_id', 'left');
+        $this->db->where(db_prefix() . 'forms.form_type', 'dpr');
+        $this->db->group_by(db_prefix() . 'forms.project_id');
+        $this->db->order_by(db_prefix() . 'projects.name', 'asc');
+        return $this->db->get()->result_array();
     }
 }
