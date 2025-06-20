@@ -2025,7 +2025,6 @@ class Estimates_model extends App_Model
         $estimate_id = $data['id'];
         $unawarded_budget = isset($data['unawarded_budget']) ? $data['unawarded_budget'] : '';
         $base_currency = $this->currencies_model->get_base_currency();
-        $units = $this->get_units();
         $this->db->where('id', $estimate_id);
         $estimates = $this->db->get(db_prefix() . 'estimates')->row();
         $unawarded_budget_head = $this->get_estimate_budget_listing($estimates->id);
@@ -2103,16 +2102,31 @@ class Estimates_model extends App_Model
                     $itemhtml .= '<td align="left">' . get_purchase_items($item['item_code']) . '</td>';
                     $itemhtml .= '<td align="left">' . clear_textarea_breaks($item['long_description']) . '</td>';
                     $itemhtml .= '<td align="left">' . get_sub_head_name_by_id($item['sub_head']) . '</td>';
-                    $itemhtml .= '<td align="align" class="all_budgeted_qty">
-                        ' . render_input($budgeted_qty_name_attr, '', $budgeted_qty, 'number', ['readonly' => true]) . '
-                        ' . render_select($budgeted_unit_name_attr, $units, ['unit_type_id', 'unit_name'], '', $item['unit_id'], ['disabled' => true]) . '
-                        </td>';
+                    $itemhtml .= '<td class="all_budgeted_qty" style="text-align: left;">
+                        <input type="number" 
+                           id="' . $budgeted_qty_name_attr . '" 
+                           name="' . $budgeted_qty_name_attr . '" 
+                           value="' . $budgeted_qty . '" 
+                           class="form-control" 
+                           readonly>
+                        <span style="text-align: left; display: block;">' . 
+                            (!empty($item['unit_id']) ? pur_get_unit_name($item['unit_id']) : '') . 
+                        '</span>
+                    </td>';
                     $itemhtml .= '<td align="align" class="all_budgeted_rate">' . render_input($budgeted_rate_name_attr, '', $budgeted_rate, 'number', ['readonly' => true]) . '</td>';
                     $itemhtml .= '<td align="align" class="all_budgeted_amount">' . render_input($budgeted_amount_name_attr, '', $budgeted_amount, 'number', ['readonly' => true]) . '</td>';
-                    $itemhtml .= '<td align="align" class="all_unawarded_qty">
-                        ' . render_input($unawarded_qty_name_attr, '', $unawarded_qty, 'number', ['onchange' => 'calculate_unawarded_capex()', 'step' => 'any']) . '
-                        ' . render_select($unawarded_unit_name_attr, $units, ['unit_type_id', 'unit_name'], '', $item['unit_id'], ['disabled' => true]) . '
-                        </td>';
+                    $itemhtml .= '<td align="right" class="all_unawarded_qty">
+                        <input type="number" 
+                           id="' . $unawarded_qty_name_attr . '" 
+                           name="' . $unawarded_qty_name_attr . '" 
+                           value="' . $unawarded_qty . '" 
+                           class="form-control" 
+                           onchange="calculate_unawarded_capex()" 
+                           step="any">
+                        <span style="text-align: left; display: block;">' . 
+                            (!empty($item['unit_id']) ? pur_get_unit_name($item['unit_id']) : '') . 
+                        '</span>
+                    </td>';
                     $itemhtml .= '<td align="align" class="all_unawarded_rate">' . render_input($unawarded_rate_name_attr, '', $unawarded_rate, 'number', ['onchange' => 'calculate_unawarded_capex()', 'step' => 'any']) . '</td>';
                     $itemhtml .= '<td align="align" class="all_unawarded_amount">' . render_input($unawarded_amount_name_attr, '', $unawarded_amount, 'number', ['readonly' => true]) . '</td>';
                     $itemhtml .= '<td align="align" class="all_unallocated_cost">' . render_input($unallocated_cost_name_attr, '', $unallocated_cost, 'number', ['readonly' => true]) . '</td>';
@@ -2195,7 +2209,6 @@ class Estimates_model extends App_Model
         $package_budget = isset($data['package_budget']) ? $data['package_budget'] : '';
         $package_id = isset($data['package_id']) ? $data['package_id'] : '';
         $base_currency = $this->currencies_model->get_base_currency();
-        $units = $this->get_units();
         if(!empty($package_id)) {
             $this->db->where('id', $package_id);
             $package_info = $this->db->get(db_prefix() . 'estimate_package_info')->row();
@@ -2352,16 +2365,30 @@ class Estimates_model extends App_Model
                     $itemhtml .= '<td align="left">' . get_purchase_items($item['item_code']) . '</td>';
                     $itemhtml .= '<td align="left">' . clear_textarea_breaks($item['long_description']) . '</td>';
                     $itemhtml .= '<td align="left">' . get_sub_head_name_by_id($item['sub_head']) . '</td>';
-                    $itemhtml .= '<td align="right" class="all_unawarded_qty">
-                        ' . render_input($unawarded_qty_name_attr, '', $unawarded_qty, 'number', ['readonly' => true]) . '
-                        ' . render_select($unawarded_unit_name_attr, $units, ['unit_type_id', 'unit_name'], '', $item['unit_id'], ['disabled' => true]) . '
-                        </td>';
+                    $itemhtml .= '<td class="all_unawarded_qty" style="text-align: left;">
+                        <input type="number" 
+                           id="' . $unawarded_qty_name_attr . '" 
+                           name="' . $unawarded_qty_name_attr . '" 
+                           value="' . $unawarded_qty . '" 
+                           class="form-control" 
+                           readonly>
+                        <span style="text-align: left; display: block;">' . 
+                            (!empty($item['unit_id']) ? pur_get_unit_name($item['unit_id']) : '') . 
+                        '</span>
+                    </td>';
                     $itemhtml .= '<td align="right" class="all_unawarded_rate">' . render_input($unawarded_rate_name_attr, '', $unawarded_rate, 'number', ['readonly' => true]) . '</td>';
                     $itemhtml .= '<td align="right" class="all_unawarded_amount">' . render_input($unawarded_amount_name_attr, '', $unawarded_amount, 'number', ['readonly' => true]) . '</td>';
                     $itemhtml .= '<td align="right" class="all_package_qty">
-                        ' . render_input($package_qty_name_attr, '', !empty($package_items_info) ? $package_items_info->package_qty : 0.00, 'number', ['onchange' => 'calculate_package()', 'step' => 'any']) . '
-                        ' . render_select($package_unit_name_attr, $units, ['unit_type_id', 'unit_name'], '', $item['unit_id'], ['disabled' => true]) . '
-                        </td>';
+                        <input type="number" id="' . $package_qty_name_attr . '" 
+                           name="' . $package_qty_name_attr . '" 
+                           value="' . (!empty($package_items_info) ? $package_items_info->package_qty : '0.00') . '" 
+                           class="form-control" 
+                           onchange="calculate_package()" 
+                           step="any">
+                        <span style="text-align: left; display: block;">' . 
+                            (!empty($item['unit_id']) ? pur_get_unit_name($item['unit_id']) : '') . 
+                        '</span>
+                    </td>';
                     $itemhtml .= '<td align="right" class="all_package_rate">' . render_input($package_rate_name_attr, '', !empty($package_items_info) ? $package_items_info->package_rate : 0.00, 'number', ['onchange' => 'calculate_package()', 'step' => 'any']) . '</td>';
                     $itemhtml .= '<td align="right" class="all_package_amount">' . render_input($package_amount_name_attr, '', 0.00, 'number', ['readonly' => true]) . '</td>';
                     $itemhtml .= '<td align="right">' . render_textarea($package_remarks_name_attr, '', !empty($package_items_info) ? $package_items_info->remarks : '') . '</td>';
