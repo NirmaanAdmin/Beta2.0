@@ -224,7 +224,7 @@
 	  var item_key = getNextItemKey();
 
 	  table_row +=
-	    '<tr class="items">';
+	    '<tr class="items pack_items">';
 
 	  var unawarded_amount = data.unawarded_qty * data.unawarded_rate;
 	  var package_amount = data.package_qty * data.package_rate;

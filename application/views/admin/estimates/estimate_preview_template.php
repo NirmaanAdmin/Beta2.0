@@ -1124,7 +1124,7 @@
 <div class="modal fade" id="package_modal" tabindex="-1" role="dialog">
    <div class="modal-dialog" role="document" style="width: 98%;">
       <div class="modal-content">
-         <?php echo form_open(admin_url('estimates/save_package'), array('id' => 'unawarded_capex_form', 'class' => '')); ?>
+         <?php echo form_open(admin_url('estimates/save_package'), array('id' => 'unawarded_package_form', 'class' => '')); ?>
          <div class="modal-header">
             <h4 class="modal-title"><div class="package_title"></div></h4>
             <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -1277,6 +1277,31 @@ $(document).on('change', 'select[name="package_budget_head"]', function () {
     $('select[name="package_budget_head"]').selectpicker('refresh');
     table_unawarded_tracker.DataTable().ajax.reload();
 });
+
+$('#unawarded_package_form').on('submit', function (e) {
+    e.preventDefault();
+    const form = this;
+    if ($(form).find('.pack_items').length > 0) {
+        $('#package_modal').modal('hide');
+        $('#package_modal').one('hidden.bs.modal', function () {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'Are you sure you want to proceed? This action involves a budget revision, as differences between the current items and the locked budget have been detected.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, submit it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    } else {
+        form.submit();
+    }
+});
+
 </script>
 <?php require 'modules/purchase/assets/js/cost_planning_js.php'; ?>
 <?php $this->load->view('admin/estimates/estimate_send_to_client'); ?>
