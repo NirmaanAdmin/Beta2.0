@@ -2150,4 +2150,20 @@ class document_management_model extends app_model
 			}
 		}
 	}
+
+	public function check_project_member_exist($project_id)
+	{
+		$this->db->where('project_id', $project_id);
+		$this->db->where('staff_id', get_staff_user_id());
+		return $this->db->get(db_prefix() . 'project_members')->row();
+	}
+
+	public function get_root_item($user_id)
+	{
+		$this->db->where('parent_id = 0 and ((creator_id = ' . $user_id . ' and creator_type = "staff") or (creator_id = 0 and creator_type = "public"))');
+		$this->db->order_by("creator_id", "desc");
+		return $this->db->get(db_prefix() . 'dmg_items')->result_array();
+	}
+
+
 }

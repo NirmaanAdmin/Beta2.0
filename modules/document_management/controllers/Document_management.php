@@ -41,7 +41,21 @@ class document_management extends AdminController
 		$data['approve_items'] = $this->document_management_model->get_item('', $query, 'name, id, dateadded, filetype, hash');
 		$query = 'sign_approve = -1 and id in (SELECT rel_id FROM ' . db_prefix() . 'dmg_approval_detail_eids where staffid = ' . $user_id . ' and approve is null and rel_type = \'document\')';
 		$data['approve_item_eids'] = $this->document_management_model->get_item('', $query, 'name, id, dateadded, filetype, hash');
-		$data_root_folder = $this->document_management_model->get_item('', 'parent_id = 0 and ((creator_id = ' . $user_id . ' and creator_type = "staff") or (creator_id = 0 and creator_type = "public"))', 'name, id, creator_id, is_primary, filetype');
+		$data_root_folder = $this->document_management_model->get_root_item($user_id);
+
+		// Added project member check similar to the reference code
+		if (!empty($data_root_folder)) {
+			foreach ($data_root_folder as $key => $value) {
+				if ($value['project_id'] != 0 && !is_admin()) {
+					$project_member = $this->document_management_model->check_project_member_exist($value['project_id']);
+					if (empty($project_member)) {
+						unset($data_root_folder[$key]);
+					}
+				}
+			}
+			$data_root_folder = array_values($data_root_folder);
+		}
+
 		if ($id == null) {
 			$id = '';
 			foreach ($data_root_folder as $key => $value) {
@@ -55,8 +69,10 @@ class document_management extends AdminController
 		} else {
 			$master_parent_id = $this->document_management_model->get_master_id($id);
 		}
-		$file_locked = false;
+		
 		$data['root_folder'] = $data_root_folder;
+		$file_locked = false;
+
 		$data['parent_id'] = $id;
 		$data['master_parent_id'] = $master_parent_id;
 		if (is_numeric($id) && $id > 0) {
@@ -227,7 +243,7 @@ class document_management extends AdminController
 					$related_file = implode(',', $data['related_file']);
 				}
 				$data['custom_field'] = $custom_field;
-				$data['related_file'] = $related_file; 
+				$data['related_file'] = $related_file;
 				$res = $this->document_management_model->update_item($data);
 				if ($res) {
 					set_alert('success', _l('dmg_updated_successfully'));
@@ -1303,7 +1319,7 @@ class document_management extends AdminController
 					if ($file->isFile()) {
 						$fileSize = $file->getSize();
 
-						if ($fileSize ) {
+						if ($fileSize) {
 							$fileSizeMB = round($fileSize / (1024 * 1024), 2);
 							$totalSizeMB += $fileSizeMB; // Add to total
 
@@ -1377,17 +1393,18 @@ class document_management extends AdminController
 			fclose($csvHandle);
 			echo "<p>Report saved to: <a href='$csvFile' download>$csvFile</a></p>";
 		}
-	}	
+	}
 
-	public function delete_pdf_attachment($id){
-		
+	public function delete_pdf_attachment($id)
+	{
+
 		$result =  $this->document_management_model->delete_pdf_attachment($id);
 		if ($result) {
 			set_alert('success', _l('Attachment deleted successfully'));
 		} else {
 			set_alert('danger', _l('Attachment deleted failed'));
 		}
-		
+
 		redirect($_SERVER['HTTP_REFERER']);
 	}
 }
