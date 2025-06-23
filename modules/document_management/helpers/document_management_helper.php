@@ -58,6 +58,30 @@ function init_fist_item($type = 'staff'){
 		$data['note'] = '';
 		$data['is_primary'] = 1;
 		$CI->db->insert(db_prefix().'dmg_items', $data);
+	} 
+
+	$CI->db->select('id, name');
+	$projects = $CI->db->get(db_prefix().'projects')->result_array();
+	if(!empty($projects)) {
+		foreach ($projects as $key => $value) {
+			$CI->db->where('project_id', $value['id']);
+			if($CI->db->get(db_prefix().'dmg_items')->num_rows() == 0){
+				$data = array();
+				$data['name'] = $value['name'];
+				$data['project_id'] = $value['id'];
+				$data['approve'] = 1;
+				$data['version'] = '1.0.0';
+				$data['parent_id'] = '';
+				$data['hash'] = app_generate_hash();
+				$data['creator_id'] = 0;
+				$data['creator_type'] = 'public';
+				$data['signed_by'] = '';
+				$data['tag'] = '';
+				$data['note'] = '';
+				$data['is_primary'] = 1;
+				$CI->db->insert(db_prefix().'dmg_items', $data);
+			}
+		}
 	}
 }
 

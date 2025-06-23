@@ -178,9 +178,9 @@
 													</svg>
 												</button>
 												<ul class="dropdown-menu" aria-labelledby="dropdown_menu_<?php echo drawing_htmldecode($value['id']); ?>">
-													<li class="no-padding">
+													<!-- <li class="no-padding">
 														<a href="#" data-name="<?php echo drawing_htmldecode($value['name']); ?>" onclick="edit_section(this, '<?php echo drawing_htmldecode($value['id']); ?>')"><?php echo _l('dmg_edit') ?></a>
-													</li>
+													</li> -->
 													<li class="no-padding">
 														<a href="#" data-type="<?php echo drawing_htmldecode($value['filetype']); ?>" onclick="share_document(this, '<?php echo drawing_htmldecode($value['id']); ?>')"><?php echo _l('dmg_share') ?></a>
 													</li>
