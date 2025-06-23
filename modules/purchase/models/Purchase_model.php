@@ -21728,8 +21728,7 @@ class Purchase_model extends App_Model
 
 
     public function update_bulk_pur_invoices($data)
-    {
-       
+    {       
         if (empty($data)) {
             return false;
         }else{

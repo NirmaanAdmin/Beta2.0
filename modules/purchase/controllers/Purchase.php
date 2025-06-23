@@ -12450,17 +12450,16 @@ class purchase extends AdminController
                     } else {
                         $id = $this->expenses_model->add($data);
                         if ($id) {
-
                             if ($select_invoice == "create_invoice") {
-                                $invoiceid = $this->expenses_model->convert_to_invoice($id);
                                 $this->purchase_model->mark_converted_pur_invoice($pur_invoice, $id);
+                                $invoiceid = $this->expenses_model->convert_to_invoice($id); 
                                 set_alert('success', _l('vendor_bills_converted_to_ril_invoices'));
                             } elseif ($select_invoice == "applied_invoice") {
+                                $this->purchase_model->mark_converted_pur_invoice($pur_invoice, $id);
                                 $applied = array();
                                 $applied['invoice_id'] = $applied_to_invoice;
                                 $applied['expense_id'] = $id;
-                                $invoiceid = $this->expenses_model->applied_to_invoice($applied);
-                                $this->purchase_model->mark_converted_pur_invoice($pur_invoice, $id);
+                                $invoiceid = $this->expenses_model->applied_to_invoice($applied); 
                                 set_alert('success', _l('vendor_bills_converted_to_ril_invoices'));
                             }
                         }
