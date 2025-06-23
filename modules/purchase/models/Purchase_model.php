@@ -21749,5 +21749,107 @@ class Purchase_model extends App_Model
         exit;
     }
 
+    /**
+     * Get purchase order dashboard
+     *
+     * @param  array  $data  Dashboard filter data
+     * @return array
+     */
+    public function get_po_charts($data)
+    {
+        $response = array();
+        $this->load->model('currencies_model');
+        $base_currency = $this->currencies_model->get_base_currency();
+        if ($request->currency != 0 && $request->currency != null) {
+            $base_currency = pur_get_currency_by_id($request->currency);
+        }
+
+        $response['total_po_value'] = $response['approved_po_value'] = $response['draft_po_value'] = $response['draft_po_count'] = $response['approved_po_count'] = $response['rejected_po_count'] = $response['completely_delivered_status'] = $response['partially_delivered_status'] = $response['undelivered_status'] = 0;
+        $response['pie_budget_name'] = $response['pie_tax_value'] = array();
+
+        $this->db->select('id, pur_order_number, approve_status, total, order_date, total_tax, group_pur, vendor');
+        $pur_orders = $this->db->get(db_prefix() . 'pur_orders')->result_array();
+
+        if (!empty($pur_orders)) {
+            $draft_po_value = 0;
+            $approved_po_value = 0;
+            $draft_po_array = array_filter($pur_orders, function ($item) {
+                return in_array($item['approve_status'], [1]);
+            });
+
+            if (!empty($draft_po_array)) {
+                $draft_po_value = array_reduce($draft_po_array, function ($carry, $item) {
+                    return $carry + (float)$item['total'];
+                }, 0);
+            }
+            $response['draft_po_value'] = app_format_money($draft_po_value, $base_currency->symbol);
+
+            $approved_po_array = array_filter($pur_orders, function ($item) {
+                return in_array($item['approve_status'], [2]);
+            });
+
+            if (!empty($approved_po_array)) {
+                $approved_po_value = array_reduce($approved_po_array, function ($carry, $item) {
+                    return $carry + (float)$item['total'];
+                }, 0);
+            }
+            $response['approved_po_value'] = app_format_money($approved_po_value, $base_currency->symbol);
+
+            $total_po_value = $draft_po_value + $approved_po_value;
+            $response['total_po_value'] = app_format_money($total_po_value, $base_currency->symbol);
+
+            $response['draft_po_count'] = count(array_filter($pur_orders, function ($item) {
+                return isset($item['approve_status']) && $item['approve_status'] == 1;
+            }));
+            $response['approved_po_count'] = count(array_filter($pur_orders, function ($item) {
+                return isset($item['approve_status']) && $item['approve_status'] == 2;
+            }));
+            $response['rejected_po_count'] = count(array_filter($pur_orders, function ($item) {
+                return isset($item['approve_status']) && $item['approve_status'] == 3;
+            }));
+
+            if (!empty($pur_orders)) {
+                $grouped = array_reduce($pur_orders, function ($carry, $item) {
+                    $items_group = get_group_name_item($item['group_pur']);
+                    $group = $items_group->name;
+                    $carry[$group] = ($carry[$group] ?? 0) + (float) $item['total'];
+                    return $carry;
+                }, []);
+                if (!empty($grouped)) {
+                    $response['pie_budget_name'] = array_keys($grouped);
+                    $response['pie_total_value'] = array_values($grouped);
+                }
+            }
+
+            foreach ($pur_orders as $item) {
+                $po_id = $item['id'];
+                $this->db->select('id');
+                $this->db->where('pr_order_id', $po_id);
+                $goods_receipt = $this->db->get(db_prefix() . 'goods_receipt')->result_array();
+                if (!empty($goods_receipt)) {
+                    $gr_ids = array_column($goods_receipt, 'id');
+                    $this->db->select('po_quantities, quantities, est_delivery_date, delivery_date');
+                    $this->db->where_in('goods_receipt_id', $gr_ids);
+                    $goods_receipt_detail = $this->db->get(db_prefix() . 'goods_receipt_detail')->result_array();
+                    if (!empty($goods_receipt_detail)) {
+                        $po_qty = array_sum(array_column($goods_receipt_detail, 'po_quantities'));
+                        $rec_qty = array_sum(array_column($goods_receipt_detail, 'quantities'));
+                        if ($rec_qty == 0) {
+                            $response['undelivered_status']++;
+                        } elseif ($rec_qty > 0 && $rec_qty < $po_qty) {
+                            $response['partially_delivered_status']++;
+                        } elseif ($rec_qty >= $po_qty) {
+                            $response['completely_delivered_status']++;
+                        }
+                    }
+                } else {
+                    $response['undelivered_status']++;
+                }
+            }
+        }
+
+        return $response;
+    }
+
        
 }
