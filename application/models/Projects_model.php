@@ -2778,7 +2778,7 @@ class Projects_model extends App_Model
         return $result;
     }
 
-    public function create_project_directory_row_template($name = '', $postion = '', $staff = '', $vendors = '', $fullname = '', $contact = '', $email_account = '', $item_key = '')
+    public function create_project_directory_row_template($name = '', $postion = '', $staff = '', $vendors = '', $fullnameinput = '', $contact = '', $email_account = '', $item_key = '')
     {
         $row = '';
         $is_template = ($name == '');
@@ -2810,52 +2810,59 @@ class Projects_model extends App_Model
 
         // Position
         $row .= '<td class="postion">' . render_input($name_postion, '', $postion, '', ['placeholder' => 'Position']) . '</td>';
-
-        // Staff select (manual render)
-        $row .= '<td class="staff"><select name="' . $name_staff . '" class="form-control selectpicker staff-select" data-live-search="true" data-none-selected-text="Staff" onchange="handleDirectoryChange(this)">';
-        $row .= '<option value=""></option>';
-        foreach ($getstaff as $staff_option) {
-            $selected = in_array($staff_option['staffid'], $selectedstaff) ? ' selected' : '';
-            $row .= '<option value="' . $staff_option['staffid'] . '" ' . $selected .
-                ' data-email="' . htmlspecialchars($staff_option['email']) . '"' .
-                ' data-phonenumber="' . htmlspecialchars($staff_option['phonenumber']) . '">' .
-                htmlspecialchars($staff_option['fullname']) . '</option>';
-        }
-        $row .= '</select></td>';
-
-        // Vendor select (manual render)
-        $row .= '<td class="vendor"><select name="' . $name_vendor . '" class="form-control selectpicker vendor-select" data-live-search="true" data-none-selected-text="Vendor" onchange="handleDirectoryChange(this)">';
-        $row .= '<option value=""></option>';
-        foreach ($getvendors as $vendor) {
-            $selected = in_array($vendor['userid'], $selectedvendors) ? ' selected' : '';
-
-            // Safely get email with fallback to empty string
-            $email = isset($vendor['email']) ? htmlspecialchars($vendor['email']) : '';
-
-            // Safely get phone number with fallback to empty string
-            $phonenumber = isset($vendor['phonenumber']) ? htmlspecialchars($vendor['phonenumber']) : '';
-
-            // Safely build full name with fallback to empty string
-            $firstname = isset($vendor['firstname']) ? htmlspecialchars($vendor['firstname']) : '';
-            $lastname = isset($vendor['lastname']) ? htmlspecialchars($vendor['lastname']) : '';
-            $fullname = trim($firstname . ' ' . $lastname);
-
-            // Safely get company name with fallback to full name if empty
-            $company = isset($vendor['company']) ? htmlspecialchars($vendor['company']) : $fullname;
-            if (empty($company)) {
-                $company = $fullname;
+        if ($vendors < 0) {
+            $row .= '<td class="staff"><select name="' . $name_staff . '" class="form-control selectpicker staff-select" data-live-search="true" data-none-selected-text="Staff" onchange="handleDirectoryChange(this)">';
+            $row .= '<option value=""></option>';
+            foreach ($getstaff as $staff_option) {
+                $selected = in_array($staff_option['staffid'], $selectedstaff) ? ' selected' : '';
+                $row .= '<option value="' . $staff_option['staffid'] . '" ' . $selected .
+                    ' data-email="' . htmlspecialchars($staff_option['email']) . '"' .
+                    ' data-phonenumber="' . htmlspecialchars($staff_option['phonenumber']) . '">' .
+                    htmlspecialchars($staff_option['fullname']) . '</option>';
             }
-
-            $row .= '<option value="' . $vendor['userid'] . '" ' . $selected .
-                ' data-email="' . $email . '"' .
-                ' data-phonenumber="' . $phonenumber . '"' .
-                ' data-fullname="' . $fullname . '">' .
-                $company . '</option>';
+            $row .= '</select></td>';
+        } else {
+            $row .= '<td></td>';
         }
-        $row .= '</select></td>';
+        // Staff select (manual render)
+        if ($staff < 0) {
+
+            $row .= '<td class="vendor"><select name="' . $name_vendor . '" class="form-control selectpicker vendor-select" data-live-search="true" data-none-selected-text="Vendor" onchange="handleDirectoryChange(this)">';
+            $row .= '<option value=""></option>';
+            foreach ($getvendors as $vendor) {
+                $selected = in_array($vendor['userid'], $selectedvendors) ? ' selected' : '';
+
+                // Safely get email with fallback to empty string
+                $email = isset($vendor['email']) ? htmlspecialchars($vendor['email']) : '';
+
+                // Safely get phone number with fallback to empty string
+                $phonenumber = isset($vendor['phonenumber']) ? htmlspecialchars($vendor['phonenumber']) : '';
+
+                // Safely build full name with fallback to empty string
+                $firstname = isset($vendor['firstname']) ? htmlspecialchars($vendor['firstname']) : '';
+                $lastname = isset($vendor['lastname']) ? htmlspecialchars($vendor['lastname']) : '';
+                $fullname = trim($firstname . ' ' . $lastname);
+
+                // Safely get company name with fallback to full name if empty
+                $company = isset($vendor['company']) ? htmlspecialchars($vendor['company']) : $fullname;
+                if (empty($company)) {
+                    $company = $fullname;
+                }
+
+                $row .= '<option value="' . $vendor['userid'] . '" ' . $selected .
+                    ' data-email="' . $email . '"' .
+                    ' data-phonenumber="' . $phonenumber . '"' .
+                    ' data-fullname="' . $fullname . '">' .
+                    $company . '</option>';
+            }
+            $row .= '</select></td>';
+        } else {
+            $row .= '<td></td>';
+        }
+        // Vendor select (manual render)
 
         // Fullname, Contact, Email
-        $row .= '<td class="fullname">' . render_input($name_fullname, '', $fullname, '', ['placeholder' => 'Name']) . '</td>';
+        $row .= '<td class="fullname">' . render_input($name_fullname, '', $fullnameinput, '', ['placeholder' => 'Name']) . '</td>';
         $row .= '<td class="contact">' . render_input($name_contact, '', $contact, 'number', ['placeholder' => 'Contact']) . '</td>';
         $row .= '<td class="email">' . render_input($name_email_account, '', $email_account, 'email', ['placeholder' => 'Email']) . '</td>';
 
