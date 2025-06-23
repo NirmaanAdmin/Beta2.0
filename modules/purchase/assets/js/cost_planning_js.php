@@ -244,7 +244,7 @@
 	    table_row +=
 	      '<td><textarea name="newpackageitems[' +
 	      item_key +
-	      '][long_description]" class="form-control long_description" rows="5">' +
+	      '][long_description]" class="form-control long_description" rows="2">' +
 	      data.long_description.replace(regex, "\n") +
 	      "</textarea></td>";
 
@@ -296,7 +296,7 @@
 	    table_row +=
 	      '<td><textarea name="newpackageitems[' +
 	      item_key +
-	      '][remarks]" class="form-control remarks" rows="5">' +
+	      '][remarks]" class="form-control remarks" rows="2">' +
 	      data.remarks.replace(regex, "\n") +
 	      "</textarea></td>";
 

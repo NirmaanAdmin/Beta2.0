@@ -2407,7 +2407,7 @@ class Estimates_model extends App_Model
                     </div>
                 </td>';
                 $itemhtml .= '<td align="left">
-                    <textarea name="long_description" rows="4" class="form-control" placeholder="'._l('item_long_description_placeholder').'">
+                    <textarea name="long_description" rows="2" class="form-control" placeholder="'._l('item_long_description_placeholder').'">
                     </textarea>
                 </td>';
                 $itemhtml .= '<td align="left"></td>';
@@ -2417,7 +2417,7 @@ class Estimates_model extends App_Model
                 $itemhtml .= '<td align="right">' . render_input('package_qty', '', 0.00, 'number') . '</td>';
                 $itemhtml .= '<td align="right">' . render_input('package_rate', '', 0.00, 'number') . '</td>';
                 $itemhtml .= '<td align="right">' . render_input('package_amount', '', 0.00, 'number', ['readonly' => true]) . '</td>';
-                $itemhtml .= '<td align="right">' . render_textarea('remarks', '', '') . '</td>';
+                $itemhtml .= '<td align="right">' . render_textarea('remarks', '', '', ['rows' => 2]) . '</td>';
                 $itemhtml .= '<td align="center">
                     <button type="button" onclick="add_package_item_to_table(\'undefined\',\'undefined\'); return false;"
                         class="btn pull-right btn-primary"><i class="fa fa-check"></i>
@@ -2476,7 +2476,7 @@ class Estimates_model extends App_Model
                     </td>';
                     $itemhtml .= '<td align="right" class="all_package_rate">' . render_input($package_rate_name_attr, '', !empty($package_items_info) ? $package_items_info->package_rate : 0.00, 'number', ['onchange' => 'calculate_package()', 'step' => 'any']) . '</td>';
                     $itemhtml .= '<td align="right" class="all_package_amount">' . render_input($package_amount_name_attr, '', 0.00, 'number', ['readonly' => true]) . '</td>';
-                    $itemhtml .= '<td align="right">' . render_textarea($package_remarks_name_attr, '', !empty($package_items_info) ? $package_items_info->remarks : '') . '</td>';
+                    $itemhtml .= '<td align="right">' . render_textarea($package_remarks_name_attr, '', !empty($package_items_info) ? $package_items_info->remarks : '', ['rows' => 2]) . '</td>';
                     $itemhtml .= '<td align="center"></td>';
                     $itemhtml .= '</tr>';
                 }
