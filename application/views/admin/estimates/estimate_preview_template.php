@@ -1248,7 +1248,7 @@ $("body").on("change", "select[name='unawarded_budget_head']", function (e) {
 function calculate_unawarded_capex() {
   var total_budgeted_amount = 0,
   total_unawarded_amount = 0,
-  total_unallocated_cost = 0;
+  total_remaining_capex = 0;
   var rows = $(".unawarded-capex-body tbody tr");
   $.each(rows, function () {
     var row = $(this);
@@ -1258,19 +1258,19 @@ function calculate_unawarded_capex() {
     var unawarded_qty = parseFloat(row.find(".all_unawarded_qty input").val()) || 0;
     var unawarded_rate = parseFloat(row.find(".all_unawarded_rate input").val()) || 0;
     var unawarded_amount = unawarded_qty * unawarded_rate;
-    var unallocated_cost = budgeted_amount - unawarded_amount;
-    if (Math.abs(unallocated_cost) < 0.01) {
-      unallocated_cost = 0;
+    var remaining_capex = budgeted_amount - unawarded_amount;
+    if (Math.abs(remaining_capex) < 0.01) {
+      remaining_capex = 0;
     }
     row.find(".all_unawarded_amount input").val(unawarded_amount.toFixed(2));
-    row.find(".all_unallocated_cost input").val(unallocated_cost.toFixed(2));
+    row.find(".all_remaining_capex input").val(remaining_capex.toFixed(2));
     total_budgeted_amount += budgeted_amount;
     total_unawarded_amount += unawarded_amount;
-    total_unallocated_cost += unallocated_cost;
+    total_remaining_capex += remaining_capex;
   });
   $(".total_budgeted_amount").html(format_money(total_budgeted_amount));
   $(".total_unawarded_amount").html(format_money(total_unawarded_amount));
-  $(".total_unallocated_cost").html(format_money(total_unallocated_cost));
+  $(".total_remaining_capex").html(format_money(total_remaining_capex));
   $(document).trigger("sales-total-calculated");
 }
 

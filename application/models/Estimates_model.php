@@ -2119,7 +2119,6 @@ class Estimates_model extends App_Model
                         <th align="left">Unawarded Rate</th>
                         <th align="left">Unawarded Capex</th>
                         <th align="left">Remaining Capex</th>
-                        <th align="left">Unallocated Cost</th>
                     </tr>
                 </thead>';
                 $itemhtml .= '<tbody style="border: 1px solid #ddd;">';
@@ -2151,14 +2150,12 @@ class Estimates_model extends App_Model
                     $budgeted_qty = number_format($item['qty'], 2, '.', '');
                     $budgeted_rate = number_format($item['rate'], 2, '.', '');
                     $budgeted_amount = number_format($budgeted_qty * $budgeted_rate, 2, '.', '');
-                    $unawarded_qty = !empty($item['unawarded_qty']) ? $item['unawarded_qty'] : $budgeted_qty;
+                    $unawarded_qty = !empty($item['unawarded_qty']) ? $item['unawarded_qty'] : 0.00;
                     $unawarded_qty = number_format($unawarded_qty, 2, '.', '');
-                    $unawarded_rate = !empty($item['unawarded_rate']) ? $item['unawarded_rate'] : $budgeted_rate;
+                    $unawarded_rate = !empty($item['unawarded_rate']) ? $item['unawarded_rate'] : 0.00;
                     $unawarded_rate = number_format($unawarded_rate, 2, '.', '');
                     $unawarded_amount = number_format($unawarded_qty * $unawarded_rate, 2, '.', '');
-                    $unallocated_cost = $budgeted_amount - $unawarded_amount;
-                    $unallocated_cost = number_format($unallocated_cost, 2, '.', '');
-                    $remaining_qty_budget = 0;
+                    $remaining_qty_budget = $budgeted_qty;
                     $remaining_capex = 0;
                     if(!empty($pur_order_detail)) {
                         $pur_detail_quantity = 0;
@@ -2169,9 +2166,9 @@ class Estimates_model extends App_Model
                         }
                         $remaining_qty_budget = $budgeted_qty - $pur_detail_quantity;
                         $remaining_qty_budget = number_format($remaining_qty_budget, 2, '.', '');
-                        $remaining_capex = $unawarded_amount - $pur_detail_amount;
-                        $remaining_capex = number_format($remaining_capex, 2, '.', '');
                     }
+                    $remaining_capex = $budgeted_amount - $unawarded_amount;
+                    $remaining_capex = number_format($remaining_capex, 2, '.', '');
                     $item_id_name_attr = "newitems[$key][item_id]";
                     $budgeted_qty_name_attr = "newitems[$key][budgeted_qty]";
                     $remaining_qty_budget_name_attr = "newitems[$key][remaining_qty_budget]";
@@ -2183,7 +2180,6 @@ class Estimates_model extends App_Model
                     $unawarded_rate_name_attr = "newitems[$key][unawarded_rate]";
                     $unawarded_amount_name_attr = "newitems[$key][unawarded_amount]";
                     $remaining_capex_name_attr = "newitems[$key][remaining_capex]";
-                    $unallocated_cost_name_attr = "newitems[$key][unallocated_cost]";
 
                     $itemhtml .= form_hidden($item_id_name_attr, $item['id']);
                     $itemhtml .= '<tr>';
@@ -2219,7 +2215,6 @@ class Estimates_model extends App_Model
                     $itemhtml .= '<td align="left" class="all_unawarded_rate">' . render_input($unawarded_rate_name_attr, '', $unawarded_rate, 'number', ['onchange' => 'calculate_unawarded_capex()', 'step' => 'any']) . '</td>';
                     $itemhtml .= '<td align="left" class="all_unawarded_amount">' . render_input($unawarded_amount_name_attr, '', $unawarded_amount, 'number', ['readonly' => true]) . '</td>';
                     $itemhtml .= '<td align="left" class="all_remaining_capex">' . render_input($remaining_capex_name_attr, '', $remaining_capex, 'number', ['readonly' => true]) . '</td>';
-                    $itemhtml .= '<td align="left" class="all_unallocated_cost">' . render_input($unallocated_cost_name_attr, '', $unallocated_cost, 'number', ['readonly' => true]) . '</td>';
                     $itemhtml .= '</tr>';
                 }
                 $itemhtml .= '</tbody>';
@@ -2242,9 +2237,9 @@ class Estimates_model extends App_Model
                         <td class="total_unawarded_amount"></td>
                     </tr>
                     <tr>
-                        <td><span class="bold tw-text-neutral-700">Total Unallocated Cost :</span>
+                        <td><span class="bold tw-text-neutral-700">Total Remaining Capex :</span>
                         </td>
-                        <td class="total_unallocated_cost"></td>
+                        <td class="total_remaining_capex"></td>
                     </tr>
                 </tbody>
             </table>
