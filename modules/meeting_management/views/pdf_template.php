@@ -253,80 +253,66 @@
             $sr = 1;
             $prev_area = ''; // Initialize the previous area value
 
-            foreach ($minutes_data as $data) {
+            foreach ($minutes_data as $data): ?>
+                <?php
                 $full_item_image = '';
                 // Process attachments if available
                 if (!empty($data['attachments']) && !empty($data['minute_id'])) {
                     $item_base_url = base_url('uploads/meetings/minutes_attachments/' . $data['minute_id'] . '/' . $data['id'] . '/' . $data['attachments']);
-                    $full_item_image = '<img class="images_w_table" src="' . $item_base_url . '" alt="' . $data['attachments'] . '" >';
+                    $full_item_image = '<img class="images_w_table" src="' . $item_base_url . '" alt="' . htmlspecialchars($data['attachments']) . '">';
                 }
 
                 // Format the target date
-                if (!empty($data['target_date'])) {
-                    $target_date = date('d M, Y', strtotime($data['target_date']));
-                } else {
-                    $target_date = '';
-                }
+                $target_date = !empty($data['target_date']) ? date('d M, Y', strtotime($data['target_date'])) : '';
 
-                // Compare current area with the previous one.
-                // If they match then set $area as an empty string.
-                // Otherwise, use the current area's value.
-                if ($data['area'] == $prev_area) {
-                    $area = '';
-                } else {
-                    $area = $data['area'];
-                }
-                // Update the previous area for the next iteration
+                // Handle area display logic
+                $area = ($data['area'] == $prev_area) ? '' : $data['area'];
                 $prev_area = $data['area'];
-            ?>
-                <tr>
+                ?>
+
+                <?php if (!empty($data['section_break'])): ?>
                     <?php
-                    // Check if a section break exists, and if so, display it.
-                    if (!empty($data['section_break'])) {
-                        $colspan = 5; // Default colspan for the row
+                    $colspan = 5; // Base columns: serial_no, area, decision, staff/vendor, target_date
 
-                        // +1 if the description column is present
-                        if ($check_desc) {
-                            $colspan += 1;
-                        }
-                        // +1 if the action column is present
-                        if ($check_action) {
-                            $colspan += 1;
-                        }
-
-
-                        // +1 if the attachment column is present
-                        if ($check_attachment) {
-                            $colspan += 1;
-                        }
-
-                        echo '<tr>
-                                <td colspan="' . $colspan . '" style="text-align:center;font-size:18px;font-weight:600">' . $data['section_break'] . '</td>
-                            </tr>';
-                    }
+                    if ($check_desc) $colspan += 1;
+                    if ($check_action) $colspan += 1;
+                    if ($check_attachment) $colspan += 1;
                     ?>
+                    <tr>
+                        <td colspan="<?php echo $colspan; ?>" style="text-align:center;font-size:18px;font-weight:600">
+                            <?php echo $data['section_break']; ?>
+                        </td>
+                    </tr>
+                <?php endif; ?>
+
+                <tr>
                     <td><?php echo $data['serial_no']; ?></td>
                     <td><?php echo $area; ?></td>
-                    <?php
-                    if ($check_desc) {
-                        echo '<td>' . $data['description'] . '</td>';
-                    }
-                    ?>
+
+                    <?php if ($check_desc): ?>
+                        <td><?php echo $data['description']; ?></td>
+                    <?php endif; ?>
+
                     <td><?php echo $data['decision']; ?></td>
-                    <?php
-                    if ($check_action) {
-                        echo '<td>' . $data['action'] . '</td>';
-                    }
-                    ?>
-                    <?php echo getStaffNamesFromCSV($data['staff']); ?><br>
-                    <?php echo $data['vendor']; ?>
+
+                    <?php if ($check_action): ?>
+                        <td><?php echo $data['action']; ?></td>
+                    <?php endif; ?>
+
+                    <td>
+                        <?php echo getStaffNamesFromCSV($data['staff']); ?>
+                        <?php if (!empty($data['vendor'])): ?>
+                            <br><?php echo $data['vendor']; ?>
+                        <?php endif; ?>
                     </td>
+
                     <td><?php echo $target_date; ?></td>
-                    <?php if ($check_attachment) { ?>
+
+                    <?php if ($check_attachment): ?>
                         <td><?php echo $full_item_image; ?></td>
-                    <?php } ?>
+                    <?php endif; ?>
                 </tr>
-            <?php } ?>
+            <?php endforeach; ?>
         </tbody>
 
     </table>
