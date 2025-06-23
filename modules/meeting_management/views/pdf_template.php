@@ -237,7 +237,9 @@
                     <th>Description</th>
                 <?php } ?>
                 <th>Decision</th>
-                <th>Action</th>
+                <?php if ($check_action) { ?>
+                    <th>Action</th>
+                <?php } ?>
                 <th>Action By</th>
                 <th>Target Date</th>
                 <?php if ($check_attachment) { ?>
@@ -281,12 +283,17 @@
                     <?php
                     // Check if a section break exists, and if so, display it.
                     if (!empty($data['section_break'])) {
-                        $colspan = 6;
+                        $colspan = 5; // Default colspan for the row
 
                         // +1 if the description column is present
                         if ($check_desc) {
                             $colspan += 1;
                         }
+                        // +1 if the action column is present
+                        if ($check_action) {
+                            $colspan += 1;
+                        }
+
 
                         // +1 if the attachment column is present
                         if ($check_attachment) {
@@ -306,10 +313,13 @@
                     }
                     ?>
                     <td><?php echo $data['decision']; ?></td>
-                    <td><?php echo $data['action']; ?></td>
-                    <td>
-                        <?php echo getStaffNamesFromCSV($data['staff']); ?><br>
-                        <?php echo $data['vendor']; ?>
+                    <?php
+                    if ($check_action) {
+                        echo '<td>' . $data['action'] . '</td>';
+                    }
+                    ?>
+                    <?php echo getStaffNamesFromCSV($data['staff']); ?><br>
+                    <?php echo $data['vendor']; ?>
                     </td>
                     <td><?php echo $target_date; ?></td>
                     <?php if ($check_attachment) { ?>
