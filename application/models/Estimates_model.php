@@ -814,6 +814,12 @@ class Estimates_model extends App_Model
             unset($data['cost_sub_head']);
         }
 
+        $next_revision = false;
+        if (isset($data['next_revision'])) {
+            $next_revision = true;
+            unset($data['next_revision']);
+        }
+
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'estimates', $data);
 
@@ -981,6 +987,10 @@ class Estimates_model extends App_Model
 
         if ($affectedRows > 0) {
             hooks()->do_action('after_estimate_updated', $id);
+
+            if($next_revision) {
+                $this->create_new_revision(['id' => $id]);
+            }
 
             return true;
         }
@@ -1960,6 +1970,43 @@ class Estimates_model extends App_Model
                 }
             }
 
+            $this->db->where('estimate_id', $id);
+            $unawarded_budget_info = $this->db->get(db_prefix() . 'unawarded_budget_info')->result_array();
+            if(!empty($unawarded_budget_info)) {
+                foreach ($unawarded_budget_info as $key => $value) {
+                    unset($value['id']);
+                    unset($value['estimate_id']);
+                    $value['estimate_id'] = $new_estimate_id;
+                    $this->db->insert(db_prefix() . 'unawarded_budget_info', $value);
+                }
+            }
+
+            $this->db->where('estimate_id', $id);
+            $estimate_package_info = $this->db->get(db_prefix() . 'estimate_package_info')->result_array();
+            if(!empty($estimate_package_info)) {
+                foreach ($estimate_package_info as $key => $value) {
+                    if(isset($value['id'])) {
+                        $old_package_id = $value['id'];
+                        unset($value['id']);
+                    }
+                    unset($value['estimate_id']);
+                    $value['estimate_id'] = $new_estimate_id;
+                    $this->db->insert(db_prefix() . 'estimate_package_info', $value);
+                    $new_package_id = $this->db->insert_id();
+
+                    $this->db->where('package_id', $old_package_id);
+                    $estimate_package_items_info = $this->db->get(db_prefix() . 'estimate_package_items_info')->result_array();
+                    if(!empty($estimate_package_items_info)) {
+                        foreach ($estimate_package_items_info as $ckey => $cvalue) {
+                            unset($cvalue['id']);
+                            unset($cvalue['package_id']);
+                            $cvalue['package_id'] = $new_package_id;
+                            $this->db->insert(db_prefix() . 'estimate_package_items_info', $cvalue);
+                        }
+                    }
+                }
+            }
+
             $this->db->where('id', $id);
             $this->db->update(db_prefix() . 'estimates', ['active' => 0]);
 
@@ -2637,5 +2684,17 @@ class Estimates_model extends App_Model
         } else {
             return $this->db->get(db_prefix() . 'ware_unit_type')->result_array();
         }
+    }
+
+    public function update_lock_budget($data)
+    {
+        $id = $data['id'];
+        $lock_budget = $data['lock_budget'];
+        $this->db->where('id', $id);
+        $this->db->update(db_prefix() . 'estimates', [
+            'lock_budget' => $lock_budget,
+        ]);
+
+        return $id;
     }
 }

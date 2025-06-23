@@ -136,6 +136,8 @@ class Estimates extends AdminController
             $data['all_area_working'] = $this->estimates_model->get_area_working($id);
             $data['area_statement_tabs'] = $this->estimates_model->get_area_statement_tabs($id);
             $data['all_area_summary'] = $this->estimates_model->get_area_summary($id);
+            $data['last_revision'] = get_estimate_revision_no($id, 0, 1);
+            $data['next_revision'] = !empty($data['last_revision']) ? $data['last_revision'] + 1 : 1;
             $title            = _l('edit', _l('estimate_lowercase'));
         }
 
@@ -755,5 +757,13 @@ class Estimates extends AdminController
             set_alert('warning', 'Something went wrong');
         }
         redirect(admin_url('purchase/unawarded_tracker'));
+    }
+
+    public function update_lock_budget()
+    {
+        $data = $this->input->post();
+        $id = $this->estimates_model->update_lock_budget($data);
+        echo json_encode(['id' => $id]);
+        exit;
     }
 }

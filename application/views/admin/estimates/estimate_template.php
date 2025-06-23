@@ -6,6 +6,12 @@
         border-left: 1px solid #e2e8f0;
         border-bottom: 1px solid #e2e8f0;
     }
+    .swal-button-style {
+        background-color: #3085d6 !important;
+        color: white !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
 </style>
 <div class="panel_s accounting-template estimate">
     <div class="panel-body">
@@ -15,6 +21,9 @@
                     echo form_hidden('estimate_request_id', $estimate_request_id);
                 }
             ?>
+            <input type="hidden" name="lock_budget" value="<?php echo $estimate->lock_budget; ?>" disabled data-lock-budget="<?php echo $estimate->lock_budget; ?>">
+            <input type="hidden" name="last_revision" value="<?php echo isset($last_revision) ? $last_revision : ''; ?>" disabled data-last-revision="<?php echo isset($last_revision) ? $last_revision : ''; ?>">
+            <input type="hidden" name="next_revision" value="<?php echo isset($next_revision) ? $next_revision : ''; ?>" disabled data-next-revision="<?php echo isset($next_revision) ? $next_revision : ''; ?>">
             <div class="col-md-6">
                 <div class="row">
                     <div class="col-md-6">
@@ -791,7 +800,7 @@
                                                 $sub_head_name = $items_indicator . '[' . $i . '][sub_head]';
                                                 $table_row .= '<td>' . render_select($sub_head_name, $sub_head, array('id', 'sub_group_name'), '', $item['sub_head']) . '</td>';
 
-                                                $table_row .= '<td><input type="number" min="0" onblur="calculate_estimate_total();" onchange="calculate_estimate_total();" data-quantity name="' . $items_indicator . '[' . $i . '][qty]" value="' . $item['qty'] . '" class="form-control">';
+                                                $table_row .= '<td class="quantity"><input type="number" min="0" onblur="calculate_estimate_total();" onchange="calculate_estimate_total();" data-quantity name="' . $items_indicator . '[' . $i . '][qty]" value="' . $item['qty'] . '" class="form-control">';
                                                 
                                                 $select = '';
                                                 $select = '<select class="selectpicker display-block" data-width="100%" name="' . $items_indicator . '[' . $i . '][unit_id]" data-none-selected-text="' . _l('unit') . '">';

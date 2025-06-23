@@ -367,6 +367,14 @@
                             </div>
                             <div class="col-sm-6 text-right">
                                 <?php
+                                if($estimate->lock_budget == 1) { ?>
+                                    <a href="#" class="btn btn-primary" onclick="update_lock_budget(<?php echo $estimate->id; ?>, '0'); return false;">Click Here for Unlock the Budget</a>
+                                    <br>
+                                <?php } else { ?>
+                                    <a href="#" class="btn btn-primary" onclick="update_lock_budget(<?php echo $estimate->id; ?>, '1'); return false;">Click Here for Lock the Budget</a>
+                                    <br>
+                                <?php } ?>
+                                <?php
                                 if($estimate->total_unalloc_cost != null) { 
                                     if($estimate->total_unalloc_cost > 0) { ?>
                                         <h4 class="bold text-warning">Budget is partially assigned.</h4>
@@ -1301,6 +1309,36 @@ $('#unawarded_package_form').on('submit', function (e) {
         form.submit();
     }
 });
+
+function update_lock_budget(id, status) {
+    var lock_budget = status === '0' ? 'Unlock' : 'Lock';
+    Swal.fire({
+        title: 'Are you sure?',
+        text: 'Are you sure you want to ' + lock_budget + ' the budget?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, ' + lock_budget + ' it!',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.post(admin_url + "estimates/update_lock_budget", {
+                id: id,
+                lock_budget: status 
+            }).done(function (response) {
+                response = JSON.parse(response);
+                if (response && response.id) {
+                    alert_float("success", lock_budget + " the budget has been successfully updated.");
+                    window.location.href = admin_url + "estimates";
+                } else {
+                    alert_float("warning", "Failed to update the budget lock status.");
+                }
+            }).fail(function () {
+                alert_float("warning", "An error occurred while updating the budget status.");
+            });
+        }
+    });
+}
+
 
 </script>
 <?php require 'modules/purchase/assets/js/cost_planning_js.php'; ?>

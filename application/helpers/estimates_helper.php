@@ -438,7 +438,7 @@ function get_purchase_unit($id)
     return '';
 }
 
-function get_estimate_revision_no($estimate_id, $count = 0)
+function get_estimate_revision_no($estimate_id, $count = 0, $use_count_only = 0)
 {
     $CI =& get_instance();
     $CI->db->select('parent_id');
@@ -446,9 +446,9 @@ function get_estimate_revision_no($estimate_id, $count = 0)
     $CI->db->where('id', $estimate_id);
     $parent = $CI->db->get()->row();
     if ($parent && $parent->parent_id != 0) {
-        return get_estimate_revision_no($parent->parent_id, $count + 1);
+        return get_estimate_revision_no($parent->parent_id, $count + 1, $use_count_only);
     }
-    return ' - Revision ' . $count;
+    return $use_count_only == 0 ? ' - Revision ' . $count : $count;
 }
 
 function get_estimate_revision_chain($estimate_id, $chain = [])
