@@ -80,6 +80,7 @@ return App_table::find('estimates')
             'project_id',
             'deleted_customer_name',
             'hash',
+            'lock_budget',
         ]);
 
         $output  = $result['output'];
@@ -100,7 +101,11 @@ return App_table::find('estimates')
 
             $numberOutput .= '<a href="' . admin_url('estimates/list_estimates/' . $aRow['id']) . '" onclick="init_estimate(' . $aRow['id'] . '); small_table_full_view(); return false;">' . _l('view') . '</a>';
             if (staff_can('edit',  'estimates')) {
-                $numberOutput .= ' | <a href="' . admin_url('estimates/estimate/' . $aRow['id']) . '">' . _l('edit') . '</a>';
+                if($aRow['lock_budget'] == 1) {
+                    $numberOutput .= '<span data-toggle="tooltip" title="Unlock the budget for editing" data-placement="bottom"> | <a href="' . admin_url('estimates/estimate/' . $aRow['id']) . '" class="disabled">' . _l('edit') . '</a></span>';
+                } else {
+                    $numberOutput .= ' | <a href="' . admin_url('estimates/estimate/' . $aRow['id']) . '">' . _l('edit') . '</a>';
+                }
             }
             $numberOutput .= '</div>';
 

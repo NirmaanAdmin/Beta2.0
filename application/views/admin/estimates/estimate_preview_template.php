@@ -143,10 +143,17 @@
                                 <a href="#" class="btn btn-primary" onclick="assign_unawarded_capex(<?php echo $estimate->id; ?>); return false;"><i class="fa-regular fa-plus tw-mr-1"></i>Assign Unawarded Capex</a>
                                 <a href="#" class="btn btn-primary" onclick="create_new_revision(<?php echo $estimate->id; ?>); return false;"><i class="fa-regular fa-plus tw-mr-1"></i><?php echo _l('create_new_revision'); ?></a>
                                 <?php if (staff_can('edit', 'estimates')) { ?>
-                                <a href="<?php echo admin_url('estimates/estimate/' . $estimate->id); ?>"
-                                    class="btn btn-default btn-with-tooltip" data-toggle="tooltip"
-                                    title="<?php echo _l('edit_estimate_tooltip'); ?>" data-placement="bottom"><i
-                                        class="fa-regular fa-pen-to-square"></i></a>
+                                <?php
+                                $tooltip_text = $estimate->lock_budget == 1 ? "Unlock the budget for editing" : _l('edit_estimate_tooltip');
+                                $disabled_class = $estimate->lock_budget == 1 ? 'disabled' : '';
+                                ?>
+                                <span data-toggle="tooltip" title="<?php echo $tooltip_text; ?>" data-placement="bottom">
+                                    <a href="<?php echo admin_url('estimates/estimate/' . $estimate->id); ?>"
+                                       class="btn btn-default btn-with-tooltip <?php echo $disabled_class; ?>"
+                                       >
+                                       <i class="fa-regular fa-pen-to-square"></i>
+                                    </a>
+                                </span>
                                 <?php } ?>
                                 <div class="btn-group">
                                     <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
