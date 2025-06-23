@@ -21729,11 +21729,13 @@ class Purchase_model extends App_Model
 
     public function update_bulk_pur_invoices($data)
     {
+       
         if (empty($data)) {
             return false;
         }else{
+            $invoice_date = to_sql_date($data['date']);           
             $dt_data =[
-                'invoice_date' => to_sql_date($data['invoice_date']),
+                'invoice_date' => $invoice_date,
                 'description_services' => $data['expense_name'],
             ];
             $this->db->where('id', $data['vbt_id']);
