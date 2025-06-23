@@ -271,7 +271,9 @@ $(function () {
   );
 
   var Timesheets_ServerParams = {};
-  var ProjectDirectory_ServerParams = {}
+  var ProjectDirectory_ServerParams = {
+    "projects": "[name='project_id']",
+  }
   $.each($("._hidden_inputs._filters.timesheets_filters input"), function () {
     Timesheets_ServerParams[$(this).attr("name")] =
       '[name="' + $(this).attr("name") + '"]';

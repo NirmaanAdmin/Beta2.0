@@ -25,6 +25,7 @@
                 </a> -->
             </div>
         </div>
+        <input type="hidden" id="project_id" name="project_id" value="<?php echo $project->id; ?>">
         <?php $table_data = [
             _l('#'),
             _l('Position'),

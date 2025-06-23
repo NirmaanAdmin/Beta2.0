@@ -16,7 +16,15 @@ $sTable       = db_prefix() . 'project_directory';
 
 $join = [];
 
+
 $where = [];
+
+
+$project = $this->ci->input->post('projects');  // Changed from 'projects' to 'project'
+if (!empty($project)) {
+    $where_project = ' AND project_id = "' . $this->ci->db->escape_str($project) . '"';
+    array_push($where, $where_project);
+}
 
 $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, ['project_id']);
 
