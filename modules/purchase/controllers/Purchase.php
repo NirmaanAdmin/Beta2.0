@@ -12444,9 +12444,9 @@ class purchase extends AdminController
                         unset($data['select_invoice']);
                         unset($data['applied_to_invoice']);
                     }
-
                     if ($select_invoice == 'none') {
                         $this->purchase_model->update_bulk_pur_invoices($data);
+                        set_alert('success', _l('updated_successfully', _l('vendor_bills')));
                     } else {
                         $id = $this->expenses_model->add($data);
                         if ($id) {
@@ -12467,7 +12467,7 @@ class purchase extends AdminController
                     }
                 }
 
-                set_alert('success', _l('updated_successfully', _l('vendor_bills')));
+                
             }
             if ($bulk_active_tab == 'bulk_assign') {
                 if (!empty($neworderitems)) {
