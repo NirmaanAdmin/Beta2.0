@@ -221,7 +221,7 @@
     <table class="mom-items-table items table-main-dpr-edit has-calculations no-mtop">
         <thead>
             <tr>
-                <th>No</th>
+                <th style="width: 5%;">No</th>
                 <th>
                     <?php
                     if ($meeting['area_head'] == 1) {
@@ -236,12 +236,18 @@
                 <?php if ($check_desc) { ?>
                     <th>Description</th>
                 <?php } ?>
-                <th>Decision</th>
+                <?php if ($check_decision) { ?>
+                    <th>Decision</th>
+                <?php } ?>
                 <?php if ($check_action) { ?>
                     <th>Action</th>
                 <?php } ?>
-                <th>Action By</th>
-                <th>Target Date</th>
+                <?php if ($check_action_by) { ?>
+                    <th>Action By</th>
+                <?php } ?>
+                <?php if ($check_target_date) { ?>
+                    <th>Target Date</th>
+                <?php } ?>
                 <?php if ($check_attachment) { ?>
                     <th>Attachments</th>
                 <?php } ?>
@@ -272,10 +278,13 @@
 
                 <?php if (!empty($data['section_break'])): ?>
                     <?php
-                    $colspan = 5; // Base columns: serial_no, area, decision, staff/vendor, target_date
+                    $colspan = 2; // Base columns: serial_no, area,
 
                     if ($check_desc) $colspan += 1;
+                    if ($check_decision) $colspan += 1;
                     if ($check_action) $colspan += 1;
+                    if ($check_action_by) $colspan += 1;
+                    if ($check_target_date) $colspan += 1;
                     if ($check_attachment) $colspan += 1;
                     ?>
                     <tr>
@@ -293,21 +302,24 @@
                         <td><?php echo $data['description']; ?></td>
                     <?php endif; ?>
 
-                    <td><?php echo $data['decision']; ?></td>
-
+                    <?php if ($check_decision): ?>
+                        <td><?php echo $data['decision']; ?></td>
+                    <?php endif; ?>
                     <?php if ($check_action): ?>
                         <td><?php echo $data['action']; ?></td>
                     <?php endif; ?>
 
-                    <td>
-                        <?php echo getStaffNamesFromCSV($data['staff']); ?>
-                        <?php if (!empty($data['vendor'])): ?>
-                            <br><?php echo $data['vendor']; ?>
-                        <?php endif; ?>
-                    </td>
-
-                    <td><?php echo $target_date; ?></td>
-
+                    <?php if ($check_action_by): ?>
+                        <td>
+                            <?php echo getStaffNamesFromCSV($data['staff']); ?>
+                            <?php if (!empty($data['vendor'])): ?>
+                                <br><?php echo $data['vendor']; ?>
+                            <?php endif; ?>
+                        </td>
+                    <?php endif; ?>
+                    <?php if ($check_target_date): ?>
+                        <td><?php echo $target_date; ?></td>
+                    <?php endif; ?>
                     <?php if ($check_attachment): ?>
                         <td><?php echo $full_item_image; ?></td>
                     <?php endif; ?>
