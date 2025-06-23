@@ -18,11 +18,11 @@ $join = [];
 
 $where = [];
 
-$result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, []);
+$result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, ['project_id']);
 
 $output  = $result['output'];
 $rResult = $result['rResult'];
-
+$hasPermissionDelete = staff_can('delete',  'projects');
 $sr = 1;
 foreach ($rResult as $aRow) {
     $row = [];
@@ -33,7 +33,13 @@ foreach ($rResult as $aRow) {
             $_data = $aRow[$aColumns[$i]];
         }
         if ($aColumns[$i] == 'postion') {
-            $_data = $aRow['postion'];
+            $name =  $aRow['postion'];
+            $name .= '<div class="row-options">';
+            if ($hasPermissionDelete) {
+                $name .= '<a href="' . admin_url('projects/deleteprojectdirectory/' . $aRow['id'].'/'.$aRow['project_id']) . '" class="text-danger _delete">' . _l('delete') . '</a>';
+            }
+            $name .= '</div>';
+            $_data = $name;
         } elseif ($aColumns[$i] == 'staff') {
             $_data = get_staff_namebyId($aRow['staff']);
         } elseif ($aColumns[$i] == 'vendor') {

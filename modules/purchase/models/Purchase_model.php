@@ -78,6 +78,57 @@ class Purchase_model extends App_Model
         return $this->db->get(db_prefix() . 'pur_vendor')->result_array();
     }
 
+    public function get_vendor_for_project_dir($id = '', $where = [])
+    {
+        $this->db->select(implode(',', prefixed_table_fields_array(db_prefix() . 'pur_vendor')) .
+            ',' . get_sql_select_vendor_company() .
+            ',' . get_sql_select_vendor_email() .
+            ',' . get_sql_select_vendor_phonenumber() .
+            ',' . get_sql_select_vendor_firstname() .
+            ',' . get_sql_select_vendor_lastname());
+
+        if (is_numeric($id)) {
+            $this->db->join(db_prefix() . 'countries', '' . db_prefix() . 'countries.country_id = ' . db_prefix() . 'pur_vendor.country', 'left');
+            $this->db->join(db_prefix() . 'pur_contacts', '' . db_prefix() . 'pur_contacts.userid = ' . db_prefix() . 'pur_vendor.userid AND is_primary = 1', 'left');
+
+            if ((is_array($where) && count($where) > 0) || (is_string($where) && $where != '')) {
+                $this->db->where($where);
+            }
+
+            $this->db->where(db_prefix() . 'pur_vendor.userid', $id);
+            $vendor = $this->db->get(db_prefix() . 'pur_vendor')->row();
+
+            if ($vendor && get_option('company_requires_vat_number_field') == 0) {
+                $vendor->vat = null;
+            }
+
+            return $vendor;
+        } else {
+            if (!has_permission('purchase_vendors', '', 'view') && is_staff_logged_in()) {
+                $this->db->join(db_prefix() . 'countries', '' . db_prefix() . 'countries.country_id = ' . db_prefix() . 'pur_vendor.country', 'left');
+                $this->db->join(db_prefix() . 'pur_contacts', '' . db_prefix() . 'pur_contacts.userid = ' . db_prefix() . 'pur_vendor.userid AND is_primary = 1', 'left');
+
+                if ((is_array($where) && count($where) > 0) || (is_string($where) && $where != '')) {
+                    $this->db->where($where);
+                }
+
+                $this->db->where(db_prefix() . 'pur_vendor.userid IN (SELECT vendor_id FROM ' . db_prefix() . 'pur_vendor_admin WHERE staff_id=' . get_staff_user_id() . ')');
+            } else {
+                $this->db->join(db_prefix() . 'countries', '' . db_prefix() . 'countries.country_id = ' . db_prefix() . 'pur_vendor.country', 'left');
+                $this->db->join(db_prefix() . 'pur_contacts', '' . db_prefix() . 'pur_contacts.userid = ' . db_prefix() . 'pur_vendor.userid AND is_primary = 1', 'left');
+
+                if ((is_array($where) && count($where) > 0) || (is_string($where) && $where != '')) {
+                    $this->db->where($where);
+                }
+            }
+        }
+
+        $this->db->order_by('company', 'asc');
+
+        return $this->db->get(db_prefix() . 'pur_vendor')->result_array();
+    }
+
+
     /**
      * Gets the contacts.
      *
@@ -2887,7 +2938,7 @@ class Purchase_model extends App_Model
             // warehouse module hook after purchase order add
             hooks()->do_action('after_purchase_order_add', $insert_id);
 
-            if(isset($data['package_id'])) {
+            if (isset($data['package_id'])) {
                 $this->db->where('id', $data['package_id']);
                 $this->db->update(db_prefix() . 'estimate_package_info', ['awarded_value' => $data['total']]);
             }
@@ -3197,7 +3248,7 @@ class Purchase_model extends App_Model
 
         $this->db->where('id', $id);
         $po = $this->db->get(db_prefix() . 'pur_orders')->row();
-        if(!empty($po->package_id)) {
+        if (!empty($po->package_id)) {
             $this->db->where('id', $po->package_id);
             $this->db->update(db_prefix() . 'estimate_package_info', ['awarded_value' => $data['total']]);
         }
@@ -20219,21 +20270,21 @@ class Purchase_model extends App_Model
 
         $this->db->select(
             db_prefix() . 'itemable.*, ' .
-            'epi_items.package_id, ' .
-            'epi_items.package_qty, ' .
-            'epi_items.package_rate'
+                'epi_items.package_id, ' .
+                'epi_items.package_qty, ' .
+                'epi_items.package_rate'
         );
         $this->db->from(db_prefix() . 'itemable');
         $this->db->join(
             db_prefix() . 'estimate_package_info',
             db_prefix() . 'estimate_package_info.estimate_id = ' . db_prefix() . 'itemable.rel_id' .
-            ' AND ' . db_prefix() . 'estimate_package_info.budget_head = ' . db_prefix() . 'itemable.annexure',
+                ' AND ' . db_prefix() . 'estimate_package_info.budget_head = ' . db_prefix() . 'itemable.annexure',
             'left'
         );
         $this->db->join(
             db_prefix() . 'estimate_package_items_info AS epi_items',
             'epi_items.package_id = ' . db_prefix() . 'estimate_package_info.id' .
-            ' AND epi_items.item_id = ' . db_prefix() . 'itemable.id',
+                ' AND epi_items.item_id = ' . db_prefix() . 'itemable.id',
             'left'
         );
         $this->db->where(db_prefix() . 'itemable.rel_id', $estimate_id);
@@ -21525,7 +21576,7 @@ class Purchase_model extends App_Model
     {
         $this->db->select(
             db_prefix() . 'estimate_package_info.*,' .
-            db_prefix() . 'estimates.project_id'
+                db_prefix() . 'estimates.project_id'
         );
         $this->db->from(db_prefix() . 'estimate_package_info');
         $this->db->join(db_prefix() . 'estimates', db_prefix() . 'estimates.id = ' . db_prefix() . 'estimate_package_info.estimate_id', 'left');
@@ -21548,12 +21599,11 @@ class Purchase_model extends App_Model
         $this->db->where(db_prefix() . 'estimate_package_items_info.package_id', $id);
         $this->db->where(db_prefix() . 'estimate_package_items_info.package_qty' . ' >', 0, false);
         $this->db->where(db_prefix() . 'estimate_package_items_info.package_rate' . ' >', 0, false);
-        if(!empty($itemableid)) {
+        if (!empty($itemableid)) {
             $this->db->where(db_prefix() . 'itemable.id', $itemableid);
         }
         $this->db->group_by(db_prefix() . 'estimate_package_items_info.id');
         return $this->db->get()->result_array();
-
     }
 
     public function get_changee_pur_order_detail($data, $pur_order)
@@ -21568,7 +21618,7 @@ class Purchase_model extends App_Model
         }
 
         $co_order_detail = $this->get_changee_non_tender_item('pur_orders', $pur_order);
-        if(!empty($co_order_detail)) {
+        if (!empty($co_order_detail)) {
             $result = array_merge($result, $co_order_detail);
         }
 
@@ -21587,7 +21637,7 @@ class Purchase_model extends App_Model
         }
 
         $co_order_detail = $this->get_changee_non_tender_item('wo_orders', $wo_order);
-        if(!empty($co_order_detail)) {
+        if (!empty($co_order_detail)) {
             $result = array_merge($result, $co_order_detail);
         }
 
@@ -21597,24 +21647,24 @@ class Purchase_model extends App_Model
     public function get_changee_non_tender_item($type, $order_id)
     {
         $this->db->select(
-            db_prefix() . 'co_order_detail.serial_no, ' . 
-            db_prefix() . 'co_order_detail.item_code, ' . 
-            db_prefix() . 'co_order_detail.tender_item as non_budget_item, ' . 
-            db_prefix() . 'co_order_detail.description, ' . 
-            db_prefix() . 'co_order_detail.unit_id, ' . 
-            db_prefix() . 'co_order_detail.area as area, ' . 
-            db_prefix() . 'co_order_detail.original_quantity as quantity, ' . 
-            db_prefix() . 'co_order_detail.quantity as amendment_qty, ' . 
-            db_prefix() . 'co_order_detail.original_unit_price as unit_price, ' . 
-            db_prefix() . 'co_order_detail.unit_price as amendment_rate, ' . 
-            db_prefix() . 'co_order_detail.into_money_updated as into_money, ' . 
-            db_prefix() . 'co_order_detail.total as total, ' . 
-            db_prefix() . 'co_order_detail.total as total_money, ' . 
-            "'' as sub_groups_pur, " .
-            "'' as image, " .
-            "'1' as is_co, " .
-            "'0' as discount_money, " .
-            "'' as discount_percent"
+            db_prefix() . 'co_order_detail.serial_no, ' .
+                db_prefix() . 'co_order_detail.item_code, ' .
+                db_prefix() . 'co_order_detail.tender_item as non_budget_item, ' .
+                db_prefix() . 'co_order_detail.description, ' .
+                db_prefix() . 'co_order_detail.unit_id, ' .
+                db_prefix() . 'co_order_detail.area as area, ' .
+                db_prefix() . 'co_order_detail.original_quantity as quantity, ' .
+                db_prefix() . 'co_order_detail.quantity as amendment_qty, ' .
+                db_prefix() . 'co_order_detail.original_unit_price as unit_price, ' .
+                db_prefix() . 'co_order_detail.unit_price as amendment_rate, ' .
+                db_prefix() . 'co_order_detail.into_money_updated as into_money, ' .
+                db_prefix() . 'co_order_detail.total as total, ' .
+                db_prefix() . 'co_order_detail.total as total_money, ' .
+                "'' as sub_groups_pur, " .
+                "'' as image, " .
+                "'1' as is_co, " .
+                "'0' as discount_money, " .
+                "'' as discount_percent"
         );
         $this->db->from(db_prefix() . 'co_order_detail');
         $this->db->join(
@@ -21623,10 +21673,10 @@ class Purchase_model extends App_Model
             'left'
         );
         $this->db->where(db_prefix() . 'co_orders.approve_status', 2);
-        if($type == "pur_orders") {
+        if ($type == "pur_orders") {
             $this->db->where(db_prefix() . 'co_orders.po_order_id', $order_id);
         }
-        if($type == "wo_orders") {
+        if ($type == "wo_orders") {
             $this->db->where(db_prefix() . 'co_orders.wo_order_id', $order_id);
         }
         $this->db->where(db_prefix() . 'co_order_detail.tender_item', 1);
@@ -21652,10 +21702,10 @@ class Purchase_model extends App_Model
             '<br/>', '') AS non_break_description
         ");
         $this->db->join(db_prefix() . 'co_orders', db_prefix() . 'co_orders.id = ' . db_prefix() . 'co_order_detail.pur_order', 'left');
-        if($type == "pur_orders") {
+        if ($type == "pur_orders") {
             $this->db->where(db_prefix() . 'co_orders.po_order_id', $order_id);
         }
-        if($type == "wo_orders") {
+        if ($type == "wo_orders") {
             $this->db->where(db_prefix() . 'co_orders.wo_order_id', $order_id);
         }
         $this->db->where(db_prefix() . 'co_orders.approve_status', 2);
@@ -21663,7 +21713,7 @@ class Purchase_model extends App_Model
         $this->db->group_by(db_prefix() . 'co_order_detail.id');
         $this->db->having('non_break_description', $non_break_description);
         $co_order_detail = $this->db->get(db_prefix() . 'co_order_detail')->result_array();
-        if(!empty($co_order_detail)) {
+        if (!empty($co_order_detail)) {
             $result['is_co'] = true;
             $updated_quantity = array_sum(array_column($co_order_detail, 'quantity'));
             $updated_unit_price = array_sum(array_column($co_order_detail, 'unit_price'));

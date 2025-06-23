@@ -74,7 +74,7 @@ function getvendorlist()
 {
     $CI = &get_instance();
     $CI->load->model('purchase/purchase_model');
-    return $get_vendor = $CI->purchase_model->get_vendor();
+    return $get_vendor = $CI->purchase_model->get_vendor_for_project_dir();
 }
 
 function getdeptmom()

@@ -44,6 +44,24 @@ function get_sql_select_vendor_company()
     return 'CASE company WHEN "" THEN (SELECT CONCAT(firstname, " ", lastname) FROM ' . db_prefix() . 'pur_contacts WHERE ' . db_prefix() . 'pur_contacts.userid = ' . db_prefix() . 'pur_vendor.userid and is_primary = 1) ELSE company END as company';
 }
 
+function get_sql_select_vendor_email()
+{
+    return '(SELECT email FROM ' . db_prefix() . 'pur_contacts WHERE ' . db_prefix() . 'pur_contacts.userid = ' . db_prefix() . 'pur_vendor.userid and is_primary = 1) as email';
+}
+
+function get_sql_select_vendor_phonenumber()
+{
+    return '(SELECT phonenumber FROM ' . db_prefix() . 'pur_contacts WHERE ' . db_prefix() . 'pur_contacts.userid = ' . db_prefix() . 'pur_vendor.userid and is_primary = 1) as phonenumber';
+}
+function get_sql_select_vendor_firstname()
+{
+    return '(SELECT firstname FROM ' . db_prefix() . 'pur_contacts WHERE ' . db_prefix() . 'pur_contacts.userid = ' . db_prefix() . 'pur_vendor.userid and is_primary = 1) as firstname';
+}
+
+function get_sql_select_vendor_lastname()
+{
+    return '(SELECT lastname FROM ' . db_prefix() . 'pur_contacts WHERE ' . db_prefix() . 'pur_contacts.userid = ' . db_prefix() . 'pur_vendor.userid and is_primary = 1) as lastname';
+}
 /**
  * Determines if vendor admin.
  *

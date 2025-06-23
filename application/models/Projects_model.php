@@ -2828,10 +2828,29 @@ class Projects_model extends App_Model
         $row .= '<option value=""></option>';
         foreach ($getvendors as $vendor) {
             $selected = in_array($vendor['userid'], $selectedvendors) ? ' selected' : '';
+
+            // Safely get email with fallback to empty string
+            $email = isset($vendor['email']) ? htmlspecialchars($vendor['email']) : '';
+
+            // Safely get phone number with fallback to empty string
+            $phonenumber = isset($vendor['phonenumber']) ? htmlspecialchars($vendor['phonenumber']) : '';
+
+            // Safely build full name with fallback to empty string
+            $firstname = isset($vendor['firstname']) ? htmlspecialchars($vendor['firstname']) : '';
+            $lastname = isset($vendor['lastname']) ? htmlspecialchars($vendor['lastname']) : '';
+            $fullname = trim($firstname . ' ' . $lastname);
+
+            // Safely get company name with fallback to full name if empty
+            $company = isset($vendor['company']) ? htmlspecialchars($vendor['company']) : $fullname;
+            if (empty($company)) {
+                $company = $fullname;
+            }
+
             $row .= '<option value="' . $vendor['userid'] . '" ' . $selected .
-                ' data-email="' . htmlspecialchars($vendor['email']) . '"' .
-                ' data-phonenumber="' . htmlspecialchars($vendor['phonenumber']) . '">' .
-                htmlspecialchars($vendor['company']) . '</option>';
+                ' data-email="' . $email . '"' .
+                ' data-phonenumber="' . $phonenumber . '"' .
+                ' data-fullname="' . $fullname . '">' .
+                $company . '</option>';
         }
         $row .= '</select></td>';
 
@@ -2946,5 +2965,18 @@ class Projects_model extends App_Model
     public function project_directory_pdf($project_directory)
     {
         return app_pdf('project_directory', LIBSPATH . 'pdf/Project_directory_pdf', $project_directory);
+    }
+
+
+    public function delete_project_directory($id)
+    {
+        $this->db->where('id', $id);
+        $this->db->delete(db_prefix() . 'project_directory');
+
+        if ($this->db->affected_rows() > 0) {
+            return true;
+        }
+
+        return false;
     }
 }

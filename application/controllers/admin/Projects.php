@@ -1304,4 +1304,18 @@ class Projects extends AdminController
         fclose($output);
         exit;
     }
+
+
+    public function deleteprojectdirectory($id, $project_id)
+    {
+        if (staff_can('delete', 'projects')) {
+            $success = $this->projects_model->delete_project_directory($id);
+            if ($success) {
+                set_alert('success', _l('deleted', _l('successfully')));
+            } else {
+                set_alert('warning', _l('problem_deleting', _l('failed_to_delete')));
+            }
+        }
+        redirect(admin_url('projects/view/' . $project_id . '?group=project_directory'));
+    }
 }
