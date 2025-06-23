@@ -18094,6 +18094,7 @@ class Purchase_model extends App_Model
                 $html .= '<div class="col-md-2">' . render_date_input('convert_date') . '</div>';
                 $html .= '<div class="col-md-2">
                     <select class="selectpicker display-block" data-width="100%" name="convert_select_invoice" id="convert_select_invoice" data-none-selected-text="' . _l('none') . '">
+                        <option value="none">' . _l('None') . '</option>
                         <option value="create_invoice">' . _l('expense_convert_to_invoice') . '</option>
                         <option value="applied_invoice">' . _l('applied_to_invoice') . '</option>
                     </select>';
@@ -18164,6 +18165,7 @@ class Purchase_model extends App_Model
 
                     $html .= '<div class="col-md-2">
                         <select class="selectpicker display-block" data-width="100%" name="' . $select_invoice_name_attr . '" id="bulk_select_invoice" data-id="' . $pvalue['id'] . '" data-none-selected-text="' . _l('none') . '">
+                            <option value="none">' . _l('None') . '</option>
                             <option value="create_invoice">' . _l('expense_convert_to_invoice') . '</option>
                             <option value="applied_invoice">' . _l('applied_to_invoice') . '</option>
                         </select>
@@ -21723,4 +21725,28 @@ class Purchase_model extends App_Model
 
         return $result;
     }
+
+
+    public function update_bulk_pur_invoices($data)
+    {
+        if (empty($data)) {
+            return false;
+        }else{
+            $dt_data =[
+                'invoice_date' => to_sql_date($data['invoice_date']),
+                'description_services' => $data['expense_name'],
+            ];
+            $this->db->where('id', $data['vbt_id']);
+            $this->db->update(db_prefix() . 'pur_invoices',$dt_data);
+            
+            if ($this->db->affected_rows() > 0) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        exit;
+    }
+
+       
 }

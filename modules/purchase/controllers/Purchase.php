@@ -1591,7 +1591,7 @@ class purchase extends AdminController
         $data['payment'] = $this->purchase_model->get_inv_payment_purchase_order($id);
         $data['pur_order_attachments'] = $this->purchase_model->get_purchase_order_attachments($id);
         $data['estimate_detail'] = $this->purchase_model->get_pur_order_detail($id);
-        if(!empty($data['estimate_detail'])) {
+        if (!empty($data['estimate_detail'])) {
             $data['estimate_detail'] = $this->purchase_model->get_changee_pur_order_detail($data['estimate_detail'], $id);
         }
         $data['estimate']          = $estimate;
@@ -9944,7 +9944,7 @@ class purchase extends AdminController
         $data['payment'] = $this->purchase_model->get_inv_payment_purchase_order($id);
         // $data['pur_order_attachments'] = $this->purchase_model->get_purchase_order_attachments($id);
         $data['estimate_detail'] = $this->purchase_model->get_wo_order_detail($id);
-        if(!empty($data['estimate_detail'])) {
+        if (!empty($data['estimate_detail'])) {
             $data['estimate_detail'] = $this->purchase_model->get_changee_wo_order_detail($data['estimate_detail'], $id);
         }
         $data['estimate']          = $estimate;
@@ -12444,20 +12444,30 @@ class purchase extends AdminController
                         unset($data['select_invoice']);
                         unset($data['applied_to_invoice']);
                     }
-                    $id = $this->expenses_model->add($data);
-                    if ($id) {
-                        $this->purchase_model->mark_converted_pur_invoice($pur_invoice, $id);
-                        if ($select_invoice == "create_invoice") {
-                            $invoiceid = $this->expenses_model->convert_to_invoice($id);
-                        } else {
-                            $applied = array();
-                            $applied['invoice_id'] = $applied_to_invoice;
-                            $applied['expense_id'] = $id;
-                            $invoiceid = $this->expenses_model->applied_to_invoice($applied);
+
+                    if ($select_invoice == 'none') {
+                        $this->purchase_model->update_bulk_pur_invoices($data);
+                    } else {
+                        $id = $this->expenses_model->add($data);
+                        if ($id) {
+
+                            if ($select_invoice == "create_invoice") {
+                                $invoiceid = $this->expenses_model->convert_to_invoice($id);
+                                $this->purchase_model->mark_converted_pur_invoice($pur_invoice, $id);
+                                set_alert('success', _l('vendor_bills_converted_to_ril_invoices'));
+                            } elseif ($select_invoice == "applied_invoice") {
+                                $applied = array();
+                                $applied['invoice_id'] = $applied_to_invoice;
+                                $applied['expense_id'] = $id;
+                                $invoiceid = $this->expenses_model->applied_to_invoice($applied);
+                                $this->purchase_model->mark_converted_pur_invoice($pur_invoice, $id);
+                                set_alert('success', _l('vendor_bills_converted_to_ril_invoices'));
+                            }
                         }
                     }
                 }
-                set_alert('success', _l('vendor_bills_converted_to_ril_invoices'));
+
+                set_alert('success', _l('updated_successfully', _l('vendor_bills')));
             }
             if ($bulk_active_tab == 'bulk_assign') {
                 if (!empty($neworderitems)) {
@@ -14930,7 +14940,7 @@ class purchase extends AdminController
         die();
     }
 
-     public function view_purchase_tracker_file($id)
+    public function view_purchase_tracker_file($id)
     {
         $data['discussion_user_profile_image_url'] = staff_profile_image_url(get_staff_user_id());
         $data['current_user_is_admin']             = is_admin();
