@@ -14,6 +14,7 @@ $to_date_filter_name = 'to_date';
 $aColumns = [
     'pur_rq_code',
     'pur_rq_name',
+    db_prefix() . 'departments.name as department_name',
     db_prefix() . 'items_groups.name',
     'sub_group_name',
     // 'area_name',
@@ -156,8 +157,8 @@ foreach ($rResult as $aRow) {
                 'staff-profile-image-small',
             ]) . '</a>';
             $_data .= ' <a href="' . admin_url('staff/profile/' . $aRow['requester']) . '">' . get_staff_full_name($aRow['requester']) . '</a>';
-        } elseif ($aColumns[$i] == 'department') {
-            $_data = $aRow['name'];
+        } elseif ($aColumns[$i] == db_prefix() . 'departments.name as department_name') {
+            $_data = $aRow['department_name'];
         } elseif ($aColumns[$i] == 'status') {
 
             $approve_status = get_status_approve($aRow['status']);

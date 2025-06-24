@@ -55,18 +55,16 @@ $module_name = 'purchase_request';
                 </select>
               </div>
               <div class="col-md-3">
-                <div class="col-md-6">
-                  <?php
-                  $from_date_type_filter = get_module_filter($module_name, 'from_date');
-                  $from_date_type_filter_val = !empty($from_date_type_filter) ?  $from_date_type_filter->filter_value : '';
-                  echo render_date_input('from_date', '',$from_date_type_filter_val, array('placeholder' => _l('from_date'))); ?>
-                </div>
-                <div class="col-md-6">
-                  <?php 
-                   $to_date_type_filter = get_module_filter($module_name, 'to_date');
-                   $to_date_type_filter_val = !empty($to_date_type_filter) ?  $to_date_type_filter->filter_value : '';
-                  echo render_date_input('to_date', '', $to_date_type_filter_val, array('placeholder' => _l('to_date'))); ?>
-                </div>
+                <?php
+                $from_date_type_filter = get_module_filter($module_name, 'from_date');
+                $from_date_type_filter_val = !empty($from_date_type_filter) ?  $from_date_type_filter->filter_value : '';
+                echo render_date_input('from_date', '',$from_date_type_filter_val, array('placeholder' => _l('from_date'))); ?>
+              </div>
+              <div class="col-md-3">
+                <?php 
+                 $to_date_type_filter = get_module_filter($module_name, 'to_date');
+                 $to_date_type_filter_val = !empty($to_date_type_filter) ?  $to_date_type_filter->filter_value : '';
+                echo render_date_input('to_date', '', $to_date_type_filter_val, array('placeholder' => _l('to_date'))); ?>
               </div>
 
               <div class="col-md-3 form-group">
@@ -89,7 +87,7 @@ $module_name = 'purchase_request';
                 $requester_filter_filter_val = !empty($requester_filter) ? explode(",", $requester_filter->filter_value) : [];
                 echo render_select('requester[]', $requester, array('staffid', 'full_name'), '', $requester_filter_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('requester'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false); ?>
               </div>
-              <div class="col-md-3 form-group">
+              <div class="col-md-2 form-group">
 
                 <?php
                 $approval_status_type_filter = get_module_filter($module_name, 'status');
@@ -113,6 +111,7 @@ $module_name = 'purchase_request';
             <?php render_datatable(array(
               _l('pur_rq_code'),
               _l('pur_rq_name'),
+              _l('department'),
               _l('group_pur'),
               _l('sub_groups_pur'),
               // _l('area_pur'),
