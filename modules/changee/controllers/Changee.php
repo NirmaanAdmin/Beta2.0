@@ -9360,4 +9360,12 @@ class changee extends AdminController
         }
         $this->load->view('changee_order/_file_new', $data);
     }
+
+    public function get_co_charts()
+    {
+        $data = $this->input->post();
+        $result = $this->changee_model->get_co_charts($data);
+        echo json_encode($result);
+        die;
+    }
 }
