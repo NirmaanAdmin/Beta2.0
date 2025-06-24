@@ -22,21 +22,15 @@ var expenseDropzone;
 	init_wo_order();
     $.each(Params, function(i, obj) {
         $('select' + obj).on('change', function() {  
-            table_rec_campaign.DataTable().ajax.reload()
-                .columns.adjust()
-                .responsive.recalc();
+            table_rec_campaign.DataTable().ajax.reload();
         });
     });
 
     $('input[name="from_date"]').on('change', function() {
-        table_rec_campaign.DataTable().ajax.reload()
-                .columns.adjust()
-                .responsive.recalc();
+        table_rec_campaign.DataTable().ajax.reload();
     });
     $('input[name="to_date"]').on('change', function() {
-        table_rec_campaign.DataTable().ajax.reload()
-                .columns.adjust()
-                .responsive.recalc();
+        table_rec_campaign.DataTable().ajax.reload();
     });
 
     
@@ -76,8 +70,15 @@ var expenseDropzone;
         var filterArea = $('.all_ot_filters');
         filterArea.find('input').val("");
         filterArea.find('select').selectpicker("val", "");
-        table_rec_campaign.DataTable().ajax.reload().columns.adjust().responsive.recalc();
+        table_rec_campaign.DataTable().ajax.reload();
+        get_work_order_dashboard();
     });
+
+    $(document).on('change', 'select[name="vendor_ft[]"], select[name="project[]"], select[name="group_pur[]"]', function() {
+      get_work_order_dashboard();
+    });
+
+    get_work_order_dashboard();
 
 })(jQuery);
 function init_wo_order(id) {
@@ -231,12 +232,14 @@ function change_delivery_status(status, id){
 
 var pieChartWOStatus;
 
-get_work_order_dashboard();
-
 function get_work_order_dashboard() {
   "use strict";
 
-  var data = {};
+  var data = {
+    vendors: $('select[name="vendor_ft[]"]').val(),
+    projects: $('select[name="project[]"]').val(),
+    group_pur: $('select[name="group_pur[]"]').val(),
+  }
 
   $.post(admin_url + 'purchase/get_wo_charts', data).done(function(response){
     response = JSON.parse(response);

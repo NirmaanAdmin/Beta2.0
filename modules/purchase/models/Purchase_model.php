@@ -21872,6 +21872,9 @@ class Purchase_model extends App_Model
     public function get_wo_charts($data)
     {
         $response = array();
+        $vendors = $data['vendors'];
+        $projects = $data['projects'];
+        $group_pur = $data['group_pur'];
         $this->load->model('currencies_model');
         $base_currency = $this->currencies_model->get_base_currency();
         if ($request->currency != 0 && $request->currency != null) {
@@ -21881,7 +21884,16 @@ class Purchase_model extends App_Model
         $response['total_wo_value'] = $response['approved_wo_value'] = $response['draft_wo_value'] = $response['draft_wo_count'] = $response['approved_wo_count'] = $response['rejected_wo_count'] = $response['completely_delivered_status'] = $response['partially_delivered_status'] = $response['undelivered_status'] = 0;
         $response['pie_budget_name'] = $response['pie_tax_value'] = array();
 
-        $this->db->select('id, wo_order_number, approve_status, total, order_date, total_tax, group_pur, vendor');
+        $this->db->select('id, wo_order_number, approve_status, total, order_date, total_tax, group_pur, vendor, project');
+        if (!empty($vendors) && is_array($vendors)) {
+            $this->db->where_in(db_prefix() . 'wo_orders.vendor', $vendors);
+        }
+        if (!empty($projects) && is_array($projects)) {
+            $this->db->where_in(db_prefix() . 'wo_orders.project', $projects);
+        }
+        if (!empty($group_pur) && is_array($group_pur)) {
+            $this->db->where_in(db_prefix() . 'wo_orders.group_pur', $group_pur);
+        }
         $wo_orders = $this->db->get(db_prefix() . 'wo_orders')->result_array();
 
         if (!empty($wo_orders)) {
