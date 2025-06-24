@@ -18,18 +18,15 @@ var Params = {
 
   $.each(Params, function (i, obj) {
     $('select' + obj).on('change', function () {
-      table_pur_request.DataTable().ajax.reload()
-        .columns.adjust().recalc();
+      table_pur_request.DataTable().ajax.reload();
     });
   });
 
   $('input[name="from_date"]').on('change', function () {
-    table_pur_request.DataTable().ajax.reload()
-      .columns.adjust().recalc();
+    table_pur_request.DataTable().ajax.reload();
   });
   $('input[name="to_date"]').on('change', function () {
-    table_pur_request.DataTable().ajax.reload()
-      .columns.adjust().recalc();
+    table_pur_request.DataTable().ajax.reload();
   });
 
   appValidateForm($('#send_rq-form'), { subject: 'required', attachment: 'required' });
@@ -38,8 +35,15 @@ var Params = {
     var filterArea = $('.all_ot_filters');
     filterArea.find('input').val("");
     filterArea.find('select').selectpicker("val", "");
-    table_pur_request.DataTable().ajax.reload().columns.adjust().responsive.recalc();
+    table_pur_request.DataTable().ajax.reload();
+    get_purchase_request_dashboard();
   });
+
+  $(document).on('change', 'select[name="project[]"], select[name="group_pur[]"]', function() {
+    get_purchase_request_dashboard();
+  });
+
+  get_purchase_request_dashboard();
 })(jQuery);
 
 function send_request_quotation(id) {
@@ -180,4 +184,165 @@ function change_pr_approve_status(status, id) {
       }
     });
   }
+}
+
+function get_purchase_request_dashboard() {
+  "use strict";
+
+  var data = {
+    projects: $('select[name="project[]"]').val(),
+    group_pur: $('select[name="group_pur[]"]').val(),
+  }
+
+  $.post(admin_url + 'purchase/get_pr_charts', data).done(function(response){
+    response = JSON.parse(response);
+
+    // Update value summaries
+    $('.total_purchase_requests').text(response.total_purchase_requests);
+    $('.total_approved_requests').text(response.total_approved_requests);
+    $('.total_draft_requests').text(response.total_draft_requests);
+    $('.total_closed_requests').text(response.total_closed_requests);
+
+    var projectCtx = document.getElementById('doughnutChartProject').getContext('2d');
+    var projectLabels = response.project_name;
+    var projectData = response.project_value;
+    var backgroundColors = [];
+    var borderColors = [];
+    for (var i = 0; i < projectLabels.length; i++) {
+      var hue = (i * 45) % 360;
+      backgroundColors.push(`hsl(${hue}, 70%, 70%)`);
+      borderColors.push(`hsl(${hue}, 70%, 50%)`);
+    }
+
+    if (window.projectChart) {
+      projectChart.data.labels = projectLabels;
+      projectChart.data.datasets[0].data = projectData;
+      projectChart.data.datasets[0].backgroundColor = backgroundColors;
+      projectChart.data.datasets[0].borderColor = borderColors;
+      projectChart.update();
+    } else {
+      window.projectChart = new Chart(projectCtx, {
+        type: 'doughnut',
+        data: {
+          labels: projectLabels,
+          datasets: [{
+            data: projectData,
+            backgroundColor: backgroundColors,
+            borderColor: borderColors,
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return context.label + ': ' + context.formattedValue;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    var budgetCtx = document.getElementById('doughnutChartBudgetHead').getContext('2d');
+    var budgetLabels = response.budget_head_name;
+    var budgetData = response.budget_head_value;
+    var backgroundColors = [];
+    var borderColors = [];
+    for (var i = 0; i < budgetLabels.length; i++) {
+      var hue = (i * 45) % 360;
+      backgroundColors.push(`hsl(${hue}, 70%, 70%)`);
+      borderColors.push(`hsl(${hue}, 70%, 50%)`);
+    }
+    
+    if (window.budgetChart) {
+      budgetChart.data.labels = budgetLabels;
+      budgetChart.data.datasets[0].data = budgetData;
+      budgetChart.data.datasets[0].backgroundColor = backgroundColors;
+      budgetChart.data.datasets[0].borderColor = borderColors;
+      budgetChart.update();
+    } else {
+      window.budgetChart = new Chart(budgetCtx, {
+        type: 'doughnut',
+        data: {
+          labels: budgetLabels,
+          datasets: [{
+            data: budgetData,
+            backgroundColor: backgroundColors,
+            borderColor: borderColors,
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return context.label + ': ' + context.formattedValue;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    var departmentCtx = document.getElementById('doughnutChartDepartment').getContext('2d');
+    var departmentLabels = response.department_name;
+    var departmentData = response.department_value;
+    var backgroundColors = [];
+    var borderColors = [];
+    for (var i = 0; i < departmentLabels.length; i++) {
+      var hue = (i * 45) % 360;
+      backgroundColors.push(`hsl(${hue}, 70%, 70%)`);
+      borderColors.push(`hsl(${hue}, 70%, 50%)`);
+    }
+    
+    if (window.departmentChart) {
+      departmentChart.data.labels = departmentLabels;
+      departmentChart.data.datasets[0].data = departmentData;
+      departmentChart.data.datasets[0].backgroundColor = backgroundColors;
+      departmentChart.data.datasets[0].borderColor = borderColors;
+      departmentChart.update();
+    } else {
+      window.departmentChart = new Chart(departmentCtx, {
+        type: 'doughnut',
+        data: {
+          labels: departmentLabels,
+          datasets: [{
+            data: departmentData,
+            backgroundColor: backgroundColors,
+            borderColor: borderColors,
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return context.label + ': ' + context.formattedValue;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+  });
 }

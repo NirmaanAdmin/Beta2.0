@@ -21950,5 +21950,95 @@ class Purchase_model extends App_Model
 
         return $response;
     }
+
+    /**
+     * Get purchase request dashboard
+     *
+     * @param  array  $data  Dashboard filter data
+     * @return array
+     */
+    public function get_pr_charts($data)
+    {
+        $response = array();
+        $projects = $data['projects'];
+        $group_pur = $data['group_pur'];
+        $this->load->model('currencies_model');
+        $this->load->model('departments_model');
+        $base_currency = $this->currencies_model->get_base_currency();
+        if ($request->currency != 0 && $request->currency != null) {
+            $base_currency = pur_get_currency_by_id($request->currency);
+        }
+
+        $response['total_purchase_requests'] = $response['total_approved_requests'] = $response['total_draft_requests'] = $response['total_closed_requests'] = 0;
+        $response['project_name'] = $response['project_value'] = array();
+        $response['budget_head_name'] = $response['budget_head_value'] = array();
+        $response['department_name'] = $response['department_value'] = array();
+
+        $this->db->select('id, pur_rq_code, status, total, total_tax, group_pur, project, department');
+        if (!empty($projects) && is_array($projects)) {
+            $this->db->where_in(db_prefix() . 'pur_request.project', $projects);
+        }
+        if (!empty($group_pur) && is_array($group_pur)) {
+            $this->db->where_in(db_prefix() . 'pur_request.group_pur', $group_pur);
+        }
+        $pur_request = $this->db->get(db_prefix() . 'pur_request')->result_array();
+
+        if (!empty($pur_request)) {
+            $response['total_purchase_requests'] = count($pur_request);
+            $response['total_approved_requests'] = count(array_filter($pur_request, function ($item) {
+                return isset($item['status']) && $item['status'] == 2;
+            }));
+            $response['total_draft_requests'] = count(array_filter($pur_request, function ($item) {
+                return isset($item['status']) && $item['status'] == 1;
+            }));
+            $response['total_closed_requests'] = count(array_filter($pur_request, function ($item) {
+                return isset($item['status']) && $item['status'] == 4;
+            }));
+
+            $project_grouped = array_reduce($pur_request, function ($carry, $item) {
+                $items_group = get_project_name_by_id($item['project']);
+                $group = !empty($items_group) ? $items_group : '';
+                if (!isset($carry[$group])) {
+                    $carry[$group] = 0;
+                }
+                $carry[$group]++;
+                return $carry;
+            }, []);
+            if (!empty($project_grouped)) {
+                $response['project_name'] = array_keys($project_grouped);
+                $response['project_value'] = array_values($project_grouped);
+            }
+
+            $group_pur_grouped = array_reduce($pur_request, function ($carry, $item) {
+                $items_group = get_group_name_by_id($item['group_pur']);
+                $group = !empty($items_group) ? $items_group : '';
+                if (!isset($carry[$group])) {
+                    $carry[$group] = 0;
+                }
+                $carry[$group]++;
+                return $carry;
+            }, []);
+            if (!empty($group_pur_grouped)) {
+                $response['budget_head_name'] = array_keys($group_pur_grouped);
+                $response['budget_head_value'] = array_values($group_pur_grouped);
+            }
+
+            $department_grouped = array_reduce($pur_request, function ($carry, $item) {
+                $items_group = $this->departments_model->get($item['department']);
+                $group = !empty($items_group) ? $items_group->name : '';
+                if (!isset($carry[$group])) {
+                    $carry[$group] = 0;
+                }
+                $carry[$group]++;
+                return $carry;
+            }, []);
+            if (!empty($department_grouped)) {
+                $response['department_name'] = array_keys($department_grouped);
+                $response['department_value'] = array_values($department_grouped);
+            }
+        }
+
+        return $response;
+    }
        
 }
