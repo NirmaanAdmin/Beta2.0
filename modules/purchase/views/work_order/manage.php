@@ -42,7 +42,7 @@
                <div id="wo-charts-section" class="collapse in">
                   <div class="row">
                      <div class="col-md-12 mtop20">
-                        <div class="row tw-flex tw-justify-center">
+                        <div class="row">
                            <div class="quick-stats-invoices col-xs-12 col-md-6 col-sm-6 col-lg-3 tw-mb-2 sm:tw-mb-0">    <div class="top_stats_wrapper">                                  
                                  <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
                                     <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">                          
@@ -102,13 +102,13 @@
                   <div class="row mtop20">
                      <div class="col-md-6">
                         <p class="mbot15 dashboard_stat_title">Pie Chart for WO Approval Status</p>
-                        <div style="width: 100%; height: 450px; display: flex; justify-content: center;">
+                        <div style="width: 100%; height: 450px; display: flex; justify-content: left;">
                            <canvas id="pieChartForWOApprovalStatus"></canvas>
                         </div>
                      </div>
                      <div class="col-md-6">
                         <p class="mbot15 dashboard_stat_title">Pie Chart for WO per Budget Head</p>
-                        <div style="width: 100%; height: 500px; display: flex; justify-content: center;">
+                        <div style="width: 100%; height: 500px; display: flex; justify-content: left;">
                            <canvas id="pieChartForWoByBudget"></canvas>
                         </div>
                      </div>
