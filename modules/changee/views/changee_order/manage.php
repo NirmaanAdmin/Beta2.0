@@ -7,6 +7,10 @@ $module_name = 'changee_order'; ?>
       z-index: 5000;
       left: 204px
    }
+   .dashboard_stat_title {
+      font-size: 18px;
+      font-weight: bold;
+   }
 </style>
 <div id="wrapper">
    <div class="content">
@@ -45,7 +49,7 @@ $module_name = 'changee_order'; ?>
                <div id="co-charts-section" class="collapse in">
                   <div class="row">
                      <div class="col-md-12 mtop20">
-                        <div class="row">
+                        <div class="row tw-flex tw-justify-center">
                            <div class="quick-stats-invoices col-xs-12 col-md-6 col-sm-6 col-lg-3 tw-mb-2 sm:tw-mb-0">    <div class="top_stats_wrapper">                                  
                                  <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
                                     <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">                          
@@ -103,22 +107,16 @@ $module_name = 'changee_order'; ?>
                      </div>
                   </div>
                   <div class="row mtop20">
-                     <div class="col-md-4">
-                        <p class="mbot15 dash-sub-title">Pie Chart for CO Approval Status</p>
+                     <div class="col-md-6">
+                        <p class="mbot15 dashboard_stat_title">Pie Chart for CO Approval Status</p>
                         <div style="width: 100%; height: 450px; display: flex; justify-content: center;">
                            <canvas id="pieChartForCOApprovalStatus"></canvas>
                         </div>
                      </div>
-                     <div class="col-md-4">
-                        <p class="mbot15 dash-sub-title">Pie Chart for CO per Budget Head</p>
-                        <div style="width: 100%; height: 490px; display: flex; justify-content: center;">
+                     <div class="col-md-6">
+                        <p class="mbot15 dashboard_stat_title">Pie Chart for CO per Budget Head</p>
+                        <div style="width: 100%; height: 500px; display: flex; justify-content: center;">
                            <canvas id="pieChartForCoByBudget"></canvas>
-                        </div>
-                     </div>
-                     <div class="col-md-4">
-                        <p class="mbot15 dash-sub-title">Doughnut Chart for Delivery Status (Completely Delivered, Partially Delivered, Undelivered)</p>
-                        <div style="width: 100%; height: 450px; display: flex; justify-content: center;">
-                           <canvas id="doughnutChartDeliveryStatus"></canvas>
                         </div>
                      </div>
                   </div>

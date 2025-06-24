@@ -14956,7 +14956,7 @@ class Changee_model extends App_Model
             $base_currency = pur_get_currency_by_id($request->currency);
         }
 
-        $response['total_co_value'] = $response['approved_co_value'] = $response['draft_co_value'] = $response['draft_co_count'] = $response['approved_co_count'] = $response['rejected_co_count'] = $response['completely_delivered_status'] = $response['partially_delivered_status'] = $response['undelivered_status'] = 0;
+        $response['total_co_value'] = $response['approved_co_value'] = $response['draft_co_value'] = $response['draft_co_count'] = $response['approved_co_count'] = $response['rejected_co_count'] = 0;
         $response['pie_budget_name'] = $response['pie_tax_value'] = array();
 
         $this->db->select('id, pur_order_number, approve_status, total, order_date, total_tax, group_pur, vendor, project');
@@ -15016,33 +15016,6 @@ class Changee_model extends App_Model
                 if (!empty($grouped)) {
                     $response['pie_budget_name'] = array_keys($grouped);
                     $response['pie_total_value'] = array_values($grouped);
-                }
-            }
-
-            foreach ($co_orders as $item) {
-                $co_id = $item['id'];
-                $this->db->select('id');
-                $this->db->where('pr_order_id', $co_id);
-                $goods_receipt = $this->db->get(db_prefix() . 'goods_receipt')->result_array();
-                $goods_receipt = array();
-                if (!empty($goods_receipt)) {
-                    $gr_ids = array_column($goods_receipt, 'id');
-                    $this->db->select('po_quantities, quantities, est_delivery_date, delivery_date');
-                    $this->db->where_in('goods_receipt_id', $gr_ids);
-                    $goods_receipt_detail = $this->db->get(db_prefix() . 'goods_receipt_detail')->result_array();
-                    if (!empty($goods_receipt_detail)) {
-                        $co_qty = array_sum(array_column($goods_receipt_detail, 'po_quantities'));
-                        $rec_qty = array_sum(array_column($goods_receipt_detail, 'quantities'));
-                        if ($rec_qty == 0) {
-                            $response['undelivered_status']++;
-                        } elseif ($rec_qty > 0 && $rec_qty < $co_qty) {
-                            $response['partially_delivered_status']++;
-                        } elseif ($rec_qty >= $co_qty) {
-                            $response['completely_delivered_status']++;
-                        }
-                    }
-                } else {
-                    $response['undelivered_status']++;
                 }
             }
         }
