@@ -56,6 +56,20 @@ $module_name = 'payment_certificate'; ?>
                            echo render_select('approval_status[]', $payment_status, array('id', 'name'), '', $approval_status_type_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('approval_status'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
                            ?>
                         </div>
+                        <?php
+                        $projects_type_filter = get_module_filter($module_name, 'projects');
+                        $projects_type_filter_val = !empty($projects_type_filter) ? explode(",", $projects_type_filter->filter_value) : [];
+                        ?>
+                        <div class="col-md-2 form-group">
+                           <select name="projects[]" id="projects" class="selectpicker" multiple="true" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('leads_all'); ?>">
+                              <?php foreach ($projects as $pj) { ?>
+                                 <option value="<?php echo pur_html_entity_decode($pj['id']); ?>"
+                                    <?php echo in_array($pj['id'], $projects_type_filter_val) ? 'selected' : ''; ?>>
+                                    <?php echo pur_html_entity_decode($pj['name']); ?>
+                                 </option>
+                              <?php } ?>
+                           </select>
+                        </div>
                         <div class="col-md-1 form-group ">
                            <a href="javascript:void(0)" class="btn btn-info btn-icon reset_all_ot_filters">
                               <?php echo _l('reset_filter'); ?>
@@ -79,7 +93,8 @@ $module_name = 'payment_certificate'; ?>
                            <!-- Column Checkboxes -->
                            <?php
                            $columns = [
-                              'payment_certificate',
+                              'Payment cert',
+                              'project',
                               'order_name',
                               'vendor',
                               'order_date',
@@ -100,7 +115,8 @@ $module_name = 'payment_certificate'; ?>
 
 
                      <?php $table_data = array(
-                        _l('payment_certificate'),
+                        _l('Payment cert'),
+                        _l('project'),
                         _l('order_name'),
                         _l('vendor'),
                         _l('order_date'),
@@ -131,8 +147,9 @@ $module_name = 'payment_certificate'; ?>
          "vendors": "[name='vendors[]']",
          "group_pur": "[name='group_pur[]']",
          "approval_status": "[name='approval_status[]']",
+         "projects": "[name='projects[]']",
       };
-      initDataTable(table_payment_certificate, admin_url + 'purchase/table_payment_certificate', [], [], Params, [3, 'desc']);
+      initDataTable(table_payment_certificate, admin_url + 'purchase/table_payment_certificate', [], [], Params, [4, 'desc']);
       $.each(Params, function(i, obj) {
          $('select' + obj).on('change', function() {
             table_payment_certificate.DataTable().ajax.reload()

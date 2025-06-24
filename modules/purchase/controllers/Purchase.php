@@ -12810,6 +12810,7 @@ class purchase extends AdminController
         $data['title'] = _l('payment_certificate');
         $data['vendors'] = $this->purchase_model->get_vendor();
         $data['item_group'] = $this->purchase_model->get_commodity_group_add_commodity();
+        $data['projects'] = $this->projects_model->get();
         $this->load->view('payment_certificate/list_payment_certificate', $data);
     }
 
