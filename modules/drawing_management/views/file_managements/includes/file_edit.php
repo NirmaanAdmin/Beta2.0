@@ -51,10 +51,24 @@ if (isset($item)) {
 						<label for="design_stage" class="control-label"><?php echo _l('design_stage'); ?></label>
 						<select id="design_stage" name="design_stage" class="selectpicker" data-width="100%" data-none-selected-text="None selected" tabindex="-98">
 							<option value=""></option>
-							<option value="Concept Design" <?php echo ($item->design_stage == "Concept Design" ? 'selected' : '') ?>>Concept Design</option>
-							<option value="Schematic Design" <?php echo ($item->design_stage == "Schematic Design" ? 'selected' : '') ?>>Schematic Design</option>
-							<option value="Design Development" <?php echo ($item->design_stage == "Design Development" ? 'selected' : '') ?>>Design Development</option>
-							<option value="Construction Documents" <?php echo ($item->design_stage == "Construction Documents" ? 'selected' : '') ?>>Construction Documents</option>
+							<?php
+							$design_stages = [
+								1 => 'Documents Under Review',
+								2 => 'Briefs',
+								3 => 'Concept',
+								4 => 'Schematic',
+								5 => 'Design Development',
+								6 => 'Tender Documents',
+								7 => 'Construction Documents',
+								8 => 'Shop Drawings',
+								9 => 'As-Built'
+							];
+
+							foreach ($design_stages as $value => $label) {
+								$selected = ($item->design_stage == $value) ? 'selected' : '';
+								echo "<option value=\"$value\" $selected>$label</option>";
+							}
+							?>
 						</select>
 					</div>
 				</div>
