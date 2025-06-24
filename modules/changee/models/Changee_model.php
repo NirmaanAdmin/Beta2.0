@@ -14948,6 +14948,8 @@ class Changee_model extends App_Model
     public function get_co_charts($data)
     {
         $response = array();
+        $vendors = $data['vendors'];
+        $projects = $data['projects'];
         $this->load->model('currencies_model');
         $base_currency = $this->currencies_model->get_base_currency();
         if ($request->currency != 0 && $request->currency != null) {
@@ -14957,7 +14959,13 @@ class Changee_model extends App_Model
         $response['total_co_value'] = $response['approved_co_value'] = $response['draft_co_value'] = $response['draft_co_count'] = $response['approved_co_count'] = $response['rejected_co_count'] = $response['completely_delivered_status'] = $response['partially_delivered_status'] = $response['undelivered_status'] = 0;
         $response['pie_budget_name'] = $response['pie_tax_value'] = array();
 
-        $this->db->select('id, pur_order_number, approve_status, total, order_date, total_tax, group_pur, vendor');
+        $this->db->select('id, pur_order_number, approve_status, total, order_date, total_tax, group_pur, vendor, project');
+        if (!empty($vendors) && is_array($vendors)) {
+            $this->db->where_in(db_prefix() . 'co_orders.vendor', $vendors);
+        }
+        if (!empty($projects) && is_array($projects)) {
+            $this->db->where_in(db_prefix() . 'co_orders.project', $projects);
+        }
         $co_orders = $this->db->get(db_prefix() . 'co_orders')->result_array();
 
         if (!empty($co_orders)) {

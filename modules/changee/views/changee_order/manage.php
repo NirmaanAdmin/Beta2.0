@@ -105,7 +105,7 @@ $module_name = 'changee_order'; ?>
                   <div class="row mtop20">
                      <div class="col-md-4">
                         <p class="mbot15 dash-sub-title">Pie Chart for CO Approval Status</p>
-                        <div style="width: 100%; height: 430px; display: flex; justify-content: center;">
+                        <div style="width: 100%; height: 450px; display: flex; justify-content: center;">
                            <canvas id="pieChartForCOApprovalStatus"></canvas>
                         </div>
                      </div>
