@@ -27,7 +27,7 @@
                         </a>
                      <?php } ?>
                      <button class="btn btn-info pull-left mleft10 display-block" type="button" data-toggle="collapse" data-target="#po-charts-section" aria-expanded="true"aria-controls="po-charts-section">
-                         <?php echo _l('PO Charts'); ?>
+                         <?php echo _l('PO Charts'); ?> <i class="fa fa-chevron-down toggle-icon"></i>
                      </button>
                   </div>
                   <div class="col-md-1 form-group pull-right">
@@ -473,6 +473,14 @@
       // Prevent dropdown from closing when clicking inside
       $('.dropdown-menu').on('click', function(e) {
          e.stopPropagation();
+      });
+
+      $('#po-charts-section').on('shown.bs.collapse', function () {
+         $('.toggle-icon').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+      });
+
+      $('#po-charts-section').on('hidden.bs.collapse', function () {
+         $('.toggle-icon').removeClass('fa-chevron-down').addClass('fa-chevron-up');
       });
    });
 </script>

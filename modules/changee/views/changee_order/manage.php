@@ -34,7 +34,7 @@ $module_name = 'changee_order'; ?>
                         </ul>
                      </div>
                      <button class="btn btn-info pull-left mleft10 display-block" type="button" data-toggle="collapse" data-target="#co-charts-section" aria-expanded="true"aria-controls="co-charts-section">
-                     <?php echo _l('CO Charts'); ?>
+                     <?php echo _l('CO Charts'); ?> <i class="fa fa-chevron-down toggle-icon"></i>
                      </button>
                   </div>
 
@@ -487,6 +487,14 @@ $module_name = 'changee_order'; ?>
       // Prevent dropdown from closing when clicking inside
       $('.dropdown-menu').on('click', function(e) {
          e.stopPropagation();
+      });
+
+      $('#co-charts-section').on('shown.bs.collapse', function () {
+         $('.toggle-icon').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+      });
+
+      $('#co-charts-section').on('hidden.bs.collapse', function () {
+         $('.toggle-icon').removeClass('fa-chevron-down').addClass('fa-chevron-up');
       });
    });
 </script>

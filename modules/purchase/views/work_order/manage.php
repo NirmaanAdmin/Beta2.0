@@ -21,7 +21,7 @@
                         </a>
                      <?php } ?>
                      <button class="btn btn-info pull-left mleft10 display-block" type="button" data-toggle="collapse" data-target="#wo-charts-section" aria-expanded="true"aria-controls="wo-charts-section">
-                         <?php echo _l('WO Charts'); ?>
+                         <?php echo _l('WO Charts'); ?> <i class="fa fa-chevron-down toggle-icon"></i>
                      </button>
                   </div>
 
@@ -461,6 +461,14 @@
       // Prevent dropdown from closing when clicking inside
       $('.dropdown-menu').on('click', function(e) {
          e.stopPropagation();
+      });
+
+      $('#wo-charts-section').on('shown.bs.collapse', function () {
+         $('.toggle-icon').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+      });
+
+      $('#wo-charts-section').on('hidden.bs.collapse', function () {
+         $('.toggle-icon').removeClass('fa-chevron-down').addClass('fa-chevron-up');
       });
    });
 </script>
