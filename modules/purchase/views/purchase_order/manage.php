@@ -12,6 +12,10 @@
       z-index: 5000;
       left: 204px
    }
+   .dashboard_stat_title {
+      font-size: 18px;
+      font-weight: bold;
+   }
 </style>
 <?php $module_name = 'purchase_order'; ?>
 <div id="wrapper">
@@ -42,7 +46,7 @@
                <div id="po-charts-section" class="collapse in">
                   <div class="row">
                      <div class="col-md-12 mtop20">
-                        <div class="row">
+                        <div class="row tw-flex tw-justify-center">
                            <div class="quick-stats-invoices col-xs-12 col-md-6 col-sm-6 col-lg-3 tw-mb-2 sm:tw-mb-0">    <div class="top_stats_wrapper">                                  
                                  <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
                                     <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">                          
@@ -101,19 +105,19 @@
                   </div>
                   <div class="row mtop20">
                      <div class="col-md-4">
-                        <p class="mbot15 dash-sub-title">Pie Chart for PO Approval Status</p>
+                        <p class="mbot15 dashboard_stat_title">Pie Chart for PO Approval Status</p>
                         <div style="width: 100%; height: 450px; display: flex; justify-content: center;">
                            <canvas id="pieChartForPOApprovalStatus"></canvas>
                         </div>
                      </div>
                      <div class="col-md-4">
-                        <p class="mbot15 dash-sub-title">Pie Chart for PO per Budget Head</p>
+                        <p class="mbot15 dashboard_stat_title">Pie Chart for PO per Budget Head</p>
                         <div style="width: 100%; height: 490px; display: flex; justify-content: center;">
                            <canvas id="pieChartForPoByBudget"></canvas>
                         </div>
                      </div>
                      <div class="col-md-4">
-                        <p class="mbot15 dash-sub-title">Doughnut Chart for Delivery Status (Completely Delivered, Partially Delivered, Undelivered)</p>
+                        <p class="mbot15 dashboard_stat_title">Doughnut Chart for Delivery Status</p>
                         <div style="width: 100%; height: 450px; display: flex; justify-content: center;">
                            <canvas id="doughnutChartDeliveryStatus"></canvas>
                         </div>
