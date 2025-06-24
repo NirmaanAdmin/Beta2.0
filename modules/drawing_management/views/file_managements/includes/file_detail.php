@@ -65,7 +65,25 @@
 				</tr>
 				<tr>
 					<td class="text-nowrap"><?php echo _l('design_stage'); ?></td>
-					<td><?php echo ($item->design_stage != null ? $item->design_stage : ''); ?></td>
+					<td>
+						<?php
+						$design_stages = [
+							1 => 'Documents Under Review',
+							2 => 'Briefs',
+							3 => 'Concept',
+							4 => 'Schematic',
+							5 => 'Design Development',
+							6 => 'Tender Documents',
+							7 => 'Construction Documents',
+							8 => 'Shop Drawings',
+							9 => 'As-Built'
+						];
+
+						echo ($item->design_stage != null && isset($design_stages[$item->design_stage]))
+							? $design_stages[$item->design_stage]
+							: '';
+						?>
+					</td>
 				</tr>
 				<tr>
 					<td class="text-nowrap"><?php echo _l('purpose'); ?></td>
@@ -83,12 +101,12 @@
 					<td class="text-nowrap"><?php echo _l('dmg_notes'); ?></td>
 					<td><?php echo ($item->note != null ? drawing_nlbr($item->note) : ''); ?></td>
 				</tr>
-				<?php 
+				<?php
 				if (strpos($item->name, '.pdf') !== false) { ?>
-				<tr>
-					<td class="text-nowrap"><?php echo _l('DWG Drawing'); ?></td>
-					<td><?php if (isset($item->pdf_attachment) && !empty($item->pdf_attachment)) : ?>
-							
+					<tr>
+						<td class="text-nowrap"><?php echo _l('DWG Drawing'); ?></td>
+						<td><?php if (isset($item->pdf_attachment) && !empty($item->pdf_attachment)) : ?>
+
 								<?php
 								// Build the correct file path and URLs
 								$file_path = FCPATH . 'modules/drawing_management/uploads/pdf_attachments/' . $item->id . '/' . $item->pdf_attachment;
@@ -99,12 +117,12 @@
 									<a href="<?php echo $download_url; ?>" class="display-block mbot5" target="_blank" download>
 										<?php echo htmlspecialchars($item->pdf_attachment); ?>
 									</a>
-									
+
 								<?php endif; ?>
-							
-						<?php endif; ?>
-					</td>
-				</tr>
+
+							<?php endif; ?>
+						</td>
+					</tr>
 
 				<?php } ?>
 				<tr>

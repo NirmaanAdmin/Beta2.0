@@ -27,6 +27,7 @@
 		color: #999;
 		pointer-events: none;
 	}
+
 	.vendor_contact {
 		padding-left: 0px;
 		padding-right: 1px;
@@ -62,18 +63,18 @@
 													<?php echo _l('dmg_upload'); ?>
 												</span>
 											</button>
-											
-												<button class="btn btn-default pull-right mright10 display-flex default-tool" onclick="create_folder()">
-													<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder-plus">
-														<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
-														<line x1="12" y1="11" x2="12" y2="17" />
-														<line x1="9" y1="14" x2="15" y2="14" />
-													</svg>
-													<span class="mleft5 mtop2">
-														<?php echo _l('dmg_new_folder'); ?>
-													</span>
-												</button>
-											
+
+											<button class="btn btn-default pull-right mright10 display-flex default-tool" onclick="create_folder()">
+												<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder-plus">
+													<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+													<line x1="12" y1="11" x2="12" y2="17" />
+													<line x1="9" y1="14" x2="15" y2="14" />
+												</svg>
+												<span class="mleft5 mtop2">
+													<?php echo _l('dmg_new_folder'); ?>
+												</span>
+											</button>
+
 
 											<!-- <?php echo render_input('search_new', '', '', 'text', ['placeholder' => _l('dmg_search_name_tag_etc')], [], 'pull-right default-tool'); ?> -->
 											<div class="input-group">
@@ -259,21 +260,24 @@
 										$design_stage_filter = get_module_filter($module_name, 'design_stage');
 										$design_stage_filter_val = !empty($design_stage_filter) ? $design_stage_filter->filter_value : '';
 										$statuses = [
-											0 => ['id' => 'Concept Design', 'name' => 'Concept Design'],
-											1 => ['id' => 'Schematic Design', 'name' => 'Schematic Design'],
-											2 => ['id' => 'Design Development', 'name' => 'Design Development'],
-											3 => ['id' => 'Construction Documents', 'name' => 'Construction Documents'],
+											1 => 'Documents Under Review',
+											2 => 'Briefs',
+											3 => 'Concept',
+											4 => 'Schematic',
+											5 => 'Design Development',
+											6 => 'Tender Documents',
+											7 => 'Construction Documents',
+											8 => 'Shop Drawings',
+											9 => 'As-Built'
 										];
-
-										// echo render_select('design_stage', $statuses, array('id', 'name'), 'design_stage', $design_stage_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('design_stage'),  'data-actions-box' => true), array(), 'no-mbot', '', true); 
 										?>
 										<label for="design_stage">Design Stage</label>
 										<select name="design_stage" id="design_stage_filter" class="form-control selectpicker" style="width: 100%;" data-actions-box="true" data-live-search="true">
 											<option value=""></option>
-											<?php foreach ($statuses as $status): ?>
-												<option value="<?php echo htmlspecialchars($status['id']); ?>"
-													<?php echo ($status['id'] == $design_stage_filter_val) ? 'selected' : ''; ?>>
-													<?php echo htmlspecialchars($status['name']); ?>
+											<?php foreach ($statuses as $value => $label): ?>
+												<option value="<?php echo htmlspecialchars($value); ?>"
+													<?php echo ($label == $design_stage_filter_val) ? 'selected' : ''; ?>>
+													<?php echo htmlspecialchars($label); ?>
 												</option>
 											<?php endforeach; ?>
 										</select>
@@ -432,7 +436,7 @@
 														$this->load->view('file_managements/includes/file_edit.php');
 													} else {
 														$this->load->view('file_managements/includes/file_detail.php');
-													} 
+													}
 												}
 											} ?>
 										<?php } else { ?>
@@ -682,7 +686,7 @@
 						<div class="vendor_basic_details">
 						</div>
 						<div class="col-md-12 vendor_contact">
-							
+
 						</div>
 					</div>
 					<div class="col-md-12 customer_group_fr hide">
