@@ -326,55 +326,5 @@ function get_work_order_dashboard() {
       });
     }
 
-    // DOUGHNUT CHART - Delivery Status
-    var deliveryCtx = document.getElementById('doughnutChartDeliveryStatus').getContext('2d');
-    var deliveryLabels = ['Completely Delivered', 'Partially Delivered', 'Undelivered'];
-    var deliveryData = [
-      response.completely_delivered_status, 
-      response.partially_delivered_status, 
-      response.undelivered_status
-    ];
-
-    if (window.deliveryStatusChart) {
-      deliveryStatusChart.data.datasets[0].data = deliveryData;
-      deliveryStatusChart.update();
-    } else {
-      window.deliveryStatusChart = new Chart(deliveryCtx, {
-        type: 'doughnut',
-        data: {
-          labels: deliveryLabels,
-          datasets: [{
-            data: deliveryData,
-            backgroundColor: [
-              'rgba(40, 167, 69, 0.7)',    // Green - Complete
-              'rgba(255, 193, 7, 0.7)',    // Yellow - Partial
-              'rgba(220, 53, 69, 0.7)'     // Red - None
-            ],
-            borderColor: [
-              'rgba(40, 167, 69, 1)',
-              'rgba(255, 193, 7, 1)',
-              'rgba(220, 53, 69, 1)'
-            ],
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              position: 'bottom'
-            },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  return context.label + ': ' + context.formattedValue;
-                }
-              }
-            }
-          }
-        }
-      });
-    }
-
   });
 }
