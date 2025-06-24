@@ -228,3 +228,150 @@ function change_delivery_status(status, id){
     });
   }
 }
+
+var pieChartWOStatus;
+
+get_work_order_dashboard();
+
+function get_work_order_dashboard() {
+  "use strict";
+
+  var data = {};
+
+  $.post(admin_url + 'purchase/get_wo_charts', data).done(function(response){
+    response = JSON.parse(response);
+
+    // Update value summaries
+    $('.total_wo_value').text(response.total_wo_value);
+    $('.approved_wo_value').text(response.approved_wo_value);
+    $('.draft_wo_value').text(response.draft_wo_value);
+
+    // PIE CHART - Approval Status
+    var pieCtx = document.getElementById('pieChartForWOApprovalStatus').getContext('2d');
+    var pieData = [response.approved_wo_count, response.draft_wo_count, response.rejected_wo_count];
+
+    if (pieChartWOStatus) {
+      pieChartWOStatus.data.datasets[0].data = pieData;
+      pieChartWOStatus.update();
+    } else {
+      pieChartWOStatus = new Chart(pieCtx, {
+        type: 'pie',
+        data: {
+          labels: ['Approved', 'Draft', 'Rejected'],
+          datasets: [{
+            data: pieData,
+            backgroundColor: [
+              'rgba(75, 192, 192, 0.7)',
+              'rgba(255, 206, 86, 0.7)',
+              'rgba(255, 99, 132, 0.7)'
+            ],
+            borderColor: [
+              'rgba(75, 192, 192, 1)',
+              'rgba(255, 206, 86, 1)',
+              'rgba(255, 99, 132, 1)'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            }
+          }
+        }
+      });
+    }
+
+    // PIE CHART - Wo Distribution by Budget
+    var woPieCtx = document.getElementById('pieChartForWoByBudget').getContext('2d');
+    var woData = response.pie_total_value;
+    var budgetLabels = response.pie_budget_name;
+
+    if (window.woByBudgetChart) {
+      woByBudgetChart.data.labels = budgetLabels;
+      woByBudgetChart.data.datasets[0].data = woData;
+      woByBudgetChart.update();
+    } else {
+      window.woByBudgetChart = new Chart(woPieCtx, {
+        type: 'pie',
+        data: {
+          labels: budgetLabels,
+          datasets: [{
+            data: woData,
+            backgroundColor: budgetLabels.map((_, i) => `hsl(${i * 35 % 360}, 70%, 60%)`),
+            borderColor: '#fff',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return context.label + ': ' + context.formattedValue;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // DOUGHNUT CHART - Delivery Status
+    var deliveryCtx = document.getElementById('doughnutChartDeliveryStatus').getContext('2d');
+    var deliveryLabels = ['Completely Delivered', 'Partially Delivered', 'Undelivered'];
+    var deliveryData = [
+      response.completely_delivered_status, 
+      response.partially_delivered_status, 
+      response.undelivered_status
+    ];
+
+    if (window.deliveryStatusChart) {
+      deliveryStatusChart.data.datasets[0].data = deliveryData;
+      deliveryStatusChart.update();
+    } else {
+      window.deliveryStatusChart = new Chart(deliveryCtx, {
+        type: 'doughnut',
+        data: {
+          labels: deliveryLabels,
+          datasets: [{
+            data: deliveryData,
+            backgroundColor: [
+              'rgba(40, 167, 69, 0.7)',    // Green - Complete
+              'rgba(255, 193, 7, 0.7)',    // Yellow - Partial
+              'rgba(220, 53, 69, 0.7)'     // Red - None
+            ],
+            borderColor: [
+              'rgba(40, 167, 69, 1)',
+              'rgba(255, 193, 7, 1)',
+              'rgba(220, 53, 69, 1)'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return context.label + ': ' + context.formattedValue;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+  });
+}
