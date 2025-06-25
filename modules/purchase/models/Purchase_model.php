@@ -22165,5 +22165,123 @@ class Purchase_model extends App_Model
 
         return $response;
     }
+
+    /**
+     * Get  Vendor Billing Tracker dashboard
+     *
+     * @param  array  $data  Dashboard filter data
+     * @return array
+     */
+    public function get_vbt_dashboard($data)
+    {
+        $response = array();
+        $vendors = $data['vendors'];
+        $group_pur = $data['group_pur'];
+        $this->load->model('currencies_model');
+        $base_currency = $this->currencies_model->get_base_currency();
+        if ($request->currency != 0 && $request->currency != null) {
+            $base_currency = pur_get_currency_by_id($request->currency);
+        }
+
+        $response['total_certified_amount'] = $response['total_bills_not_tag_to_orders'] = $response['total_uninvoice_bills'] = $response['total_pending_amount_to_be_invoice'] = 0;
+        $response['bar_top_vendor_name'] = $response['bar_top_vendor_value'] = array();
+        $response['pie_budget_name'] = $response['pie_total_value'] = array();
+        $response['pie_billing_name'] = $response['pie_billing_value'] = array();
+
+        $this->db->select('
+            ' . db_prefix() . 'pur_invoices.id,
+            ' . db_prefix() . 'pur_invoices.vendor,
+            ' . db_prefix() . 'pur_invoices.group_pur,
+            ' . db_prefix() . 'pur_invoices.project_id,
+            ' . db_prefix() . 'pur_invoices.final_certified_amount,
+            ' . db_prefix() . 'pur_invoices.pur_order,
+            ' . db_prefix() . 'pur_invoices.wo_order,
+            ' . db_prefix() . 'pur_invoices.order_tracker_id,
+            ' . db_prefix() . 'pur_invoices.expense_convert,
+            ' . db_prefix() . 'invoices.id as ril_invoice_id,
+            ' . db_prefix() . 'pur_invoices.payment_status
+        ');
+        $this->db->from(db_prefix() . 'pur_invoices');
+        $this->db->join(
+            db_prefix() . 'expenses',
+            db_prefix() . 'expenses.id = ' . db_prefix() . 'pur_invoices.expense_convert',
+            'left'
+        );
+        $this->db->join(
+            db_prefix() . 'invoices',
+            db_prefix() . 'invoices.id = ' . db_prefix() . 'expenses.invoiceid',
+            'left'
+        );
+        if (!empty($vendors) && is_array($vendors)) {
+            $this->db->where_in(db_prefix() . 'pur_invoices.vendor', $vendors);
+        }
+        if (!empty($group_pur)) {
+            $this->db->where(db_prefix() . 'pur_invoices.group_pur', $group_pur);
+        }
+        $this->db->group_by(db_prefix() . 'pur_invoices.id');
+        $pur_invoices = $this->db->get()->result_array();
+
+        if (!empty($pur_invoices)) {
+            $total_certified_amount = array_reduce($pur_invoices, function ($carry, $item) {
+                return $carry + (float)$item['final_certified_amount'];
+            }, 0);
+            $response['total_certified_amount'] = app_format_money($total_certified_amount, $base_currency->symbol);
+            $response['total_bills_not_tag_to_orders'] = count(array_filter($pur_invoices, fn($item) =>
+                empty($item['pur_order']) &&
+                empty($item['wo_order']) &&
+                empty($item['order_tracker_id'])
+            ));
+            $response['total_uninvoice_bills'] = count(array_filter($pur_invoices, fn($item) =>
+                empty($item['ril_invoice_id'])
+            ));
+            $total_pending_amount_to_be_invoice = array_sum(array_column(array_filter($pur_invoices, fn($item) => empty($item['ril_invoice_id'])), 'final_certified_amount'));
+            $response['total_pending_amount_to_be_invoice'] = app_format_money($total_pending_amount_to_be_invoice, $base_currency->symbol);
+
+            $bar_top_vendors = array();
+            foreach ($pur_invoices as $key => $value) {
+                $vendor_id = $value['vendor'];
+                if (!isset($bar_top_vendors[$vendor_id])) {
+                    $bar_top_vendors[$vendor_id]['name'] = get_vendor_company_name($vendor_id);
+                    $bar_top_vendors[$vendor_id]['value'] = 0;
+                }
+                $bar_top_vendors[$vendor_id]['value'] += $value['final_certified_amount'];
+            }
+
+            if (!empty($bar_top_vendors)) {
+                usort($bar_top_vendors, function ($a, $b) {
+                    return $b['value'] <=> $a['value'];
+                });
+                $bar_top_vendors = array_slice($bar_top_vendors, 0, 10);
+                $response['bar_top_vendor_name'] = array_column($bar_top_vendors, 'name');
+                $response['bar_top_vendor_value'] = array_column($bar_top_vendors, 'value');
+            }
+
+            $budget_grouped = array_reduce($pur_invoices, function ($carry, $item) {
+                $items_group = get_group_name_item($item['group_pur']);
+                $group = $items_group->name;
+                $carry[$group] = ($carry[$group] ?? 0) + (float) $item['final_certified_amount'];
+                return $carry;
+            }, []);
+            if (!empty($budget_grouped)) {
+                $response['pie_budget_name'] = array_keys($budget_grouped);
+                $response['pie_total_value'] = array_values($budget_grouped);
+            }
+
+            $payment_status_grouped = array_reduce($pur_invoices, function ($carry, $item) {
+                $group = get_vbt_payment_status($item['payment_status']);
+                if ($group !== null) {
+                    $carry[$group] = ($carry[$group] ?? 0) + 1;
+                }
+                return $carry;
+            }, []);
+
+            if (!empty($payment_status_grouped)) {
+                $response['pie_billing_name'] = array_keys($payment_status_grouped);
+                $response['pie_billing_value'] = array_values($payment_status_grouped);
+            }
+        }
+
+        return $response;
+    }
        
 }

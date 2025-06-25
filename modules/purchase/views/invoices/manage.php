@@ -54,7 +54,10 @@
       text-align: center;
       font-weight: bold;
    }
-
+   .dashboard_stat_title {
+      font-size: 18px;
+      font-weight: bold;
+   }
 </style>
 <?php $module_name = 'vendor_billing_tracker'; ?>
 <div id="wrapper">
@@ -76,92 +79,196 @@
                               <?php echo _l('new'); ?>
                            </a>
                         <?php } ?>
-
-                        <div class="vbt_all_filters">
-                           <div class="col-md-2">
-                              <?php
-                              $from_date_filter = get_module_filter($module_name, 'from_date');
-                              $from_date_filter_val = !empty($from_date_filter) ? $from_date_filter->filter_value : '';
-                              echo render_date_input('from_date', '', $from_date_filter_val, array('placeholder' => _l('from_date')));
-                              ?>
-                           </div>
-
-                           <div class="col-md-2">
-                              <?php
-                              $to_date_filter = get_module_filter($module_name, 'to_date');
-                              $to_date_filter_val = !empty($to_date_filter) ? $to_date_filter->filter_value : '';
-                              echo render_date_input('to_date', '', $to_date_filter_val, array('placeholder' => _l('to_date')));
-                              ?>
-                           </div>
-
-                           <div class="col-md-3 form-group">
-                              <?php
-                              $vendors_filter = get_module_filter($module_name, 'vendors');
-                              $vendors_filter_val = !empty($vendors_filter) ? explode(",", $vendors_filter->filter_value) : '';
-                              echo render_select('vendor_ft[]', $vendors, array('userid', 'company'), '', $vendors_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('vendors'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
-                              ?>
-                           </div>
-
-                           <div class="col-md-3 form-group">
-                              <?php
-                              $billing_invoices_filter = get_module_filter($module_name, 'billing_invoices');
-                              $billing_invoices_filter_val = !empty($billing_invoices_filter) ? $billing_invoices_filter->filter_value : '';
-                              ?>
-                              <select name="billing_invoices" class="selectpicker" data-width="100%" data-none-selected-text="<?php echo _l('pur_invoices'); ?>" data-actions-box="true">
-                                 <option value=""></option>
-                                 <option value="None" <?php echo ($billing_invoices_filter_val == 'None') ? 'selected' : ''; ?>>To Be Converted</option>
-                                 <?php foreach ($billing_invoices as $invoice) { ?>
-                                    <option value="<?php echo $invoice['id']; ?>" <?php echo ($billing_invoices_filter_val == $invoice['id']) ? 'selected' : ''; ?>><?php echo $invoice['value']; ?></option>
-                                 <?php } ?>
-                              </select>
-                           </div>
-                           <div class="col-md-3 form-group" style="padding-left: 0px">
-                              <?php
-                              $budget_head_filter = get_module_filter($module_name, 'budget_head');
-                              $budget_head_filter_val = !empty($budget_head_filter) ? $budget_head_filter->filter_value : '';
-                              ?>
-                              <select name="budget_head" class="selectpicker" data-width="100%" data-none-selected-text="<?php echo _l('group_pur'); ?>" data-actions-box="true">
-                                 <option value=""></option>
-                                 <option value="None">None</option>
-                                 <?php foreach ($budget_head as $head) { ?>
-                                    <option value="<?php echo $head['id']; ?>" <?php echo ($budget_head_filter_val == $head['id']) ? 'selected' : ''; ?>><?php echo $head['name']; ?></option>
-                                 <?php } ?>
-                              </select>
-                           </div>
-                           <div class="col-md-3 form-group">
-                              <?php
-                              $billing_status_filter = get_module_filter($module_name, 'billing_status');
-                              $billing_status_filter_val = !empty($billing_status_filter) ? $billing_status_filter->filter_value : '';
-                              $billing_status = [
-                                 ['id' => 1, 'name' => _l('rejected')],
-                                 ['id' => 2, 'name' => _l('recevied_with_comments')],
-                                 ['id' => 3, 'name' => _l('bill_verification_in_process')],
-                                 ['id' => 4, 'name' => _l('bill_verification_on_hold')],
-                                 ['id' => 5, 'name' => _l('bill_verified_by_ril')],
-                                 ['id' => 6, 'name' => _l('payment_certifiate_issued')],
-                                 ['id' => 7, 'name' => _l('payment_processed')],
-                                 ['id' => 8, 'name' => _l('unpaid')]
-                              ];
-
-                              ?>
-                              <select name="billing_status" class="selectpicker" data-width="100%" data-none-selected-text="<?php echo _l('billing_status'); ?>" data-actions-box="true">
-                                 <option value=""></option>
-                                 <option value="None">None</option>
-                                 <?php foreach ($billing_status as $head) { ?>
-                                    <option value="<?php echo $head['id']; ?>" <?php echo ($billing_status_filter_val == $head['id']) ? 'selected' : ''; ?>><?php echo $head['name']; ?></option>
-                                 <?php } ?>
-                              </select>
-                           </div>
-                           <div class="col-md-1 form-group">
-                              <a href="javascript:void(0)" class="btn btn-info btn-icon reset_vbt_all_filters">
-                                 <?php echo _l('reset_filter'); ?>
-                              </a>
-                           </div>
-                        </div></br>
-
-
-
+                        <button class="btn btn-info pull-left mleft10 display-block" type="button" data-toggle="collapse" data-target="#vbt-charts-section" aria-expanded="true"aria-controls="vbt-charts-section">
+                         <?php echo _l('Vendor Billing Tracker Charts'); ?> <i class="fa fa-chevron-down toggle-icon"></i>
+                        </button>
                      </div>
+                  </div>
+
+                  <div id="vbt-charts-section" class="collapse in">
+                     <div class="row">
+                        <div class="col-md-12 mtop20">
+                           <div class="row">
+                              <div class="quick-stats-invoices col-xs-12 col-md-6 col-sm-6 col-lg-3 tw-mb-2 sm:tw-mb-0">    <div class="top_stats_wrapper">                                  
+                                    <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                       <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">                          
+                                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="tw-w-6 tw-h-6 tw-mr-3 rtl:tw-ml-3 tw-text-neutral-600">                              
+                                             <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z">
+                                             </path>                          
+                                          </svg>                          
+                                          <span class="tw-truncate">Total Certified Amount</span>                 
+                                       </div>                      
+                                       <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0 total_certified_amount"></span>  
+                                    </div>                    
+                                    <div class="progress tw-mb-0 tw-mt-4 progress-bar-mini">                      
+                                       <div class="progress-bar progress-bar-info no-percent-text not-dynamic" role="progressbar" aria-valuenow="100.00" aria-valuemin="0" aria-valuemax="100" style="width: 100%;" data-percent="100.00">                      
+                                       </div>                  
+                                    </div>              
+                                 </div>          
+                              </div>
+
+                              <div class="quick-stats-invoices col-xs-12 col-md-6 col-sm-6 col-lg-3 tw-mb-2 sm:tw-mb-0">    <div class="top_stats_wrapper">                                  
+                                    <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                       <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">                          
+                                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="tw-w-6 tw-h-6 tw-mr-3 rtl:tw-ml-3 tw-text-neutral-600">                              
+                                             <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z">
+                                             </path>                          
+                                          </svg>                          
+                                          <span class="tw-truncate">Total Untagged bills to orders</span>                 
+                                       </div>                      
+                                       <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0 total_bills_not_tag_to_orders"></span>  
+                                    </div>                    
+                                    <div class="progress tw-mb-0 tw-mt-4 progress-bar-mini">                      
+                                       <div class="progress-bar progress-bar-info no-percent-text not-dynamic" role="progressbar" aria-valuenow="100.00" aria-valuemin="0" aria-valuemax="100" style="width: 100%;" data-percent="100.00">                      
+                                       </div>                  
+                                    </div>              
+                                 </div>          
+                              </div>
+
+                              <div class="quick-stats-invoices col-xs-12 col-md-6 col-sm-6 col-lg-3 tw-mb-2 sm:tw-mb-0">    <div class="top_stats_wrapper">                                  
+                                    <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                       <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">                          
+                                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="tw-w-6 tw-h-6 tw-mr-3 rtl:tw-ml-3 tw-text-neutral-600">                              
+                                             <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z">
+                                             </path>                          
+                                          </svg>                          
+                                          <span class="tw-truncate">Uninvoice Bills</span>                 
+                                       </div>                      
+                                       <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0 total_uninvoice_bills"></span>  
+                                    </div>                    
+                                    <div class="progress tw-mb-0 tw-mt-4 progress-bar-mini">                      
+                                       <div class="progress-bar progress-bar-info no-percent-text not-dynamic" role="progressbar" aria-valuenow="100.00" aria-valuemin="0" aria-valuemax="100" style="width: 100%;" data-percent="100.00">                      
+                                       </div>                  
+                                    </div>              
+                                 </div>          
+                              </div>
+
+                              <div class="quick-stats-invoices col-xs-12 col-md-6 col-sm-6 col-lg-3 tw-mb-2 sm:tw-mb-0">    <div class="top_stats_wrapper">                                  
+                                    <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                       <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">                          
+                                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="tw-w-6 tw-h-6 tw-mr-3 rtl:tw-ml-3 tw-text-neutral-600">                              
+                                             <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z">
+                                             </path>                          
+                                          </svg>                          
+                                          <span class="tw-truncate">Pending Amount to be Invoice</span>                 
+                                       </div>                      
+                                       <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0 total_pending_amount_to_be_invoice"></span>  
+                                    </div>                    
+                                    <div class="progress tw-mb-0 tw-mt-4 progress-bar-mini">                      
+                                       <div class="progress-bar progress-bar-info no-percent-text not-dynamic" role="progressbar" aria-valuenow="100.00" aria-valuemin="0" aria-valuemax="100" style="width: 100%;" data-percent="100.00">                      
+                                       </div>                  
+                                    </div>              
+                                 </div>          
+                              </div>
+
+                           </div>
+                           <div class="row mtop20">
+                              <div class="col-md-4">
+                                 <p class="mbot15 dashboard_stat_title">Top 10 Vendors by Total Certified Amount</p>
+                                 <div style="width: 100%; height: 500px;">
+                                   <canvas id="barChartTopVendors"></canvas>
+                                 </div>
+                              </div>
+                              <div class="col-md-4">
+                                 <p class="mbot15 dashboard_stat_title">Total Certified Amount per Budget Head</p>
+                                 <div style="width: 100%; height: 500px; display: flex; justify-content: left;">
+                                    <canvas id="pieChartForBudget"></canvas>
+                                 </div>
+                              </div>
+                              <div class="col-md-4">
+                                 <p class="mbot15 dashboard_stat_title">Total Vendor Bills per Billing Status</p>
+                                 <div style="width: 100%; height: 470px; display: flex; justify-content: left;">
+                                    <canvas id="pieChartForBilling"></canvas>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div class="row vbt_all_filters mtop20">
+                     <div class="col-md-2">
+                        <?php
+                        $from_date_filter = get_module_filter($module_name, 'from_date');
+                        $from_date_filter_val = !empty($from_date_filter) ? $from_date_filter->filter_value : '';
+                        echo render_date_input('from_date', '', $from_date_filter_val, array('placeholder' => _l('from_date')));
+                        ?>
+                     </div>
+
+                     <div class="col-md-2">
+                        <?php
+                        $to_date_filter = get_module_filter($module_name, 'to_date');
+                        $to_date_filter_val = !empty($to_date_filter) ? $to_date_filter->filter_value : '';
+                        echo render_date_input('to_date', '', $to_date_filter_val, array('placeholder' => _l('to_date')));
+                        ?>
+                     </div>
+
+                     <div class="col-md-3">
+                        <?php
+                        $vendors_filter = get_module_filter($module_name, 'vendors');
+                        $vendors_filter_val = !empty($vendors_filter) ? explode(",", $vendors_filter->filter_value) : '';
+                        echo render_select('vendor_ft[]', $vendors, array('userid', 'company'), '', $vendors_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('vendors'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
+                        ?>
+                     </div>
+
+                     <div class="col-md-3 form-group">
+                        <?php
+                        $billing_invoices_filter = get_module_filter($module_name, 'billing_invoices');
+                        $billing_invoices_filter_val = !empty($billing_invoices_filter) ? $billing_invoices_filter->filter_value : '';
+                        ?>
+                        <select name="billing_invoices" class="selectpicker" data-width="100%" data-none-selected-text="<?php echo _l('pur_invoices'); ?>" data-actions-box="true">
+                           <option value=""></option>
+                           <option value="None" <?php echo ($billing_invoices_filter_val == 'None') ? 'selected' : ''; ?>>To Be Converted</option>
+                           <?php foreach ($billing_invoices as $invoice) { ?>
+                              <option value="<?php echo $invoice['id']; ?>" <?php echo ($billing_invoices_filter_val == $invoice['id']) ? 'selected' : ''; ?>><?php echo $invoice['value']; ?></option>
+                           <?php } ?>
+                        </select>
+                     </div>
+                     <div class="col-md-3 form-group">
+                        <?php
+                        $budget_head_filter = get_module_filter($module_name, 'budget_head');
+                        $budget_head_filter_val = !empty($budget_head_filter) ? $budget_head_filter->filter_value : '';
+                        ?>
+                        <select name="budget_head" class="selectpicker" data-width="100%" data-none-selected-text="<?php echo _l('group_pur'); ?>" data-actions-box="true">
+                           <option value=""></option>
+                           <option value="None">None</option>
+                           <?php foreach ($budget_head as $head) { ?>
+                              <option value="<?php echo $head['id']; ?>" <?php echo ($budget_head_filter_val == $head['id']) ? 'selected' : ''; ?>><?php echo $head['name']; ?></option>
+                           <?php } ?>
+                        </select>
+                     </div>
+                     <div class="col-md-3 form-group">
+                        <?php
+                        $billing_status_filter = get_module_filter($module_name, 'billing_status');
+                        $billing_status_filter_val = !empty($billing_status_filter) ? $billing_status_filter->filter_value : '';
+                        $billing_status = [
+                           ['id' => 1, 'name' => _l('rejected')],
+                           ['id' => 2, 'name' => _l('recevied_with_comments')],
+                           ['id' => 3, 'name' => _l('bill_verification_in_process')],
+                           ['id' => 4, 'name' => _l('bill_verification_on_hold')],
+                           ['id' => 5, 'name' => _l('bill_verified_by_ril')],
+                           ['id' => 6, 'name' => _l('payment_certifiate_issued')],
+                           ['id' => 7, 'name' => _l('payment_processed')],
+                           ['id' => 8, 'name' => _l('unpaid')]
+                        ];
+
+                        ?>
+                        <select name="billing_status" class="selectpicker" data-width="100%" data-none-selected-text="<?php echo _l('billing_status'); ?>" data-actions-box="true">
+                           <option value=""></option>
+                           <option value="None">None</option>
+                           <?php foreach ($billing_status as $head) { ?>
+                              <option value="<?php echo $head['id']; ?>" <?php echo ($billing_status_filter_val == $head['id']) ? 'selected' : ''; ?>><?php echo $head['name']; ?></option>
+                           <?php } ?>
+                        </select>
+                     </div>
+                     <div class="col-md-1 form-group">
+                        <a href="javascript:void(0)" class="btn btn-info btn-icon reset_vbt_all_filters">
+                           <?php echo _l('reset_filter'); ?>
+                        </a>
+                     </div>
+                  </div>
+
+                  <div class="row">
                      <div class="col-md-offset-9 col-md-3">
                         <div style="display: flex;align-items: end;padding: 0px;">
                            <?php echo form_open_multipart(admin_url('purchase/import_file_xlsx_vendor_billing_tracker'), array('id' => 'import_form')); ?>
@@ -548,6 +655,14 @@
             }
          });
       }
+
+      $('#vbt-charts-section').on('shown.bs.collapse', function () {
+         $('.toggle-icon').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+      });
+
+      $('#vbt-charts-section').on('hidden.bs.collapse', function () {
+         $('.toggle-icon').removeClass('fa-chevron-down').addClass('fa-chevron-up');
+      });
    });
 
 
@@ -682,6 +797,7 @@
       });
    }
 </script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 
 </html>

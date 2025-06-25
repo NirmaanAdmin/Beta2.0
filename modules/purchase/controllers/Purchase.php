@@ -15005,4 +15005,12 @@ class purchase extends AdminController
         echo json_encode($result);
         die;
     }
+
+    public function get_vbt_dashboard()
+    {
+        $data = $this->input->post();
+        $result = $this->purchase_model->get_vbt_dashboard($data);
+        echo json_encode($result);
+        die;
+    }
 }

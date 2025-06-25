@@ -4503,3 +4503,24 @@ function get_expensive_item_wise()
 
     return $CI->db->get()->result_array();
 }
+
+function get_vbt_payment_status($id = '')
+{
+    $payment_statuses = [
+        ['id' => 0, 'name' => _l('unpaid')],
+        ['id' => 1, 'name' => _l('rejected')],
+        ['id' => 2, 'name' => _l('recevied_with_comments')],
+        ['id' => 3, 'name' => _l('bill_verification_in_process')],
+        ['id' => 4, 'name' => _l('bill_verification_on_hold')],
+        ['id' => 5, 'name' => _l('bill_verified_by_ril')],
+        ['id' => 6, 'name' => _l('payment_certifiate_issued')],
+        ['id' => 7, 'name' => _l('payment_processed')],
+    ];
+    if ($id === '') {
+        return $payment_statuses;
+    } else {
+        $index = array_search($id, array_column($payment_statuses, 'id'));
+        return $index !== false ? $payment_statuses[$index]['name'] : null;
+    }
+    return '';
+}
