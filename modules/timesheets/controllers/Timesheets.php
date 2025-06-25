@@ -5786,278 +5786,226 @@ class timesheets extends AdminController
 			require_once module_dir_path(TIMESHEETS_MODULE_NAME) . '/assets/plugins/XLSXReader/XLSXReader.php';
 		}
 		require_once module_dir_path(TIMESHEETS_MODULE_NAME) . '/assets/plugins/XLSXWriter/xlsxwriter.class.php';
-		if ($this->input->post()) {
 
-			$month_filter = $this->input->post('month');
-			$department_filter = $this->input->post('department');
-			$role_filter = $this->input->post('role');
-			$staff_filter = $this->input->post('staff');
-			if ($staff_filter == '') {
-				$staff_id_arr = [];
-				$staffs = $this->timesheets_model->get_staff_timekeeping_applicable_object();
-				foreach ($staffs as $key => $staff) {
-					$staff_id_arr[] = $staff['staffid'];
-				}
-				$staff_filter = $staff_id_arr;
-			}
-
-			$list = $this->timesheets_model->get_data_attendance_export($month_filter, $department_filter, $role_filter, $staff_filter);
-			$get_month_year = explode('-', $month_filter);
-			$month = $get_month_year[1];
-			$month_year = $get_month_year[0];
-			$days_in_month = cal_days_in_month(CAL_GREGORIAN, $month, $month_year);
-			$get_emp_code = $this->timesheets_model->get_emp_code();
-			// Create a mapping array for quick lookup of emp codes by staff name
-			$emp_code_map = [];
-			foreach ($get_emp_code as $emp) {
-				$emp_code_map[trim($emp['Staff'])] = $emp['staff_identifi'];
-			}
-			$get_emp_position = $this->timesheets_model->get_emp_position();
-			// Create a mapping array for quick lookup of emp positions by staff name
-			$emp_position_map = [];
-			foreach ($get_emp_position as $emp) {
-				$emp_position_map[trim($emp['Staff'])] = $emp['job_position'];
-			}
-
-			$get_emp_date_of_joining = $this->timesheets_model->get_emp_date_of_joining();
-			// Create a mapping array for quick lookup of emp date of joining by staff name
-
-			$emp_date_of_joining_map = [];
-			foreach ($get_emp_date_of_joining as $emp) {
-				$emp_date_of_joining_map[trim($emp['Staff'])] = $emp['joining_date'];
-			}
-
-			$get_emp_active_status = $this->timesheets_model->get_emp_active_status();
-			// Create a mapping array for quick lookup of emp active status by staff name
-			$emp_active_status_map = [];
-			foreach ($get_emp_active_status as $emp) {
-				$emp_active_status_map[trim($emp['Staff'])] = $emp['active'];
-			}
-			$set_col_tk = [];
-			$set_col_tk['S.NO'] = 'S.NO';
-			$set_col_tk['Status'] = 'Status';
-			$set_col_tk["Employee's Name as per Aadhar"] = "Employee's Name as per Aadhar";
-			$set_col_tk["Emp. Code"] = "Emp. Code";
-			$set_col_tk['Designation'] = 'Designation';
-			$set_col_tk['SITE'] = 'SITE';
-			$set_col_tk['DOJ'] = 'DOJ';
-			$widthst = [];
-			$widthst[] = 10;
-			$widthst[] = 40;
-			for ($d = 1; $d <= $days_in_month; $d++) {
-				$time = mktime(12, 0, 0, $month, $d, $month_year);
-				if (date('m', $time) == $month) {
-					$set_col_tk[date('D d', $time)] = date('D d', $time);
-					$widthst[] = 10;
-				}
-			}
-			$set_col_tk['TOTAL "P"'] = 'TOTAL "P"';
-			$set_col_tk['TOTAL "L"'] = 'TOTAL "L"';
-			$set_col_tk['TOTAL S/L'] = 'TOTAL S/L';
-			$set_col_tk['TOTAL OFF'] = 'TOTAL OFF';
-			$set_col_tk['TOTAL "H"'] = 'TOTAL "H"';
-			$set_col_tk['TOTAL C/OFF'] = 'TOTAL C/OFF';
-			$set_col_tk['TOTAL H/F'] = 'TOTAL H/F';
-			$set_col_tk['TOTAL W/H'] = 'TOTAL W/H';
-			$set_col_tk['TOTAL N/A'] = 'TOTAL N/A';
-			$set_col_tk['TOTAL'] = 'TOTAL';
-			$writer_header = $set_col_tk;
-
-			$writer = new XLSXWriter();
-
-			// Total columns for merging
-			$total_columns = count($writer_header);
-			$get_company_name = get_company_name_for_attendance();
-			$writer->writeSheetRow(
-				'Sheet1',
-				[$get_company_name],
-				[
-					// just styling here; no merge key
-					'height'    => 30,
-					'font-size' => 16,
-					'font'      => 'Calibri',
-					'bold'      => true,
-					'halign'    => 'center',
-				]
-			);
-			// now merge that first row across all columns:
-			$writer->markMergedCell('Sheet1', 0, 0, 0, count($writer_header) - 1);
-
-			$month_name    = strtoupper(date('F', mktime(0, 0, 0, $month, 10)));
-			$heading_text  = "STAFF ATTENDANCE FOR THE MONTH OF {$month_name} - {$month_year}";
-			$writer->writeSheetRow(
-				'Sheet1',
-				[$heading_text],
-				[
-					'height'    => 25,
-					'font-size' => 14,
-					'font-weight' => '500',
-					'font'      => 'Calibri',
-					'bold'      => true,
-					'halign'    => 'center',
-				]
-			);
-			$writer->markMergedCell('Sheet1', 1, 0, 1, count($writer_header) - 1);
-
-			// 2. Write the headers row with styling
-			$writer->writeSheetRow('Sheet1', $writer_header, [
-				'fill' => '#C65911',
-				'font-style' => 'bold',
-				'color' => '#FFFFFF',
-				'border' => 'left,right,top,bottom',
-				'height' => 25,
-				'border-color' => '#FFFFFF',
-				'font-size' => 13,
-				'font' => 'Calibri'
-			]);
-
-
-			$style1 = array(
-				'fill' => '#F8CBAD',
-				'height' => 25,
-				'border' => 'left,right,top,bottom',
-				'border-color' => '#FFFFFF',
-				'font-size' => 12,
-				'font' => 'Calibri',
-				'color' => '#000000'
-			);
-			$style2 = array(
-				'fill' => '#FCE4D6',
-				'height' => 25,
-				'border' => 'left,right,top,bottom',
-				'border-color' => '#FFFFFF',
-				'font-size' => 12,
-				'font' => 'Calibri',
-				'color' => '#000000'
-			);
-
-			foreach ($list as $k => $value) {
-				if (isset($value['HR code'])) {
-					unset($value['HR code']);
-				}
-
-				$list_add = [];
-				$serial = $k + 1;
-				$list_add = [$serial];
-
-				// Get the status from the current row
-				$status = isset($emp_active_status_map[$value['Staff']]) ? $emp_active_status_map[$value['Staff']] : '';
-				// Add the status to the row
-				if ($status == 1) {
-					$list_add[] = 'CONTINUING';
-				} else {
-					$list_add[] = 'DISCONTINUED';
-				}
-
-				// Get the staff name from the current row
-				$staff_name = trim($value['Staff']);
-				if ($staff_name === 'Admin N360' || $staff_name === 'Trial Demo ID') {
-					continue;
-				}
-
-				// Find the corresponding emp code
-				$emp_code = isset($emp_code_map[$staff_name]) ? $emp_code_map[$staff_name] : '';
-
-				// Find the corresponding emp position
-				$emp_position = isset($emp_position_map[$staff_name]) ? $emp_position_map[$staff_name] : '';
-
-				// Find the corresponding emp date of joining
-				$emp_date_of_joining = isset($emp_date_of_joining_map[$staff_name]) ? date('d M, Y', strtotime($emp_date_of_joining_map[$staff_name])) : '';
-
-				// Add the staff name and emp code to the row
-				$list_add[] = $staff_name; // Employee's Name as per Aadhar
-				$list_add[] = $emp_code;   // Emp. Code
-				$list_add[] = $emp_position; // Designation
-				$list_add[] = ''; // SITE
-				$list_add[] = $emp_date_of_joining; // DOJ (JAMNAGAR SITE)
-
-				// Initialize counters
-				$count_p = 0;
-				$count_l = 0;
-				$count_sl = 0; // Assuming S/L is for something else
-				$count_ns = 0;
-				$count_h = 0;
-				$count_coff = 0;
-				$count_hf = 0;
-				$count_wh = 0;
-				$count_na = 0;
-
-				// Process day values
-				foreach ($value as $i => $item) {
-					if ($i !== 'Staff') { // Skip the Staff field as we've already added it
-						// Check if it's a day field (contains space, like "Thu 24")
-						if (strpos($i, ' ') !== false) {
-							// Replace W:9.5 with P
-							if (strpos($item, 'W:') === 0) {
-								$item = 'P';
-								$count_p++;
-							}
-							// Replace empty with L
-							elseif (empty($item)) {
-								$item = 'L';
-								$count_l++;
-							}
-							// Count NS (OFF days)
-							elseif ($item === 'NS') {
-								$item = 'OFF';
-								$count_ns++;
-							}
-							// Add other conditions for H, C/OFF, H/F, W/H, N/A as needed
-							// Example:
-							elseif ($item === 'H') {
-								$count_h++;
-							} elseif ($item === 'C/OFF') {
-								$count_coff++;
-							} elseif ($item === 'H/F') {
-								$count_hf++;
-							} elseif ($item === 'W/H') {
-								$count_wh++;
-							} elseif ($item === 'N/A') {
-								$count_na++;
-							}
-						}
-						$list_add[] = $item;
-					}
-				}
-
-				// Add the totals to the row
-				$list_add[] = $count_p;          // TOTAL "P"
-				$list_add[] = $count_l;          // TOTAL "L"
-				$list_add[] = $count_sl;         // TOTAL S/L
-				$list_add[] = $count_ns;         // TOTAL OFF (NS)
-				$list_add[] = $count_h;          // TOTAL "H"
-				$list_add[] = $count_coff;       // TOTAL C/OFF
-				$list_add[] = $count_hf;         // TOTAL H/F
-				$list_add[] = $count_wh;         // TOTAL W/H
-				$list_add[] = $count_na;         // TOTAL N/A
-
-				// Calculate grand total (sum of all counts)
-				$grand_total = $count_p + $count_l + $count_sl + $count_ns + $count_h +
-					$count_coff + $count_hf + $count_wh + $count_na;
-				$list_add[] = $grand_total;      // TOTAL
-
-				if (($k % 2) == 0) {
-					$writer->writeSheetRow('Sheet1', $list_add, $style1);
-				} else {
-					$writer->writeSheetRow('Sheet1', $list_add, $style2);
-				}
-			}
-			$files = glob(TIMESHEETS_PATH_EXPORT_FILE . '*');
-			foreach ($files as $file) {
-				if (is_file($file)) {
-					// delete file
-					unlink($file);
-				}
-			}
-			$filename = 'attendance_' . $month_filter . '.xlsx';
-			$writer->writeToFile(str_replace($filename, TIMESHEETS_PATH_EXPORT_FILE . $filename, $filename));
-			echo json_encode([
-				'site_url' => site_url(),
-				'filename' => TIMESHEETS_PATH_EXPORT_FILE . $filename,
-			]);
-			die;
+		if (! $this->input->post()) {
+			return;
 		}
+
+		// 1) Grab filters
+		$month_filter      = $this->input->post('month');
+		$department_filter = $this->input->post('department');
+		$role_filter       = $this->input->post('role');
+		$staff_filter      = $this->input->post('staff');
+
+		// 2) Build staff list if none selected
+		if (empty($staff_filter)) {
+			$staff_filter = array_column(
+				$this->timesheets_model->get_staff_timekeeping_applicable_object(),
+				'staffid'
+			);
+		}
+
+		// 3) Fetch your attendance data
+		$list = $this->timesheets_model->get_data_attendance_export(
+			$month_filter,
+			$department_filter,
+			$role_filter,
+			$staff_filter
+		);
+
+		//
+		// 4) Parse year + month robustly
+		//
+		$dt = DateTime::createFromFormat('Y-m', $month_filter);
+		if (! $dt) {
+			// fallback if someone passed "06-2025"
+			$parts = explode('-', $month_filter);
+			if (count($parts) === 2) {
+				list($m, $y) = $parts;
+				$dt = DateTime::createFromFormat('!m-Y', "{$m}-{$y}");
+			}
+		}
+		if (! $dt) {
+			// ultimate fallback: today
+			$dt = new DateTime();
+		}
+		$month      = (int)$dt->format('m');
+		$month_year = (int)$dt->format('Y');
+		$days_in_month = cal_days_in_month(CAL_GREGORIAN, $month, $month_year);
+
+		//
+		// 5) Prep lookup maps (codes, positions, etc.)
+		//
+		$emp_code_map           = $this->build_map('Staff', 'staff_identifi',  $this->timesheets_model->get_emp_code());
+		$emp_position_map       = $this->build_map('Staff', 'job_position',    $this->timesheets_model->get_emp_position());
+		$emp_date_of_joining_map = $this->build_map('Staff', 'joining_date',    $this->timesheets_model->get_emp_date_of_joining());
+		$emp_active_status_map  = $this->build_map('Staff', 'active',          $this->timesheets_model->get_emp_active_status());
+
+		//
+		// 6) Construct a **numeric** header array in desired order
+		//
+		$header = [
+			'S.NO',
+			'Status',
+			"Employee's Name as per Aadhar",
+			'Emp. Code',
+			'Designation',
+			'SITE',
+			'DOJ'
+		];
+		// dates columns "Mon 01", "Tue 02", ...
+		for ($d = 1; $d <= $days_in_month; $d++) {
+			$time = mktime(12, 0, 0, $month, $d, $month_year);
+			if ((int)date('m', $time) === $month) {
+				$header[] = date('D d', $time);
+			}
+		}
+		// totals
+		$header = array_merge($header, [
+			'TOTAL "P"',
+			'TOTAL "L"',
+			'TOTAL S/L',
+			'TOTAL OFF',
+			'TOTAL "H"',
+			'TOTAL C/OFF',
+			'TOTAL H/F',
+			'TOTAL W/H',
+			'TOTAL N/A',
+			'TOTAL'
+		]);
+
+		//
+		// 7) Start writing with XLSXWriter
+		//
+		$writer = new XLSXWriter();
+
+		// Company name row (merged)
+		$company = get_company_name_for_attendance();
+		$writer->writeSheetRow('Sheet1', [$company], [
+			'height' => 30,
+			'font-size' => 16,
+			'font' => 'Calibri',
+			'bold' => true,
+			'halign' => 'center'
+		]);
+		$writer->markMergedCell('Sheet1', 0, 0, 0, count($header) - 1);
+
+		// Title row
+		$month_name   = strtoupper($dt->format('F'));
+		$title        = "STAFF ATTENDANCE FOR THE MONTH OF {$month_name} - {$month_year}";
+		$writer->writeSheetRow('Sheet1', [$title], [
+			'height' => 25,
+			'font-size' => 14,
+			'font' => 'Calibri',
+			'bold' => true,
+			'halign' => 'center'
+		]);
+		$writer->markMergedCell('Sheet1', 1, 0, 1, count($header) - 1);
+
+		// Header row
+		$writer->writeSheetRow('Sheet1', $header, [
+			'fill' => '#C65911',
+			'font-style' => 'bold',
+			'color' => '#FFFFFF',
+			'border' => 'left,right,top,bottom',
+			'border-color' => '#FFFFFF',
+			'height' => 25,
+			'font-size' => 13,
+			'font' => 'Calibri'
+		]);
+
+		// Row styles
+		$styleOdd  = ['fill' => '#F8CBAD', 'border' => 'left,right,top,bottom', 'border-color' => '#FFFFFF', 'height' => 25, 'font-size' => 12, 'font' => 'Calibri'];
+		$styleEven = ['fill' => '#FCE4D6', 'border' => 'left,right,top,bottom', 'border-color' => '#FFFFFF', 'height' => 25, 'font-size' => 12, 'font' => 'Calibri'];
+
+		// 8) Write data rows
+		foreach ($list as $idx => $row) {
+			$staff_name = trim($row['Staff'] ?? '');
+			if (in_array($staff_name, ['Admin N360', 'Trial Demo ID'], true)) {
+				continue;
+			}
+			$status = ($emp_active_status_map[$staff_name] ?? 0) == 1 ? 'CONTINUING' : 'DISCONTINUED';
+
+			// start building this row
+			$out = [];
+			$out[] = $idx + 1;            // S.NO
+			$out[] = $status;             // Status
+			$out[] = $staff_name;         // Name
+			$out[] = $emp_code_map[$staff_name]           ?? '';
+			$out[] = $emp_position_map[$staff_name]       ?? '';
+			$out[] = 'Jamnagar';          // SITE (hard-coded)
+			$doj_raw = $emp_date_of_joining_map[$staff_name] ?? '';
+			$out[] = $doj_raw ? date('d M, Y', strtotime($doj_raw)) : '';
+
+			// per-day columns + counters
+			$counters = ['P' => 0, 'L' => 0, 'SL' => 0, 'OFF' => 0, 'H' => 0, 'COFF' => 0, 'HF' => 0, 'WH' => 0, 'NA' => 0];
+			foreach (array_slice($header, 7, $days_in_month) as $col) {
+				$val = $row[$col] ?? '';
+				if (strpos($val, 'W:') === 0) {
+					$val = 'P';
+					$counters['P']++;
+				} elseif ($val === '') {
+					$val = 'L';
+					$counters['L']++;
+				} elseif ($val === 'NS') {
+					$val = 'OFF';
+					$counters['OFF']++;
+				} elseif ($val === 'H') {
+					$counters['H']++;
+				} elseif ($val === 'C/OFF') {
+					$counters['COFF']++;
+				} elseif ($val === 'H/F') {
+					$counters['HF']++;
+				} elseif ($val === 'W/H') {
+					$counters['WH']++;
+				} elseif ($val === 'N/A') {
+					$counters['NA']++;
+				}
+				$out[] = $val;
+			}
+
+			// totals
+			$out[] = $counters['P'];
+			$out[] = $counters['L'];
+			$out[] = $counters['SL'];
+			$out[] = $counters['OFF'];
+			$out[] = $counters['H'];
+			$out[] = $counters['COFF'];
+			$out[] = $counters['HF'];
+			$out[] = $counters['WH'];
+			$out[] = $counters['NA'];
+			$out[] = array_sum($counters);
+
+			// write the row
+			$writer->writeSheetRow('Sheet1', $out, ($idx % 2) ? $styleEven : $styleOdd);
+		}
+
+		// 9) Clean up old files & save
+		foreach (glob(TIMESHEETS_PATH_EXPORT_FILE . '*') as $f) {
+			is_file($f) && @unlink($f);
+		}
+		$filename = 'attendance_' . str_replace('-', '_', $month_filter) . '.xlsx';
+		$writer->writeToFile(TIMESHEETS_PATH_EXPORT_FILE . $filename);
+
+		echo json_encode([
+			'site_url' => site_url(),
+			'filename' => TIMESHEETS_PATH_EXPORT_FILE . $filename,
+		]);
+		exit;
 	}
+
+	/**
+	 * Helper to build [ key => value ] map from a result set
+	 */
+	private function build_map($keyCol, $valCol, array $rows)
+	{
+		$map = [];
+		foreach ($rows as $r) {
+			$map[trim($r[$keyCol])] = $r[$valCol];
+		}
+		return $map;
+	}
+
 	/**
 	 * history check in out report
 	 * @return
