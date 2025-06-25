@@ -22059,7 +22059,7 @@ class Purchase_model extends App_Model
             $base_currency = pur_get_currency_by_id($request->currency);
         }
 
-        $response['total_purchase_orders'] = $response['total_work_orders'] = $response['total_certified_value'] = 0;
+        $response['total_purchase_orders'] = $response['total_work_orders'] = $response['total_certified_value'] = $response['approved_payment_certificates'] = 0;
         $response['bar_top_vendor_name'] = $response['bar_top_vendor_value'] = array();
         $response['line_order_date'] = $response['line_order_total'] = array(); 
 
@@ -22115,11 +22115,14 @@ class Purchase_model extends App_Model
             $response['total_work_orders'] = count(
                 array_unique(
                     array_column(
-                        array_filter($payment_certificate, fn($item) => !empty($item['po_id'])),
+                        array_filter($payment_certificate, fn($item) => !empty($item['wo_id'])),
                         'wo_id'
                     )
                 )
             );
+            $response['approved_payment_certificates'] = count(array_filter($payment_certificate, function ($item) {
+                return isset($item['approve_status']) && $item['approve_status'] == 2;
+            }));
             $total_certified_value = 0;
             $bar_top_vendors = array();
             $line_order_total = array();
