@@ -665,6 +665,10 @@ function purchase_add_footer_components()
     if (!(strpos($viewuri, '/admin/purchase/invoice_payments') === false)) {
         echo '<script src="' . module_dir_url(PURCHASE_MODULE_NAME, 'assets/js/manage_invoice_payments.js') . '?v=' . PURCHASE_REVISION . '"></script>';
     }
+
+    if (!(strpos($viewuri, '/admin/purchase/list_payment_certificate') === false)) {
+        echo '<script src="' . module_dir_url(PURCHASE_MODULE_NAME, 'assets/js/payment_certificate_manage.js') . '?v=' . PURCHASE_REVISION . '"></script>';
+    }
 }
 
 /**

@@ -22040,5 +22040,127 @@ class Purchase_model extends App_Model
 
         return $response;
     }
+
+    /**
+     * Get payment_certificate dashboard
+     *
+     * @param  array  $data  Dashboard filter data
+     * @return array
+     */
+    public function get_pc_charts($data)
+    {
+        $response = array();
+        $vendors = $data['vendors'];
+        $projects = $data['projects'];
+        $group_pur = $data['group_pur'];
+        $this->load->model('currencies_model');
+        $base_currency = $this->currencies_model->get_base_currency();
+        if ($request->currency != 0 && $request->currency != null) {
+            $base_currency = pur_get_currency_by_id($request->currency);
+        }
+
+        $response['total_purchase_orders'] = $response['total_work_orders'] = $response['total_certified_value'] = 0;
+        $response['bar_top_vendor_name'] = $response['bar_top_vendor_value'] = array();
+        $response['line_order_date'] = $response['line_order_total'] = array(); 
+
+        $this->db->select('
+            ' . db_prefix() . 'payment_certificate.id,
+            ' . db_prefix() . 'payment_certificate.po_id,
+            ' . db_prefix() . 'payment_certificate.wo_id,
+            ' . db_prefix() . 'payment_certificate.approve_status,
+            ' . db_prefix() . 'payment_certificate.group_pur,
+            ' . db_prefix() . 'payment_certificate.vendor,
+            ' . db_prefix() . 'payment_certificate.order_date,
+            (CASE 
+                WHEN ' . db_prefix() . 'payment_certificate.po_id IS NOT NULL THEN ' . db_prefix() . 'pur_orders.project 
+                WHEN ' . db_prefix() . 'payment_certificate.wo_id IS NOT NULL THEN ' . db_prefix() . 'wo_orders.project 
+                ELSE NULL 
+             END) as project'
+        );
+        $this->db->from(db_prefix() . 'payment_certificate');
+        $this->db->join(
+            db_prefix() . 'pur_orders',
+            db_prefix() . 'pur_orders.id = ' . db_prefix() . 'payment_certificate.po_id',
+            'left'
+        );
+        $this->db->join(
+            db_prefix() . 'wo_orders',
+            db_prefix() . 'wo_orders.id = ' . db_prefix() . 'payment_certificate.wo_id',
+            'left'
+        );
+        if (!empty($vendors) && is_array($vendors)) {
+            $this->db->where_in(db_prefix() . 'payment_certificate.vendor', $vendors);
+        }
+        if (!empty($group_pur) && is_array($group_pur)) {
+            $this->db->where_in(db_prefix() . 'payment_certificate.group_pur', $group_pur);
+        }
+        $this->db->group_by(db_prefix() . 'payment_certificate.id');
+        if (!empty($projects) && is_array($projects)) {
+            $escapedProjects = array_map('intval', $projects);
+            $this->db->having('project IN (' . implode(',', $escapedProjects) . ')');
+        }
+        $this->db->order_by(db_prefix() . 'payment_certificate.order_date', 'asc');
+        $payment_certificate = $this->db->get()->result_array();
+
+
+        if (!empty($payment_certificate)) {
+            $response['total_purchase_orders'] = count(
+                array_unique(
+                    array_column(
+                        array_filter($payment_certificate, fn($item) => !empty($item['po_id'])),
+                        'po_id'
+                    )
+                )
+            );
+            $response['total_work_orders'] = count(
+                array_unique(
+                    array_column(
+                        array_filter($payment_certificate, fn($item) => !empty($item['po_id'])),
+                        'wo_id'
+                    )
+                )
+            );
+            $total_certified_value = 0;
+            $bar_top_vendors = array();
+            $line_order_total = array();
+            foreach ($payment_certificate as $key => $value) {
+                $payment_certificate_calc = $this->get_payment_certificate_calc($value['id']);
+                if($value['approve_status'] == 2) {
+                    $amount_rec_4 = !empty($payment_certificate_calc['amount_rec_4']) ? $payment_certificate_calc['amount_rec_4'] : 0;
+                    $total_certified_value = $total_certified_value + $amount_rec_4;
+
+                    $vendor_id = $value['vendor'];
+                    if (!isset($bar_top_vendors[$vendor_id])) {
+                        $bar_top_vendors[$vendor_id]['name'] = get_vendor_company_name($vendor_id);
+                        $bar_top_vendors[$vendor_id]['value'] = 0;
+                    }
+                    $bar_top_vendors[$vendor_id]['value'] += $amount_rec_4;
+
+                    $month = date('M-y', strtotime($value['order_date']));
+                    if (!isset($line_order_total[$month])) {
+                        $line_order_total[$month] = 0;
+                    }
+                    $line_order_total[$month] += $amount_rec_4;
+                }
+            }
+            $response['total_certified_value'] = app_format_money($total_certified_value, $base_currency->symbol);
+
+            if (!empty($bar_top_vendors)) {
+                usort($bar_top_vendors, function ($a, $b) {
+                    return $b['value'] <=> $a['value'];
+                });
+                $bar_top_vendors = array_slice($bar_top_vendors, 0, 10);
+                $response['bar_top_vendor_name'] = array_column($bar_top_vendors, 'name');
+                $response['bar_top_vendor_value'] = array_column($bar_top_vendors, 'value');
+            }
+
+            if (!empty($line_order_total)) {
+                $response['line_order_date'] = array_keys($line_order_total);
+                $response['line_order_total'] = array_values($line_order_total);
+            }
+        }
+
+        return $response;
+    }
        
 }

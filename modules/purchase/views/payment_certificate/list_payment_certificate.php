@@ -13,6 +13,10 @@ $module_name = 'payment_certificate'; ?>
       z-index: 5000;
       left: 204px
    }
+   .dashboard_stat_title {
+      font-size: 18px;
+      font-weight: bold;
+   }
 </style>
 <div id="wrapper">
    <div class="content">
@@ -27,9 +31,90 @@ $module_name = 'payment_certificate'; ?>
                            <h4 class="no-margin font-bold"><i class="fa fa-clipboard" aria-hidden="true"></i> <?php echo _l('payment_certificate'); ?></h4>
                            <hr />
                         </div>
+                        <div class="col-md-3">
+                           <button class="btn btn-info display-block" type="button" data-toggle="collapse" data-target="#pc-charts-section" aria-expanded="true" aria-controls="pc-charts-section">
+                              <?php echo _l('Payment Certificate Charts'); ?> <i class="fa fa-chevron-down toggle-icon"></i>
+                           </button>
+                        </div>
                      </div>
 
-                     <div class="row all_ot_filters">
+                     <div id="pc-charts-section" class="collapse in">
+                        <div class="row">
+                           <div class="col-md-12 mtop20">
+                              <div class="row">
+                                 <div class="quick-stats-invoices col-xs-12 col-md-6 col-sm-6 col-lg-3 tw-mb-2 sm:tw-mb-0">    <div class="top_stats_wrapper">                                  
+                                       <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                          <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">                          
+                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="tw-w-6 tw-h-6 tw-mr-3 rtl:tw-ml-3 tw-text-neutral-600">                              
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z">
+                                                </path>                          
+                                             </svg>                          
+                                             <span class="tw-truncate">Total Purchase Orders</span>                 
+                                          </div>                      
+                                          <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0 total_purchase_orders"></span>  
+                                       </div>                    
+                                       <div class="progress tw-mb-0 tw-mt-4 progress-bar-mini">                      
+                                          <div class="progress-bar progress-bar-info no-percent-text not-dynamic" role="progressbar" aria-valuenow="100.00" aria-valuemin="0" aria-valuemax="100" style="width: 100%;" data-percent="100.00">                      
+                                          </div>                  
+                                       </div>              
+                                    </div>          
+                                 </div>
+
+                                 <div class="quick-stats-invoices col-xs-12 col-md-6 col-sm-6 col-lg-3 tw-mb-2 sm:tw-mb-0">    <div class="top_stats_wrapper">                                  
+                                       <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                          <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">                          
+                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="tw-w-6 tw-h-6 tw-mr-3 rtl:tw-ml-3 tw-text-neutral-600">                              
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z">
+                                                </path>                          
+                                             </svg>                          
+                                             <span class="tw-truncate">Total Work Orders</span>                 
+                                          </div>                      
+                                          <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0 total_work_orders"></span>  
+                                       </div>                    
+                                       <div class="progress tw-mb-0 tw-mt-4 progress-bar-mini">                      
+                                          <div class="progress-bar progress-bar-info no-percent-text not-dynamic" role="progressbar" aria-valuenow="100.00" aria-valuemin="0" aria-valuemax="100" style="width: 100%;" data-percent="100.00">                      
+                                          </div>                  
+                                       </div>              
+                                    </div>          
+                                 </div>
+
+                                 <div class="quick-stats-invoices col-xs-12 col-md-6 col-sm-6 col-lg-3 tw-mb-2 sm:tw-mb-0">    <div class="top_stats_wrapper">                                  
+                                       <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                          <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">                          
+                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="tw-w-6 tw-h-6 tw-mr-3 rtl:tw-ml-3 tw-text-neutral-600">                              
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z">
+                                                </path>                          
+                                             </svg>                          
+                                             <span class="tw-truncate">Total Certified Value</span>                 
+                                          </div>                      
+                                          <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0 total_certified_value"></span>  
+                                       </div>                    
+                                       <div class="progress tw-mb-0 tw-mt-4 progress-bar-mini">                      
+                                          <div class="progress-bar progress-bar-info no-percent-text not-dynamic" role="progressbar" aria-valuenow="100.00" aria-valuemin="0" aria-valuemax="100" style="width: 100%;" data-percent="100.00">                      
+                                          </div>                  
+                                       </div>              
+                                    </div>          
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="row mtop20">
+                           <div class="col-md-6">
+                              <p class="mbot15 dashboard_stat_title">Bar Chart for Top 10 Vendors by Certified Value</p>
+                              <div style="width: 100%; height: 400px;">
+                                <canvas id="barChartTopVendors"></canvas>
+                              </div>
+                           </div>
+                           <div class="col-md-6">
+                              <p class="mbot15 dashboard_stat_title">Certified Value Over Time</p>
+                              <div style="width: 100%; height: 400px;">
+                                <canvas id="lineChartOverTime"></canvas>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div class="row all_ot_filters mtop20">
                         <div class="col-md-2 form-group">
                            <?php
                            $vendors_type_filter = get_module_filter($module_name, 'vendors');
@@ -152,16 +237,22 @@ $module_name = 'payment_certificate'; ?>
       initDataTable(table_payment_certificate, admin_url + 'purchase/table_payment_certificate', [], [], Params, [4, 'desc']);
       $.each(Params, function(i, obj) {
          $('select' + obj).on('change', function() {
-            table_payment_certificate.DataTable().ajax.reload()
-               .columns.adjust()
-               .responsive.recalc();
+            table_payment_certificate.DataTable().ajax.reload();
          });
       });
       $(document).on('click', '.reset_all_ot_filters', function() {
          var filterArea = $('.all_ot_filters');
          filterArea.find('input').val("");
          filterArea.find('select').selectpicker("val", "");
-         table_payment_certificate.DataTable().ajax.reload().columns.adjust().responsive.recalc();
+         table_payment_certificate.DataTable().ajax.reload();
+      });
+
+      $('#pc-charts-section').on('shown.bs.collapse', function () {
+         $('.toggle-icon').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+      });
+
+      $('#pc-charts-section').on('hidden.bs.collapse', function () {
+         $('.toggle-icon').removeClass('fa-chevron-down').addClass('fa-chevron-up');
       });
 
       // Handle "Select All" checkbox
@@ -193,6 +284,7 @@ $module_name = 'payment_certificate'; ?>
 
    });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 
 </html>
