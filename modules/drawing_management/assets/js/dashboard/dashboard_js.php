@@ -3,7 +3,7 @@
     "use strict";
 
     $(document).ready(function() {
-      $('select[name="vendors"], select[name="projects"], select[name="group_pur"], select[name="kind"]').on('change', function() {
+      $('select[name="projects"]').on('change', function() {
         get_inventory_dashboard();
       });
 
@@ -27,12 +27,7 @@
       "use strict";
 
       var data = {
-        vendors: $('select[name="vendors"]').val(),
         projects: $('select[name="projects"]').val(),
-        group_pur: $('select[name="group_pur"]').val(),
-        kind: $('select[name="kind"]').val(),
-        from_date: $('input[name="from_date"]').val(),
-        to_date: $('input[name="to_date"]').val()
       };
 
       $.post(admin_url + 'drawing_management/dashboard/get_drawing_management_dashboard', data).done(function(response) {
@@ -82,6 +77,54 @@
           }
         });
 
+        // DOUGHNUT CHART - Approval Status
+        // DOUGHNUT CHART - Approval Status Percentage
+        var approvalStatusCtx = document.getElementById('doughnutChartapproval').getContext('2d');
+        var approvalStatusLabels = ['Approved', 'Draft', 'Rejected'];
+        var approvalStatusData = [
+          response.approved_percent,
+          response.draft_percent,
+          response.rejected_percent
+        ];
+
+        if (window.approvalStatusChart) {
+          approvalStatusChart.data.datasets[0].data = approvalStatusData;
+          approvalStatusChart.update();
+        } else {
+          window.approvalStatusChart = new Chart(approvalStatusCtx, {
+            type: 'doughnut',
+            data: {
+              labels: approvalStatusLabels,
+              datasets: [{
+                data: approvalStatusData,
+                backgroundColor: ['#5cb85c', '#2563eb', '#F44336'], // Green, Yellow, Red
+                borderColor: ['#388E3C', '#4373da', '#D32F2F'],
+                borderWidth: 1
+              }]
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: {
+                  position: 'bottom'
+                },
+                title: {
+                  display: true,
+                  text: 'Approval Status (%)'
+                },
+                tooltip: {
+                  callbacks: {
+                    label: function(context) {
+                      var label = context.label || '';
+                      var value = context.raw || 0;
+                      return `${label}: ${value}%`;
+                    }
+                  }
+                }
+              }
+            }
+          });
+        }
       });
       dicipline_status_charts();
     }

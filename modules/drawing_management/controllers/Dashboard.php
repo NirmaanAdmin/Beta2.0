@@ -75,6 +75,15 @@ class Dashboard extends AdminController
 
     public function get_drawing_management_dashboard()
     {
+        $module_name = 'drawing_dashboard';
+        $data = $this->input->post();
+        $projects = $data['projects'];
+
+        $project_filter_name = 'project';
+        update_module_filter($module_name, $project_filter_name, NULL);
+        if (!empty($projects)) {
+			update_module_filter($module_name, $project_filter_name, $projects);
+		}
         // Fetch all disciplines
         $disciplines = $this->db->select('id, name')->get(db_prefix() . 'dms_discipline')->result_array();
 
@@ -83,6 +92,62 @@ class Dashboard extends AdminController
             ->group_by(['discipline', 'design_stage'])
             ->get(db_prefix() . 'dms_items')
             ->result_array();
+
+        // Get approval status counts
+        $approval_counts = $this->db->select('approve, COUNT(*) as count')
+            ->group_by('approve')
+            ->get(db_prefix() . 'dms_items')
+            ->result_array();
+
+        // Initialize approval counts
+        $approved = 0;
+        $draft = 0;
+        $rejected = 0;
+
+        foreach ($approval_counts as $row) {
+            if ($row['approve'] == 1) {
+                $approved = $row['count'];
+            } elseif ($row['approve'] == 0) {
+                $draft = $row['count'];
+            } elseif ($row['approve'] == 2) {
+                $rejected = $row['count'];
+            }
+        }
+
+        // Calculate total count and percentages
+        $total = $approved + $draft + $rejected;
+
+        // Initialize percentages
+        $approved_percent = 0;
+        $draft_percent = 0;
+        $rejected_percent = 0;
+
+        if ($total > 0) {
+            // Calculate raw percentages
+            $approved_percent = ($approved / $total) * 100;
+            $draft_percent = ($draft / $total) * 100;
+            $rejected_percent = ($rejected / $total) * 100;
+
+            // Apply minimum 1% rule for non-zero values
+            if ($approved > 0 && $approved_percent < 1) $approved_percent = 1;
+            if ($draft > 0 && $draft_percent < 1) $draft_percent = 1;
+            if ($rejected > 0 && $rejected_percent < 1) $rejected_percent = 1;
+
+            // Calculate total after minimum adjustments
+            $adjusted_total = $approved_percent + $draft_percent + $rejected_percent;
+
+            // Normalize to ensure exact 100% total
+            if ($adjusted_total > 0) {
+                $approved_percent = round(($approved_percent / $adjusted_total) * 100);
+                $draft_percent = round(($draft_percent / $adjusted_total) * 100);
+                $rejected_percent = 100 - $approved_percent - $draft_percent;
+            }
+
+            // Final check to ensure no negative percentages
+            if ($approved_percent < 0) $approved_percent = 0;
+            if ($draft_percent < 0) $draft_percent = 0;
+            if ($rejected_percent < 0) $rejected_percent = 0;
+        }
 
         $designStages = range(1, 9);
         $stageLabels = [
@@ -139,7 +204,10 @@ class Dashboard extends AdminController
 
         echo json_encode([
             'stacked_labor_labels' => $stacked_labor_labels,
-            'stacked_labor_values' => $stacked_labor_values
+            'stacked_labor_values' => $stacked_labor_values,
+            'approved_percent' => $approved_percent,
+            'draft_percent' => $draft_percent,
+            'rejected_percent' => $rejected_percent
         ]);
     }
 }
