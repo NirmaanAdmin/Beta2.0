@@ -28,13 +28,6 @@
                          <?php echo _l('WO Charts'); ?> <i class="fa fa-chevron-down toggle-icon"></i>
                      </button>
                   </div>
-
-                  <div class="col-md-1 form-group pull-right">
-                     <a href="javascript:void(0)" class="btn btn-info btn-icon reset_all_ot_filters">
-                        <?php echo _l('reset_filter'); ?>
-                     </a>
-                  </div>
-
                   <div class="_buttons col-md-1 pull-right">
                      <a href="#" class="btn btn-default btn-with-tooltip toggle-small-view hidden-xs pull-right" onclick="toggle_small_wo_order_view('.table-table_wo_order','#pur_order'); return false;" data-toggle="tooltip" title="<?php echo _l('estimates_toggle_table_tooltip'); ?>"><i class="fa fa-angle-double-left"></i></a>
                   </div>
@@ -100,16 +93,22 @@
                      </div>
                   </div>
                   <div class="row mtop20">
-                     <div class="col-md-6">
+                     <div class="col-md-4">
                         <p class="mbot15 dashboard_stat_title">Pie Chart for WO Approval Status</p>
                         <div style="width: 100%; height: 450px; display: flex; justify-content: left;">
                            <canvas id="pieChartForWOApprovalStatus"></canvas>
                         </div>
                      </div>
-                     <div class="col-md-6">
+                     <div class="col-md-4">
                         <p class="mbot15 dashboard_stat_title">Pie Chart for WO per Budget Head</p>
                         <div style="width: 100%; height: 500px; display: flex; justify-content: left;">
                            <canvas id="pieChartForWoByBudget"></canvas>
+                        </div>
+                     </div>
+                     <div class="col-md-4">
+                        <p class="mbot15 dashboard_stat_title">Pie Chart for WO per Department</p>
+                        <div style="width: 100%; height: 500px; display: flex; justify-content: left;">
+                           <canvas id="pieChartForDepartment"></canvas>
                         </div>
                      </div>
                   </div>
@@ -235,6 +234,13 @@
                   </div>
 
 
+               </div>
+               <div class="row">
+                  <div class="col-md-1 form-group">
+                     <a href="javascript:void(0)" class="btn btn-info btn-icon reset_all_ot_filters">
+                        <?php echo _l('reset_filter'); ?>
+                     </a>
+                  </div>
                </div>
             </div>
          </div>
@@ -470,7 +476,7 @@
       });
    });
 </script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="<?php echo module_dir_url(PURCHASE_MODULE_NAME, 'assets/plugins/charts/chart.js'); ?>?v=<?php echo PURCHASE_REVISION; ?>"></script>
 </body>
 
 </html>

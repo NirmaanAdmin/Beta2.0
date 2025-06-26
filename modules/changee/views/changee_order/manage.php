@@ -107,16 +107,22 @@ $module_name = 'changee_order'; ?>
                      </div>
                   </div>
                   <div class="row mtop20">
-                     <div class="col-md-6">
+                     <div class="col-md-4">
                         <p class="mbot15 dashboard_stat_title">Pie Chart for CO Approval Status</p>
                         <div style="width: 100%; height: 450px; display: flex; justify-content: left;">
                            <canvas id="pieChartForCOApprovalStatus"></canvas>
                         </div>
                      </div>
-                     <div class="col-md-6">
+                     <div class="col-md-4">
                         <p class="mbot15 dashboard_stat_title">Pie Chart for CO per Budget Head</p>
                         <div style="width: 100%; height: 500px; display: flex; justify-content: left;">
                            <canvas id="pieChartForCoByBudget"></canvas>
+                        </div>
+                     </div>
+                     <div class="col-md-4">
+                        <p class="mbot15 dashboard_stat_title">Pie Chart for CO per Department</p>
+                        <div style="width: 100%; height: 480px; display: flex; justify-content: left;">
+                           <canvas id="pieChartForDepartment"></canvas>
                         </div>
                      </div>
                   </div>
@@ -496,7 +502,7 @@ $module_name = 'changee_order'; ?>
       });
    });
 </script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="<?php echo module_dir_url(PURCHASE_MODULE_NAME, 'assets/plugins/charts/chart.js'); ?>?v=<?php echo PURCHASE_REVISION; ?>"></script>
 </body>
 
 </html>

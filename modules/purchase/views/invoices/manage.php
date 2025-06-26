@@ -96,7 +96,7 @@
                                              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z">
                                              </path>                          
                                           </svg>                          
-                                          <span class="tw-truncate">Total Certified Amount</span>                 
+                                          <span class="tw-truncate">Total certified amount</span>                 
                                        </div>                      
                                        <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0 total_certified_amount"></span>  
                                     </div>                    
@@ -114,7 +114,7 @@
                                              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z">
                                              </path>                          
                                           </svg>                          
-                                          <span class="tw-truncate">Total Untagged bills to orders</span>                 
+                                          <span class="tw-truncate">Total untagged bills to orders</span>                 
                                        </div>                      
                                        <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0 total_bills_not_tag_to_orders"></span>  
                                     </div>                    
@@ -132,7 +132,7 @@
                                              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z">
                                              </path>                          
                                           </svg>                          
-                                          <span class="tw-truncate">Uninvoice Bills</span>                 
+                                          <span class="tw-truncate">Uninvoice bills</span>                 
                                        </div>                      
                                        <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0 total_uninvoice_bills"></span>  
                                     </div>                    
@@ -150,7 +150,7 @@
                                              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z">
                                              </path>                          
                                           </svg>                          
-                                          <span class="tw-truncate">Pending Amount to be Invoice</span>                 
+                                          <span class="tw-truncate">To be invoiced</span>                 
                                        </div>                      
                                        <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0 total_pending_amount_to_be_invoice"></span>  
                                     </div>                    
@@ -797,7 +797,7 @@
       });
    }
 </script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="<?php echo module_dir_url(PURCHASE_MODULE_NAME, 'assets/plugins/charts/chart.js'); ?>?v=<?php echo PURCHASE_REVISION; ?>"></script>
 </body>
 
 </html>

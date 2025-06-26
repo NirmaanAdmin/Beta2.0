@@ -338,7 +338,7 @@ $module_name = 'purchase_request';
       });
    });
 </script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="<?php echo module_dir_url(PURCHASE_MODULE_NAME, 'assets/plugins/charts/chart.js'); ?>?v=<?php echo PURCHASE_REVISION; ?>"></script>
 </body>
 
 </html>

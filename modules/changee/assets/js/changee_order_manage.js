@@ -298,5 +298,44 @@ function get_change_order_dashboard() {
       });
     }
 
+    // PIE CHART - Pie Chart for CO per Department
+    var departmentPieCtx = document.getElementById('pieChartForDepartment').getContext('2d');
+    var departmentData = response.department_value;
+    var departmentLabels = response.department_name;
+
+    if (window.departmentChart) {
+      departmentChart.data.labels = departmentLabels;
+      departmentChart.data.datasets[0].data = departmentData;
+      departmentChart.update();
+    } else {
+      window.departmentChart = new Chart(departmentPieCtx, {
+        type: 'pie',
+        data: {
+          labels: departmentLabels,
+          datasets: [{
+            data: departmentData,
+            backgroundColor: departmentLabels.map((_, i) => `hsl(${i * 35 % 360}, 70%, 60%)`),
+            borderColor: '#fff',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return context.label + ': ' + context.formattedValue;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
   });
 }

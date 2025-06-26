@@ -21755,12 +21755,12 @@ class Purchase_model extends App_Model
      * @param  array  $data  Dashboard filter data
      * @return array
      */
-    public function get_po_charts($data)
+    public function get_po_charts($data = array())
     {
         $response = array();
-        $vendors = $data['vendors'];
-        $projects = $data['projects'];
-        $group_pur = $data['group_pur'];
+        $vendors = isset($data['vendors']) ? $data['vendors'] : '';
+        $projects = isset($data['projects']) ? $data['projects'] : '';
+        $group_pur = isset($data['group_pur']) ? $data['group_pur'] : '';
         $this->load->model('currencies_model');
         $base_currency = $this->currencies_model->get_base_currency();
         if ($request->currency != 0 && $request->currency != null) {
@@ -21869,13 +21869,14 @@ class Purchase_model extends App_Model
      * @param  array  $data  Dashboard filter data
      * @return array
      */
-    public function get_wo_charts($data)
+    public function get_wo_charts($data = array())
     {
         $response = array();
-        $vendors = $data['vendors'];
-        $projects = $data['projects'];
-        $group_pur = $data['group_pur'];
+        $vendors = isset($data['vendors']) ? $data['vendors'] : '';
+        $projects = isset($data['projects']) ? $data['projects'] : '';
+        $group_pur = isset($data['group_pur']) ? $data['group_pur'] : '';
         $this->load->model('currencies_model');
+        $this->load->model('departments_model');
         $base_currency = $this->currencies_model->get_base_currency();
         if ($request->currency != 0 && $request->currency != null) {
             $base_currency = pur_get_currency_by_id($request->currency);
@@ -21883,8 +21884,9 @@ class Purchase_model extends App_Model
 
         $response['total_wo_value'] = $response['approved_wo_value'] = $response['draft_wo_value'] = $response['draft_wo_count'] = $response['approved_wo_count'] = $response['rejected_wo_count'] = 0;
         $response['pie_budget_name'] = $response['pie_tax_value'] = array();
+        $response['department_name'] = $response['department_value'] = array();
 
-        $this->db->select('id, wo_order_number, approve_status, total, order_date, total_tax, group_pur, vendor, project');
+        $this->db->select('id, wo_order_number, approve_status, total, order_date, total_tax, group_pur, vendor, project, department');
         if (!empty($vendors) && is_array($vendors)) {
             $this->db->where_in(db_prefix() . 'wo_orders.vendor', $vendors);
         }
@@ -21934,17 +21936,29 @@ class Purchase_model extends App_Model
                 return isset($item['approve_status']) && $item['approve_status'] == 3;
             }));
 
-            if (!empty($wo_orders)) {
-                $grouped = array_reduce($wo_orders, function ($carry, $item) {
-                    $items_group = get_group_name_item($item['group_pur']);
-                    $group = $items_group->name;
-                    $carry[$group] = ($carry[$group] ?? 0) + (float) $item['total'];
-                    return $carry;
-                }, []);
-                if (!empty($grouped)) {
-                    $response['pie_budget_name'] = array_keys($grouped);
-                    $response['pie_total_value'] = array_values($grouped);
+            $grouped = array_reduce($wo_orders, function ($carry, $item) {
+                $items_group = get_group_name_item($item['group_pur']);
+                $group = $items_group->name;
+                $carry[$group] = ($carry[$group] ?? 0) + (float) $item['total'];
+                return $carry;
+            }, []);
+            if (!empty($grouped)) {
+                $response['pie_budget_name'] = array_keys($grouped);
+                $response['pie_total_value'] = array_values($grouped);
+            }
+
+            $department_grouped = array_reduce($wo_orders, function ($carry, $item) {
+                $items_group = $this->departments_model->get($item['department']);
+                $group = !empty($items_group) ? $items_group->name : 'None';
+                if (!isset($carry[$group])) {
+                    $carry[$group] = 0;
                 }
+                $carry[$group]++;
+                return $carry;
+            }, []);
+            if (!empty($department_grouped)) {
+                $response['department_name'] = array_keys($department_grouped);
+                $response['department_value'] = array_values($department_grouped);
             }
         }
 
@@ -21957,11 +21971,11 @@ class Purchase_model extends App_Model
      * @param  array  $data  Dashboard filter data
      * @return array
      */
-    public function get_pr_charts($data)
+    public function get_pr_charts($data = array())
     {
         $response = array();
-        $projects = $data['projects'];
-        $group_pur = $data['group_pur'];
+        $projects = isset($data['projects']) ? $data['projects'] : '';
+        $group_pur = isset($data['group_pur']) ? $data['group_pur'] : '';
         $this->load->model('currencies_model');
         $this->load->model('departments_model');
         $base_currency = $this->currencies_model->get_base_currency();
@@ -22047,12 +22061,12 @@ class Purchase_model extends App_Model
      * @param  array  $data  Dashboard filter data
      * @return array
      */
-    public function get_pc_charts($data)
+    public function get_pc_charts($data = array())
     {
         $response = array();
-        $vendors = $data['vendors'];
-        $projects = $data['projects'];
-        $group_pur = $data['group_pur'];
+        $vendors = isset($data['vendors']) ? $data['vendors'] : '';
+        $projects = isset($data['projects']) ? $data['projects'] : '';
+        $group_pur = isset($data['group_pur']) ? $data['group_pur'] : '';
         $this->load->model('currencies_model');
         $base_currency = $this->currencies_model->get_base_currency();
         if ($request->currency != 0 && $request->currency != null) {
@@ -22172,11 +22186,11 @@ class Purchase_model extends App_Model
      * @param  array  $data  Dashboard filter data
      * @return array
      */
-    public function get_vbt_dashboard($data)
+    public function get_vbt_dashboard($data = array())
     {
         $response = array();
-        $vendors = $data['vendors'];
-        $group_pur = $data['group_pur'];
+        $vendors = isset($data['vendors']) ? $data['vendors'] : '';
+        $group_pur = isset($data['group_pur']) ? $data['group_pur'] : '';
         $this->load->model('currencies_model');
         $base_currency = $this->currencies_model->get_base_currency();
         if ($request->currency != 0 && $request->currency != null) {
