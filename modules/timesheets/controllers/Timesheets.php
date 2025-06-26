@@ -7593,25 +7593,49 @@ class timesheets extends AdminController
 	 */
 	public function create_attendance_sample_file()
 	{
+		// Load models
 		$this->load->model('staff_model');
-		$this->load->model('departments_model');
+		// no more departments_model, since we removed staff_departments
 
 		$month_attendance = $this->input->post('month_attendance');
 
+		// Ensure XLSX libraries are loaded
 		if (!class_exists('XLSXReader_fin')) {
 			require_once module_dir_path(HR_PAYROLL_MODULE_NAME) . '/assets/plugins/XLSXReader/XLSXReader.php';
 		}
 		require_once module_dir_path(HR_PAYROLL_MODULE_NAME) . '/assets/plugins/XLSXWriter/xlsxwriter.class.php';
 
+		// Cleanup old sample files
 		$this->delete_error_file_day_before('1', TIMESHEETS_CREATE_ATTENDANCE_SAMPLE);
 
 		$rel_type = hrp_get_timesheets_status();
-		//get attendance data
 		$current_month = date('Y-m-d', strtotime($month_attendance . '-01'));
-		//get day header in month
+
+		// Fetch headers for the month
 		$days_header_in_month = $this->hr_payroll_model->get_day_header_in_month($current_month, $rel_type);
 
-		// Define headers and data keys to remove
+		// ── REMOVE staff_departments COLUMN ── //
+		// 1a) Remove header "Department name"
+		$days_header_in_month['headers'] = array_values(array_filter(
+			$days_header_in_month['headers'],
+			fn($h) => strtolower($h) !== 'department name'
+		));
+		// 1b) Remove code-key from staff_key
+		if (isset($days_header_in_month['staff_key'])) {
+			$days_header_in_month['staff_key'] = array_values(array_filter(
+				$days_header_in_month['staff_key'],
+				fn($k) => $k !== 'staff_departments'
+			));
+		}
+		// 1c) Strip from columns_type
+		foreach ($days_header_in_month['columns_type'] as $i => $col) {
+			if ($col['data'] === 'staff_departments') {
+				unset($days_header_in_month['columns_type'][$i]);
+			}
+		}
+		$days_header_in_month['columns_type'] = array_values($days_header_in_month['columns_type']);
+
+		// Define other headers/data to remove
 		$headers_to_remove = [
 			'Actual working time of probation contract (hours)',
 			'Actual working time of formal contract (hours)',
@@ -7619,145 +7643,124 @@ class timesheets extends AdminController
 			'Unpaid leave time (hours)',
 			'Standard working time of the month (hours)',
 		];
-
 		$data_keys_to_remove = [
 			'actual_workday_probation',
 			'actual_workday',
 			'paid_leave',
 			'unpaid_leave',
-			'standard_workday',
-			'staff_departments' // Add this to remove staff_departments
+			'standard_workday'
 		];
-
-		// 1. Remove from headers array
-		$days_header_in_month['headers'] = array_values(array_diff($days_header_in_month['headers'], $headers_to_remove));
-
-		// 2. Remove from attendance_key array
+		// Remove unwanted headers
+		$days_header_in_month['headers']        = array_values(array_diff($days_header_in_month['headers'], $headers_to_remove));
 		$days_header_in_month['attendance_key'] = array_values(array_diff($days_header_in_month['attendance_key'], $data_keys_to_remove));
-
-		// 3. Remove from columns_type array
-		foreach ($days_header_in_month['columns_type'] as $index => $column) {
+		foreach ($days_header_in_month['columns_type'] as $idx => $column) {
 			if (in_array($column['data'], $data_keys_to_remove)) {
-				unset($days_header_in_month['columns_type'][$index]);
+				unset($days_header_in_month['columns_type'][$idx]);
 			}
 		}
-		// Re-index the columns_type array
 		$days_header_in_month['columns_type'] = array_values($days_header_in_month['columns_type']);
-
-		// 4. Remove from days_header array
 		foreach ($data_keys_to_remove as $key) {
 			if (isset($days_header_in_month['days_header'][$key])) {
 				unset($days_header_in_month['days_header'][$key]);
 			}
 		}
 
-		// Update header_key
+		// Build header_key for writer
 		$header_key = array_merge(
 			$days_header_in_month['staff_key'],
 			$days_header_in_month['days_key'],
-			$days_header_in_month['attendance_key']  // This now excludes the removed keys
+			$days_header_in_month['attendance_key']
 		);
 
-		$attendances = $this->hr_payroll_model->get_hrp_attendance($current_month);
+		// Fetch existing attendance records
+		$attendances       = $this->hr_payroll_model->get_hrp_attendance($current_month);
 		$attendances_value = [];
-		foreach ($attendances as $key => $value) {
-			$attendances_value[$value['staff_id'] . '_' . $value['month']] = $value;
+		foreach ($attendances as $rec) {
+			$attendances_value[$rec['staff_id'] . '_' . $rec['month']] = $rec;
 		}
 
-		//load staff
+		// Load staff list
 		if (!is_admin() && !has_permission('hrp_employee', '', 'view')) {
-			//View own
 			$staffs = $this->hr_payroll_model->get_staff_timekeeping_applicable_object(get_staffid_by_permission());
 		} else {
-			//admin or view global
 			$staffs = $this->hr_payroll_model->get_staff_timekeeping_applicable_object();
 		}
 
-		//Writer file
+		// Prepare XLSXWriter
 		$writer_header = [];
-		$widths = [];
-		foreach ($days_header_in_month['headers'] as $value) {
-			$writer_header[$value] = 'string';
-			$widths[] = 30;
+		$widths        = [];
+		foreach ($days_header_in_month['headers'] as $h) {
+			$writer_header[$h] = 'string';
+			$widths[]         = 30;
 		}
-
-		$writer = new XLSXWriter();
+		$writer     = new XLSXWriter();
 		$col_style1 = [0, 1, 2, 3, 4, 5, 6];
-		$style1 = ['widths' => $widths, 'fill' => '#ff9800', 'font-style' => 'bold', 'color' => '#0a0a0a', 'border' => 'left,right,top,bottom', 'border-color' => '#0a0a0a', 'font-size' => 13];
-
+		$style1     = [
+			'widths'       => $widths,
+			'fill'         => '#ff9800',
+			'font-style'   => 'bold',
+			'color'        => '#0a0a0a',
+			'border'       => 'left,right,top,bottom',
+			'border-color' => '#0a0a0a',
+			'font-size'    => 13
+		];
 		$writer->writeSheetHeader_v2(
 			'Sheet1',
 			$writer_header,
-			$col_options = ['widths' => $widths, 'fill' => '#03a9f46b', 'font-style' => 'bold', 'color' => '#0a0a0a', 'border' => 'left,right,top,bottom', 'border-color' => '#0a0a0a', 'font-size' => 13],
+			['widths' => $widths, 'fill' => '#03a9f46b', 'font-style' => 'bold', 'color' => '#0a0a0a', 'border' => 'left,right,top,bottom', 'border-color' => '#0a0a0a', 'font-size' => 13],
 			$col_style1,
 			$style1
 		);
 
-		$data_object_kpi = [];
-		foreach ($staffs as $staff_key => $staff_value) {
+		// Write rows per staff
+		foreach ($staffs as $i => $staff) {
 			$data_object_kpi = [];
-			$staffid = 0;
-			$hr_code = '';
-			$id = 0;
-			$staff_name = '';
+			// Basic staff info
+			$info = $this->hr_payroll_model->get_staff_info($staff['staffid']);
+			$data_object_kpi['hr_code']    = $info->staff_identifi ?? '';
+			$data_object_kpi['staff_name'] = trim(($info->firstname ?? '') . ' ' . ($info->lastname ?? ''));
 
-			/*check value from database*/
-			$staffid = $staff_value['staffid'];
-
-			/*check value from database*/
-			$staff_i = $this->hr_payroll_model->get_staff_info($staff_value['staffid']);
-			if ($staff_i) {
-				if (isset($staff_i->staff_identifi)) {
-					$data_object_kpi['hr_code'] = $staff_i->staff_identifi;
-				} else {
-					$data_object_kpi['hr_code'] = '';
-				}
-
-				$data_object_kpi['staff_name'] = $staff_i->firstname . ' ' . $staff_i->lastname;
-
-				// Removed the staff_departments collection code
+			// ID and existing days
+			$key = $staff['staffid'] . '_' . $current_month;
+			if (isset($attendances_value[$key])) {
+				$rec                        = $attendances_value[$key];
+				$data_object_kpi['id']      = $rec['id'];
+				$data_object_kpi             = array_merge($data_object_kpi, $rec);
 			} else {
-				$data_object_kpi['hr_code'] = '';
-				$data_object_kpi['staff_name'] = '';
+				$data_object_kpi['id']      = 0;
+				$data_object_kpi             = array_merge($data_object_kpi, $days_header_in_month['days_header']);
+			}
+			// Strip out unwanted attendance keys
+			foreach ($data_keys_to_remove as $k) {
+				unset($data_object_kpi[$k]);
 			}
 
-			if (isset($attendances_value[$staff_value['staffid'] . '_' . $current_month])) {
-				$data_object_kpi['id'] = $attendances_value[$staff_value['staffid'] . '_' . $current_month]['id'];
-				$data_object_kpi = array_merge($data_object_kpi, $attendances_value[$staff_value['staffid'] . '_' . $current_month]);
-			} else {
-				$data_object_kpi['id'] = 0;
-				$data_object_kpi = array_merge($data_object_kpi, $days_header_in_month['days_header']);
-			}
-
-			// Remove the unwanted data keys if they exist
-			foreach ($data_keys_to_remove as $key) {
-				if (isset($data_object_kpi[$key])) {
-					unset($data_object_kpi[$key]);
-				}
-			}
-
+			// Mandatory keys
 			$data_object_kpi['rel_type'] = $rel_type;
-			$data_object_kpi['month'] = $current_month;
-			$data_object_kpi['staff_id'] = $staff_value['staffid'];
+			$data_object_kpi['month']    = $current_month;
+			$data_object_kpi['staff_id'] = $staff['staffid'];
 
-			if ($staff_key == 0) {
+			// Write header row once
+			if ($i === 0) {
 				$writer->writeSheetRow('Sheet1', $header_key);
 			}
-
-			$get_values_for_keys = $this->get_values_for_keys($data_object_kpi, $header_key);
-			$writer->writeSheetRow('Sheet1', $get_values_for_keys);
+			$row = $this->get_values_for_keys($data_object_kpi, $header_key);
+			$writer->writeSheetRow('Sheet1', $row);
 		}
 
-		$filename = 'attendance_sample_file' . get_staff_user_id() . '_' . strtotime(date('Y-m-d H:i:s')) . '.xlsx';
-		$writer->writeToFile(new_str_replace($filename, TIMESHEETS_CREATE_ATTENDANCE_SAMPLE . $filename, $filename));
+		// Save file
+		$filename = 'attendance_sample_file' . get_staff_user_id() . '_' . time() . '.xlsx';
+		$writer->writeToFile(TIMESHEETS_CREATE_ATTENDANCE_SAMPLE . $filename);
 
+		// Return JSON
 		echo json_encode([
-			'success' => true,
+			'success'  => true,
 			'site_url' => site_url(),
 			'staff_id' => get_staff_user_id(),
 			'filename' => TIMESHEETS_CREATE_ATTENDANCE_SAMPLE . $filename,
 		]);
 	}
+
 	/**
 	 * get values for keys
 	 * @param  [type] $mapping
