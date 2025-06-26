@@ -22754,4 +22754,103 @@ class Warehouse_model extends App_Model
 
         return $response;
     }
+
+    /**
+     * Get Stock Received dashboard
+     *
+     * @param  array  $data  Dashboard filter data
+     * @return array
+     */
+    public function get_stock_issued_dashboard($data = array())
+    {
+        $response = array();
+        $vendors = isset($data['vendors']) ? $data['vendors'] : '';
+        $report_months = isset($data['report_months']) ? $data['report_months'] : '';
+        $report_from = isset($data['report_from']) ? $data['report_from'] : '';
+        $report_to = isset($data['report_to']) ? $data['report_to'] : '';
+        $this->load->model('currencies_model');
+        $base_currency = $this->currencies_model->get_base_currency();
+        if ($request->currency != 0 && $request->currency != null) {
+            $base_currency = pur_get_currency_by_id($request->currency);
+        }
+
+        $response['total_issued_quantity'] = $response['total_issued_entries'] = $response['total_returnable_items'] = $response['non_returnable_ratio'] = $response['returnable_ratio'] = 0;
+        $response['bar_top_material_name'] = $response['bar_top_material_value'] = array();
+        $response['line_order_date'] = $response['line_order_total'] = array(); 
+
+        $this->db->select('id, date_add');
+        $this->db->from(db_prefix() . 'goods_delivery');
+        $this->db->order_by(db_prefix() . 'goods_delivery.date_add', 'asc');
+        $goods_delivery = $this->db->get()->result_array();
+
+        $this->db->select('
+            ' . db_prefix() . 'goods_delivery_detail.id,
+            ' . db_prefix() . 'goods_delivery_detail.commodity_name,
+            ' . db_prefix() . 'goods_delivery_detail.quantities,
+            ' . db_prefix() . 'goods_delivery_detail.returnable,
+            ' . db_prefix() . 'goods_delivery.date_add'
+        );
+        $this->db->join(
+            db_prefix() . 'goods_delivery',
+            db_prefix() . 'goods_delivery.id = ' . db_prefix() . 'goods_delivery_detail.goods_delivery_id',
+            'left'
+        );
+        $this->db->from(db_prefix() . 'goods_delivery_detail');
+        $this->db->group_by(db_prefix() . 'goods_delivery_detail.id');
+        $this->db->order_by(db_prefix() . 'goods_delivery_detail.id', 'asc');
+        $goods_delivery_detail = $this->db->get()->result_array();
+
+        if (!empty($goods_delivery)) {
+        	$response['total_issued_entries'] = count($goods_delivery);
+        }
+
+        if (!empty($goods_delivery_detail)) {
+        	$response['total_issued_quantity'] = number_format(array_sum(array_column($goods_delivery_detail, 'quantities')), 2, '.', '');
+        	$total_returnable_items = count(array_filter($goods_delivery_detail, function($item) {
+			    return isset($item['returnable']) && $item['returnable'] == 1;
+			}));
+			$response['total_returnable_items'] = $total_returnable_items;
+			$total_items = count($goods_delivery_detail);
+
+			$bar_top_materials = array();
+			$line_order_total = array();
+			foreach ($goods_delivery_detail as $item) {
+				$commodity_name = $item['commodity_name'];
+                if (!isset($bar_top_materials[$commodity_name])) {
+                    $bar_top_materials[$commodity_name]['name'] = $commodity_name;
+                    $bar_top_materials[$commodity_name]['value'] = 0;
+                }
+                $bar_top_materials[$commodity_name]['value'] += (float) $item['quantities'];
+
+                $month = date('M-y', strtotime($item['date_add']));
+                if (!isset($line_order_total[$month])) {
+                    $line_order_total[$month] = 0;
+                }
+                $line_order_total[$month] += (float) $item['quantities'];
+			}
+
+			if (!empty($bar_top_materials)) {
+                usort($bar_top_materials, function ($a, $b) {
+                    return $b['value'] <=> $a['value'];
+                });
+                $bar_top_materials = array_slice($bar_top_materials, 0, 10);
+                $response['bar_top_material_name'] = array_column($bar_top_materials, 'name');
+                $response['bar_top_material_value'] = array_column($bar_top_materials, 'value');
+            }
+
+            if (!empty($line_order_total)) {
+                $response['line_order_date'] = array_keys($line_order_total);
+                $response['line_order_total'] = array_values($line_order_total);
+            }
+
+            $percentage_utilized = 0;
+            if ($total_items > 0) {
+				$percentage_utilized = round(($total_returnable_items / $total_items) * 100);
+			}
+			$response['returnable_ratio'] = $percentage_utilized;
+			$response['non_returnable_ratio'] = 100 - $response['returnable_ratio'];
+		}
+        
+        return $response;
+    }
 }
