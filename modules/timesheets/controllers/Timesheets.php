@@ -5957,7 +5957,7 @@ class timesheets extends AdminController
 				} elseif ($val === 'C/OFF') {
 					$counters['COFF']++;
 				} elseif ($val === 'H/F') {
-					$_counters['HF']++;
+					$counters['HF']++;
 				} elseif ($val === 'W/H') {
 					$counters['WH']++;
 				} elseif ($val === 'N/A') {
