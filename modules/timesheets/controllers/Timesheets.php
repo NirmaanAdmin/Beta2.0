@@ -6027,7 +6027,7 @@ class timesheets extends AdminController
 		$month_filter_for_note = date('m-Y', strtotime($month_filter));
 		
 		$notes = $this->timesheets_model->get_notes($month_filter_for_note);
-		$noteText = 'NOTE: '.$notes['note'] ?? '';
+		$noteText = $notes['note'] ?? '';
 		if ($noteText) {
 			// Blank row before NOTE
 			$writer->writeSheetRow('Sheet1', []);
@@ -6042,7 +6042,7 @@ class timesheets extends AdminController
 			// merge from col 0 to col 3 (A→D) on that row :contentReference[oaicite:1]{index=1}
 			$writer->markMergedCell('Sheet1', $noteRow, 0, $noteRow, 3);
 			// now write the NOTE
-			$writer->writeSheetRow('Sheet1', [$noteText], $noteStyle);
+			$writer->writeSheetRow('Sheet1', ['NOTE: '.$noteText], $noteStyle);
 		}
 
 

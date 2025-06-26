@@ -149,7 +149,7 @@
                 } ?>
 
 
-                <?php if (is_admin() || has_permission('timesheets_timekeeping', '', 'edit')) {
+                <?php 
                   if ($notes['note'] != '') {
                     $notes_val = $notes['note'];
                   } else {
@@ -172,7 +172,6 @@
                   <a class="btn btn-default pull-right exit_edit_timesheets mleft5 hide"><?php echo _l('close'); ?></a>
 
 
-                <?php } ?>
               </div>
               <!-- Custom Scroll Slider -->
               <div id="scroll-slider">
