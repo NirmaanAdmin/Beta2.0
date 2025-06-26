@@ -100,7 +100,7 @@
                              </div>
                         </div>
                         <div class="row mtop20">
-                          <div class="col-md-4">
+                          <div class="col-md-5">
                               <p class="mbot15 dashboard_stat_title">Issued Quantity by Material</p>
                               <div style="width: 100%; height: 400px;">
                                 <canvas id="barChartTopMaterials"></canvas>
@@ -112,7 +112,7 @@
                                 <canvas id="lineChartOverTime"></canvas>
                               </div>
                            </div>
-                           <div class="col-md-4">
+                           <div class="col-md-3">
                               <p class="mbot15 dashboard_stat_title">Returnable vs Non-Returnable</p>
                               <div style="width: 100%; height: 400px;">
                                 <canvas id="returnablevsnonreturnable"></canvas>
