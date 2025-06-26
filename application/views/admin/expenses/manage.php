@@ -25,7 +25,9 @@
                             </app-filters>
                         </div>
 
-                        <a href="#" onclick="slideToggle('#expense-chart'); return false;" class="pull-right btn btn-default mleft5 btn-with-tooltip" data-toggle="tooltip" title="Expense Chart"><i class="fa fa-pie-chart"></i></a>
+                        <a href="#" onclick="toggleExpenseChart(); return false;" class="pull-right btn btn-default mleft5 btn-with-tooltip" data-toggle="tooltip" title="Expense Chart">
+                        <i class="fa fa-pie-chart"></i>
+                        </a>
 
                         <a href="#" onclick="slideToggle('#stats-top'); return false;"
                             class="pull-right btn btn-default mleft5 btn-with-tooltip" data-toggle="tooltip"
@@ -38,7 +40,7 @@
                             <hr />
                             <div id="expenses_total"></div>
                         </div>
-                        <div id="expense-chart" class="hide mtop15">
+                        <div id="expense-chart" class="mtop15">
                             <div class="col-md-3 pull-right" style="padding-right: 0px; padding-bottom: 10px;">
                                 <select class="form-control" id="expenseType" name="expenseType" onchange="updateExpenseChart();">
                                    <option value="0">Category Wise</option>
@@ -121,8 +123,8 @@ var hidden_columns = [4, 5, 6, 7, 8, 9];
 </script>
 <?php init_tail(); ?>
 <?php 
-echo '<script src="' . base_url('modules/project_roadmap/assets/js/plugins/highcharts/highcharts.js') . '"></script>';
-echo '<script src="' . base_url('modules/project_roadmap/assets/js/plugins/highcharts/exporting.js') .'"></script>';
+echo '<script src="' . base_url('assets/plugins/highcharts/highcharts.js') . '"></script>';
+echo '<script src="' . base_url('assets/plugins/highcharts/exporting.js') . '"></script>';
 ?>
 <script>
 Dropzone.autoDiscover = false;
@@ -166,54 +168,59 @@ $(function() {
 });
 </script>
 <script>
-   document.addEventListener('DOMContentLoaded', function() {
-      renderChart(<?php echo json_encode($chart_data); ?>, 'Category Wise Expenses');
-   });
+document.addEventListener('DOMContentLoaded', function () {
+  $('#expense-chart').slideDown(); // Show on page load
+  renderChart(<?php echo json_encode($chart_data); ?>, 'Category Wise Expenses');
+});
 
-   function renderChart(chartData, titleText) {
-      Highcharts.chart('expense_chart', {
-         chart: {
-            type: 'pie',
-            options3d: {
-            enabled: true,
-            alpha: 45
-        }
-         },
-         title: {
-            text: titleText
-         },
-         series: [{
-            name: 'Expense',
-            colorByPoint: true,
-            data: chartData
-         }]
-      });
-   }
+// Toggle chart visibility and refresh if shown
+function toggleExpenseChart() {
+  var chartSection = $('#expense-chart');
+  if (chartSection.is(':visible')) {
+    chartSection.slideUp();
+  } else {
+    chartSection.slideDown(function () {
+      updateExpenseChart(); // Refresh chart when shown again
+    });
+  }
+}
 
-   function updateExpenseChart() {
-      var selectedType = document.getElementById("expenseType").value;
-      var titleText = '';
-
-      // Determine the chart title and request data based on the selected type
-      if (selectedType == '0') {
-         titleText = 'Category Wise Expenses';
-      } else if (selectedType == '1') {
-         titleText = 'Payment Wise Expenses';
-      } else if (selectedType == '2') {
-         titleText = 'Project Wise Expenses';
+function renderChart(chartData, titleText) {
+  Highcharts.chart('expense_chart', {
+    chart: {
+      type: 'pie',
+      options3d: {
+        enabled: true,
+        alpha: 45
       }
+    },
+    title: {
+      text: titleText
+    },
+    series: [{
+      name: 'Expense',
+      colorByPoint: true,
+      data: chartData
+    }]
+  });
+}
 
-      // Use AJAX to fetch the correct chart data
-      var xhr = new XMLHttpRequest();
-      xhr.open('GET', '' + admin_url + 'expenses/get_expenses_chart_data_type_wise?type=' + selectedType, true);
-      xhr.onload = function() {
-         if (xhr.status === 200) {
-            var responseData = JSON.parse(xhr.responseText);
-            renderChart(responseData, titleText); // Update chart with new data and title
-         }
-      };
-      xhr.send();
-   }
+function updateExpenseChart() {
+  var selectedType = document.getElementById("expenseType").value;
+  var titleText = selectedType == '1' ? 'Payment Wise Expenses' :
+                  selectedType == '2' ? 'Project Wise Expenses' :
+                  'Category Wise Expenses';
+
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', admin_url + 'expenses/get_expenses_chart_data_type_wise?type=' + selectedType, true);
+  xhr.onload = function () {
+    if (xhr.status === 200) {
+      var responseData = JSON.parse(xhr.responseText);
+      renderChart(responseData, titleText);
+    }
+  };
+  xhr.send();
+}
 </script>
 </body>
 
