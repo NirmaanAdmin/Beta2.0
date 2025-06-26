@@ -9968,4 +9968,12 @@ class warehouse extends AdminController
         echo json_encode($result);
         die;
     }
+
+    public function get_stock_issued_dashboard()
+    {
+        $data = $this->input->post();
+        $result = $this->warehouse_model->get_stock_issued_dashboard($data);
+        echo json_encode($result);
+        die;
+    }
 }

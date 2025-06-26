@@ -39,6 +39,14 @@ $('#delivery_status').on('change', function () {
     table_manage_delivery.DataTable().ajax.reload();
 });
 
+$('#si-charts-section').on('shown.bs.collapse', function () {
+    $('.toggle-icon').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+});
+
+$('#si-charts-section').on('hidden.bs.collapse', function () {
+    $('.toggle-icon').removeClass('fa-chevron-down').addClass('fa-chevron-up');
+});
+
 
  init_goods_delivery();
   function init_goods_delivery(id) {
@@ -97,6 +105,173 @@ function toggle_small_view_proposal(table, main_data) {
     $(main_data).toggleClass('hide');
     $(window).trigger('resize');
     
+}
+var lineChartOverTime;
+
+get_stock_issued_dashboard();
+
+function get_stock_issued_dashboard() {
+  "use strict";
+
+  var data = {}
+
+  $.post(admin_url + 'warehouse/get_stock_issued_dashboard', data).done(function(response){
+    response = JSON.parse(response);
+
+    // Update value summaries
+    $('.total_issued_quantity').text(response.total_issued_quantity);
+    $('.total_issued_entries').text(response.total_issued_entries);
+    $('.total_returnable_items').text(response.total_returnable_items);
+
+    // BAR CHART - Issued Quantity by Material (Horizontal)
+    var materialBarCtx = document.getElementById('barChartTopMaterials').getContext('2d');
+    var materialLabels = response.bar_top_material_name;
+    var materialData = response.bar_top_material_value;
+
+    if (window.barTopMaterialsChart) {
+      barTopMaterialsChart.data.labels = materialLabels;
+      barTopMaterialsChart.data.datasets[0].data = materialData;
+      barTopMaterialsChart.update();
+    } else {
+      window.barTopMaterialsChart = new Chart(materialBarCtx, {
+        type: 'bar',
+        data: {
+          labels: materialLabels,
+          datasets: [{
+            label: 'Issued Quantity',
+            data: materialData,
+            backgroundColor: '#1E90FF',
+            borderColor: '#1E90FF',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          indexAxis: 'y', // <--- This makes it horizontal
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            x: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Issued Quantity'
+              }
+            },
+            y: {
+              ticks: {
+                autoSkip: false
+              },
+              title: {
+                display: true,
+                text: 'Materials'
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // LINE CHART - Consumption Over Time
+    var lineCtx = document.getElementById('lineChartOverTime').getContext('2d');
+
+    if (lineChartOverTime) {
+      lineChartOverTime.data.labels = response.line_order_date;
+      lineChartOverTime.data.datasets[0].data = response.line_order_total;
+      lineChartOverTime.update();
+    } else {
+      lineChartOverTime = new Chart(lineCtx, {
+        type: 'line',
+        data: {
+          labels: response.line_order_date,
+          datasets: [{
+            label: 'Quantities',
+            data: response.line_order_total,
+            fill: false,
+            borderColor: 'rgba(54, 162, 235, 1)',
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            tension: 0.3
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'bottom'
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Month'
+              }
+            },
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Quantities'
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // DOUGHNUT CHART - Returnable vs Non-Returnable
+    var returnableUtilizationCtx = document.getElementById('returnablevsnonreturnable').getContext('2d');
+    var returnableUtilizationLabels = ['Returnable', 'Non-Returnable'];
+    var returnableUtilizationData = [
+      response.returnable_ratio,
+      response.non_returnable_ratio
+    ];
+    if (window.returnableUtilizationChart) {
+      returnableUtilizationChart.data.datasets[0].data = returnableUtilizationData;
+      returnableUtilizationChart.update();
+    } else {
+      window.returnableUtilizationChart = new Chart(returnableUtilizationCtx, {
+        type: 'doughnut',
+        data: {
+          labels: returnableUtilizationLabels,
+          datasets: [{
+            data: returnableUtilizationData,
+            backgroundColor: ['#00008B', '#1E90FF'],
+            borderColor: ['#00008B', '#1E90FF'],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  var label = context.label || '';
+                  var value = context.formattedValue;
+                  return `${label}: ${value}%`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+  });
 }
 
 </script>
