@@ -7499,7 +7499,7 @@ class timesheets extends AdminController
 				// collect day-columns (index 7 onward)
 				for ($i = 7; $i < count($column_key); $i++) {
 					$cell = strtoupper($row[$i] ?? '');
-					if (!in_array($cell, ['P', 'L','OFF','N/A','W/H','H/F'], true)) {
+					if (!in_array($cell, ['P', 'L', 'OFF', 'N/A', 'W/H', 'H/F'], true)) {
 						continue;
 					}
 					$day_number = $i - 6; // index 7 → day 1
@@ -7618,7 +7618,6 @@ class timesheets extends AdminController
 			'Paid leave time (hours)',
 			'Unpaid leave time (hours)',
 			'Standard working time of the month (hours)',
-			'Department name'
 		];
 
 		$data_keys_to_remove = [
@@ -7627,7 +7626,7 @@ class timesheets extends AdminController
 			'paid_leave',
 			'unpaid_leave',
 			'standard_workday',
-			'staff_departments'
+			'staff_departments' // Add this to remove staff_departments
 		];
 
 		// 1. Remove from headers array
@@ -7701,7 +7700,6 @@ class timesheets extends AdminController
 			$hr_code = '';
 			$id = 0;
 			$staff_name = '';
-			$staff_departments = '';
 
 			/*check value from database*/
 			$staffid = $staff_value['staffid'];
@@ -7717,23 +7715,7 @@ class timesheets extends AdminController
 
 				$data_object_kpi['staff_name'] = $staff_i->firstname . ' ' . $staff_i->lastname;
 
-				$arr_department = $this->hr_payroll_model->get_staff_departments($staff_i->staffid, true);
-
-				$list_department = '';
-				if (count($arr_department) > 0) {
-					foreach ($arr_department as $key => $department) {
-						$department_value = $this->departments_model->get($department);
-
-						if ($department_value) {
-							if (new_strlen($list_department) != 0) {
-								$list_department .= ', ' . $department_value->name;
-							} else {
-								$list_department .= $department_value->name;
-							}
-						}
-					}
-				}
-
+				// Removed the staff_departments collection code
 			} else {
 				$data_object_kpi['hr_code'] = '';
 				$data_object_kpi['staff_name'] = '';
