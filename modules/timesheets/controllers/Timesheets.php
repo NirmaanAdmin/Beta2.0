@@ -7694,7 +7694,7 @@ class timesheets extends AdminController
 			$widths[]         = 30;
 		}
 		$writer     = new XLSXWriter();
-		$col_style1 = [0, 1, 2, 3, 4, 5, 6];
+		$col_style1 = [0, 1, 2, 3, 4, 5];
 		$style1     = [
 			'widths'       => $widths,
 			'fill'         => '#ff9800',
