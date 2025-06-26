@@ -6,8 +6,14 @@ var GoodsreceiptParams = {
     "kind": "select[name='kind']",
     "toggle-filter": "input[name='toggle-filter']",
     "vendor": '[name="vendor[]"]',
-    "status": "select[name='status']"
+    "status": "select[name='status']",
+    "report_months": '[name="months-report"]',
+    "report_from": '[name="report-from"]',
+    "report_to": '[name="report-to"]'
 };
+var report_from = $('input[name="report-from"]');
+var report_to = $('input[name="report-to"]');
+var date_range = $('#date-range');
 var table_manage_goods_receipt = $('.table-table_manage_goods_receipt');
 
 initDataTable(table_manage_goods_receipt, admin_url + 'warehouse/table_manage_goods_receipt', [], [], GoodsreceiptParams, [0, 'desc']);
@@ -27,6 +33,40 @@ $('#vendor').on('change', function () {
 });
 $('#status').on('change', function () {
     table_manage_goods_receipt.DataTable().ajax.reload();
+});
+$('select[name="months-report"]').on('change', function() {
+  var val = $(this).val();
+  report_to.attr('disabled', true);
+  report_to.val('');
+  report_from.val('');
+  if (val == 'custom') {
+    date_range.addClass('fadeIn').removeClass('hide');
+    return;
+  } else {
+    if (!date_range.hasClass('hide')) {
+      date_range.removeClass('fadeIn').addClass('hide');
+    }
+  }
+  table_manage_goods_receipt.DataTable().ajax.reload();
+});
+report_from.on('change', function() {
+  var val = $(this).val();
+  var report_to_val = report_to.val();
+  if (val != '') {
+    report_to.attr('disabled', false);
+    if (report_to_val != '') {
+      table_manage_goods_receipt.DataTable().ajax.reload();
+    }
+  } else {
+    report_to.attr('disabled', true);
+  }
+});
+
+report_to.on('change', function() {
+  var val = $(this).val();
+  if (val != '') {
+    table_manage_goods_receipt.DataTable().ajax.reload();
+  }
 });
 $('.toggle-filter').on('change', function () {
     var isChecked = $(this).is(':checked') ? 1 : 0;

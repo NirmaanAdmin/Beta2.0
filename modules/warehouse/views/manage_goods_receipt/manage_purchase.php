@@ -44,9 +44,9 @@
                                 <a href="#" class="btn btn-default pull-right btn-with-tooltip toggle-small-view hidden-xs" onclick="toggle_small_view_proposal(' .purchase_sm','#purchase_sm_view'); return false;" data-toggle="tooltip" title="<?php echo _l('invoices_toggle_table_tooltip'); ?>"><i class="fa fa-angle-double-left"></i></a>
                             </div>
                         </div>
-                        <br />
-                        <div class="row">
-                            <div class="col-md-3 pull-right">
+                        
+                        <div class="row mtop20">
+                            <div class="col-md-3 form-group pull-right">
                                 <select name="kind" id="kind" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('cat'); ?>">
                                     <option value=""></option>
                                     <option value="Client Supply"><?php echo _l('client_supply'); ?></option>
@@ -60,7 +60,7 @@
 
                                 echo render_date_input('date_add', '', '', $input_attr_e); ?>
                             </div>
-                            <div class="col-md-3 pull-right">
+                            <div class="col-md-3 form-group pull-right">
                                 <select name="vendor[]" id="vendor" class="selectpicker" multiple="true" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('vendor'); ?>">
                                     <option value=""></option>
                                     <?php
@@ -70,12 +70,43 @@
                                     <?php  } ?>
                                 </select>
                             </div>
-                            <div class="col-md-3 pull-right">
+                            <div class="col-md-3 form-group pull-right">
                                 <select name="status" id="status" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('status'); ?>">
                                     <option value=""></option>
                                     <option value="approved"><?php echo _l('approved'); ?></option>
                                     <option value="not_yet_approve"><?php echo _l('not_yet_approve'); ?></option>
                                 </select>
+                            </div>
+                            <div class="col-md-3 form-group" id="report-time">
+                                <select class="selectpicker" name="months-report" id="months-report" data-width="100%" data-none-selected-text="<?php echo _l('dropdown_non_selected_tex'); ?>">
+                                    <option value=""><?php echo _l('report_sales_months_all_time'); ?></option>
+                                    <option value="this_month"><?php echo _l('this_month'); ?></option>
+                                    <option value="1"><?php echo _l('last_month'); ?></option>
+                                    <option value="this_year"><?php echo _l('this_year'); ?></option>
+                                    <option value="last_year"><?php echo _l('last_year'); ?></option>
+                                    <option value="3" data-subtext="<?php echo _d(date('Y-m-01', strtotime("-2 MONTH"))); ?> - <?php echo _d(date('Y-m-t')); ?>"><?php echo _l('report_sales_months_three_months'); ?></option>
+                                    <option value="6" data-subtext="<?php echo _d(date('Y-m-01', strtotime("-5 MONTH"))); ?> - <?php echo _d(date('Y-m-t')); ?>"><?php echo _l('report_sales_months_six_months'); ?></option>
+                                    <option value="12" data-subtext="<?php echo _d(date('Y-m-01', strtotime("-11 MONTH"))); ?> - <?php echo _d(date('Y-m-t')); ?>"><?php echo _l('report_sales_months_twelve_months'); ?></option>
+                                    <option value="custom"><?php echo _l('period_datepicker'); ?></option>
+                                </select>
+                            </div>
+                            <div id="date-range" class="hide">
+                                <div class="col-md-3 form-group">
+                                    <div class="input-group date">
+                                        <input type="text" class="form-control datepicker" id="report-from" name="report-from">
+                                        <div class="input-group-addon">
+                                            <i class="fa fa-calendar calendar-icon"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 form-group">
+                                    <div class="input-group date">
+                                        <input type="text" class="form-control datepicker" disabled="disabled" id="report-to" name="report-to">
+                                        <div class="input-group-addon">
+                                            <i class="fa fa-calendar calendar-icon"></i>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <br />

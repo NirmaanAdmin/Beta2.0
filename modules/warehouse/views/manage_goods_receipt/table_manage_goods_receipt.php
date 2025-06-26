@@ -60,6 +60,12 @@ if (isset($status)) {
     }
 }
 
+$this->ci->load->model('purchase/purchase_model');
+$custom_date_select = $this->ci->purchase_model->get_where_report_period(db_prefix() . 'goods_receipt.date_add');
+if ($custom_date_select != '') {
+    array_push($where, $custom_date_select);
+}
+
 $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, ['id', 'date_add', 'date_c', 'goods_receipt_code', 'supplier_code', 'pr_order_id', 'wo_order_id']);
 
 $output  = $result['output'];
