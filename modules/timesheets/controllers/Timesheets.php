@@ -255,6 +255,7 @@ class timesheets extends AdminController
 		$data['data_lack'] = $data_lack;
 		$data['set_col_tk'] = json_encode($data['set_col_tk']);
 
+		$data['notes'] = $this->timesheets_model->get_notes(date('m-Y'));
 		$this->load->view('timekeeping/manage_timekeeping', $data);
 	}
 	/**
@@ -472,8 +473,7 @@ class timesheets extends AdminController
 					foreach ($data['time_sheet'] as $key => $value) {
 						$ts_val[] = array_combine($day_month_tk, $value);
 					}
-					unset($data['time_sheet']);
-
+					$this->timesheets_model->add_update_note($data);
 					$add = $this->timesheets_model->add_update_timesheet($ts_val, true);
 					if ($add > 0) {
 						set_alert('success', _l('timekeeping') . ' ' . _l('successfully'));
@@ -659,7 +659,8 @@ class timesheets extends AdminController
 				$data['cell_background'] = $result['cell_background'];
 			}
 		}
-
+		$monthandyear = $g_month . '-' . $year;
+		$data['notes'] = $this->timesheets_model->get_notes($monthandyear);
 		$data_lack = [];
 		$data['data_lack'] = $data_lack;
 
@@ -670,7 +671,8 @@ class timesheets extends AdminController
 			'check_latch_timesheet' => $data['check_latch_timesheet'],
 			'month' => $data['month'],
 			'data_lack' => $data['data_lack'],
-			'cell_background' => $data['cell_background']
+			'cell_background' => $data['cell_background'],
+			'notes' => $data['notes']['note'],
 		]);
 		die;
 	}
@@ -5787,17 +5789,17 @@ class timesheets extends AdminController
 		}
 		require_once module_dir_path(TIMESHEETS_MODULE_NAME) . '/assets/plugins/XLSXWriter/xlsxwriter.class.php';
 
-		if (! $this->input->post()) {
+		if (!$this->input->post()) {
 			return;
 		}
 
-		// 1) Grab filters
+		// 1) Filters
 		$month_filter      = $this->input->post('month');
 		$department_filter = $this->input->post('department');
 		$role_filter       = $this->input->post('role');
 		$staff_filter      = $this->input->post('staff');
 
-		// 2) Build staff list if none selected
+		// 2) Default staff list
 		if (empty($staff_filter)) {
 			$staff_filter = array_column(
 				$this->timesheets_model->get_staff_timekeeping_applicable_object(),
@@ -5805,7 +5807,7 @@ class timesheets extends AdminController
 			);
 		}
 
-		// 3) Fetch your attendance data
+		// 3) Fetch data
 		$list = $this->timesheets_model->get_data_attendance_export(
 			$month_filter,
 			$department_filter,
@@ -5813,37 +5815,29 @@ class timesheets extends AdminController
 			$staff_filter
 		);
 
-		//
-		// 4) Parse year + month robustly
-		//
+		// 4) Parse month
 		$dt = DateTime::createFromFormat('Y-m', $month_filter);
-		if (! $dt) {
-			// fallback if someone passed "06-2025"
+		if (!$dt) {
 			$parts = explode('-', $month_filter);
 			if (count($parts) === 2) {
 				list($m, $y) = $parts;
 				$dt = DateTime::createFromFormat('!m-Y', "{$m}-{$y}");
 			}
 		}
-		if (! $dt) {
-			// ultimate fallback: today
+		if (!$dt) {
 			$dt = new DateTime();
 		}
-		$month      = (int)$dt->format('m');
-		$month_year = (int)$dt->format('Y');
+		$month         = (int)$dt->format('m');
+		$month_year    = (int)$dt->format('Y');
 		$days_in_month = cal_days_in_month(CAL_GREGORIAN, $month, $month_year);
 
-		//
-		// 5) Prep lookup maps (codes, positions, etc.)
-		//
-		$emp_code_map           = $this->build_map('Staff', 'staff_identifi',  $this->timesheets_model->get_emp_code());
-		$emp_position_map       = $this->build_map('Staff', 'job_position',    $this->timesheets_model->get_emp_position());
-		$emp_date_of_joining_map = $this->build_map('Staff', 'joining_date',    $this->timesheets_model->get_emp_date_of_joining());
-		$emp_active_status_map  = $this->build_map('Staff', 'active',          $this->timesheets_model->get_emp_active_status());
+		// 5) Lookup maps
+		$emp_code_map            = $this->build_map('Staff', 'staff_identifi',   $this->timesheets_model->get_emp_code());
+		$emp_position_map        = $this->build_map('Staff', 'job_position',     $this->timesheets_model->get_emp_position());
+		$emp_date_of_joining_map = $this->build_map('Staff', 'joining_date',     $this->timesheets_model->get_emp_date_of_joining());
+		$emp_active_status_map   = $this->build_map('Staff', 'active',           $this->timesheets_model->get_emp_active_status());
 
-		//
-		// 6) Construct a **numeric** header array in desired order
-		//
+		// 6) Build header
 		$header = [
 			'S.NO',
 			'Status',
@@ -5853,18 +5847,18 @@ class timesheets extends AdminController
 			'SITE',
 			'DOJ'
 		];
-		// dates columns "Mon 01", "Tue 02", ...
 		for ($d = 1; $d <= $days_in_month; $d++) {
 			$time = mktime(12, 0, 0, $month, $d, $month_year);
 			if ((int)date('m', $time) === $month) {
 				$header[] = date('D d', $time);
 			}
 		}
-		// totals
 		$header = array_merge($header, [
 			'TOTAL "P"',
 			'TOTAL "L"',
 			'TOTAL S/L',
+			'TOTAL OW',
+			'TOTAL CL',
 			'TOTAL OFF',
 			'TOTAL "H"',
 			'TOTAL C/OFF',
@@ -5874,51 +5868,48 @@ class timesheets extends AdminController
 			'TOTAL'
 		]);
 
-		//
-		// 7) Start writing with XLSXWriter
-		//
+		// 7) Writer setup
 		$writer = new XLSXWriter();
 
-		// Company name row (merged)
+		// Company title
 		$company = get_company_name_for_attendance();
 		$writer->writeSheetRow('Sheet1', [$company], [
-			'height' => 30,
+			'height'    => 30,
 			'font-size' => 16,
-			'font' => 'Calibri',
-			'bold' => true,
-			'halign' => 'center'
+			'font'      => 'Calibri',
+			'bold'      => true,
+			'halign'    => 'center',
 		]);
 		$writer->markMergedCell('Sheet1', 0, 0, 0, count($header) - 1);
 
-		// Title row
-		$month_name   = strtoupper($dt->format('F'));
-		$title        = "STAFF ATTENDANCE FOR THE MONTH OF {$month_name} - {$month_year}";
+		// Month title
+		$month_name = strtoupper($dt->format('F'));
+		$title      = "STAFF ATTENDANCE FOR THE MONTH OF {$month_name} - {$month_year}";
 		$writer->writeSheetRow('Sheet1', [$title], [
-			'height' => 25,
+			'height'    => 25,
 			'font-size' => 14,
-			'font' => 'Calibri',
-			'bold' => true,
-			'halign' => 'center'
+			'font'      => 'Calibri',
+			'bold'      => true,
+			'halign'    => 'center',
 		]);
 		$writer->markMergedCell('Sheet1', 1, 0, 1, count($header) - 1);
 
-		// Header row
+		// Header row style
 		$writer->writeSheetRow('Sheet1', $header, [
-			'fill' => '#C65911',
-			'font-style' => 'bold',
-			'color' => '#FFFFFF',
-			'border' => 'left,right,top,bottom',
+			'fill'         => '#C65911',
+			'font-style'   => 'bold',
+			'color'        => '#FFFFFF',
+			'border'       => 'left,right,top,bottom',
 			'border-color' => '#FFFFFF',
-			'height' => 25,
-			'font-size' => 13,
-			'font' => 'Calibri'
+			'height'       => 25,
+			'font-size'    => 13,
+			'font'         => 'Calibri',
 		]);
 
-		// Row styles
 		$styleOdd  = ['fill' => '#F8CBAD', 'border' => 'left,right,top,bottom', 'border-color' => '#FFFFFF', 'height' => 25, 'font-size' => 12, 'font' => 'Calibri'];
 		$styleEven = ['fill' => '#FCE4D6', 'border' => 'left,right,top,bottom', 'border-color' => '#FFFFFF', 'height' => 25, 'font-size' => 12, 'font' => 'Calibri'];
+		// 8) Data rows
 		$sr_no = 1;
-		// 8) Write data rows
 		foreach ($list as $idx => $row) {
 			$staff_name = trim($row['Staff'] ?? '');
 			if (in_array($staff_name, ['Admin N360', 'Trial Demo ID'], true)) {
@@ -5926,28 +5917,39 @@ class timesheets extends AdminController
 			}
 			$status = ($emp_active_status_map[$staff_name] ?? 0) == 1 ? 'CONTINUING' : 'DISCONTINUED';
 
-			// start building this row
 			$out = [];
-			$out[] = $sr_no++;            // S.NO
-			$out[] = $status;             // Status
-			$out[] = $staff_name;         // Name
-			$out[] = $emp_code_map[$staff_name]           ?? '';
-			$out[] = $emp_position_map[$staff_name]       ?? '';
-			$out[] = 'Jamnagar';          // SITE (hard-coded)
+			$out[] = $sr_no++;
+			$out[] = $status;
+			$out[] = $staff_name;
+			$out[] = $emp_code_map[$staff_name]     ?? '';
+			$out[] = $emp_position_map[$staff_name] ?? '';
+			$out[] = 'Jamnagar';
 			$doj_raw = $emp_date_of_joining_map[$staff_name] ?? '';
 			$out[] = $doj_raw ? date('d M, Y', strtotime($doj_raw)) : '';
 
-			// per-day columns + counters
-			$counters = ['P' => 0, 'L' => 0, 'SL' => 0, 'OFF' => 0, 'H' => 0, 'COFF' => 0, 'HF' => 0, 'WH' => 0, 'NA' => 0];
+			$counters = [
+				'P'   => 0,
+				'L'   => 0,
+				'SL'  => 0,
+				'OW'  => 0,
+				'CL'  => 0,
+				'OFF' => 0,
+				'H'   => 0,
+				'COFF' => 0,
+				'HF'  => 0,
+				'WH'  => 0,
+				'NA'  => 0,
+			];
+
 			foreach (array_slice($header, 7, $days_in_month) as $col) {
 				$val = $row[$col] ?? '';
-				if (strpos($val, 'W:') === 0) {
+				if (strpos($val, 'P') === 0) {
 					$val = 'P';
 					$counters['P']++;
 				} elseif ($val === '') {
 					$val = 'L';
 					$counters['L']++;
-				} elseif ($val === 'NS') {
+				} elseif ($val === 'OFF') {
 					$val = 'OFF';
 					$counters['OFF']++;
 				} elseif ($val === 'H') {
@@ -5955,32 +5957,97 @@ class timesheets extends AdminController
 				} elseif ($val === 'C/OFF') {
 					$counters['COFF']++;
 				} elseif ($val === 'H/F') {
-					$counters['HF']++;
+					$_counters['HF']++;
 				} elseif ($val === 'W/H') {
 					$counters['WH']++;
 				} elseif ($val === 'N/A') {
 					$counters['NA']++;
+				} elseif ($val === 'OW') {
+					$counters['OW']++;
+				} elseif ($val === 'CL') {
+					$counters['CL']++;
 				}
 				$out[] = $val;
 			}
 
-			// totals
-			$out[] = $counters['P'];
-			$out[] = $counters['L'];
-			$out[] = $counters['SL'];
-			$out[] = $counters['OFF'];
-			$out[] = $counters['H'];
-			$out[] = $counters['COFF'];
-			$out[] = $counters['HF'];
-			$out[] = $counters['WH'];
-			$out[] = $counters['NA'];
-			$out[] = array_sum($counters);
+			$out = array_merge($out, [
+				$counters['P'],
+				$counters['L'],
+				$counters['SL'],
+				$counters['OW'],
+				$counters['CL'],
+				$counters['OFF'],
+				$counters['H'],
+				$counters['COFF'],
+				$counters['HF'],
+				$counters['WH'],
+				$counters['NA'],
+				array_sum($counters)
+			]);
 
-			// write the row
 			$writer->writeSheetRow('Sheet1', $out, ($idx % 2) ? $styleEven : $styleOdd);
 		}
 
-		// 9) Clean up old files & save
+		// ── 9) LEGENDS + NOTE ──
+
+		// Blank row
+		// Blank row
+		$writer->writeSheetRow('Sheet1', []);
+
+		// Legend entries center-aligned with borders
+		$legends = [
+			['HO',   'Public Holiday'],
+			['P',    'Present'],
+			['L',    'On Leave'],
+			['OFF',  'Sunday Off'],
+			['H/F',  'Half Day'],
+			['SL',   'Sick Leave'],
+			['ML',   'Maternity Leave'],
+			['W/H',  'Work From Home'],
+			['C/OFF', 'Compensatory Off'],
+			['N/A',  'Not Applicable'],
+		];
+		$legendStyle = [
+			'font'      => 'Calibri',
+			'halign'    => 'center',
+			'valign'    => 'center',
+			'border'       => 'left,right,top,bottom',
+			'border_style' => 'medium',    // solid medium-weight
+			'border_color' => '000000',    // black
+		];
+
+		foreach ($legends as $lg) {
+			$writer->writeSheetRow('Sheet1', $lg, $legendStyle);
+		}
+
+
+
+		// NOTE row (merged across columns A–D)
+	
+		$month_filter_for_note = date('m-Y', strtotime($month_filter));
+		
+		$notes = $this->timesheets_model->get_notes($month_filter_for_note);
+		$noteText = 'NOTE: '.$notes['note'] ?? '';
+		if ($noteText) {
+			// Blank row before NOTE
+			$writer->writeSheetRow('Sheet1', []);
+			$noteStyle = [
+				'font'       => 'Calibri',
+				'font-style' => 'italic',
+				'halign'     => 'center',
+				'valign'     => 'center',
+			];
+			// get the zero-based row index where the NOTE will be written
+			$noteRow = $writer->countSheetRows('Sheet1');
+			// merge from col 0 to col 3 (A→D) on that row :contentReference[oaicite:1]{index=1}
+			$writer->markMergedCell('Sheet1', $noteRow, 0, $noteRow, 3);
+			// now write the NOTE
+			$writer->writeSheetRow('Sheet1', [$noteText], $noteStyle);
+		}
+
+
+
+		// 10) Cleanup & save
 		foreach (glob(TIMESHEETS_PATH_EXPORT_FILE . '*') as $f) {
 			is_file($f) && @unlink($f);
 		}
@@ -5993,6 +6060,8 @@ class timesheets extends AdminController
 		]);
 		exit;
 	}
+
+
 
 	/**
 	 * Helper to build [ key => value ] map from a result set

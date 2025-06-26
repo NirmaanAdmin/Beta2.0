@@ -45,9 +45,10 @@ $file_header[] = _l('standard_working_time_of_month');
 							<ul>
 								<li class="text-danger">1. <?php echo _l('file_xlsx_attendance1'); ?></li>
 								<li class="text-danger">2. <?php echo _l('file_xlsx_attendance2'); ?></li>
+								<li class="text-danger">3. Enter P for Present, Enter L for Leave, Enter OFF for day-off/no shift, Enter WFH for Work from Home, Enter OW for Out for Work</li>
 
 							</ul>
-							<div class="table-responsive no-dt">
+							<!-- <div class="table-responsive no-dt">
 								<table class="table table-hover table-bordered">
 									<thead>
 										<tr>
@@ -83,14 +84,14 @@ $file_header[] = _l('standard_working_time_of_month');
 										?>
 									</tbody>
 								</table>
-							</div>
+							</div> -->
 							<hr>
 
 						<?php } ?>
 						
 						<div class="row">
 							<div class="col-md-4">
-								<?php echo form_open_multipart(admin_url('hrm/import_job_p_excel'),array('id'=>'import_form')) ;?>
+								<?php echo form_open_multipart(admin_url('timesheets/import_attendance_excel_new'),array('id'=>'import_form')) ;?>
 								<?php echo form_hidden('leads_import','true'); ?>
 								<?php echo render_input('file_csv','choose_excel_file','','file'); ?> 
 

@@ -116,6 +116,11 @@
           }, 800);
 
         }
+        if (response.notes == null || response.notes == undefined) {
+          $('#note').val('');
+        } else {
+          $('#note').val(response.notes);
+        }
 
         $('input[name="month"]').val(response.month);
         if (response.check_latch_timesheet) {
@@ -288,7 +293,7 @@
       if ($('input[name="is_edit"]').val() == 0) {
         var month = $("#month_timesheets").val();
         if (typeof month == 'undefined') {
-          month = $('input[name="current_month"]').val(); 
+          month = $('input[name="current_month"]').val();
         }
         data.month = month;
         $.post(admin_url + 'timesheets/show_detail_timesheets', data).done(function(response) {

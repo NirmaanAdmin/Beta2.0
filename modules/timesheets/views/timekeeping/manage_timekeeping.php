@@ -99,22 +99,20 @@
             <hr class="hr-panel-heading no-margin" />
             <div class="row mtop15" style="position: relative;">
               <div class="col-md-8 line-suggestion">
-                <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="<?php echo _l('p_x_timekeeping'); ?>" class="btn">AL</button>
-                <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="<?php echo _l('W_x_timekeeping'); ?>" class="btn">W</button>
-                <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="<?php echo _l('A_x_timekeeping'); ?>" class="btn">U</button>
+
                 <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="<?php echo _l('Le_x_timekeeping'); ?>" class="btn">HO</button>
-                <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="<?php echo _l('E_x_timekeeping'); ?>" class="btn">E</button>
-                <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="<?php echo _l('L_x_timekeeping'); ?>" class="btn">L</button>
-                <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="<?php echo _l('CT_x_timekeeping'); ?>" class="btn">B</button>
-                <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="<?php echo _l('OM_x_timekeeping'); ?>" class="btn">SI</button>
-                <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="<?php echo _l('TS_x_timekeeping'); ?>" class="btn">M</button>
-                <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="<?php echo _l('H_x_timekeeping'); ?>" class="btn">ME</button>
-                <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="<?php echo _l('NS_x_timekeeping'); ?>" class="btn">NS</button>
-                <!--  <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="<?php //echo _l('EB_x_timekeeping'); 
-                                                                                                            ?>" class="btn" >EB</button>
-        <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="<?php //echo _l('UB_x_timekeeping'); 
-                                                                                              ?>" class="btn" >UB</button> -->
                 <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="<?php echo _l('P_timekeeping'); ?>" class="btn">P</button>
+                <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="<?php echo _l('L_x_timekeeping'); ?>" class="btn">L</button>
+                <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="Sunday Off" class="btn">OFF</button>
+                <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="Half Day" class="btn">HF</button>
+                <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="Sick Leave" class="btn">SL</button>
+                <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="Casual Leave" class="btn">CL</button>
+                <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="Out For Work" class="btn">OW</button>
+                <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="Maternity Leave" class="btn">ML</button>
+                <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="Work From Home" class="btn">WFH</button>
+                <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="Compensatory Off" class="btn">CO</button>
+                <button type="button" data-toggle="tooltip" data-placement="top" data-original-title=" NOT APPLICABLE" class="btn">N/A</button>
+
                 <div class="clearfix"></div>
               </div>
               <div class="col-md-4" style="margin-bottom: 30px;">
@@ -151,8 +149,15 @@
                 } ?>
 
 
-                <?php if (is_admin() || has_permission('timesheets_timekeeping', '', 'edit')) { ?>
+                <?php if (is_admin() || has_permission('timesheets_timekeeping', '', 'edit')) {
+                  if ($notes['note'] != '') {
+                    $notes_val = $notes['note'];
+                  } else {
+                    $notes_val = '';
+                  }
+                ?>
 
+                  <?php echo render_textarea('note', 'Note', $notes_val, ['rows' => 5]); ?>
                   <button class="btn btn-danger pull-right unlatch_time_sheet mleft5 <?php echo html_entity_decode($latched); ?>" id="btn_unlatch" onclick="return confirm('<?php echo _l('timekeeping_unlatch'); ?>')"><?php echo _l('reopen_attendance'); ?></button>
 
                   <button class="btn btn-info pull-right latch_time_sheet mleft5 <?php echo html_entity_decode($latch); ?>" id="btn_latch" onclick="return confirm('<?php echo _l('timekeeping_latch'); ?>')"><?php echo _l('close_attendance'); ?></button>

@@ -4974,7 +4974,7 @@ class timesheets_model extends app_model
 	 */
 	public function add_update_timesheet($data, $is_timesheets = false)
 	{
-		$type_valid = ['AL', 'W', 'U', 'HO', 'E', 'L', 'B', 'SI', 'M', 'ME', 'NS', 'P'];
+		$type_valid = ['AL', 'W', 'U', 'HO', 'E', 'L', 'B', 'SI', 'M', 'ME', 'NS', 'P', 'OFF', 'H/F', 'W/H', 'N/A'];
 		$data_type_of_leave = $this->get_type_of_leave();
 		foreach ($data_type_of_leave as $key => $value) {
 			$type_valid[] = $value['symbol'];
@@ -4984,12 +4984,32 @@ class timesheets_model extends app_model
 		foreach ($data as $row) {
 			foreach ($row as $key => $val) {
 				if ($key != 'staff_id' && $key != 'staff_name') {
-					$ts = explode(";", $val);
 					if ($is_timesheets === true) {
 						$this->db->where('staff_id', $row['staff_id']);
 						$this->db->where('date_work', $key);
 						$this->db->delete(db_prefix() . 'timesheets_timesheet');
 					}
+
+					// Handle simple values like "P" without colon
+					if (in_array(strtoupper(trim($val)), $type_valid)) {
+						if (strtoupper(trim($val)) == 'P' || strtoupper(trim($val)) == 'L' || strtoupper(trim($val)) == 'W/H' || strtoupper(trim($val)) == 'H/F' || strtoupper(trim($val)) == 'N/A' || strtoupper(trim($val)) == 'OFF') {
+							$this->db->insert(db_prefix() . 'timesheets_timesheet', [
+								'staff_id' => $row['staff_id'],
+								'date_work' => $key,
+								'value' => '',
+								'add_from' => get_staff_user_id(),
+								'type' => strtoupper(trim($val)),
+							]);
+							$insert_id = $this->db->insert_id();
+							if ($insert_id) {
+								$results++;
+							}
+						}
+						continue; // Skip the rest of processing for this value
+					}
+
+					// Original processing for values with colon (like "W:9.5")
+					$ts = explode(";", $val);
 					foreach ($ts as $ex) {
 						$value = explode(':', trim($ex));
 
@@ -5305,9 +5325,25 @@ class timesheets_model extends app_model
 		if ($string != '') {
 			$array = explode(';', $string);
 			$list_type = [];
+			$special_cases = ['H/F', 'W/H', 'N/A']; // Add any other special cases here
+
+			// First check if this is a special case that shouldn't be processed
+			if (count($array) == 1) {
+				$trimmed = trim($array[0]);
+				if (in_array($trimmed, $special_cases)) {
+					return $trimmed; // Return the special case as-is
+				}
+			}
+
 			foreach ($array as $key => $value) {
 				$value = trim($value);
 				$split = explode(':', $value);
+
+				// Skip processing if this is a special case
+				if (in_array($value, $special_cases)) {
+					continue;
+				}
+
 				if (isset($split[0]) && isset($split[1])) {
 					if (count($list_type) == 0) {
 						array_push($list_type, $split[0]);
@@ -5320,6 +5356,15 @@ class timesheets_model extends app_model
 					}
 				}
 			}
+
+			// If we have special cases mixed with regular entries, return original
+			foreach ($array as $value) {
+				$value = trim($value);
+				if (in_array($value, $special_cases)) {
+					return $string;
+				}
+			}
+
 			$array_result = [];
 			foreach ($list_type as $key => $type) {
 				$type = str_replace(' ', '', $type);
@@ -5333,16 +5378,22 @@ class timesheets_model extends app_model
 						}
 					}
 				}
-				// if ($total > $max_hour) {
-				// 	$total = $max_hour;
-				// }
+
 				if ($total > 0) {
 					$array_result[] = $type . ':' . $total;
 				}
 			}
+
 			if (count($array_result) > 0) {
 				return implode('; ', $array_result);
 			} else {
+				// Check if we had only special cases that were skipped
+				foreach ($array as $value) {
+					$value = trim($value);
+					if (in_array($value, $special_cases)) {
+						return $value;
+					}
+				}
 				return '';
 			}
 		} else {
@@ -6830,7 +6881,7 @@ class timesheets_model extends app_model
 	 */
 	public function get_attendance_manual($staffs_list, $month = '', $year = '', $from_date = '', $to_date = '')
 	{
-		$type_valid = ['AL', 'W', 'U', 'HO', 'E', 'L', 'B', 'SI', 'M', 'ME', 'NS', 'P'];
+		$type_valid = ['AL', 'W', 'U', 'HO', 'E', 'L', 'B', 'SI', 'M', 'ME', 'NS', 'P', 'OFF', 'H/F', 'W/H', 'N/A'];;
 		$data_type_of_leave = $this->get_type_of_leave();
 		foreach ($data_type_of_leave as $key => $value) {
 			$type_valid[] = $value['symbol'];
@@ -6951,7 +7002,7 @@ class timesheets_model extends app_model
 
 						$result_lack = $this->merge_ts($total_lack, $max_hour, $type_valid);
 						if (empty($result_lack)) {
-							$result_lack = 'NS';
+							$result_lack = 'OFF';
 						}
 					} else {
 						if ($check_holiday == 'holiday') {
@@ -7552,12 +7603,14 @@ class timesheets_model extends app_model
 		$data_timekeeping_form = get_timesheets_option('timekeeping_form');
 		$staff_row_tk = [];
 		$staffs = $this->getStaff('', $newquerystring);
+
 		$data['staffs_setting'] = $this->staff_model->get();
 		$data['staffs'] = $staffs;
 		if ($data_timekeeping_form == 'timekeeping_task' && $data['check_latch_timesheet'] == false) {
 			$result = $this->get_attendance_task($staffs, $g_month, $year);
 			$staff_row_tk = $result['staff_row_tk'];
 		} else {
+
 			if ($data['check_latch_timesheet'] == false) {
 				$result = $this->get_attendance_manual($staffs, $g_month, $year);
 				$staff_row_tk = $result['staff_row_tk'];
@@ -8952,5 +9005,55 @@ class timesheets_model extends app_model
 		}
 
 		return $affectedRows > 0;
+	}
+
+	public function add_update_note()
+	{
+		if ($this->input->post()) {
+			// 1) Grab only month & note
+			$month = $this->input->post('month');
+			$note  = $this->input->post('note');
+
+			// 2) Prepare data array
+			$data = [
+				'month' => $month,
+				'note'  => $note,
+			];
+
+			// 3) Check for existing entry by month
+			$existing = $this->db
+				->where('month', $month)
+				->get('tbltimesheets_notes')
+				->row();
+
+			if ($existing) {
+				// 4a) If found, do an update
+				$this->db
+					->where('month', $month)
+					->update('tbltimesheets_notes', $data);
+			} else {
+				// 4b) Otherwise, insert new
+				$this->db
+					->insert('tbltimesheets_notes', $data);
+			}
+
+			// (optional) return success/failure
+			return $this->db->affected_rows() > 0;
+		}
+
+		return false;
+	}
+	public function get_notes($month = null)
+	{	
+		$this->db->from('tbltimesheets_notes');
+
+		if ($month !== null) {
+			$this->db->where('month', $month);
+			$query = $this->db->get();
+			$row   = $query->row_array();
+			return $row ?: [];
+		}
+
+		return $this->db->get()->result_array();
 	}
 }
