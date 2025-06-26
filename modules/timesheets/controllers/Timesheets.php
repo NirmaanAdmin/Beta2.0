@@ -7487,10 +7487,10 @@ class timesheets extends AdminController
 					->where('d.staff_id', $staff_id_raw);
 				$shift = $this->db->get()->row_array();
 
-				if (empty($shift['time_start_work']) || empty($shift['time_end_work'])) {
-					// skip or set default hours (here skipping)
-					continue;
-				}
+				// if (empty($shift['time_start_work']) || empty($shift['time_end_work'])) {
+				// 	// skip or set default hours (here skipping)
+				// 	continue;
+				// }
 
 				$start_ts = strtotime($shift['time_start_work']);
 				$end_ts   = strtotime($shift['time_end_work']);
@@ -7499,7 +7499,7 @@ class timesheets extends AdminController
 				// collect day-columns (index 7 onward)
 				for ($i = 7; $i < count($column_key); $i++) {
 					$cell = strtoupper($row[$i] ?? '');
-					if (!in_array($cell, ['P', 'L'], true)) {
+					if (!in_array($cell, ['P', 'L','OFF','N/A','W/H','H/F'], true)) {
 						continue;
 					}
 					$day_number = $i - 6; // index 7 → day 1
@@ -7508,8 +7508,8 @@ class timesheets extends AdminController
 					$arr_insert[] = [
 						'staff_id'    => $staff_id_raw,
 						'date_work'   => $date_work,
-						'value'       => $cell === 'P' ? $hours : '',
-						'type'        => $cell === 'P' ? 'W' : 'L',
+						'value'       => '',
+						'type'        => $cell,
 						'add_from'    => get_staff_user_id(),
 					];
 				}
@@ -7617,7 +7617,8 @@ class timesheets extends AdminController
 			'Actual working time of formal contract (hours)',
 			'Paid leave time (hours)',
 			'Unpaid leave time (hours)',
-			'Standard working time of the month (hours)'
+			'Standard working time of the month (hours)',
+			'Department name'
 		];
 
 		$data_keys_to_remove = [
@@ -7625,7 +7626,8 @@ class timesheets extends AdminController
 			'actual_workday',
 			'paid_leave',
 			'unpaid_leave',
-			'standard_workday'
+			'standard_workday',
+			'staff_departments'
 		];
 
 		// 1. Remove from headers array
@@ -7710,7 +7712,7 @@ class timesheets extends AdminController
 				if (isset($staff_i->staff_identifi)) {
 					$data_object_kpi['hr_code'] = $staff_i->staff_identifi;
 				} else {
-					$data_object_kpi['hr_code'] = $this->hr_payroll_model->hrp_format_code('EXS', $staff_i->staffid, 5);
+					$data_object_kpi['hr_code'] = '';
 				}
 
 				$data_object_kpi['staff_name'] = $staff_i->firstname . ' ' . $staff_i->lastname;
@@ -7732,11 +7734,9 @@ class timesheets extends AdminController
 					}
 				}
 
-				$data_object_kpi['staff_departments'] = $list_department;
 			} else {
 				$data_object_kpi['hr_code'] = '';
 				$data_object_kpi['staff_name'] = '';
-				$data_object_kpi['staff_departments'] = '';
 			}
 
 			if (isset($attendances_value[$staff_value['staffid'] . '_' . $current_month])) {
