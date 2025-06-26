@@ -104,12 +104,12 @@
                 <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="<?php echo _l('P_timekeeping'); ?>" class="btn">P</button>
                 <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="<?php echo _l('L_x_timekeeping'); ?>" class="btn">L</button>
                 <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="Sunday Off" class="btn">OFF</button>
-                <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="Half Day" class="btn">HF</button>
+                <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="Half Day" class="btn">H/F</button>
                 <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="Sick Leave" class="btn">SL</button>
                 <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="Casual Leave" class="btn">CL</button>
                 <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="Out For Work" class="btn">OW</button>
                 <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="Maternity Leave" class="btn">ML</button>
-                <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="Work From Home" class="btn">WFH</button>
+                <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="Work From Home" class="btn">W/H</button>
                 <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="Compensatory Off" class="btn">CO</button>
                 <button type="button" data-toggle="tooltip" data-placement="top" data-original-title=" NOT APPLICABLE" class="btn">N/A</button>
 
