@@ -22607,4 +22607,151 @@ class Warehouse_model extends App_Model
 
 		return $arr_wo_order;
 	}
+
+	/**
+     * Get Stock Received dashboard
+     *
+     * @param  array  $data  Dashboard filter data
+     * @return array
+     */
+    public function get_stock_received_dashboard($data = array())
+    {
+        $response = array();
+        $vendors = isset($data['vendors']) ? $data['vendors'] : '';
+        $report_months = isset($data['report_months']) ? $data['report_months'] : '';
+        $report_from = isset($data['report_from']) ? $data['report_from'] : '';
+        $report_to = isset($data['report_to']) ? $data['report_to'] : '';
+        $this->load->model('currencies_model');
+        $this->load->model('purchase/purchase_model');
+        $base_currency = $this->currencies_model->get_base_currency();
+        if ($request->currency != 0 && $request->currency != null) {
+            $base_currency = pur_get_currency_by_id($request->currency);
+        }
+
+        $response['total_receipts'] = $response['total_received_po'] = $response['total_po'] = $response['total_quantity_received'] = $response['total_client_supply'] = $response['total_bought_out_items'] = $response['fully_documented'] = $response['incompleted'] = 0;
+        $response['line_order_date'] = $response['line_order_total'] = array(); 
+        $response['bar_top_vendor_name'] = $response['bar_top_vendor_value'] = array();
+
+        $custom_date_select = $this->purchase_model->get_where_report_period(db_prefix() . 'goods_receipt.date_add');
+        if(!empty($custom_date_select)) {
+        	$custom_date_select = str_replace("AND (", "", $custom_date_select);
+        	$custom_date_select = str_replace(")", "", $custom_date_select);
+        }
+
+        $this->db->select(
+		    db_prefix() . 'pur_orders.id, ' .
+		    db_prefix() . 'pur_orders.vendor, ' .
+		    db_prefix() . 'pur_orders.order_date'
+		);
+        $this->db->from(db_prefix() . 'pur_orders');
+        if (!empty($vendors) && is_array($vendors)) {
+            $this->db->where_in(db_prefix() . 'pur_orders.vendor', $vendors);
+        }
+        $pur_orders = $this->db->get()->result_array();
+
+        $this->db->select(
+		    db_prefix() . 'goods_receipt.id, ' .
+		    db_prefix() . 'goods_receipt.pr_order_id, ' .
+		    db_prefix() . 'goods_receipt.supplier_code, ' .
+		    db_prefix() . 'goods_receipt.kind, ' .
+		    db_prefix() . 'goods_receipt.date_add, ' .
+		    'SUM(' . db_prefix() . 'goods_receipt_detail.quantities) AS total_quantity'
+		);
+        $this->db->from(db_prefix() . 'goods_receipt');
+        $this->db->join(
+            db_prefix() . 'goods_receipt_detail',
+            db_prefix() . 'goods_receipt_detail.goods_receipt_id = ' . db_prefix() . 'goods_receipt.id',
+            'left'
+        );
+        if (!empty($vendors) && is_array($vendors)) {
+            $this->db->where_in(db_prefix() . 'goods_receipt.supplier_code', $vendors);
+        }
+        if (!empty($custom_date_select)) {
+        	$this->db->where($custom_date_select);
+        }
+        $this->db->group_by(db_prefix() . 'goods_receipt.id');
+        $this->db->order_by(db_prefix() . 'goods_receipt.date_add', 'asc');
+        $goods_receipt = $this->db->get()->result_array();
+
+        if (!empty($pur_orders)) {
+        	$response['total_po'] = count($pur_orders);
+        }
+
+        if (!empty($goods_receipt)) {
+            $response['total_receipts'] = count($goods_receipt);
+            $response['total_received_po'] = count(
+		        array_unique(
+		            array_column(
+		                array_filter($goods_receipt, fn($item) => !empty($item['pr_order_id'])),
+		                'pr_order_id'
+		            )
+		        )
+		    );
+		    $response['total_quantity_received'] = number_format(array_sum(array_column($goods_receipt, 'total_quantity')), 2, '.', '');
+		    $response['total_client_supply'] = count(array_filter($goods_receipt, function ($item) {
+                return isset($item['kind']) && $item['kind'] == "Client Supply";
+            }));
+            $response['total_bought_out_items'] = count(array_filter($goods_receipt, function ($item) {
+                return isset($item['kind']) && $item['kind'] == "Bought out items";
+            }));
+
+            $line_order_total = array();
+            $bar_top_vendors = array();
+            foreach ($goods_receipt as $key => $value) {
+            	$month = date('M-y', strtotime($value['date_add']));
+                if (!isset($line_order_total[$month])) {
+                    $line_order_total[$month] = 0;
+                }
+                $line_order_total[$month]++;
+
+                $vendor_id = $value['supplier_code'];
+                if (!isset($bar_top_vendors[$vendor_id])) {
+                    $bar_top_vendors[$vendor_id]['name'] = get_vendor_company_name($vendor_id);
+                    $bar_top_vendors[$vendor_id]['value'] = 0;
+                }
+                $bar_top_vendors[$vendor_id]['value']++;
+            }
+
+            if (!empty($line_order_total)) {
+                $response['line_order_date'] = array_keys($line_order_total);
+                $response['line_order_total'] = array_values($line_order_total);
+            }
+
+            if (!empty($bar_top_vendors)) {
+                usort($bar_top_vendors, function ($a, $b) {
+                    return $b['value'] <=> $a['value'];
+                });
+                $bar_top_vendors = array_slice($bar_top_vendors, 0, 10);
+                $response['bar_top_vendor_name'] = array_column($bar_top_vendors, 'name');
+                $response['bar_top_vendor_value'] = array_column($bar_top_vendors, 'value');
+            }
+        }
+
+        // Get total distinct goods_receipt_id from documentation table
+		$this->db->select('COUNT(*) as total_received');
+		$this->db->from(db_prefix() . 'goods_receipt_documentation');
+		$total_received_row = $this->db->get()->row_array();
+		$total_received = isset($total_received_row['total_received']) ? (int)$total_received_row['total_received'] : 0;
+		if ($total_received > 0) {
+			$this->db->select('COUNT(*) as attached_rows');
+			$this->db->from(db_prefix() . 'goods_receipt_documentation');
+			$this->db->where("(`attachments` = 1 OR (`required` = 0 AND `attachments` = 0))", null, false);
+			$attached_rows_result = $this->db->get()->row_array();
+			$attached_rows = isset($attached_rows_result['attached_rows']) ? (int)$attached_rows_result['attached_rows'] : 0;
+			$response['fully_documented'] = ($total_received > 0 && $total_received === $attached_rows)
+				? 100
+				: round(($attached_rows / $total_received) * 100);
+			$subquery_incomplete = '(SELECT goods_receipt_id
+				FROM ' . db_prefix() . 'goods_receipt_documentation
+				WHERE required = 1 AND attachments = 0
+			) AS incomplete_gr';
+			$this->db->select('COUNT(*) AS incomplete_count');
+			$this->db->from($subquery_incomplete, null, false);
+			$incomplete_result = $this->db->get()->row_array();
+			$incomplete_count = isset($incomplete_result['incomplete_count']) ? (int)$incomplete_result['incomplete_count'] : 0;
+			$response['incompleted'] = round(($incomplete_count / $total_received) * 100);
+		}
+
+        return $response;
+    }
 }

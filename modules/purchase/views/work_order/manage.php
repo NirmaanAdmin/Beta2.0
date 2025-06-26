@@ -95,7 +95,7 @@
                   <div class="row mtop20">
                      <div class="col-md-4">
                         <p class="mbot15 dashboard_stat_title">Pie Chart for WO Approval Status</p>
-                        <div style="width: 100%; height: 450px; display: flex; justify-content: left;">
+                        <div style="width: 100%; height: 440px; display: flex; justify-content: left;">
                            <canvas id="pieChartForWOApprovalStatus"></canvas>
                         </div>
                      </div>
@@ -107,7 +107,7 @@
                      </div>
                      <div class="col-md-4">
                         <p class="mbot15 dashboard_stat_title">Pie Chart for WO per Department</p>
-                        <div style="width: 100%; height: 500px; display: flex; justify-content: left;">
+                        <div style="width: 100%; height: 470px; display: flex; justify-content: left;">
                            <canvas id="pieChartForDepartment"></canvas>
                         </div>
                      </div>
