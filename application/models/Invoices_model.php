@@ -2400,6 +2400,7 @@ class Invoices_model extends App_Model
         $response['pie_status_name'] = $response['pie_status_value'] = array();
 
         $this->db->select('id, total, date, project_id, status');
+        $this->db->order_by(db_prefix() . 'invoices.date', 'asc');
         $invoices = $this->db->get(db_prefix() . 'invoices')->result_array();
 
         if (!empty($invoices)) {
