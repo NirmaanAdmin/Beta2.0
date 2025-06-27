@@ -5782,6 +5782,7 @@ class timesheets extends AdminController
 	 * @return json
 	 */
 
+
 	public function export_attendance_excel()
 	{
 		if (!class_exists('XLSXReader_fin')) {
@@ -5853,6 +5854,7 @@ class timesheets extends AdminController
 				$header[] = date('D d', $time);
 			}
 		}
+		// Append only the TOTAL columns
 		$header = array_merge($header, [
 			'TOTAL "P"',
 			'TOTAL "L"',
@@ -5867,6 +5869,12 @@ class timesheets extends AdminController
 			'TOTAL N/A',
 			'TOTAL'
 		]);
+
+		// Calculate indices
+		$numTotals       = 12;
+		$totalStartIndex = count($header) - $numTotals;
+		$dayStartIndex   = 7;
+		$dayCount        = $totalStartIndex - $dayStartIndex;
 
 		// 7) Writer setup
 		$writer = new XLSXWriter();
@@ -5894,8 +5902,11 @@ class timesheets extends AdminController
 		]);
 		$writer->markMergedCell('Sheet1', 1, 0, 1, count($header) - 1);
 
-		// Header row style
-		$writer->writeSheetRow('Sheet1', $header, [
+		// Single color for day columns
+		$dayColor = '#DDEBF7';
+
+		// Define styles
+		$defaultHeaderStyle = [
 			'fill'         => '#C65911',
 			'font-style'   => 'bold',
 			'color'        => '#FFFFFF',
@@ -5904,10 +5915,67 @@ class timesheets extends AdminController
 			'height'       => 25,
 			'font-size'    => 13,
 			'font'         => 'Calibri',
-		]);
+			'halign'       => 'center',
+			'valign'       => 'center',
+		];
+		$greenHeaderStyle  = [
+			'fill'         => '#C6EFCE',
+			'font-style'   => 'bold',
+			'color'        => '#000000',
+			'border'       => 'left,right,top,bottom',
+			'border-color' => '#000000',
+			'font-size'    => 13,
+			'font'         => 'Calibri',
+			'halign'       => 'center',
+			'valign'       => 'center',
+		];
+		$dayHeaderStyle   = [
+			'fill'         => $dayColor,
+			'font-style'   => 'bold',
+			'color'        => '#000000',
+			'border'       => 'left,right,top,bottom',
+			'border-color' => '#000000',
+			'font-size'    => 13,
+			'font'         => 'Calibri',
+			'halign'       => 'center',
+			'valign'       => 'center',
+		];
 
-		$styleOdd  = ['fill' => '#F8CBAD', 'border' => 'left,right,top,bottom', 'border-color' => '#FFFFFF', 'height' => 25, 'font-size' => 12, 'font' => 'Calibri'];
-		$styleEven = ['fill' => '#FCE4D6', 'border' => 'left,right,top,bottom', 'border-color' => '#FFFFFF', 'height' => 25, 'font-size' => 12, 'font' => 'Calibri'];
+		// Build header style map
+		$headerStyleMap = [];
+		foreach ($header as $i => $_h) {
+			if ($i < $dayStartIndex) {
+				$headerStyleMap[$i] = $defaultHeaderStyle;
+			} elseif ($i < $totalStartIndex) {
+				$headerStyleMap[$i] = $dayHeaderStyle;
+			} else {
+				$headerStyleMap[$i] = $greenHeaderStyle;
+			}
+		}
+		$writer->writeSheetRow('Sheet1', $header, $headerStyleMap);
+
+		// Data row styles
+		$defaultOdd  = ['fill' => '#F8CBAD', 'border' => 'left,right,top,bottom', 'border-color' => '#FFFFFF', 'font' => 'Calibri', 'font-size' => 12];
+		$defaultEven = ['fill' => '#FCE4D6', 'border' => 'left,right,top,bottom', 'border-color' => '#FFFFFF', 'font' => 'Calibri', 'font-size' => 12];
+		$dayDataStyle = [
+			'fill'         => $dayColor,
+			'border'       => 'left,right,top,bottom',
+			'border-color' => '#FFFFFF',
+			'font-size'    => 12,
+			'font'         => 'Calibri',
+			'halign'       => 'center',
+			'valign'       => 'center',
+		];
+		$greenData    = [
+			'fill'         => '#C6EFCE',
+			'border'       => 'left,right,top,bottom',
+			'border-color' => '#000000',
+			'font-size'    => 12,
+			'font'         => 'Calibri',
+			'halign'       => 'center',
+			'valign'       => 'center',
+		];
+
 		// 8) Data rows
 		$sr_no = 1;
 		foreach ($list as $idx => $row) {
@@ -5927,109 +5995,97 @@ class timesheets extends AdminController
 			$doj_raw = $emp_date_of_joining_map[$staff_name] ?? '';
 			$out[] = $doj_raw ? date('d M, Y', strtotime($doj_raw)) : '';
 
-			$counters = [
-				'P'   => 0,
-				'L'   => 0,
-				'SL'  => 0,
-				'OW'  => 0,
-				'CL'  => 0,
-				'OFF' => 0,
-				'H'   => 0,
-				'COFF' => 0,
-				'HF'  => 0,
-				'WH'  => 0,
-				'NA'  => 0,
-			];
-
-			foreach (array_slice($header, 7, $days_in_month) as $col) {
+			$counters = array_fill_keys(['P', 'L', 'SL', 'OW', 'CL', 'OFF', 'H', 'COFF', 'HF', 'WH', 'NA'], 0);
+			foreach (array_slice($header, $dayStartIndex, $dayCount) as $col) {
 				$val = $row[$col] ?? '';
-				if (strpos($val, 'P') === 0) {
-					$val = 'P';
-					$counters['P']++;
-				} elseif ($val === '') {
-					$val = 'L';
-					$counters['L']++;
-				} elseif ($val === 'OFF') {
-					$val = 'OFF';
-					$counters['OFF']++;
-				} elseif ($val === 'H') {
-					$counters['H']++;
-				} elseif ($val === 'C/OFF') {
-					$counters['COFF']++;
-				} elseif ($val === 'H/F') {
-					$counters['HF']++;
-				} elseif ($val === 'W/H') {
-					$counters['WH']++;
-				} elseif ($val === 'N/A') {
-					$counters['NA']++;
-				} elseif ($val === 'OW') {
-					$counters['OW']++;
-				} elseif ($val === 'CL') {
-					$counters['CL']++;
+				switch (true) {
+					case strpos($val, 'P') === 0:
+						$val = 'P';
+						$counters['P']++;
+						break;
+					case $val === '':
+						$val = 'L';
+						$counters['L']++;
+						break;
+					case $val === 'OFF':
+						$counters['OFF']++;
+						break;
+					case $val === 'H':
+						$counters['H']++;
+						break;
+					case $val === 'C/OFF':
+						$counters['COFF']++;
+						break;
+					case $val === 'H/F':
+						$counters['HF']++;
+						break;
+					case $val === 'W/H':
+						$counters['WH']++;
+						break;
+					case $val === 'N/A':
+						$counters['NA']++;
+						break;
+					case $val === 'OW':
+						$counters['OW']++;
+						break;
+					case $val === 'CL':
+						$counters['CL']++;
+						break;
 				}
 				$out[] = $val;
 			}
+			$totals = array_merge(
+				array_values($counters),
+				[array_sum($counters)]
+			);
+			$out = array_merge($out, $totals);
 
-			$out = array_merge($out, [
-				$counters['P'],
-				$counters['L'],
-				$counters['SL'],
-				$counters['OW'],
-				$counters['CL'],
-				$counters['OFF'],
-				$counters['H'],
-				$counters['COFF'],
-				$counters['HF'],
-				$counters['WH'],
-				$counters['NA'],
-				array_sum($counters)
-			]);
+			// Build style map for each cell
+			$rowStyleMap = [];
+			foreach ($out as $i => $_val) {
+				if ($i < $dayStartIndex) {
+					$rowStyleMap[$i] = ($idx % 2) ? $defaultEven : $defaultOdd;
+				} elseif ($i < $totalStartIndex) {
+					$rowStyleMap[$i] = $dayDataStyle;
+				} else {
+					$rowStyleMap[$i] = $greenData;
+				}
+			}
 
-			$writer->writeSheetRow('Sheet1', $out, ($idx % 2) ? $styleEven : $styleOdd);
+			$writer->writeSheetRow('Sheet1', $out, $rowStyleMap);
 		}
 
 		// ── 9) LEGENDS + NOTE ──
-
-		// Blank row
-		// Blank row
 		$writer->writeSheetRow('Sheet1', []);
-
-		// Legend entries center-aligned with borders
 		$legends = [
-			['HO',   'Public Holiday'],
-			['P',    'Present'],
-			['L',    'On Leave'],
-			['OFF',  'Sunday Off'],
-			['H/F',  'Half Day'],
-			['SL',   'Sick Leave'],
-			['ML',   'Maternity Leave'],
-			['W/H',  'Work From Home'],
+			['HO', 'Public Holiday'],
+			['P', 'Present'],
+			['L', 'On Leave'],
+			['OFF', 'Sunday Off'],
+			['H/F', 'Half Day'],
+			['SL', 'Sick Leave'],
+			['ML', 'Maternity Leave'],
+			['W/H', 'Work From Home'],
 			['C/OFF', 'Compensatory Off'],
-			['N/A',  'Not Applicable'],
+			['N/A', 'Not Applicable']
 		];
 		$legendStyle = [
-			'font'      => 'Calibri',
-			'halign'    => 'center',
-			'valign'    => 'center',
+			'font'         => 'Calibri',
+			'halign'       => 'center',
+			'valign'       => 'center',
 			'border'       => 'left,right,top,bottom',
-			'border_style' => 'medium',    // solid medium-weight
-			'border_color' => '000000',    // black
+			'border_style' => 'medium',
+			'border_color' => '000000',
 		];
-
 		foreach ($legends as $lg) {
 			$writer->writeSheetRow('Sheet1', $lg, $legendStyle);
 		}
 
-
-
-		// NOTE row (merged across columns A–D)
-
+		// NOTE
 		$month_filter_for_note = date('m-Y', strtotime($month_filter));
-
 		$notes = $this->timesheets_model->get_notes($month_filter_for_note);
 		$noteText = $notes['note'] ?? '';
 		if ($noteText) {
-			// Blank row before NOTE
 			$writer->writeSheetRow('Sheet1', []);
 			$noteStyle = [
 				'font'       => 'Calibri',
@@ -6037,15 +6093,10 @@ class timesheets extends AdminController
 				'halign'     => 'center',
 				'valign'     => 'center',
 			];
-			// get the zero-based row index where the NOTE will be written
 			$noteRow = $writer->countSheetRows('Sheet1');
-			// merge from col 0 to col 3 (A→D) on that row :contentReference[oaicite:1]{index=1}
 			$writer->markMergedCell('Sheet1', $noteRow, 0, $noteRow, 3);
-			// now write the NOTE
 			$writer->writeSheetRow('Sheet1', ['NOTE: ' . $noteText], $noteStyle);
 		}
-
-
 
 		// 10) Cleanup & save
 		foreach (glob(TIMESHEETS_PATH_EXPORT_FILE . '*') as $f) {
