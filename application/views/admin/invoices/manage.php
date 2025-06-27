@@ -34,11 +34,8 @@ $(document).ready(function() {
 
   function get_client_invoices_dashboard() {
   	"use strict";
-	var data = {
-	    vendors: $('select[name="vendor_ft[]"]').val(),
-	    projects: $('select[name="project[]"]').val(),
-	    group_pur: $('select[name="group_pur[]"]').val(),
-	}
+	var data = {}
+	
   	$.post(admin_url + 'invoices/get_client_invoices_dashboard', data).done(function(response){
 	    response = JSON.parse(response);
 
