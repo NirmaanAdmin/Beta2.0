@@ -990,4 +990,12 @@ class Invoices extends AdminController
         echo '</Workbook>';
         exit;
     }
+
+    public function get_client_invoices_dashboard()
+    {
+        $data = $this->input->post();
+        $result = $this->invoices_model->get_client_invoices_dashboard($data);
+        echo json_encode($result);
+        die;
+    }
 }

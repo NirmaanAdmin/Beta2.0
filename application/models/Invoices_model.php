@@ -2378,4 +2378,77 @@ class Invoices_model extends App_Model
 
         return $response;
     }
+
+    /**
+     * Get client invoices dashboard
+     *
+     * @param  array  $data  Dashboard filter data
+     * @return array
+     */
+    public function get_client_invoices_dashboard($data = array())
+    {
+        $response = array();
+        $this->load->model('currencies_model');
+        $base_currency = $this->currencies_model->get_base_currency();
+        if ($request->currency != 0 && $request->currency != null) {
+            $base_currency = pur_get_currency_by_id($request->currency);
+        }
+
+        $response['total_invoices_raised'] = $response['total_invoiced_amount'] = $response['average_invoice_value'] = 0;
+        $response['line_order_date'] = $response['line_order_total'] = array();
+        $response['pie_project_name'] = $response['pie_project_value'] = array();
+        $response['pie_status_name'] = $response['pie_status_value'] = array();
+
+        $this->db->select('id, total, date, project_id, status');
+        $invoices = $this->db->get(db_prefix() . 'invoices')->result_array();
+
+        if (!empty($invoices)) {
+            $total_invoices_raised = count($invoices);
+            $response['total_invoices_raised'] = $total_invoices_raised;
+            $total_invoiced_amount = array_reduce($invoices, function ($carry, $item) {
+                return $carry + (float)$item['total'];
+            }, 0);
+            $response['total_invoiced_amount'] = app_format_money($total_invoiced_amount, $base_currency->symbol);
+            if($total_invoices_raised > 0) {
+                $average_invoice_value = $total_invoiced_amount / $total_invoices_raised;
+                $response['average_invoice_value'] = app_format_money($average_invoice_value, $base_currency->symbol);
+            }
+
+            $line_order_total = array();
+            foreach ($invoices as $key => $value) {
+                $month = date('M-y', strtotime($value['date']));
+                if (!isset($line_order_total[$month])) {
+                    $line_order_total[$month] = 0;
+                }
+                $line_order_total[$month] += $value['total'];
+            }
+
+            if (!empty($line_order_total)) {
+                $response['line_order_date'] = array_keys($line_order_total);
+                $response['line_order_total'] = array_values($line_order_total);
+            }
+
+            $project_grouped = array_reduce($invoices, function ($carry, $item) {
+                $group = get_project_name_by_id($item['project_id']);
+                $carry[$group] = ($carry[$group] ?? 0) + (float) $item['total'];
+                return $carry;
+            }, []);
+            if (!empty($project_grouped)) {
+                $response['pie_project_name'] = array_keys($project_grouped);
+                $response['pie_project_value'] = array_values($project_grouped);
+            }
+
+            $status_grouped = array_reduce($invoices, function ($carry, $item) {
+                $group = format_invoice_status($item['status'], '', false);
+                $carry[$group] = ($carry[$group] ?? 0) + (float) $item['total'];
+                return $carry;
+            }, []);
+            if (!empty($status_grouped)) {
+                $response['pie_status_name'] = array_keys($status_grouped);
+                $response['pie_status_value'] = array_values($status_grouped);
+            }
+        }
+
+        return $response;
+    }
 }
