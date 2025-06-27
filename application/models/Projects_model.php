@@ -2932,12 +2932,12 @@ class Projects_model extends App_Model
         <thead>
           <tr>
             <th class="thead-dark" align="left" style="width: 3%">' . _l('#') . '</th>
-            <th class="thead-dark" align="left" style="width: 14%">' . _l('Company/Consultant') . '</th>
-            <th class="thead-dark" align="left" style="width: 19.5%">' . _l('Address') . '</th>            
-            <th class="thead-dark" align="left" style="width: 14%">' . _l('Name') . '</th>
-            <th class="thead-dark" align="left" style="width: 19.5%">' . _l('Designation') . '</th>
-            <th class="thead-dark" align="left" style="width: 14%">' . _l('Contact') . '</th>
-            <th class="thead-dark" align="left" style="width: 14%">' . _l('Email Account') . '</th>            
+            <th class="thead-dark" align="left" style="width: 20%">Company/Consultant</th>
+            <th class="thead-dark" align="left" style="width: 16%">' . _l('Address') . '</th>            
+            <th class="thead-dark" align="left" style="width: 15%">' . _l('Name') . '</th>
+            <th class="thead-dark" align="left" style="width: 15%">' . _l('Designation') . '</th>
+            <th class="thead-dark" align="left" style="width: 15%">' . _l('Contact') . '</th>
+            <th class="thead-dark" align="left" style="width: 16%">' . _l('Email Account') . '</th>            
           </tr>
           </thead>
           <tbody>';
@@ -2946,12 +2946,12 @@ class Projects_model extends App_Model
 
             $html .= '<tr>
                 <td  style="width: 3%" >' . $serial_no . '</td>
-                <td  style="width: 14%">' . $row['com_con_name'] . '</td>';
-            $html .= '<td  style="width: 19.5%">' . $row['address'] . '</td>
-                <td  style="width: 19.5%">' . $row['fullname'] . '</td>
-                <td  style="width: 14%">' . $row['designation'] . '</td>';
-            $html .= '<td >' . $row['contact'] . '</td>
-                <td  style="width: 14%">' . $row['email_account'] . '</td>
+                <td  style="width: 20%">' . $row['com_con_name'] . '</td>';
+            $html .= '<td  style="width: 16%">' . $row['address'] . '</td>
+                <td  style="width: 15%">' . $row['fullname'] . '</td>
+                <td align="left" style="width: 15%">' . $row['designation'] . '</td>';
+            $html .= '<td style="width: 15%">' . $row['contact'] . '</td>
+                <td  style="width: 16%">' . $row['email_account'] . '</td>
             </tr>';
             $serial_no++;
         }
