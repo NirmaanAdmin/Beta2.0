@@ -6935,6 +6935,7 @@ class timesheets_model extends app_model
 			$ts_date = '';
 			$ts_ts = '';
 			$result_tb = [];
+
 			if (isset($data_map[$s['staffid']])) {
 				foreach ($data_map[$s['staffid']] as $key => $value) {
 					$ts_date = $data_map[$s['staffid']][$key]['date'];
@@ -6947,8 +6948,8 @@ class timesheets_model extends app_model
 			$dt_ts_detail = [];
 			$dt_cell_bg = [];
 			$dt_ts = [_l('staff_id') => $s['staffid'], _l('staff') => $s['firstname'] . ' ' . $s['lastname']];
-			$note = [];
 			$list_dtts = [];
+
 			foreach ($result_tb as $key => $rs) {
 				foreach ($rs as $day => $val) {
 					if ($val == "NS" || $val == "HO") {
@@ -6960,67 +6961,50 @@ class timesheets_model extends app_model
 
 			foreach ($list_date as $key => $value) {
 				$date_s = date('D d', strtotime($value));
-				$max_hour = isset($list_hour_shift[$value]) ? $list_hour_shift[$value] : 0;
-				$check_holiday = isset($list_date[date('m-d', strtotime($value))]) ? $list_date[date('m-d', strtotime($value))] : false;
-				$result_lack = '';
-				if ($max_hour > 0) {
-					if (!$check_holiday) {
+				$date_md = date('m-d', strtotime($value));
+				$max_hour = $list_hour_shift[$value] ?? 0;
 
-						$ts_lack = '';
-						if (isset($list_dtts[$date_s])) {
-							$ts_lack = $list_dtts[$date_s] . '; ';
-						}
-						$total_lack = $ts_lack;
-						if ($total_lack) {
-							$total_lack = rtrim($total_lack, '; ');
-						}
+				// Check if current date is a holiday
+				$holiday_type = $list_holiday[$date_md] ?? false;
 
-						$result_lack = $this->merge_ts($total_lack, $max_hour, $type_valid);
-					} else {
-						if ($check_holiday == 'holiday') {
+				$ts_lack = $list_dtts[$date_s] ?? '';
+				if ($ts_lack) {
+					$ts_lack .= '; ';
+				}
+				$total_lack = rtrim($ts_lack, '; ');
+
+				if ($holiday_type) {
+					// Handle holiday cases
+					switch ($holiday_type) {
+						case 'holiday':
 							$result_lack = "HO";
-						}
-						if ($check_holiday == 'event_break') {
+							break;
+						case 'event_break':
 							$result_lack = "EB";
-						}
-						if ($check_holiday == 'unexpected_break') {
+							break;
+						case 'unexpected_break':
 							$result_lack = "UB";
-						}
+							break;
+						default:
+							$result_lack = $this->merge_ts($total_lack, $max_hour, $type_valid);
 					}
 				} else {
-					// $result_lack = 'NS';
-					if (!$check_holiday) {
-
-						$ts_lack = '';
-						if (isset($list_dtts[$date_s])) {
-							$ts_lack = $list_dtts[$date_s] . '; ';
-						}
-						$total_lack = $ts_lack;
-						if ($total_lack) {
-							$total_lack = rtrim($total_lack, '; ');
-						}
-
+					// Normal day processing
+					if ($max_hour > 0) {
+						$result_lack = $this->merge_ts($total_lack, $max_hour, $type_valid);
+					} else {
 						$result_lack = $this->merge_ts($total_lack, $max_hour, $type_valid);
 						if (empty($result_lack)) {
 							$result_lack = 'OFF';
 						}
-					} else {
-						if ($check_holiday == 'holiday') {
-							$result_lack = "HO";
-						}
-						if ($check_holiday == 'event_break') {
-							$result_lack = "EB";
-						}
-						if ($check_holiday == 'unexpected_break') {
-							$result_lack = "UB";
-						}
 					}
 				}
+
 				$dt_ts[$date_s] = $result_lack;
 				$dt_ts_detail[$value] = $result_lack;
-
 				$dt_cell_bg[$date_s] = $list_color[$value];
 			}
+
 			$data['staff_row_tk'][] = $dt_ts;
 			$data['staff_row_tk_detailt'][] = $dt_ts_detail;
 			$data['cell_background'][] = $dt_cell_bg;
@@ -9044,7 +9028,7 @@ class timesheets_model extends app_model
 		return false;
 	}
 	public function get_notes($month = null)
-	{	
+	{
 		$this->db->from('tbltimesheets_notes');
 
 		if ($month !== null) {
