@@ -2927,7 +2927,7 @@ class Projects_model extends App_Model
         $project_name = $this->get($project_id);
         $html = '';
         $html .= '<p style="text-align: left;font-size: 12px">' . $project_name->name . '</p>';
-        $html .= '<h3 style="text-align: center;">' . _l('PROJECT TEAM & COMMUNICATION CHANNELS') . '</h3>';
+        $html .= '<h3 style="text-align: left;">' . _l('PROJECT TEAM & COMMUNICATION CHANNELS') . '</h3>';
         $html .=  '<table class="table purorder-item" style="width: 100%">
         <thead>
           <tr>
