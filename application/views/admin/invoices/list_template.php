@@ -22,9 +22,9 @@
                     <?php echo _l('invoices_list_recurring'); ?>
                 </a>
             <?php } ?>
-            <?php /* <button class="btn btn-info pull-left mleft10 display-block" type="button" data-toggle="collapse" data-target="#ci-charts-section" aria-expanded="true"aria-controls="ci-charts-section">
+            <button class="btn btn-info pull-left mleft10 display-block" type="button" data-toggle="collapse" data-target="#ci-charts-section" aria-expanded="true"aria-controls="ci-charts-section">
             <?php echo _l('Client Invoices Charts'); ?> <i class="fa fa-chevron-down toggle-icon"></i>
-            </button> */ ?>
+            </button>
             <div class="display-block pull-right tw-space-x-0 sm:tw-space-x-1.5">
                 <a href="#" class="btn btn-default btn-with-tooltip toggle-small-view hidden-xs"
                     onclick="toggle_small_view('.table-invoices','#invoice'); return false;" data-toggle="tooltip"
@@ -48,7 +48,7 @@
         </div>
     </div>
 
-    <div id="ci-charts-section" class="hide collapse in">
+    <div id="ci-charts-section" class="collapse in">
       <div class="row">
          <div class="col-md-12 mtop20">
             <div class="panel_s">
