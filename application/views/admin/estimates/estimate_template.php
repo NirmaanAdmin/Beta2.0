@@ -432,9 +432,11 @@
                             <tr>
                                 <th></th>
                                 <th width="25%" align="left"><?php echo _l('group_pur'); ?></th>
-                                <th width="25%" align="right">Cost (INR)</th>
-                                <th width="25%" align="right">Cost/BUA</th>
-                                <th width="25%" align="right"><?php echo _l('remarks'); ?></th>
+                                <th width="15%" align="right">Cost (INR)</th>
+                                <th width="15%" align="right">Cost/BUA</th>
+                                <th width="15%" align="right">Booked Amount</th>
+                                <th width="15%" align="right">Pending Amount</th>
+                                <th width="15%" align="right"><?php echo _l('remarks'); ?></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -452,6 +454,12 @@
                                         </td>
                                         <td align="right">
                                             <?php echo app_format_money($svalue['total_bua'], $base_currency); ?>
+                                        </td>
+                                        <td align="right">
+                                            <?php echo app_format_money($svalue['booked_amount'], $base_currency); ?>
+                                        </td>
+                                        <td align="right">
+                                            <?php echo app_format_money($svalue['pending_amount'], $base_currency); ?>
                                         </td>
                                         <td align="right">
                                             <?php
