@@ -943,4 +943,106 @@ class Expenses_model extends App_Model
         $file = $this->db->get(db_prefix() . 'files')->row();
         return $file;
     }
+
+    /**
+     * Get expenses dashboard
+     *
+     * @param  array  $data  Dashboard filter data
+     * @return array
+     */
+    public function get_expenses_dashboard($data = array())
+    {
+        $response = array();
+        $this->load->model('currencies_model');
+        $base_currency = $this->currencies_model->get_base_currency();
+        if ($request->currency != 0 && $request->currency != null) {
+            $base_currency = pur_get_currency_by_id($request->currency);
+        }
+
+        $response['total_expenses'] = $response['total_average_expenses'] = $response['total_expenses_without_receipts'] = 0;
+        $response['line_order_date'] = $response['line_order_total'] = array();
+        $response['pie_project_name'] = $response['pie_project_value'] = array();
+        $response['pie_category_name'] = $response['pie_category_value'] = array();
+
+        $this->db->select(
+            db_prefix() . 'expenses.id, ' .
+            db_prefix() . 'expenses.expense_name, ' .
+            db_prefix() . 'expenses.category, ' .
+            db_prefix() . 'expenses.invoiceid, ' .
+            db_prefix() . 'expenses.project_id, ' .
+            db_prefix() . 'expenses.date, ' .
+            db_prefix() . 'files.file_name, ' .
+            db_prefix() . 'expenses.amount, ' .
+            db_prefix() . 'expenses_categories.name as category_name'
+        );
+        $this->db->from(db_prefix() . 'expenses');
+        $this->db->join(
+            db_prefix() . 'files',
+            db_prefix() . 'files.rel_id = ' . db_prefix() . 'expenses.id AND ' . db_prefix() . 'files.rel_type = "expense"',
+            'left'
+        );
+        $this->db->join(
+            db_prefix() . 'expenses_categories',
+            db_prefix() . 'expenses_categories.id = ' . db_prefix() . 'expenses.category',
+            'left'
+        );
+        $this->db->where(db_prefix() . 'expenses.invoiceid IS NULL');
+        $this->db->group_by(db_prefix() . 'expenses.id');
+        $this->db->order_by(db_prefix() . 'expenses.date', 'asc');
+        $expenses = $this->db->get()->result_array();
+
+        if (!empty($expenses)) {
+            $total_expenses_raised = count($expenses);
+            $total_expenses = array_reduce($expenses, function ($carry, $item) {
+                return $carry + (float)$item['amount'];
+            }, 0);
+            $response['total_expenses'] = app_format_money($total_expenses, $base_currency->symbol);
+            if($total_expenses_raised > 0) {
+                $total_average_expenses = $total_expenses / $total_expenses_raised;
+                $response['total_average_expenses'] = app_format_money($total_average_expenses, $base_currency->symbol);
+            }
+            $response['total_expenses_without_receipts'] = count(array_filter($expenses, fn($item) =>
+                empty($item['file_name'])
+            ));
+            $response['total_expenses_without_receipts'] = count(array_filter($expenses, fn($item) =>
+                empty($item['file_name'])
+            ));
+
+            $line_order_total = array();
+            foreach ($expenses as $key => $value) {
+                $month = date('M-y', strtotime($value['date']));
+                if (!isset($line_order_total[$month])) {
+                    $line_order_total[$month] = 0;
+                }
+                $line_order_total[$month] += $value['amount'];
+            }
+
+            if (!empty($line_order_total)) {
+                $response['line_order_date'] = array_keys($line_order_total);
+                $response['line_order_total'] = array_values($line_order_total);
+            }
+
+            $project_grouped = array_reduce($expenses, function ($carry, $item) {
+                $group = get_project_name_by_id($item['project_id']);
+                $carry[$group] = ($carry[$group] ?? 0) + (float) $item['amount'];
+                return $carry;
+            }, []);
+            if (!empty($project_grouped)) {
+                $response['pie_project_name'] = array_keys($project_grouped);
+                $response['pie_project_value'] = array_values($project_grouped);
+            }
+
+            $category_grouped = array_reduce($expenses, function ($carry, $item) {
+                $group = $item['category_name'];
+                $carry[$group] = ($carry[$group] ?? 0) + (float) $item['amount'];
+                return $carry;
+            }, []);
+            if (!empty($category_grouped)) {
+                $response['pie_category_name'] = array_keys($category_grouped);
+                $response['pie_category_value'] = array_values($category_grouped);
+            }
+        }
+
+        return $response;
+    }
 }
