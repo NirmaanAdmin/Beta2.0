@@ -2778,7 +2778,7 @@ class Projects_model extends App_Model
         return $result;
     }
 
-    public function create_project_directory_row_template($name = '', $postion = '', $staff = '', $vendors = '', $fullnameinput = '', $contact = '', $email_account = '', $item_key = '')
+    public function create_project_directory_row_template($name = '', $com_con_name = '', $address = '', $fullnameinput = '',$designation = '', $contact = '', $email_account = '', $item_key = '')
     {
         $row = '';
         $is_template = ($name == '');
@@ -2794,75 +2794,78 @@ class Projects_model extends App_Model
         }
 
         // Field names
-        $name_postion = $is_template ? 'postion' : $name . '[postion]';
-        $name_staff = $is_template ? 'staff' : $name . '[staff]';
-        $name_vendor = $is_template ? 'vendor' : $name . '[vendor]';
+        $name_com_con_name = $is_template ? 'com_con_name' : $name . '[com_con_name]';
+        $name_address = $is_template ? 'address' : $name . '[address]';
         $name_fullname = $is_template ? 'fullname' : $name . '[fullname]';
+        $name_designation = $is_template ? 'designation' : $name . '[designation]';
         $name_contact = $is_template ? 'contact' : $name . '[contact]';
         $name_email_account = $is_template ? 'email_account' : $name . '[email_account]';
 
         // Get lists
-        $getstaff = getstafflist();
-        $getvendors = getvendorlist();
+        // $getstaff = getstafflist();
+        // $getvendors = getvendorlist();
 
-        $selectedstaff = !empty($staff) ? (is_array($staff) ? $staff : explode(",", $staff)) : [];
-        $selectedvendors = !empty($vendors) ? (is_array($vendors) ? $vendors : explode(",", $vendors)) : [];
+        // $selectedstaff = !empty($staff) ? (is_array($staff) ? $staff : explode(",", $staff)) : [];
+        // $selectedvendors = !empty($vendors) ? (is_array($vendors) ? $vendors : explode(",", $vendors)) : [];
 
         // Position
-        $row .= '<td class="postion">' . render_input($name_postion, '', $postion, '', ['placeholder' => 'Position']) . '</td>';
-        if ($vendors < 0) {
-            $row .= '<td class="staff"><select name="' . $name_staff . '" class="form-control selectpicker staff-select" data-live-search="true" data-none-selected-text="Staff" onchange="handleDirectoryChange(this)">';
-            $row .= '<option value=""></option>';
-            foreach ($getstaff as $staff_option) {
-                $selected = in_array($staff_option['staffid'], $selectedstaff) ? ' selected' : '';
-                $row .= '<option value="' . $staff_option['staffid'] . '" ' . $selected .
-                    ' data-email="' . htmlspecialchars($staff_option['email']) . '"' .
-                    ' data-phonenumber="' . htmlspecialchars($staff_option['phonenumber']) . '">' .
-                    htmlspecialchars($staff_option['fullname']) . '</option>';
-            }
-            $row .= '</select></td>';
-        } else {
-            $row .= '<td></td>';
-        }
+        
+        $row .= '<td class="com_con_name">' . render_input($name_com_con_name, '', $com_con_name, '', ['placeholder' => 'Company/Consultant Name']) . '</td>';
+        $row .= '<td class="address">' . render_input($name_address, '', $address, '', ['placeholder' => 'Address']) . '</td>';
+        // if ($vendors < 0) {
+        //     $row .= '<td class="staff"><select name="' . $name_staff . '" class="form-control selectpicker staff-select" data-live-search="true" data-none-selected-text="Staff" onchange="handleDirectoryChange(this)">';
+        //     $row .= '<option value=""></option>';
+        //     foreach ($getstaff as $staff_option) {
+        //         $selected = in_array($staff_option['staffid'], $selectedstaff) ? ' selected' : '';
+        //         $row .= '<option value="' . $staff_option['staffid'] . '" ' . $selected .
+        //             ' data-email="' . htmlspecialchars($staff_option['email']) . '"' .
+        //             ' data-phonenumber="' . htmlspecialchars($staff_option['phonenumber']) . '">' .
+        //             htmlspecialchars($staff_option['fullname']) . '</option>';
+        //     }
+        //     $row .= '</select></td>';
+        // } else {
+        //     $row .= '<td></td>';
+        // }
         // Staff select (manual render)
-        if ($staff < 0) {
+        // if ($staff < 0) {
 
-            $row .= '<td class="vendor"><select name="' . $name_vendor . '" class="form-control selectpicker vendor-select" data-live-search="true" data-none-selected-text="Vendor" onchange="handleDirectoryChange(this)">';
-            $row .= '<option value=""></option>';
-            foreach ($getvendors as $vendor) {
-                $selected = in_array($vendor['userid'], $selectedvendors) ? ' selected' : '';
+        //     $row .= '<td class="vendor"><select name="' . $name_vendor . '" class="form-control selectpicker vendor-select" data-live-search="true" data-none-selected-text="Vendor" onchange="handleDirectoryChange(this)">';
+        //     $row .= '<option value=""></option>';
+        //     foreach ($getvendors as $vendor) {
+        //         $selected = in_array($vendor['userid'], $selectedvendors) ? ' selected' : '';
 
-                // Safely get email with fallback to empty string
-                $email = isset($vendor['email']) ? htmlspecialchars($vendor['email']) : '';
+        //         // Safely get email with fallback to empty string
+        //         $email = isset($vendor['email']) ? htmlspecialchars($vendor['email']) : '';
 
-                // Safely get phone number with fallback to empty string
-                $phonenumber = isset($vendor['phonenumber']) ? htmlspecialchars($vendor['phonenumber']) : '';
+        //         // Safely get phone number with fallback to empty string
+        //         $phonenumber = isset($vendor['phonenumber']) ? htmlspecialchars($vendor['phonenumber']) : '';
 
-                // Safely build full name with fallback to empty string
-                $firstname = isset($vendor['firstname']) ? htmlspecialchars($vendor['firstname']) : '';
-                $lastname = isset($vendor['lastname']) ? htmlspecialchars($vendor['lastname']) : '';
-                $fullname = trim($firstname . ' ' . $lastname);
+        //         // Safely build full name with fallback to empty string
+        //         $firstname = isset($vendor['firstname']) ? htmlspecialchars($vendor['firstname']) : '';
+        //         $lastname = isset($vendor['lastname']) ? htmlspecialchars($vendor['lastname']) : '';
+        //         $fullname = trim($firstname . ' ' . $lastname);
 
-                // Safely get company name with fallback to full name if empty
-                $company = isset($vendor['company']) ? htmlspecialchars($vendor['company']) : $fullname;
-                if (empty($company)) {
-                    $company = $fullname;
-                }
+        //         // Safely get company name with fallback to full name if empty
+        //         $company = isset($vendor['company']) ? htmlspecialchars($vendor['company']) : $fullname;
+        //         if (empty($company)) {
+        //             $company = $fullname;
+        //         }
 
-                $row .= '<option value="' . $vendor['userid'] . '" ' . $selected .
-                    ' data-email="' . $email . '"' .
-                    ' data-phonenumber="' . $phonenumber . '"' .
-                    ' data-fullname="' . $fullname . '">' .
-                    $company . '</option>';
-            }
-            $row .= '</select></td>';
-        } else {
-            $row .= '<td></td>';
-        }
+        //         $row .= '<option value="' . $vendor['userid'] . '" ' . $selected .
+        //             ' data-email="' . $email . '"' .
+        //             ' data-phonenumber="' . $phonenumber . '"' .
+        //             ' data-fullname="' . $fullname . '">' .
+        //             $company . '</option>';
+        //     }
+        //     $row .= '</select></td>';
+        // } else {
+        //     $row .= '<td></td>';
+        // }
         // Vendor select (manual render)
 
         // Fullname, Contact, Email
         $row .= '<td class="fullname">' . render_input($name_fullname, '', $fullnameinput, '', ['placeholder' => 'Name']) . '</td>';
+        $row .= '<td class="designation">' . render_input($name_designation, '', $designation, '', ['placeholder' => 'Designation']) . '</td>';
         $row .= '<td class="contact">' . render_input($name_contact, '', $contact, 'number', ['placeholder' => 'Contact']) . '</td>';
         $row .= '<td class="email">' . render_input($name_email_account, '', $email_account, 'email', ['placeholder' => 'Email']) . '</td>';
 
@@ -2884,9 +2887,9 @@ class Projects_model extends App_Model
     public function add_project_directory($data)
     {
 
-        unset($data['postion']);
-        unset($data['staff']);
-        unset($data['vendor']);
+        unset($data['com_con_name']);
+        unset($data['address']);
+        unset($data['designation']);
         unset($data['fullname']);
         unset($data['contact']);
         unset($data['email_account']);
@@ -2901,9 +2904,9 @@ class Projects_model extends App_Model
             foreach ($project_dir_arr as $key => $rqd) {
 
                 $dt_data = [
-                    'postion' => $rqd['postion'],
-                    'staff' => $rqd['staff'],
-                    'vendor' => $rqd['vendor'],
+                    'com_con_name' => $rqd['com_con_name'],
+                    'address' => $rqd['address'],
+                    'designation' => $rqd['designation'],
                     'fullname' => $rqd['fullname'],
                     'contact' => $rqd['contact'],
                     'email_account' => $rqd['email_account'],
@@ -2929,10 +2932,10 @@ class Projects_model extends App_Model
         <thead>
           <tr>
             <th class="thead-dark" align="left" style="width: 3%">' . _l('#') . '</th>
-            <th class="thead-dark" align="left" style="width: 14%">' . _l('Position') . '</th>
-            <th class="thead-dark" align="left" style="width: 19.5%">' . _l('Staff') . '</th>
-            <th class="thead-dark" align="left" style="width: 19.5%">' . _l('Vendors') . '</th>
+            <th class="thead-dark" align="left" style="width: 14%">' . _l('Company/Consultant') . '</th>
+            <th class="thead-dark" align="left" style="width: 19.5%">' . _l('Address') . '</th>            
             <th class="thead-dark" align="left" style="width: 14%">' . _l('Name') . '</th>
+            <th class="thead-dark" align="left" style="width: 19.5%">' . _l('Designation') . '</th>
             <th class="thead-dark" align="left" style="width: 14%">' . _l('Contact') . '</th>
             <th class="thead-dark" align="left" style="width: 14%">' . _l('Email Account') . '</th>            
           </tr>
@@ -2943,10 +2946,10 @@ class Projects_model extends App_Model
 
             $html .= '<tr>
                 <td  style="width: 3%" >' . $serial_no . '</td>
-                <td  style="width: 14%">' . $row['postion'] . '</td>';
-            $html .= '<td  style="width: 19.5%">' . get_staff_namebyId($row['staff']) . '</td>
-                <td  style="width: 19.5%">' . get_vendor_company_name($row['vendor']) . '</td>
-                <td  style="width: 14%">' . $row['fullname'] . '</td>';
+                <td  style="width: 14%">' . $row['com_con_name'] . '</td>';
+            $html .= '<td  style="width: 19.5%">' . $row['address'] . '</td>
+                <td  style="width: 19.5%">' . $row['fullname'] . '</td>
+                <td  style="width: 14%">' . $row['designation'] . '</td>';
             $html .= '<td >' . $row['contact'] . '</td>
                 <td  style="width: 14%">' . $row['email_account'] . '</td>
             </tr>';

@@ -2,7 +2,7 @@
 <style>
     .export-btn-div {
         position: absolute;
-        z-index: 999;
+        z-index: 999; 
         left: 140px;
     }
 </style>
@@ -28,10 +28,10 @@
         <input type="hidden" id="project_id" name="project_id" value="<?php echo $project->id; ?>">
         <?php $table_data = [
             _l('#'),
-            _l('Position'),
-            _l('Staff'),
-            _l('Vendors'),
+            _l('Company/Consultant'),
+            _l('Address'),
             _l('Name'),
+            _l('Designation'),
             _l('Contact'),
             _l('Email Account'),
         ];

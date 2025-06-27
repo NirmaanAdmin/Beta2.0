@@ -24,7 +24,7 @@
 	                        	<?php if(!isset($invoice_id)){ ?>
 		                        	<?php if (has_permission('warehouse', '', 'create') || is_admin()) { ?>
 			                        <a href="<?php echo admin_url('warehouse/goods_delivery'); ?>"class="btn btn-info pull-left mright10 display-block">
-			                            <?php echo _l('export_ouput_splip'); ?>
+			                            Add New
 			                        </a>
 			                        <?php } ?>
 			                    <?php } ?>

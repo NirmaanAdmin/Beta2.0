@@ -18,7 +18,7 @@
 	                        	<?php if(!isset($invoice_id)){ ?>
 		                        	<?php if (has_permission('warehouse', '', 'create') || is_admin()) { ?>
 			                        <a href="<?php echo admin_url('warehouse/add_stock_reconciliation'); ?>"class="btn btn-info pull-left mright10 display-block">
-			                            <?php echo _l('stock_reconciliation'); ?>
+			                            Add New
 			                        </a>
 			                        <?php } ?>
 			                    <?php } ?>

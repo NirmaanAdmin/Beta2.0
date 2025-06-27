@@ -40,7 +40,7 @@
                             <div class="_buttons col-md-3">
                                 <?php if (has_permission('warehouse', '', 'create') || is_admin()) { ?>
                                     <a href="<?php echo admin_url('warehouse/manage_goods_receipt'); ?>" class="btn btn-info pull-left mright10 display-block">
-                                        Stock Received
+                                        Add New
                                     </a>
                                 <?php } ?>
                                 <button class="btn btn-info pull-left mleft10 display-block" type="button" data-toggle="collapse" data-target="#sr-charts-section" aria-expanded="true"aria-controls="sr-charts-section">

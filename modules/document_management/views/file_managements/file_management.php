@@ -185,11 +185,11 @@
 											</div>
 										</li>
 									<?php } ?>
-									<li class="list-group-item list-group-item-action">
+									<!-- <li class="list-group-item list-group-item-action">
 										<a href="javascript:void(0)" onclick="create_new_section()">
 											<i class="fa fa-plus"></i> <?php echo _l('dmg_create_new_section'); ?>
 										</a>
-									</li>
+									</li> -->
 								</ul>
 								<hr>
 								<ul class="list-group list-group-flush list-group-custom" role="tablist">

@@ -4,10 +4,10 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 $aColumns = [
     'id',
-    'postion',
-    'staff',
-    'vendor',
+    'com_con_name',
+    'address',
     'fullname',
+    'designation',
     'contact',
     'email_account',
 ];
@@ -40,18 +40,18 @@ foreach ($rResult as $aRow) {
         } else {
             $_data = $aRow[$aColumns[$i]];
         }
-        if ($aColumns[$i] == 'postion') {
-            $name =  $aRow['postion'];
+        if ($aColumns[$i] == 'com_con_name') {
+            $name =  $aRow['com_con_name'];
             $name .= '<div class="row-options">';
             if ($hasPermissionDelete) {
                 $name .= '<a href="' . admin_url('projects/deleteprojectdirectory/' . $aRow['id'].'/'.$aRow['project_id']) . '" class="text-danger _delete">' . _l('delete') . '</a>';
             }
             $name .= '</div>';
             $_data = $name;
-        } elseif ($aColumns[$i] == 'staff') {
-            $_data = get_staff_namebyId($aRow['staff']);
-        } elseif ($aColumns[$i] == 'vendor') {
-            $_data = get_vendor_company_name($aRow['vendor']);
+        } elseif ($aColumns[$i] == 'address') {
+            $_data = $aRow['address'];
+        } elseif ($aColumns[$i] == 'designation') {
+            $_data = $aRow['designation'];
         } elseif ($aColumns[$i] == 'fullname') {
             $_data = $aRow['fullname'];
         } elseif ($aColumns[$i] == 'contact') {

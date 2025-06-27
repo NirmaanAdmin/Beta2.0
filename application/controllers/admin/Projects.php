@@ -356,7 +356,7 @@ class Projects extends AdminController
                 $data['timesheets_staff_ids'] = $this->projects_model->get_distinct_tasks_timesheets_staff($id);
             } elseif ($group == 'project_directory') {
                 $project_directory_row_template = $this->projects_model->create_project_directory_row_template();
-
+ 
                 $data['project_directory_row'] = $project_directory_row_template;
             }
 
@@ -1194,15 +1194,15 @@ class Projects extends AdminController
     public function project_dir_get_item_row_template()
     {
         $name = $this->input->post('name');
-        $postion = $this->input->post('postion');
-        $staff = $this->input->post('staff');
-        $vendor = $this->input->post('vendor');
+        $com_con_name = $this->input->post('com_con_name');
+        $address = $this->input->post('address');
         $fullname = $this->input->post('fullname');
+        $designation = $this->input->post('designation');
         $item_key = $this->input->post('item_key');
         $contact = $this->input->post('contact');
         $email_account = $this->input->post('email_account');
 
-        echo $this->projects_model->create_project_directory_row_template($name, $postion, $staff, $vendor, $fullname, $contact, $email_account, $item_key);
+        echo $this->projects_model->create_project_directory_row_template($name, $com_con_name, $address, $fullname, $designation, $contact, $email_account, $item_key);
     }
 
 

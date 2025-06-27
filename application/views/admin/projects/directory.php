@@ -20,10 +20,10 @@
                                 <thead>
                                     <tr>
                                         <th width="1%"></th>
-                                        <th>Position</th>
-                                        <th width="15%">Staff</th>
-                                        <th width="15%">Vendors</th>
+                                        <th>Company/Consultant</th>
+                                        <th>Address</th>
                                         <th>Name</th>
+                                        <th>Designation</th>
                                         <th>Contact</th>
                                         <th>Email Account</th>
                                         <th width="3%"></th>
