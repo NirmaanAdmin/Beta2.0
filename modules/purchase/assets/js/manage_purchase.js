@@ -11,7 +11,7 @@ var GoodsreceiptParams = {
 
 var table_manage_goods_receipt = $('.table-table_manage_goods_receipt');
 
-initDataTable(table_manage_goods_receipt, admin_url + 'purchase/table_manage_goods_receipt', [], [], GoodsreceiptParams, [7, 'asc']);
+initDataTable(table_manage_goods_receipt, admin_url + 'purchase/table_manage_goods_receipt', [], [], GoodsreceiptParams, [5, 'desc']);
 
 
 $('.purchase_sm').DataTable().columns([0]).visible(false, false);
