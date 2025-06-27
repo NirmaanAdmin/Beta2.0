@@ -6023,9 +6023,9 @@ class timesheets extends AdminController
 
 
 		// NOTE row (merged across columns A–D)
-	
+
 		$month_filter_for_note = date('m-Y', strtotime($month_filter));
-		
+
 		$notes = $this->timesheets_model->get_notes($month_filter_for_note);
 		$noteText = $notes['note'] ?? '';
 		if ($noteText) {
@@ -6042,7 +6042,7 @@ class timesheets extends AdminController
 			// merge from col 0 to col 3 (A→D) on that row :contentReference[oaicite:1]{index=1}
 			$writer->markMergedCell('Sheet1', $noteRow, 0, $noteRow, 3);
 			// now write the NOTE
-			$writer->writeSheetRow('Sheet1', ['NOTE: '.$noteText], $noteStyle);
+			$writer->writeSheetRow('Sheet1', ['NOTE: ' . $noteText], $noteStyle);
 		}
 
 
@@ -7464,10 +7464,9 @@ class timesheets extends AdminController
 				_l('id')         => 'string',
 				_l('hr_code')    => 'string',
 				_l('staff_name') => 'string',
-				_l('department') => 'string',
 				_l('month')      => 'string',
 				_l('error')      => 'string',
-			], ['widths' => [40, 40, 40, 50, 40, 50, 50]]);
+			], ['widths' => [40, 40, 40, 50, 50, 50]]);
 
 			// move upload to temp
 			$tmpDir    = TEMP_FOLDER . '/' . time() . uniqid();
@@ -7507,8 +7506,7 @@ class timesheets extends AdminController
 				$hr_code_raw    = $row[2] ?? '';
 				$month_raw      = $row[3] ?? '';
 				$staff_name_raw = $row[4] ?? '';
-				$dept_raw       = $row[5] ?? '';
-				$rel_type_raw   = $row[6] ?? 'hr_timesheets';
+				$rel_type_raw   = $row[5] ?? 'hr_timesheets';
 
 				// validation
 				if (trim($staff_id_raw) === '') {
@@ -7525,7 +7523,6 @@ class timesheets extends AdminController
 						$id_raw,
 						$hr_code_raw,
 						$staff_name_raw,
-						$dept_raw,
 						$month_raw,
 						$errors
 					]);
@@ -7541,7 +7538,6 @@ class timesheets extends AdminController
 						$id_raw,
 						$hr_code_raw,
 						$staff_name_raw,
-						$dept_raw,
 						$month_raw,
 						_l('invalid_date_format')
 					]);
@@ -7556,22 +7552,17 @@ class timesheets extends AdminController
 					->where('d.staff_id', $staff_id_raw);
 				$shift = $this->db->get()->row_array();
 
-				// if (empty($shift['time_start_work']) || empty($shift['time_end_work'])) {
-				// 	// skip or set default hours (here skipping)
-				// 	continue;
-				// }
-
 				$start_ts = strtotime($shift['time_start_work']);
 				$end_ts   = strtotime($shift['time_end_work']);
 				$hours    = $end_ts > $start_ts ? ($end_ts - $start_ts) / 3600 : 0;
 
-				// collect day-columns (index 7 onward)
-				for ($i = 7; $i < count($column_key); $i++) {
+				// collect day-columns (index 6 onward after removing department)
+				for ($i = 6; $i < count($column_key); $i++) {
 					$cell = strtoupper($row[$i] ?? '');
 					if (!in_array($cell, ['P', 'L', 'OFF', 'N/A', 'W/H', 'H/F'], true)) {
 						continue;
 					}
-					$day_number = $i - 6; // index 7 → day 1
+					$day_number = $i - 5; // adjusted index after removing department
 					$date_work  = date('Y-m-d', strtotime("$base_date +" . ($day_number - 1) . " days"));
 
 					$arr_insert[] = [
