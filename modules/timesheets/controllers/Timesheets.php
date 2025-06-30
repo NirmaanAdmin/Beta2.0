@@ -7433,333 +7433,181 @@ class timesheets extends AdminController
 	 * import attendance excel
 	 * @return [type]
 	 */
-	public function export_attendance_excel()
+	public function import_attendance_excel()
 	{
+		if (
+			!has_permission('hrp_employee', '', 'create')
+			&& !has_permission('hrp_employee', '', 'edit')
+			&& !is_admin()
+		) {
+			access_denied('hrp_employee');
+		}
+
 		if (!class_exists('XLSXReader_fin')) {
-			require_once module_dir_path(TIMESHEETS_MODULE_NAME) . '/assets/plugins/XLSXReader/XLSXReader.php';
+			require_once module_dir_path(HR_PAYROLL_MODULE_NAME) . '/assets/plugins/XLSXReader/XLSXReader.php';
 		}
-		require_once module_dir_path(TIMESHEETS_MODULE_NAME) . '/assets/plugins/XLSXWriter/xlsxwriter.class.php';
+		require_once module_dir_path(HR_PAYROLL_MODULE_NAME) . '/assets/plugins/XLSXWriter/xlsxwriter.class.php';
 
-		if (!$this->input->post()) {
-			return;
-		}
+		$filename           = '';
+		$message            = '';
+		$total_rows         = 0;
+		$total_row_success  = 0;
+		$total_row_false    = 0;
 
-		// 1) Filters
-		$month_filter      = $this->input->post('month');
-		$department_filter = $this->input->post('department');
-		$role_filter       = $this->input->post('role');
-		$staff_filter      = $this->input->post('staff');
+		if ($this->input->post() && !empty($_FILES['file_csv']['tmp_name'])) {
+			$this->delete_error_file_day_before();
 
-		// 2) Default staff list
-		if (empty($staff_filter)) {
-			$staff_filter = array_column(
-				$this->timesheets_model->get_staff_timekeeping_applicable_object(),
-				'staffid'
-			);
-		}
+			// prepare error-writer
+			$writer = new XLSXWriter();
+			$writer->writeSheetHeader('Sheet1', [
+				_l('staffid')    => 'string',
+				_l('id')         => 'string',
+				_l('hr_code')    => 'string',
+				_l('staff_name') => 'string',
+				_l('department') => 'string',
+				_l('month')      => 'string',
+				_l('error')      => 'string',
+			], ['widths' => [40, 40, 40, 50, 40, 50, 50]]);
 
-		// 3) Fetch data
-		$list = $this->timesheets_model->get_data_attendance_export(
-			$month_filter,
-			$department_filter,
-			$role_filter,
-			$staff_filter
-		);
+			// move upload to temp
+			$tmpDir    = TEMP_FOLDER . '/' . time() . uniqid();
+			@mkdir($tmpDir, 0755, true);
+			$newPath   = $tmpDir . '/' . basename($_FILES['file_csv']['name']);
+			move_uploaded_file($_FILES['file_csv']['tmp_name'], $newPath);
 
-		// 4) Parse month
-		$dt = DateTime::createFromFormat('Y-m', $month_filter);
-		if (!$dt) {
-			$parts = explode('-', $month_filter);
-			if (count($parts) === 2) {
-				list($m, $y) = $parts;
-				$dt = DateTime::createFromFormat('!m-Y', "{$m}-{$y}");
+			// read sheet
+			$xlsx       = new XLSXReader_fin($newPath);
+			$sheetNames = $xlsx->getSheetNames();
+			$data       = $xlsx->getSheetData($sheetNames[1]);
+			@unlink($newPath);
+
+			$arr_insert = [];
+
+			// ensure header exists
+			if (empty($data) || !isset($data[0]) || !is_array($data[0])) {
+				echo json_encode(['message' => 'No data or invalid sheet.']);
+				return;
 			}
-		}
-		if (!$dt) {
-			$dt = new DateTime();
-		}
-		$month         = (int)$dt->format('m');
-		$month_year    = (int)$dt->format('Y');
-		$days_in_month = cal_days_in_month(CAL_GREGORIAN, $month, $month_year);
+			$column_key = $data[0];
 
-		// 5) Lookup maps
-		$emp_code_map            = $this->build_map('Staff', 'staff_identifi',   $this->timesheets_model->get_emp_code());
-		$emp_position_map        = $this->build_map('Staff', 'job_position',     $this->timesheets_model->get_emp_position());
-		$emp_date_of_joining_map = $this->build_map('Staff', 'joining_date',     $this->timesheets_model->get_emp_date_of_joining());
-		$emp_active_status_map   = $this->build_map('Staff', 'active',           $this->timesheets_model->get_emp_active_status());
-
-		// 6) Build header
-		$header = [
-			'S.NO',
-			'Status',
-			"Employee's Name as per Aadhar",
-			'Emp. Code',
-			'Designation',
-			'SITE',
-			'DOJ'
-		];
-		for ($d = 1; $d <= $days_in_month; $d++) {
-			$time = mktime(12, 0, 0, $month, $d, $month_year);
-			if ((int)date('m', $time) === $month) {
-				$header[] = date('D d', $time);
-			}
-		}
-		// Append only the TOTAL columns
-		$header = array_merge($header, [
-			'TOTAL "P"',
-			'TOTAL "L"',
-			'TOTAL S/L',
-			'TOTAL OW',
-			'TOTAL CL',
-			'TOTAL OFF',
-			'TOTAL "H"',
-			'TOTAL C/OFF',
-			'TOTAL H/F',
-			'TOTAL W/H',
-			'TOTAL N/A',
-			'TOTAL'
-		]);
-
-		// Calculate indices
-		$numTotals       = 12;
-		$totalStartIndex = count($header) - $numTotals;
-		$dayStartIndex   = 7;
-		$dayCount        = $totalStartIndex - $dayStartIndex;
-
-		// 7) Writer setup
-		$writer = new XLSXWriter();
-
-		// Company title
-		$company = get_company_name_for_attendance();
-		$writer->writeSheetRow('Sheet1', [$company], [
-			'height'    => 30,
-			'font-size' => 16,
-			'font'      => 'Calibri',
-			'bold'      => true,
-			'halign'    => 'center',
-		]);
-		$writer->markMergedCell('Sheet1', 0, 0, 0, count($header) - 1);
-
-		// Month title
-		$month_name = strtoupper($dt->format('F'));
-		$title      = "STAFF ATTENDANCE FOR THE MONTH OF {$month_name} - {$month_year}";
-		$writer->writeSheetRow('Sheet1', [$title], [
-			'height'    => 25,
-			'font-size' => 14,
-			'font'      => 'Calibri',
-			'bold'      => true,
-			'halign'    => 'center',
-		]);
-		$writer->markMergedCell('Sheet1', 1, 0, 1, count($header) - 1);
-
-		// Single color for day columns
-		$dayColor = '#DDEBF7';
-
-		// Define styles
-		$defaultHeaderStyle = [
-			'fill'         => '#C65911',
-			'font-style'   => 'bold',
-			'color'        => '#FFFFFF',
-			'border'       => 'left,right,top,bottom',
-			'border-color' => '#FFFFFF',
-			'height'       => 25,
-			'font-size'    => 13,
-			'font'         => 'Calibri',
-			'halign'       => 'center',
-			'valign'       => 'center',
-		];
-		$greenHeaderStyle  = [
-			'fill'         => '#C6EFCE',
-			'font-style'   => 'bold',
-			'color'        => '#000000',
-			'border'       => 'left,right,top,bottom',
-			'border-color' => '#000000',
-			'font-size'    => 13,
-			'font'         => 'Calibri',
-			'halign'       => 'center',
-			'valign'       => 'center',
-		];
-		$dayHeaderStyle   = [
-			'fill'         => $dayColor,
-			'font-style'   => 'bold',
-			'color'        => '#000000',
-			'border'       => 'left,right,top,bottom',
-			'border-color' => '#000000',
-			'font-size'    => 13,
-			'font'         => 'Calibri',
-			'halign'       => 'center',
-			'valign'       => 'center',
-		];
-
-		// Build header style map
-		$headerStyleMap = [];
-		foreach ($header as $i => $_h) {
-			if ($i < $dayStartIndex) {
-				$headerStyleMap[$i] = $defaultHeaderStyle;
-			} elseif ($i < $totalStartIndex) {
-				$headerStyleMap[$i] = $dayHeaderStyle;
-			} else {
-				$headerStyleMap[$i] = $greenHeaderStyle;
-			}
-		}
-		$writer->writeSheetRow('Sheet1', $header, $headerStyleMap);
-
-		// Data row styles
-		$defaultOdd  = ['fill' => '#F8CBAD', 'border' => 'left,right,top,bottom', 'border-color' => '#FFFFFF', 'font' => 'Calibri', 'font-size' => 12];
-		$defaultEven = ['fill' => '#FCE4D6', 'border' => 'left,right,top,bottom', 'border-color' => '#FFFFFF', 'font' => 'Calibri', 'font-size' => 12];
-		$dayDataStyle = [
-			'fill'         => $dayColor,
-			'border'       => 'left,right,top,bottom',
-			'border-color' => '#FFFFFF',
-			'font-size'    => 12,
-			'font'         => 'Calibri',
-			'halign'       => 'center',
-			'valign'       => 'center',
-		];
-		$greenData    = [
-			'fill'         => '#C6EFCE',
-			'border'       => 'left,right,top,bottom',
-			'border-color' => '#000000',
-			'font-size'    => 12,
-			'font'         => 'Calibri',
-			'halign'       => 'center',
-			'valign'       => 'center',
-		];
-
-		// 8) Data rows
-		$sr_no = 1;
-		foreach ($list as $idx => $row) {
-			$staff_name = trim($row['Staff'] ?? '');
-			if (in_array($staff_name, ['Admin N360', 'Trial Demo ID'], true)) {
-				continue;
-			}
-			$status = ($emp_active_status_map[$staff_name] ?? 0) == 1 ? 'CONTINUING' : 'DISCONTINUED';
-
-			$out = [];
-			$out[] = $sr_no++;
-			$out[] = $status;
-			$out[] = $staff_name;
-			$out[] = $emp_code_map[$staff_name]     ?? '';
-			$out[] = $emp_position_map[$staff_name] ?? '';
-			$out[] = 'Jamnagar';
-			$doj_raw = $emp_date_of_joining_map[$staff_name] ?? '';
-			$out[] = $doj_raw ? date('d M, Y', strtotime($doj_raw)) : '';
-
-			$counters = array_fill_keys(['P', 'L', 'SL', 'OW', 'CL', 'OFF', 'H', 'COFF', 'HF', 'WH', 'NA'], 0);
-			foreach (array_slice($header, $dayStartIndex, $dayCount) as $col) {
-				$val = $row[$col] ?? '';
-				switch (true) {
-					case strpos($val, 'P') === 0:
-						$val = 'P';
-						$counters['P']++;
-						break;
-					case $val === '':
-						$val = 'L';
-						$counters['L']++;
-						break;
-					case $val === 'OFF':
-						$counters['OFF']++;
-						break;
-					case $val === 'H':
-						$counters['H']++;
-						break;
-					case $val === 'C/OFF':
-						$counters['COFF']++;
-						break;
-					case $val === 'H/F':
-						$counters['HF']++;
-						break;
-					case $val === 'W/H':
-						$counters['WH']++;
-						break;
-					case $val === 'N/A':
-						$counters['NA']++;
-						break;
-					case $val === 'OW':
-						$counters['OW']++;
-						break;
-					case $val === 'CL':
-						$counters['CL']++;
-						break;
+			// loop each row
+			for ($r = 1; $r < count($data); $r++) {
+				// skip null or empty rows
+				if (!isset($data[$r]) || !is_array($data[$r]) || count(array_filter($data[$r])) === 0) {
+					continue;
 				}
-				$out[] = $val;
-			}
-			$totals = array_merge(
-				array_values($counters),
-				[array_sum($counters)]
-			);
-			$out = array_merge($out, $totals);
 
-			// Build style map for each cell
-			$rowStyleMap = [];
-			foreach ($out as $i => $_val) {
-				if ($i < $dayStartIndex) {
-					$rowStyleMap[$i] = ($idx % 2) ? $defaultEven : $defaultOdd;
-				} elseif ($i < $totalStartIndex) {
-					$rowStyleMap[$i] = $dayDataStyle;
-				} else {
-					$rowStyleMap[$i] = $greenData;
+				$total_rows++;
+				$row    = $data[$r];
+				$errors = '';
+
+				// safely pull each column (use ?? '' so no offset warning)
+				$staff_id_raw   = $row[0] ?? '';
+				$id_raw         = $row[1] ?? '';
+				$hr_code_raw    = $row[2] ?? '';
+				$month_raw      = $row[3] ?? '';
+				$staff_name_raw = $row[4] ?? '';
+				$dept_raw       = $row[5] ?? '';
+				$rel_type_raw   = $row[6] ?? 'hr_timesheets';
+
+				// validation
+				if (trim($staff_id_raw) === '') {
+					$errors .= _l('staff_id') . ' ' . _l('not_empty') . '; ';
+				}
+				if (trim($month_raw) === '') {
+					$errors .= _l('month') . ' ' . _l('not_empty') . '; ';
+				}
+
+				// if errors, write row to error sheet
+				if ($errors !== '') {
+					$writer->writeSheetRow('Sheet1', [
+						$staff_id_raw,
+						$id_raw,
+						$hr_code_raw,
+						$staff_name_raw,
+						$dept_raw,
+						$month_raw,
+						$errors
+					]);
+					$total_row_false++;
+					continue;
+				}
+
+				// parse month, ensure valid date
+				$base_date = date('Y-m-d', strtotime($month_raw));
+				if ($base_date === false) {
+					$writer->writeSheetRow('Sheet1', [
+						$staff_id_raw,
+						$id_raw,
+						$hr_code_raw,
+						$staff_name_raw,
+						$dept_raw,
+						$month_raw,
+						_l('invalid_date_format')
+					]);
+					$total_row_false++;
+					continue;
+				}
+
+				// fetch shift; guard against missing record
+				$this->db->select('st.time_start_work, st.time_end_work')
+					->from(db_prefix() . 'work_shift_detail_number_day d')
+					->join(db_prefix() . 'shift_type st', 'st.id = d.shift_id', 'left')
+					->where('d.staff_id', $staff_id_raw);
+				$shift = $this->db->get()->row_array();
+
+				// if (empty($shift['time_start_work']) || empty($shift['time_end_work'])) {
+				// 	// skip or set default hours (here skipping)
+				// 	continue;
+				// }
+
+				$start_ts = strtotime($shift['time_start_work']);
+				$end_ts   = strtotime($shift['time_end_work']);
+				$hours    = $end_ts > $start_ts ? ($end_ts - $start_ts) / 3600 : 0;
+
+				// collect day-columns (index 7 onward)
+				for ($i = 7; $i < count($column_key); $i++) {
+					$cell = strtoupper($row[$i] ?? '');
+					if (!in_array($cell, ['P', 'L', 'OFF', 'N/A', 'W/H', 'H/F'], true)) {
+						continue;
+					}
+					$day_number = $i - 6; // index 7 → day 1
+					$date_work  = date('Y-m-d', strtotime("$base_date +" . ($day_number - 1) . " days"));
+
+					$arr_insert[] = [
+						'staff_id'    => $staff_id_raw,
+						'date_work'   => $date_work,
+						'value'       => '',
+						'type'        => $cell,
+						'add_from'    => get_staff_user_id(),
+					];
 				}
 			}
 
-			$writer->writeSheetRow('Sheet1', $out, $rowStyleMap);
-		}
+			// bulk insert if any
+			if (!empty($arr_insert)) {
+				$this->timesheets_model->import_attendance_data($arr_insert);
+				$total_row_success = count($arr_insert);
+				$message           = 'Import completed';
+			}
 
-		// ── 9) LEGENDS + NOTE ──
-		$writer->writeSheetRow('Sheet1', []);
-		$legends = [
-			['HO', 'Public Holiday'],
-			['P', 'Present'],
-			['L', 'On Leave'],
-			['OFF', 'Sunday Off'],
-			['H/F', 'Half Day'],
-			['SL', 'Sick Leave'],
-			['ML', 'Maternity Leave'],
-			['W/H', 'Work From Home'],
-			['C/OFF', 'Compensatory Off'],
-			['N/A', 'Not Applicable']
-		];
-		$legendStyle = [
-			'font'         => 'Calibri',
-			'halign'       => 'center',
-			'valign'       => 'center',
-			'border'       => 'left,right,top,bottom',
-			'border_style' => 'medium',
-			'border_color' => '000000',
-		];
-		foreach ($legends as $lg) {
-			$writer->writeSheetRow('Sheet1', $lg, $legendStyle);
+			// write error file if needed
+			if ($total_row_false > 0) {
+				$filename = 'Import_attendance_error_'
+					. get_staff_user_id() . '_' . time() . '.xlsx';
+				$writer->writeToFile(TIMESHEETS_ERROR . $filename);
+			}
 		}
-
-		// NOTE
-		$month_filter_for_note = date('m-Y', strtotime($month_filter));
-		$notes = $this->timesheets_model->get_notes($month_filter_for_note);
-		$noteText = $notes['note'] ?? '';
-		if ($noteText) {
-			$writer->writeSheetRow('Sheet1', []);
-			$noteStyle = [
-				'font'       => 'Calibri',
-				'font-style' => 'italic',
-				'halign'     => 'center',
-				'valign'     => 'center',
-			];
-			$noteRow = $writer->countSheetRows('Sheet1');
-			$writer->markMergedCell('Sheet1', $noteRow, 0, $noteRow, 3);
-			$writer->writeSheetRow('Sheet1', ['NOTE: ' . $noteText], $noteStyle);
-		}
-
-		// 10) Cleanup & save
-		foreach (glob(TIMESHEETS_PATH_EXPORT_FILE . '*') as $f) {
-			is_file($f) && @unlink($f);
-		}
-		$filename = 'attendance_' . str_replace('-', '_', $month_filter) . '.xlsx';
-		$writer->writeToFile(TIMESHEETS_PATH_EXPORT_FILE . $filename);
 
 		echo json_encode([
-			'site_url' => site_url(),
-			'filename' => TIMESHEETS_PATH_EXPORT_FILE . $filename,
+			'message'           => $message,
+			'total_row_success' => $total_row_success ?? 0,
+			'total_row_false'   => $total_row_false,
+			'total_rows'        => $total_rows,
+			'site_url'          => site_url(),
+			'staff_id'          => get_staff_user_id(),
+			'filename'          => $filename ?? '',
 		]);
-		exit;
 	}
 
 
