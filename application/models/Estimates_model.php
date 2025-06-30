@@ -1625,6 +1625,7 @@ class Estimates_model extends App_Model
         foreach ($items as $key => $value) {
             $annexure = $value['annexure'];
             $items_group = $this->get_items_groups($annexure);
+            $booked_amount = $this->get_estimate_booked_amount($estimateid, $annexure);
             $summary[$annexure]['name'] = $items_group->name;
             $summary[$annexure]['description'] = '';
             $summary[$annexure]['qty'] += $value['qty'];
@@ -1634,6 +1635,8 @@ class Estimates_model extends App_Model
             $summary[$annexure]['amount'] = $summary[$annexure]['subtotal'] + $summary[$annexure]['tax'];
             $summary[$annexure]['annexure'] = $annexure;
             $summary[$annexure]['total_bua'] = $summary[$annexure]['amount'] / $total_built_up_area;
+            $summary[$annexure]['booked_amount'] = $booked_amount;
+            $summary[$annexure]['pending_amount'] = $summary[$annexure]['amount'] - $booked_amount;
         }
         $summary = !empty($summary) ? array_values($summary) : array();
         if(!empty($summary)) {
@@ -1848,6 +1851,7 @@ class Estimates_model extends App_Model
         foreach ($items as $key => $value) {
             $annexure = $value['annexure'];
             $items_group = $this->get_items_groups($annexure);
+            $booked_amount = $this->get_estimate_booked_amount($id, $annexure);
             $annexure_estimate[$annexure]['name'] = $items_group->name;
             $annexure_estimate[$annexure]['description'] = '';
             $annexure_estimate[$annexure]['qty'] += $value['qty'];
@@ -1857,6 +1861,8 @@ class Estimates_model extends App_Model
             $annexure_estimate[$annexure]['amount'] = $annexure_estimate[$annexure]['subtotal'];
             $annexure_estimate[$annexure]['annexure'] = $annexure;
             $annexure_estimate[$annexure]['total_bua'] = $annexure_estimate[$annexure]['amount'] / $total_built_up_area;
+            $annexure_estimate[$annexure]['booked_amount'] = $booked_amount;
+            $annexure_estimate[$annexure]['pending_amount'] = $annexure_estimate[$annexure]['amount'] - $booked_amount;
         }
         $annexure_estimate = !empty($annexure_estimate) ? array_values($annexure_estimate) : array();
         if(!empty($annexure_estimate)) {
@@ -2692,4 +2698,25 @@ class Estimates_model extends App_Model
 
         return $id;
     }
+
+    public function get_estimate_booked_amount($estimate_id, $budget_head)
+    {
+        $booked_amount = 0;
+        $this->db->select('SUM(' . db_prefix() . 'pur_order_detail.total) as total');
+        $this->db->from(db_prefix() . 'pur_order_detail');
+        $this->db->join(
+            db_prefix() . 'pur_orders',
+            db_prefix() . 'pur_orders.id = ' . db_prefix() . 'pur_order_detail.pur_order',
+            'left'
+        );
+        $this->db->where(db_prefix() . 'pur_orders.estimate', $estimate_id);
+        $this->db->where(db_prefix() . 'pur_orders.group_pur', $budget_head);
+        $this->db->where(db_prefix() . 'pur_orders.approve_status', 2);
+        $this->db->where(db_prefix() . 'pur_order_detail.quantity >', 0, false);
+        $this->db->where(db_prefix() . 'pur_order_detail.total >', 0, false);
+        $result = $this->db->get()->row();
+        $booked_amount = isset($result->total) ? $result->total : 0;
+        return $booked_amount;
+    }
+
 }

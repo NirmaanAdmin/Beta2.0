@@ -513,9 +513,11 @@
                                             <thead>
                                                 <tr>
                                                     <th width="25%" align="left"><?php echo _l('group_pur'); ?></th>
-                                                    <th width="25%" align="right">Cost (INR)</th>
-                                                    <th width="25%" align="right">Cost/BUA</th>
-                                                    <th width="25%" align="right"><?php echo _l('remarks'); ?></th>
+                                                    <th width="15%" align="right">Cost (INR)</th>
+                                                    <th width="15%" align="right">Cost/BUA</th>
+                                                    <th width="15%" align="right">Booked Amount</th>
+                                                    <th width="15%" align="right">Pending Amount</th>
+                                                    <th width="15%" align="right"><?php echo _l('remarks'); ?></th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -524,9 +526,13 @@
                                                     $annexure_estimate = $cost_planning_details['annexure_estimate'];
                                                     $total_amount = 0;
                                                     $total_bua = 0;
+                                                    $total_booked = 0;
+                                                    $total_pending = 0;
                                                     foreach($annexure_estimate as $ikey => $svalue) {
                                                     $total_amount = $total_amount + $svalue['amount'];
                                                     $total_bua = $total_bua + $svalue['total_bua'];
+                                                    $total_booked = $total_booked + $svalue['booked_amount'];
+                                                    $total_pending = $total_pending + $svalue['pending_amount'];
                                                     ?>
                                                         <tr>
                                                             <td align="left">
@@ -539,6 +545,12 @@
                                                                 <?php 
                                                                 echo app_format_money($svalue['total_bua'], $base_currency); 
                                                                 ?>
+                                                            </td>
+                                                            <td align="right">
+                                                                <?php echo app_format_money($svalue['booked_amount'], $base_currency); ?>
+                                                            </td>
+                                                            <td align="right">
+                                                                <?php echo app_format_money($svalue['pending_amount'], $base_currency); ?>
                                                             </td>
                                                             <td align="right">
                                                                 <?php
@@ -562,6 +574,8 @@
                                                     <td align="left">Total</td>
                                                     <td align="right"><?php echo app_format_money($total_amount, $base_currency); ?></td>
                                                     <td align="right"><?php echo app_format_money($total_bua, $base_currency); ?></td>
+                                                    <td align="right"><?php echo app_format_money($total_booked, $base_currency); ?></td>
+                                                    <td align="right"><?php echo app_format_money($total_pending, $base_currency); ?></td>
                                                     <td align="right"></td>
                                                 </tr>
                                             </tfoot>
