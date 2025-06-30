@@ -364,7 +364,7 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
             pur_order,
             SUM(vendor_submitted_amount_without_tax) AS vendor_submitted_amount_without_tax
             FROM tblpur_invoices
-            WHERE pur_order IS NOT NULL
+            WHERE pur_order IS NOT NULL AND payment_status IN (5,6,7)
             GROUP BY pur_order
         ) AS inv_po_sum
             ON inv_po_sum.pur_order = po.id
@@ -410,7 +410,7 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
             wo_order,
             SUM(vendor_submitted_amount_without_tax) AS vendor_submitted_amount_without_tax
             FROM tblpur_invoices
-            WHERE wo_order IS NOT NULL
+            WHERE wo_order IS NOT NULL AND payment_status IN (5,6,7)
             GROUP BY wo_order
         ) AS inv_wo_sum
             ON inv_wo_sum.wo_order = wo.id
@@ -450,7 +450,7 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
             order_tracker_id ,
             SUM(vendor_submitted_amount_without_tax) AS vendor_submitted_amount_without_tax
             FROM tblpur_invoices
-            WHERE order_tracker_id  IS NOT NULL
+            WHERE order_tracker_id  IS NOT NULL AND payment_status IN (5,6,7)
             GROUP BY order_tracker_id 
         ) AS inv_ot_sum
             ON inv_ot_sum.order_tracker_id = t.id
@@ -562,7 +562,6 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
     $sOrder
     $sLimit
     ";
-
     $rResult = hooks()->apply_filters(
         'datatables_sql_query_results',
         $CI->db->query($resultQuery)->result_array(),
