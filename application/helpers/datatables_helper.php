@@ -615,6 +615,7 @@ function data_tables_init_union_unawarded($aColumns, $sIndexColumn, $combinedTab
     $sTable = "(
         SELECT 
             p.id,
+            pr.id as project_id,
             pr.name as project,
             p.estimate_id,
             budget_head,
@@ -951,7 +952,7 @@ function data_tables_purchase_tracker_init($aColumns, $join = [], $where = [], $
         $sLimit = 'LIMIT ' . intval($CI->input->post('start')) . ', ' . intval($CI->input->post('length'));
     }
 
-    $sTable = "( SELECT *, CASE WHEN type = 1 THEN CASE WHEN ( SELECT COALESCE(SUM(po_quantities), 0) FROM tblgoods_receipt_detail WHERE goods_receipt_id = combined_orders.id ) = ( SELECT COALESCE(SUM(quantities), 0) FROM tblgoods_receipt_detail WHERE goods_receipt_id = combined_orders.id ) THEN '2' WHEN ( SELECT COALESCE(SUM(quantities), 0) FROM tblgoods_receipt_detail WHERE goods_receipt_id = combined_orders.id ) = 0 THEN '0' WHEN ( SELECT COALESCE(SUM(quantities), 0) FROM tblgoods_receipt_detail WHERE goods_receipt_id = combined_orders.id ) > 0 THEN '1' ELSE '0' END ELSE '0' END AS delivery_status FROM ( SELECT id, goods_receipt_code, supplier_code AS supplier_name, buyer_id, kind, pr_order_id, date_add, approval, id AS pdf_id, 1 AS type FROM tblgoods_receipt UNION ALL SELECT id, '' AS goods_receipt_code, vendor AS supplier_name, id AS buyer_id, kind, id AS pr_order_id, datecreated AS date_add, approve_status AS approval, id AS pdf_id, 2 AS type FROM tblpur_orders WHERE goods_id = 0 ) AS combined_orders ) AS final_result";
+    $sTable = "( SELECT *, CASE WHEN type = 1 THEN CASE WHEN ( SELECT COALESCE(SUM(po_quantities), 0) FROM tblgoods_receipt_detail WHERE goods_receipt_id = combined_orders.id ) = ( SELECT COALESCE(SUM(quantities), 0) FROM tblgoods_receipt_detail WHERE goods_receipt_id = combined_orders.id ) THEN '2' WHEN ( SELECT COALESCE(SUM(quantities), 0) FROM tblgoods_receipt_detail WHERE goods_receipt_id = combined_orders.id ) = 0 THEN '0' WHEN ( SELECT COALESCE(SUM(quantities), 0) FROM tblgoods_receipt_detail WHERE goods_receipt_id = combined_orders.id ) > 0 THEN '1' ELSE '0' END ELSE '0' END AS delivery_status FROM ( SELECT id, goods_receipt_code, supplier_code AS supplier_name, buyer_id, kind, pr_order_id, date_add, approval, id AS pdf_id, 1 AS type, project FROM tblgoods_receipt UNION ALL SELECT id, '' AS goods_receipt_code, vendor AS supplier_name, id AS buyer_id, kind, id AS pr_order_id, datecreated AS date_add, approve_status AS approval, id AS pdf_id, 2 AS type, project FROM tblpur_orders WHERE goods_id = 0 ) AS combined_orders ) AS final_result";
 
     $allColumns = [];
     foreach ($aColumns as $column) {

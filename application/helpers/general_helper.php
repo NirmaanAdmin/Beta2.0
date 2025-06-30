@@ -1063,3 +1063,46 @@ function get_share_to_me_dms() {
     $row = $CI->db->get()->result();
     return $row;
 }
+
+function get_project_listing($selected = '')
+{
+    $CI = &get_instance();
+    $CI->db->select('id, name');
+    $CI->db->from(db_prefix() . 'projects');
+    $CI->db->order_by(db_prefix() . 'projects.id', 'asc');
+    $projects = $CI->db->get()->result_array();
+
+    $CI->db->select('*');
+    $CI->db->from(db_prefix() . 'default_projects');
+    $CI->db->where('staff_id', get_staff_user_id());
+    $default_project = $CI->db->get()->row();
+    if(!empty($default_project)) {
+        $selected = $default_project->project;
+    }
+
+    $html = '<div class="form-group">';
+    $html .= '<select name="default_project" id="default_project" class="selectpicker" data-live-search="true" data-none-selected-text="Select Project" onchange="change_default_project(this.value)">';
+    foreach ($projects as $project) {
+        $is_selected = ($selected == $project['id']) ? 'selected' : '';
+        $html .= '<option value="' . $project['id'] . '" ' . $is_selected . '>' . htmlspecialchars($project['name']) . '</option>';
+    }
+    $html .= '</select>';
+    return $html;
+}
+
+function get_default_project()
+{
+    $selected = 1;
+    $CI = &get_instance();
+    $CI->db->select('*');
+    $CI->db->from(db_prefix() . 'default_projects');
+    $CI->db->where('project !=', 0);
+    $CI->db->where('project IS NOT NULL', NULL, false);
+    $CI->db->where('staff_id', get_staff_user_id());
+    $default_project = $CI->db->get()->row();
+    if(!empty($default_project)) {
+        $selected = $default_project->project;
+    }
+    return $selected;
+}
+

@@ -65,6 +65,7 @@ if (isset($project)) {
    $where_project = '';
    foreach ($project as $t) {
       if ($t != '') {
+         $where_project .= ' AND (project_id = "' . $t . '"';
       }
    }
    if ($where_project != '') {

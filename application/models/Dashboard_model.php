@@ -408,4 +408,23 @@ class Dashboard_model extends App_Model
 
         return $chart;
     }
+
+    public function change_default_project($data)
+    {
+        $id = $data['id'];
+        $this->db->select('*');
+        $this->db->from(db_prefix() . 'default_projects');
+        $this->db->where('staff_id', get_staff_user_id());
+        $row = $this->db->get()->row();
+        if(!empty($row)) {
+            $this->db->where('staff_id', get_staff_user_id());
+            $this->db->update(db_prefix() . 'default_projects', [
+                'project' => $id,
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+        } else {
+            $this->db->insert(db_prefix() . 'default_projects', ['project' => $id, 'staff_id' => get_staff_user_id(), 'created_at' => date('Y-m-d H:i:s')]);
+        }
+        return true;
+    }
 }

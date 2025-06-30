@@ -27,7 +27,7 @@ if (isset($day_vouchers)) {
     
 }
 
-
+$where[] = 'AND project = "' . get_default_project() . '"';
 
 $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, ['id','date_add','internal_delivery_name','internal_delivery_code','description','date_c','date_add','datecreated']);
 

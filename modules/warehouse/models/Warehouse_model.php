@@ -22631,6 +22631,7 @@ class Warehouse_model extends App_Model
         $response['total_receipts'] = $response['total_received_po'] = $response['total_po'] = $response['total_quantity_received'] = $response['total_client_supply'] = $response['total_bought_out_items'] = $response['fully_documented'] = $response['incompleted'] = 0;
         $response['line_order_date'] = $response['line_order_total'] = array(); 
         $response['bar_top_vendor_name'] = $response['bar_top_vendor_value'] = array();
+        $default_project = get_default_project();
 
         $custom_date_select = $this->purchase_model->get_where_report_period(db_prefix() . 'goods_receipt.date_add');
         if(!empty($custom_date_select)) {
@@ -22668,6 +22669,9 @@ class Warehouse_model extends App_Model
         }
         if (!empty($custom_date_select)) {
         	$this->db->where($custom_date_select);
+        }
+        if (!empty($default_project)) {
+            $this->db->where(db_prefix() . 'goods_receipt.project', $default_project);
         }
         $this->db->group_by(db_prefix() . 'goods_receipt.id');
         $this->db->order_by(db_prefix() . 'goods_receipt.date_add', 'asc');
@@ -22728,25 +22732,49 @@ class Warehouse_model extends App_Model
         }
 
         // Get total distinct goods_receipt_id from documentation table
-		$this->db->select('COUNT(*) as total_received');
+		$this->db->select('COUNT(' . db_prefix() . 'goods_receipt_documentation.id) as total_received');
 		$this->db->from(db_prefix() . 'goods_receipt_documentation');
+		$this->db->join(
+		    db_prefix() . 'goods_receipt',
+		    db_prefix() . 'goods_receipt.id = ' . db_prefix() . 'goods_receipt_documentation.goods_receipt_id',
+		    'left'
+		);
+		if (!empty($default_project)) {
+            $this->db->where(db_prefix() . 'goods_receipt.project', $default_project);
+        }
+        $this->db->group_by(db_prefix() . 'goods_receipt_documentation.id');
 		$total_received_row = $this->db->get()->row_array();
 		$total_received = isset($total_received_row['total_received']) ? (int)$total_received_row['total_received'] : 0;
 		if ($total_received > 0) {
-			$this->db->select('COUNT(*) as attached_rows');
+			$this->db->select('COUNT(' . db_prefix() . 'goods_receipt_documentation.id) as attached_rows');
 			$this->db->from(db_prefix() . 'goods_receipt_documentation');
+			$this->db->join(
+			    db_prefix() . 'goods_receipt',
+			    db_prefix() . 'goods_receipt.id = ' . db_prefix() . 'goods_receipt_documentation.goods_receipt_id',
+			    'left'
+			);
 			$this->db->where("(`attachments` = 1 OR (`required` = 0 AND `attachments` = 0))", null, false);
+			if (!empty($default_project)) {
+	            $this->db->where(db_prefix() . 'goods_receipt.project', $default_project);
+	        }
+			$this->db->group_by(db_prefix() . 'goods_receipt_documentation.id');
 			$attached_rows_result = $this->db->get()->row_array();
 			$attached_rows = isset($attached_rows_result['attached_rows']) ? (int)$attached_rows_result['attached_rows'] : 0;
 			$response['fully_documented'] = ($total_received > 0 && $total_received === $attached_rows)
 				? 100
 				: round(($attached_rows / $total_received) * 100);
-			$subquery_incomplete = '(SELECT goods_receipt_id
-				FROM ' . db_prefix() . 'goods_receipt_documentation
-				WHERE required = 1 AND attachments = 0
-			) AS incomplete_gr';
 			$this->db->select('COUNT(*) AS incomplete_count');
-			$this->db->from($subquery_incomplete, null, false);
+			$this->db->from(db_prefix() . 'goods_receipt_documentation as grd');
+			$this->db->join(
+			    db_prefix() . 'goods_receipt as gr',
+			    'gr.id = grd.goods_receipt_id',
+			    'left'
+			);
+			$this->db->where('grd.required', 1);
+			$this->db->where('grd.attachments', 0);
+			if (!empty($default_project)) {
+			    $this->db->where('gr.project', $default_project);
+			}
 			$incomplete_result = $this->db->get()->row_array();
 			$incomplete_count = isset($incomplete_result['incomplete_count']) ? (int)$incomplete_result['incomplete_count'] : 0;
 			$response['incompleted'] = round(($incomplete_count / $total_received) * 100);
@@ -22777,9 +22805,13 @@ class Warehouse_model extends App_Model
         $response['total_issued_quantity'] = $response['total_issued_entries'] = $response['total_returnable_items'] = $response['non_returnable_ratio'] = $response['returnable_ratio'] = 0;
         $response['bar_top_material_name'] = $response['bar_top_material_value'] = array();
         $response['line_order_date'] = $response['line_order_total'] = array(); 
+        $default_project = get_default_project();
 
         $this->db->select('id, date_add');
         $this->db->from(db_prefix() . 'goods_delivery');
+        if (!empty($default_project)) {
+            $this->db->where(db_prefix() . 'goods_delivery.project', $default_project);
+        }
         $this->db->order_by(db_prefix() . 'goods_delivery.date_add', 'asc');
         $goods_delivery = $this->db->get()->result_array();
 
@@ -22796,6 +22828,9 @@ class Warehouse_model extends App_Model
             'left'
         );
         $this->db->from(db_prefix() . 'goods_delivery_detail');
+        if (!empty($default_project)) {
+            $this->db->where(db_prefix() . 'goods_delivery.project', $default_project);
+        }
         $this->db->group_by(db_prefix() . 'goods_delivery_detail.id');
         $this->db->order_by(db_prefix() . 'goods_delivery_detail.id', 'asc');
         $goods_delivery_detail = $this->db->get()->result_array();

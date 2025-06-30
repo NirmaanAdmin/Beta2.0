@@ -963,6 +963,7 @@ class Expenses_model extends App_Model
         $response['line_order_date'] = $response['line_order_total'] = array();
         $response['pie_project_name'] = $response['pie_project_value'] = array();
         $response['pie_category_name'] = $response['pie_category_value'] = array();
+        $default_project = get_default_project();
 
         $this->db->select(
             db_prefix() . 'expenses.id, ' .
@@ -986,7 +987,10 @@ class Expenses_model extends App_Model
             db_prefix() . 'expenses_categories.id = ' . db_prefix() . 'expenses.category',
             'left'
         );
-        $this->db->where(db_prefix() . 'expenses.invoiceid IS NULL');
+        $this->db->where(db_prefix() . 'expenses.invoiceid IS NULL', null, false);
+        if (!empty($default_project)) {
+            $this->db->where(db_prefix() . 'expenses.project_id', $default_project);
+        }
         $this->db->group_by(db_prefix() . 'expenses.id');
         $this->db->order_by(db_prefix() . 'expenses.date', 'asc');
         $expenses = $this->db->get()->result_array();

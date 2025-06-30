@@ -156,6 +156,8 @@ return App_table::find('preports')
             array_push($where, 'AND form_type = "' . $module . '"');
         }
 
+        array_push($where, 'AND project_id = '.get_default_project().'');
+
         $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, $additionalSelect);
 
         $output  = $result['output'];

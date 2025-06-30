@@ -112,4 +112,11 @@ class Dashboard extends AdminController
         $data['tickets_report'] = (new app\services\TicketsReportByStaff())->filterBy($type);
         $this->load->view('admin/dashboard/widgets/tickets_report_table', $data);
     }
+
+    public function change_default_project()
+    {
+        $data = $this->input->post();
+        $this->dashboard_model->change_default_project($data);
+        return true;
+    }
 }

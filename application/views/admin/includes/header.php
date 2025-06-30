@@ -143,6 +143,11 @@
 
             <ul class="nav navbar-nav navbar-right">
                 <?php do_action_deprecated('after_render_top_search', [], '3.0.0', 'admin_navbar_start'); ?>
+                <li class="nav-item">
+                    <div class="nav-link mtop15">
+                        <?php echo get_project_listing(); ?>
+                    </div>
+                </li>
                 <?php hooks()->do_action('admin_navbar_start'); ?>
                 <?php if (is_staff_member()) { ?>
                 <li class="icon header-newsfeed">
