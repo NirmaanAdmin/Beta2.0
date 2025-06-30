@@ -7506,25 +7506,24 @@ class timesheets extends AdminController
 		if ($this->input->post() && !empty($_FILES['file_csv']['tmp_name'])) {
 			$this->delete_error_file_day_before();
 
-			// prepare error-writer
+			// Prepare error-writer
 			$writer = new XLSXWriter();
 			$writer->writeSheetHeader('Sheet1', [
 				_l('staffid')    => 'string',
 				_l('id')         => 'string',
 				_l('hr_code')    => 'string',
 				_l('staff_name') => 'string',
-				_l('department') => 'string',
 				_l('month')      => 'string',
 				_l('error')      => 'string',
-			], ['widths' => [40, 40, 40, 50, 40, 50, 50]]);
+			], ['widths' => [40, 40, 40, 50, 50, 50]]);
 
-			// move upload to temp
-			$tmpDir    = TEMP_FOLDER . '/' . time() . uniqid();
+			// Move upload to temp
+			$tmpDir  = TEMP_FOLDER . '/' . time() . uniqid();
 			@mkdir($tmpDir, 0755, true);
-			$newPath   = $tmpDir . '/' . basename($_FILES['file_csv']['name']);
+			$newPath = $tmpDir . '/' . basename($_FILES['file_csv']['name']);
 			move_uploaded_file($_FILES['file_csv']['tmp_name'], $newPath);
 
-			// read sheet
+			// Read sheet
 			$xlsx       = new XLSXReader_fin($newPath);
 			$sheetNames = $xlsx->getSheetNames();
 			$data       = $xlsx->getSheetData($sheetNames[1]);
@@ -7532,16 +7531,15 @@ class timesheets extends AdminController
 
 			$arr_insert = [];
 
-			// ensure header exists
+			// Ensure header exists
 			if (empty($data) || !isset($data[0]) || !is_array($data[0])) {
 				echo json_encode(['message' => 'No data or invalid sheet.']);
 				return;
 			}
 			$column_key = $data[0];
 
-			// loop each row
+			// Loop each row
 			for ($r = 1; $r < count($data); $r++) {
-				// skip null or empty rows
 				if (!isset($data[$r]) || !is_array($data[$r]) || count(array_filter($data[$r])) === 0) {
 					continue;
 				}
@@ -7550,16 +7548,13 @@ class timesheets extends AdminController
 				$row    = $data[$r];
 				$errors = '';
 
-				// safely pull each column (use ?? '' so no offset warning)
 				$staff_id_raw   = $row[0] ?? '';
 				$id_raw         = $row[1] ?? '';
 				$hr_code_raw    = $row[2] ?? '';
-				$month_raw      = $row[3] ?? '';
-				$staff_name_raw = $row[4] ?? '';
-				$dept_raw       = $row[5] ?? '';
-				$rel_type_raw   = $row[6] ?? 'hr_timesheets';
+				$staff_name_raw = $row[3] ?? '';
+				$month_raw      = $row[4] ?? '';
+				$rel_type_raw   = $row[5] ?? 'hr_timesheets';
 
-				// validation
 				if (trim($staff_id_raw) === '') {
 					$errors .= _l('staff_id') . ' ' . _l('not_empty') . '; ';
 				}
@@ -7567,14 +7562,12 @@ class timesheets extends AdminController
 					$errors .= _l('month') . ' ' . _l('not_empty') . '; ';
 				}
 
-				// if errors, write row to error sheet
 				if ($errors !== '') {
 					$writer->writeSheetRow('Sheet1', [
 						$staff_id_raw,
 						$id_raw,
 						$hr_code_raw,
 						$staff_name_raw,
-						$dept_raw,
 						$month_raw,
 						$errors
 					]);
@@ -7582,7 +7575,6 @@ class timesheets extends AdminController
 					continue;
 				}
 
-				// parse month, ensure valid date
 				$base_date = date('Y-m-d', strtotime($month_raw));
 				if ($base_date === false) {
 					$writer->writeSheetRow('Sheet1', [
@@ -7590,7 +7582,6 @@ class timesheets extends AdminController
 						$id_raw,
 						$hr_code_raw,
 						$staff_name_raw,
-						$dept_raw,
 						$month_raw,
 						_l('invalid_date_format')
 					]);
@@ -7598,52 +7589,43 @@ class timesheets extends AdminController
 					continue;
 				}
 
-				// fetch shift; guard against missing record
 				$this->db->select('st.time_start_work, st.time_end_work')
 					->from(db_prefix() . 'work_shift_detail_number_day d')
 					->join(db_prefix() . 'shift_type st', 'st.id = d.shift_id', 'left')
 					->where('d.staff_id', $staff_id_raw);
 				$shift = $this->db->get()->row_array();
 
-				// if (empty($shift['time_start_work']) || empty($shift['time_end_work'])) {
-				// 	// skip or set default hours (here skipping)
-				// 	continue;
-				// }
-
 				$start_ts = strtotime($shift['time_start_work']);
 				$end_ts   = strtotime($shift['time_end_work']);
 				$hours    = $end_ts > $start_ts ? ($end_ts - $start_ts) / 3600 : 0;
 
-				// collect day-columns (index 7 onward)
-				for ($i = 7; $i < count($column_key); $i++) {
+				// Collect day-columns (index 6 onward since 'department' removed)
+				for ($i = 6; $i < count($column_key); $i++) {
 					$cell = strtoupper($row[$i] ?? '');
 					if (!in_array($cell, ['P', 'L', 'OFF', 'N/A', 'W/H', 'H/F'], true)) {
 						continue;
 					}
-					$day_number = $i - 6; // index 7 → day 1
+					$day_number = $i - 5; // index 6 → day 1
 					$date_work  = date('Y-m-d', strtotime("$base_date +" . ($day_number - 1) . " days"));
 
 					$arr_insert[] = [
-						'staff_id'    => $staff_id_raw,
-						'date_work'   => $date_work,
-						'value'       => '',
-						'type'        => $cell,
-						'add_from'    => get_staff_user_id(),
+						'staff_id'  => $staff_id_raw,
+						'date_work' => $date_work,
+						'value'     => '',
+						'type'      => $cell,
+						'add_from'  => get_staff_user_id(),
 					];
 				}
 			}
 
-			// bulk insert if any
 			if (!empty($arr_insert)) {
 				$this->timesheets_model->import_attendance_data($arr_insert);
 				$total_row_success = count($arr_insert);
 				$message           = 'Import completed';
 			}
 
-			// write error file if needed
 			if ($total_row_false > 0) {
-				$filename = 'Import_attendance_error_'
-					. get_staff_user_id() . '_' . time() . '.xlsx';
+				$filename = 'Import_attendance_error_' . get_staff_user_id() . '_' . time() . '.xlsx';
 				$writer->writeToFile(TIMESHEETS_ERROR . $filename);
 			}
 		}
@@ -7658,6 +7640,7 @@ class timesheets extends AdminController
 			'filename'          => $filename ?? '',
 		]);
 	}
+
 
 
 
