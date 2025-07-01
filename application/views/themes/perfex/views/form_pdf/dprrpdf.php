@@ -108,9 +108,12 @@ $formrowsinfo .= '</tbody>';
 $formrowsinfo .= '</table>';
 
 
-//add note to pdf
-$formrowsinfo .= '<br/><br/>';
-$formrowsinfo .= '<h2>Note:</h2>';
-$formrowsinfo .= '<p>' . $form_data->message. '</p>';
+if ($form_data->message != '') {
+    //add note to pdf
+    $formrowsinfo .= '<br/><br/>';
+    $formrowsinfo .= '<h2>Note:</h2>';
+    $formrowsinfo .= '<p>' . $form_data->message . '</p>';
+}
+
 
 $pdf->writeHTML($formrowsinfo, true, false, false, false, '');
