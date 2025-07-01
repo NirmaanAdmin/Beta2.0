@@ -7484,6 +7484,7 @@ class timesheets extends AdminController
 	 */
 	public function import_attendance_excel()
 	{
+		// Permission check
 		if (
 			!has_permission('hrp_employee', '', 'create')
 			&& !has_permission('hrp_employee', '', 'edit')
@@ -7492,74 +7493,75 @@ class timesheets extends AdminController
 			access_denied('hrp_employee');
 		}
 
+		// Load required libraries
 		if (!class_exists('XLSXReader_fin')) {
 			require_once module_dir_path(HR_PAYROLL_MODULE_NAME) . '/assets/plugins/XLSXReader/XLSXReader.php';
 		}
 		require_once module_dir_path(HR_PAYROLL_MODULE_NAME) . '/assets/plugins/XLSXWriter/xlsxwriter.class.php';
 
-		$filename           = '';
-		$message            = '';
-		$total_rows         = 0;
-		$total_row_success  = 0;
-		$total_row_false    = 0;
+		$filename = '';
+		$message = '';
+		$total_rows = 0;
+		$total_row_success = 0;
+		$total_row_false = 0;
+		$total_days_updated = 0;
+		$error_rows = [];
 
 		if ($this->input->post() && !empty($_FILES['file_csv']['tmp_name'])) {
 			$this->delete_error_file_day_before();
 
-			// prepare error-writer
-			$writer = new XLSXWriter();
-			$writer->writeSheetHeader('Sheet1', [
-				_l('staffid')    => 'string',
-				_l('id')         => 'string',
-				_l('hr_code')    => 'string',
-				_l('staff_name') => 'string',
-				_l('department') => 'string',
-				_l('month')      => 'string',
-				_l('error')      => 'string',
-			], ['widths' => [40, 40, 40, 50, 40, 50, 50]]);
-
-			// move upload to temp
-			$tmpDir    = TEMP_FOLDER . '/' . time() . uniqid();
+			// Process uploaded file
+			$tmpDir = TEMP_FOLDER . '/' . time() . uniqid();
 			@mkdir($tmpDir, 0755, true);
-			$newPath   = $tmpDir . '/' . basename($_FILES['file_csv']['name']);
-			move_uploaded_file($_FILES['file_csv']['tmp_name'], $newPath);
+			$newPath = $tmpDir . '/' . basename($_FILES['file_csv']['name']);
 
-			// read sheet
-			$xlsx       = new XLSXReader_fin($newPath);
-			$sheetNames = $xlsx->getSheetNames();
-			$data       = $xlsx->getSheetData($sheetNames[1]);
+			if (!move_uploaded_file($_FILES['file_csv']['tmp_name'], $newPath)) {
+				echo json_encode(['message' => 'Failed to upload file']);
+				return;
+			}
+
+			try {
+				// Read Excel data
+				$xlsx = new XLSXReader_fin($newPath);
+				$sheetNames = $xlsx->getSheetNames();
+				$data = $xlsx->getSheetData($sheetNames[1]);
+			} catch (Exception $e) {
+				@unlink($newPath);
+				@rmdir($tmpDir);
+				echo json_encode(['message' => 'Error reading Excel file: ' . $e->getMessage()]);
+				return;
+			}
+
 			@unlink($newPath);
+			@rmdir($tmpDir);
 
-			$arr_insert = [];
+			$arr_update = [];
 
-			// ensure header exists
 			if (empty($data) || !isset($data[0]) || !is_array($data[0])) {
 				echo json_encode(['message' => 'No data or invalid sheet.']);
 				return;
 			}
+
 			$column_key = $data[0];
 
-			// loop each row
+			// Process each employee row
 			for ($r = 1; $r < count($data); $r++) {
-				// skip null or empty rows
 				if (!isset($data[$r]) || !is_array($data[$r]) || count(array_filter($data[$r])) === 0) {
 					continue;
 				}
 
 				$total_rows++;
-				$row    = $data[$r];
+				$row = $data[$r];
 				$errors = '';
 
-				// safely pull each column (use ?? '' so no offset warning)
-				$staff_id_raw   = $row[0] ?? '';
-				$id_raw         = $row[1] ?? '';
-				$hr_code_raw    = $row[2] ?? '';
-				$month_raw      = $row[3] ?? '';
-				$staff_name_raw = $row[4] ?? '';
-				$dept_raw       = $row[5] ?? '';
-				$rel_type_raw   = $row[6] ?? 'hr_timesheets';
+				// Get row data
+				$staff_id_raw = $row[0] ?? '';
+				$id_raw = $row[1] ?? '';
+				$hr_code_raw = $row[4] ?? '';
+				$month_raw = $row[3] ?? '';
+				$staff_name_raw = $row[5] ?? '';
 
-				// validation
+				// Validate required fields
 				if (trim($staff_id_raw) === '') {
 					$errors .= _l('staff_id') . ' ' . _l('not_empty') . '; ';
 				}
@@ -7567,97 +7569,146 @@ class timesheets extends AdminController
 					$errors .= _l('month') . ' ' . _l('not_empty') . '; ';
 				}
 
-				// if errors, write row to error sheet
 				if ($errors !== '') {
-					$writer->writeSheetRow('Sheet1', [
+					$error_rows[] = [
 						$staff_id_raw,
 						$id_raw,
 						$hr_code_raw,
 						$staff_name_raw,
-						$dept_raw,
 						$month_raw,
 						$errors
-					]);
+					];
 					$total_row_false++;
 					continue;
 				}
 
-				// parse month, ensure valid date
+				// Parse month
 				$base_date = date('Y-m-d', strtotime($month_raw));
 				if ($base_date === false) {
-					$writer->writeSheetRow('Sheet1', [
+					$error_rows[] = [
 						$staff_id_raw,
 						$id_raw,
 						$hr_code_raw,
 						$staff_name_raw,
-						$dept_raw,
 						$month_raw,
 						_l('invalid_date_format')
-					]);
+					];
 					$total_row_false++;
 					continue;
 				}
 
-				// fetch shift; guard against missing record
-				$this->db->select('st.time_start_work, st.time_end_work')
-					->from(db_prefix() . 'work_shift_detail_number_day d')
-					->join(db_prefix() . 'shift_type st', 'st.id = d.shift_id', 'left')
-					->where('d.staff_id', $staff_id_raw);
-				$shift = $this->db->get()->row_array();
+				// Get month info
+				$month_start = date('Y-m-01', strtotime($base_date));
+				$days_in_month = date('t', strtotime($base_date));
 
-				// if (empty($shift['time_start_work']) || empty($shift['time_end_work'])) {
-				// 	// skip or set default hours (here skipping)
-				// 	continue;
-				// }
+				// Process each day column (columns G onward)
+				for ($excel_col = 6; $excel_col < count($column_key) && ($excel_col - 6) < $days_in_month; $excel_col++) {
+					$day_of_month = $excel_col - 5; // Column G (6) = Day 1
+					$calendar_date = date('Y-m-d', strtotime("$month_start +" . ($day_of_month - 1) . " days"));
 
-				$start_ts = strtotime($shift['time_start_work']);
-				$end_ts   = strtotime($shift['time_end_work']);
-				$hours    = $end_ts > $start_ts ? ($end_ts - $start_ts) / 3600 : 0;
+					$cell = strtoupper(trim($row[$excel_col] ?? ''));
 
-				// collect day-columns (index 7 onward)
-				for ($i = 7; $i < count($column_key); $i++) {
-					$cell = strtoupper($row[$i] ?? '');
-					if (!in_array($cell, ['P', 'L', 'OFF', 'N/A', 'W/H', 'H/F'], true)) {
+					// Skip only if completely empty (not even '0')
+					if ($cell === '') {
 						continue;
 					}
-					$day_number = $i - 6; // index 7 → day 1
-					$date_work  = date('Y-m-d', strtotime("$base_date +" . ($day_number - 1) . " days"));
 
-					$arr_insert[] = [
-						'staff_id'    => $staff_id_raw,
-						'date_work'   => $date_work,
-						'value'       => '',
-						'type'        => $cell,
-						'add_from'    => get_staff_user_id(),
+					// Validate attendance codes
+					// $valid_codes = ['P', 'L', 'OFF', 'N/A', 'W/H', 'H/F', '0'];
+					// if (!in_array($cell, $valid_codes, true)) {
+					// 	$errors .= sprintf(_l('invalid_attendance_code'), $cell, $calendar_date) . '; ';
+					// 	continue;
+					// }
+
+					// Only process if not '0' (0 means no update needed)
+					if ($cell !== '0') {
+						$arr_update[] = [
+							'staff_id' => $staff_id_raw,
+							'date_work' => $calendar_date,
+							'value' => '',
+							'type' => $cell,
+							'add_from' => get_staff_user_id(),
+						];
+						$total_days_updated++;
+					}
+				}
+
+				if ($errors !== '') {
+					$error_rows[] = [
+						$staff_id_raw,
+						$id_raw,
+						$hr_code_raw,
+						$staff_name_raw,
+						$month_raw,
+						$errors
 					];
+					$total_row_false++;
+				} else {
+					$total_row_success++;
 				}
 			}
 
-			// bulk insert if any
-			if (!empty($arr_insert)) {
-				$this->timesheets_model->import_attendance_data($arr_insert);
-				$total_row_success = count($arr_insert);
-				$message           = 'Import completed';
+			// Bulk update attendance data
+			if (!empty($arr_update)) {
+				try {
+					$this->timesheets_model->import_attendance_data($arr_update);
+					$message = sprintf(_l('import_successful_with_days'), count($arr_update));
+				} catch (Exception $e) {
+					$message = 'Error saving data: ' . $e->getMessage();
+					log_message('error', $message);
+				}
 			}
 
-			// write error file if needed
-			if ($total_row_false > 0) {
-				$filename = 'Import_attendance_error_'
-					. get_staff_user_id() . '_' . time() . '.xlsx';
-				$writer->writeToFile(TIMESHEETS_ERROR . $filename);
+			// Generate error file if needed
+			if (!empty($error_rows)) {
+				try {
+					$writer = new XLSXWriter();
+					$writer->writeSheetHeader('Sheet1', [
+						_l('staffid') => 'string',
+						_l('id') => 'string',
+						_l('hr_code') => 'string',
+						_l('staff_name') => 'string',
+						_l('month') => 'string',
+						_l('error') => 'string',
+					], ['widths' => [40, 40, 40, 50, 50, 50]]);
+
+					foreach ($error_rows as $error_row) {
+						$writer->writeSheetRow('Sheet1', $error_row);
+					}
+
+					// Ensure error directory exists
+					if (!file_exists(TIMESHEETS_ERROR)) {
+						mkdir(TIMESHEETS_ERROR, 0755, true);
+					}
+
+					$filename = 'Import_attendance_error_' . get_staff_user_id() . '_' . time() . '.xlsx';
+					$filepath = TIMESHEETS_ERROR . $filename;
+
+					if (is_writable(dirname($filepath))) {
+						$writer->writeToFile($filepath);
+					} else {
+						log_message('error', 'Directory not writable: ' . TIMESHEETS_ERROR);
+						$filename = '';
+					}
+				} catch (Exception $e) {
+					log_message('error', 'Error creating error file: ' . $e->getMessage());
+					$filename = '';
+				}
 			}
 		}
 
 		echo json_encode([
-			'message'           => $message,
-			'total_row_success' => $total_row_success ?? 0,
-			'total_row_false'   => $total_row_false,
-			'total_rows'        => $total_rows,
-			'site_url'          => site_url(),
-			'staff_id'          => get_staff_user_id(),
-			'filename'          => $filename ?? '',
+			'message' => $message,
+			'total_row_success' => $total_row_success,
+			'total_row_false' => $total_row_false,
+			'total_rows' => $total_rows,
+			'total_days_updated' => $total_days_updated,
+			'site_url' => site_url(),
+			'staff_id' => get_staff_user_id(),
+			'filename' => $filename,
 		]);
 	}
+
 
 
 

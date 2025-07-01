@@ -97,7 +97,7 @@ $file_header[] = _l('standard_working_time_of_month');
 
 								<div class="form-group">
 									
-									<a href="<?php echo admin_url('hr_payroll/manage_attendance'); ?>" class=" btn  btn-default ">
+									<a href="<?php echo admin_url('timesheets/timekeeping'); ?>" class=" btn  btn-default ">
 										<?php echo _l('hrp_back'); ?>
 									</a>
 									<button id="uploadfile" type="button" class="btn btn-info import" onclick="return uploadfilecsv(this);" ><?php echo _l('import'); ?></button>
