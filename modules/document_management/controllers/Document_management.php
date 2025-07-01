@@ -21,6 +21,7 @@ class document_management extends AdminController
 	/* index */
 	public function index()
 	{
+		$default_project = get_default_project();
 		if (!(has_permission('document_management_file_management', '', 'view') || has_permission('document_management_file_management', '', 'view_own'))) {
 			access_denied('document_management');
 		}
@@ -28,7 +29,7 @@ class document_management extends AdminController
 		init_fist_item();
 		$user_id = get_staff_user_id();
 		$master_parent_id = '';
-		$id = $this->input->get('id') ?? 2;
+		$id = $this->input->get('id') ?? $this->document_management_model->get_default_dmg_project($default_project);
 		$edit = $this->input->get('edit');
 		$share_to_me = $this->input->get('share_to_me');
 		$my_approval = $this->input->get('my_approval');
@@ -41,7 +42,7 @@ class document_management extends AdminController
 		$data['approve_items'] = $this->document_management_model->get_item('', $query, 'name, id, dateadded, filetype, hash');
 		$query = 'sign_approve = -1 and id in (SELECT rel_id FROM ' . db_prefix() . 'dmg_approval_detail_eids where staffid = ' . $user_id . ' and approve is null and rel_type = \'document\')';
 		$data['approve_item_eids'] = $this->document_management_model->get_item('', $query, 'name, id, dateadded, filetype, hash');
-		$data_root_folder = $this->document_management_model->get_root_item($user_id);
+		$data_root_folder = $this->document_management_model->get_root_item($user_id, $default_project);
 
 		// Added project member check similar to the reference code
 		if (!empty($data_root_folder)) {

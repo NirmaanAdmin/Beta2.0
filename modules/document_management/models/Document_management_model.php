@@ -2158,11 +2158,32 @@ class document_management_model extends app_model
 		return $this->db->get(db_prefix() . 'project_members')->row();
 	}
 
-	public function get_root_item($user_id)
+	public function get_root_item($user_id, $project_id = 0)
 	{
-		$this->db->where('parent_id = 0 and ((creator_id = ' . $user_id . ' and creator_type = "staff") or (creator_id = 0 and creator_type = "public"))');
+		$this->db->where('parent_id = 0');
+		$this->db->group_start();
+		$this->db->where('project_id', 0);
+		$this->db->or_where('project_id', $project_id);
+		$this->db->group_end();
+		$this->db->group_start();
+		$this->db->where('(creator_id = ' . $user_id . ' and creator_type = "staff")');
+		$this->db->or_where('(creator_id = 0 and creator_type = "public")');
+		$this->db->group_end();
 		$this->db->order_by("creator_id", "desc");
 		return $this->db->get(db_prefix() . 'dmg_items')->result_array();
+
+	}
+
+	public function get_default_dmg_project($project_id)
+	{
+		$master_id = 2;
+		$this->db->select('id');
+		$this->db->where('project_id', $project_id);
+		$data = $this->db->get(db_prefix() . 'dmg_items')->row();
+		if(!empty($data)) {
+			$master_id = $data->id;
+		}
+		return $master_id;
 	}
 
 

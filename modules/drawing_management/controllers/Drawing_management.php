@@ -21,6 +21,7 @@ class drawing_management extends AdminController
 	/* index */
 	public function index()
 	{
+		$default_project = get_default_project();
 		if (!(has_permission('drawing_management_file_management', '', 'view') || has_permission('drawing_management_file_management', '', 'view_own'))) {
 			access_denied('drawing_management');
 		}
@@ -28,7 +29,7 @@ class drawing_management extends AdminController
 		init_drawing_fist_item();
 		$user_id = get_staff_user_id();
 		$master_parent_id = '';
-		$id = $this->input->get('id') ?? 3;
+		$id = $this->input->get('id') ?? $this->drawing_management_model->get_default_dms_project($default_project);
 		$edit = $this->input->get('edit');
 		$share_to_me = $this->input->get('share_to_me');
 		$my_approval = $this->input->get('my_approval');
@@ -41,7 +42,7 @@ class drawing_management extends AdminController
 		$data['approve_items'] = $this->drawing_management_model->get_item('', $query, 'name, id, dateadded, filetype, hash');
 		$query = 'sign_approve = -1 and id in (SELECT rel_id FROM ' . db_prefix() . 'dms_approval_detail_eids where staffid = ' . $user_id . ' and approve is null and rel_type = \'document\')';
 		$data['approve_item_eids'] = $this->drawing_management_model->get_item('', $query, 'name, id, dateadded, filetype, hash');
-		$data_root_folder = $this->drawing_management_model->get_root_item($user_id);
+		$data_root_folder = $this->drawing_management_model->get_root_item($user_id, $default_project);
 		if (!empty($data_root_folder)) {
 			foreach ($data_root_folder as $key => $value) {
 				if ($value['project_id'] != 0 && !is_admin()) {

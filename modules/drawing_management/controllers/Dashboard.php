@@ -10,6 +10,7 @@ class Dashboard extends AdminController
     {
         parent::__construct();
         $this->load->model('dashboard_model');
+        $this->load->model('drawing_management_model');
         $this->load->model('purchase/purchase_model');
         hooks()->do_action('purchase_init');
     }
@@ -36,15 +37,19 @@ class Dashboard extends AdminController
     public function dicipline_status_charts()
     {
         $this->load->database();
+        $default_project = get_default_project();
+        $master_id = $this->drawing_management_model->get_default_dms_project($default_project);
 
         // Fetch all disciplines
         $disciplines = $this->db->select('id, name')->get(db_prefix() . 'dms_discipline')->result_array();
 
         // Fetch counts in one query to avoid loop hits
-        $counts = $this->db->select('discipline, design_stage, COUNT(*) as total')
-            ->group_by(['discipline', 'design_stage'])
-            ->get(db_prefix() . 'dms_items')
-            ->result_array();
+        $this->db->select('discipline, design_stage, COUNT(*) as total');
+        if (!empty($master_id)) {
+            $this->db->where('master_id', $master_id);
+        }
+        $this->db->group_by(['discipline', 'design_stage']);
+        $counts = $this->db->get(db_prefix() . 'dms_items')->result_array();
 
         // Organize counts into an associative array
         $count_map = [];
@@ -75,6 +80,7 @@ class Dashboard extends AdminController
 
     public function get_drawing_management_dashboard()
     {
+        $default_project = get_default_project();
         $module_name = 'drawing_dashboard';
         $data = $this->input->post();
         $projects = $data['projects'];
@@ -84,20 +90,28 @@ class Dashboard extends AdminController
         if (!empty($projects)) {
 			update_module_filter($module_name, $project_filter_name, $projects);
 		}
+
+        $master_id = $this->drawing_management_model->get_default_dms_project($default_project);
         // Fetch all disciplines
         $disciplines = $this->db->select('id, name')->get(db_prefix() . 'dms_discipline')->result_array();
 
         // Fetch counts grouped by discipline and design stage
-        $counts = $this->db->select('discipline, design_stage, COUNT(*) as total')
-            ->group_by(['discipline', 'design_stage'])
-            ->get(db_prefix() . 'dms_items')
-            ->result_array();
+        $this->db->select('discipline, design_stage, COUNT(*) as total');
+        if (!empty($master_id)) {
+            $this->db->where('master_id', $master_id);
+        }
+        $this->db->group_by(['discipline', 'design_stage']);
+
+        $counts = $this->db->get(db_prefix() . 'dms_items')->result_array();
+
 
         // Get approval status counts
-        $approval_counts = $this->db->select('approve, COUNT(*) as count')
-            ->group_by('approve')
-            ->get(db_prefix() . 'dms_items')
-            ->result_array();
+        $this->db->select('approve, COUNT(*) as count');
+        if (!empty($master_id)) {
+            $this->db->where('master_id', $master_id);
+        }
+        $this->db->group_by('approve');
+        $approval_counts = $this->db->get(db_prefix() . 'dms_items')->result_array();
 
         // Initialize approval counts
         $approved = 0;
