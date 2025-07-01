@@ -4751,4 +4751,11 @@ class Forms_model extends App_Model
         $this->db->order_by(db_prefix() . 'projects.name', 'asc');
         return $this->db->get()->result_array();
     }
+    public function get_form_dpr_pdf_data($id)
+    {
+        $this->db->select('*');
+        $this->db->where('formid', $id);
+        $query = $this->db->get(db_prefix() . 'forms');
+        return $query->row();
+    }
 }

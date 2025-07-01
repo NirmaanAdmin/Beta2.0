@@ -156,7 +156,7 @@ return App_table::find('preports')
             array_push($where, 'AND form_type = "' . $module . '"');
         }
 
-        array_push($where, 'AND project_id = '.get_default_project().'');
+        array_push($where, 'AND project_id = ' . get_default_project() . '');
 
         $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, $additionalSelect);
 
@@ -174,9 +174,9 @@ return App_table::find('preports')
 
                 if ($aColumns[$i] == '1') {
                     $_data = '<div class="checkbox"><input type="checkbox" value="' . $aRow['formid'] . '" data-name="' . $aRow['subject'] . '" data-status="' . $aRow['status'] . '"><label></label></div>';
-                }  elseif ($aColumns[$i] == 'project_id') {
+                } elseif ($aColumns[$i] == 'project_id') {
                     $_data = get_project_name_by_id($aRow['project_id']);
-                }  elseif ($aColumns[$i] == 'lastreply') {
+                } elseif ($aColumns[$i] == 'lastreply') {
                     if ($aRow[$aColumns[$i]] == null) {
                         $_data = _l('form_no_reply_yet');
                     } else {
@@ -228,7 +228,15 @@ return App_table::find('preports')
                 } elseif ($aColumns[$i] == 'priority') {
                     $_data = e(form_priority_translate($aRow['priority']));
                 } elseif ($aColumns[$i] == '2') {
-                    $_data = '';
+                    $form_pdf = '';
+                    $form_pdf .= '<a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa-regular fa-file-pdf"></i><span class="caret"></span></a>';
+                    $form_pdf .= '<ul class="dropdown-menu dropdown-menu-right">';
+                    $form_pdf .= '<li class="hidden-xs"><a href="' . admin_url('forms/form_dpr_pdf/' . $aRow['formid'] . '?output_type=I') . '">' . _l('view_pdf') . '</a></li>';
+                    $form_pdf .= '<li class="hidden-xs"><a href="' . admin_url('forms/form_dpr_pdf/' . $aRow['formid'] . '?output_type=I') . '" target="_blank">' . _l('view_pdf_in_new_window') . '</a></li>';
+                    $form_pdf .= '<li><a href="' . admin_url('forms/form_dpr_pdf/' . $aRow['formid']) . '">' . _l('download') . '</a></li>';
+                    $form_pdf .= '<li><a href="' . admin_url('forms/form_dpr_pdf/' . $aRow['formid'] . '?print=true') . '" target="_blank">' . _l('print') . '</a></li>';
+                    $form_pdf .= '</ul>';
+                    $_data = $form_pdf;
                 } else {
                     if (strpos($aColumns[$i], 'date_picker_') !== false) {
                         $_data = (strpos($_data, ' ') !== false ? _dt($_data) : _d($_data));

@@ -1108,3 +1108,16 @@ function get_default_project()
     return $selected;
 }
 
+function get_priority_name($priority)
+{
+    if ($priority == 1) {
+        return "Low";
+    } elseif ($priority == 2) {
+        return "Medium";
+    } elseif ($priority == 3) {
+        return "High";
+    } else {
+        return null; // or handle invalid input as needed
+    }
+}
+

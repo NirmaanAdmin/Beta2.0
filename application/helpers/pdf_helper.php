@@ -332,3 +332,8 @@ function form_pdf_qor($form, $tag = '')
 {
     return app_pdf('form', LIBSPATH . 'pdf/Form_pdf_qor', $form, $tag);
 }
+
+function create_dpr_form_pdf($form_data)
+{
+    return app_pdf('Dprr', LIBSPATH . 'pdf/Dprr_pdf', $form_data);
+}

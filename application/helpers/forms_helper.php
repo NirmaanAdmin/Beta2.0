@@ -757,3 +757,32 @@ function AdminReportsTableStructure($name = '', $bulk_action = false)
 
     return $table;
 }
+function get_progress_report_type_name($type)
+{
+    $CI = &get_instance();
+    $CI->db->where('id', $type);
+    $CI->db->select('name');
+    $result = $CI->db->get(db_prefix() . 'progress_report_type')->result_array();
+    return !empty($result) ? $result[0]['name'] : '';
+}
+
+function get_progress_report_sub_type_name($sub_type)
+{
+    $CI = &get_instance();
+    $CI->db->where('id', $sub_type);
+    $CI->db->select('name');
+    $result = $CI->db->get(db_prefix() . 'progress_report_sub_type')->result_array();
+    return !empty($result) ? $result[0]['name'] : '';
+}
+
+function get_progress_report_machinary_name($machinery)
+{
+    $CI = &get_instance();
+    if (empty($machinery)) {
+        return '';
+    }
+    $CI->db->where('id', $machinery);
+    $CI->db->select('name');
+    $result = $CI->db->get(db_prefix() . 'progress_report_machinary')->result_array();
+    return !empty($result) ? $result[0]['name'] : '';
+}
