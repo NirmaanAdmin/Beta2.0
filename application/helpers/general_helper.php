@@ -1066,11 +1066,13 @@ function get_share_to_me_dms() {
 
 function get_project_listing($selected = '')
 {
+    $projects = array();
     $CI = &get_instance();
-    $CI->db->select('id, name');
-    $CI->db->from(db_prefix() . 'projects');
-    $CI->db->order_by(db_prefix() . 'projects.id', 'asc');
-    $projects = $CI->db->get()->result_array();
+    $CI->load->model('projects_model');
+    $projects = $CI->projects_model->get_items();
+    usort($projects, function($a, $b) {
+        return $a['id'] - $b['id'];
+    });
 
     $CI->db->select('*');
     $CI->db->from(db_prefix() . 'default_projects');
