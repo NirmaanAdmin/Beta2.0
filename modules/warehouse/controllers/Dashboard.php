@@ -35,6 +35,7 @@ class Dashboard extends AdminController
 
     public function receipt_status_charts()
     {
+        $default_project = get_default_project();
         $aColumns = [
             'pr_order_id',
             1,
@@ -46,8 +47,9 @@ class Dashboard extends AdminController
         $sTable       = db_prefix() . 'goods_receipt';
         $join         = [];
         $where = [];
-
-
+        if (!empty($default_project)) {
+            $where[] = 'AND ' . db_prefix() . 'goods_receipt.project = ' . $default_project;
+        }
 
         $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, ['id', 'date_add', 'date_c', 'goods_receipt_code', 'supplier_code']);
 
@@ -93,23 +95,29 @@ class Dashboard extends AdminController
 
     public function return_details_charts()
     {
+        $default_project = get_default_project();
         $aColumns = [
             1,
             'commodity_name',
-            'description',
+            db_prefix() . 'goods_delivery_detail.description',
             2,
             'returnable_date',
             3,
         ]; 
-        $sIndexColumn = 'id';
+        $sIndexColumn = db_prefix() . 'goods_delivery_detail.id';
         $sTable       = db_prefix() . 'goods_delivery_detail';
-        $join         = [];
+        $join = [
+            'LEFT JOIN ' . db_prefix() . 'goods_delivery gd ON gd.id = ' . db_prefix() . 'goods_delivery_detail.goods_delivery_id'
+        ];
         $where = [];
 
         array_push($where, 'AND returnable = 1');
         array_push($where, 'AND returnable_date != ""');
+        if (!empty($default_project)) {
+            array_push($where, 'AND gd.project = ' . $default_project);
+        }
 
-        $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, ['id', 'goods_delivery_id',]);
+        $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [db_prefix() . 'goods_delivery_detail.id', 'goods_delivery_id']);
 
 
         $output  = $result['output'];

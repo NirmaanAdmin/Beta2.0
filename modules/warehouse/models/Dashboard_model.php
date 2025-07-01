@@ -11,6 +11,7 @@ class Dashboard_model extends App_Model
 	{
 		$this->load->model('currencies_model');
 		$base_currency = $this->currencies_model->get_base_currency();
+		$default_project = get_default_project();
 		$vendors = $data['vendors'];
 		$projects = $data['projects'];
 		$group_pur = $data['group_pur'];
@@ -63,17 +64,13 @@ class Dashboard_model extends App_Model
 		$this->db->from(db_prefix() . 'items i');
 		$this->db->join(db_prefix() . 'inventory_manage im', 'im.commodity_id = i.id', 'inner');
 		$this->db->where('im.inventory_number >', 0);
-
-
 		$result = $this->db->get()->row_array();
 		$response['total_inventory_count'] = isset($result['total_inventory_count']) ? (int)$result['total_inventory_count'] : 0;
 
 		$response['fully_po_material_receipt'] = 0;
 
-
-		$result = $this->get_pr_order_fully_delivered();
+		$result = $this->get_pr_order_fully_delivered($default_project);
 		$total_count_fully_po_delivered = !empty($result) ? $result : 0;
-
 
 		$response['fully_po_material_receipt'] = $total_count_fully_po_delivered;
 
@@ -81,40 +78,57 @@ class Dashboard_model extends App_Model
 
 		$this->db->select('COUNT(i.id) as total_missing_security_count');
 		$this->db->from(db_prefix() . 'goods_receipt_documentation i');
+		$this->db->join(
+		    db_prefix() . 'goods_receipt as gr',
+		    'gr.id = i.goods_receipt_id',
+		    'left'
+		);
+		if (!empty($default_project)) {
+		    $this->db->where('gr.project', $default_project);
+		}
 		$this->db->where('i.checklist_id', 2);
 		$this->db->where('i.required >', 0);
-		$this->db->where('i.attachments', 0); // 🔹 fix: looking for missing attachments
-
+		$this->db->where('i.attachments', 0); // looking for missing attachments
 		$get_missing_security = $this->db->get()->row_array();
 
 		$response['missing_security_signature'] = isset($get_missing_security['total_missing_security_count'])
 			? (int)$get_missing_security['total_missing_security_count']
 			: 0;
 
-
-
 		$response['missing_production_certificate'] = 0;
 
 		$this->db->select('COUNT(i.id) as total_production_certificate_count');
 		$this->db->from(db_prefix() . 'goods_receipt_documentation i');
-		$this->db->where('i.checklist_id  ', 4);
-		$this->db->where('i.required   >', 0);
-		$this->db->where('i.attachments', 0);
-
+		$this->db->join(
+		    db_prefix() . 'goods_receipt as gr',
+		    'gr.id = i.goods_receipt_id',
+		    'left'
+		);
+		if (!empty($default_project)) {
+		    $this->db->where('gr.project', $default_project);
+		}
+		$this->db->where('i.checklist_id', 4);   // Cleaned up
+		$this->db->where('i.required >', 0);     // Cleaned up
+		$this->db->where('i.attachments', 0);    // Missing attachments
 		$get_production_certificate_count = $this->db->get()->row_array();
 
 		$response['missing_production_certificate'] = isset($get_production_certificate_count['total_production_certificate_count']) ? (int)$get_production_certificate_count['total_production_certificate_count'] : 0;
-
-
 
 		$response['missing_transport_document'] = 0;
 
 		$this->db->select('COUNT(i.id) as transport_document_count');
 		$this->db->from(db_prefix() . 'goods_receipt_documentation i');
-		$this->db->where('i.checklist_id  ', 3);
-		$this->db->where('i.required   >', 0);
+		$this->db->join(
+		    db_prefix() . 'goods_receipt as gr',
+		    'gr.id = i.goods_receipt_id',
+		    'left'
+		);
+		if (!empty($default_project)) {
+		    $this->db->where('gr.project', $default_project);
+		}
+		$this->db->where('i.checklist_id', 3);
+		$this->db->where('i.required >', 0);
 		$this->db->where('i.attachments', 0);
-
 		$get_transport_document_count = $this->db->get()->row_array();
 
 		$response['missing_transport_document'] = isset($get_transport_document_count['transport_document_count']) ? (int)$get_transport_document_count['transport_document_count'] : 0;
@@ -160,10 +174,11 @@ class Dashboard_model extends App_Model
 		$this->db->select("DATE_FORMAT(gd.date_add, '%b') AS month_name, MONTH(gd.date_add) AS month_number, ROUND(SUM(gdd.quantities)) AS total_quantity");
 		$this->db->from(db_prefix() . 'goods_delivery gd');
 		$this->db->join(db_prefix() . 'goods_delivery_detail gdd', 'gdd.goods_delivery_id = gd.id', 'left');
+		if (!empty($default_project)) {
+            $this->db->where('gd.project', $default_project);
+        }
 		$this->db->group_by(['month_number', 'month_name']);
 		$this->db->order_by('month_number', 'ASC');
-
-
 		$get_getconsumption_data = $this->db->get()->result_array();
 
 		$response['getconsumption_months'] = array_column($get_getconsumption_data, 'month_name');
@@ -176,7 +191,7 @@ class Dashboard_model extends App_Model
         FROM (
             SELECT MIN(id) AS id 
             FROM tblgoods_delivery 
-            WHERE pr_order_id IS NOT NULL AND approval = 1
+            WHERE pr_order_id IS NOT NULL AND approval = 1 AND project = ".$default_project."
             GROUP BY pr_order_id
         ) AS unique_deliveries";
 
@@ -184,9 +199,14 @@ class Dashboard_model extends App_Model
 
 		// Step 2: Get count from goods_delivery_detail for those goods_delivery_id
 		if (!empty($get_total_issued_unique_count['ids'])) {
-			$final_records = "SELECT COUNT(*) AS final_unique_count 
-                      FROM `tblgoods_delivery_detail` 
-                      WHERE `goods_delivery_id` IN (" . $get_total_issued_unique_count['ids'] . ")";
+            $final_records = "
+		        SELECT COUNT(gdd.id) AS final_unique_count
+		        FROM " . db_prefix() . "goods_delivery_detail gdd
+		        LEFT JOIN " . db_prefix() . "goods_delivery gd
+		            ON gd.id = gdd.goods_delivery_id
+		        WHERE gdd.goods_delivery_id IN (" . $get_total_issued_unique_count['ids'] . ")
+		        AND gd.project = ".$default_project."
+		    ";
 
 			$get_total_issued_final_unique_count = $this->db->query($final_records)->row_array();
 
@@ -202,12 +222,11 @@ class Dashboard_model extends App_Model
         FROM (
             SELECT MIN(id) AS id 
             FROM tblstock_reconciliation 
-            WHERE pr_order_id IS NOT NULL 
+            WHERE pr_order_id IS NOT NULL AND project = ".$default_project." 
             GROUP BY pr_order_id
         ) AS unique_deliveries";
 
 		$get_total_issued_reconcilied_unique_count = $this->db->query($sql_new)->row_array();
-
 
 		if (!empty($get_total_issued_reconcilied_unique_count['ids'])) {
 			$final_records = "SELECT COUNT(*) AS final_unique_count 
@@ -221,14 +240,21 @@ class Dashboard_model extends App_Model
 				: 0;
 		}
 
-
 		$response['returnable_past_dates'] = 0;
 
-		$this->db->select('returnable_date,returnable')
-			->from('tblgoods_delivery_detail')
-			->where('returnable', 1)
-			->where('returnable_date IS NOT NULL')
-			->where("returnable_date != ''");
+		$this->db->select('gdd.returnable_date, gdd.returnable');
+		$this->db->from(db_prefix() . 'goods_delivery_detail gdd');
+		$this->db->join(
+		    db_prefix() . 'goods_delivery gd',
+		    'gd.id = gdd.goods_delivery_id',
+		    'left'
+		);
+		$this->db->where('gdd.returnable', 1);
+		$this->db->where('gdd.returnable_date IS NOT NULL', null, false);
+		$this->db->where("gdd.returnable_date != ''");
+		if (!empty($default_project)) {
+		    $this->db->where('gd.project', $default_project);
+		}
 		$get_all_records_with_returnable_date = $this->db->get()->result_array();
 
 		$passed_count = 0;
@@ -253,10 +279,10 @@ class Dashboard_model extends App_Model
 
 
 
-	public function  get_pr_order_fully_delivered()
+	public function  get_pr_order_fully_delivered($default_project)
 	{
 		$result = $result1 = [];
-		$pur_orders = $this->db->query('select * from tblpur_orders where approve_status = 2 order by id desc')->result_array();
+		$pur_orders = $this->db->query('select * from tblpur_orders where approve_status = 2 and project = '.$default_project.' order by id desc')->result_array();
 		if (!empty($pur_orders)) {
 			foreach ($pur_orders as $key => $value) {
 				$po_id = $value['id'];
