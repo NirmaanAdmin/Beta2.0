@@ -14,7 +14,7 @@
       $(document).on('click', '.reset_all_filters', function() {
         var filterArea = $('.all_filters');
         filterArea.find('input').val("");
-        filterArea.find('select').selectpicker("val", "");
+        filterArea.find('select').not('select[name="projects"]').selectpicker("val", "");
         get_purchase_order_dashboard();
       });
 

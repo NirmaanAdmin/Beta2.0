@@ -33,7 +33,7 @@ var hidden_columns = [2, 4, 5, 6];
     $(document).on('click', '.reset_all_ot_filters', function () {
         var filterArea = $('.all_ot_filters');
         filterArea.find('input').val("");
-        filterArea.find('select').selectpicker("val", "");
+        filterArea.find('select').not('select[name="project[]"]').selectpicker("val", "");
         table_estimates.DataTable().ajax.reload().columns.adjust().responsive.recalc();
     });
 })(jQuery);

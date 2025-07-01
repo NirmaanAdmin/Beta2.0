@@ -262,7 +262,7 @@ $module_name = 'payment_certificate'; ?>
       $(document).on('click', '.reset_all_ot_filters', function() {
          var filterArea = $('.all_ot_filters');
          filterArea.find('input').val("");
-         filterArea.find('select').selectpicker("val", "");
+         filterArea.find('select').not('select[name="projects[]"]').selectpicker("val", "");
          table_payment_certificate.DataTable().ajax.reload();
       });
 

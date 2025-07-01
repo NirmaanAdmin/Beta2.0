@@ -34,7 +34,7 @@ var Params = {
   $(document).on('click', '.reset_all_ot_filters', function () {
     var filterArea = $('.all_ot_filters');
     filterArea.find('input').val("");
-    filterArea.find('select').selectpicker("val", "");
+    filterArea.find('select').not('select[name="project[]"]').selectpicker("val", "");
     table_pur_request.DataTable().ajax.reload();
     get_purchase_request_dashboard();
   });
