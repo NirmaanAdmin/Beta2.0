@@ -1121,3 +1121,18 @@ function get_priority_name($priority)
     }
 }
 
+function get_staff_department_name($department)
+{
+    if (!empty($department)) {
+        $CI = &get_instance();
+        $CI->db->select('name');
+        $CI->db->from('tbldepartments');
+        $CI->db->where('departmentid', $department);
+        $query = $CI->db->get();
+        $result = $query->row();
+        if (!empty($result)) {
+            return $result->name;
+        }
+    }
+    return '';
+}
