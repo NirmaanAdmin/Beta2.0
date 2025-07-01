@@ -72,14 +72,22 @@ if(isset($vendor)){
     array_push($where, ' AND '.db_prefix().'pur_debit_notes.vendorid = '.$vendor);
 }
 
-
+$having = '';
+$having = 'project = "'.get_default_project().'"';
 
 $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [
     db_prefix() . 'pur_debit_notes.id',
     db_prefix() . 'pur_debit_notes.vendorid',
     db_prefix(). 'currencies.name as currency_name',
     'deleted_vendor_name',
-]);
+    '(CASE 
+        WHEN ' . db_prefix() . 'pur_debit_notes.pur_order IS NOT NULL 
+            THEN (SELECT project FROM ' . db_prefix() . 'pur_orders WHERE ' . db_prefix() . 'pur_orders.id = ' . db_prefix() . 'pur_debit_notes.pur_order LIMIT 1) 
+        WHEN ' . db_prefix() . 'pur_debit_notes.wo_order IS NOT NULL 
+            THEN (SELECT project FROM ' . db_prefix() . 'wo_orders WHERE ' . db_prefix() . 'wo_orders.id = ' . db_prefix() . 'pur_debit_notes.wo_order LIMIT 1)
+        ELSE NULL 
+    END) as project',
+], '', [], $having);
 
 $output  = $result['output'];
 $rResult = $result['rResult'];

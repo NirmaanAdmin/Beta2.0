@@ -22201,6 +22201,7 @@ class Purchase_model extends App_Model
         $response['bar_top_vendor_name'] = $response['bar_top_vendor_value'] = array();
         $response['pie_budget_name'] = $response['pie_total_value'] = array();
         $response['pie_billing_name'] = $response['pie_billing_value'] = array();
+        $default_project = get_default_project();
 
         $this->db->select('
             ' . db_prefix() . 'pur_invoices.id,
@@ -22231,6 +22232,9 @@ class Purchase_model extends App_Model
         }
         if (!empty($group_pur)) {
             $this->db->where(db_prefix() . 'pur_invoices.group_pur', $group_pur);
+        }
+        if (!empty($default_project)) {
+            $this->db->where(db_prefix() . 'pur_invoices.project_id', $default_project);
         }
         $this->db->group_by(db_prefix() . 'pur_invoices.id');
         $pur_invoices = $this->db->get()->result_array();

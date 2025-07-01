@@ -2398,8 +2398,12 @@ class Invoices_model extends App_Model
         $response['line_order_date'] = $response['line_order_total'] = array();
         $response['pie_project_name'] = $response['pie_project_value'] = array();
         $response['pie_status_name'] = $response['pie_status_value'] = array();
+        $default_project = get_default_project();
 
         $this->db->select('id, total, date, project_id, status');
+        if (!empty($default_project)) {
+            $this->db->where(db_prefix() . 'invoices.project_id', $default_project);
+        }
         $this->db->order_by(db_prefix() . 'invoices.date', 'asc');
         $invoices = $this->db->get(db_prefix() . 'invoices')->result_array();
 

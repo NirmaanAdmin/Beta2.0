@@ -36,6 +36,8 @@ if (staff_cant('view', 'payments')) {
     array_push($where, $whereUser);
 }
 
+array_push($where, 'AND ' . db_prefix() . 'invoices.project_id = '.get_default_project().'');
+
 $sIndexColumn = 'id';
 $sTable       = db_prefix() . 'invoicepaymentrecords';
 
