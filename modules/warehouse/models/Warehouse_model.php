@@ -22732,49 +22732,32 @@ class Warehouse_model extends App_Model
         }
 
         // Get total distinct goods_receipt_id from documentation table
-		$this->db->select('COUNT(' . db_prefix() . 'goods_receipt_documentation.id) as total_received');
+		$this->db->select('COUNT(*) as total_received');
 		$this->db->from(db_prefix() . 'goods_receipt_documentation');
-		$this->db->join(
-		    db_prefix() . 'goods_receipt',
-		    db_prefix() . 'goods_receipt.id = ' . db_prefix() . 'goods_receipt_documentation.goods_receipt_id',
-		    'left'
-		);
-		if (!empty($default_project)) {
-            $this->db->where(db_prefix() . 'goods_receipt.project', $default_project);
-        }
-        $this->db->group_by(db_prefix() . 'goods_receipt_documentation.id');
 		$total_received_row = $this->db->get()->row_array();
 		$total_received = isset($total_received_row['total_received']) ? (int)$total_received_row['total_received'] : 0;
+
 		if ($total_received > 0) {
-			$this->db->select('COUNT(' . db_prefix() . 'goods_receipt_documentation.id) as attached_rows');
+
+			$this->db->select('COUNT(*) as attached_rows');
 			$this->db->from(db_prefix() . 'goods_receipt_documentation');
-			$this->db->join(
-			    db_prefix() . 'goods_receipt',
-			    db_prefix() . 'goods_receipt.id = ' . db_prefix() . 'goods_receipt_documentation.goods_receipt_id',
-			    'left'
-			);
 			$this->db->where("(`attachments` = 1 OR (`required` = 0 AND `attachments` = 0))", null, false);
-			if (!empty($default_project)) {
-	            $this->db->where(db_prefix() . 'goods_receipt.project', $default_project);
-	        }
-			$this->db->group_by(db_prefix() . 'goods_receipt_documentation.id');
 			$attached_rows_result = $this->db->get()->row_array();
+
 			$attached_rows = isset($attached_rows_result['attached_rows']) ? (int)$attached_rows_result['attached_rows'] : 0;
+
 			$response['fully_documented'] = ($total_received > 0 && $total_received === $attached_rows)
 				? 100
 				: round(($attached_rows / $total_received) * 100);
+
+
+			$subquery_incomplete = '(SELECT goods_receipt_id
+				FROM ' . db_prefix() . 'goods_receipt_documentation
+				WHERE required = 1 AND attachments = 0
+			) AS incomplete_gr';
+
 			$this->db->select('COUNT(*) AS incomplete_count');
-			$this->db->from(db_prefix() . 'goods_receipt_documentation as grd');
-			$this->db->join(
-			    db_prefix() . 'goods_receipt as gr',
-			    'gr.id = grd.goods_receipt_id',
-			    'left'
-			);
-			$this->db->where('grd.required', 1);
-			$this->db->where('grd.attachments', 0);
-			if (!empty($default_project)) {
-			    $this->db->where('gr.project', $default_project);
-			}
+			$this->db->from($subquery_incomplete, null, false);
 			$incomplete_result = $this->db->get()->row_array();
 			$incomplete_count = isset($incomplete_result['incomplete_count']) ? (int)$incomplete_result['incomplete_count'] : 0;
 			$response['incompleted'] = round(($incomplete_count / $total_received) * 100);
