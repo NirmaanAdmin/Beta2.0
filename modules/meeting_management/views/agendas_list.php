@@ -40,32 +40,7 @@
                         </tr>
                      </thead>
                      <tbody id="minutes-tbody">
-                        <?php $sr = 1; if (!empty($agendas)) : ?>
-
-                           <?php foreach ($agendas as $agenda) : ?>
-                              <tr>
-                                 <td><?php echo $sr++; ?></td>
-                                 <td><?php echo $agenda['meeting_title']; ?></td>
-                                 <td><?php echo isset($agenda['project_id']) ? get_project_name_by_id($agenda['project_id']) : 'N/A'; ?></td>
-                                 <td><?php echo date('d M, Y h:i A', strtotime($agenda['meeting_date'])); ?></td>
-
-                                 <td>
-                                    <!-- Correct Edit and Delete URLs with module name -->
-
-                                    <a href="<?php echo admin_url('meeting_management/minutesController/index/' . $agenda['id']); ?>" class="btn btn-primary"><?php echo _l('edit_converted_metting'); ?></a>
-
-                                    <a href="<?php echo admin_url('meeting_management/agendaController/delete/' . $agenda['id']); ?>" class="btn btn-danger"><?php echo _l('delete'); ?></a>
-
-                                    <!-- View Meeting Button -->
-                                    <a href="<?php echo admin_url('meeting_management/agendaController/view_meeting/' . $agenda['id']); ?>" class="btn btn-secondary"><?php echo _l('view_meeting'); ?></a>
-                                 </td>
-                              </tr>
-                           <?php endforeach; ?>
-                        <?php else : ?>
-                           <tr>
-                              <td colspan="4" class="text-center"><?php echo _l('no_agendas_found'); ?></td>
-                           </tr>
-                        <?php endif; ?>
+                        
                      </tbody>
                   </table>
                </div>
@@ -83,9 +58,15 @@
 
 <script>
    $(document).ready(function() {
+      const selectedProject = $('#project_filter').val();
+      view_mom_list(selectedProject);
+
       $('#project_filter').change(function() {
          const selectedProject = $(this).val();
+         view_mom_list(selectedProject);
+      });
 
+      function view_mom_list(selectedProject) {
          $.ajax({
             url: '<?php echo admin_url('meeting_management/agendaController/filter_minutes'); ?>',
             type: 'GET',
@@ -100,7 +81,7 @@
                console.error('Error:', error);
             }
          });
-      });
+      }
 
       function updateTableBody(data) {
          const tbody = $('table tbody');
