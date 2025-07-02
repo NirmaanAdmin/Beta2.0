@@ -1084,11 +1084,26 @@ function get_project_listing($selected = '')
 
     $html = '<div class="form-group">';
     $html .= '<select name="default_project" id="default_project" class="selectpicker" data-live-search="true" data-none-selected-text="Select Project" onchange="change_default_project(this.value)">';
+    $first = true;
     foreach ($projects as $project) {
         $is_selected = ($selected == $project['id']) ? 'selected' : '';
-        $html .= '<option value="' . $project['id'] . '" ' . $is_selected . '>' . htmlspecialchars($project['name']) . '</option>';
+        if (empty($selected) && $first) {
+            $is_selected = 'selected';
+            $option_content = '<i class="fa-regular fa-star tw-text-primary-600"></i> ' . htmlspecialchars($project['name']);
+            $html .= '<option value="' . $project['id'] . '" ' . $is_selected . ' data-content=\'' . $option_content . '\'>' . htmlspecialchars($project['name']) . '</option>';
+        } else {
+            if ($is_selected) {
+                $option_content = '<i class="fa-regular fa-star tw-text-primary-600"></i> ' . htmlspecialchars($project['name']);
+                $html .= '<option value="' . $project['id'] . '" ' . $is_selected . ' data-content=\'' . $option_content . '\'>' . htmlspecialchars($project['name']) . '</option>';
+            } else {
+                $html .= '<option value="' . $project['id'] . '">' . htmlspecialchars($project['name']) . '</option>';
+            }
+        }
+        $first = false;
     }
     $html .= '</select>';
+    $html .= '</div>';
+
     return $html;
 }
 
