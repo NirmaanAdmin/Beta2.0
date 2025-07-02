@@ -375,12 +375,11 @@
             </div>
           </div>
 
-          <?php /*
+          
           <div class="panel-body mtop10 invoice-item">
             <div class="row">
               <div class="col-md-4" data-toggle="tooltip" data-placement="top" title="<?php echo _l('vendor_item_select_note'); ?>">
                 <?php $this->load->view('purchase/item_include/main_item_select'); ?>
-
               </div>
 
 
@@ -495,7 +494,6 @@
               </div>
             </div>
           </div>
-          */ ?>
 
           <div class="">
             <div class="panel-body bottom-transaction">

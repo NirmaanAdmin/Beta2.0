@@ -271,7 +271,7 @@
             <div class="col-md-6 ">
 
               <?php
-              echo render_input('total','<small class="req text-danger">* </small>Quote Value ( ₹ )', (isset($estimate) ? $estimate->total : ''), 'number', array(), array(), '','');
+              echo render_input('total','<small class="req text-danger">* </small>Quote Value ( ₹ )', (isset($estimate) ? $estimate->total : 0), 'number', ['readonly'=>true], array(), '','');
               ?>
             </div>
             
@@ -349,9 +349,9 @@
 
 <div class="panel-body mtop10 invoice-item">
   <div class="row">
-    <!-- <div class="col-md-4">
+    <div class="col-md-4">
       <?php $this->load->view('purchase/item_include/main_item_select'); ?>
-    </div> -->
+    </div>
     <?php
     $estimate_currency = $base_currency;
     if (isset($estimate) && $estimate->currency != 0) {
@@ -380,7 +380,7 @@
   </div>
 </div>
 
-<!-- <div class="row">
+<div class="row">
   <div class="col-md-12">
     <div class="table-responsive">
       <table class="table invoice-items-table items table-main-invoice-edit has-calculations no-mtop">
@@ -454,7 +454,7 @@
     </div>
     <div id="removed-items"></div>
   </div>
-</div> -->
+</div>
 </div>
 <div class="row">
   <div class="col-md-12 mtop15">

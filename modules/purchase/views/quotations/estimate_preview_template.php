@@ -341,7 +341,7 @@ if ($estimate->currency != 0) {
                      </div>
 
                   </div>
-                  <!-- <div class="row">
+                  <div class="row">
                      <div class="col-md-12">
                         <div class="table-responsive">
                            <table class="table items items-preview estimate-items-preview" data-type="estimate">
@@ -457,7 +457,7 @@ if ($estimate->currency != 0) {
                         <p><?php echo pur_html_entity_decode($estimate->terms); ?></p>
                      </div>
                      <?php } ?>
-                  </div> -->
+                  </div>
                </div>
             </div>
 
