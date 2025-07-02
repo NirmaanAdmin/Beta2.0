@@ -52,6 +52,7 @@
                         </div>
                      </div>
                      <div class="col-md-8">
+
                         <div class="btn-group pull-right btn-with-tooltip-group _filter_data" data-toggle="tooltip" data-title="<?php echo _l('filter_by'); ?>">
                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                               <i class="fa fa-filter" aria-hidden="true"></i>
@@ -107,7 +108,11 @@
                               <?php } ?>
                            </ul>
                         </div>
-
+                        <div class="pull-right">
+                           <a href="<?php echo site_url('purchase/vendors_portal'); ?>" target="_blank" class="btn btn-info mright5">
+                              <?php echo _l('vendor_login'); ?>
+                           </a>
+                        </div>
                      </div>
                   </div>
 
