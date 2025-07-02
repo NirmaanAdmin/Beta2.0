@@ -11807,7 +11807,7 @@ class Purchase_model extends App_Model
             $name_tax_value = $name . '[tax_value]';
 
 
-            $array_qty_attr = ['onblur' => 'pur_calculate_total();', 'onchange' => 'pur_calculate_total();', 'min' => '0.0', 'step' => 'any',  'data-quantity' => (float)$quantity];
+            $array_qty_attr = ['onblur' => 'pur_calculate_total();', 'onchange' => 'pur_calculate_total();', 'min' => '0.0', 'step' => 'any',  'data-quantity' => (float)$quantity,'readonly' => true];
 
 
             $array_rate_attr = ['onblur' => 'pur_calculate_total();', 'onchange' => 'pur_calculate_total();', 'min' => '0.0', 'step' => 'any', 'data-amount' => 'invoice', 'placeholder' => _l('rate')];
