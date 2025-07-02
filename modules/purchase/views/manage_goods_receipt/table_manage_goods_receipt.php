@@ -56,7 +56,9 @@ if ($this->ci->input->post('vendors')
     $where[] = 'AND supplier_name IN (' . implode(',', $this->ci->input->post('vendors')) . ')';
 }
 
-$where[] = 'AND project = "' . get_default_project() . '"';
+if(get_default_project()) {
+    $where[] = 'AND project = "' . get_default_project() . '"';
+}
 
 $result = data_tables_purchase_tracker_init($aColumns, $join, $where, [
     'type',

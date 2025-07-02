@@ -62,7 +62,9 @@ return App_table::find('invoices')
             array_push($where, $userWhere);
         }
 
-        array_push($where, 'AND ' . db_prefix() . 'invoices.project_id = '.get_default_project().'');
+        if(get_default_project()) {
+            array_push($where, 'AND ' . db_prefix() . 'invoices.project_id = '.get_default_project().'');
+        }
 
         $aColumns = hooks()->apply_filters('invoices_table_sql_columns', $aColumns);
 

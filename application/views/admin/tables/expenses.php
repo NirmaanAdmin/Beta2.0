@@ -56,7 +56,9 @@ return App_table::find('expenses')
 
         array_push($where, 'AND invoiceid IS NULL');
 
-        array_push($where, 'AND ' . db_prefix() . 'expenses.project_id = '.get_default_project().'');
+        if(get_default_project()) {
+            array_push($where, 'AND ' . db_prefix() . 'expenses.project_id = '.get_default_project().'');
+        }
 
         $sIndexColumn = 'id';
         $sTable       = db_prefix() . 'expenses';

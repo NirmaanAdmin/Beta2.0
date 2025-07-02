@@ -60,7 +60,9 @@ if (isset($status)) {
     }
 }
 
-$where[] = 'AND ' . db_prefix() . 'goods_receipt.project = '.get_default_project().'';
+if(get_default_project()) {
+    $where[] = 'AND ' . db_prefix() . 'goods_receipt.project = '.get_default_project().'';
+}
 
 $this->ci->load->model('purchase/purchase_model');
 $custom_date_select = $this->ci->purchase_model->get_where_report_period(db_prefix() . 'goods_receipt.date_add');

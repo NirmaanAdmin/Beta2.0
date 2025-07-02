@@ -3162,7 +3162,9 @@ class warehouse extends AdminController
 				$sTable = db_prefix() . 'wh_loss_adjustment';
 				$join = [];
 
-				$where[] = 'AND project = "' . get_default_project() . '"';
+				if(get_default_project()) {
+					$where[] = 'AND project = "' . get_default_project() . '"';
+				}
 
 				$result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [
 

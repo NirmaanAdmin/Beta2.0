@@ -61,7 +61,9 @@ return App_table::find('credit_notes')
             array_push($where, 'AND project_id=' . $this->ci->db->escape_str($project_id));
         }
 
-        array_push($where, 'AND ' . db_prefix() . 'creditnotes.project_id = '.get_default_project().'');
+        if(get_default_project()) {
+            array_push($where, 'AND ' . db_prefix() . 'creditnotes.project_id = '.get_default_project().'');
+        }
 
         // Fix for big queries. Some hosting have max_join_limit
         if (count($custom_fields) > 4) {

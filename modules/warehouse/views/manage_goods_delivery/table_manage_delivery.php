@@ -47,7 +47,9 @@ if ($this->ci->input->post('delivery_status')) {
     }
 }
 
-$where[] = 'AND ' . db_prefix() . 'goods_delivery.project = '.get_default_project().'';
+if(get_default_project()) {
+    $where[] = 'AND ' . db_prefix() . 'goods_delivery.project = '.get_default_project().'';
+}
 
 // Add any extra fields you want to retrieve
 $additionalSelect = [

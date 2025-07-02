@@ -211,7 +211,9 @@ if (isset($billing_status)) {
     }
 }
 
-array_push($where, 'AND ' . db_prefix() . 'pur_invoices.project_id = '.get_default_project().'');
+if(get_default_project()) {
+    array_push($where, 'AND ' . db_prefix() . 'pur_invoices.project_id = '.get_default_project().'');
+}
 
 $from_date_filter_value = !empty($this->ci->input->post('from_date')) ? $this->ci->input->post('from_date') : NULL;
 update_module_filter($module_name, $from_date_filter_name, $from_date_filter_value);
