@@ -607,7 +607,7 @@ class Estimates_model extends App_Model
                 }
             }
 
-            if(!empty($newareasummaryitems)) {
+            if (!empty($newareasummaryitems)) {
                 foreach ($newareasummaryitems as $akey => $aitem) {
                     $this->add_new_area_summary_item_post($aitem, $insert_id);
                 }
@@ -723,14 +723,14 @@ class Estimates_model extends App_Model
             }
         }
 
-        if(!empty($data['removed_area_working_items'])) {
+        if (!empty($data['removed_area_working_items'])) {
             foreach ($data['removed_area_working_items'] as $remove_item_id) {
                 $this->delete_area_working_item($remove_item_id);
             }
         }
         unset($data['removed_area_working_items']);
 
-        if(!empty($data['removed_area_summary_items'])) {
+        if (!empty($data['removed_area_summary_items'])) {
             foreach ($data['removed_area_summary_items'] as $remove_item_id) {
                 $this->delete_area_summary_item($remove_item_id);
             }
@@ -944,13 +944,13 @@ class Estimates_model extends App_Model
             }
         }
 
-        if(!empty($newareaworkingitems)) {
+        if (!empty($newareaworkingitems)) {
             foreach ($newareaworkingitems as $awkey => $awitem) {
                 $this->add_new_area_working_item_post($awitem, $id);
             }
         }
 
-        if(!empty($areaworkingitems)) {
+        if (!empty($areaworkingitems)) {
             foreach ($areaworkingitems as $awkey => $awitem) {
                 $awid = $awitem['itemid'];
                 unset($awitem['itemid']);
@@ -958,13 +958,13 @@ class Estimates_model extends App_Model
             }
         }
 
-        if(!empty($newareasummaryitems)) {
+        if (!empty($newareasummaryitems)) {
             foreach ($newareasummaryitems as $askey => $asitem) {
                 $this->add_new_area_summary_item_post($asitem, $id);
             }
         }
 
-        if(!empty($areasummaryitems)) {
+        if (!empty($areasummaryitems)) {
             foreach ($areasummaryitems as $askey => $asitem) {
                 $asid = $asitem['itemid'];
                 unset($asitem['itemid']);
@@ -988,7 +988,7 @@ class Estimates_model extends App_Model
         if ($affectedRows > 0) {
             hooks()->do_action('after_estimate_updated', $id);
 
-            if($next_revision) {
+            if ($next_revision) {
                 $this->create_new_revision(['id' => $id]);
             }
 
@@ -1212,8 +1212,8 @@ class Estimates_model extends App_Model
             }
 
             if (total_rows(db_prefix() . 'proposals', [
-                    'estimate_id' => $id,
-                ]) > 0) {
+                'estimate_id' => $id,
+            ]) > 0) {
                 $this->db->where('estimate_id', $id);
                 $estimate = $this->db->get(db_prefix() . 'proposals')->row();
                 $this->db->where('id', $estimate->id);
@@ -1356,8 +1356,10 @@ class Estimates_model extends App_Model
                 array_push($emails_sent, $contact['email']);
             }
 
-            if (can_send_sms_based_on_creation_date($estimate->datecreated)
-                && $this->app_sms->trigger(SMS_TRIGGER_ESTIMATE_EXP_REMINDER, $contact['phonenumber'], $merge_fields)) {
+            if (
+                can_send_sms_based_on_creation_date($estimate->datecreated)
+                && $this->app_sms->trigger(SMS_TRIGGER_ESTIMATE_EXP_REMINDER, $contact['phonenumber'], $merge_fields)
+            ) {
                 $sms_sent = true;
                 array_push($sms_reminder_log, $contact['firstname'] . ' (' . $contact['phonenumber'] . ')');
             }
@@ -1602,7 +1604,7 @@ class Estimates_model extends App_Model
 
     public function get_co_total_for_estimate($id)
     {
-        $co_total = $this->db->query('SELECT SUM(total) as co_total FROM ' . db_prefix() . 'co_orders WHERE estimate = '.$id.' AND approve_status = 2')->result_array();
+        $co_total = $this->db->query('SELECT SUM(total) as co_total FROM ' . db_prefix() . 'co_orders WHERE estimate = ' . $id . ' AND approve_status = 2')->result_array();
         return !empty($co_total) ? $co_total[0]['co_total'] : 0;
     }
 
@@ -1617,7 +1619,7 @@ class Estimates_model extends App_Model
         $final_estimate = array();
 
         $all_area_summary = $this->get_area_summary($estimateid);
-        if(!empty($all_area_summary)) {
+        if (!empty($all_area_summary)) {
             $total_built_up_area = array_sum(array_column(array_filter($all_area_summary, fn($item) => $item['area_id'] == 2), 'area'));
             $total_built_up_area = $total_built_up_area == 0 ? 1 : $total_built_up_area;
         }
@@ -1639,16 +1641,16 @@ class Estimates_model extends App_Model
             $summary[$annexure]['pending_amount'] = $summary[$annexure]['amount'] - $booked_amount;
         }
         $summary = !empty($summary) ? array_values($summary) : array();
-        if(!empty($summary)) {
-            usort($summary, function($a, $b) {
+        if (!empty($summary)) {
+            usort($summary, function ($a, $b) {
                 return $a['annexure'] <=> $b['annexure'];
             });
             $summary = array_values($summary);
         }
 
         $summary = !empty($summary) ? array_values($summary) : array();
-        if(!empty($summary)) {
-            usort($summary, function($a, $b) {
+        if (!empty($summary)) {
+            usort($summary, function ($a, $b) {
                 return $a['annexure'] <=> $b['annexure'];
             });
             $summary = array_values($summary);
@@ -1662,7 +1664,7 @@ class Estimates_model extends App_Model
             $final_estimate['tax'] += $value['tax'];
             $final_estimate['amount'] += $value['amount'];
         }
-    
+
         $response = array();
         $response['summary'] = $summary;
         $response['final_estimate'] = $final_estimate;
@@ -1677,7 +1679,7 @@ class Estimates_model extends App_Model
             return $item['id'] == $id;
         });
         $result = array_values($result);
-        if(!empty($result)) {
+        if (!empty($result)) {
             $result = $result[0];
         }
         return (object) $result;
@@ -1724,22 +1726,22 @@ class Estimates_model extends App_Model
 
     public function update_area_statement_tabs($data)
     {
-        if(!empty($data)) {
-            if(!empty($data['id']) && !empty($data['name'])) {
-               $this->db->where('id', $data['id']);
-               $this->db->update(db_prefix() . 'area_statement_tabs', ['name' => $data['name']]); 
-               if ($this->db->affected_rows() > 0) {
+        if (!empty($data)) {
+            if (!empty($data['id']) && !empty($data['name'])) {
+                $this->db->where('id', $data['id']);
+                $this->db->update(db_prefix() . 'area_statement_tabs', ['name' => $data['name']]);
+                if ($this->db->affected_rows() > 0) {
                     return $data['id'];
-               }
+                }
             }
         }
-        return null; 
+        return null;
     }
 
     public function add_area_statement_tabs($data)
     {
-        if(!empty($data)) {
-            if(!empty($data['name']) && !empty($data['estimate_id'])) {
+        if (!empty($data)) {
+            if (!empty($data['name']) && !empty($data['estimate_id'])) {
                 $this->db->insert(db_prefix() . 'area_statement_tabs', $data);
                 return $this->db->insert_id();
             }
@@ -1749,8 +1751,8 @@ class Estimates_model extends App_Model
 
     public function delete_area_statement_tabs($data)
     {
-        if(!empty($data)) {
-            if(!empty($data['id'])) {
+        if (!empty($data)) {
+            if (!empty($data['id'])) {
                 $this->db->where('id', $data['id']);
                 $this->db->delete(db_prefix() . 'area_statement_tabs');
                 $this->db->where('area_id', $data['id']);
@@ -1790,12 +1792,12 @@ class Estimates_model extends App_Model
 
     public function update_estimate_budget_info($id, $estimate_budget_info, $type)
     {
-        if(!empty($estimate_budget_info)) {
+        if (!empty($estimate_budget_info)) {
             foreach ($estimate_budget_info as $ckey => $cvalue) {
                 $this->db->where('estimate_id', $id);
                 $this->db->where('budget_id', $ckey);
                 $estimate_budget_info = $this->db->get(db_prefix() . 'estimate_budget_info')->row();
-                if(empty($estimate_budget_info) && !empty($cvalue)) {
+                if (empty($estimate_budget_info) && !empty($cvalue)) {
                     $this->db->insert(db_prefix() . 'estimate_budget_info', [
                         'estimate_id' => $id,
                         'budget_id' => $ckey,
@@ -1843,7 +1845,7 @@ class Estimates_model extends App_Model
         $area_statement_tabs = $this->get_area_statement_tabs($id);
         $area_working = $this->get_area_working($id);
 
-        if(!empty($all_area_summary)) {
+        if (!empty($all_area_summary)) {
             $total_built_up_area = array_sum(array_column(array_filter($all_area_summary, fn($item) => $item['area_id'] == 2), 'area'));
             $total_built_up_area = $total_built_up_area == 0 ? 1 : $total_built_up_area;
         }
@@ -1865,16 +1867,16 @@ class Estimates_model extends App_Model
             $annexure_estimate[$annexure]['pending_amount'] = $annexure_estimate[$annexure]['amount'] - $booked_amount;
         }
         $annexure_estimate = !empty($annexure_estimate) ? array_values($annexure_estimate) : array();
-        if(!empty($annexure_estimate)) {
-            usort($annexure_estimate, function($a, $b) {
+        if (!empty($annexure_estimate)) {
+            usort($annexure_estimate, function ($a, $b) {
                 return $a['annexure'] <=> $b['annexure'];
             });
             $annexure_estimate = array_values($annexure_estimate);
         }
 
         $annexure_estimate = !empty($annexure_estimate) ? array_values($annexure_estimate) : array();
-        if(!empty($annexure_estimate)) {
-            usort($annexure_estimate, function($a, $b) {
+        if (!empty($annexure_estimate)) {
+            usort($annexure_estimate, function ($a, $b) {
                 return $a['annexure'] <=> $b['annexure'];
             });
             $annexure_estimate = array_values($annexure_estimate);
@@ -1888,14 +1890,15 @@ class Estimates_model extends App_Model
         $final_result['area_statement_tabs'] = $area_statement_tabs;
         $final_result['area_working'] = $area_working;
         $final_result['estimate_items'] = $items;
-        
+
         return $final_result;
     }
 
-    public function get_overall_budget_area($budgetData, $budget_id, $amount) {
+    public function get_overall_budget_area($budgetData, $budget_id, $amount)
+    {
         foreach ($budgetData as $entry) {
             if ($entry['budget_id'] == $budget_id) {
-                if(!empty($entry['overall_budget_area'])) {
+                if (!empty($entry['overall_budget_area'])) {
                     return $amount / $entry['overall_budget_area'];
                 }
             }
@@ -1903,21 +1906,21 @@ class Estimates_model extends App_Model
         return 0;
     }
 
-    public function create_new_revision($data) 
+    public function create_new_revision($data)
     {
         $new_estimate_id = '';
         $id = $data['id'];
 
         $this->db->where('id', $id);
         $estimates = $this->db->get(db_prefix() . 'estimates')->row();
-        if(!empty($estimates)) {
+        if (!empty($estimates)) {
             $estimates = json_decode(json_encode($estimates), true);
             unset($estimates['id']);
             $this->db->insert(db_prefix() . 'estimates', $estimates);
             $new_estimate_id = $this->db->insert_id();
 
             $area_summary = $this->get_area_summary($id);
-            if(!empty($area_summary)) {
+            if (!empty($area_summary)) {
                 foreach ($area_summary as $key => $value) {
                     unset($value['id']);
                     unset($value['estimate_id']);
@@ -1927,9 +1930,9 @@ class Estimates_model extends App_Model
             }
 
             $area_statement = $this->get_area_statement_tabs($id);
-            if(!empty($area_statement)) {
+            if (!empty($area_statement)) {
                 foreach ($area_statement as $key => $value) {
-                    if(isset($value['id'])) {
+                    if (isset($value['id'])) {
                         $old_area_statement_tab_id = $value['id'];
                         unset($value['id']);
                     }
@@ -1941,7 +1944,7 @@ class Estimates_model extends App_Model
                     $this->db->where('estimate_id', $id);
                     $this->db->where('area_id', $old_area_statement_tab_id);
                     $costarea_working = $this->db->get(db_prefix() . 'costarea_working')->result_array();
-                    if(!empty($costarea_working)) {
+                    if (!empty($costarea_working)) {
                         foreach ($costarea_working as $ckey => $cvalue) {
                             unset($cvalue['id']);
                             unset($cvalue['estimate_id']);
@@ -1955,7 +1958,7 @@ class Estimates_model extends App_Model
             }
 
             $estimate_budget_info = $this->get_estimate_budget_info($id);
-            if(!empty($estimate_budget_info)) {
+            if (!empty($estimate_budget_info)) {
                 foreach ($estimate_budget_info as $key => $value) {
                     unset($value['id']);
                     unset($value['estimate_id']);
@@ -1967,7 +1970,7 @@ class Estimates_model extends App_Model
             $this->db->where('rel_id', $id);
             $this->db->where('rel_type', 'estimate');
             $itemable = $this->db->get(db_prefix() . 'itemable')->result_array();
-            if(!empty($itemable)) {
+            if (!empty($itemable)) {
                 foreach ($itemable as $key => $value) {
                     unset($value['id']);
                     unset($value['rel_id']);
@@ -1978,7 +1981,7 @@ class Estimates_model extends App_Model
 
             $this->db->where('estimate_id', $id);
             $unawarded_budget_info = $this->db->get(db_prefix() . 'unawarded_budget_info')->result_array();
-            if(!empty($unawarded_budget_info)) {
+            if (!empty($unawarded_budget_info)) {
                 foreach ($unawarded_budget_info as $key => $value) {
                     unset($value['id']);
                     unset($value['estimate_id']);
@@ -1989,9 +1992,9 @@ class Estimates_model extends App_Model
 
             $this->db->where('estimate_id', $id);
             $estimate_package_info = $this->db->get(db_prefix() . 'estimate_package_info')->result_array();
-            if(!empty($estimate_package_info)) {
+            if (!empty($estimate_package_info)) {
                 foreach ($estimate_package_info as $key => $value) {
-                    if(isset($value['id'])) {
+                    if (isset($value['id'])) {
                         $old_package_id = $value['id'];
                         unset($value['id']);
                     }
@@ -2002,7 +2005,7 @@ class Estimates_model extends App_Model
 
                     $this->db->where('package_id', $old_package_id);
                     $estimate_package_items_info = $this->db->get(db_prefix() . 'estimate_package_items_info')->result_array();
-                    if(!empty($estimate_package_items_info)) {
+                    if (!empty($estimate_package_items_info)) {
                         foreach ($estimate_package_items_info as $ckey => $cvalue) {
                             unset($cvalue['id']);
                             unset($cvalue['package_id']);
@@ -2025,7 +2028,7 @@ class Estimates_model extends App_Model
 
     public function find_awarded_capex($group_pur, $project_id)
     {
-    $sql = "SELECT combined_orders.total_rev_contract_value, combined_orders.project_id, combined_orders.group_pur FROM (
+        $sql = "SELECT combined_orders.total_rev_contract_value, combined_orders.project_id, combined_orders.group_pur FROM (
             SELECT (po.subtotal + IFNULL(co_sum.co_total, 0)) AS total_rev_contract_value, pr.id AS project_id, po.group_pur 
             FROM tblpur_orders po 
             LEFT JOIN (
@@ -2063,7 +2066,7 @@ class Estimates_model extends App_Model
         $query = $this->db->query($sql);
         $result = $query->result_array();
         $awarded_capex = 0;
-        if(!empty($result)) {
+        if (!empty($result)) {
             $awarded_capex = array_sum(array_column($result, 'total_rev_contract_value'));
         }
         return $awarded_capex;
@@ -2081,8 +2084,8 @@ class Estimates_model extends App_Model
         $this->db->where('id', $estimate_id);
         $estimates = $this->db->get(db_prefix() . 'estimates')->row();
         $unawarded_budget_head = $this->get_estimate_budget_listing($estimates->id);
-        if(!empty($unawarded_budget_head)) {
-            if(empty($unawarded_budget)) {
+        if (!empty($unawarded_budget_head)) {
+            if (empty($unawarded_budget)) {
                 $unawarded_budget = isset($unawarded_budget_head[0]) ? $unawarded_budget_head[0]['annexure'] : '';
                 $budgetsummaryhtml = '<div class="form-group">';
                 $budgetsummaryhtml .= '<label for="unawarded_budget_head" class="control-label">' . _l('Budget Head') . '</label>';
@@ -2093,13 +2096,12 @@ class Estimates_model extends App_Model
                 }
                 $budgetsummaryhtml .= '</select>';
                 $budgetsummaryhtml .= '</div>';
-
             }
 
             $this->db->select(
                 db_prefix() . 'itemable.*,' .
-                db_prefix() . 'unawarded_budget_info.unawarded_qty,' .
-                db_prefix() . 'unawarded_budget_info.unawarded_rate'
+                    db_prefix() . 'unawarded_budget_info.unawarded_qty,' .
+                    db_prefix() . 'unawarded_budget_info.unawarded_rate'
             );
             $this->db->from(db_prefix() . 'itemable');
             $this->db->join(db_prefix() . 'unawarded_budget_info', db_prefix() . 'unawarded_budget_info.item_id = ' . db_prefix() . 'itemable.id', 'left');
@@ -2163,7 +2165,7 @@ class Estimates_model extends App_Model
                     $unawarded_amount = number_format($unawarded_qty * $unawarded_rate, 2, '.', '');
                     $remaining_qty_budget = $budgeted_qty;
                     $remaining_capex = 0;
-                    if(!empty($pur_order_detail)) {
+                    if (!empty($pur_order_detail)) {
                         $pur_detail_quantity = 0;
                         $pur_detail_amount = 0;
                         foreach ($pur_order_detail as $srow) {
@@ -2199,8 +2201,8 @@ class Estimates_model extends App_Model
                            value="' . $budgeted_qty . '" 
                            class="form-control" 
                            readonly>
-                        <span style="text-align: left; display: block;">' . 
-                            (!empty($item['unit_id']) ? pur_get_unit_name($item['unit_id']) : '') . 
+                        <span style="text-align: left; display: block;">' .
+                        (!empty($item['unit_id']) ? pur_get_unit_name($item['unit_id']) : '') .
                         '</span>
                     </td>';
                     $itemhtml .= '<td align="left" class="all_remaining_qty_budget">' . render_input($remaining_qty_budget_name_attr, '', $remaining_qty_budget, 'number', ['readonly' => true]) . '</td>';
@@ -2214,8 +2216,8 @@ class Estimates_model extends App_Model
                            class="form-control" 
                            onchange="calculate_unawarded_capex()" 
                            step="any">
-                        <span style="text-align: left; display: block;">' . 
-                            (!empty($item['unit_id']) ? pur_get_unit_name($item['unit_id']) : '') . 
+                        <span style="text-align: left; display: block;">' .
+                        (!empty($item['unit_id']) ? pur_get_unit_name($item['unit_id']) : '') .
                         '</span>
                     </td>';
                     $itemhtml .= '<td align="left" class="all_unawarded_rate">' . render_input($unawarded_rate_name_attr, '', $unawarded_rate, 'number', ['onchange' => 'calculate_unawarded_capex()', 'step' => 'any']) . '</td>';
@@ -2260,13 +2262,13 @@ class Estimates_model extends App_Model
         $newitems = isset($data['newitems']) ? $data['newitems'] : array();
         $estimate_id = isset($data['estimate_id']) ? $data['estimate_id'] : 0;
         $budget_head = isset($data['unawarded_budget_head']) ? $data['unawarded_budget_head'] : NULL;
-        if(!empty($newitems)) {
+        if (!empty($newitems)) {
             foreach ($newitems as $key => $value) {
                 $this->db->where('estimate_id', $estimate_id);
                 $this->db->where('budget_head', $budget_head);
                 $this->db->where('item_id', $value['item_id']);
                 $unawarded_budget_info = $this->db->get(db_prefix() . 'unawarded_budget_info')->row();
-                if(!empty($unawarded_budget_info)) {
+                if (!empty($unawarded_budget_info)) {
                     $this->db->where('estimate_id', $estimate_id);
                     $this->db->where('budget_head', $budget_head);
                     $this->db->where('item_id', $value['item_id']);
@@ -2300,17 +2302,17 @@ class Estimates_model extends App_Model
         $package_budget = isset($data['package_budget']) ? $data['package_budget'] : '';
         $package_id = isset($data['package_id']) ? $data['package_id'] : '';
         $base_currency = $this->currencies_model->get_base_currency();
-        if(!empty($package_id)) {
+        if (!empty($package_id)) {
             $this->db->where('id', $package_id);
             $package_info = $this->db->get(db_prefix() . 'estimate_package_info')->row();
         }
         $this->db->where('id', $estimate_id);
         $estimates = $this->db->get(db_prefix() . 'estimates')->row();
         $package_budget_head = $this->get_estimate_budget_listing($estimates->id);
-        if(!empty($package_budget_head)) {
-            if(empty($package_budget)) {
+        if (!empty($package_budget_head)) {
+            if (empty($package_budget)) {
                 $package_budget = isset($package_budget_head[0]) ? $package_budget_head[0]['annexure'] : '';
-                if(!empty($package_info)) {
+                if (!empty($package_info)) {
                     $package_budget = $package_info->budget_head;
                 }
                 $budgetsummaryhtml .= '<div class="row">';
@@ -2363,8 +2365,8 @@ class Estimates_model extends App_Model
 
             $this->db->select(
                 db_prefix() . 'itemable.*,' .
-                db_prefix() . 'unawarded_budget_info.unawarded_qty,' .
-                db_prefix() . 'unawarded_budget_info.unawarded_rate'
+                    db_prefix() . 'unawarded_budget_info.unawarded_qty,' .
+                    db_prefix() . 'unawarded_budget_info.unawarded_rate'
             );
             $this->db->from(db_prefix() . 'itemable');
             $this->db->join(db_prefix() . 'unawarded_budget_info', db_prefix() . 'unawarded_budget_info.item_id = ' . db_prefix() . 'itemable.id', 'left');
@@ -2374,7 +2376,7 @@ class Estimates_model extends App_Model
             $this->db->group_by(db_prefix() . 'itemable.id');
             $unawarded_budget_itemable = $this->db->get()->result_array();
             $total_budgeted_amount = 0;
-            if(!empty($unawarded_budget_itemable)) {
+            if (!empty($unawarded_budget_itemable)) {
                 $total_budgeted_amount = array_reduce($unawarded_budget_itemable, function ($carry, $item) {
                     return $carry + ($item['qty'] * $item['rate']);
                 }, 0);
@@ -2413,7 +2415,7 @@ class Estimates_model extends App_Model
                     </div>
                 </td>';
                 $itemhtml .= '<td align="left">
-                    <textarea name="long_description" rows="2" class="form-control" placeholder="'._l('item_long_description_placeholder').'">
+                    <textarea name="long_description" rows="2" class="form-control" placeholder="' . _l('item_long_description_placeholder') . '">
                     </textarea>
                 </td>';
                 $itemhtml .= '<td align="left"></td>';
@@ -2432,7 +2434,7 @@ class Estimates_model extends App_Model
                 $itemhtml .= '</tr>';
                 foreach ($unawarded_budget_itemable as $key => $item) {
                     $package_items_info = array();
-                    if(!empty($package_id)) {
+                    if (!empty($package_id)) {
                         $this->db->where('package_id', $package_id);
                         $this->db->where('item_id', $item['id']);
                         $package_items_info = $this->db->get(db_prefix() . 'estimate_package_items_info')->row();
@@ -2463,8 +2465,8 @@ class Estimates_model extends App_Model
                            value="' . $unawarded_qty . '" 
                            class="form-control" 
                            readonly>
-                        <span style="text-align: left; display: block;">' . 
-                            (!empty($item['unit_id']) ? pur_get_unit_name($item['unit_id']) : '') . 
+                        <span style="text-align: left; display: block;">' .
+                        (!empty($item['unit_id']) ? pur_get_unit_name($item['unit_id']) : '') .
                         '</span>
                     </td>';
                     $itemhtml .= '<td align="right" class="all_unawarded_rate">' . render_input($unawarded_rate_name_attr, '', $unawarded_rate, 'number', ['readonly' => true]) . '</td>';
@@ -2476,8 +2478,8 @@ class Estimates_model extends App_Model
                            class="form-control" 
                            onchange="calculate_package()" 
                            step="any">
-                        <span style="text-align: left; display: block;">' . 
-                            (!empty($item['unit_id']) ? pur_get_unit_name($item['unit_id']) : '') . 
+                        <span style="text-align: left; display: block;">' .
+                        (!empty($item['unit_id']) ? pur_get_unit_name($item['unit_id']) : '') .
                         '</span>
                     </td>';
                     $itemhtml .= '<td align="right" class="all_package_rate">' . render_input($package_rate_name_attr, '', !empty($package_items_info) ? $package_items_info->package_rate : 0.00, 'number', ['onchange' => 'calculate_package()', 'step' => 'any']) . '</td>';
@@ -2498,7 +2500,7 @@ class Estimates_model extends App_Model
                     <tr>
                         <td><span class="bold tw-text-neutral-700">Total Budgeted Amount :</span>
                         </td>
-                        <td>'.app_format_money($total_budgeted_amount, $base_currency).'</td>
+                        <td>' . app_format_money($total_budgeted_amount, $base_currency) . '</td>
                     </tr>
                     <tr>
                         <td width="75%"><span class="bold tw-text-neutral-700">Total Unawarded Amount :</span>
@@ -2536,6 +2538,99 @@ class Estimates_model extends App_Model
         return $response;
     }
 
+    // public function save_package($data)
+    // {
+    //     $items = isset($data['items']) ? $data['items'] : array();
+    //     $package_id = isset($data['package_id']) ? $data['package_id'] : NULL;
+    //     $estimate_id = isset($data['estimate_id']) ? $data['estimate_id'] : NULL;
+    //     $budget_head = isset($data['package_budget_head']) ? $data['package_budget_head'] : NULL;
+    //     $project_awarded_date = isset($data['project_awarded_date']) ? $data['project_awarded_date'] : NULL;
+    //     $package_name = isset($data['package_name']) ? $data['package_name'] : NULL;
+    //     $sdeposit_percent = isset($data['sdeposit_percent']) ? $data['sdeposit_percent'] : NULL;
+    //     $sdeposit_value = isset($data['sdeposit_value']) ? $data['sdeposit_value'] : NULL;
+    //     $total_package = isset($data['total_package']) ? $data['total_package'] : NULL;
+    //     $newpackageitems = isset($data['newpackageitems']) ? $data['newpackageitems'] : array();
+    //     $kind = isset($data['kind']) ? $data['kind'] : NULL;
+    //     $rli_filter = isset($data['rli_filter']) ? $data['rli_filter'] : NULL;
+
+    //     if(!empty($package_id)) {
+    //         $this->db->where('id', $package_id);
+    //         $this->db->update(db_prefix() . 'estimate_package_info', [
+    //             'estimate_id' => $estimate_id,
+    //             'budget_head' => $budget_head,
+    //             'project_awarded_date' => date('Y-m-d', strtotime($project_awarded_date)),
+    //             'package_name' => $package_name,
+    //             'sdeposit_percent' => $sdeposit_percent,
+    //             'sdeposit_value' => $sdeposit_value,
+    //             'total_package' => $total_package,
+    //             'kind' => $kind,
+    //             'rli_filter' => $rli_filter,
+    //         ]);
+    //         if(!empty($items)) {
+    //             foreach ($items as $key => $value) {
+    //                 $this->db->where('package_id', $package_id);
+    //                 $this->db->where('item_id', $value['item_id']);
+    //                 $this->db->update(db_prefix() . 'estimate_package_items_info', [
+    //                     'package_qty' => $value['package_qty'],
+    //                     'package_rate' => $value['package_rate'],
+    //                     'remarks' => $value['remarks'],
+    //                 ]);
+    //             }
+    //         }
+    //     } else {
+    //         $this->db->insert(db_prefix() . 'estimate_package_info', [
+    //             'estimate_id' => $estimate_id,
+    //             'budget_head' => $budget_head,
+    //             'project_awarded_date' => date('Y-m-d', strtotime($project_awarded_date)),
+    //             'package_name' => $package_name,
+    //             'sdeposit_percent' => $sdeposit_percent,
+    //             'sdeposit_value' => $sdeposit_value,
+    //             'total_package' => $total_package,
+    //             'kind' => $kind,
+    //             'rli_filter' => $rli_filter,
+    //         ]);
+    //         $package_id = $this->db->insert_id();
+    //         if(!empty($items)) {
+    //             foreach ($items as $key => $value) {
+    //                 $this->db->insert(db_prefix() . 'estimate_package_items_info', [
+    //                     'package_id' => $package_id,
+    //                     'item_id' => $value['item_id'],
+    //                     'package_qty' => $value['package_qty'],
+    //                     'package_rate' => $value['package_rate'],
+    //                     'remarks' => $value['remarks'],
+    //                 ]);
+    //             }
+    //         }
+    //     }
+
+    //     if(!empty($newpackageitems)) {
+    //         foreach ($newpackageitems as $key => $value) {
+    //             $this->db->insert(db_prefix() . 'itemable', [
+    //                 'rel_id' => $estimate_id,
+    //                 'rel_type' => 'estimate',
+    //                 'long_description' => $value['long_description'],
+    //                 'annexure' => $budget_head,
+    //                 'item_code' => $value['item_name'],
+    //             ]);
+    //             $itemable_id = $this->db->insert_id();
+    //             $this->db->insert(db_prefix() . 'unawarded_budget_info', [
+    //                 'estimate_id' => $estimate_id,
+    //                 'budget_head' => $budget_head,
+    //                 'item_id' => $itemable_id,
+    //             ]);
+    //             $this->db->insert(db_prefix() . 'estimate_package_items_info', [
+    //                 'package_id' => $package_id,
+    //                 'item_id' => $itemable_id,
+    //                 'package_qty' => $value['package_qty'],
+    //                 'package_rate' => $value['package_rate'],
+    //                 'remarks' => $value['remarks'],
+    //             ]);
+    //         }
+    //     }
+
+    //     return true;
+    // }
+
     public function save_package($data)
     {
         $items = isset($data['items']) ? $data['items'] : array();
@@ -2550,8 +2645,9 @@ class Estimates_model extends App_Model
         $newpackageitems = isset($data['newpackageitems']) ? $data['newpackageitems'] : array();
         $kind = isset($data['kind']) ? $data['kind'] : NULL;
         $rli_filter = isset($data['rli_filter']) ? $data['rli_filter'] : NULL;
-
-        if(!empty($package_id)) {
+        $get_est_data = get_estimate_data($estimate_id);
+        if (!empty($package_id)) {
+            // Update existing package
             $this->db->where('id', $package_id);
             $this->db->update(db_prefix() . 'estimate_package_info', [
                 'estimate_id' => $estimate_id,
@@ -2564,7 +2660,8 @@ class Estimates_model extends App_Model
                 'kind' => $kind,
                 'rli_filter' => $rli_filter,
             ]);
-            if(!empty($items)) {
+
+            if (!empty($items)) {
                 foreach ($items as $key => $value) {
                     $this->db->where('package_id', $package_id);
                     $this->db->where('item_id', $value['item_id']);
@@ -2575,7 +2672,52 @@ class Estimates_model extends App_Model
                     ]);
                 }
             }
+            
+
+            // Update tender inform ation
+            $this->db->where('package_id', $package_id);
+            $tender_exists = $this->db->get(db_prefix() . 'pur_tender')->row();
+
+            if ($tender_exists) {
+                // Update existing tender
+                $this->db->where('package_id', $package_id);
+                $this->db->update(db_prefix() . 'pur_tender', [
+                    'estimate_id' => $estimate_id,
+                    'group_pur' => $budget_head,
+                    'request_date' => date('Y-m-d H:i:s'),
+                ]);
+                $tender_id = $tender_exists->id;
+
+                // Delete existing tender items to reinsert them
+                $this->db->where('pur_tender', $tender_id);
+                $this->db->delete(db_prefix() . 'pur_tender_detail');
+            }
         } else {
+            $prefix = get_purchase_option('pur_tender_prefix');
+            $next_number = get_purchase_option('next_tender_number');
+
+            if ($get_est_data->project_id != '' && $get_est_data->project_id > 0) {
+                // Get project name
+                $this->db->where('id', $get_est_data->project_id);
+                $project = $this->db->get(db_prefix() . 'projects')->row();
+
+                if ($project) {
+                    // Extract clean 3-letter project code
+                    $project_code = strtoupper(preg_replace('/[^a-zA-Z]/', '', substr($project->name, 0, 3)));
+
+                    // Reconstruct with project code inserted after sequential number
+                    $new_po_parts = [
+                        $prefix,  // #TN
+                        str_pad($next_number, 4, '0', STR_PAD_LEFT),  // 00080
+                        $project_code, // SUR
+                        date('Y'), // year
+                    ];
+
+                    $pur_tn_code = implode('-', $new_po_parts);
+                }
+            }
+
+            // Insert new package
             $this->db->insert(db_prefix() . 'estimate_package_info', [
                 'estimate_id' => $estimate_id,
                 'budget_head' => $budget_head,
@@ -2588,7 +2730,8 @@ class Estimates_model extends App_Model
                 'rli_filter' => $rli_filter,
             ]);
             $package_id = $this->db->insert_id();
-            if(!empty($items)) {
+
+            if (!empty($items)) {
                 foreach ($items as $key => $value) {
                     $this->db->insert(db_prefix() . 'estimate_package_items_info', [
                         'package_id' => $package_id,
@@ -2599,9 +2742,38 @@ class Estimates_model extends App_Model
                     ]);
                 }
             }
+
+            // Insert new tender
+            $this->db->insert(db_prefix() . 'pur_tender', [
+                'pur_tn_code' => $pur_tn_code,
+                'package_id' => $package_id,
+                'estimate_id' => $estimate_id,
+                'group_pur' => $budget_head,
+                'project' => $get_est_data->project_id,
+                'request_date' => date('Y-m-d H:i:s'),
+            ]);
+            $tender_id = $this->db->insert_id();
+            if (isset($tender_id)) {
+                $next_number = $next_number + 1;
+                $this->db->where('option_name', 'next_tender_number');
+                $this->db->update(db_prefix() . 'purchase_option', ['option_val' =>  $next_number,]);
+            }
         }
 
-        if(!empty($newpackageitems)) {
+        // Insert items into tender_detail (for both new and updated tenders)
+        if (!empty($items) && isset($tender_id)) {
+            foreach ($items as $key => $value) {
+                $this->db->insert(db_prefix() . 'pur_tender_detail', [
+                    'pur_tender' => $tender_id,
+                    'item_code' => $value['item_id'],
+                    'quantity' => $value['package_qty'],
+                    'unit_price' => $value['package_rate'],
+                    'remarks' => $value['remarks'],
+                ]);
+            }
+        }
+
+        if (!empty($newpackageitems)) {
             foreach ($newpackageitems as $key => $value) {
                 $this->db->insert(db_prefix() . 'itemable', [
                     'rel_id' => $estimate_id,
@@ -2623,12 +2795,22 @@ class Estimates_model extends App_Model
                     'package_rate' => $value['package_rate'],
                     'remarks' => $value['remarks'],
                 ]);
+
+                // Also insert into tender_detail if tender exists
+                if (isset($tender_id)) {
+                    $this->db->insert(db_prefix() . 'pur_tender_detail', [
+                        'pur_tender' => $tender_id,
+                        'item_code' => $itemable_id,
+                        'quantity' => $value['package_qty'],
+                        'unit_price' => $value['package_rate'],
+                        'remarks' => $value['remarks'],
+                    ]);
+                }
             }
         }
 
         return true;
     }
-
     public function delete_package($id)
     {
         $affectedRows = 0;
@@ -2655,22 +2837,22 @@ class Estimates_model extends App_Model
         $budget_listing = array();
         $budget_listing = $this->db->select(
             db_prefix() . 'itemable.id as id, ' .
-            db_prefix() . 'itemable.annexure as annexure, ' .
-            db_prefix() . 'items_groups.name as budget_head'
+                db_prefix() . 'itemable.annexure as annexure, ' .
+                db_prefix() . 'items_groups.name as budget_head'
         )
-        ->from(db_prefix() . 'itemable')
-        ->join(
-            db_prefix() . 'items_groups', 
-            db_prefix() . 'items_groups.id = ' . db_prefix() . 'itemable.annexure', 
-            'left'
-        )
-        ->where('rel_id', $estimate_id)
-        ->where('rel_type', 'estimate')
-        ->group_by(db_prefix() . 'itemable.annexure')
-        ->get()
-        ->result_array();
-        if(!empty($budget_listing)) {
-            usort($budget_listing, function($a, $b) {
+            ->from(db_prefix() . 'itemable')
+            ->join(
+                db_prefix() . 'items_groups',
+                db_prefix() . 'items_groups.id = ' . db_prefix() . 'itemable.annexure',
+                'left'
+            )
+            ->where('rel_id', $estimate_id)
+            ->where('rel_type', 'estimate')
+            ->group_by(db_prefix() . 'itemable.annexure')
+            ->get()
+            ->result_array();
+        if (!empty($budget_listing)) {
+            usort($budget_listing, function ($a, $b) {
                 return $a['annexure'] <=> $b['annexure'];
             });
         }
@@ -2718,5 +2900,4 @@ class Estimates_model extends App_Model
         $booked_amount = isset($result->total) ? $result->total : 0;
         return $booked_amount;
     }
-
 }

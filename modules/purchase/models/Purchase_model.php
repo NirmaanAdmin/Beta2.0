@@ -22345,5 +22345,40 @@ class Purchase_model extends App_Model
 
         return $custom_date_select;
     }
+
+    public function get_purchase_tender($id = '')
+    {
+        if ($id == '') {
+            if (!has_permission('purchase_tender', '', 'view') && is_staff_logged_in()) {
+
+                $or_where = '';
+                $list_vendor = get_vendor_admin_list(get_staff_user_id());
+                foreach ($list_vendor as $vendor_id) {
+                    $or_where .= ' OR find_in_set(' . $vendor_id . ', ' . db_prefix() . 'pur_tender.send_to_vendors)';
+                }
+                $this->db->where('(' . db_prefix() . 'pur_tender.requester = ' . get_staff_user_id() .  $or_where . ')');
+            }
+
+            return $this->db->get(db_prefix() . 'pur_tender')->result_array();
+        } else {
+            $this->db->where('id', $id);
+            return $this->db->get(db_prefix() . 'pur_tender')->row();
+        }
+    }
+
+    public function get_pur_tender_detail($pur_tender)
+    {
+        $this->db->where('pur_tender', $pur_tender);
+        $pur_tender_lst = $this->db->get(db_prefix() . 'pur_tender_detail')->result_array();
+
+        foreach ($pur_tender_lst as $key => $detail) {
+            $pur_tender_lst[$key]['into_money'] = (float) $detail['into_money'];
+            $pur_tender_lst[$key]['total'] = (float) $detail['total'];
+            $pur_tender_lst[$key]['unit_price'] = (float) $detail['unit_price'];
+            $pur_tender_lst[$key]['tax_value'] = (float) $detail['tax_value'];
+        }
+
+        return $pur_tender_lst;
+    }
        
 }

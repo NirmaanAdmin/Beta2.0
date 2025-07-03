@@ -13934,7 +13934,7 @@ class purchase extends AdminController
         $data['budget_head'] = $this->purchase_model->get_commodity_group_add_commodity();
         $data['rli_filters'] = $this->purchase_model->get_all_rli_filters();
 
-        $this->load->view('unawarded_tracker/manage', $data);
+        $this->load->view('unawarded_tracker/manage', $data); 
     }
 
     public function import_file_xlsx_unawared_tracker_items()
@@ -14973,5 +14973,92 @@ class purchase extends AdminController
         $result = $this->purchase_model->get_vbt_dashboard($data);
         echo json_encode($result);
         die;
+    }
+
+    public function purchase_tender()
+    {
+        $this->load->model('departments_model');
+        $this->load->model('projects_model');
+
+        $data['title'] = _l('purchase_tender');
+        $data['vendors'] = $this->purchase_model->get_vendor();
+        $data['departments'] = $this->departments_model->get();
+        $data['vendor_contacts'] = $this->purchase_model->get_contacts();
+        $data['projects'] = $this->projects_model->get();
+        $data['item_group'] = $this->purchase_model->get_commodity_group_add_commodity();
+        $data['item_sub_group'] = $this->purchase_model->get_sub_group();
+        $data['requester'] = $this->staff_model->get('', ['active' => 1]);
+
+        $this->load->view('purchase_tender/manage', $data);
+    }
+
+    public function table_pur_tender()
+    {
+        $this->app->get_table_data(module_views_path('purchase', 'purchase_tender/table_pur_tender'));
+    }
+
+    public function view_pur_tender($id)
+    {
+        if (!has_permission('purchase_tender', '', 'view') && !has_permission('purchase_tender', '', 'view_own')) {
+            access_denied('purchase');
+        }
+
+        $this->load->model('departments_model');
+        $this->load->model('currencies_model');
+
+        $send_mail_approve = $this->session->userdata("send_mail_approve");
+        if ((isset($send_mail_approve)) && $send_mail_approve != '') {
+            $data['send_mail_approve'] = $send_mail_approve;
+            $this->session->unset_userdata("send_mail_approve");
+        }
+        $data['pur_tender'] = $this->purchase_model->get_purchase_tender($id);
+
+        if (has_permission('purchase_tender', '', 'view_own') && !is_admin()) {
+            $staffid = get_staff_user_id();
+            $in_vendor = false;
+
+            if ($data['pur_tender']->send_to_vendors != null &&  $data['pur_tender']->send_to_vendors != '') {
+                $send_to_vendors_ids = explode(',', $data['pur_tender']->send_to_vendors);
+
+                $list_vendor = get_vendor_admin_list($staffid);
+                foreach ($list_vendor as $vendor_id) {
+                    if (in_array($vendor_id, $send_to_vendors_ids)) {
+                        $in_vendor = true;
+                    }
+                }
+            }
+
+            $approve_access = total_rows(db_prefix() . 'pur_approval_details', ['staffid' => $staffid, 'rel_type' => 'pur_tender', 'rel_id' => $id]);
+
+            if ($data['pur_tender']->requester != $staffid && $in_vendor == false && $approve_access == 0) {
+                access_denied('purchase');
+            }
+        }
+
+        if (!$data['pur_tender']) {
+            show_404();
+        }
+
+        $data['pur_tender_detail'] = $this->purchase_model->get_pur_tender_detail($id);
+        $data['title'] = $data['pur_tender']->pur_tn_name;
+        $data['departments'] = $this->departments_model->get();
+        $data['units'] = $this->purchase_model->get_units();
+        $data['items'] = $this->purchase_model->get_items();
+        $data['taxes_data'] = $this->purchase_model->get_html_tax_pur_request($id);
+        $data['base_currency'] = $this->currencies_model->get_base_currency();
+        $data['check_appr'] = $this->purchase_model->get_approve_setting('pur_tender');
+        $data['get_staff_sign'] = $this->purchase_model->get_staff_sign($id, 'pur_tender');
+        $data['check_approve_status'] = $this->purchase_model->check_approval_details($id, 'pur_tender');
+        $data['list_approve_status'] = $this->purchase_model->get_list_approval_details($id, 'pur_tender');
+        $data['taxes'] = $this->purchase_model->get_taxes();
+        $data['pur_request_attachments'] = $this->purchase_model->get_purchase_request_attachments($id);
+        $data['check_approval_setting'] = $this->purchase_model->check_approval_setting($data['pur_request']->project, 'pur_request', 0);
+        $data['attachments'] = $this->purchase_model->get_purchase_attachments('pur_request', $id);
+        $data['pur_request'] = $this->purchase_model->get_purchase_request($id);
+        $data['commodity_groups_request'] = $this->purchase_model->get_commodity_group_add_commodity();
+        $data['sub_groups_request'] = $this->purchase_model->get_sub_group();
+        $data['area_request'] = $this->purchase_model->get_area();
+        $data['activity'] = $this->purchase_model->get_pr_activity($id);
+        $this->load->view('purchase_tender/view_pur_tender', $data);
     }
 }

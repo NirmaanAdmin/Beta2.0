@@ -530,3 +530,16 @@ function get_sub_head($id)
     return '';
 }
 
+function get_estimate_data($est_id)
+{
+    $CI = &get_instance();
+    $CI->db->select('*');
+    $CI->db->from(db_prefix() . 'estimates');
+    $CI->db->where('id', $est_id);
+    $estimate = $CI->db->get()->row();
+    if ($estimate) {
+        return $estimate;
+    }
+    return null;
+
+}
