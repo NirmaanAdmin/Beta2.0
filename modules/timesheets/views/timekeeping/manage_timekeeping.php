@@ -110,7 +110,7 @@
                 <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="Out For Work" class="btn">OW</button>
                 <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="Maternity Leave" class="btn">ML</button>
                 <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="Work From Home" class="btn">W/H</button>
-                <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="Compensatory Off" class="btn">CO</button>
+                <button type="button" data-toggle="tooltip" data-placement="top" data-original-title="Compensatory Off" class="btn">C/OFF</button>
                 <button type="button" data-toggle="tooltip" data-placement="top" data-original-title=" NOT APPLICABLE" class="btn">N/A</button>
 
                 <div class="clearfix"></div>

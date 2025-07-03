@@ -4974,7 +4974,7 @@ class timesheets_model extends app_model
 	 */
 	public function add_update_timesheet($data, $is_timesheets = false)
 	{
-		$type_valid = ['AL', 'W', 'U', 'HO', 'E', 'L', 'B', 'SI', 'M', 'ME', 'NS', 'P', 'OFF', 'H/F', 'W/H', 'N/A'];
+		$type_valid = ['AL', 'W', 'U', 'HO', 'E', 'L', 'B', 'SI', 'M', 'ME', 'NS', 'P', 'OFF', 'H/F', 'W/H', 'N/A','OW', 'C/OFF'];
 		$data_type_of_leave = $this->get_type_of_leave();
 		foreach ($data_type_of_leave as $key => $value) {
 			$type_valid[] = $value['symbol'];
@@ -4992,7 +4992,7 @@ class timesheets_model extends app_model
 
 					// Handle simple values like "P" without colon
 					if (in_array(strtoupper(trim($val)), $type_valid)) {
-						if (strtoupper(trim($val)) == 'P' || strtoupper(trim($val)) == 'L' || strtoupper(trim($val)) == 'W/H' || strtoupper(trim($val)) == 'H/F' || strtoupper(trim($val)) == 'N/A' || strtoupper(trim($val)) == 'OFF') {
+						if (strtoupper(trim($val)) == 'P' || strtoupper(trim($val)) == 'L' || strtoupper(trim($val)) == 'W/H' || strtoupper(trim($val)) == 'H/F' || strtoupper(trim($val)) == 'N/A' || strtoupper(trim($val)) == 'OFF' || strtoupper(trim($val)) == 'OW' || strtoupper(trim($val)) == 'C/OFF') {
 							$this->db->insert(db_prefix() . 'timesheets_timesheet', [
 								'staff_id' => $row['staff_id'],
 								'date_work' => $key,
@@ -5325,7 +5325,7 @@ class timesheets_model extends app_model
 		if ($string != '') {
 			$array = explode(';', $string);
 			$list_type = [];
-			$special_cases = ['H/F', 'W/H', 'N/A']; // Add any other special cases here
+			$special_cases = ['H/F', 'W/H', 'N/A','OW','C/OFF']; // Add any other special cases here
 
 			// First check if this is a special case that shouldn't be processed
 			if (count($array) == 1) {
@@ -6881,7 +6881,7 @@ class timesheets_model extends app_model
 	 */
 	public function get_attendance_manual($staffs_list, $month = '', $year = '', $from_date = '', $to_date = '')
 	{
-		$type_valid = ['AL', 'W', 'U', 'HO', 'E', 'L', 'B', 'SI', 'M', 'ME', 'NS', 'P', 'OFF', 'H/F', 'W/H', 'N/A'];;
+		$type_valid = ['AL', 'W', 'U', 'HO', 'E', 'L', 'B', 'SI', 'M', 'ME', 'NS', 'P', 'OFF', 'H/F', 'W/H', 'N/A','OW','C/OFF'];;
 		$data_type_of_leave = $this->get_type_of_leave();
 		foreach ($data_type_of_leave as $key => $value) {
 			$type_valid[] = $value['symbol'];
