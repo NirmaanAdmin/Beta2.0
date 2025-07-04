@@ -139,7 +139,7 @@
                         <!-- Row 1 -->
                         <tr class="project-overview">
                           <td width="50%">
-                            <span class="bold"><?php echo _l('pur_rq_code'); ?> :</span>
+                            <span class="bold"><?php echo _l('Tender Code'); ?> :</span>
                             <span><?php echo pur_html_entity_decode($pur_tender->pur_tn_code); ?></span>
                           </td>
                           <td width="50%">
@@ -154,17 +154,17 @@
                         <!-- Row 2 -->
                         <tr class="project-overview">
                           <td width="50%">
-                            <span class="bold"><?php echo _l('pur_rq_name'); ?> :</span>
+                            <span class="bold"><?php echo _l('Tender Name'); ?> :</span>
                             <span><?php echo pur_html_entity_decode($pur_tender->pur_tn_name); ?></span>
                           </td>
-                          <td width="50%">
+                          <!-- <td width="50%">
                             <span class="bold"><?php echo _l('sub_groups_pur'); ?> :</span>
                             <span><?php foreach ($sub_groups_request as $group) {
                                     if ($group['id'] == $pur_tender->sub_groups_pur) {
                                       echo $group['sub_group_name'];
                                     }
                                   } ?></span>
-                          </td>
+                          </td> -->
                         </tr>
                         <!-- Row 3 -->
                         <tr class="project-overview">
@@ -176,23 +176,16 @@
                               echo pur_html_entity_decode($_data); ?>
                             </span>
                           </td>
-                          <td width="50%">
+                          <!-- <td width="50%">
                             <span class="bold"><?php echo _l('area_pur'); ?> :</span>
                             <span><?php foreach ($area_request as $area) {
                                     if ($area['id'] == $pur_tender->area_pur) {
                                       echo $area['area_name'];
                                     }
                                   } ?></span>
-                          </td>
-                        </tr>
-
-                        <tr class="project-overview">
+                          </td> -->
                           <td width="50%">
-                            <span class="bold"><?php echo _l('request_date'); ?> :</span>
-                            <span><?php echo _dt($pur_tender->request_date); ?></span>
-                          </td>
-                          <td width="50%">
-                            <span class="bold"><?php echo _l('pdf'); ?> : </span>
+                            <span class="bold"><?php echo _l('PDF'); ?> : </span>
                             <span>
                               <div class="btn-group">
                                 <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-file-pdf"></i><?php if (is_mobile()) {
@@ -207,6 +200,14 @@
 
 
                           </td>
+                        </tr>
+
+                        <tr class="project-overview">
+                          <td width="50%">
+                            <span class="bold"><?php echo _l('Tender Date'); ?> :</span>
+                            <span><?php echo _dt($pur_tender->request_date); ?></span>
+                          </td>
+
                           </td>
                         </tr>
                         <tr class="project-overview">
@@ -241,15 +242,11 @@
                             <span class="bold"><?php echo _l('pur_send_to_vendors'); ?> :</span>
                             <span><?php echo get_pur_send_to_vendors_list($pur_tender->send_to_vendors); ?></span>
                           </td>
-                          <td width="50%">
-                            <?php echo get_pur_order_by_id_pur_request($pur_tender->id); ?>
-                            
-                          </td>
                         </tr>
 
                         <tr class="project-overview">
                           <td class="bold"><?php echo _l('rq_description'); ?></td>
-                          <td><?php echo pur_html_entity_decode($pur_tender->rq_description); ?></td>
+                          <td><?php echo pur_html_entity_decode($pur_tender->tn_description); ?></td>
                         </tr>
 
                       </tbody>
@@ -264,16 +261,17 @@
                         <span style="margin-right: 10px;">
                           <button class="btn btn-primary" id="settings-toggle">Columns</button>
                           <div id="settings-dropdown" style="display: none; position: absolute; background: #fff; border: 1px solid #ccc; padding: 10px; width: 130px;">
-                            <label><input type="checkbox" class="column-toggle" data-column="1" checked style="width: 20px;"> <?php echo _l('debit_note_table_item_heading'); ?></label><br>
+                            <label><input type="checkbox" class="column-toggle" data-column="1" checked style="width: 20px;"> <?php echo _l('Uniclass Code'); ?></label><br>
                             <label><input type="checkbox" class="column-toggle" data-column="2" checked style="width: 20px;"> <?php echo _l('decription'); ?></label><br>
+                             <label><input type="checkbox" class="column-toggle" data-column="2" checked style="width: 20px;"> <?php echo _l('Sub Head'); ?></label><br>
                             <label><input type="checkbox" class="column-toggle" data-column="3" checked style="width: 20px;"> <?php echo _l('area'); ?></label><br>
                             <label><input type="checkbox" class="column-toggle" data-column="4" checked style="width: 20px;"> <?php echo _l('Image'); ?></label><br>
                             <label><input type="checkbox" class="column-toggle" data-column="5" checked style="width: 20px;"> <?php echo _l('purchase_quantity'); ?></label><br>
-                            <label><input type="checkbox" class="column-toggle" data-column="6" checked style="width: 20px;"> <?php echo _l('unit_price'); ?></label><br>
+                            <!-- <label><input type="checkbox" class="column-toggle" data-column="6" checked style="width: 20px;"> <?php echo _l('unit_price'); ?></label><br>
                             <label><input type="checkbox" class="column-toggle" data-column="7" checked style="width: 20px;"> <?php echo _l('subtotal_before_tax'); ?></label><br>
                             <label><input type="checkbox" class="column-toggle" data-column="8" checked style="width: 20px;"> <?php echo _l('debit_note_table_tax_heading'); ?></label><br>
                             <label><input type="checkbox" class="column-toggle" data-column="9" checked style="width: 20px;"> <?php echo _l('tax_value'); ?></label><br>
-                            <label><input type="checkbox" class="column-toggle" data-column="10" checked style="width: 20px;"> <?php echo _l('debit_note_total'); ?></label>
+                            <label><input type="checkbox" class="column-toggle" data-column="10" checked style="width: 20px;"> <?php echo _l('debit_note_total'); ?></label> -->
                           </div>
                         </span>
                         <span style="padding: 0px;">
@@ -289,17 +287,19 @@
                       <table class="table items items-preview estimate-items-preview" data-type="estimate">
                         <thead>
                           <tr>
-                            <th width="20%" align="left" class="hide"><?php echo _l('debit_note_table_item_heading'); ?></th>
-                            <th width="20%" align="left"><?php echo _l('debit_note_table_item_heading'); ?></th>
+
+                            <th width="20%" align="left"><?php echo _l('Uniclass Code'); ?></th>
                             <th width="15%" align="right" class="qty"><?php echo _l('decription'); ?></th>
+                            <th width="10%" align="right" class="qty"><?php echo _l('Sub Head'); ?></th>
                             <th width="20%" align="right"><?php echo _l('area'); ?></th>
                             <th width="20%" align="right"><?php echo _l('Image'); ?></th>
                             <th width="10%" align="right" class="qty"><?php echo _l('purchase_quantity'); ?></th>
-                            <th width="10%" align="right"><?php echo _l('unit_price'); ?></th>
+                            <th width="20%" align="right"><?php echo _l('Remarks'); ?></th>
+                            <!-- <th width="10%" align="right"><?php echo _l('unit_price'); ?></th>
                             <th width="10%" align="right"><?php echo _l('subtotal_before_tax'); ?></th>
                             <th width="15%" align="right"><?php echo _l('debit_note_table_tax_heading'); ?></th>
                             <th width="10%" align="right"><?php echo _l('tax_value'); ?></th>
-                            <th width="10%" align="right"><?php echo _l('debit_note_total'); ?></th>
+                            <th width="10%" align="right"><?php echo _l('debit_note_total'); ?></th> -->
                           </tr>
                         </thead>
                         <tbody class="ui-sortable">
@@ -312,14 +312,6 @@
                               $_total += $es['total'];
                           ?>
                               <tr nobr="true" class="sortable">
-                                <td class="description hide" align="left"><strong>
-                                    <?php
-                                    $item = get_item_hp($es['item_code']);
-                                    echo isset($item) && isset($item->commodity_code) && isset($item->description)
-                                      ? pur_html_entity_decode($item->commodity_code . ' - ' . $item->description)
-                                      : pur_html_entity_decode($es['item_text']);
-                                    ?>
-                                  </strong></td>
                                 <td class="description" align="left"><strong>
                                     <?php
                                     $item = get_item_hp($es['item_code']);
@@ -329,17 +321,19 @@
                                     ?>
                                   </strong></td>
                                 <td align="right"><?php echo nl2br($es['description']); ?></td>
+                                <td align="right"><?php echo get_sub_head_name_by_id($es['sub_head']); ?></td>
                                 <td align="right"><?php echo get_area_name_by_id($es['area']); ?></td>
                                 <td align="right">
                                   <?php
                                   if (!empty($es['image'])) {
-                                    $img_url = base_url('uploads/purchase/pur_request/' . $es['pur_request'] . '/' . $es['prd_id'] . '/' . $es['image']);
+                                    $img_url = base_url('uploads/purchase/pur_tender/' . $es['pur_tender'] . '/' . $es['tn_id'] . '/' . $es['image']);
                                     echo '<img class="images_w_table" src="' . $img_url . '" alt="' . $es['image'] . '">';
                                   }
                                   ?>
                                 </td>
                                 <td align="right"><?php echo pur_html_entity_decode($es['quantity']) . ' ' . pur_get_unit_name($es['unit_id']); ?></td>
-                                <td align="right"><?php echo app_format_money($es['unit_price'], $base_currency->symbol); ?></td>
+                                <td align="right"><?php echo $es['remarks']; ?></td>
+                                <!-- <td align="right"><?php echo app_format_money($es['unit_price'], $base_currency->symbol); ?></td>
                                 <td align="right"><?php echo app_format_money($es['into_money'], $base_currency->symbol); ?></td>
                                 <td align="right">
                                   <?php
@@ -360,7 +354,7 @@
                                   ?>
                                 </td>
                                 <td align="right"><?php echo app_format_money($es['tax_value'], $base_currency->symbol); ?></td>
-                                <td class="amount" align="right"><?php echo app_format_money($es['total'], $base_currency->symbol); ?></td>
+                                <td class="amount" align="right"><?php echo app_format_money($es['total'], $base_currency->symbol); ?></td> -->
                               </tr>
                           <?php }
                           } ?>
@@ -368,7 +362,7 @@
                       </table>
                     </div>
                   </div>
-                  <div class="col-md-6 col-md-offset-6">
+                  <!-- <div class="col-md-6 col-md-offset-6">
                     <table class="table text-right mbot0">
                       <tbody>
                         <tr id="subtotal">
@@ -403,7 +397,7 @@
                       </tbody>
                     </table>
 
-                  </div>
+                  </div> -->
                   <?php echo form_hidden('request_detail'); ?>
 
                   <div class=" col-md-12">
@@ -535,7 +529,7 @@
                     if (isset($attachments) && count($attachments) > 0) {
                       foreach ($attachments as $value) {
                         echo '<div class="col-md-3">';
-                        $path = get_upload_path_by_type('purchase') . 'pur_request/' . $value['rel_id'] . '/' . $value['file_name'];
+                        $path = get_upload_path_by_type('purchase') . 'pur_tender/' . $value['rel_id'] . '/' . $value['file_name'];
                         $is_image = is_image($path);
                         if ($is_image) {
                           echo '<div class="preview_image">';
@@ -823,8 +817,7 @@
                     </div>
                     <div class="col-md-12">
                       <br>
-                      <p><span class="bold"><?php echo _l('purchase_request_description') . ': '; ?></span><span><?php echo pur_html_entity_decode($pur_tender->rq_description); ?></span></p>
-                      <?php echo render_textarea('compare_note', 'comparison_notes', clear_textarea_breaks($pur_tender->compare_note)) ?>
+                      <!-- <p><span class="bold"><?php echo _l('purchase_request_description') . ': '; ?></span><span><?php echo pur_html_entity_decode($pur_tender->tn_description); ?></span></p> -->
                     </div>
                     <div class="col-md-12">
                       <button id="sm_btn" class="btn btn-info save_detail pull-right"><?php echo _l('pur_confirm'); ?></button>

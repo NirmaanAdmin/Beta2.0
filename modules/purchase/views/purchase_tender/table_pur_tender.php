@@ -226,8 +226,8 @@ foreach ($rResult as $aRow) {
             $approve_status .= '</span>';
 
             $_data = $approve_status;
-        } elseif ($aColumns[$i] == 'pur_rq_name') {
-            $name = '<a href="' . admin_url('purchase/view_pur_tender/' . $aRow['id']) . '">' . $aRow['pur_rq_name'] . '</a>';
+        } elseif ($aColumns[$i] == 'pur_tn_name') {
+            $name = '<a href="' . admin_url('purchase/view_pur_tender/' . $aRow['id']) . '">' . $aRow['pur_tn_name'] . '</a>';
 
             $name .= '<div class="row-options">';
 

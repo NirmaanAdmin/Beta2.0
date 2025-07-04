@@ -11681,7 +11681,7 @@ class purchase extends AdminController
         $goods_receipt['pr_order_id'] = $pur_order->id;
         $data['goods_receipt'] = (object) $goods_receipt;
         if (!empty($pur_order_details)) {
-            foreach ($pur_order_details as $key => $detail) {
+            foreach ($pur_order_details as $key => $detail) { 
                 $pur_order_details[$key]['commodity_code'] = $detail['item_code'];
                 $pur_order_details[$key]['po_quantities'] = (float) $detail['quantity'];
                 $pur_order_details[$key]['quantities'] = 0;
@@ -15053,12 +15053,127 @@ class purchase extends AdminController
         $data['taxes'] = $this->purchase_model->get_taxes();
         $data['pur_request_attachments'] = $this->purchase_model->get_purchase_request_attachments($id);
         $data['check_approval_setting'] = $this->purchase_model->check_approval_setting($data['pur_request']->project, 'pur_request', 0);
-        $data['attachments'] = $this->purchase_model->get_purchase_attachments('pur_request', $id);
+        $data['attachments'] = $this->purchase_model->get_purchase_attachments('pur_tender', $id);
         $data['pur_request'] = $this->purchase_model->get_purchase_request($id);
         $data['commodity_groups_request'] = $this->purchase_model->get_commodity_group_add_commodity();
         $data['sub_groups_request'] = $this->purchase_model->get_sub_group();
         $data['area_request'] = $this->purchase_model->get_area();
         $data['activity'] = $this->purchase_model->get_pr_activity($id);
         $this->load->view('purchase_tender/view_pur_tender', $data);
+    }
+
+    public function pur_tender($id = '')
+    {
+        $this->load->model('departments_model');
+        $this->load->model('staff_model');
+        $this->load->model('projects_model');
+        $this->load->model('currencies_model');
+        if ($id == '') {
+
+            // if ($this->input->post()) {
+            //     $add_data = $this->input->post();
+            //     $id = $this->purchase_model->add_pur_request($add_data);
+            //     if ($id) {
+            //         set_alert('success', _l('added_pur_request'));
+            //     }
+            //     redirect(admin_url('purchase/purchase_request'));
+            // }
+
+            // $data['title'] = _l('add_new');
+            // $is_edit = false;
+        } else {
+            if ($this->input->post()) {
+                $edit_data = $this->input->post();
+                
+                $success = $this->purchase_model->update_pur_tender($edit_data, $id);
+                if ($success == true) {
+                    set_alert('success', _l('updated_pur_request'));
+                }
+                redirect(admin_url('purchase/view_pur_tender/' . $id));
+            }
+
+            $data['pur_tender_detail'] = json_encode($this->purchase_model->get_pur_tender_detail($id));
+            $data['pur_tender'] = $this->purchase_model->get_purchase_tender($id);
+            $data['taxes_data'] = $this->purchase_model->get_html_tax_pur_request($id);
+            $data['attachments'] = $this->purchase_model->get_purchase_attachments('pur_tender', $id);
+            $data['title'] = _l('edit');
+            $is_edit = true;
+        }
+        $data['commodity_groups_pur_tender'] = $this->purchase_model->get_commodity_group_add_commodity();
+        $data['sub_groups_pur_request'] = $this->purchase_model->get_sub_group();
+        $data['area_pur_request'] = $this->purchase_model->get_area();
+        $data['base_currency'] = $this->currencies_model->get_base_currency();
+
+        $purchase_request_row_template = '';
+
+        if ($id != '') {
+            $data['pur_tender_detail'] = $this->purchase_model->get_pur_tender_detail($id);
+            $currency_rate = 1;
+            if ($data['pur_tender']->currency != 0 && $data['pur_tender']->currency_rate != null) {
+                $currency_rate = $data['pur_tender']->currency_rate;
+            }
+
+            $to_currency = $data['base_currency']->name;
+            if ($data['pur_tender']->currency != 0 && $data['pur_tender']->to_currency != null) {
+                $to_currency = $data['pur_tender']->to_currency;
+            }
+
+            if (count($data['pur_tender_detail']) > 0) {
+                $index_request = 0;
+                foreach ($data['pur_tender_detail'] as $tender_detail) {
+                    $index_request++;
+                    $unit_name = $tender_detail['unit_id'];
+                    $taxname = '';
+                    $item_text = $tender_detail['item_text'];
+
+                    if (strlen($item_text) == 0) {
+                        $item_text = pur_get_item_variatiom($tender_detail['item_code']);
+                    }
+
+                    $purchase_request_row_template .= $this->purchase_model->create_purchase_tender_row_template('items[' . $index_request . ']', $tender_detail['item_code'], $tender_detail['description'], $tender_detail['area'], $tender_detail['image'], $tender_detail['quantity'], $tender_detail['tn_id'],  true, $tender_detail, $tender_detail['remarks']);
+                }
+            }
+        }
+
+        $data['currencies'] = $this->currencies_model->get();
+        $data['is_edit'] = $is_edit;
+        $data['vendors'] = $this->purchase_model->get_vendor();
+        $data['purchase_request_row_template'] = $purchase_request_row_template;
+        $data['invoices'] = $this->purchase_model->get_invoice_for_pr();
+        $data['salse_estimates'] = $this->purchase_model->get_sale_estimate_for_pr();
+
+        $data['taxes'] = $this->purchase_model->get_taxes();
+        $data['projects'] = $this->projects_model->get_items();
+        $data['staffs'] = $this->staff_model->get();
+        $data['departments'] = $this->departments_model->get();
+        $data['units'] = $this->purchase_model->get_units();
+
+        // Old script  $data['items'] = $this->purchase_model->get_items();
+        $data['ajaxItems'] = false;
+
+        if (total_rows(db_prefix() . 'items') <= ajax_on_total_items()) {
+            $data['items'] = $this->purchase_model->pur_get_grouped('can_be_purchased');
+        } else {
+            $data['items']     = [];
+            $data['ajaxItems'] = true;
+        }
+
+        $this->load->view('purchase_tender/pur_tender', $data);
+    }
+
+    public function delete_pur_tender($id)
+    {
+        if (!$id) {
+            redirect(admin_url('purchase/purchase_tender'));
+        }
+        $response = $this->purchase_model->delete_pur_tender($id);
+        if (is_array($response) && isset($response['referenced'])) {
+            set_alert('warning', _l('is_referenced', _l('Tender')));
+        } elseif ($response == true) {
+            set_alert('success', _l('deleted', _l('Tender')));
+        } else {
+            set_alert('warning', _l('problem_deleting', _l('Tender')));
+        }
+        redirect(admin_url('purchase/purchase_tender'));
     }
 }

@@ -2381,7 +2381,6 @@ class Estimates_model extends App_Model
                     return $carry + ($item['qty'] * $item['rate']);
                 }, 0);
             }
-
             if (!empty($unawarded_budget_itemable)) {
                 $itemhtml .= '<div class="table-responsive s_table">';
                 $itemhtml .= '<table class="table items">';
@@ -2646,6 +2645,37 @@ class Estimates_model extends App_Model
         $kind = isset($data['kind']) ? $data['kind'] : NULL;
         $rli_filter = isset($data['rli_filter']) ? $data['rli_filter'] : NULL;
         $get_est_data = get_estimate_data($estimate_id);
+
+        $this->db->where('id', $estimate_id);
+        $estimates = $this->db->get(db_prefix() . 'estimates')->row();
+
+        $package_budget_head = $this->get_estimate_budget_listing($estimates->id);
+
+        if (!empty($package_budget_head)) {
+            $package_budget = isset($package_budget_head[0]) ? $package_budget_head[0]['annexure'] : '';
+
+            $this->db->select(
+                db_prefix() . 'itemable.*'
+            );
+
+            $this->db->from(db_prefix() . 'itemable');
+            $this->db->join(db_prefix() . 'unawarded_budget_info', db_prefix() . 'unawarded_budget_info.item_id = ' . db_prefix() . 'itemable.id', 'left');
+            $this->db->where('rel_id', $estimates->id);
+            $this->db->where('rel_type', 'estimate');
+            $this->db->where('annexure', $budget_head);
+            $this->db->group_by(db_prefix() . 'itemable.id');
+            $unawarded_budget_itemable = $this->db->get()->result_array();
+        }
+
+        $unawarded_map = [];
+        if (!empty($unawarded_budget_itemable)) {
+            foreach ($unawarded_budget_itemable as $ubi) {
+                $unawarded_map[$ubi['id']] = [
+                    'description' => $ubi['long_description'],
+                    'sub_head'    => $ubi['sub_head']
+                ];
+            }
+        }
         if (!empty($package_id)) {
             // Update existing package
             $this->db->where('id', $package_id);
@@ -2672,7 +2702,6 @@ class Estimates_model extends App_Model
                     ]);
                 }
             }
-            
 
             // Update tender inform ation
             $this->db->where('package_id', $package_id);
@@ -2683,6 +2712,7 @@ class Estimates_model extends App_Model
                 $this->db->where('package_id', $package_id);
                 $this->db->update(db_prefix() . 'pur_tender', [
                     'estimate_id' => $estimate_id,
+                    'pur_tn_name' => $package_name,
                     'group_pur' => $budget_head,
                     'request_date' => date('Y-m-d H:i:s'),
                 ]);
@@ -2746,6 +2776,7 @@ class Estimates_model extends App_Model
             // Insert new tender
             $this->db->insert(db_prefix() . 'pur_tender', [
                 'pur_tn_code' => $pur_tn_code,
+                'pur_tn_name' => $package_name,
                 'package_id' => $package_id,
                 'estimate_id' => $estimate_id,
                 'group_pur' => $budget_head,
@@ -2763,12 +2794,16 @@ class Estimates_model extends App_Model
         // Insert items into tender_detail (for both new and updated tenders)
         if (!empty($items) && isset($tender_id)) {
             foreach ($items as $key => $value) {
+                $desc = isset($unawarded_map[$value['item_id']]) ? $unawarded_map[$value['item_id']]['description'] : '';
+                $sub  = isset($unawarded_map[$value['item_id']]) ? $unawarded_map[$value['item_id']]['sub_head']    : '';
                 $this->db->insert(db_prefix() . 'pur_tender_detail', [
                     'pur_tender' => $tender_id,
                     'item_code' => $value['item_id'],
                     'quantity' => $value['package_qty'],
                     'unit_price' => $value['package_rate'],
                     'remarks' => $value['remarks'],
+                    'description' => $desc,
+                    'sub_head' => $sub,
                 ]);
             }
         }
@@ -2804,6 +2839,8 @@ class Estimates_model extends App_Model
                         'quantity' => $value['package_qty'],
                         'unit_price' => $value['package_rate'],
                         'remarks' => $value['remarks'],
+                        'description' => $value['long_description'],
+                        'sub_head' => $value['sub_head'] ?? '', // Assuming sub_head is
                     ]);
                 }
             }

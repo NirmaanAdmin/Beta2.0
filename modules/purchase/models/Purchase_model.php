@@ -11807,7 +11807,7 @@ class Purchase_model extends App_Model
             $name_tax_value = $name . '[tax_value]';
 
 
-            $array_qty_attr = ['onblur' => 'pur_calculate_total();', 'onchange' => 'pur_calculate_total();', 'min' => '0.0', 'step' => 'any',  'data-quantity' => (float)$quantity,'readonly' => true];
+            $array_qty_attr = ['onblur' => 'pur_calculate_total();', 'onchange' => 'pur_calculate_total();', 'min' => '0.0', 'step' => 'any',  'data-quantity' => (float)$quantity, 'readonly' => true];
 
 
             $array_rate_attr = ['onblur' => 'pur_calculate_total();', 'onchange' => 'pur_calculate_total();', 'min' => '0.0', 'step' => 'any', 'data-amount' => 'invoice', 'placeholder' => _l('rate')];
@@ -21728,18 +21728,18 @@ class Purchase_model extends App_Model
 
 
     public function update_bulk_pur_invoices($data)
-    {       
+    {
         if (empty($data)) {
             return false;
-        }else{
-            $invoice_date = to_sql_date($data['date']);           
-            $dt_data =[
+        } else {
+            $invoice_date = to_sql_date($data['date']);
+            $dt_data = [
                 'invoice_date' => $invoice_date,
                 'description_services' => $data['expense_name'],
             ];
             $this->db->where('id', $data['vbt_id']);
-            $this->db->update(db_prefix() . 'pur_invoices',$dt_data);
-            
+            $this->db->update(db_prefix() . 'pur_invoices', $dt_data);
+
             if ($this->db->affected_rows() > 0) {
                 return true;
             } else {
@@ -22075,9 +22075,10 @@ class Purchase_model extends App_Model
 
         $response['total_purchase_orders'] = $response['total_work_orders'] = $response['total_certified_value'] = $response['approved_payment_certificates'] = 0;
         $response['bar_top_vendor_name'] = $response['bar_top_vendor_value'] = array();
-        $response['line_order_date'] = $response['line_order_total'] = array(); 
+        $response['line_order_date'] = $response['line_order_total'] = array();
 
-        $this->db->select('
+        $this->db->select(
+            '
             ' . db_prefix() . 'payment_certificate.id,
             ' . db_prefix() . 'payment_certificate.po_id,
             ' . db_prefix() . 'payment_certificate.wo_id,
@@ -22142,7 +22143,7 @@ class Purchase_model extends App_Model
             $line_order_total = array();
             foreach ($payment_certificate as $key => $value) {
                 $payment_certificate_calc = $this->get_payment_certificate_calc($value['id']);
-                if($value['approve_status'] == 2) {
+                if ($value['approve_status'] == 2) {
                     $amount_rec_4 = !empty($payment_certificate_calc['amount_rec_4']) ? $payment_certificate_calc['amount_rec_4'] : 0;
                     $total_certified_value = $total_certified_value + $amount_rec_4;
 
@@ -22244,12 +22245,16 @@ class Purchase_model extends App_Model
                 return $carry + (float)$item['final_certified_amount'];
             }, 0);
             $response['total_certified_amount'] = app_format_money($total_certified_amount, $base_currency->symbol);
-            $response['total_bills_not_tag_to_orders'] = count(array_filter($pur_invoices, fn($item) =>
+            $response['total_bills_not_tag_to_orders'] = count(array_filter(
+                $pur_invoices,
+                fn($item) =>
                 empty($item['pur_order']) &&
-                empty($item['wo_order']) &&
-                empty($item['order_tracker_id'])
+                    empty($item['wo_order']) &&
+                    empty($item['order_tracker_id'])
             ));
-            $response['total_uninvoice_bills'] = count(array_filter($pur_invoices, fn($item) =>
+            $response['total_uninvoice_bills'] = count(array_filter(
+                $pur_invoices,
+                fn($item) =>
                 empty($item['ril_invoice_id'])
             ));
             $total_pending_amount_to_be_invoice = array_sum(array_column(array_filter($pur_invoices, fn($item) => empty($item['ril_invoice_id'])), 'final_certified_amount'));
@@ -22380,5 +22385,180 @@ class Purchase_model extends App_Model
 
         return $pur_tender_lst;
     }
-       
+
+    public function create_purchase_tender_row_template($name = '', $item_code = '', $item_description = '', $area = '', $image = '', $quantity = '', $item_key = '', $is_edit = false, $tender_detail = [], $remarks = '')
+    {
+        $this->load->model('invoice_items_model');
+        $row = '';
+
+        $name_item_text = 'item_text';
+        $name_item_description = 'description';
+        $name_area = 'area';
+        $name_image = 'image';
+        $name_quantity = 'quantity';
+        $name_remarks = 'remarks';
+
+        $text_right_class = 'text-right';
+        $array_qty_attr = []; // Added missing variable initialization
+
+        if ($name == '') {
+            $row .= '<tr class="main">
+              <td></td>';
+        } else {
+            $manual = false;
+            $row .= '<tr class="sortable item">
+                <td class="dragger"><input type="hidden" class="ids" name="' . $name . '[id]" value="' . $item_key . '"></td>';
+            $name_item_text = $name . '[item_text]';
+            $name_item_description = $name . '[item_description]';
+            $name_area = $name . '[area][]';
+            $name_image = $name . '[image]';
+            $name_quantity = $name . '[quantity]';
+            $name_remarks = $name . '[remarks]';
+        }
+
+        $full_item_image = '';
+        if (!empty($image) && !empty($tender_detail)) {
+            $item_base_url = base_url('uploads/purchase/pur_tender/' . $tender_detail['pur_tender'] . '/' . $tender_detail['tn_id'] . '/' . $tender_detail['image']);
+            $full_item_image = '<img class="images_w_table" src="' . $item_base_url . '" alt="' . $image . '">';
+        }
+
+        $get_selected_item = pur_get_item_selcted_select($item_code, $name_item_text);
+
+        if ($item_code == '') {
+            $row .= '<td>
+        <select id="' . $name_item_text . '" name="' . $name_item_text . '" data-selected-id="' . $item_code . '" class="form-control selectpicker item-select" data-live-search="true">
+            <option value="">Type at least 3 letters...</option>
+        </select>
+     </td>';
+        } else {
+            $row .= '<td>' . $get_selected_item . '</td>';
+        }
+
+        $style_description = '';
+        if ($is_edit) {
+            $style_description = 'width: 290px; height: 150px';
+        }
+
+        $row .= '<td>' . render_textarea($name_item_description, '', $item_description, ['rows' => 2, 'placeholder' => _l('item_description'), 'style' => $style_description,'disabled' => true]) . '</td>';
+        $row .= '<td class="area">' . get_area_list($name_area, $area) . '</td>';
+        $row .= '<td><input type="file" extension="' . str_replace(['.', ' '], '', '.png,.jpg,.jpeg') . '" filesize="' . file_upload_max_size() . '" class="form-control" name="' . $name_image . '" accept="' . get_item_form_accepted_mimes() . '">' . $full_item_image . '</td>';
+
+        $row .= '<td class="quantities">' .
+            render_input($name_quantity, '', $quantity, 'number', $array_qty_attr, [], 'no-margin', $text_right_class) .
+            '</td>';
+
+        // Fixed typo: render_textare -> render_textarea
+        $row .= '<td>' . render_textarea($name_remarks, '', $remarks, ['rows' => 2, 'placeholder' => _l('remarks')]) . '</td>';
+
+        $row .= '</tr>';
+
+        return $row;
+    }
+
+    public function update_pur_tender($data, $id)
+    {
+        $affectedRows = 0;
+
+        $update_purchase_request = [];
+        if (isset($data['items'])) {
+            $update_purchase_request = $data['items'];
+            unset($data['items']);
+        }
+
+
+        unset($data['item_text']);
+        unset($data['description']);
+        unset($data['area']);
+        unset($data['image']);
+        unset($data['unit_price']);
+        unset($data['quantity']);
+        unset($data['into_money']);
+        unset($data['tax_select']);
+        unset($data['tax_value']);
+        unset($data['total']);
+        unset($data['item_select']);
+        unset($data['item_code']);
+        unset($data['unit_name']);
+        unset($data['request_detail']);
+        unset($data['isedit']);
+        unset($data['unit_id']);
+        unset($data['number']);
+        unset($data['pur_tn_code']);
+        unset($data['pur_tn_name']);
+        unset($data['from_currency']);
+        unset($data['currency_rate']);
+        
+        if (isset($data['send_to_vendors']) && count($data['send_to_vendors']) > 0) {
+            $data['send_to_vendors'] = implode(',', $data['send_to_vendors']);
+        }
+
+        $this->db->where('id', $id);
+        $this->db->update(db_prefix() . 'pur_tender', $data);
+        $this->save_purchase_files('pur_tender', $id);
+        if ($this->db->affected_rows() > 0) {
+            $affectedRows++;
+        }
+
+        if (count($update_purchase_request) > 0) {
+            foreach ($update_purchase_request as $_key => $rqd) {
+                $dt_data = [];
+                $dt_data['pur_tender'] = $id;
+                $dt_data['area'] = !empty($rqd['area']) ? implode(',', $rqd['area']) : NULL;
+                $dt_data['quantity'] = ($rqd['quantity'] != '' && $rqd['quantity'] != null) ? $rqd['quantity'] : 0;
+                $dt_data['remarks'] = $rqd['remarks'] ?? '';
+                $this->db->where('tn_id', $rqd['id']);
+                $this->db->update(db_prefix() . 'pur_tender_detail', $dt_data);
+                if ($this->db->affected_rows() > 0) {
+                    $affectedRows++;
+                }
+                $iuploadedFiles = handle_purchase_item_attachment_array('pur_tender', $id, $rqd['id'], 'items', $_key);
+                if ($iuploadedFiles && is_array($iuploadedFiles)) {
+                    foreach ($iuploadedFiles as $ifile) {
+                        $idata = array();
+                        $idata['image'] = $ifile['file_name'];
+                        $this->db->where('tn_id', $ifile['item_id']);
+                        $this->db->update(db_prefix() . 'pur_tender_detail', $idata);
+                    }
+                }
+            }
+        }
+
+
+        if ($affectedRows > 0) {
+            return true;
+        }
+        return false;
+    }
+
+    public function delete_pur_tender($id)
+    {
+        $affectedRows = 0;
+        $this->db->where('id', $id);
+        $this->db->delete(db_prefix() . 'pur_tender');
+        if ($this->db->affected_rows() > 0) {
+            $affectedRows++;
+        }
+
+        $this->db->where('rel_id', $id);
+        $this->db->where('rel_type', 'pur_tender');
+        $this->db->delete(db_prefix() . 'files');
+        if ($this->db->affected_rows() > 0) {
+            $affectedRows++;
+        }
+
+        if (is_dir(PURCHASE_MODULE_UPLOAD_FOLDER . '/pur_tender/' . $id)) {
+            delete_dir(PURCHASE_MODULE_UPLOAD_FOLDER . '/pur_tender/' . $id);
+        }
+
+        $this->db->where('pur_tender', $id);
+        $this->db->delete(db_prefix() . 'pur_tender_detail');
+        if ($this->db->affected_rows() > 0) {
+            $affectedRows++;
+        }
+
+        if ($affectedRows > 0) {
+            return true;
+        }
+        return false;
+    }
 }
