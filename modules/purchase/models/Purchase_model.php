@@ -3079,7 +3079,7 @@ class Purchase_model extends App_Model
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'pur_orders', $data);
         $this->save_purchase_files('pur_order', $id);
-        $this->update_cost_control_remarks($cost_control_remarks, $insert_id);
+        // $this->update_cost_control_remarks($cost_control_remarks, $insert_id);
 
         if ($this->db->affected_rows() > 0) {
             $affectedRows++;
@@ -3101,7 +3101,7 @@ class Purchase_model extends App_Model
 
                 $dt_data = [];
                 $dt_data['pur_order'] = $id;
-                $dt_data['item_code'] = $rqd['item_name'];
+                $dt_data['item_code'] = $rqd['item_code'];
                 $dt_data['unit_id'] = isset($rqd['unit_name']) ? $rqd['unit_name'] : null;
                 $dt_data['area'] = !empty($rqd['area']) ? implode(',', $rqd['area']) : NULL;
                 $dt_data['unit_price'] = $rqd['unit_price'];
@@ -3137,7 +3137,6 @@ class Purchase_model extends App_Model
 
                 $dt_data['quantity'] = ($rqd['quantity'] != '' && $rqd['quantity'] != null) ? $rqd['quantity'] : 0;
                 $dt_data['reorder'] = isset($rqd['order']) ? $rqd['order'] : null;
-
                 $this->db->insert(db_prefix() . 'pur_order_detail', $dt_data);
                 $new_quote_insert_id = $this->db->insert_id();
                 if ($new_quote_insert_id) {
@@ -3162,7 +3161,7 @@ class Purchase_model extends App_Model
             foreach ($update_order as $_key => $rqd) {
                 $dt_data = [];
                 $dt_data['pur_order'] = $id;
-                $dt_data['item_code'] = $rqd['item_name'];
+                $dt_data['item_code'] = $rqd['item_code'];
                 $dt_data['unit_id'] = isset($rqd['unit_name']) ? $rqd['unit_name'] : null;
                 $dt_data['area'] = !empty($rqd['area']) ? implode(',', $rqd['area']) : NULL;
                 $dt_data['unit_price'] = $rqd['unit_price'];
@@ -22439,7 +22438,7 @@ class Purchase_model extends App_Model
             $style_description = 'width: 290px; height: 150px';
         }
 
-        $row .= '<td>' . render_textarea($name_item_description, '', $item_description, ['rows' => 2, 'placeholder' => _l('item_description'), 'style' => $style_description,'disabled' => true]) . '</td>';
+        $row .= '<td>' . render_textarea($name_item_description, '', $item_description, ['rows' => 2, 'placeholder' => _l('item_description'), 'style' => $style_description, 'disabled' => true]) . '</td>';
         $row .= '<td class="area">' . get_area_list($name_area, $area) . '</td>';
         $row .= '<td><input type="file" extension="' . str_replace(['.', ' '], '', '.png,.jpg,.jpeg') . '" filesize="' . file_upload_max_size() . '" class="form-control" name="' . $name_image . '" accept="' . get_item_form_accepted_mimes() . '">' . $full_item_image . '</td>';
 
@@ -22487,7 +22486,7 @@ class Purchase_model extends App_Model
         unset($data['pur_tn_name']);
         unset($data['from_currency']);
         unset($data['currency_rate']);
-        
+
         if (isset($data['send_to_vendors']) && count($data['send_to_vendors']) > 0) {
             $data['send_to_vendors'] = implode(',', $data['send_to_vendors']);
         }
