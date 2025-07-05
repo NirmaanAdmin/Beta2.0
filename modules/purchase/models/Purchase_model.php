@@ -2868,7 +2868,7 @@ class Purchase_model extends App_Model
                 foreach ($order_detail as $key => $rqd) {
                     $dt_data = [];
                     $dt_data['pur_order'] = $insert_id;
-                    $dt_data['item_code'] = $rqd['item_name'];
+                    $dt_data['item_code'] = $rqd['item_code'];
                     $dt_data['unit_id'] = isset($rqd['unit_name']) ? $rqd['unit_name'] : null;
                     $dt_data['unit_price'] = $rqd['unit_price'];
                     $dt_data['into_money'] = $rqd['into_money'];
