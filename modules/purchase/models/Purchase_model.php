@@ -16678,7 +16678,7 @@ class Purchase_model extends App_Model
 
                 $dt_data = [];
                 $dt_data['wo_order'] = $id;
-                $dt_data['item_code'] = $rqd['item_name'];
+                $dt_data['item_code'] = $rqd['item_code'];
                 $dt_data['unit_id'] = isset($rqd['unit_name']) ? $rqd['unit_name'] : null;
                 $dt_data['area'] = !empty($rqd['area']) ? implode(',', $rqd['area']) : NULL;
                 $dt_data['unit_price'] = $rqd['unit_price'];
@@ -16738,7 +16738,7 @@ class Purchase_model extends App_Model
             foreach ($update_order as $_key => $rqd) {
                 $dt_data = [];
                 $dt_data['wo_order'] = $id;
-                $dt_data['item_code'] = $rqd['item_name'];
+                $dt_data['item_code'] = $rqd['item_code'];
                 $dt_data['unit_id'] = isset($rqd['unit_name']) ? $rqd['unit_name'] : null;
                 $dt_data['area'] = !empty($rqd['area']) ? implode(',', $rqd['area']) : NULL;
                 $dt_data['unit_price'] = $rqd['unit_price'];
