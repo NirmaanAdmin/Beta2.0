@@ -322,27 +322,27 @@ class Vendors_portal extends App_Controller
                 $data['zip']         = $this->input->post('zip');
                 $data['state']       = $this->input->post('state');
                 $data['newworkcompleteditems'] = array();
-                if($this->input->post('newworkcompleteditems')) {
+                if ($this->input->post('newworkcompleteditems')) {
                     $data['newworkcompleteditems'] = $this->input->post('newworkcompleteditems');
                 }
                 $data['workcompleteditems'] = array();
-                if($this->input->post('workcompleteditems')) {
+                if ($this->input->post('workcompleteditems')) {
                     $data['workcompleteditems'] = $this->input->post('workcompleteditems');
                 }
                 $data['rworkcompleteditems'] = array();
-                if($this->input->post('rworkcompleteditems')) {
+                if ($this->input->post('rworkcompleteditems')) {
                     $data['rworkcompleteditems'] = $this->input->post('rworkcompleteditems');
                 }
                 $data['newworkprogressitems'] = array();
-                if($this->input->post('newworkprogressitems')) {
+                if ($this->input->post('newworkprogressitems')) {
                     $data['newworkprogressitems'] = $this->input->post('newworkprogressitems');
                 }
                 $data['workprogressitems'] = array();
-                if($this->input->post('workprogressitems')) {
+                if ($this->input->post('workprogressitems')) {
                     $data['workprogressitems'] = $this->input->post('workprogressitems');
                 }
                 $data['rworkprogressitems'] = array();
-                if($this->input->post('rworkprogressitems')) {
+                if ($this->input->post('rworkprogressitems')) {
                     $data['rworkprogressitems'] = $this->input->post('rworkprogressitems');
                 }
 
@@ -487,7 +487,7 @@ class Vendors_portal extends App_Controller
         if (!is_vendor_logged_in() && !is_staff_logged_in()) {
 
             redirect(site_url('purchase/authentication_vendor/login'));
-        } 
+        }
 
         $data['title']            = _l('quotations');
 
@@ -566,7 +566,7 @@ class Vendors_portal extends App_Controller
         $data['currencies'] = $this->currencies_model->get();
         $data['base_currency'] = $this->currencies_model->get_base_currency();
 
-        $pur_quotation_row_template = $this->purchase_model->create_quotation_row_template();
+        $pur_quotation_row_template = '';
 
         if ($id == '') {
             $title = _l('create_new_estimate');
@@ -637,8 +637,7 @@ class Vendors_portal extends App_Controller
             $data['ajaxItems'] = true;
         }
 
-        $data['pur_request'] = $this->purchase_model->get_purchase_request_by_vendor(get_vendor_user_id());
-
+        $data['pur_tender'] = $this->purchase_model->get_purchase_tender_by_vendor(get_vendor_user_id());
         $data['pur_quotation_row_template'] = $pur_quotation_row_template;
 
         $this->load->model('taxes_model');
@@ -660,18 +659,17 @@ class Vendors_portal extends App_Controller
         $data['commodity_groups_pur'] = $this->purchase_model->get_commodity_group_add_commodity();
         $data['sub_groups_pur'] = $this->purchase_model->get_sub_group();
         $data['area_pur'] = $this->purchase_model->get_area();
-        $purchase_request = isset($_GET['purchase_request']) ? $_GET['purchase_request'] : null;
-        if(!empty($purchase_request)) {
-            $purchase_request_detail = $this->purchase_model->get_purchase_request($purchase_request);
-            if(!empty($purchase_request_detail)) {
-                $data['pur_request_total'] = $purchase_request_detail->total;
-                $data['pur_request_attachments'] = $this->purchase_model->get_purchase_attachments('pur_request', $purchase_request);
+        $purchase_tender= isset($_GET['purchase_tender']) ? $_GET['purchase_tender'] : null;
+        if (!empty($purchase_tender)) {
+            $purchase_tender_detail = $this->purchase_model->get_purchase_tender($purchase_tender);
+            if (!empty($purchase_tender_detail)) {
+                $data['pur_tender_total'] = $purchase_tender_detail->total;
+                $data['pur_tender_attachments'] = $this->purchase_model->get_purchase_attachments('pur_tender', $purchase_tender);
             }
         }
-
         $data['title']             = $title;
 
-
+        // echo '<pre>'; print_r($data);die;
         $this->data($data);
         $this->view('vendor_portal/estimate');
         $this->layout();
@@ -725,11 +723,11 @@ class Vendors_portal extends App_Controller
             }
         }
         $data['attachments'] = $this->purchase_model->get_purchase_attachments('pur_quotation', $id);
-        if(isset($estimate->pur_request)) {
-            if(!empty($estimate->pur_request)) {
+        if (isset($estimate->pur_request)) {
+            if (!empty($estimate->pur_request)) {
                 $purchase_request = $estimate->pur_request->id;
                 $purchase_request_detail = $this->purchase_model->get_purchase_request($purchase_request);
-                if(!empty($purchase_request_detail)) {
+                if (!empty($purchase_request_detail)) {
                     $data['pur_request_total'] = $purchase_request_detail->total;
                     $data['pur_request_attachments'] = $this->purchase_model->get_purchase_attachments('pur_request', $purchase_request);
                 }
@@ -790,7 +788,7 @@ class Vendors_portal extends App_Controller
             $estimate_data = $this->input->post();
             $estimate_data['vendor'] = get_vendor_user_id();
             $estimate_data['terms'] = $this->input->post('terms', false);
-            if(!empty($estimate_data['pur_request'])) {
+            if (!empty($estimate_data['pur_request'])) {
                 $pur_request = $this->purchase_model->get_purchase_request($estimate_data['pur_request']);
                 $estimate_data['project'] = !empty($pur_request) ? $pur_request->project : '';
             }
@@ -978,7 +976,7 @@ class Vendors_portal extends App_Controller
         $data['attachments'] = $this->purchase_model->get_purchase_attachments('pur_request', $id);
 
         $this->data($data);
-        $this->view('vendor_portal/pur_request'); 
+        $this->view('vendor_portal/pur_request');
         $this->layout();
     }
 
@@ -2130,7 +2128,7 @@ class Vendors_portal extends App_Controller
             $master_parent_id = $this->drawing_management_model->get_master_id($id);
         }
         $file_locked = false;
-        $data_root_folder = array_filter($data_root_folder, function($item) {
+        $data_root_folder = array_filter($data_root_folder, function ($item) {
             return ($item['project_id'] != 0 && $item['name'] != 'Annux Building');
         });
         $data['root_folder'] = $data_root_folder;
@@ -2195,5 +2193,125 @@ class Vendors_portal extends App_Controller
             $this->zip->download($folder_name . '.zip');
             $this->zip->clear_data();
         }
+    }
+
+
+    public function pur_tender($id, $hash)
+    {
+
+        check_pur_tender_restrictions($id, $hash);
+
+        $this->load->model('departments_model');
+        $this->load->model('currencies_model');
+
+        $data['pur_tender_detail'] = $this->purchase_model->get_pur_tender_detail($id);
+        $data['pur_tender'] = $this->purchase_model->get_purchase_tender($id);
+        $data['title'] = $data['pur_tender']->pur_tn_name;
+        $data['departments'] = $this->departments_model->get();
+        $data['units'] = $this->purchase_model->get_units();
+        $data['items'] = $this->purchase_model->get_items();
+
+        $data['check_appr'] = $this->purchase_model->get_approve_setting('pur_tender');
+        $data['get_staff_sign'] = $this->purchase_model->get_staff_sign($id, 'pur_tender');
+        $data['check_approve_status'] = $this->purchase_model->check_approval_details($id, 'pur_tender');
+        $data['list_approve_status'] = $this->purchase_model->get_list_approval_details($id, 'pur_tender');
+
+        $data['base_currency'] = $this->currencies_model->get_base_currency();
+        if ($data['pur_tender']->currency != 0) {
+            $data['base_currency'] = pur_get_currency_by_id($data['pur_tender']->currency);
+        }
+
+        $data['taxes'] = $this->purchase_model->get_taxes();
+        $data['taxes_data'] = $this->purchase_model->get_html_tax_pur_request($id);
+
+        // $files = $this->purchase_model->get_pur_request_files($id);
+        // $data['files'] = $files;
+        $data['files'] = '';
+        $data['attachments'] = $this->purchase_model->get_purchase_attachments('pur_tender', $id);
+
+        $this->data($data);
+        $this->view('vendor_portal/pur_tender');
+        $this->layout();
+    }
+
+    public function purchase_tender()
+    {
+        if (!is_vendor_logged_in() && !is_staff_logged_in()) {
+            redirect(site_url('purchase/authentication_vendor/login'));
+        }
+
+        $data['title'] = _l('purchase_tender');
+        $data['purchase_tender'] = $this->purchase_model->get_purchase_tender_by_vendor(get_vendor_user_id());
+
+        $this->data($data);
+        $this->view('vendor_portal/purchase_tender/manage');
+        $this->layout();
+    }
+
+
+    public function coppy_pur_tender($pur_tender)
+    {
+        
+        $this->load->model('currencies_model');
+       
+        $pur_tender_detail = $this->purchase_model->get_pur_tender_detail_in_estimate($pur_tender); 
+        $purchase_tender = $this->purchase_model->get_purchase_tender($pur_tender);
+   
+        $base_currency = $this->currencies_model->get_base_currency();
+        $taxes = [];
+        $tax_val = [];
+        $tax_name = [];
+        $subtotal = 0;
+        $total = 0;
+        $data_rs = [];
+        $tax_html = '';
+
+        if (count($pur_tender_detail) > 0) {
+            foreach ($pur_tender_detail as $key => $item) {
+                $subtotal += $item['into_money'];
+                $total += $item['total'];
+            }
+        }
+
+
+        $list_item = '';
+
+        $currency_rate = 1;
+        $to_currency = $base_currency->id;
+        if ($purchase_tender->currency != 0 && $purchase_tender->currency_rate != null) {
+            $currency_rate = $purchase_tender->currency_rate;
+            $to_currency = $purchase_tender->currency;
+        }
+
+        if (count($pur_tender_detail) > 0) {
+            $index_quote = 0;
+            foreach ($pur_tender_detail as $key => $item) {
+                $index_quote++;
+                $unit_name = pur_get_unit_name($item['unit_id']);
+                $taxname = $item['tax_name'];
+                $item_name = $item['item_text'];
+
+                if (strlen($item_name) == 0) {
+                    $item_name = pur_get_item_variatiom($item['item_code']);
+                }
+
+                $list_item .= $this->purchase_model->create_quotation_row_template('newitems[' . $index_quote . ']',  $item_name, $item['area'], $item['image'], $item['quantity'], $unit_name, $item['unit_price'], $taxname, $item['item_code'], $item['unit_id'], $item['tax_rate'],  $item['total'], '', '', $item['total'], $item['into_money'], $item['tax'], $item['tax_value'], $index_quote, true, $currency_rate, $to_currency,$item);
+            }
+        }
+
+
+        $taxes_data = $this->purchase_model->get_html_tax_pur_tender($pur_tender);
+        $tax_html = $taxes_data['html'];
+      
+        echo json_encode([
+            'result' => $pur_tender_detail,
+            'subtotal' => app_format_money(round($subtotal, 2), ''),
+            'total' => app_format_money(round($total, 2), ''),
+            'tax_html' => $tax_html,
+            'taxes' => $taxes,
+            'list_item' => $list_item,
+            'currency' => $to_currency,
+            'currency_rate' => $currency_rate,
+        ]);
     }
 }

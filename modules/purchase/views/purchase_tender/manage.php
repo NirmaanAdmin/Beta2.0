@@ -224,7 +224,7 @@ $module_name = 'purchase_tender';
               _l('Tender Name'),
               _l('department'),
               _l('group_pur'),
-              _l('sub_groups_pur'),
+              // _l('sub_groups_pur'),
               // _l('area_pur'),
               _l('requester'),
               // _l('department'),

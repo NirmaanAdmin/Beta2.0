@@ -6,7 +6,7 @@
 			<div class="panel-body">
 				<h4><?php echo pur_html_entity_decode($title) ?></h4>
 				<hr>
-				<a href="<?php echo site_url('purchase/vendors_portal/add_update_quotation'); ?>" class="btn btn-info"><?php echo _l('add_new'); ?></a>
+				<!-- <a href="<?php echo site_url('purchase/vendors_portal/add_update_quotation'); ?>" class="btn btn-info"><?php echo _l('add_new'); ?></a> -->
 				<br><br>
 				<table class="table dt-table" >
 		            <thead>
@@ -14,7 +14,7 @@
 		                  <th ><?php echo _l('quotations'); ?></th>
 		                  <th ><?php echo _l('estimate_dt_table_heading_amount'); ?></th> 
 		                  <th ><?php echo _l('estimates_total_tax'); ?></th>
-		                  <th ><?php echo _l('purchase_request'); ?></th>
+		                  <th ><?php echo _l('Tender'); ?></th>
 		                  <th ><?php echo _l('estimate_dt_table_heading_date'); ?></th>
 		                  <th ><?php echo _l('estimate_dt_table_heading_expirydate'); ?></th>
 		                  <th ><?php echo _l('approval_status'); ?></th>
@@ -35,9 +35,9 @@
 		            			<td><?php echo pur_html_entity_decode(app_format_money($p['total'], $base_currency->symbol)); ?></td>
 		            			<td><?php echo app_format_money($p['total_tax'], $base_currency->symbol); ?></td>
 		            			<td>
-		            				<?php $pr = $this->purchase_model->get_purchase_request($p['pur_request']) ?>
+		            				<?php $pr = $this->purchase_model->get_purchase_tender($p['pur_tender']) ?>
 		            				<?php if($pr && !is_array($pr)){ ?>
-		            					<a href="<?php echo site_url('purchase/vendors_portal/pur_request/'.$pr->id.'/'.$pr->hash); ?>"><?php echo pur_html_entity_decode($pr->pur_rq_code); ?>
+		            					<a href="<?php echo site_url('purchase/vendors_portal/pur_tender/'.$pr->id.'/'.$pr->hash); ?>"><?php echo pur_html_entity_decode($pr->pur_tn_code); ?>
 		            				<?php } ?>
 		            			</td>
 		            			<td><span class="label label-primary"><?php echo pur_html_entity_decode(_d($p['date'])); ?></span></td>

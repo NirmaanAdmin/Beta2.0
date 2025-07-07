@@ -11681,7 +11681,7 @@ class purchase extends AdminController
         $goods_receipt['pr_order_id'] = $pur_order->id;
         $data['goods_receipt'] = (object) $goods_receipt;
         if (!empty($pur_order_details)) {
-            foreach ($pur_order_details as $key => $detail) { 
+            foreach ($pur_order_details as $key => $detail) {
                 $pur_order_details[$key]['commodity_code'] = $detail['item_code'];
                 $pur_order_details[$key]['po_quantities'] = (float) $detail['quantity'];
                 $pur_order_details[$key]['quantities'] = 0;
@@ -12413,21 +12413,19 @@ class purchase extends AdminController
                         if ($id) {
                             if ($select_invoice == "create_invoice") {
                                 $this->purchase_model->mark_converted_pur_invoice($pur_invoice, $id);
-                                $invoiceid = $this->expenses_model->convert_to_invoice($id); 
+                                $invoiceid = $this->expenses_model->convert_to_invoice($id);
                                 set_alert('success', _l('vendor_bills_converted_to_ril_invoices'));
                             } elseif ($select_invoice == "applied_invoice") {
                                 $this->purchase_model->mark_converted_pur_invoice($pur_invoice, $id);
                                 $applied = array();
                                 $applied['invoice_id'] = $applied_to_invoice;
                                 $applied['expense_id'] = $id;
-                                $invoiceid = $this->expenses_model->applied_to_invoice($applied); 
+                                $invoiceid = $this->expenses_model->applied_to_invoice($applied);
                                 set_alert('success', _l('vendor_bills_converted_to_ril_invoices'));
                             }
                         }
                     }
                 }
-
-                
             }
             if ($bulk_active_tab == 'bulk_assign') {
                 if (!empty($neworderitems)) {
@@ -13934,7 +13932,7 @@ class purchase extends AdminController
         $data['budget_head'] = $this->purchase_model->get_commodity_group_add_commodity();
         $data['rli_filters'] = $this->purchase_model->get_all_rli_filters();
 
-        $this->load->view('unawarded_tracker/manage', $data); 
+        $this->load->view('unawarded_tracker/manage', $data);
     }
 
     public function import_file_xlsx_unawared_tracker_items()
@@ -15038,23 +15036,23 @@ class purchase extends AdminController
         if (!$data['pur_tender']) {
             show_404();
         }
-
+        
         $data['pur_tender_detail'] = $this->purchase_model->get_pur_tender_detail($id);
         $data['title'] = $data['pur_tender']->pur_tn_name;
         $data['departments'] = $this->departments_model->get();
         $data['units'] = $this->purchase_model->get_units();
         $data['items'] = $this->purchase_model->get_items();
-        $data['taxes_data'] = $this->purchase_model->get_html_tax_pur_request($id);
+        $data['taxes_data'] = $this->purchase_model->get_html_tax_pur_tender($id);
         $data['base_currency'] = $this->currencies_model->get_base_currency();
         $data['check_appr'] = $this->purchase_model->get_approve_setting('pur_tender');
         $data['get_staff_sign'] = $this->purchase_model->get_staff_sign($id, 'pur_tender');
         $data['check_approve_status'] = $this->purchase_model->check_approval_details($id, 'pur_tender');
         $data['list_approve_status'] = $this->purchase_model->get_list_approval_details($id, 'pur_tender');
         $data['taxes'] = $this->purchase_model->get_taxes();
-        $data['pur_request_attachments'] = $this->purchase_model->get_purchase_request_attachments($id);
+        $data['pur_tender_attachments'] = $this->purchase_model->get_purchase_tender_attachments($id);
         $data['check_approval_setting'] = $this->purchase_model->check_approval_setting($data['pur_request']->project, 'pur_request', 0);
         $data['attachments'] = $this->purchase_model->get_purchase_attachments('pur_tender', $id);
-        $data['pur_request'] = $this->purchase_model->get_purchase_request($id);
+        $data['pur_tender'] = $this->purchase_model->get_purchase_tender($id);
         $data['commodity_groups_request'] = $this->purchase_model->get_commodity_group_add_commodity();
         $data['sub_groups_request'] = $this->purchase_model->get_sub_group();
         $data['area_request'] = $this->purchase_model->get_area();
@@ -15084,7 +15082,7 @@ class purchase extends AdminController
         } else {
             if ($this->input->post()) {
                 $edit_data = $this->input->post();
-                
+
                 $success = $this->purchase_model->update_pur_tender($edit_data, $id);
                 if ($success == true) {
                     set_alert('success', _l('updated_pur_request'));
@@ -15175,5 +15173,18 @@ class purchase extends AdminController
             set_alert('warning', _l('problem_deleting', _l('Tender')));
         }
         redirect(admin_url('purchase/purchase_tender'));
+    }
+
+
+    public function compare_quote_pur_tender($pur_tender)
+    {
+        if ($this->input->post()) {
+            $data = $this->input->post();
+            $success = $this->purchase_model->update_compare_quote_tender($pur_tender, $data);
+            if ($success) {
+                set_alert('success', _l('updated_successfully'));
+            }
+            redirect(admin_url('purchase/view_pur_tender/' . $pur_tender));
+        }
     }
 }

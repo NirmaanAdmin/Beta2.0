@@ -16,7 +16,7 @@ $aColumns = [
     'pur_tn_name',
     db_prefix() . 'departments.name as department_name',
     db_prefix() . 'items_groups.name',
-    'sub_group_name',
+    // 'sub_group_name',
     // 'area_name',
     'requester',
     // 'department', 

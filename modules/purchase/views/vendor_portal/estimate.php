@@ -4,6 +4,7 @@
     overflow-x: visible !important;
     scrollbar-width: none !important;
   }
+
   .area .dropdown-menu .open {
     width: max-content !important;
   }
@@ -28,7 +29,7 @@
           <div class="panel-body">
             <?php $additional_discount = 0; ?>
             <input type="hidden" name="additional_discount" value="<?php echo pur_html_entity_decode($additional_discount); ?>">
-
+            <input type="hidden" name="pur_tender" value="<?php echo pur_html_entity_decode($pur_tender[0]['id']); ?>">
             <div class="horizontal-scrollable-tabs preview-tabs-top">
               <div class="horizontal-tabs">
                 <ul class="nav nav-tabs nav-tabs-horizontal mbot15" role="tablist">
@@ -40,10 +41,12 @@
                     </a>
                   </li>
 
-                  <li role="presentation" class="<?php if($this->input->get('tab') === 'attachment'){echo 'active';} ?>">
-                     <a href="#attachment" aria-controls="attachment" role="tab" data-toggle="tab">
-                     <?php echo _l('pur_attachment'); ?>
-                     </a>
+                  <li role="presentation" class="<?php if ($this->input->get('tab') === 'attachment') {
+                                                    echo 'active';
+                                                  } ?>">
+                    <a href="#attachment" aria-controls="attachment" role="tab" data-toggle="tab">
+                      <?php echo _l('pur_attachment'); ?>
+                    </a>
                   </li>
 
                   <?php if ($view == 1) { ?>
@@ -153,58 +156,20 @@
                     </div>
 
                     <div class="col-md-12">
-                      <label for="pur_request"><?php echo _l('pur_request'); ?></label>
-                      <select name="pur_request" id="pur_request" onchange="coppy_pur_request(); return false;" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
+                      <label for="pur_tender"><?php echo _l('Purchase Tender'); ?></label>
+                      <select name="pur_tender" id="pur_tender" onchange="coppy_pur_tender(); return false;" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>" disabled>
                         <option value=""></option>
-                        <?php foreach ($pur_request as $s) { ?>
-                          <option value="<?php echo pur_html_entity_decode($s['id']); ?>" <?php if (isset($estimate) && $estimate->pur_request != '' && $estimate->pur_request->id == $s['id']) {
+                        <?php foreach ($pur_tender as $s) { ?>
+                          <option value="<?php echo pur_html_entity_decode($s['id']); ?>" <?php if (isset($estimate) && $estimate->pur_tender != '' && $estimate->pur_tender->id == $s['id']) {
                                                                                             echo 'selected';
-                                                                                          } ?>><?php echo pur_html_entity_decode($s['pur_rq_code'] . ' - ' . $s['pur_rq_name']); ?></option>
+                                                                                          } ?> selected><?php echo pur_html_entity_decode($s['pur_tn_code'] . ' - ' . $s['pur_tn_name']); ?></option>
                         <?php } ?>
                       </select>
                     </div>
-                   
-                    <div class="clearfix mbot15"></div> 
-                      <div class="col-md-6">
 
-                        <?php
-                        $selected = '';
-                        // foreach ($commodity_groups_pur as $group) {
-                        //   if (isset($estimate)) {
-                        //     if ($estimate->group_pur == $group['id']) {
-                        //       $selected = $group['id'];
-                        //     }
-                        //   }
-                        //   if (isset($selected_head)) {
-                        //     if ($selected_head == $group['id']) {
-                        //       $selected = $group['id'];
-                        //     }
-                        //   }
-                        // }
-                        echo render_select('group_pur', $commodity_groups_pur, array('id', 'name'), 'Budget Head', $selected);
-                        ?>
-                      </div>
-                      <div class="col-md-6 ">
+                    <div class="clearfix mbot15"></div>
 
-                        <?php
 
-                        $selected = '';
-                        // foreach ($sub_groups_pur as $sub_group) {
-                        //   if (isset($estimate)) {
-                        //     if ($estimate->sub_groups_pur == $sub_group['id']) {
-                        //       $selected = $sub_group['id'];
-                        //     }
-                        //   }
-                        //   if (isset($selected_sub_head)) {
-                        //     if ($selected_sub_head == $sub_group['id']) {
-                        //       $selected = $sub_group['id'];
-                        //     }
-                        //   }
-                        // }
-                        echo render_select('sub_groups_pur', $sub_groups_pur, array('id', 'sub_group_name'), 'Budget Sub Head', $selected);
-                        ?>
-                      </div>
-                    
 
                     <div class="clearfix mbot15"></div>
 
@@ -234,19 +199,7 @@
                   </div>
                   <div class="col-md-6">
                     <div class="row">
-                      <div class="col-md-12 form-group">
 
-
-                        <label for="buyer" class="control-label"><?php echo _l('buyer'); ?></label>
-                        <select name="buyer" class="selectpicker" id="buyer" data-width="100%" data-live-search="true" data-none-selected-text="<?php echo _l('dropdown_non_selected_tex'); ?>">
-                          <option value=""></option>
-                          <?php foreach ($staff as $st) { ?>
-                            <option value="<?php echo pur_html_entity_decode($st['staff_id']); ?>" <?php if (isset($estimate) && $estimate->buyer == $st['staff_id']) {
-                                                                                                      echo 'selected';
-                                                                                                    } ?>><?php echo get_staff_full_name($st['staff_id']); ?></option>
-                          <?php } ?>
-                        </select>
-                      </div>
 
                       <div class="col-md-6">
                         <?php
@@ -284,16 +237,48 @@
                           </select>
                         </div>
                       </div>
-                      
+                      <div class="col-md-6">
+
+                        <?php
+                        $selected = '';
+                        if (isset($estimate) && $estimate->group_pur != '') {
+                          foreach ($commodity_groups_pur as $group) {
+                            if (isset($estimate)) {
+                              if ($estimate->group_pur == $group['id']) {
+                                $selected = $group['id'];
+                              }
+                            }
+                            if (isset($selected_head)) {
+                              if ($selected_head == $group['id']) {
+                                $selected = $group['id'];
+                              }
+                            }
+                          }
+                        } else {
+                          // echo '<pre>'; print_r($pur_tender);
+                          foreach ($commodity_groups_pur as $group) {
+                            if (isset($pur_tender)) {
+
+                              if ($pur_tender[0]['group_pur'] == $group['id']) {
+                                $selected = $group['id'];
+                              }
+                            }
+                          }
+                          // die;
+                        }
+
+                        echo render_select('group_pur', $commodity_groups_pur, array('id', 'name'), 'Budget Head', $selected, ['disabled' => true]);
+                        ?>
+                      </div>
                       <div class="col-md-6">
                         <?php
                         $total = '';
-                        if(isset($pur_request_total)) {
-                          $total = $pur_request_total;
+                        if (isset($pur_tender_total)) {
+                          $total = $pur_tender_total;
                         } else {
                           $total = isset($estimate) ? $estimate->total : '';
                         }
-                        echo render_input('total','Quote Value ( ₹ )', $total, 'number', array(), array(), '','');
+                        echo render_input('total', 'Quote Value ( ₹ )', $total, 'number', array(), array(), '', '');
                         ?>
                       </div>
 
@@ -345,42 +330,41 @@
                 </div>
               <?php } ?>
 
-              <div role="tabpanel" class="tab-pane <?php if($this->input->get('tab') === 'attachment'){echo ' active';} ?>" id="attachment">
-                    <div class="col-md-12">
-                    <?php
-                    if (isset($pur_request_attachments) && count($pur_request_attachments) > 0) {
-                      foreach ($pur_request_attachments as $value) {
-                        echo '<div class="col-md-3">';
-                        $path = get_upload_path_by_type('purchase') . 'pur_request/' . $value['rel_id'] . '/' . $value['file_name'];
-                        $is_image = is_image($path);
-                        if ($is_image) {
-                          echo '<div class="preview_image">';
-                        }
-                    ?>
-                        <a href="<?php echo site_url('download/file/purchase/' . $value['id']); ?>" class="display-block mbot5" <?php if ($is_image) { ?> data-lightbox="attachment-purchase-<?php echo $value['rel_id']; ?>" <?php } ?>>
-                          <i class="<?php echo get_mime_class($value['filetype']); ?>"></i> <?php echo $value['file_name']; ?>
-                          <?php if ($is_image) { ?>
-                            <img class="mtop5" src="<?php echo site_url('download/preview_image?path=' . protected_file_url_by_path($path) . '&type=' . $value['filetype']); ?>" style="height: 165px;">
-                          <?php } ?>
-                        </a>
-                        <?php if ($is_image) {
-                          echo '</div>';
-                          // echo '<a href="' . admin_url('purchase/delete_attachment/' . $value['id']) . '" class="text-danger _delete">' . _l('delete') . '</a>';
-                        } ?>
-                    <?php echo '</div>';
+              <div role="tabpanel" class="tab-pane <?php if ($this->input->get('tab') === 'attachment') {
+                                                      echo ' active';
+                                                    } ?>" id="attachment">
+                <div class="col-md-12">
+                  <?php
+                  if (isset($pur_tender_attachments) && count($pur_tender_attachments) > 0) {
+                    foreach ($pur_tender_attachments as $value) {
+                      echo '<div class="col-md-3">';
+                      $path = get_upload_path_by_type('purchase') . 'pur_tender/' . $value['rel_id'] . '/' . $value['file_name'];
+                      $is_image = is_image($path);
+                      if ($is_image) {
+                        echo '<div class="preview_image">';
                       }
-                    } ?>
-                  </div>
+                  ?>
+                      <a href="<?php echo site_url('download/file/purchase/' . $value['id']); ?>" class="display-block mbot5" <?php if ($is_image) { ?> data-lightbox="attachment-purchase-<?php echo $value['rel_id']; ?>" <?php } ?>>
+                        <i class="<?php echo get_mime_class($value['filetype']); ?>"></i> <?php echo $value['file_name']; ?>
+                        <?php if ($is_image) { ?>
+                          <img class="mtop5" src="<?php echo site_url('download/preview_image?path=' . protected_file_url_by_path($path) . '&type=' . $value['filetype']); ?>" style="height: 165px;">
+                        <?php } ?>
+                      </a>
+                      <?php if ($is_image) {
+                        echo '</div>';
+                        // echo '<a href="' . admin_url('purchase/delete_attachment/' . $value['id']) . '" class="text-danger _delete">' . _l('delete') . '</a>';
+                      } ?>
+                  <?php echo '</div>';
+                    }
+                  } ?>
+                </div>
               </div>
             </div>
           </div>
 
-          
+
           <div class="panel-body mtop10 invoice-item">
             <div class="row">
-              <div class="col-md-4" data-toggle="tooltip" data-placement="top" title="<?php echo _l('vendor_item_select_note'); ?>">
-                <?php $this->load->view('purchase/item_include/main_item_select'); ?>
-              </div>
 
 
               <?php
@@ -435,7 +419,6 @@
                         <th align="right"><?php echo _l('tax_value'); ?><span class="th_currency"><?php echo '(' . $estimate_currency->name . ')'; ?></span></th>
                         <th align="right"><?php echo _l('pur_subtotal_after_tax'); ?><span class="th_currency"><?php echo '(' . $estimate_currency->name . ')'; ?></span></th>
                         <th align="right"><?php echo _l('total'); ?><span class="th_currency"><?php echo '(' . $estimate_currency->name . ')'; ?></span></th>
-                        <th align="center"><i class="fa fa-cog"></i></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -453,7 +436,7 @@
                         <td class="wh-subtotal">
                         </td>
                       </tr>
-                      <tr id="total_discount">
+                      <tr id="total_discount" class="hide">
                         <td><span class="bold"><?php echo _l('total_discount'); ?> :</span>
                           <?php echo form_hidden('dc_total', ''); ?>
                         </td>
@@ -461,7 +444,7 @@
                         </td>
                       </tr>
 
-                      <tr>
+                      <tr class="hide">
                         <td>
                           <div class="row">
                             <div class="col-md-9">
@@ -501,10 +484,10 @@
                 <?php $value = (isset($estimate) ? $estimate->vendornote : get_purchase_option('vendor_note')); ?>
                 <?php echo render_textarea('vendornote', 'estimate_add_edit_vendor_note', $value, array(), array(), 'mtop15'); ?>
               </div>
-              <div class="col-md-12 pad_left_0 pad_right_0">
+              <!-- <div class="col-md-12 pad_left_0 pad_right_0">
                 <?php $value = (isset($estimate) ? $estimate->terms : get_purchase_option('terms_and_conditions')); ?>
                 <?php echo render_textarea('terms', 'terms_and_conditions', $value, array(), array(), 'mtop15', 'tinymce'); ?>
-              </div>
+              </div> -->
 
               <div class=" text-right">
 
@@ -533,4 +516,5 @@
 </body>
 
 </html>
+
 <?php require 'modules/purchase/assets/js/estimate_vendor_js.php'; ?>

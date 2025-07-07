@@ -1392,7 +1392,7 @@ class Purchase_model extends App_Model
                 foreach ($detail_data as $key => $rqd) {
                     $dt_data = [];
                     $dt_data['pur_request'] = $insert_id;
-                    $dt_data['item_code'] = $rqd['item_text'];
+                    $dt_data['item_code'] = $rqd['item_code'];
                     $dt_data['description'] = nl2br($rqd['item_description']);
                     $dt_data['area'] = !empty($rqd['area']) ? implode(',', $rqd['area']) : NULL;
                     $dt_data['unit_id'] = isset($rqd['unit_id']) ? $rqd['unit_id'] : null;
@@ -11736,7 +11736,7 @@ class Purchase_model extends App_Model
      *
      * @return     string
      */
-    public function create_quotation_row_template($name = '', $item_name = '', $area = '', $image = '', $quantity = '', $unit_name = '', $unit_price = '', $taxname = '',  $item_code = '', $unit_id = '', $tax_rate = '', $total_money = '', $discount = '', $discount_money = '', $total = '', $into_money = '', $tax_id = '', $tax_value = '', $item_key = '', $is_edit = false, $currency_rate = 1, $to_currency = '', $quote_detail = array())
+    public function create_quotation_row_template($name = '', $item_name = '', $area = '', $image = '', $quantity = '', $unit_name = '', $unit_price = '', $taxname = '',  $item_code = '', $unit_id = '', $tax_rate = '', $total_money = '', $discount = '', $discount_money = '', $total = '', $into_money = '', $tax_id = '', $tax_value = '', $item_key = '', $is_edit = false, $currency_rate = 1, $to_currency = '', $quote_detail = [])
     {
 
         $this->load->model('invoice_items_model');
@@ -11843,16 +11843,15 @@ class Purchase_model extends App_Model
             $sub_total = (float)$unit_price * (float)$quantity;
             $amount = app_format_number($amount);
         }
-
         $full_item_image = '';
         if (!empty($image)) {
-            $item_base_url = base_url('uploads/purchase/pur_quotation/' . $quote_detail['pur_estimate'] . '/' . $quote_detail['id'] . '/' . $quote_detail['image']);
-            $full_item_image = '<img class="images_w_table" src="' . $item_base_url . '" alt="' . $image . '" >';
+            $item_base_url = base_url('uploads/purchase/pur_tender/' . $quote_detail['pur_tender'] . '/' . $quote_detail['tender_id'] . '/' . $quote_detail['image']);
+            $full_item_image = '<img class="images_w_table" width="100" src="' . $item_base_url . '" alt="' . $image . '" >';
         }
 
         $row .= '<td class="">' . render_textarea($name_item_name, '', $item_name, ['rows' => 2, 'placeholder' => 'Product code name', 'readonly' => true]) . '</td>';
-        $row .= '<td class="area">' . get_area_list($name_area, $area) . '</td>';
-        $row .= '<td class=""><input type="file" extension="' . str_replace(['.', ' '], '', '.png,.jpg,.jpeg') . '" filesize="' . file_upload_max_size() . '" class="form-control" name="' . $name_image . '" accept="' . get_item_form_accepted_mimes() . '">' . $full_item_image . '</td>';
+        $row .= '<td class="area">' . get_vendor_area_list($name_area, $area) . '</td>';
+        $row .= '<td class="">' . $full_item_image . '</td>';
 
         $row .= '<td class="rate">' . render_input($name_unit_price, '', $unit_price, 'number', $array_rate_attr, [], 'no-margin', $text_right_class);
         if ($unit_price != '') {
@@ -11896,11 +11895,7 @@ class Purchase_model extends App_Model
         $row .= '<td class="hide total_after_discount">' . render_input($name_total_money, '', $total_money, 'number', []) . '</td>';
         $row .= '<td class="hide _into_money">' . render_input($name_into_money, '', $into_money, 'number', []) . '</td>';
 
-        if ($name == '') {
-            $row .= '<td><button type="button" onclick="pur_add_item_to_table(\'undefined\',\'undefined\'); return false;" class="btn pull-right btn-info"><i class="fa fa-check"></i></button></td>';
-        } else {
-            $row .= '<td><a href="#" class="btn btn-danger pull-right" onclick="pur_delete_item(this,' . $item_key . ',\'.invoice-item\'); return false;"><i class="fa fa-trash"></i></a></td>';
-        }
+
         $row .= '</tr>';
         return $row;
     }
@@ -16467,7 +16462,7 @@ class Purchase_model extends App_Model
 
             $total = [];
             $total['total_tax'] = 0;
-            
+
             if (count($order_detail) > 0) {
                 foreach ($order_detail as $key => $rqd) {
                     $dt_data = [];
@@ -22556,6 +22551,159 @@ class Purchase_model extends App_Model
         }
 
         if ($affectedRows > 0) {
+            return true;
+        }
+        return false;
+    }
+
+    public function get_purchase_tender_by_vendor($vendorid)
+    {
+        $this->db->where('find_in_set(' . $vendorid . ', send_to_vendors)');
+        // $this->db->where('status', 2);
+        return $this->db->get(db_prefix() . 'pur_tender')->result_array();
+    }
+
+    public function get_pur_tender_detail_in_estimate($pur_tender)
+    {
+        $this->db->select('
+        item_code, 
+        prq.unit_id as unit_id, 
+        unit_price, 
+        quantity, 
+        into_money, 
+        prq.description as description, 
+        prq.tax as tax, 
+        tax_name, 
+        tax_rate, 
+        item_text, 
+        tax_value, 
+        total as total_money, 
+        total as total, 
+        prq.area,
+        prq.image,
+        prq.tn_id as tender_id, 
+        prq.pur_tender
+    ');
+
+        $this->db->from(db_prefix() . 'pur_tender_detail prq');
+        $this->db->join(db_prefix() . 'items it', 'prq.item_code = it.id', 'left');
+        $this->db->where('prq.pur_tender', $pur_tender);
+
+        $pur_tender_lst = $this->db->get()->result_array();
+
+        foreach ($pur_tender_lst as &$detail) {
+            $detail['into_money'] = (float) $detail['into_money'];
+            $detail['total'] = (float) $detail['total'];
+            $detail['total_money'] = (float) $detail['total_money'];
+            $detail['unit_price'] = (float) $detail['unit_price'];
+            $detail['tax_value'] = (float) $detail['tax_value'];
+        }
+
+        return $pur_tender_lst;
+    }
+
+
+    public function get_html_tax_pur_tender($id)
+    {
+        $html = '';
+        $preview_html = '';
+        $pdf_html = '';
+        $taxes = [];
+        $t_rate = [];
+        $tax_val = [];
+        $tax_val_rs = [];
+        $tax_name = [];
+        $rs = [];
+
+        $request = $this->get_purchase_tender($id);
+
+        $this->load->model('currencies_model');
+        $base_currency = $this->currencies_model->get_base_currency();
+        if ($request->currency != 0 && $request->currency != null) {
+            $base_currency = pur_get_currency_by_id($request->currency);
+        }
+
+        $this->db->where('pur_tender', $id);
+        $details = $this->db->get(db_prefix() . 'pur_tender_detail')->result_array();
+        foreach ($details as $row) {
+            if ($row['tax'] != '') {
+                $tax_arr = explode('|', $row['tax']);
+
+                $tax_rate_arr = [];
+                if ($row['tax_rate'] != '') {
+                    $tax_rate_arr = explode('|', $row['tax_rate']);
+                }
+
+                foreach ($tax_arr as $k => $tax_it) {
+                    if (!isset($tax_rate_arr[$k])) {
+                        $tax_rate_arr[$k] = $this->tax_rate_by_id($tax_it);
+                    }
+
+                    if (!in_array($tax_it, $taxes)) {
+                        $taxes[$tax_it] = $tax_it;
+                        $t_rate[$tax_it] = $tax_rate_arr[$k];
+                        $tax_name[$tax_it] = $this->get_tax_name($tax_it) . ' (' . $tax_rate_arr[$k] . '%)';
+                    }
+                }
+            }
+        }
+
+        if (count($tax_name) > 0) {
+            foreach ($tax_name as $key => $tn) {
+                $tax_val[$key] = 0;
+                foreach ($details as $row_dt) {
+                    if (!(strpos($row_dt['tax'] ?? '', $taxes[$key]) === false)) {
+                        $tax_val[$key] += ($row_dt['into_money'] * $t_rate[$key] / 100);
+                    }
+                }
+                $pdf_html .= '<tr id="subtotal"><td width="33%"></td><td>' . $tn . '</td><td>' . app_format_money($tax_val[$key], $base_currency->symbol) . '</td></tr>';
+                $preview_html .= '<tr id="subtotal"><td>' . $tn . '</td><td>' . app_format_money($tax_val[$key], $base_currency->symbol) . '</td><tr>';
+                $html .= '<tr class="tax-area_pr"><td>' . $tn . '</td><td width="65%">' . app_format_money($tax_val[$key], '') . ' ' . ($base_currency->symbol) . '</td></tr>';
+                $tax_val_rs[] = $tax_val[$key];
+            }
+        }
+
+        $rs['pdf_html'] = $pdf_html;
+        $rs['preview_html'] = $preview_html;
+        $rs['html'] = $html;
+        $rs['taxes'] = $taxes;
+        $rs['taxes_val'] = $tax_val_rs;
+        return $rs;
+    }
+
+    public function get_purchase_tender_attachments($id)
+    {
+
+        $this->db->where('rel_id', $id);
+        $this->db->where('rel_type', 'pur_tender');
+        return $this->db->get(db_prefix() . 'files')->result_array();
+    }
+
+
+     public function update_compare_quote_tender($pur_tender, $data)
+    {
+        if (!$pur_tender) {
+            return false;
+        }
+
+        $affected_rows = 0;
+        $this->db->where('id', $pur_tender);
+        $this->db->update(db_prefix() . 'pur_tender', ['compare_note' => $data['compare_note']]);
+        if ($this->db->affected_rows() > 0) {
+            $affected_rows++;
+        }
+
+        if (count($data['mark_a_contract']) > 0) {
+            foreach ($data['mark_a_contract'] as $key => $mark) {
+                $this->db->where('id', $key);
+                $this->db->update(db_prefix() . 'pur_estimates', ['make_a_contract' => $mark]);
+                if ($this->db->affected_rows() > 0) {
+                    $affected_rows++;
+                }
+            }
+        }
+
+        if ($affected_rows > 0) {
             return true;
         }
         return false;

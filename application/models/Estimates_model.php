@@ -3001,6 +3001,7 @@ class Estimates_model extends App_Model
                 'group_pur' => $budget_head,
                 'project' => $get_est_data->project_id,
                 'request_date' => date('Y-m-d H:i:s'),
+                'hash' => app_generate_hash(),
             ]);
             $tender_id = $this->db->insert_id();
             if (isset($tender_id)) {
@@ -3025,6 +3026,7 @@ class Estimates_model extends App_Model
                         'remarks' => $value['remarks'],
                         'description' => $desc,
                         'sub_head' => $sub,
+                        
                     ]);
                 }
             }
@@ -3063,6 +3065,7 @@ class Estimates_model extends App_Model
                         'remarks' => $value['remarks'],
                         'description' => $value['long_description'],
                         'sub_head' => $value['sub_head'] ?? '', // Assuming sub_head is
+                        'hash' => app_generate_hash(),
                     ]);
                 }
             }

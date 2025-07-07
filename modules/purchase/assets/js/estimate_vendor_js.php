@@ -772,4 +772,37 @@ function clear_item_preview_values(default_taxes) {
     $('input[name="task_id"]').val('');
     $('input[name="expense_id"]').val('');
 }
+$(document).ready(function() {
+    coppy_pur_tender();
+});
+function coppy_pur_tender(){
+  "use strict";
+  var pur_tender = $('select[name="pur_tender"]').val();
+  if(pur_tender != ''){
+     
+    $.post(site_url + 'purchase/vendors_portal/coppy_pur_tender/'+pur_tender).done(function(response){
+        response = JSON.parse(response);
+        if(response){
+          $('select[name="currency"]').val(response.currency).change();
+          $('input[name="currency_rate"]').val(response.currency_rate).change();
+
+          $('.invoice-item table.invoice-items-table.items tbody').html('');
+          $('.invoice-item table.invoice-items-table.items tbody').append(response.list_item);
+
+          setTimeout(function () {
+            pur_calculate_total();
+          }, 15);
+
+          init_selectpicker();
+          pur_reorder_items('.invoice-item');
+          pur_clear_item_preview_values('.invoice-item');
+          $('body').find('#items-warning').remove();
+          $("body").find('.dt-loader').remove();
+          $('#item_select').selectpicker('val', '');
+        }
+    });
+  }else{
+    alert_float('warning', '<?php echo _l('please_chose_pur_request'); ?>')
+  }
+}
 </script>

@@ -30,11 +30,19 @@
                   </a>
                </li>
                
-               <li class="customers-nav-item-items">
+               <!-- <li class="customers-nav-item-items">
                   <a href="<?php echo site_url('purchase/vendors_portal/purchase_request'); ?>">
                      <?php
                      
                      echo _l('purchase_request');
+                    ?>
+                  </a>
+               </li> -->
+               <li class="customers-nav-item-items">
+                  <a href="<?php echo site_url('purchase/vendors_portal/purchase_tender'); ?>">
+                     <?php
+                     
+                     echo _l('Tenders');
                     ?>
                   </a>
                </li>

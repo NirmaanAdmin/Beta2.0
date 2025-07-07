@@ -1308,6 +1308,21 @@ function check_pur_request_restrictions($id, $hash)
     }
 }
 
+function check_pur_tender_restrictions($id, $hash)
+{
+    $CI = &get_instance();
+    $CI->load->model('purchase/purchase_model');
+
+    if (!$hash || !$id) {
+        show_404();
+    }
+
+
+    $pur_tender = $CI->purchase_model->get_purchase_tender($id);
+    if (!$pur_tender || ($pur_tender->hash != $hash)) {
+        show_404();
+    }
+}
 
 function get_pur_order_by_client($client)
 {
@@ -4523,4 +4538,45 @@ function get_vbt_payment_status($id = '')
         return $index !== false ? $payment_statuses[$index]['name'] : null;
     }
     return '';
+}
+
+function get_vendor_area_list($name_area, $area)
+{
+    $CI = &get_instance();
+    $CI->load->model('purchase_model');
+    $get_area = $CI->purchase_model->get_area();
+    $selected = !empty($area) ? $area : array();
+    if (!is_array($selected)) {
+        $selected = explode(",", $selected);
+    }
+    return render_select($name_area, $get_area, array('id', 'area_name'), '', $selected, ['multiple' => true, 'disabled' => true], array('id' => 'project_area'), '', '', false);
+}
+
+function get_quotations_by_pur_tender($pur_tender)
+{
+    $CI           = &get_instance();
+
+    $CI->db->where('pur_tender', $pur_tender);
+    $quotes = $CI->db->get(db_prefix() . 'pur_estimates')->result_array();
+    return $quotes;
+}
+
+function get_arr_vendors_by_tender($pur_tender)
+{
+    $CI           = &get_instance();
+    $CI->load->model('purchase/purchase_model');
+
+    $CI->db->where('pur_tender', $pur_tender);
+    $quotes = $CI->db->get(db_prefix() . 'pur_estimates')->result_array();
+    $arr_vendor = [];
+    $arr_vendor_rs = [];
+    if (count($quotes) > 0) {
+        foreach ($quotes as $quote) {
+            if (!in_array($quote['vendor'], $arr_vendor)) {
+                $arr_vendor[] = $quote['vendor'];
+                $arr_vendor_rs[] = $CI->purchase_model->get_vendor($quote['vendor']);
+            }
+        }
+    }
+    return $arr_vendor_rs;
 }

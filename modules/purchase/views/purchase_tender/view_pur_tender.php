@@ -7,7 +7,10 @@
       <div class="col-md-12">
         <div class="panel_s">
           <div class="panel-body">
-            <?php $csrf = array(
+            <?php
+
+
+            $csrf = array(
               'name' => $this->security->get_csrf_token_name(),
               'hash' => $this->security->get_csrf_hash(),
             );
@@ -34,6 +37,7 @@
                 <div class="scroller arrow-left"><i class="fa fa-angle-left"></i></div>
                 <div class="scroller arrow-right"><i class="fa fa-angle-right"></i></div>
                 <div class="horizontal-tabs">
+
                   <ul class="nav nav-tabs nav-tabs-horizontal mbot15" role="tablist">
                     <li role="presentation" class="<?php if ($this->input->get('tab') != 'attachment') {
                                                       echo 'active';
@@ -64,7 +68,7 @@
                       </a>
                     </li>
 
-                    <?php $quotations = get_quotations_by_pur_request($pur_tender->id); ?>
+                    <?php $quotations = get_quotations_by_pur_tender($pur_tender->id); ?>
                     <li role="presentation" class="">
                       <a href="#compare_quotes" aria-controls="compare_quotes" role="tab" data-toggle="tab">
                         <?php echo _l('compare_quotes') . '(' . count($quotations) . ')'; ?>
@@ -76,6 +80,7 @@
                   </ul>
                 </div>
               </div>
+
               <div class="tab-content">
                 <div role="tabpanel" class="tab-pane ptop10 active" id="information">
 
@@ -223,7 +228,7 @@
                               </div>
                               <div class="col-md-9">
                                 <?php if ($pur_tender->hash != '' && $pur_tender->hash != null) {
-                                  echo render_input('link_public', '', site_url('purchase/vendors_portal/pur_request/' . $pur_tender->id . '/' . $pur_tender->hash));
+                                  echo render_input('link_public', '', site_url('purchase/vendors_portal/pur_tender/' . $pur_tender->id . '/' . $pur_tender->hash));
                                 } else {
                                   echo render_input('link_public', '', '');
                                 } ?>
@@ -263,7 +268,7 @@
                           <div id="settings-dropdown" style="display: none; position: absolute; background: #fff; border: 1px solid #ccc; padding: 10px; width: 130px;">
                             <label><input type="checkbox" class="column-toggle" data-column="1" checked style="width: 20px;"> <?php echo _l('Uniclass Code'); ?></label><br>
                             <label><input type="checkbox" class="column-toggle" data-column="2" checked style="width: 20px;"> <?php echo _l('decription'); ?></label><br>
-                             <label><input type="checkbox" class="column-toggle" data-column="2" checked style="width: 20px;"> <?php echo _l('Sub Head'); ?></label><br>
+                            <label><input type="checkbox" class="column-toggle" data-column="2" checked style="width: 20px;"> <?php echo _l('Sub Head'); ?></label><br>
                             <label><input type="checkbox" class="column-toggle" data-column="3" checked style="width: 20px;"> <?php echo _l('area'); ?></label><br>
                             <label><input type="checkbox" class="column-toggle" data-column="4" checked style="width: 20px;"> <?php echo _l('Image'); ?></label><br>
                             <label><input type="checkbox" class="column-toggle" data-column="5" checked style="width: 20px;"> <?php echo _l('purchase_quantity'); ?></label><br>
@@ -327,7 +332,7 @@
                                   <?php
                                   if (!empty($es['image'])) {
                                     $img_url = base_url('uploads/purchase/pur_tender/' . $es['pur_tender'] . '/' . $es['tn_id'] . '/' . $es['image']);
-                                    echo '<img class="images_w_table" src="' . $img_url . '" alt="' . $es['image'] . '">';
+                                    echo '<img class="images_w_table" width="100" src="' . $img_url . '" alt="' . $es['image'] . '">';
                                   }
                                   ?>
                                 </td>
@@ -619,7 +624,7 @@
                 </div>
 
                 <div role="tabpanel" class="tab-pane ptop10 " id="compare_quotes">
-                  <?php if (total_rows(db_prefix() . 'pur_estimates', ['pur_request' => $pur_tender->id]) > 0) { ?>
+                  <?php if (total_rows(db_prefix() . 'pur_estimates', ['pur_tender' => $pur_tender->id]) > 0) { ?>
 
                     <!-- <div class="btn-group pull-right mright5" data-toggle="tooltip" title="<?php echo _l('compare_quotation_tooltip'); ?>">
                       <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-file-pdf"></i><span class="caret"></span></a>
@@ -634,8 +639,8 @@
                       <table class="table border table-striped martop0">
                         <tbody>
                           <tr class="project-overview">
-                            <td class="bold" width="30%">PR Code</td>
-                            <td><?php echo pur_html_entity_decode($pur_tender->pur_rq_code); ?><div class="btn-group  mright5" style="margin-left: 10px;" data-toggle="tooltip" title="" data-original-title="Preview/Download compare quotation pdf">
+                            <td class="bold" width="30%">Tender Code</td>
+                            <td><?php echo pur_html_entity_decode($pur_tender->pur_tn_code); ?><div class="btn-group  mright5" style="margin-left: 10px;" data-toggle="tooltip" title="" data-original-title="Preview/Download compare quotation pdf">
                                 <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                   <i class="fa fa-file-pdf"></i><span class="caret"></span>
                                 </a>
@@ -660,8 +665,8 @@
                             </td>
                           </tr>
                           <tr class="project-overview">
-                            <td class="bold">PR Name</td>
-                            <td><?php echo _l($pur_tender->pur_rq_name); ?></td>
+                            <td class="bold">Tender Name</td>
+                            <td><?php echo _l($pur_tender->pur_tn_name); ?></td>
                           </tr>
                           <tr class="project-overview">
                             <td class="bold"><?php echo _l('purchase_requestor'); ?></td>
@@ -675,7 +680,7 @@
 
                           <tr class="project-overview">
                             <td class="bold"><?php echo _l('request_date'); ?></td>
-                            <td><?php echo _dt($pur_tender->request_date); ?></td>
+                            <td><?php echo date('d M, Y H:i A', strtoTime($pur_tender->request_date)); ?></td>
                           </tr>
                         </tbody>
                       </table>
@@ -687,31 +692,26 @@
                           <tr class="project-overview">
                             <td class=""><span class="bold"><?= _l('group_pur') ?> :</span></td>
                             <td>
-                              asdmamdad
-
+                              <?php foreach ($commodity_groups_request as $group) {
+                                if ($group['id'] == $pur_tender->group_pur) {
+                                  echo $group['name'];
+                                }
+                              } ?>
                             </td>
-                          </tr>
-                          <tr class="project-overview">
-                            <td class=""><span class="bold"><?= _l('sub_groups_pur'); ?> :</span></td>
                             <td>
-                              asdmamdad
-
-                            </td>
-                          </tr>
-                          <tr class="project-overview">
-                            <td class=""><span class="bold"><?= _l('area_pur'); ?> :</span></td>
-                            <td>
-                              asdmamdad
-
+                             
                             </td>
                           </tr>
 
+
                           <tr class="project-overview">
-                            <td colspan="3" class="bold text-center" width="30%"><?php echo _l('vendors'); ?></td>
+                            <td  class="bold " ><?php echo _l('vendors'); ?></td>
+                            <td  class="bold " ></td>
+                            <td  class="bold " ></td>
                           </tr>
                           <?php
 
-                          $arr_vendors = get_arr_vendors_by_pr($pur_tender->id); ?>
+                          $arr_vendors = get_arr_vendors_by_tender($pur_tender->id); ?>
                           <?php foreach ($arr_vendors as $vendor) { ?>
                             <tr class="project-overview">
                               <td class=""><span class="bold"><?php echo pur_html_entity_decode($vendor->company); ?></span></td>
@@ -728,7 +728,7 @@
                     </div>
                     <div class="col-md-12">
                       <div class="table-responsive">
-                        <?php echo form_open(admin_url('purchase/compare_quote_pur_request/' . $pur_tender->id), array('id' => 'compare_quote_pur_request-form'));  ?>
+                        <?php echo form_open(admin_url('purchase/compare_quote_pur_tender/' . $pur_tender->id), array('id' => 'compare_quote_pur_tender-form'));  ?>
                         <table class="table table-bordered compare_quotes_table">
                           <thead class="bold">
                             <tr>
@@ -753,7 +753,7 @@
                           <tbody>
                             <?php
                             $this->load->model('purchase/purchase_model');
-                            $list_items = $this->purchase_model->get_pur_request_detail($pur_tender->id);
+                            $list_items = $this->purchase_model->get_pur_tender_detail($pur_tender->id);
                             ?>
                             <?php foreach ($list_items as $key => $item) { ?>
                               <tr>
@@ -933,4 +933,4 @@
 </body>
 
 </html>
-<?php require 'modules/purchase/assets/js/view_pur_request_js.php'; ?>
+<?php require 'modules/purchase/assets/js/view_pur_tender_js.php'; ?>
