@@ -3162,4 +3162,179 @@ class Estimates_model extends App_Model
         $booked_amount = isset($result->total) ? $result->total : 0;
         return $booked_amount;
     }
+
+    public function cost_control_sheet($data)
+    {
+        $this->load->model('currencies_model');
+        $response = array();
+        $budgetsummary = '';
+        $itemhtml = '';
+        $estimate_id = $data['id'];
+        $unawarded_budget = isset($data['unawarded_budget']) ? $data['unawarded_budget'] : '';
+        $base_currency = $this->currencies_model->get_base_currency();
+        $this->db->where('id', $estimate_id);
+        $estimates = $this->db->get(db_prefix() . 'estimates')->row();
+        $unawarded_budget_head = $this->get_estimate_budget_listing($estimates->id);
+        if (!empty($unawarded_budget_head)) {
+
+            $this->db->select(
+                db_prefix() . 'itemable.*,' .
+                    db_prefix() . 'unawarded_budget_info.unawarded_qty,' .
+                    db_prefix() . 'unawarded_budget_info.unawarded_rate'
+            );
+            $this->db->from(db_prefix() . 'itemable');
+            $this->db->join(db_prefix() . 'unawarded_budget_info', db_prefix() . 'unawarded_budget_info.item_id = ' . db_prefix() . 'itemable.id', 'left');
+            $this->db->where('rel_id', $estimates->id);
+            $this->db->where('rel_type', 'estimate');
+            $this->db->where('annexure', $unawarded_budget);
+            $this->db->group_by(db_prefix() . 'itemable.id');
+            $unawarded_budget_itemable = $this->db->get()->result_array();
+
+            if (!empty($unawarded_budget_itemable)) {
+                $itemhtml .= '<div class="table-responsive s_table">';
+                $itemhtml .= '<table class="table items">';
+                $itemhtml .= '<thead>
+                    <tr>
+                        <th align="left">' . _l('estimate_table_item_heading') . '</th>
+                        <th align="left">' . _l('estimate_table_item_description') . '</th>
+                        <th align="left">' . _l('sub_groups_pur') . '</th>
+                        <th align="left">' . _l('budgeted_qty') . '</th>
+                        <th align="left">' . _l('budgeted_rate') . '</th>
+                        <th align="left">' . _l('budgeted_amount') . '</th>
+                        <th align="left">Used Quantity</th>
+                        <th align="left">Used Amount</th>
+                        <th align="left">Remaining Quantity</th>
+                        <th align="left">Remaining Amount</th>
+                    </tr>
+                </thead>';
+                $itemhtml .= '<tbody style="border: 1px solid #ddd;">';
+                $itemhtml .= form_hidden('estimate_id', $estimates->id);
+                foreach ($unawarded_budget_itemable as $key => $item) {
+                    $non_break_description = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $item['long_description']));
+                    $this->db->select(db_prefix() . 'pur_order_detail.id as id, ' . db_prefix() . 'pur_order_detail.quantity as quantity, ' . db_prefix() . 'pur_order_detail.total as total');
+                    $this->db->select("
+                        REPLACE(
+                            REPLACE(
+                                REPLACE(
+                                    REPLACE(" . db_prefix() . "pur_order_detail.description, '\r', ''),
+                                '\n', ''),
+                            '<br />', ''),
+                        '<br/>', '') AS non_break_description
+                    ");
+                    $this->db->from(db_prefix() . 'pur_order_detail');
+                    $this->db->join(db_prefix() . 'pur_orders', db_prefix() . 'pur_orders.id = ' . db_prefix() . 'pur_order_detail.pur_order', 'left');
+                    $this->db->where(db_prefix() . 'pur_order_detail.item_code', $item['item_code']);
+                    $this->db->where(db_prefix() . 'pur_orders.estimate', $estimates->id);
+                    $this->db->where(db_prefix() . 'pur_orders.group_pur', $unawarded_budget);
+                    $this->db->where(db_prefix() . 'pur_orders.approve_status', 2);
+                    $this->db->where(db_prefix() . 'pur_order_detail.quantity' . ' >', 0, false);
+                    $this->db->where(db_prefix() . 'pur_order_detail.total' . ' >', 0, false);
+                    $this->db->group_by(db_prefix() . 'pur_order_detail.id');
+                    $this->db->having('non_break_description', $non_break_description);
+                    $pur_order_detail = $this->db->get()->result_array();
+
+                    $budgeted_qty = number_format($item['qty'], 2, '.', '');
+                    $budgeted_rate = number_format($item['rate'], 2, '.', '');
+                    $budgeted_amount = number_format($budgeted_qty * $budgeted_rate, 2, '.', '');
+                    $used_qty = 0.00;
+                    $used_amount = 0.00;
+                    $remaining_qty = $budgeted_qty;
+                    $remaining_amount = $budgeted_amount;
+                    if (!empty($pur_order_detail)) {
+                        foreach ($pur_order_detail as $srow) {
+                            $used_qty += (float)$srow['quantity'];
+                            $used_amount += (float)$srow['total'];
+                        }
+                        $remaining_qty = $budgeted_qty - $used_qty;
+                        $remaining_qty = number_format($remaining_qty, 2, '.', '');
+                        $remaining_amount = $budgeted_amount - $used_amount;
+                        $remaining_amount = number_format($remaining_amount, 2, '.', '');
+                    }
+                    $item_id_name_attr = "newitems[$key][item_id]";
+                    $budgeted_qty_name_attr = "newitems[$key][budgeted_qty]";
+                    $budgeted_unit_name_attr = "newitems[$key][budgeted_unit]";
+                    $budgeted_rate_name_attr = "newitems[$key][budgeted_rate]";
+                    $budgeted_amount_name_attr = "newitems[$key][budgeted_amount]";
+                    $used_qty_name_attr = "newitems[$key][used_qty]";
+                    $used_unit_name_attr = "newitems[$key][used_unit]";
+                    $used_amount_name_attr = "newitems[$key][used_amount]";
+                    $remaining_qty_name_attr = "newitems[$key][remaining_qty]";
+                    $remaining_unit_name_attr = "newitems[$key][remaining_unit]";
+                    $remaining_amount_name_attr = "newitems[$key][remaining_amount]";
+
+                    $itemhtml .= form_hidden($item_id_name_attr, $item['id']);
+                    $itemhtml .= '<tr>';
+                    $itemhtml .= '<td align="left">' . get_purchase_items($item['item_code']) . '</td>';
+                    $itemhtml .= '<td align="left">' . clear_textarea_breaks($item['long_description']) . '</td>';
+                    $itemhtml .= '<td align="left">' . get_sub_head_name_by_id($item['sub_head']) . '</td>';
+                    $itemhtml .= '<td class="all_budgeted_qty" style="text-align: left;">
+                        <input type="number" 
+                           id="' . $budgeted_qty_name_attr . '" 
+                           name="' . $budgeted_qty_name_attr . '" 
+                           value="' . $budgeted_qty . '" 
+                           class="form-control" 
+                           readonly>
+                        <span style="text-align: left; display: block;">' .
+                        (!empty($item['unit_id']) ? pur_get_unit_name($item['unit_id']) : '') .
+                        '</span>
+                    </td>';
+                    $itemhtml .= '<td align="left" class="all_budgeted_rate">' . render_input($budgeted_rate_name_attr, '', $budgeted_rate, 'number', ['readonly' => true]) . '</td>';
+                    $itemhtml .= '<td align="left" class="all_budgeted_amount">' . render_input($budgeted_amount_name_attr, '', $budgeted_amount, 'number', ['readonly' => true]) . '</td>';
+                    $itemhtml .= '<td align="left" class="all_used_qty">
+                        <input type="number" 
+                           id="' . $used_qty_name_attr . '" 
+                           name="' . $used_qty_name_attr . '" 
+                           value="' . $used_qty . '" 
+                           class="form-control" 
+                           readonly>
+                        <span style="text-align: left; display: block;">' .
+                        (!empty($item['unit_id']) ? pur_get_unit_name($item['unit_id']) : '') .
+                        '</span>
+                    </td>';
+                    $itemhtml .= '<td align="left" class="all_used_amount">' . render_input($used_amount_name_attr, '', $used_amount, 'number', ['readonly' => true]) . '</td>';
+                    $itemhtml .= '<td align="left" class="all_remaining_qty">
+                        <input type="number" 
+                           id="' . $remaining_qty_name_attr . '" 
+                           name="' . $remaining_qty_name_attr . '" 
+                           value="' . $remaining_qty . '" 
+                           class="form-control" 
+                           readonly>
+                        <span style="text-align: left; display: block;">' .
+                        (!empty($item['unit_id']) ? pur_get_unit_name($item['unit_id']) : '') .
+                        '</span>
+                    </td>';
+                    $itemhtml .= '<td align="left" class="all_remaining_amount">' . render_input($remaining_amount_name_attr, '', $remaining_amount, 'number', ['readonly' => true]) . '</td>';
+                    $itemhtml .= '</tr>';
+                }
+                $itemhtml .= '</tbody>';
+                $itemhtml .= '</table>';
+                $itemhtml .= '</div>';
+            }
+        }
+
+        $itemhtml .= '<div class="col-md-8 col-md-offset-4">
+            <table class="table text-right">
+                <tbody>
+                    <tr>
+                        <td><span class="bold tw-text-neutral-700">Total Budgeted Amount :</span>
+                        </td>
+                        <td class="total_budgeted_amount"></td>
+                    </tr>
+                    <tr>
+                        <td><span class="bold tw-text-neutral-700">Total Used Amount :</span>
+                        </td>
+                        <td class="total_used_amount"></td>
+                    </tr>
+                    <tr>
+                        <td><span class="bold tw-text-neutral-700">Total Remaining Amount :</span>
+                        </td>
+                        <td class="total_remaining_amount"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>';
+
+        $response = ['budgetsummaryhtml' => $budgetsummaryhtml, 'itemhtml' => $itemhtml];
+        return $response;
+    }
 }

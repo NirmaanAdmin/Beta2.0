@@ -1176,6 +1176,28 @@
    </div>
 </div>
 
+<div class="modal fade" id="cost_control_sheet_modal" tabindex="-1" role="dialog">
+   <div class="modal-dialog" role="document" style="width: 98%;">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h4 class="modal-title"><div class="cost_control_sheet_title"></div></h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+         </div>
+         <div class="modal-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="cost-control-sheet-body">
+                    </div>
+                </div>
+            </div>
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo _l('close'); ?></button>
+         </div>
+      </div>
+   </div>
+</div>
+
 <script>
 init_items_sortable(true);
 init_btn_with_tooltips();
@@ -1206,20 +1228,18 @@ $("body").on('click', '#download_historical_data', function() {
 function cost_control_sheet(el) {
   var estimate_id = <?php echo e($estimate->id); ?>;
   var budget_head_id = $(el).closest('.detailed-costing-tab').data('id');
-  $.post(admin_url + "estimates/assign_unawarded_capex", {
+  $.post(admin_url + "estimates/cost_control_sheet", {
     id: estimate_id,
     unawarded_budget: budget_head_id,
   }).done(function (res) {
     var response = JSON.parse(res);
     if (response.itemhtml) {
-      $('.unawarded-capex-body').html('');
-      $('.unawarded-capex-body').html(response.itemhtml);
-      $('.unawarded-capex-body table input').prop('disabled', true);
-      $('.unawarded_capex_title').html('View Items');
-      $('#unawarded_capex_modal button[type="submit"]').hide();
+      $('.cost-control-sheet-body').html('');
+      $('.cost-control-sheet-body').html(response.itemhtml);
+      $('.cost_control_sheet_title').html('View Items');
       init_selectpicker();
-      calculate_unawarded_capex();
-      $('#unawarded_capex_modal').modal('show');
+      calculate_cost_control_sheet();
+      $('#cost_control_sheet_modal').modal('show');
     }
   });
 }
@@ -1292,6 +1312,26 @@ function calculate_unawarded_capex() {
   $(".total_budgeted_amount").html(format_money(total_budgeted_amount));
   $(".total_unawarded_amount").html(format_money(total_unawarded_amount));
   $(".total_remaining_capex").html(format_money(total_remaining_capex));
+  $(document).trigger("sales-total-calculated");
+}
+
+function calculate_cost_control_sheet() {
+  var total_budgeted_amount = 0,
+  total_used_amount = 0,
+  total_remaining_amount = 0;
+  var rows = $(".cost-control-sheet-body tbody tr");
+  $.each(rows, function () {
+    var row = $(this);
+    var budgeted_amount = parseFloat(row.find(".all_budgeted_amount input").val()) || 0;
+    var used_amount = parseFloat(row.find(".all_used_amount input").val()) || 0;
+    var remaining_amount = parseFloat(row.find(".all_remaining_amount input").val()) || 0;
+    total_budgeted_amount += budgeted_amount;
+    total_used_amount += used_amount;
+    total_remaining_amount += remaining_amount;
+  });
+  $(".total_budgeted_amount").html(format_money(total_budgeted_amount));
+  $(".total_used_amount").html(format_money(total_used_amount));
+  $(".total_remaining_amount").html(format_money(total_remaining_amount));
   $(document).trigger("sales-total-calculated");
 }
 

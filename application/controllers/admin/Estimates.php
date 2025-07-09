@@ -766,4 +766,11 @@ class Estimates extends AdminController
         echo json_encode(['id' => $id]);
         exit;
     }
+
+    public function cost_control_sheet()
+    {
+        $data = $this->input->post();
+        $response = $this->estimates_model->cost_control_sheet($data);
+        echo json_encode($response);
+    }
 }
