@@ -11638,17 +11638,17 @@ class Warehouse_model extends App_Model
 	{
 		$result = array();
 		$pur_orders = $this->db->query('select * from tblpur_orders where approve_status = 2 order by id desc')->result_array();
-		if (!empty($pur_orders)) {
-			foreach ($pur_orders as $key => $value) {
-				$po_id = $value['id'];
-				$get_pur_order = $this->goods_delivery_get_pur_order($po_id);
-				$pur_order_detail = $get_pur_order['goods_delivery_exist'] ? $get_pur_order['goods_delivery_exist'] : 0;
-				if ($pur_order_detail > 0) {
-					$result[] = $value;
-				}
-			}
-		}
-		$result = !empty($result) ? array_values($result) : array();
+		// if (!empty($pur_orders)) {
+		// 	foreach ($pur_orders as $key => $value) {
+		// 		$po_id = $value['id'];
+		// 		$get_pur_order = $this->goods_delivery_get_pur_order($po_id);
+		// 		$pur_order_detail = $get_pur_order['goods_delivery_exist'] ? $get_pur_order['goods_delivery_exist'] : 0;
+		// 		if ($pur_order_detail > 0) {
+		// 			$result[] = $value;
+		// 		}
+		// 	}
+		// }
+		$result = !empty($pur_orders) ? array_values($pur_orders) : array();
 		return $result;
 	}
 
