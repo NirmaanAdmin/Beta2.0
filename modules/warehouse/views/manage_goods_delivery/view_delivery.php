@@ -127,20 +127,20 @@
                   ?>
 
                   <?php
-                  if (get_status_modules_wh('purchase')) {
-                    if (($goods_delivery->pr_order_id != '') && ($goods_delivery->pr_order_id != 0)) { ?>
-
-                      <tr class="project-overview">
-                        <td class="bold"><?php echo _l('reference_purchase_order'); ?></td>
-                        <td>
+                  if (get_status_modules_wh('purchase')) { ?>
+                    <tr class="project-overview">
+                      <td class="bold"><?php echo _l('reference_order'); ?></td>
+                      <td>
+                        <?php 
+                        if(!empty($goods_delivery->pr_order_id)) { ?>
                           <a href="<?php echo admin_url('purchase/purchase_order/' . $goods_delivery->pr_order_id) ?>"><?php echo get_pur_order_name($goods_delivery->pr_order_id) ?></a>
+                        <?php } if(!empty($goods_delivery->wo_order_id)) { ?>
+                          <a href="<?php echo admin_url('purchase/work_order/' . $goods_delivery->wo_order_id) ?>"><?php echo get_wo_order_name($goods_delivery->wo_order_id) ?></a>
+                        <?php } ?>
 
-                        </td>
-                      </tr>
-
-                  <?php   }
-                  }
-                  ?>
+                      </td>
+                    </tr>
+                  <?php } ?>
 
                   <tr>
                     <td class="bold"><?php echo _l('print'); ?></td>

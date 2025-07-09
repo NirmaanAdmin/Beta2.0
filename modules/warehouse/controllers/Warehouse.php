@@ -1610,6 +1610,7 @@ class warehouse extends AdminController
 				$this->load->model('projects_model');
 
 				$data['pr_orders'] = $this->warehouse_model->get_pr_order_delivered();
+				$data['wo_orders'] = $this->warehouse_model->get_wo_order_delivered();
 				$data['pr_orders_status'] = true;
 
 				$data['vendors'] = $this->purchase_model->get_vendor();
@@ -1619,10 +1620,12 @@ class warehouse extends AdminController
 				$data['departments'] = $this->departments_model->get();
 			} else {
 				$data['pr_orders'] = [];
+				$data['wo_orders'] = [];
 				$data['pr_orders_status'] = false;
 			}
 		} else {
 			$data['pr_orders'] = [];
+			$data['wo_orders'] = [];
 			$data['pr_orders_status'] = false;
 		}
 
@@ -9980,4 +9983,18 @@ class warehouse extends AdminController
         echo json_encode($result);
         die;
     }
+
+    /**
+	 * goods delivery copy wo order
+	 * @param  integer $wo_order
+	 * @return json encode
+	 */
+	public function goods_delivery_copy_wo_order($wo_order = '')
+	{
+		$wo_order_detail = $this->warehouse_model->goods_delivery_get_wo_order($wo_order);
+		echo json_encode([
+			'result' => $wo_order_detail['result'] ? $wo_order_detail['result'] : '',
+			'additional_discount' => $wo_order_detail['additional_discount'] ? $wo_order_detail['additional_discount'] : '',
+		]);
+	}
 }

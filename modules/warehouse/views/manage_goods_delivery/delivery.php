@@ -85,10 +85,26 @@
                         <option value=""></option>
                         <?php foreach ($pr_orders as $pr_order) { ?>
                           <option value="<?php echo html_entity_decode($pr_order['id']); ?>" <?php if (isset($goods_delivery) && ($goods_delivery->pr_order_id == $pr_order['id'])) {
-                                                                                                echo 'selected';
-                                                                                              } ?>><?php echo html_entity_decode($pr_order['pur_order_number'] . ' - ' . $pr_order['pur_order_name'] . ' - ' . get_vendor_name($pr_order['vendor'])); ?>
-                          </option>
-                        <?php } ?>
+                            echo 'selected';
+                          } ?>><?php echo html_entity_decode($pr_order['pur_order_number'] . ' - ' . $pr_order['pur_order_name'] . ' - ' . get_vendor_name($pr_order['vendor'])); ?>
+                        </option>
+                      <?php } ?>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="wo_order_id"><?php echo _l('reference_work_order'); ?></label>
+                      <select onchange="wo_order_change(this); return false;" name="wo_order_id" id="wo_order_id" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>"
+                        <?php echo ($edit_approval == 'true') ? 'disabled' : ''; ?>>
+                        <option value=""></option>
+                        <?php foreach ($wo_orders as $wo_order) { ?>
+                          <option value="<?php echo html_entity_decode($wo_order['id']); ?>" <?php if (isset($goods_delivery) && ($goods_delivery->wo_order_id == $wo_order['id'])) {
+                            echo 'selected';
+                          } ?>><?php echo html_entity_decode($wo_order['wo_order_number'] . ' - ' . $wo_order['wo_order_name'] . ' - ' . get_vendor_name($wo_order['vendor'])); ?>
+                        </option>
+                      <?php } ?>
                       </select>
                     </div>
                   </div>

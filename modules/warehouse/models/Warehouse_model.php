@@ -4133,7 +4133,12 @@ class Warehouse_model extends App_Model
 		$address = get_option('invoice_company_address');
 		$tax_data = $this->get_html_tax_delivery($goods_delivery_id);
 		$get_dept = $this->get_department($goods_delivery->department);
-		$get_all_po_details = get_all_po_details_in_warehouse($goods_delivery->pr_order_id);
+		if(!empty($goods_delivery->pr_order_id)) {
+			$get_all_order_details = get_all_po_details_in_warehouse($goods_delivery->pr_order_id);
+		}
+		if(!empty($goods_delivery->wo_order_id)) {
+			$get_all_order_details = get_all_wo_details_in_warehouse($goods_delivery->wo_order_id);
+		}
 		$budget_head = get_group_name_item($get_all_po_details->group_pur);
 
 		$this->load->model('staff_model');
@@ -4179,7 +4184,12 @@ class Warehouse_model extends App_Model
 		//organization_info
 		$organization_info = '<div  class="bill_to_color">';
 		$organization_info .= '<b>' . _l('project') . ': ' . get_project_name_by_id($goods_delivery->project) . '</b><br />';
-		$organization_info .= '<b>' . _l('pur_order') . ': ' . get_pur_order_name($goods_delivery->pr_order_id) . '</b><br />';
+		if(!empty($goods_delivery->pr_order_id)) {
+			$organization_info .= '<b>PO Name : </b>' . $get_all_order_details->pur_order_number . '-' . $get_all_order_details->pur_order_name  . '<br>';
+		}
+		if(!empty($goods_delivery->wo_order_id)) {
+			$organization_info .= '<b>WO Name : </b>' . $get_all_order_details->wo_order_number . '-' . $get_all_order_details->wo_order_name  . '<br>';
+		}
 		$organization_info .= '<b>' . _l('Issued By') . ':</b> ' . $staff_name->firstname . ' ' . $staff_name->lastname . '<br />';
 
 
@@ -20512,14 +20522,7 @@ class Warehouse_model extends App_Model
 	 */
 	public function goods_delivery_get_pur_order($pur_order)
 	{
-		$arr_pur_resquest = [];
-		$subtotal = 0;
-		$total_discount = 0;
-		$total_payment = 0;
-		$total_tax_money = 0;
-		$additional_discount = 0;
-		$pur_total_money = 0;
-		$goods_delivery_exist = 0;
+		$arr_pur_order = [];
 		$goods_delivery_row_template = '';
 		$goods_delivery_row_template = $this->warehouse_model->create_goods_delivery_row_template();
 
@@ -20527,180 +20530,160 @@ class Warehouse_model extends App_Model
 		$this->db->join(db_prefix() . 'items', '' . db_prefix() . 'pur_order_detail.item_code = ' . db_prefix() . 'items.id', 'left');
 		$this->db->where(db_prefix() . 'pur_order_detail.pur_order = ' . $pur_order);
 		$arr_results = $this->db->get(db_prefix() . 'pur_order_detail')->result_array();
-		$this->db->where('id', $pur_order);
-		$get_pur_order = $this->db->get(db_prefix() . 'pur_orders')->row();
+		$co_exist = $this->purchase_model->get_po_changes($pur_order);
 		$index = 0;
-		$status = false;
-		$item_index = 0;
+		$last_index = 0;
 
 		if (count($arr_results) > 0) {
-			$status = false;
 			foreach ($arr_results as $key => $value) {
-				$tax_rate = null;
-				$tax_name = null;
-				$tax_id = null;
-				$tax_rate_value = 0;
-				$pur_total_money += (float)$value['total_after_discount'];
-				/*caculatoe guarantee*/
-				$guarantee_period = '';
-				if ($value) {
-					if (($value['guarantee'] != '') && (($value['guarantee'] != null)))
-						$guarantee_period = date('Y-m-d', strtotime(date('Y-m-d') . ' + ' . $value['guarantee'] . ' months'));
-				}
-				/*caculator subtotal*/
-				/*total discount*/
-				/*total payment*/
-				$total_goods_money = (float)$value['quantities'] * (float)$value['rate'];
-				//get tax value
-				if ($value['tax_id'] != null && $value['tax_id'] != '') {
-					$tax_id = $value['tax_id'];
-					$arr_tax = explode('|', $value['tax_id']);
-					$arr_tax_rate = explode('|', $value['tax_rate']);
-					foreach ($arr_tax as $key => $tax_id) {
-						$get_tax_name = $this->get_tax_name($tax_id);
-						if (isset($arr_tax_rate[$key])) {
-							$get_tax_rate = $arr_tax_rate[$key];
-						} else {
-							$tax = $this->get_taxe_value($tax_id);
-							$get_tax_rate = (float)$tax->taxrate;
-						}
-						$tax_rate_value += (float)$get_tax_rate;
-						if (strlen($tax_rate) > 0) {
-							$tax_rate .= '|' . $get_tax_rate;
-						} else {
-							$tax_rate .= $get_tax_rate;
-						}
-						if (strlen($tax_name) > 0) {
-							$tax_name .= '|' . $get_tax_name;
-						} else {
-							$tax_name .= $get_tax_name;
-						}
+				$available_quantity = (float)$value['quantities'];
+				$non_break_description = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $value['description']));
+				$this->db->select(db_prefix() . 'goods_receipt_detail.quantities');
+				$this->db->select("
+				    REPLACE(
+				        REPLACE(
+				            REPLACE(
+				                REPLACE(" . db_prefix() . "goods_receipt_detail.description, '\r', ''),
+				            '\n', ''),
+				        '<br />', ''),
+				    '<br/>', '') AS non_break_description
+				");
+				$this->db->where(db_prefix() . 'goods_receipt.approval', 1);
+				$this->db->where('pr_order_id', $pur_order);
+				$this->db->join(db_prefix() . 'goods_receipt', db_prefix() . 'goods_receipt.id = ' . db_prefix() . 'goods_receipt_detail.goods_receipt_id', 'left');
+				$this->db->group_by(db_prefix() . 'goods_receipt_detail.id');
+				$this->db->having('non_break_description', $non_break_description);
+				$goods_receipt_description = $this->db->get(db_prefix() . 'goods_receipt_detail')->result_array();
+				if (!empty($goods_receipt_description)) {
+					$total_quantity = 0;
+					foreach ($goods_receipt_description as $qitem) {
+						$total_quantity += $qitem['quantities'];
 					}
+					$available_quantity = $total_quantity;
 				}
+				$available_quantity = round($available_quantity, 2);
 
-				$index++;
-				$unit_name = wh_get_unit_name($value['unit_id']);
-				$unit_id = $value['unit_id'];
-				$vendor_id =  '';
-				$taxname = '';
-				$issued_date = null;
-				$lot_number = null;
-				$note = null;
-				$commodity_name = wh_get_item_variatiom($value['commodity_code']);
-				$description = $value['description'];
-				$total_money = 0;
-				$total_after_discount = 0;
-				$quantities = (float)$value['quantities'];
-				$unit_price = (float)$value['rate'];
-				$commodity_code = $value['commodity_code'];
-				$discount_money = $value['discount_money'];
-
-				if ((float)$tax_rate_value != 0) {
-					$tax_money = (float)$unit_price * (float)$quantities * (float)$tax_rate_value / 100;
-					$total_money = (float)$unit_price * (float)$quantities + (float)$tax_money;
-					$amount = (float)$unit_price * (float)$quantities + (float)$tax_money;
-					$discount_money = (float)$amount * (float)$value['discount'] / 100;
-					$total_after_discount = (float)$unit_price * (float)$quantities + (float)$tax_money - (float)$discount_money;
-				} else {
-					$total_money = (float)$unit_price * (float)$quantities;
-					$amount = (float)$unit_price * (float)$quantities;
-					$discount_money = (float)$amount * (float)$value['discount'] / 100;
-					$total_after_discount = (float)$unit_price * (float)$quantities - (float)$discount_money;
-				}
-
-				$sub_total = (float)$unit_price * (float)$quantities;
-
-				if ((float)$quantities > 0) {
-					$temporaty_quantity = $quantities;
-					$inventory_warehouse_by_commodity = $this->get_inventory_warehouse_by_commodity($commodity_code);
-
-					foreach ($inventory_warehouse_by_commodity as $key => $inventory_warehouse) {
-						if ($temporaty_quantity > 0) {
-							$available_quantity = (float)$inventory_warehouse['inventory_number'];
-							$warehouse_id = $inventory_warehouse['warehouse_id'];
-							$temporaty_available_quantity = $available_quantity;
-							$list_temporaty_serial_numbers = $this->get_list_temporaty_serial_numbers($commodity_code, $inventory_warehouse['warehouse_id'], $quantities);
-							foreach ($list_temporaty_serial_numbers as $value) {
-								if ($temporaty_available_quantity > 0) {
-									$temporaty_commodity_name = $commodity_name . ' SN: ' . $value['serial_number'];
-									$quantities = 1;
-									$name = 'newitems[' . $item_index . ']';
-									$goods_delivery_exist++;
-									$goods_delivery_row_template .= $this->create_goods_delivery_row_template([], $name, $temporaty_commodity_name, $warehouse_id, $temporaty_available_quantity, 0, $unit_name, $unit_price, $taxname, $commodity_code, $unit_id, '', $tax_rate, '', '', '', $total_after_discount, $guarantee_period, $issued_date, $lot_number, $note, $sub_total, $tax_name, $tax_id, 'undefined', false, false, $value['serial_number'], 0, $description, '', $value['area']);
-									$temporaty_quantity--;
-									$temporaty_available_quantity--;
-									$item_index++;
-									$inventory_warehouse_by_commodity[$key]['inventory_number'] = $temporaty_available_quantity;
-								}
-							}
-						}
+				$this->db->select(db_prefix() . 'goods_delivery_detail.quantities');
+				$this->db->select("
+				    REPLACE(
+				        REPLACE(
+				            REPLACE(
+				                REPLACE(" . db_prefix() . "goods_delivery_detail.description, '\r', ''),
+				            '\n', ''),
+				        '<br />', ''),
+				    '<br/>', '') AS non_break_description
+				");
+				$this->db->where(db_prefix() . 'goods_delivery.approval', 1);
+				$this->db->where('pr_order_id', $pur_order);
+				$this->db->join(db_prefix() . 'goods_delivery', db_prefix() . 'goods_delivery.id = ' . db_prefix() . 'goods_delivery_detail.goods_delivery_id', 'left');
+				$this->db->group_by(db_prefix() . 'goods_delivery_detail.id');
+				$this->db->having('non_break_description', $non_break_description);
+				$goods_delivery_description = $this->db->get(db_prefix() . 'goods_delivery_detail')->result_array();
+				if (!empty($goods_delivery_description)) {
+					$total_quantity = 0;
+					foreach ($goods_delivery_description as $qitem) {
+						$total_quantity += $qitem['quantities'];
 					}
-
-					if ($temporaty_quantity > 0) {
-						$quantities = $temporaty_quantity;
-						$available_quantity = 0;
-						$name = 'newitems[' . $item_index . ']';
-						foreach ($inventory_warehouse_by_commodity as $key => $inventory_warehouse) {
-							if ((float)$inventory_warehouse['inventory_number'] > 0 && $temporaty_quantity > 0) {
-								$available_quantity = (float)$inventory_warehouse['inventory_number'];
-								$warehouse_id = $inventory_warehouse['warehouse_id'];
-								if ($temporaty_quantity >= $inventory_warehouse['inventory_number']) {
-									$temporaty_quantity = (float) $temporaty_quantity - (float) $inventory_warehouse['inventory_number'];
-									$quantities = (float)$inventory_warehouse['inventory_number'];
-								} else {
-									$quantities = (float)$temporaty_quantity;
-									$temporaty_quantity = 0;
-								}
-								$duplicates = array_filter($arr_results, function ($item) use ($commodity_code) {
-									return $item['commodity_code'] == $commodity_code;
-								});
-								if (count($duplicates) > 1) {
-									$non_break_description = str_replace("<br />", "", $description);
-									$this->db->select(db_prefix() . 'goods_receipt_detail.quantities');
-									$this->db->like(db_prefix() . 'goods_receipt_detail.description', $non_break_description);
-									$this->db->where(db_prefix() . 'goods_receipt.approval', 1);
-									$this->db->where('pr_order_id', $pur_order);
-									$this->db->join(db_prefix() . 'goods_receipt', db_prefix() . 'goods_receipt.id = ' . db_prefix() . 'goods_receipt_detail.goods_receipt_id', 'left');
-									$goods_receipt_description = $this->db->get(db_prefix() . 'goods_receipt_detail')->result_array();
-									if (!empty($goods_receipt_description)) {
-										$available_quantity = array_sum(array_column($goods_receipt_description, 'quantities'));
-									}
-
-									$this->db->select(db_prefix() . 'goods_delivery_detail.quantities');
-									$this->db->like(db_prefix() . 'goods_delivery_detail.description', $non_break_description);
-									$this->db->where(db_prefix() . 'goods_delivery.approval', 1);
-									$this->db->where('pr_order_id', $pur_order);
-									$this->db->join(db_prefix() . 'goods_delivery', db_prefix() . 'goods_delivery.id = ' . db_prefix() . 'goods_delivery_detail.goods_delivery_id', 'left');
-									$goods_delivery_description = $this->db->get(db_prefix() . 'goods_delivery_detail')->result_array();
-									if (!empty($goods_delivery_description)) {
-										$total_quantity = 0;
-										foreach ($goods_delivery_description as $qitem) {
-											$total_quantity += $qitem['quantities'];
-										}
-										$available_quantity = $available_quantity - $total_quantity;
-									}
-								}
-								$goods_delivery_exist++;
-								$goods_delivery_row_template .= $this->create_goods_delivery_row_template([], $name, $commodity_name, $warehouse_id, $available_quantity, 0, $unit_name, $unit_price, $taxname, $commodity_code, $unit_id, '', $tax_rate, '', '', '', $total_after_discount, $guarantee_period, $issued_date, $lot_number, $note, $sub_total, $tax_name, $tax_id, 'undefined', false, false, $value['serial_number'], 0, $description, '', $value['area']);
-								$item_index++;
-							}
-						}
-					}
+					$available_quantity = $available_quantity - $total_quantity;
 				}
-			}
 
-			if ($get_pur_order) {
-				if ((float)$get_pur_order->discount_percent > 0) {
-					$additional_discount = (float)$get_pur_order->discount_percent * (float)$pur_total_money / 100;
+				if(!empty($co_exist)) {
+					$updated_co_quantity = $this->get_changee_order_quantity($value['commodity_code'], $value['description'], $pur_order, 'pur_orders');
+					$available_quantity = $available_quantity + $updated_co_quantity;
+					$available_quantity = round($available_quantity, 2);
+				}
+
+				if ($available_quantity > 0) {
+					$index++;
+					$unit_name = wh_get_unit_name($value['unit_id']);
+					$commodity_name = wh_get_item_variatiom($value['commodity_code']);
+					$quantities = (float)$value['quantities'];
+					$unit_price = (float)$value['rate'];
+
+					$goods_delivery_row_template .= $this->create_goods_delivery_row_template([], 'newitems[' . $index . ']', $commodity_name, '', $available_quantity, 0, $unit_name, $unit_price, '', $value['commodity_code'], $value['unit_id'], '', '', '', '', '', '', '', '', '', '', '', '', '', 'undefined', false, false, $value['serial_number'], 0, $value['description'], '', $value['area']);
+					$last_index = $index;
 				}
 			}
 		}
 
-		$arr_pur_resquest['result'] = $goods_delivery_row_template;
-		$arr_pur_resquest['additional_discount'] = $additional_discount;
-		$arr_pur_resquest['goods_delivery_exist'] = $goods_delivery_exist;
+		if(!empty($co_exist)) {
+			$sql = 'select item_code as commodity_code, ' . db_prefix() . 'co_order_detail.description, ' . db_prefix() . 'co_order_detail.unit_id, unit_price, quantity as quantities, ' . db_prefix() . 'co_order_detail.tax as tax, into_money, (' . db_prefix() . 'co_order_detail.total-' . db_prefix() . 'co_order_detail.into_money) as tax_money, ' . db_prefix() . 'co_order_detail.total as goods_money, tax_rate, tax_value, ' . db_prefix() . 'co_order_detail.id as id, delivery_date, ' . db_prefix() . 'co_order_detail.area as area from ' . db_prefix() . 'co_order_detail
+			left join ' . db_prefix() . 'co_orders on ' . db_prefix() . 'co_orders.id =  ' . db_prefix() . 'co_order_detail.pur_order
+			left join ' . db_prefix() . 'items on ' . db_prefix() . 'co_order_detail.item_code =  ' . db_prefix() . 'items.id
+			left join ' . db_prefix() . 'taxes on ' . db_prefix() . 'taxes.id = ' . db_prefix() . 'co_order_detail.tax where ' . db_prefix() . 'co_orders.po_order_id = ' . $pur_order . ' and ' . db_prefix() . 'co_order_detail.tender_item = 1
+			GROUP BY ' . db_prefix() . 'co_order_detail.id';
+			$co_results = $this->db->query($sql)->result_array();
+			if(!empty($co_results)) {
+				foreach ($co_results as $key => $value) {
+					$available_quantity = (float)$value['quantities'];
+					$non_break_description = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $value['description']));
+					$this->db->select(db_prefix() . 'goods_receipt_detail.quantities');
+					$this->db->select("
+					    REPLACE(
+					        REPLACE(
+					            REPLACE(
+					                REPLACE(" . db_prefix() . "goods_receipt_detail.description, '\r', ''),
+					            '\n', ''),
+					        '<br />', ''),
+					    '<br/>', '') AS non_break_description
+					");
+					$this->db->where(db_prefix() . 'goods_receipt.approval', 1);
+					$this->db->where('pr_order_id', $pur_order);
+					$this->db->join(db_prefix() . 'goods_receipt', db_prefix() . 'goods_receipt.id = ' . db_prefix() . 'goods_receipt_detail.goods_receipt_id', 'left');
+					$this->db->group_by(db_prefix() . 'goods_receipt_detail.id');
+					$this->db->having('non_break_description', $non_break_description);
+					$goods_receipt_description = $this->db->get(db_prefix() . 'goods_receipt_detail')->result_array();
+					if (!empty($goods_receipt_description)) {
+						$total_quantity = 0;
+						foreach ($goods_receipt_description as $qitem) {
+							$total_quantity += $qitem['quantities'];
+						}
+						$available_quantity = $total_quantity;
+					}
+					$available_quantity = round($available_quantity, 2);
 
-		return $arr_pur_resquest;
+					$this->db->select(db_prefix() . 'goods_delivery_detail.quantities');
+					$this->db->select("
+					    REPLACE(
+					        REPLACE(
+					            REPLACE(
+					                REPLACE(" . db_prefix() . "goods_delivery_detail.description, '\r', ''),
+					            '\n', ''),
+					        '<br />', ''),
+					    '<br/>', '') AS non_break_description
+					");
+					$this->db->where(db_prefix() . 'goods_delivery.approval', 1);
+					$this->db->where('pr_order_id', $pur_order);
+					$this->db->join(db_prefix() . 'goods_delivery', db_prefix() . 'goods_delivery.id = ' . db_prefix() . 'goods_delivery_detail.goods_delivery_id', 'left');
+					$this->db->group_by(db_prefix() . 'goods_delivery_detail.id');
+					$this->db->having('non_break_description', $non_break_description);
+					$goods_delivery_description = $this->db->get(db_prefix() . 'goods_delivery_detail')->result_array();
+					if (!empty($goods_delivery_description)) {
+						$total_quantity = 0;
+						foreach ($goods_delivery_description as $qitem) {
+							$total_quantity += $qitem['quantities'];
+						}
+						$available_quantity = $available_quantity - $total_quantity;
+					}
+
+					if ($available_quantity > 0) {
+						$index++;
+						$unit_name = wh_get_unit_name($value['unit_id']);
+						$commodity_name = wh_get_item_variatiom($value['commodity_code']);
+						$quantities = (float)$value['quantities'];
+						$unit_price = (float)$value['rate'];
+
+						$goods_delivery_row_template .= $this->create_goods_delivery_row_template([], 'newitems[' . $index . ']', $commodity_name, '', $available_quantity, 0, $unit_name, $unit_price, '', $value['commodity_code'], $value['unit_id'], '', '', '', '', '', '', '', '', '', '', '', '', '', 'undefined', false, false, $value['serial_number'], 0, $value['description'], '', $value['area']);
+						$last_index = $index;
+					}
+				}
+			}
+		}
+
+		$arr_pur_order['result'] = $goods_delivery_row_template;
+		$arr_pur_order['additional_discount'] = 0;
+
+		return $arr_pur_order;
 	}
 
 	public function get_department($dept_id)
@@ -22871,4 +22854,182 @@ class Warehouse_model extends App_Model
         
         return $response;
     }
+
+    /**
+	 * get wo order delivered
+	 * @return [type] 
+	 */
+	public function  get_wo_order_delivered()
+	{
+		$result = array();
+		$wo_orders = $this->db->query('select * from tblwo_orders where approve_status = 2 order by id desc')->result_array();
+		$result = !empty($wo_orders) ? array_values($wo_orders) : array();
+		return $result;
+	}
+
+	public function goods_delivery_get_wo_order($wo_order)
+	{
+		$arr_wo_order = [];
+		$goods_delivery_row_template = '';
+		$goods_delivery_row_template = $this->warehouse_model->create_goods_delivery_row_template();
+
+		$this->db->select('item_code as commodity_code, ' . db_prefix() . 'wo_order_detail.description, ' . db_prefix() . 'wo_order_detail.unit_id , unit_price as rate, quantity as quantities, ' . db_prefix() . 'wo_order_detail.tax as tax_id, ' . db_prefix() . 'wo_order_detail.total as total_money, ' . db_prefix() . 'wo_order_detail.total, ' . db_prefix() . 'wo_order_detail.discount_% as discount, ' . db_prefix() . 'wo_order_detail.discount_money, ' . db_prefix() . 'wo_order_detail.total_money as total_after_discount, ' . db_prefix() . 'items.guarantee, , ' . db_prefix() . 'wo_order_detail.area as area, ' . db_prefix() . 'wo_order_detail.tax_rate');
+		$this->db->join(db_prefix() . 'items', '' . db_prefix() . 'wo_order_detail.item_code = ' . db_prefix() . 'items.id', 'left');
+		$this->db->where(db_prefix() . 'wo_order_detail.wo_order = ' . $wo_order);
+		$arr_results = $this->db->get(db_prefix() . 'wo_order_detail')->result_array();
+		$co_exist = $this->purchase_model->get_change_wo_order($wo_order);
+		$index = 0;
+		$last_index = 0;
+
+		if (count($arr_results) > 0) {
+			foreach ($arr_results as $key => $value) {
+				$available_quantity = (float)$value['quantities'];
+				$non_break_description = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $value['description']));
+				$this->db->select(db_prefix() . 'goods_receipt_detail.quantities');
+				$this->db->select("
+				    REPLACE(
+				        REPLACE(
+				            REPLACE(
+				                REPLACE(" . db_prefix() . "goods_receipt_detail.description, '\r', ''),
+				            '\n', ''),
+				        '<br />', ''),
+				    '<br/>', '') AS non_break_description
+				");
+				$this->db->where(db_prefix() . 'goods_receipt.approval', 1);
+				$this->db->where('wo_order_id', $wo_order);
+				$this->db->join(db_prefix() . 'goods_receipt', db_prefix() . 'goods_receipt.id = ' . db_prefix() . 'goods_receipt_detail.goods_receipt_id', 'left');
+				$this->db->group_by(db_prefix() . 'goods_receipt_detail.id');
+				$this->db->having('non_break_description', $non_break_description);
+				$goods_receipt_description = $this->db->get(db_prefix() . 'goods_receipt_detail')->result_array();
+				if (!empty($goods_receipt_description)) {
+					$total_quantity = 0;
+					foreach ($goods_receipt_description as $qitem) {
+						$total_quantity += $qitem['quantities'];
+					}
+					$available_quantity = $total_quantity;
+				}
+				$available_quantity = round($available_quantity, 2);
+
+				$this->db->select(db_prefix() . 'goods_delivery_detail.quantities');
+				$this->db->select("
+				    REPLACE(
+				        REPLACE(
+				            REPLACE(
+				                REPLACE(" . db_prefix() . "goods_delivery_detail.description, '\r', ''),
+				            '\n', ''),
+				        '<br />', ''),
+				    '<br/>', '') AS non_break_description
+				");
+				$this->db->where(db_prefix() . 'goods_delivery.approval', 1);
+				$this->db->where('wo_order_id', $wo_order);
+				$this->db->join(db_prefix() . 'goods_delivery', db_prefix() . 'goods_delivery.id = ' . db_prefix() . 'goods_delivery_detail.goods_delivery_id', 'left');
+				$this->db->group_by(db_prefix() . 'goods_delivery_detail.id');
+				$this->db->having('non_break_description', $non_break_description);
+				$goods_delivery_description = $this->db->get(db_prefix() . 'goods_delivery_detail')->result_array();
+				if (!empty($goods_delivery_description)) {
+					$total_quantity = 0;
+					foreach ($goods_delivery_description as $qitem) {
+						$total_quantity += $qitem['quantities'];
+					}
+					$available_quantity = $available_quantity - $total_quantity;
+				}
+
+				if(!empty($co_exist)) {
+					$updated_co_quantity = $this->get_changee_order_quantity($value['commodity_code'], $value['description'], $wo_order, 'wo_orders');
+					$available_quantity = $available_quantity + $updated_co_quantity;
+					$available_quantity = round($available_quantity, 2);
+				}
+
+				if ($available_quantity > 0) {
+					$index++;
+					$unit_name = wh_get_unit_name($value['unit_id']);
+					$commodity_name = wh_get_item_variatiom($value['commodity_code']);
+					$quantities = (float)$value['quantities'];
+					$unit_price = (float)$value['rate'];
+
+					$goods_delivery_row_template .= $this->create_goods_delivery_row_template([], 'newitems[' . $index . ']', $commodity_name, '', $available_quantity, 0, $unit_name, $unit_price, '', $value['commodity_code'], $value['unit_id'], '', '', '', '', '', '', '', '', '', '', '', '', '', 'undefined', false, false, $value['serial_number'], 0, $value['description'], '', $value['area']);
+					$last_index = $index;
+				}
+			}
+		}
+
+		if(!empty($co_exist)) {
+			$sql = 'select item_code as commodity_code, ' . db_prefix() . 'co_order_detail.description, ' . db_prefix() . 'co_order_detail.unit_id, unit_price, quantity as quantities, ' . db_prefix() . 'co_order_detail.tax as tax, into_money, (' . db_prefix() . 'co_order_detail.total-' . db_prefix() . 'co_order_detail.into_money) as tax_money, ' . db_prefix() . 'co_order_detail.total as goods_money, tax_rate, tax_value, ' . db_prefix() . 'co_order_detail.id as id, delivery_date, ' . db_prefix() . 'co_order_detail.area as area from ' . db_prefix() . 'co_order_detail
+			left join ' . db_prefix() . 'co_orders on ' . db_prefix() . 'co_orders.id =  ' . db_prefix() . 'co_order_detail.pur_order
+			left join ' . db_prefix() . 'items on ' . db_prefix() . 'co_order_detail.item_code =  ' . db_prefix() . 'items.id
+			left join ' . db_prefix() . 'taxes on ' . db_prefix() . 'taxes.id = ' . db_prefix() . 'co_order_detail.tax where ' . db_prefix() . 'co_orders.wo_order_id = ' . $wo_order . ' and ' . db_prefix() . 'co_order_detail.tender_item = 1
+			GROUP BY ' . db_prefix() . 'co_order_detail.id';
+			$co_results = $this->db->query($sql)->result_array();
+			if(!empty($co_results)) {
+				foreach ($co_results as $key => $value) {
+					$available_quantity = (float)$value['quantities'];
+					$non_break_description = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $value['description']));
+					$this->db->select(db_prefix() . 'goods_receipt_detail.quantities');
+					$this->db->select("
+					    REPLACE(
+					        REPLACE(
+					            REPLACE(
+					                REPLACE(" . db_prefix() . "goods_receipt_detail.description, '\r', ''),
+					            '\n', ''),
+					        '<br />', ''),
+					    '<br/>', '') AS non_break_description
+					");
+					$this->db->where(db_prefix() . 'goods_receipt.approval', 1);
+					$this->db->where('wo_order_id', $wo_order);
+					$this->db->join(db_prefix() . 'goods_receipt', db_prefix() . 'goods_receipt.id = ' . db_prefix() . 'goods_receipt_detail.goods_receipt_id', 'left');
+					$this->db->group_by(db_prefix() . 'goods_receipt_detail.id');
+					$this->db->having('non_break_description', $non_break_description);
+					$goods_receipt_description = $this->db->get(db_prefix() . 'goods_receipt_detail')->result_array();
+					if (!empty($goods_receipt_description)) {
+						$total_quantity = 0;
+						foreach ($goods_receipt_description as $qitem) {
+							$total_quantity += $qitem['quantities'];
+						}
+						$available_quantity = $total_quantity;
+					}
+					$available_quantity = round($available_quantity, 2);
+
+					$this->db->select(db_prefix() . 'goods_delivery_detail.quantities');
+					$this->db->select("
+					    REPLACE(
+					        REPLACE(
+					            REPLACE(
+					                REPLACE(" . db_prefix() . "goods_delivery_detail.description, '\r', ''),
+					            '\n', ''),
+					        '<br />', ''),
+					    '<br/>', '') AS non_break_description
+					");
+					$this->db->where(db_prefix() . 'goods_delivery.approval', 1);
+					$this->db->where('wo_order_id', $wo_order);
+					$this->db->join(db_prefix() . 'goods_delivery', db_prefix() . 'goods_delivery.id = ' . db_prefix() . 'goods_delivery_detail.goods_delivery_id', 'left');
+					$this->db->group_by(db_prefix() . 'goods_delivery_detail.id');
+					$this->db->having('non_break_description', $non_break_description);
+					$goods_delivery_description = $this->db->get(db_prefix() . 'goods_delivery_detail')->result_array();
+					if (!empty($goods_delivery_description)) {
+						$total_quantity = 0;
+						foreach ($goods_delivery_description as $qitem) {
+							$total_quantity += $qitem['quantities'];
+						}
+						$available_quantity = $available_quantity - $total_quantity;
+					}
+
+					if ($available_quantity > 0) {
+						$index++;
+						$unit_name = wh_get_unit_name($value['unit_id']);
+						$commodity_name = wh_get_item_variatiom($value['commodity_code']);
+						$quantities = (float)$value['quantities'];
+						$unit_price = (float)$value['rate'];
+
+						$goods_delivery_row_template .= $this->create_goods_delivery_row_template([], 'newitems[' . $index . ']', $commodity_name, '', $available_quantity, 0, $unit_name, $unit_price, '', $value['commodity_code'], $value['unit_id'], '', '', '', '', '', '', '', '', '', '', '', '', '', 'undefined', false, false, $value['serial_number'], 0, $value['description'], '', $value['area']);
+						$last_index = $index;
+					}
+				}
+			}
+		}
+
+		$arr_wo_order['result'] = $goods_delivery_row_template;
+		$arr_wo_order['additional_discount'] = 0;
+
+		return $arr_wo_order;
+	}
 }

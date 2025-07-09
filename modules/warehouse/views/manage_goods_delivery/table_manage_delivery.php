@@ -58,7 +58,8 @@ $additionalSelect = [
     'date_c',
     'goods_delivery_code',
     'total_money',
-    'type_of_delivery'
+    'type_of_delivery',
+    'wo_order_id'
 ];
 
 $result  = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, $additionalSelect);
@@ -146,6 +147,9 @@ foreach ($rResult as $aRow) {
                 $_data = '';
                 if (get_status_modules_wh('purchase') && !empty($aRow['pr_order_id'])) {
                     $_data = '<a href="' . admin_url('purchase/purchase_order/' . $aRow['pr_order_id']) . '">' . get_pur_order_name($aRow['pr_order_id']) . '</a>';
+                }
+                if (get_status_modules_wh('purchase') && !empty($aRow['wo_order_id'])) {
+                    $_data = '<a href="' . admin_url('purchase/work_order/' . $aRow['wo_order_id']) . '" >' . get_wo_order_name($aRow['wo_order_id']) . '</a>';
                 }
                 break;
             case 'id as pdf':
