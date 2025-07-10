@@ -1,240 +1,38 @@
 <script>  
 
-var commodity_group_type_value = {};
-    function new_commodity_group_type(){
-    	"use strict";
-        $('#commodity_group_type').modal('show');
-        $('.edit-title').addClass('hide');
-        $('.add-title').removeClass('hide');
-        $('#commodity_group_type_id').html('');
+function new_commodity_group_type(){
+  "use strict";
+  $('#commodity_group_type').modal('show');
+  $('.edit-title').addClass('hide');
+  $('.add-title').removeClass('hide');
+  $('input[name="commodity_group_type_id"]').val('');
+  $('input[name="commodity_group_code"]').val('');
+  $('input[name="name"]').val('');
+}
 
-        var handsontable_html ='<div id="hot_commodity_group_type" class="hot handsontable htColumnHeaders"></div>';
-        if($('#add_handsontable').html() != null){
-          $('#add_handsontable').empty();
+function edit_commodity_group_type(invoker, id) {
+  "use strict";
+  appValidateForm($('#add_commodity_group_type'),{commodity_group_code:'required', name:'required'});
+  var commodity_group_code = $(invoker).data('commodity_group_code');
+  var name = $(invoker).data('name');
+  $('input[name="commodity_group_type_id"]').val(id);
+  $('input[name="commodity_group_code"]').val(commodity_group_code);
+  $('input[name="name"]').val(name);
+  $('#commodity_group_type').modal('show');
+  $('#commodity_group_type .add-title').addClass('hide');
+  $('#commodity_group_type .edit-title').removeClass('hide');
+}
 
-          $('#add_handsontable').html(handsontable_html);
-        }else{
-          $('#add_handsontable').html(handsontable_html);
+appValidateForm($('#add_commodity_group_type'),{commodity_group_code:'required', name:'required'});
 
-        }
-       
-
-    setTimeout(function(){
-        "use strict";
-
-      //hansometable for allowance no taxable
-      var hotElement1 = document.querySelector('#hot_commodity_group_type');
-
-       var commodity_group_type = new Handsontable(hotElement1, {
-        contextMenu: true,
-        manualRowMove: true,
-        manualColumnMove: true,
-        stretchH: 'all',
-        autoWrapRow: true,
-        rowHeights: 30,
-        defaultRowHeight: 100,
-        maxRows: 22,
-        minRows: 9,
-        width: '100%',
-        height: 330,
-        licenseKey: 'non-commercial-and-evaluation',
-        rowHeaders: true,
-        autoColumncommodity_group: {
-          samplingRatio: 23
-        },
-       
-
-        filters: true,
-        manualRowRecommodity_group: true,
-        manualColumnRecommodity_group: true,
-        allowInsertRow: true,
-        allowRemoveRow: true,
-      	columnHeaderHeight: 40,
-
-        colWidths: [40, 100, 30,30, 30, 140],
-        rowHeights: 30,
-        
-        rowHeaderWidth: [44],
-        minRow : 10,
-
-        columns: [
-                    {
-                      type: 'text',
-                      data: 'commodity_group_code'
-                    },
-                     {
-                      type: 'text',
-                      data: 'name',
-                      // set desired format pattern and
-                    },
-                    {
-                      type: 'numeric',
-                      data: 'order',
-                    },
-                    {
-                      type: 'checkbox',
-                      data: 'display',
-                      checkedTemplate: 'yes',
-                      uncheckedTemplate: 'no'
-                    },
-                    {
-                      type: 'text',
-                      data: 'note',
-                    },
-                  
-                  ],
-
-        colHeaders: [
-        "<?php echo _l('commodity_group_code') ?>",
-        "<?php echo _l('commodity_group_name') ?>",
-        "<?php echo _l('order') ?>",
-        "<?php echo _l('display') ?>",
-        "<?php echo _l('note') ?>",
-      ],
-       
-        
-        data: [
-        {"commodity_group_code":"","name":"","order":"","display":"yes","note":""},
-        {"commodity_group_code":"","name":"","order":"","display":"yes","note":""},
-        {"commodity_group_code":"","name":"","order":"","display":"yes","note":""},
-        {"commodity_group_code":"","name":"","order":"","display":"yes","note":""},
-        {"commodity_group_code":"","name":"","order":"","display":"yes","note":""},
-        {"commodity_group_code":"","name":"","order":"","display":"yes","note":""},
-        {"commodity_group_code":"","name":"","order":"","display":"yes","note":""},
-        {"commodity_group_code":"","name":"","order":"","display":"yes","note":""},
-        {"commodity_group_code":"","name":"","order":"","display":"yes","note":""},
-        ],
-
-      });
-       commodity_group_type_value = commodity_group_type;
-      },300);
-
-    }
-
-  function edit_commodity_group_type(invoker,id){
-    "use strict";
-
-    var commodity_group_code = $(invoker).data('commodity_group_code');
-    var name = $(invoker).data('name');
-
-    var order = $(invoker).data('order');
-    if($(invoker).data('display') == 0){
-      var display = 'no';
-    }else{
-      var display = 'yes';
-    }
-    var note = $(invoker).data('note');
-
-        $('#commodity_group_type_id').html('');
-        $('#commodity_group_type_id').append(hidden_input('id',id));
-        
-        $('#commodity_group_type').modal('show');
-        $('.edit-title').removeClass('hide');
-        $('.add-title').addClass('hide');
-      
-
-        var handsontable_html ='<div id="hot_commodity_group_type" class="hot handsontable htColumnHeaders"></div>';
-        if($('#add_handsontable').html() != null){
-          $('#add_handsontable').empty();
-
-          $('#add_handsontable').html(handsontable_html);
-        }else{
-          $('#add_handsontable').html(handsontable_html);
-
-        }
-
-    setTimeout(function(){
-      "use strict";
-      var hotElement1 = document.querySelector('#hot_commodity_group_type');
-
-       var commodity_group_type = new Handsontable(hotElement1, {
-        contextMenu: true,
-        manualRowMove: true,
-        manualColumnMove: true,
-        stretchH: 'all',
-        autoWrapRow: true,
-        rowHeights: 30,
-        defaultRowHeight: 100,
-        maxRows: 1,
-        width: '100%',
-        height: 130,
-        rowHeaders: true,
-        autoColumncommodity_group: {
-          samplingRatio: 23
-        },
-        
-		licenseKey: 'non-commercial-and-evaluation',
-        filters: true,
-        manualRowRecommodity_group: true,
-        manualColumnRecommodity_group: true,
-       
-      	columnHeaderHeight: 40,
-
-        colWidths: [40, 100, 30,30, 30, 140],
-        rowHeights: 30,
-        
-        rowHeaderWidth: [44],
-
-        columns: [
-                {
-                  type: 'text',
-                  data: 'commodity_group_code',
-                  
-                },
-                 {
-                  type: 'text',
-                  data: 'name',
-                  // set desired format pattern and
-                },
-                {
-                  type: 'numeric',
-                  data: 'order',
-                },
-                {
-                  type: 'checkbox',
-                  data: 'display',
-                  checkedTemplate: 'yes',
-                  uncheckedTemplate: 'no'
-                },
-                {
-                  type: 'text',
-                  data: 'note',
-                },
-              
-              ],
-
-        colHeaders: [
-        "<?php echo _l('commodity_group_code') ?>",
-        "<?php echo _l('commodity_group_name') ?>",
-        "<?php echo _l('order') ?>",
-        "<?php echo _l('display') ?>",
-        "<?php echo _l('note') ?>",
-      ],
-
-
-        data: [{"commodity_group_code":commodity_group_code,"name":name,"order":order,"display":display,"note":note}],
-
-      });
-       commodity_group_type_value = commodity_group_type;
-      },300);
-
-    }
-
-    function add_commodity_group_type(invoker){
-      	"use strict";
-    
-        var valid_commodity_group_type = $('#hot_commodity_group_type').find('.htInvalid').html();
-
-        if(valid_commodity_group_type){
-          alert_float('danger', "<?php echo _l('data_must_number') ; ?>");
-          
-        }else{
-
-          $('input[name="hot_commodity_group_type"]').val(commodity_group_type_value.getData());
-          $('#add_commodity_group_type').submit(); 
-
-        }
-        
-    }
+var commodity_group_table;
+commodity_group_table = $('.commodity-group-table');
+var Params = {
+  "project": "[name='select_project']"
+};
+initDataTable('.commodity-group-table', admin_url + 'purchase/table_pur_commodity_group', [], [], Params, [0, 'asc']);
+$('select[name="select_project"]').on('change', function () {
+  commodity_group_table.DataTable().ajax.reload();
+});
 
 </script>

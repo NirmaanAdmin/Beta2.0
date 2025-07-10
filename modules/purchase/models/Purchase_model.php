@@ -6412,80 +6412,17 @@ class Purchase_model extends App_Model
      */
     public function add_commodity_group_type($data, $id = false)
     {
-        $data['commodity_group'] = str_replace(', ', '|/\|', $data['hot_commodity_group_type']);
-
-        $data_commodity_group_type = explode(',', $data['commodity_group']);
-        $results = 0;
-        $results_update = '';
-        $flag_empty = 0;
-
-        foreach ($data_commodity_group_type as $commodity_group_type_key => $commodity_group_type_value) {
-            if ($commodity_group_type_value == '') {
-                $commodity_group_type_value = 0;
+        if($id) {
+            $this->db->where('id', $id);
+            $this->db->update(db_prefix() . 'items_groups', $data);
+            if ($this->db->affected_rows() > 0) {
+                return $id;
             }
-            if (($commodity_group_type_key + 1) % 5 == 0) {
-
-                $arr_temp['note'] = str_replace('|/\|', ', ', $commodity_group_type_value);
-
-                if ($id == false && $flag_empty == 1) {
-                    $this->db->insert(db_prefix() . 'items_groups', $arr_temp);
-                    $insert_id = $this->db->insert_id();
-                    if ($insert_id) {
-                        $results++;
-                    }
-                }
-                if (is_numeric($id) && $flag_empty == 1) {
-                    $this->db->where('id', $id);
-                    $this->db->update(db_prefix() . 'items_groups', $arr_temp);
-                    if ($this->db->affected_rows() > 0) {
-                        $results_update = true;
-                    } else {
-                        $results_update = false;
-                    }
-                }
-
-                $flag_empty = 0;
-                $arr_temp = [];
-            } else {
-
-                switch (($commodity_group_type_key + 1) % 5) {
-                    case 1:
-                        if (is_numeric($id)) {
-                            //update
-                            $arr_temp['commodity_group_code'] = str_replace('|/\|', ', ', $commodity_group_type_value);
-                            $flag_empty = 1;
-                        } else {
-                            //add
-                            $arr_temp['commodity_group_code'] = str_replace('|/\|', ', ', $commodity_group_type_value);
-
-                            if ($commodity_group_type_value != '0') {
-                                $flag_empty = 1;
-                            }
-                        }
-                        break;
-                    case 2:
-                        $arr_temp['name'] = str_replace('|/\|', ', ', $commodity_group_type_value);
-                        break;
-                    case 3:
-                        $arr_temp['order'] = $commodity_group_type_value;
-                        break;
-                    case 4:
-                        //display 1: display (yes) , 0: not displayed (no)
-                        if ($commodity_group_type_value == 'yes') {
-                            $display_value = 1;
-                        } else {
-                            $display_value = 0;
-                        }
-                        $arr_temp['display'] = $display_value;
-                        break;
-                }
-            }
-        }
-
-        if ($id == false) {
-            return $results > 0 ? true : false;
         } else {
-            return $results_update;
+            $data['project'] = get_default_project();
+            $this->db->insert(db_prefix() . 'items_groups', $data);
+            $insert_id = $this->db->insert_id();
+            return $insert_id;
         }
     }
     public function add_area($data)
