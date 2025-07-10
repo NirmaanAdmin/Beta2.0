@@ -3931,7 +3931,7 @@ function pur_get_item_selcted_select($id, $name_item_name)
         $preSelectedId = $id;
 
         // Begin the select element
-        $selct .= '<select id="' . $name_item_name . '" name="' . $name_item_name . '" data-selected-id="' . $preSelectedId . '" class="form-control selectpicker item-select" data-live-search="true"  disabled="disabled">';
+        $selct .= '<select id="' . $name_item_name . '" name="' . $name_item_name . '" data-selected-id="' . $preSelectedId . '" class="form-control selectpicker item-select" data-live-search="true">';
         $selct .=  '<option value="">Type at least 3 letters..</option>';
         // Iterate over the items to create options
         foreach ($items as $item) {
