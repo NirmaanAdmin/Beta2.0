@@ -375,10 +375,10 @@
                             <div class="col-sm-6 text-right">
                                 <?php
                                 if($estimate->lock_budget == 1) { ?>
-                                    <a href="#" class="btn btn-primary" onclick="update_lock_budget(<?php echo $estimate->id; ?>, '0'); return false;">Click Here for Unlock the Budget</a>
+                                    <a href="#" class="btn btn-primary" onclick="update_lock_budget(<?php echo $estimate->id; ?>, '0'); return false;"><i class="fa fa-unlock"></i> Click Here for Unlock the Budget</a>
                                     <br>
                                 <?php } else { ?>
-                                    <a href="#" class="btn btn-primary" onclick="update_lock_budget(<?php echo $estimate->id; ?>, '1'); return false;">Click Here for Lock the Budget</a>
+                                    <a href="#" class="btn btn-primary" onclick="update_lock_budget(<?php echo $estimate->id; ?>, '1'); return false;"><i class="fa fa-lock"></i> Click Here for Lock the Budget</a>
                                     <br>
                                 <?php } ?>
                                 <?php

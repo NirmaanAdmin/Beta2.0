@@ -20409,6 +20409,7 @@ class Purchase_model extends App_Model
             foreach ($all_revisions as $key => $revision) {
                 $headers[] = 'R' . $key . ' Qty';
                 $headers[] = 'R' . $key . ' Rate';
+                $headers[] = 'R' . $key . ' Remarks';
             }
         }
         // Write headers to CSV
@@ -20429,6 +20430,7 @@ class Purchase_model extends App_Model
                 $item_output[] = $item_description;
                 $item_output[] = $sub_head;
                 if (!empty($all_revisions)) {
+                    $previous_revision = null;
                     foreach ($all_revisions as $key => $revision) {
                         $this->db->where('rel_id', $revision);
                         $this->db->where('rel_type', 'estimate');
@@ -20443,6 +20445,27 @@ class Purchase_model extends App_Model
                             $item_output[] = '';
                             $item_output[] = '';
                         }
+                        $item_remarks = '';
+                        $estimate_item = $this->get_estimate_item_details($revision, $budget_head_id, $item['item_code'], $item['long_description']);
+                        if(empty($estimate_item)) {
+                            $item_remarks .= 'The item does not exist in this revision.';
+                        } else if(!empty($estimate_item)) {
+                            if ($previous_revision !== null) {
+                                $previous_estimate_item = $this->get_estimate_item_details($previous_revision, $budget_head_id, $item['item_code'], $item['long_description']);
+                                if(empty($previous_estimate_item)) {
+                                    $item_remarks .= 'The new item is added in this revision.';
+                                } else {
+                                    if($estimate_item->qty != $previous_estimate_item->qty) {
+                                        $item_remarks .= 'The quantity is updated from '.$previous_estimate_item->qty.' to '.$estimate_item->qty.'';
+                                    } if($estimate_item->rate != $previous_estimate_item->rate) {
+                                        $item_remarks .= 'The rate is updated from '.$previous_estimate_item->rate.' to '.$estimate_item->rate.'';
+                                    }
+                                }
+                            }
+                        }
+                        $item_output[] = $item_remarks;
+
+                        $previous_revision = $revision;
                     }
                 }
 
@@ -22707,5 +22730,27 @@ class Purchase_model extends App_Model
             return true;
         }
         return false;
+    }
+
+    public function get_estimate_item_details($revision, $budget_head_id, $item_code, $long_description)
+    {
+        $non_break_description = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $long_description));
+        $this->db->select(db_prefix() . 'itemable.*');
+        $this->db->select("
+            REPLACE(
+                REPLACE(
+                    REPLACE(
+                        REPLACE(" . db_prefix() . "itemable.long_description, '\r', ''),
+                    '\n', ''),
+                '<br />', ''),
+            '<br/>', '') AS non_break_description
+        ");
+        $this->db->where('rel_id', $revision);
+        $this->db->where('rel_type', 'estimate');
+        $this->db->where('annexure', $budget_head_id);
+        $this->db->where('item_code', $item_code);
+        $this->db->group_by(db_prefix() . 'itemable.id');
+        $this->db->having('non_break_description', $non_break_description);
+        return $this->db->get(db_prefix() . 'itemable')->row();
     }
 }
