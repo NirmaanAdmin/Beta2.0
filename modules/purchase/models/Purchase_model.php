@@ -6508,73 +6508,17 @@ class Purchase_model extends App_Model
      */
     public function add_sub_group($data, $id = false)
     {
-        $commodity_type = str_replace(', ', '|/\|', $data['hot_sub_group']);
-
-        $data_commodity_type = explode(',', $commodity_type);
-        $results = 0;
-        $results_update = '';
-        $flag_empty = 0;
-
-        foreach ($data_commodity_type as $commodity_type_key => $commodity_type_value) {
-            if ($commodity_type_value == '') {
-                $commodity_type_value = 0;
+        if($id) {
+            $this->db->where('id', $id);
+            $this->db->update(db_prefix() . 'wh_sub_group', $data);
+            if ($this->db->affected_rows() > 0) {
+                return $id;
             }
-            if (($commodity_type_key + 1) % 6 == 0) {
-                $arr_temp['note'] = str_replace('|/\|', ', ', $commodity_type_value);
-
-                if ($id == false && $flag_empty == 1) {
-                    $this->db->insert(db_prefix() . 'wh_sub_group', $arr_temp);
-                    $insert_id = $this->db->insert_id();
-                    if ($insert_id) {
-                        $results++;
-                    }
-                }
-                if (is_numeric($id) && $flag_empty == 1) {
-                    $this->db->where('id', $id);
-                    $this->db->update(db_prefix() . 'wh_sub_group', $arr_temp);
-                    if ($this->db->affected_rows() > 0) {
-                        $results_update = true;
-                    } else {
-                        $results_update = false;
-                    }
-                }
-                $flag_empty = 0;
-                $arr_temp = [];
-            } else {
-
-                switch (($commodity_type_key + 1) % 6) {
-                    case 1:
-                        $arr_temp['sub_group_code'] = str_replace('|/\|', ', ', $commodity_type_value);
-                        if ($commodity_type_value != '0') {
-                            $flag_empty = 1;
-                        }
-                        break;
-                    case 2:
-                        $arr_temp['sub_group_name'] = str_replace('|/\|', ', ', $commodity_type_value);
-                        break;
-                    case 3:
-                        $arr_temp['group_id'] = $commodity_type_value;
-                        break;
-                    case 4:
-                        $arr_temp['order'] = $commodity_type_value;
-                        break;
-                    case 5:
-                        //display 1: display (yes) , 0: not displayed (no)
-                        if ($commodity_type_value == 'yes') {
-                            $display_value = 1;
-                        } else {
-                            $display_value = 0;
-                        }
-                        $arr_temp['display'] = $display_value;
-                        break;
-                }
-            }
-        }
-
-        if ($id == false) {
-            return $results > 0 ? true : false;
         } else {
-            return $results_update;
+            $data['project'] = get_default_project();
+            $this->db->insert(db_prefix() . 'wh_sub_group', $data);
+            $insert_id = $this->db->insert_id();
+            return $insert_id;
         }
     }
 

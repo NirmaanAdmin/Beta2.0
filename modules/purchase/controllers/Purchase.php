@@ -4318,8 +4318,8 @@ class purchase extends AdminController
             $message = '';
             $data = $this->input->post();
 
-            if (!$this->input->post('id')) {
-
+            if (!$this->input->post('sub_group_type_id')) {
+                unset($data['sub_group_type_id']);
                 $mess = $this->purchase_model->add_sub_group($data);
                 if ($mess) {
                     set_alert('success', _l('added_successfully') . ' ' . _l('sub_group'));
@@ -4328,8 +4328,8 @@ class purchase extends AdminController
                 }
                 redirect(admin_url('purchase/setting?group=sub_group'));
             } else {
-                $id = $data['id'];
-                unset($data['id']);
+                $id = $data['sub_group_type_id'];
+                unset($data['sub_group_type_id']);
                 $success = $this->purchase_model->add_sub_group($data, $id);
                 if ($success) {
                     set_alert('success', _l('updated_successfully') . ' ' . _l('sub_group'));
@@ -15191,5 +15191,10 @@ class purchase extends AdminController
     public function table_pur_commodity_group()
     {
         $this->app->get_table_data(module_views_path('purchase', 'includes/table_pur_commodity_group'));
+    }
+
+    public function table_pur_sub_group()
+    {
+        $this->app->get_table_data(module_views_path('purchase', 'includes/table_pur_sub_group'));
     }
 }

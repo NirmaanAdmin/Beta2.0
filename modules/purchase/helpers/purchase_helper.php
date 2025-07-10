@@ -4580,3 +4580,18 @@ function get_arr_vendors_by_tender($pur_tender)
     }
     return $arr_vendor_rs;
 }
+
+function get_budget_head_project_wise($id = false)
+{
+    $CI = &get_instance();
+    if (is_numeric($id)) {
+        $CI->db->where('id', $id);
+        return $CI->db->get(db_prefix() . 'items_groups')->row();
+    } else {
+        $default_project = get_default_project();
+        $CI->db->select('*');
+        $CI->db->from(db_prefix() . 'items_groups');
+        $CI->db->where('(project IS NULL OR project = '.$default_project.')');
+        return $CI->db->get()->result_array();
+    }
+}
