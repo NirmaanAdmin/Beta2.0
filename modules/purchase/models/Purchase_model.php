@@ -6419,7 +6419,7 @@ class Purchase_model extends App_Model
                 return $id;
             }
         } else {
-            $data['project'] = get_default_project();
+            $data['project_id'] = get_default_project();
             $this->db->insert(db_prefix() . 'items_groups', $data);
             $insert_id = $this->db->insert_id();
             return $insert_id;
@@ -6515,7 +6515,7 @@ class Purchase_model extends App_Model
                 return $id;
             }
         } else {
-            $data['project'] = get_default_project();
+            $data['project_id'] = get_default_project();
             $this->db->insert(db_prefix() . 'wh_sub_group', $data);
             $insert_id = $this->db->insert_id();
             return $insert_id;

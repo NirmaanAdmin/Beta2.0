@@ -4591,7 +4591,40 @@ function get_budget_head_project_wise($id = false)
         $default_project = get_default_project();
         $CI->db->select('*');
         $CI->db->from(db_prefix() . 'items_groups');
-        $CI->db->where('(project IS NULL OR project = '.$default_project.')');
+        $CI->db->where('(project_id IS NULL OR project_id = '.$default_project.')');
+        $CI->db->order_by('id', 'asc');
+        return $CI->db->get()->result_array();
+    }
+}
+
+function get_budget_sub_head_project_wise($id = false)
+{
+    $CI = &get_instance();
+    if (is_numeric($id)) {
+        $CI->db->where('id', $id);
+        return $CI->db->get(db_prefix() . 'wh_sub_group')->row();
+    } else {
+        $default_project = get_default_project();
+        $CI->db->select('*');
+        $CI->db->from(db_prefix() . 'wh_sub_group');
+        $CI->db->where('(project_id IS NULL OR project_id = '.$default_project.')');
+        $CI->db->order_by('id', 'asc');
+        return $CI->db->get()->result_array();
+    }
+}
+
+function get_area_project_wise($id = false)
+{
+    $CI = &get_instance();
+    if (is_numeric($id)) {
+        $CI->db->where('id', $id);
+        return $CI->db->get(db_prefix() . 'area')->row();
+    } else {
+        $default_project = get_default_project();
+        $CI->db->select('*');
+        $CI->db->from(db_prefix() . 'area');
+        $CI->db->where('(project_id IS NULL OR project_id = '.$default_project.')');
+        $CI->db->order_by('id', 'asc');
         return $CI->db->get()->result_array();
     }
 }

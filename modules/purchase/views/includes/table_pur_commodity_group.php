@@ -6,7 +6,7 @@ $aColumns = [
     'id',
     'commodity_group_code',
     'name',
-    'project',
+    'project_id',
 ];
 
 $sIndexColumn = 'id';
@@ -16,7 +16,7 @@ $where        = [];
 
 if ($this->ci->input->post('project')) {
     $project = $this->ci->input->post('project');
-    array_push($where, 'AND (project IS NULL OR project = ' . $project . ')');
+    array_push($where, 'AND (project_id IS NULL OR project_id = ' . $project . ')');
 }
 
 $result  = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [$sIndexColumn]);
@@ -33,7 +33,7 @@ foreach ($rResult as $key => $aRow) {
     $row[] = $key + 1;
     $row[] = $commodity_group_code;
     $row[] = $name;
-    $row[] = get_project_name_by_id($aRow['project']);
+    $row[] = get_project_name_by_id($aRow['project_id']);
 
     $options = '';
 
