@@ -264,11 +264,12 @@
                               $production_status .= '<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="tablePurOderStatus-' . $aRow['id'] . '">';
                               foreach ($production_labels as $key => $status) {
                                 if ($key != $receipt_value['production_status']) {
+                                  $purchase_tracker_json = htmlspecialchars(json_encode($purchase_tracker ?? false), ENT_QUOTES, 'UTF-8');
                                   $production_status .= '<li>
-                                           <a href="#" onclick="change_production_status(' . $key . ', ' . $receipt_value['id'] . '); return false;">
-                                               ' . $status['text'] . '
-                                           </a>
-                                       </li>';
+                                      <a href="#" onclick="change_production_status(' . $key . ', ' . $receipt_value['id'] . ', ' . $purchase_tracker_json . '); return false;"> 
+                                          ' . $status['text'] . '
+                                      </a>
+                                  </li>';
                                 }
                               }
                               $production_status .= '</ul>';
@@ -294,11 +295,12 @@
                               $imp_local_status .= '<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="tableImpLocalStatus-' . $aRow['id'] . '">';
                               foreach ($imp_local_labels as $key => $status) {
                                 if ($key != $receipt_value['imp_local_status']) {
+                                  $imp_local_status_json = htmlspecialchars(json_encode($purchase_tracker ?? false), ENT_QUOTES, 'UTF-8');
                                   $imp_local_status .= '<li>
-                                           <a href="#" onclick="change_imp_local_status(' . $key . ', ' . $receipt_value['id'] . '); return false;">
-                                               ' . $status['text'] . '
-                                           </a>
-                                       </li>';
+                                      <a href="#" onclick="change_imp_local_status(' . $key . ', ' . $receipt_value['id'] . ', ' . $imp_local_status_json . '); return false;"> 
+                                          ' . $status['text'] . '
+                                      </a>
+                                  </li>';
                                 }
                               }
                               $imp_local_status .= '</ul>';
@@ -326,11 +328,12 @@
                               $tracker_status .= '<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="tableTrackerStatus-' . $aRow['id'] . '">';
                               foreach ($tracker_status_labels as $key => $status) {
                                 if ($key != $receipt_value['tracker_status']) {
+                                  $tracker_status_json = htmlspecialchars(json_encode($purchase_tracker ?? false), ENT_QUOTES, 'UTF-8');
                                   $tracker_status .= '<li>
-                                           <a href="#" onclick="change_tracker_status(' . $key . ', ' . $receipt_value['id'] . '); return false;">
-                                               ' . $status['text'] . '
-                                           </a>
-                                       </li>';
+                                      <a href="#" onclick="change_tracker_status(' . $key . ', ' . $receipt_value['id'] . ', ' . $tracker_status_json . '); return false;"> 
+                                          ' . $status['text'] . '
+                                      </a>
+                                  </li>';
                                 }
                               }
                               $tracker_status .= '</ul>';
@@ -355,6 +358,7 @@
                                 echo '<input type="date" class="form-control payment-date-input"
                                   value="' . $payment_date . '"
                                   data-id="' . $receipt_value['id'] . '"
+                                  data-tracker=\'' . (isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false') . '\'
                                   ">';
                                 ?>
                               </td>
@@ -363,6 +367,7 @@
                                 echo '<input type="date" class="form-control est-delivery-date-input"
                                   value="' . $est_delivery_date . '"
                                   data-id="' . $receipt_value['id'] . '"
+                                  data-tracker=\'' . (isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false') . '\'
                                   ">';
                                 ?>
                               </td>
@@ -371,10 +376,11 @@
                                 echo '<input type="date" class="form-control delivery-date-input"
                                   value="' . $delivery_date . '"
                                   data-id="' . $receipt_value['id'] . '"
+                                  data-tracker=\'' . (isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false') . '\'
                                   ">';
                                 ?>
                               </td>
-                              <td><?php echo '<textarea style="width: 154px;height: 50px;" class="form-control  remarks-input" data-id="' . $receipt_value['id'] . '">' . $remarks . '</textarea>' ?></td>
+                              <td><?php echo '<textarea style="width: 154px;height: 50px;" class="form-control  remarks-input" data-id="' . $receipt_value['id'] . '" data-tracker=\'' . (isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false') . '\'>' . $remarks . '</textarea>' ?></td>
                             </tr>
                           <?php  } ?>
                         </tbody>
@@ -506,12 +512,12 @@
                               <td><?php echo html_entity_decode($description) ?></td>
                               <td>
                                 <div class="form-group">
-                                  <input type="number" id="lead_time_days" name="lead_time_days" class="form-control" min="0" max="100" value="<?php echo $lead_time_days; ?>" data-id="<?php echo $receipt_value['id']; ?>">
+                                  <input type="number" id="lead_time_days" name="lead_time_days" class="form-control" min="0" max="100" value="<?php echo $lead_time_days; ?>" data-id="<?php echo $receipt_value['id']; ?>" data-tracker='<?php echo isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false'; ?>'>
                                 </div>
                               </td>
                               <td>
                                 <div class="form-group">
-                                  <input type="number" id="advance_payment" name="advance_payment" class="form-control" min="0" max="100" value="<?php echo $advance_payment; ?>" data-id="<?php echo $receipt_value['id']; ?>">
+                                  <input type="number" id="advance_payment" name="advance_payment" class="form-control" min="0" max="100" value="<?php echo $advance_payment; ?>" data-id="<?php echo $receipt_value['id']; ?>" data-tracker='<?php echo isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false'; ?>'>
                                 </div>
                               </td>
                               <td>
@@ -548,13 +554,13 @@
                                 ?>
                               </td>
                               <td>
-                                <input type="date" id="shop_submission" name="shop_submission" class="form-control" value="<?php echo $shop_submission; ?>" data-id="<?php echo $receipt_value['id']; ?>">
+                                <input type="date" id="shop_submission" name="shop_submission" class="form-control" value="<?php echo $shop_submission; ?>" data-id="<?php echo $receipt_value['id']; ?>" data-tracker='<?php echo isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false'; ?>'>
                               </td>
                               <td>
-                                <input type="date" id="shop_approval" name="shop_approval" class="form-control" value="<?php echo $shop_approval; ?>" data-id="<?php echo $receipt_value['id']; ?>">
+                                <input type="date" id="shop_approval" name="shop_approval" class="form-control" value="<?php echo $shop_approval; ?>" data-id="<?php echo $receipt_value['id']; ?>" data-tracker='<?php echo isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false'; ?>'>
                               </td>
                               <td>
-                                <textarea style="width: 154px;height: 50px;" class="form-control" name="actual_remarks" data-id="<?php echo $receipt_value['id']; ?>"><?php echo $actual_remarks; ?></textarea>
+                                <textarea style="width: 154px;height: 50px;" class="form-control" name="actual_remarks" data-id="<?php echo $receipt_value['id']; ?>" data-tracker='<?php echo isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false'; ?>'><?php echo $actual_remarks; ?></textarea>
                               </td>
                             </tr>
                           <?php  } ?>
@@ -655,328 +661,6 @@
 
 </html>
 <script>
-  var table_order_tracker = $('.table-items-preview').DataTable();
-
-  // Inline editing for "Payment Date"
-  $('body').on('change', '.payment-date-input', function(e) {
-    e.preventDefault();
-
-    var rowId = $(this).data('id');
-    var paymentDate = $(this).val();
-    var purchase_tracker = <?php echo isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false'; ?>;
-
-    // Perform AJAX request to update the completion date
-    $.post(admin_url + 'warehouse/update_payment_date', {
-      id: rowId,
-      payment_date: paymentDate,
-      purchase_tracker: purchase_tracker
-    }).done(function(response) {
-      response = JSON.parse(response);
-      if (response.success) {
-        alert_float('success', response.message);
-        table_order_tracker.ajax.reload(null, false); // Reload table without refreshing the page
-      } else {
-        alert_float('danger', response.message);
-      }
-    });
-  });
-
-  // Inline editing for "EST delivery Date"
-  $('body').on('change', '.est-delivery-date-input', function(e) {
-    e.preventDefault();
-
-    var rowId = $(this).data('id');
-    var estDeliveryDate = $(this).val();
-    var purchase_tracker = <?php echo isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false'; ?>;
-
-    // Perform AJAX request to update the completion date
-    $.post(admin_url + 'warehouse/update_est_delivery_date', {
-      id: rowId,
-      est_delivery_date: estDeliveryDate,
-      purchase_tracker: purchase_tracker
-    }).done(function(response) {
-      response = JSON.parse(response);
-      if (response.success) {
-        alert_float('success', response.message);
-        table_order_tracker.ajax.reload(null, false); // Reload table without refreshing the page
-      } else {
-        alert_float('danger', response.message);
-      }
-    });
-  });
-
-
-  // Inline editing for "Delivery Date"
-  $('body').on('change', '.delivery-date-input', function(e) {
-    e.preventDefault();
-
-    var rowId = $(this).data('id');
-    var DeliveryDate = $(this).val();
-    var purchase_tracker = <?php echo isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false'; ?>;
-
-    // Perform AJAX request to update the completion date
-    $.post(admin_url + 'warehouse/update_delivery_date', {
-      id: rowId,
-      delivery_date: DeliveryDate,
-      purchase_tracker: purchase_tracker
-    }).done(function(response) {
-      response = JSON.parse(response);
-      if (response.success) {
-        alert_float('success', response.message);
-        table_order_tracker.ajax.reload(null, false); // Reload table without refreshing the page
-      } else {
-        alert_float('danger', response.message);
-      }
-    });
-  });
-
-  // Inline editing for "Remarks"
-  $('body').on('change', '.remarks-input', function(e) {
-    e.preventDefault();
-
-    var rowId = $(this).data('id');
-    var remarks = $(this).val();
-    var purchase_tracker = <?php echo isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false'; ?>;
-
-    // Perform AJAX request to update the completion date
-    $.post(admin_url + 'warehouse/update_remarks', {
-      id: rowId,
-      remarks: remarks,
-      purchase_tracker: purchase_tracker
-    }).done(function(response) {
-      response = JSON.parse(response);
-      if (response.success) {
-        alert_float('success', response.message);
-        table_order_tracker.ajax.reload(null, false); // Reload table without refreshing the page
-      } else {
-        alert_float('danger', response.message);
-      }
-    });
-  });
-
-  function change_production_status(status, id) {
-    "use strict";
-    var purchase_tracker = <?php echo isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false'; ?>;
-    if (id > 0) {
-      $.post(admin_url + 'warehouse/change_production_status/' + status + '/' + id + '/' + purchase_tracker)
-        .done(function(response) {
-          try {
-            response = JSON.parse(response);
-
-            if (response.success) {
-              var $statusSpan = $('#status_span_' + id);
-
-              // Remove all status-related classes
-              $statusSpan.removeClass('label-danger label-success label-info label-warning label-primary label-purple label-teal label-orange label-green label-defaul label-secondaryt');
-
-              // Add the new class and update content
-              if (response.class) {
-                $statusSpan.addClass('label-' + response.class);
-              }
-              if (response.status_str) {
-                $statusSpan.html(response.status_str + ' ' + (response.html || ''));
-              }
-
-              // Display success message
-              alert_float('success', response.mess);
-            } else {
-              // Display warning message if the operation fails
-              alert_float('warning', response.mess);
-            }
-          } catch (e) {
-            console.error('Error parsing server response:', e);
-            alert_float('danger', 'Invalid server response');
-          }
-        })
-        .fail(function(xhr, status, error) {
-          console.error('AJAX Error:', error);
-          alert_float('danger', 'Failed to update status');
-        });
-    }
-  }
-
-  function change_imp_local_status(status, id) {
-    "use strict";
-    var purchase_tracker = <?php echo isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false'; ?>;
-    if (id > 0) {
-      $.post(admin_url + 'warehouse/change_imp_local_status/' + status + '/' + id + '/' + purchase_tracker)
-        .done(function(response) {
-          try {
-            response = JSON.parse(response);
-
-            if (response.success) {
-              var $statusSpan = $('#imp_status_span_' + id);
-
-              // Remove all status-related classes
-              $statusSpan.removeClass('label-danger label-success label-info label-warning label-primary label-purple label-teal label-orange label-green label-defaul label-secondaryt');
-
-              // Add the new class and update content
-              if (response.class) {
-                $statusSpan.addClass('label-' + response.class);
-              }
-              if (response.status_str) {
-                $statusSpan.html(response.status_str + ' ' + (response.html || ''));
-              }
-
-              // Display success message
-              alert_float('success', response.mess);
-            } else {
-              // Display warning message if the operation fails
-              alert_float('warning', response.mess);
-            }
-          } catch (e) {
-            console.error('Error parsing server response:', e);
-            alert_float('danger', 'Invalid server response');
-          }
-        })
-        .fail(function(xhr, status, error) {
-          console.error('AJAX Error:', error);
-          alert_float('danger', 'Failed to update status');
-        });
-    }
-  }
-
-  function change_tracker_status(status, id) {
-    "use strict";
-    var purchase_tracker = <?php echo isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false'; ?>;
-    if (id > 0) {
-      $.post(admin_url + 'warehouse/change_tracker_status/' + status + '/' + id + '/' + purchase_tracker)
-        .done(function(response) {
-          try {
-            response = JSON.parse(response);
-
-            if (response.success) {
-              var $statusSpan = $('#tracker_status_span_' + id);
-
-              // Remove all status-related classes
-              $statusSpan.removeClass('label-danger label-success label-info label-warning label-primary label-purple label-teal label-orange label-green label-defaul label-secondaryt');
-
-              // Add the new class and update content
-              if (response.class) {
-                $statusSpan.addClass('label-' + response.class);
-              }
-              if (response.status_str) {
-                $statusSpan.html(response.status_str + ' ' + (response.html || ''));
-              }
-
-              // Display success message
-              alert_float('success', response.mess);
-            } else {
-              // Display warning message if the operation fails
-              alert_float('warning', response.mess);
-            }
-          } catch (e) {
-            console.error('Error parsing server response:', e);
-            alert_float('danger', 'Invalid server response');
-          }
-        })
-        .fail(function(xhr, status, error) {
-          console.error('AJAX Error:', error);
-          alert_float('danger', 'Failed to update status');
-        });
-    }
-  }
-
-  $('[data-toggle="tooltip"]').tooltip({
-    html: true
-  });
-
-  $('body').on('change', 'input[name="lead_time_days"]', function(e) {
-    e.preventDefault();
-    var rowId = $(this).data('id');
-    var lead_time_days = $(this).val();
-    var purchase_tracker = <?php echo isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false'; ?>;
-    $.post(admin_url + 'warehouse/update_lead_time_days', {
-      id: rowId,
-      lead_time_days: lead_time_days,
-      purchase_tracker: purchase_tracker
-    }).done(function(response) {
-      response = JSON.parse(response);
-      if (response.success) {
-        alert_float('success', response.message);
-      } else {
-        alert_float('danger', response.message);
-      }
-    });
-  });
-
-  $('body').on('change', 'input[name="advance_payment"]', function(e) {
-    e.preventDefault();
-    var rowId = $(this).data('id');
-    var advance_payment = $(this).val();
-    var purchase_tracker = <?php echo isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false'; ?>;
-    $.post(admin_url + 'warehouse/update_advance_payment', {
-      id: rowId,
-      advance_payment: advance_payment,
-      purchase_tracker: purchase_tracker
-    }).done(function(response) {
-      response = JSON.parse(response);
-      if (response.success) {
-        alert_float('success', response.message);
-      } else {
-        alert_float('danger', response.message);
-      }
-    });
-  });
-
-  $('body').on('change', 'input[name="shop_submission"]', function(e) {
-    e.preventDefault();
-    var rowId = $(this).data('id');
-    var shop_submission = $(this).val();
-    var purchase_tracker = <?php echo isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false'; ?>;
-    $.post(admin_url + 'warehouse/update_shop_submission', {
-      id: rowId,
-      shop_submission: shop_submission,
-      purchase_tracker: purchase_tracker
-    }).done(function(response) {
-      response = JSON.parse(response);
-      if (response.success) {
-        alert_float('success', response.message);
-      } else {
-        alert_float('danger', response.message);
-      }
-    });
-  });
-
-  $('body').on('change', 'input[name="shop_approval"]', function(e) {
-    e.preventDefault();
-    var rowId = $(this).data('id');
-    var shop_approval = $(this).val();
-    var purchase_tracker = <?php echo isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false'; ?>;
-    $.post(admin_url + 'warehouse/update_shop_approval', {
-      id: rowId,
-      shop_approval: shop_approval,
-      purchase_tracker: purchase_tracker
-    }).done(function(response) {
-      response = JSON.parse(response);
-      if (response.success) {
-        alert_float('success', response.message);
-      } else {
-        alert_float('danger', response.message);
-      }
-    });
-  });
-
-  $('body').on('change', 'textarea[name="actual_remarks"]', function(e) {
-    e.preventDefault();
-    var rowId = $(this).data('id');
-    var actual_remarks = $(this).val();
-    var purchase_tracker = <?php echo isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false'; ?>;
-    $.post(admin_url + 'warehouse/update_actual_remarks', {
-      id: rowId,
-      actual_remarks: actual_remarks,
-      purchase_tracker: purchase_tracker
-    }).done(function(response) {
-      response = JSON.parse(response);
-      if (response.success) {
-        alert_float('success', response.message);
-      } else {
-        alert_float('danger', response.message);
-      }
-    });
-  });
-</script>
-<script>
   // Toggle settings dropdown visibility
   document.getElementById('settings-toggle').addEventListener('click', function() {
     const dropdown = document.getElementById('settings-dropdown');
@@ -1030,44 +714,4 @@
       });
     });
   });
-  $(document).off('click', '.upload_shop_drawings_attachments')
-    .on('click', '.upload_shop_drawings_attachments', function(e) {
-      e.preventDefault();
-
-      // *** Log once, at handler entry ***
-      console.log('upload clicked');
-
-      var rowId = $(this).data('id');
-      var input = $(this).closest('.input-group').find('.upload_shop_drawings_files')[0];
-
-      if (!input.files.length) {
-        alert_float('warning', "Please select at least one file to upload.");
-        return;
-      }
-
-      var formData = new FormData();
-      // now loop only to append, no logging inside here
-      for (var i = 0; i < input.files.length; i++) {
-        formData.append('attachments[]', input.files[i]);
-      }
-      formData.append('id', rowId);
-      formData.append("csrf_token_name", $('input[name="csrf_token_name"]').val());
-
-      $.ajax({
-        url: admin_url + 'warehouse/upload_purchase_tracker_attachments',
-        type: 'POST',
-        data: formData,
-        processData: false,
-        contentType: false
-      }).done(function(response) {
-        var res = JSON.parse(response);
-        if (res.status) {
-          alert_float('success', "Attachments are uploaded successfully.");
-        } else {
-          alert_float('warning', "Upload failed.");
-        }
-      }).fail(function() {
-        alert_float('warning', "Upload failed.");
-      });
-    });
 </script>
