@@ -76,7 +76,7 @@
                             <div class="dropdown-menu" style="padding: 10px; min-width: 250px;">
                                 <!-- Select All / Deselect All -->
                                 <div>
-                                    <input type="checkbox" id="select-all-columns"> <strong><?php echo _l('select_all'); ?></strong>
+                                    <input type="checkbox" id="select-all-goods-receipt-columns"> <strong><?php echo _l('select_all'); ?></strong>
                                 </div>
                                 <hr>
                                 <!-- Column Checkboxes -->
@@ -95,7 +95,7 @@
                                 ?>
                                 <div>
                                     <?php foreach ($columns as $key => $label): ?>
-                                        <input type="checkbox" class="toggle-column" value="<?php echo $key; ?>" checked>
+                                        <input type="checkbox" class="toggle-goods-receipt-column" value="<?php echo $key; ?>" checked>
                                         <?php echo $label; ?><br>
                                     <?php endforeach; ?>
                                 </div>
@@ -183,25 +183,25 @@
         var table = $('.table-table_manage_goods_receipt').DataTable();
 
         // Handle "Select All" checkbox
-        $('#select-all-columns').on('change', function() {
+        $('#select-all-goods-receipt-columns').on('change', function() {
             var isChecked = $(this).is(':checked');
-            $('.toggle-column').prop('checked', isChecked).trigger('change');
+            $('.toggle-goods-receipt-column').prop('checked', isChecked).trigger('change');
         });
 
         // Handle individual column visibility toggling
-        $('.toggle-column').on('change', function() {
+        $('.toggle-goods-receipt-column').on('change', function() {
             var column = table.column($(this).val());
             column.visible($(this).is(':checked'));
 
             // Sync "Select All" checkbox state
-            var allChecked = $('.toggle-column').length === $('.toggle-column:checked').length;
-            $('#select-all-columns').prop('checked', allChecked);
+            var allChecked = $('.toggle-goods-receipt-column').length === $('.toggle-goods-receipt-column:checked').length;
+            $('#select-all-goods-receipt-columns').prop('checked', allChecked);
         });
 
         // Sync checkboxes with column visibility on page load
         table.columns().every(function(index) {
             var column = this;
-            $('.toggle-column[value="' + index + '"]').prop('checked', column.visible());
+            $('.toggle-goods-receipt-column[value="' + index + '"]').prop('checked', column.visible());
         });
 
         // Prevent dropdown from closing when clicking inside
