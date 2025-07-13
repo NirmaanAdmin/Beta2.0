@@ -403,7 +403,7 @@ class Dashboard_model extends App_Model
 
 				$sub_total = (float)$unit_price * (float)$quantities;
 
-				if ((float)$quantities > 0) {
+				if ((float)$quantities > 0 && !empty($commodity_code)) {
 					$temporaty_quantity = $quantities;
 					$inventory_warehouse_by_commodity = $this->get_inventory_warehouse_by_commodity($commodity_code);
 
