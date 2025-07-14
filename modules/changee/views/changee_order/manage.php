@@ -325,11 +325,11 @@ $module_name = 'changee_order'; ?>
                                  <th><?php echo _l('project'); ?></th>
                                  <th><?php echo _l('department'); ?></th>
                                  <th><?php echo _l('co_description'); ?></th>
+                                 <th><?php echo _l('approval_status'); ?></th>
                                  <th><?php echo _l('co_value'); ?></th>
                                  <th><?php echo _l('tax_value'); ?></th>
                                  <th><?php echo _l('co_value_included_tax'); ?></th>
                                  <th><?php echo _l('tags'); ?></th>
-                                 <th><?php echo _l('approval_status'); ?></th>
                                  <th><?php echo _l('payment_status'); ?></th>
                                  <th><?php echo _l('convert_expense'); ?></th>
                               </tr>
@@ -347,10 +347,10 @@ $module_name = 'changee_order'; ?>
                               <td></td>
                               <td></td>
                               <td></td>
+                              <td></td>
                               <td class="total_co_value"></td>
                               <td class="total_tax_value"></td>
                               <td class="total_co_value_included_tax"></td>
-                              <td></td>
                               <td></td>
                               <td></td>
                               <td></td>
