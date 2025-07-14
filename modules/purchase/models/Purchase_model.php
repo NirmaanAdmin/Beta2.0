@@ -6412,7 +6412,7 @@ class Purchase_model extends App_Model
      */
     public function add_commodity_group_type($data, $id = false)
     {
-        if($id) {
+        if ($id) {
             $this->db->where('id', $id);
             $this->db->update(db_prefix() . 'items_groups', $data);
             if ($this->db->affected_rows() > 0) {
@@ -6508,7 +6508,7 @@ class Purchase_model extends App_Model
      */
     public function add_sub_group($data, $id = false)
     {
-        if($id) {
+        if ($id) {
             $this->db->where('id', $id);
             $this->db->update(db_prefix() . 'wh_sub_group', $data);
             if ($this->db->affected_rows() > 0) {
@@ -20328,18 +20328,19 @@ class Purchase_model extends App_Model
                         }
                         $item_remarks = '';
                         $estimate_item = $this->get_estimate_item_details($revision, $budget_head_id, $item['item_code'], $item['long_description']);
-                        if(empty($estimate_item)) {
+                        if (empty($estimate_item)) {
                             $item_remarks .= 'The item does not exist in this revision.';
-                        } else if(!empty($estimate_item)) {
+                        } else if (!empty($estimate_item)) {
                             if ($previous_revision !== null) {
                                 $previous_estimate_item = $this->get_estimate_item_details($previous_revision, $budget_head_id, $item['item_code'], $item['long_description']);
-                                if(empty($previous_estimate_item)) {
+                                if (empty($previous_estimate_item)) {
                                     $item_remarks .= 'The new item is added in this revision.';
                                 } else {
-                                    if($estimate_item->qty != $previous_estimate_item->qty) {
-                                        $item_remarks .= 'The quantity is updated from '.$previous_estimate_item->qty.' to '.$estimate_item->qty.'';
-                                    } if($estimate_item->rate != $previous_estimate_item->rate) {
-                                        $item_remarks .= 'The rate is updated from '.$previous_estimate_item->rate.' to '.$estimate_item->rate.'';
+                                    if ($estimate_item->qty != $previous_estimate_item->qty) {
+                                        $item_remarks .= 'The quantity is updated from ' . $previous_estimate_item->qty . ' to ' . $estimate_item->qty . '';
+                                    }
+                                    if ($estimate_item->rate != $previous_estimate_item->rate) {
+                                        $item_remarks .= 'The rate is updated from ' . $previous_estimate_item->rate . ' to ' . $estimate_item->rate . '';
                                     }
                                 }
                             }
@@ -20372,38 +20373,46 @@ class Purchase_model extends App_Model
 
     public function update_vbt_bulk_assign_order($data)
     {
-        if (isset($data['pur_order'])) {
-            if (!empty($data['pur_order'])) {
-                $pur_order = $this->get_pur_order($data['pur_order']);
-                $this->db->where('id', $data['pur_invoice']);
-                $this->db->update(
-                    db_prefix() . 'pur_invoices',
-                    ['vendor' => $pur_order->vendor, 'project_id' => $pur_order->project, 'pur_order' => $data['pur_order']]
-                );
-            }
+        if (isset($data['pur_order']) && !empty($data['pur_order'])) {
+            $pur_order = $this->get_pur_order($data['pur_order']);
+            $this->db->where('id', $data['pur_invoice']);
+            $this->db->update(
+                db_prefix() . 'pur_invoices',
+                [
+                    'vendor' => $pur_order->vendor,
+                    'project_id' => $pur_order->project,
+                    'pur_order' => $data['pur_order'],
+                    'wo_order' => null,
+                    'order_tracker_id' => null
+                ]
+            );
+        } elseif (isset($data['wo_order']) && !empty($data['wo_order'])) {
+            $wo_order = $this->get_wo_order($data['wo_order']);
+            $this->db->where('id', $data['pur_invoice']);
+            $this->db->update(
+                db_prefix() . 'pur_invoices',
+                [
+                    'vendor' => $wo_order->vendor,
+                    'project_id' => $wo_order->project,
+                    'wo_order' => $data['wo_order'],
+                    'pur_order' => null,
+                    'order_tracker_id' => null
+                ]
+            );
+        } elseif (isset($data['order_tracker']) && !empty($data['order_tracker'])) {
+            $order_tracker = $this->get_order_tracker($data['order_tracker']);
+            $this->db->where('id', $data['pur_invoice']);
+            $this->db->update(
+                db_prefix() . 'pur_invoices',
+                [
+                    'vendor' => $order_tracker->vendor,
+                    'order_tracker_id' => $data['order_tracker'],
+                    'pur_order' => null,
+                    'wo_order' => null
+                ]
+            );
         }
 
-        if (isset($data['wo_order'])) {
-            if (!empty($data['wo_order'])) {
-                $wo_order = $this->get_wo_order($data['wo_order']);
-                $this->db->where('id', $data['pur_invoice']);
-                $this->db->update(
-                    db_prefix() . 'pur_invoices',
-                    ['vendor' => $wo_order->vendor, 'project_id' => $wo_order->project, 'wo_order' => $data['wo_order']]
-                );
-            }
-        }
-
-        if (isset($data['order_tracker'])) {
-            if (!empty($data['order_tracker'])) {
-                $order_tracker = $this->get_order_tracker($data['order_tracker']);
-                $this->db->where('id', $data['pur_invoice']);
-                $this->db->update(
-                    db_prefix() . 'pur_invoices',
-                    ['vendor' => $order_tracker->vendor, 'order_tracker_id' => $data['order_tracker']]
-                );
-            }
-        }
         return true;
     }
 
@@ -22584,7 +22593,7 @@ class Purchase_model extends App_Model
     }
 
 
-     public function update_compare_quote_tender($pur_tender, $data)
+    public function update_compare_quote_tender($pur_tender, $data)
     {
         if (!$pur_tender) {
             return false;
