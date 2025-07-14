@@ -1097,3 +1097,255 @@ function data_tables_purchase_tracker_init($aColumns, $join = [], $where = [], $
         ],
     ];
 }
+
+function data_tables_actual_purchase_tracker_init($aColumns, $join = [], $where = [], $additionalSelect = [], $sGroupBy = '', $having = '')
+{
+    $CI = &get_instance();
+    $data = $CI->input->post();
+
+    /*
+     * Paging
+     */
+    $sLimit = '';
+    if ((is_numeric($CI->input->post('start'))) && $CI->input->post('length') != '-1') {
+        $sLimit = 'LIMIT ' . intval($CI->input->post('start')) . ', ' . intval($CI->input->post('length'));
+    }
+
+    $sTable = "( 
+        WITH aggregated AS (
+            SELECT 
+                goods_receipt_id, 
+                SUM(po_quantities) AS total_po_quantities, 
+                SUM(quantities) AS total_quantities
+            FROM tblgoods_receipt_detail
+            GROUP BY goods_receipt_id
+        )
+        SELECT 
+            combined_orders.*,
+            CASE 
+                WHEN combined_orders.type = 1 THEN
+                    CASE 
+                        WHEN COALESCE(agg.total_po_quantities, 0) = COALESCE(agg.total_quantities, 0) THEN '2'
+                        WHEN COALESCE(agg.total_quantities, 0) = 0 THEN '0'
+                        WHEN COALESCE(agg.total_quantities, 0) > 0 THEN '1'
+                        ELSE '0'
+                    END
+                ELSE '0'
+            END AS delivery_status
+        FROM (
+            SELECT 
+                gr.id AS id,
+                gr.goods_receipt_code,
+                gr.supplier_code AS supplier_name,
+                gr.buyer_id,
+                gr.kind,
+                gr.pr_order_id,
+                gr.date_add,
+                gr.approval,
+                1 AS type,
+                gr.project,
+                grd.id as item_detail_id,
+                grd.commodity_code,
+                grd.description,
+                grd.area,
+                grd.po_quantities,
+                grd.quantities,
+                grd.unit_id,
+                grd.imp_local_status,
+                grd.tracker_status,
+                grd.production_status,
+                grd.payment_date,
+                grd.est_delivery_date,
+                grd.delivery_date,
+                grd.remarks,
+                grd.lead_time_days,
+                grd.advance_payment,
+                grd.shop_submission,
+                grd.shop_approval,
+                grd.actual_remarks
+            FROM tblgoods_receipt_detail grd
+            LEFT JOIN tblgoods_receipt gr ON gr.id = grd.goods_receipt_id
+
+            UNION ALL
+
+            SELECT 
+                po.id AS id,
+                '' AS goods_receipt_code,
+                po.vendor AS supplier_name,
+                po.id AS buyer_id,
+                po.kind,
+                po.id AS pr_order_id,
+                po.datecreated AS date_add,
+                po.approve_status AS approval,
+                2 AS type,
+                po.project,
+                pod.id as item_detail_id,
+                pod.item_code AS commodity_code,
+                pod.description,
+                pod.area,
+                pod.quantity AS po_quantities,
+                0 AS quantities,
+                pod.unit_id,
+                pod.imp_local_status,
+                pod.tracker_status,
+                pod.production_status,
+                pod.payment_date,
+                pod.est_delivery_date,
+                pod.delivery_date,
+                pod.remarks,
+                pod.lead_time_days,
+                pod.advance_payment,
+                pod.shop_submission,
+                pod.shop_approval,
+                pod.actual_remarks
+            FROM tblpur_order_detail pod
+            LEFT JOIN tblpur_orders po ON po.id = pod.pur_order
+            WHERE po.goods_id = 0
+        ) AS combined_orders
+        LEFT JOIN aggregated agg ON combined_orders.id = agg.goods_receipt_id
+        WHERE combined_orders.project = '1'
+    ) AS final_result";
+
+    $allColumns = [];
+    foreach ($aColumns as $column) {
+        if (strpos($column, ' as ') !== false) {
+            // Extract alias and real column name
+            $aliasColumn = strbefore($column, ' as');
+            $aliasName = strafter($column, ' as ');
+            $allColumns[] = "$aliasColumn AS $aliasName";
+        } else {
+            $allColumns[] = $column;
+        }
+    }
+
+    /*
+     * Ordering
+     */
+    $sOrder = '';
+    if ($CI->input->post('order')) {
+        $sOrder = 'ORDER BY ';
+        foreach ($CI->input->post('order') as $key => $val) {
+            $columnName = $aColumns[intval($data['order'][$key]['column'])];
+            $dir = strtoupper($data['order'][$key]['dir']);
+            $type = $data['order'][$key]['type'] ?? null;
+
+            if (!in_array($dir, ['ASC', 'DESC'])) {
+                $dir = 'ASC';
+            }
+
+            if (strpos($columnName, ' as ') !== false) {
+                $columnName = strbefore($columnName, ' as');
+            }
+
+            if ($type === 'text') {
+                $sOrder .= "CONVERT($columnName USING utf8) COLLATE utf8_general_ci $dir, ";
+            } elseif ($type === 'number') {
+                $sOrder .= "CAST($columnName AS SIGNED) $dir, ";
+            } elseif ($type === 'date_picker') {
+                $sOrder .= "CAST($columnName AS DATE) $dir, ";
+            } elseif ($type === 'date_picker_time') {
+                $sOrder .= "CAST($columnName AS DATETIME) $dir, ";
+            } else {
+                $sOrder .= "$columnName $dir, ";
+            }
+        }
+        $sOrder = rtrim($sOrder, ', ');
+    }
+
+    /*
+     * Filtering
+     */
+    $sWhere = '';
+    if ((isset($data['search'])) && $data['search']['value'] != '') {
+        $search_value = trim($data['search']['value']);
+        $sWhere = 'WHERE (';
+
+        foreach ($aColumns as $i => $column) {
+            $columnName = strpos($column, ' as ') !== false ? strbefore($column, ' as') : $column;
+
+            if (isset($data['columns'][$i]) && $data['columns'][$i]['searchable'] == 'true') {
+                $sWhere .= "CONVERT($columnName USING utf8) LIKE '%" . $CI->db->escape_like_str($search_value) . "%' ESCAPE '!' OR ";
+            }
+        }
+
+        $sWhere = substr($sWhere, 0, -3) . ')';
+    }
+
+    /*
+     * SQL Queries
+     */
+    $additionalColumns = '';
+    if (count($additionalSelect) > 0) {
+        $additionalColumns = ',' . implode(',', $additionalSelect);
+    }
+
+    $where = implode(' ', $where);
+
+    if ($sWhere == '') {
+        $where = trim($where);
+        if (startsWith($where, 'AND') || startsWith($where, 'OR')) {
+            if (startsWith($where, 'OR')) {
+                $where = substr($where, 2);
+            } else {
+                $where = substr($where, 3);
+            }
+            $where = 'WHERE ' . $where;
+        }
+    }
+
+    $join = implode(' ', $join);
+
+    $havingSet = '';
+    if (!empty($having)) {
+        $havingSet = 'HAVING ' . $having;
+    }
+
+    $resultQuery = "
+    SELECT " . str_replace(' , ', ' ', implode(', ', $allColumns)) . " $additionalColumns
+    FROM $sTable
+    $join
+    $sWhere
+    $where
+    $sGroupBy
+    $havingSet
+    $sOrder
+    $sLimit
+    ";
+
+    $rResult = hooks()->apply_filters(
+        'datatables_sql_query_results',
+        $CI->db->query($resultQuery)->result_array(),
+        [
+            'table' => $sTable,
+            'limit' => $sLimit,
+            'order' => $sOrder,
+        ]
+    );
+
+    /* Data set length after filtering */
+    $iFilteredTotal = $CI->db->query("
+        SELECT COUNT(*) as iFilteredTotal
+        FROM $sTable
+        $join
+        $sWhere
+        $where
+        $sGroupBy
+    ")->row()->iFilteredTotal;
+
+    if (startsWith($where, 'AND')) {
+        $where = 'WHERE ' . substr($where, 3);
+    }
+
+    /* Total data set length */
+    $iTotal = $CI->db->query("SELECT COUNT(*) as iTotal FROM $sTable $join $where")->row()->iTotal;
+
+    return [
+        'rResult' => $rResult,
+        'output' => [
+            'draw' => $data['draw'] ? intval($data['draw']) : 0,
+            'iTotalRecords' => $iTotal,
+            'iTotalDisplayRecords' => $iFilteredTotal,
+            'aaData' => [],
+        ],
+    ];
+}

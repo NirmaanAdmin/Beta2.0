@@ -15197,4 +15197,14 @@ class purchase extends AdminController
     {
         $this->app->get_table_data(module_views_path('purchase', 'includes/table_pur_sub_group'));
     }
+
+    /**
+     * table manage goods receipt
+     * @param  integer $id
+     * @return array
+     */
+    public function table_manage_actual_goods_receipt()
+    {
+        $this->app->get_table_data(module_views_path('purchase', 'manage_goods_receipt/table_manage_actual_goods_receipt'));
+    }
 }

@@ -13,22 +13,54 @@ var table_manage_goods_receipt = $('.table-table_manage_goods_receipt');
 
 initDataTable(table_manage_goods_receipt, admin_url + 'purchase/table_manage_goods_receipt', [], [], GoodsreceiptParams, [5, 'desc']);
 
+var table_manage_actual_goods_receipt = $('.table-table_manage_actual_goods_receipt');
 
-$('.purchase_sm').DataTable().columns([0]).visible(false, false);
+initDataTable(table_manage_actual_goods_receipt, admin_url + 'purchase/table_manage_actual_goods_receipt', [], [], GoodsreceiptParams, [9, 'desc']);
+
+$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+    var activeTabId = $('.tracker-pane.active').attr('id');
+    if (activeTabId === 'tracker_2') {
+        $('.purchase_sm').DataTable().columns([0]).visible(false, false);
+        table_manage_goods_receipt.DataTable().ajax.reload();
+    } else {
+        $('.purchase_sm').DataTable().columns([0]).visible(true, true);
+        table_manage_actual_goods_receipt.DataTable().ajax.reload();
+    }
+});
 
 $('#date_add').on('change', function () {
-    table_manage_goods_receipt.DataTable().ajax.reload();
+    var activeTabId = $('.tracker-pane.active').attr('id');
+    if (activeTabId === 'tracker_2') {
+        table_manage_goods_receipt.DataTable().ajax.reload();
+    } else {
+        table_manage_actual_goods_receipt.DataTable().ajax.reload();
+    }
 });
 
 $('#kind').on('change', function () {
-    table_manage_goods_receipt.DataTable().ajax.reload();
+    var activeTabId = $('.tracker-pane.active').attr('id');
+    if (activeTabId === 'tracker_2') {
+        table_manage_goods_receipt.DataTable().ajax.reload();
+    } else {
+        table_manage_actual_goods_receipt.DataTable().ajax.reload();
+    }
 });
 $('#delivery').on('change', function () {
-    table_manage_goods_receipt.DataTable().ajax.reload();
+    var activeTabId = $('.tracker-pane.active').attr('id');
+    if (activeTabId === 'tracker_2') {
+        table_manage_goods_receipt.DataTable().ajax.reload();
+    } else {
+        table_manage_actual_goods_receipt.DataTable().ajax.reload();
+    }
 });
 $('select[name="vendors[]"]').on('change', function () {
     $('select[name="vendors[]"]').selectpicker('refresh');
-    table_manage_goods_receipt.DataTable().ajax.reload();
+    var activeTabId = $('.tracker-pane.active').attr('id');
+    if (activeTabId === 'tracker_2') {
+        table_manage_goods_receipt.DataTable().ajax.reload();
+    } else {
+        table_manage_actual_goods_receipt.DataTable().ajax.reload();
+    }
 });
 $('.toggle-filter').on('change', function () {
     var isChecked = $(this).is(':checked') ? 1 : 0;

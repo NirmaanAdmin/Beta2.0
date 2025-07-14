@@ -9,7 +9,7 @@
     .show_hide_columns {
         position: absolute;
         z-index: 99999;
-        left: 204px
+        left: 190px
     }
 </style>
 <div id="wrapper">
@@ -67,51 +67,153 @@
                             
                         </div>
                         <br />
-                        <div class="btn-group show_hide_columns" id="show_hide_columns">
-                            <!-- Settings Icon -->
-                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding: 4px 7px;">
-                                <i class="fa fa-cog"></i> <?php  ?> <span class="caret"></span>
-                            </button>
-                            <!-- Dropdown Menu with Checkboxes -->
-                            <div class="dropdown-menu" style="padding: 10px; min-width: 250px;">
-                                <!-- Select All / Deselect All -->
-                                <div>
-                                    <input type="checkbox" id="select-all-goods-receipt-columns"> <strong><?php echo _l('select_all'); ?></strong>
-                                </div>
-                                <hr>
-                                <!-- Column Checkboxes -->
-                                <?php
-                                $columns = [
-                                    _l('id'),
-                                    _l('stock_received_docket_code'),
-                                    _l('reference_purchase_order'),
-                                    _l('supplier_name'),
-                                    // _l('Buyer'),
-                                    _l('category'),
-                                    _l('day_vouchers'),
-                                    _l('production_status'),
-                                    _l('status_label'),
-                                ];
-                                ?>
-                                <div>
-                                    <?php foreach ($columns as $key => $label): ?>
-                                        <input type="checkbox" class="toggle-goods-receipt-column" value="<?php echo $key; ?>" checked>
-                                        <?php echo $label; ?><br>
-                                    <?php endforeach; ?>
-                                </div>
 
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="horizontal-tabs">
+                                  <ul class="nav nav-tabs nav-tabs-horizontal mbot15" role="tablist">
+                                    <li role="presentation" class="active">
+                                      <a href="#tracker_1" aria-controls="tracker_1" role="tab" id="tab_tracker_1" data-toggle="tab">
+                                        General Information
+                                      </a>
+                                    </li>
+                                    <li role="presentation">
+                                      <a href="#tracker_2" aria-controls="tracker_2" role="tab" id="tab_tracker_2" data-toggle="tab">
+                                        Listing
+                                      </a>
+                                    </li>
+                                  </ul>
+                                </div>
+                            </div>
+
+                            <div class="tab-content">
+                                <div role="tabpanel" class="col-md-12 tab-pane tracker-pane active" id="tracker_1">
+                                    <div class="btn-group show_hide_columns" id="show_hide_columns">
+                                        <!-- Settings Icon -->
+                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding: 4px 7px;">
+                                            <i class="fa fa-cog"></i> <?php  ?> <span class="caret"></span>
+                                        </button>
+                                        <!-- Dropdown Menu with Checkboxes -->
+                                        <div class="dropdown-menu" style="padding: 10px; min-width: 250px;">
+                                            <!-- Select All / Deselect All -->
+                                            <div>
+                                                <input type="checkbox" id="select-all-columns"> <strong><?php echo _l('select_all'); ?></strong>
+                                            </div>
+                                            <hr>
+                                            <!-- Column Checkboxes -->
+                                            <?php
+                                            $columns = [
+                                                _l('stock_received_docket_code'),
+                                                _l('reference_purchase_order'),
+                                                _l('commodity_code'),
+                                                _l('description'),
+                                                _l('area'),
+                                                _l('po_quantity'),
+                                                _l('received_quantity'),
+                                                _l('supplier_name'),
+                                                _l('category'),
+                                                _l('day_vouchers'),
+                                                _l('imported_local'),
+                                                _l('status'),
+                                                _l('production_status'),
+                                                _l('payment_date'),
+                                                _l('est_delivery_date'),
+                                                _l('delivery_date'),
+                                                _l('management_remarks'),
+                                                _l('lead_time_days'),
+                                                _l('advance_payment'),
+                                                _l('shop_drawings_upload'),
+                                                _l('shop_drawings_download'),
+                                                _l('shop_drawings_submission'),
+                                                _l('shop_drawings_approval'),
+                                                _l('procurement_remarks'),
+                                            ];
+                                            ?>
+                                            <div>
+                                                <?php foreach ($columns as $key => $label): ?>
+                                                    <input type="checkbox" class="toggle-column" value="<?php echo $key; ?>" checked>
+                                                    <?php echo $label; ?><br>
+                                                <?php endforeach; ?>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    <?php render_datatable(array(
+                                        _l('stock_received_docket_code'),
+                                        _l('reference_purchase_order'),
+                                        _l('commodity_code'),
+                                        _l('description'),
+                                        _l('area'),
+                                        _l('po_quantity'),
+                                        _l('received_quantity'),
+                                        _l('supplier_name'),
+                                        _l('category'),
+                                        _l('day_vouchers'),
+                                        _l('imported_local'),
+                                        _l('status'),
+                                        _l('production_status'),
+                                        _l('payment_date'),
+                                        _l('est_delivery_date'),
+                                        _l('delivery_date'),
+                                        _l('management_remarks'),
+                                        _l('lead_time_days'),
+                                        _l('advance_payment'),
+                                        _l('shop_drawings_upload'),
+                                        _l('shop_drawings_download'),
+                                        _l('shop_drawings_submission'),
+                                        _l('shop_drawings_approval'),
+                                        _l('procurement_remarks'),
+                                    ), 'table_manage_actual_goods_receipt', ['purchase_sm' => 'purchase_sm']); ?>
+                                </div>
+                                <div role="tabpanel" class="col-md-12 tab-pane tracker-pane" id="tracker_2">
+                                    <div class="btn-group show_hide_columns" id="show_hide_columns">
+                                        <!-- Settings Icon -->
+                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding: 4px 7px;">
+                                            <i class="fa fa-cog"></i> <?php  ?> <span class="caret"></span>
+                                        </button>
+                                        <!-- Dropdown Menu with Checkboxes -->
+                                        <div class="dropdown-menu" style="padding: 10px; min-width: 250px;">
+                                            <!-- Select All / Deselect All -->
+                                            <div>
+                                                <input type="checkbox" id="select-all-goods-receipt-columns"> <strong><?php echo _l('select_all'); ?></strong>
+                                            </div>
+                                            <hr>
+                                            <!-- Column Checkboxes -->
+                                            <?php
+                                            $columns = [
+                                                _l('id'),
+                                                _l('stock_received_docket_code'),
+                                                _l('reference_purchase_order'),
+                                                _l('supplier_name'),
+                                                // _l('Buyer'),
+                                                _l('category'),
+                                                _l('day_vouchers'),
+                                                _l('production_status'),
+                                                _l('status_label'),
+                                            ];
+                                            ?>
+                                            <div>
+                                                <?php foreach ($columns as $key => $label): ?>
+                                                    <input type="checkbox" class="toggle-goods-receipt-column" value="<?php echo $key; ?>" checked>
+                                                    <?php echo $label; ?><br>
+                                                <?php endforeach; ?>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    <?php render_datatable(array(
+                                        _l('id'),
+                                        _l('stock_received_docket_code'),
+                                        _l('reference_purchase_order'),
+                                        _l('supplier_name'),
+                                        _l('category'),
+                                        _l('day_vouchers'),
+                                        _l('production_status'),
+                                        _l('status_label'),
+                                    ), 'table_manage_goods_receipt', ['purchase_sm' => 'purchase_sm']); ?>
+                                </div>
                             </div>
                         </div>
-                        <?php render_datatable(array(
-                            _l('id'),
-                            _l('stock_received_docket_code'),
-                            _l('reference_purchase_order'),
-                            _l('supplier_name'),
-                            _l('category'),
-                            _l('day_vouchers'),
-                            _l('production_status'),
-                            _l('status_label'),
-                        ), 'table_manage_goods_receipt', ['purchase_sm' => 'purchase_sm']); ?>
 
                     </div>
                 </div>
@@ -181,11 +283,18 @@
 <script>
     $(document).ready(function() {
         var table = $('.table-table_manage_goods_receipt').DataTable();
+        var actual_table = $('.table-table_manage_actual_goods_receipt').DataTable();
 
         // Handle "Select All" checkbox
         $('#select-all-goods-receipt-columns').on('change', function() {
             var isChecked = $(this).is(':checked');
             $('.toggle-goods-receipt-column').prop('checked', isChecked).trigger('change');
+        });
+
+        // Handle "Select All" checkbox
+        $('#select-all-columns').on('change', function() {
+            var isChecked = $(this).is(':checked');
+            $('.toggle-column').prop('checked', isChecked).trigger('change');
         });
 
         // Handle individual column visibility toggling
@@ -198,10 +307,26 @@
             $('#select-all-goods-receipt-columns').prop('checked', allChecked);
         });
 
+        // Handle individual column visibility toggling
+        $('.toggle-column').on('change', function() {
+            var column = actual_table.column($(this).val());
+            column.visible($(this).is(':checked'));
+
+            // Sync "Select All" checkbox state
+            var allChecked = $('.toggle-column').length === $('.toggle-column:checked').length;
+            $('#select-all-columns').prop('checked', allChecked);
+        });
+
         // Sync checkboxes with column visibility on page load
         table.columns().every(function(index) {
             var column = this;
             $('.toggle-goods-receipt-column[value="' + index + '"]').prop('checked', column.visible());
+        });
+
+        // Sync checkboxes with column visibility on page load
+        actual_table.columns().every(function(index) {
+            var column = this;
+            $('.toggle-column[value="' + index + '"]').prop('checked', column.visible());
         });
 
         // Prevent dropdown from closing when clicking inside
@@ -210,6 +335,7 @@
         });
     });
 </script>
+<?php require 'modules/warehouse/assets/js/view_purchase_js.php'; ?>
 </body>
 
 </html>

@@ -82,7 +82,12 @@
     //   signaturePadChanged();
     // });
 
-    var table_order_tracker = $('.table-items-preview').DataTable();
+    var table_order_tracker;
+    if ($('.table-table_manage_actual_goods_receipt').length) {
+      table_order_tracker = $('.table-table_manage_actual_goods_receipt').DataTable();
+    } else if ($('.table-items-preview').length) {
+      table_order_tracker = $('.table-items-preview').DataTable();
+    }
 
     $('body').on('change', '.payment-date-input', function(e) {
       e.preventDefault();
@@ -177,6 +182,7 @@
         response = JSON.parse(response);
         if (response.success) {
           alert_float('success', response.message);
+          table_order_tracker.ajax.reload(null, false);
         } else {
           alert_float('danger', response.message);
         }
@@ -196,6 +202,7 @@
         response = JSON.parse(response);
         if (response.success) {
           alert_float('success', response.message);
+          table_order_tracker.ajax.reload(null, false);
         } else {
           alert_float('danger', response.message);
         }
@@ -215,6 +222,7 @@
         response = JSON.parse(response);
         if (response.success) {
           alert_float('success', response.message);
+          table_order_tracker.ajax.reload(null, false);
         } else {
           alert_float('danger', response.message);
         }
@@ -234,6 +242,7 @@
         response = JSON.parse(response);
         if (response.success) {
           alert_float('success', response.message);
+          table_order_tracker.ajax.reload(null, false);
         } else {
           alert_float('danger', response.message);
         }
@@ -253,6 +262,7 @@
         response = JSON.parse(response);
         if (response.success) {
           alert_float('success', response.message);
+          table_order_tracker.ajax.reload(null, false);
         } else {
           alert_float('danger', response.message);
         }
@@ -289,6 +299,7 @@
           var res = JSON.parse(response);
           if (res.status) {
             alert_float('success', "Attachments are uploaded successfully.");
+            table_order_tracker.ajax.reload(null, false);
           } else {
             alert_float('warning', "Upload failed.");
           }

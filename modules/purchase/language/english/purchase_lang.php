@@ -954,3 +954,5 @@ $lang['bill_deletion_failed'] = 'Bill deletion failed';
 $lang['shop_drawings_upload'] = 'Shop Drawings Upload';
 $lang['shop_drawings_download'] = 'Shop Drawings Download';
 $lang['purchase_tender'] = 'Tendering';
+$lang['management_remarks'] = 'Management Remarks';
+$lang['procurement_remarks'] = 'Procurement Remarks';
