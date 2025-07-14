@@ -291,11 +291,11 @@ $module_name = 'changee_order'; ?>
                               'project',
                               'department',
                               'co_description',
+                              'approval_status',
                               'co_value',
                               'tax_value',
                               'co_value_included_tax',
                               'tags',
-                              'approval_status',
                               'payment_status',
                               'convert_expense',
                            ];
