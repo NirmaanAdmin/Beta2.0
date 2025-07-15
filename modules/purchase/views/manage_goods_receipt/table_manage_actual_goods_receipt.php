@@ -72,6 +72,21 @@ if ($this->ci->input->post('vendors')
     $where[] = 'AND supplier_name IN (' . implode(',', $this->ci->input->post('vendors')) . ')';
 }
 
+if ($this->ci->input->post('group_pur')
+    && count($this->ci->input->post('group_pur')) > 0) {
+    $where[] = 'AND group_pur IN (' . implode(',', $this->ci->input->post('group_pur')) . ')';
+}
+
+if ($this->ci->input->post('tracker_status')
+    && count($this->ci->input->post('tracker_status')) > 0) {
+    $where[] = 'AND tracker_status IN (' . implode(',', $this->ci->input->post('tracker_status')) . ')';
+}
+
+if ($this->ci->input->post('production_status')
+    && count($this->ci->input->post('production_status')) > 0) {
+    $where[] = 'AND production_status IN (' . implode(',', $this->ci->input->post('production_status')) . ')';
+}
+
 if(get_default_project()) {
     $where[] = 'AND project = "' . get_default_project() . '"';
 }

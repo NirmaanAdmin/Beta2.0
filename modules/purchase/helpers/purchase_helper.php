@@ -4628,3 +4628,27 @@ function get_area_project_wise($id = false)
         return $CI->db->get()->result_array();
     }
 }
+
+function get_purchase_tracker_status()
+{
+    $tracker_status = [
+        ['id' => 1, 'name' => _l('not_set')],
+        ['id' => 2, 'name' => _l('SPC')],
+        ['id' => 3, 'name' => _l('RFQ')],
+        ['id' => 4, 'name' => _l('FQR')],
+        ['id' => 5, 'name' => _l('POI')],
+        ['id' => 6, 'name' => _l('PIR')],
+    ];
+    return $tracker_status;
+}
+
+function get_purchase_tracker_production_status()
+{
+    $production_status = [
+        ['id' => 1, 'name' => _l('not_started')],
+        ['id' => 2, 'name' => _l('approved')],
+        ['id' => 3, 'name' => _l('on_going')],
+        ['id' => 4, 'name' => _l('Delivered')],
+    ];
+    return $production_status;
+}

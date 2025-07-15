@@ -64,6 +64,27 @@
                                 echo render_select('vendors[]', $vendors, array('userid', 'company'), '', '', array('data-width' => '100%', 'data-none-selected-text' => _l('vendor'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false); 
                                 ?>
                             </div>
+
+                            <div class="col-md-3 form-group">
+                                <?php
+                                $group_pur = get_budget_head_project_wise();
+                                echo render_select('group_pur[]', $group_pur, array('id', 'name'), '', '', array('data-width' => '100%', 'data-none-selected-text' => _l('group_pur'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
+                                ?>
+                            </div>
+
+                            <div class="col-md-3 form-group">
+                                <?php
+                                $tracker_status = get_purchase_tracker_status();
+                                echo render_select('tracker_status[]', $tracker_status, array('id', 'name'), '', '', array('data-width' => '100%', 'data-none-selected-text' => _l('status'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
+                                ?>
+                            </div>
+
+                            <div class="col-md-3 form-group">
+                                <?php
+                                $production_status = get_purchase_tracker_production_status();
+                                echo render_select('production_status[]', $production_status, array('id', 'name'), '', '', array('data-width' => '100%', 'data-none-selected-text' => _l('production_status'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
+                                ?>
+                            </div>
                             
                         </div>
                         <br />

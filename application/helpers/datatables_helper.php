@@ -1162,9 +1162,11 @@ function data_tables_actual_purchase_tracker_init($aColumns, $join = [], $where 
                 grd.advance_payment,
                 grd.shop_submission,
                 grd.shop_approval,
-                grd.actual_remarks
+                grd.actual_remarks,
+                po.group_pur
             FROM tblgoods_receipt_detail grd
             LEFT JOIN tblgoods_receipt gr ON gr.id = grd.goods_receipt_id
+            LEFT JOIN tblpur_orders po ON po.id = gr.pr_order_id
 
             UNION ALL
 
@@ -1197,7 +1199,8 @@ function data_tables_actual_purchase_tracker_init($aColumns, $join = [], $where 
                 pod.advance_payment,
                 pod.shop_submission,
                 pod.shop_approval,
-                pod.actual_remarks
+                pod.actual_remarks,
+                po.group_pur
             FROM tblpur_order_detail pod
             LEFT JOIN tblpur_orders po ON po.id = pod.pur_order
             WHERE po.goods_id = 0

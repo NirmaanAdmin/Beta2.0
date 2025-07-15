@@ -6,6 +6,9 @@ var GoodsreceiptParams = {
     "kind": "select[name='kind']",
     "delivery": "select[name='delivery']",
     "vendors": "[name='vendors[]']",
+    "group_pur": "[name='group_pur[]']",
+    "tracker_status": "[name='tracker_status[]']",
+    "production_status": "[name='production_status[]']",
     "toggle-filter": "input[name='toggle-filter']"
 };
 
@@ -68,6 +71,27 @@ $('.toggle-filter').on('change', function () {
 
     // Trigger DataTable reload to apply the new filter
     table_manage_goods_receipt.DataTable().ajax.reload();
+});
+$('select[name="group_pur[]"]').on('change', function () {
+    $('select[name="group_pur[]"]').selectpicker('refresh');
+    var activeTabId = $('.tracker-pane.active').attr('id');
+    if (activeTabId === 'tracker_1') {
+        table_manage_actual_goods_receipt.DataTable().ajax.reload();
+    }
+});
+$('select[name="tracker_status[]"]').on('change', function () {
+    $('select[name="tracker_status[]"]').selectpicker('refresh');
+    var activeTabId = $('.tracker-pane.active').attr('id');
+    if (activeTabId === 'tracker_1') {
+        table_manage_actual_goods_receipt.DataTable().ajax.reload();
+    }
+});
+$('select[name="production_status[]"]').on('change', function () {
+    $('select[name="production_status[]"]').selectpicker('refresh');
+    var activeTabId = $('.tracker-pane.active').attr('id');
+    if (activeTabId === 'tracker_1') {
+        table_manage_actual_goods_receipt.DataTable().ajax.reload();
+    }
 });
 init_goods_receipt();
 function init_goods_receipt(id) {
