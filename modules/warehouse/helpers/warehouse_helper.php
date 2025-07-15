@@ -2383,3 +2383,15 @@ function get_all_wo_details_in_warehouse($id)
     $wo_orders = $CI->db->get(db_prefix() . 'wo_orders')->row();
     return $wo_orders;
 }
+
+function get_inventory_reconcilliation_area_list($name_area, $area)
+{
+    $CI = &get_instance();
+    $CI->load->model('purchase/purchase_model');
+    $get_area = $CI->purchase_model->get_area();
+    $selected = !empty($area) ? $area : array();
+    if (!is_array($selected)) {
+        $selected = explode(",", $selected);
+    }
+    return render_select($name_area, $get_area, array('id', 'area_name'), '', $selected, ['multiple' => true, 'disabled' => true ], ['id' => 'project_area'], '', '', false);
+}
