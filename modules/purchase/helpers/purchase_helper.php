@@ -3629,7 +3629,7 @@ function get_sub_head_list($name_sub_head, $sub_head)
 {
     $CI = &get_instance();
     $CI->load->model('purchase_model');
-    $get_sub_group = $CI->purchase_model->get_sub_group();
+    $get_sub_group = get_budget_sub_head_project_wise();
     $selected = '';
     foreach ($get_sub_group as $sub_group) {
         if (isset($sub_head)) {

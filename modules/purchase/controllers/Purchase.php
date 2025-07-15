@@ -1546,7 +1546,7 @@ class purchase extends AdminController
         $data['pur_request'] = $this->purchase_model->get_pur_request_by_status(2);
 
         $data['projects'] = $this->projects_model->get();
-        $data['item_group'] = $this->purchase_model->get_commodity_group_add_commodity();
+        $data['item_group'] = get_budget_head_project_wise();
 
         $this->load->view('purchase_order/manage', $data);
     }
@@ -1722,9 +1722,9 @@ class purchase extends AdminController
         $data['vendors'] = $this->purchase_model->get_vendor();
         $data['estimates'] = $this->purchase_model->get_estimates_by_status(2);
         $data['units'] = $this->purchase_model->get_units();
-        $data['commodity_groups_pur'] = $this->purchase_model->get_commodity_group_add_commodity();
-        $data['sub_groups_pur'] = $this->purchase_model->get_sub_group();
-        $data['area_pur'] = $this->purchase_model->get_area();
+        $data['commodity_groups_pur'] = get_budget_head_project_wise();
+        $data['sub_groups_pur'] = get_budget_sub_head_project_wise();
+        $data['area_pur'] = get_area_project_wise();
         $this->load->model('invoices_model');
         $data['get_hsn_sac_code'] = $this->invoices_model->get_hsn_sac_code();
         $data['budgets'] = $this->purchase_model->get_all_estimates();
