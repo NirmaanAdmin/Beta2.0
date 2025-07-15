@@ -3606,7 +3606,7 @@ function get_budget_head_list($name_kind, $category)
 {
     $CI = &get_instance();
     $CI->load->model('purchase_model');
-    $get_buget_head = $CI->purchase_model->get_commodity_group_add_commodity();
+    $get_buget_head = get_budget_head_project_wise();
     $selected = !empty($category) ? $category : array();
     if (!is_array($selected)) {
         $selected = explode(",", $selected);
