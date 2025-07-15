@@ -9850,7 +9850,7 @@ class purchase extends AdminController
         $data['pur_request'] = $this->purchase_model->get_pur_request_by_status(2);
 
         $data['projects'] = $this->projects_model->get();
-        $data['item_group'] = $this->purchase_model->get_commodity_group_add_commodity();
+        $data['item_group'] = get_budget_head_project_wise();
         $this->load->view('work_order/manage', $data);
     }
     public function table_wo_order()
@@ -10030,9 +10030,9 @@ class purchase extends AdminController
         $data['vendors'] = $this->purchase_model->get_vendor();
         $data['estimates'] = $this->purchase_model->get_estimates_by_status(2);
         $data['units'] = $this->purchase_model->get_units();
-        $data['commodity_groups_pur'] = $this->purchase_model->get_commodity_group_add_commodity();
-        $data['sub_groups_pur'] = $this->purchase_model->get_sub_group();
-        $data['area_pur'] = $this->purchase_model->get_area();
+        $data['commodity_groups_pur'] = get_budget_head_project_wise();
+        $data['sub_groups_pur'] = get_budget_sub_head_project_wise();
+        $data['area_pur'] = get_area_project_wise();
         $this->load->model('invoices_model');
         $data['get_hsn_sac_code'] = $this->invoices_model->get_hsn_sac_code();
         $data['ajaxItems'] = false;
@@ -10962,7 +10962,7 @@ class purchase extends AdminController
         $data['commodity_groups_pur'] = $this->purchase_model->get_commodity_group_add_commodity();
         $data['projects'] = $this->projects_model->get();
         $data['order_tracker_row_template'] = $this->purchase_model->create_order_tracker_row_template();
-        $data['budget_head'] = $this->purchase_model->get_commodity_group_add_commodity();
+        $data['budget_head'] = get_budget_head_project_wise();
         $data['rli_filters'] = $this->purchase_model->get_all_rli_filters();
         $data['sub_groups_pur'] = $this->purchase_model->get_sub_group();
         $this->load->view('order_tracker/manage', $data);
@@ -12768,7 +12768,7 @@ class purchase extends AdminController
     {
         $data['title'] = _l('payment_certificate');
         $data['vendors'] = $this->purchase_model->get_vendor();
-        $data['item_group'] = $this->purchase_model->get_commodity_group_add_commodity();
+        $data['item_group'] = get_budget_head_project_wise();
         $data['projects'] = $this->projects_model->get();
         $this->load->view('payment_certificate/list_payment_certificate', $data);
     }
