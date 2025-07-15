@@ -5133,7 +5133,7 @@ class purchase extends AdminController
         $data['currency'] = $this->currencies_model->get_base_currency();
         $data['payment_modes'] = $this->payment_modes_model->get('', [], true);
         $data['billing_invoices'] = $this->purchase_model->get_billing_invoices();
-        $data['budget_head'] = $this->purchase_model->get_commodity_group_add_commodity();
+        $data['budget_head'] = get_budget_head_project_wise();
         $data['invoices'] = get_all_applied_invoices();
         $this->load->view('invoices/manage', $data);
     }
@@ -5229,7 +5229,7 @@ class purchase extends AdminController
             $data['items']     = [];
             $data['ajaxItems'] = true;
         }
-        $data['commodity_groups_pur'] = $this->purchase_model->get_commodity_group_add_commodity();
+        $data['commodity_groups_pur'] = get_budget_head_project_wise();
         $this->load->view('invoices/pur_invoice', $data);
     }
 
@@ -12090,7 +12090,7 @@ class purchase extends AdminController
         $data['currency'] = $this->currencies_model->get_base_currency();
         $data['payment_modes'] = $this->payment_modes_model->get('', [], true);
         $data['billing_invoices'] = $this->purchase_model->get_billing_invoices();
-        $data['budget_head'] = $this->purchase_model->get_commodity_group_add_commodity();
+        $data['budget_head'] = get_budget_head_project_wise();
         $data['invoices'] = get_all_applied_invoices();
         $this->load->view('invoice_payments/manage', $data);
     }

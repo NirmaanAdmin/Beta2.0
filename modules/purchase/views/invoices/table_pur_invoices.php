@@ -312,7 +312,7 @@ foreach ($rResult as $aRow) {
             $budget_head .= '<span data-toggle="tooltip" title="' . _l('ticket_single_change_status') . '"><i class="fa fa-caret-down" aria-hidden="true"></i></span>';
             $budget_head .= '</a>';
             $budget_head .= '<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="tableChangeBudget-' . $aRow['id'] . '">';
-            $group_name_item = get_group_name_item();
+            $group_name_item = get_budget_head_project_wise();
             foreach ($group_name_item as $gkey => $gvalue) {
                 $budget_head .= '<li>
                     <a href="#" onclick="change_budget_head( ' . $gvalue['id'] . ',' . $aRow['id'] . '); return false;">

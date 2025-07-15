@@ -2218,7 +2218,7 @@ function get_inventory_area_list($name_area, $area)
 {
     $CI = &get_instance();
     $CI->load->model('purchase/purchase_model');
-    $get_area = $CI->purchase_model->get_area();
+    $get_area = get_area_project_wise();
     $selected = !empty($area) ? $area : array();
     if (!is_array($selected)) {
         $selected = explode(",", $selected);
