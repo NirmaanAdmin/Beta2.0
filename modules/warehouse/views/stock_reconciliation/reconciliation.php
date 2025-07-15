@@ -41,7 +41,7 @@
                 <div class="row">
 
                   <div class="col-md-6">
-                    <?php  $goods_delivery_code = isset($goods_delivery) ? $goods_delivery->goods_delivery_code : (isset($stock_reconciliation_code) ? $stock_reconciliation_code : ''); ?>
+                    <?php $goods_delivery_code = isset($goods_delivery) ? $goods_delivery->goods_delivery_code : (isset($stock_reconciliation_code) ? $stock_reconciliation_code : ''); ?>
                     <?php echo render_input('goods_reconciliation_code', 'document_number', $goods_delivery_code, '', array('disabled' => 'true')) ?>
                   </div>
 
@@ -60,7 +60,7 @@
                     <?php echo render_date_input('date_add', 'Reconciliation Date', _d($date_add), $disabled) ?>
                   </div>
                   <?php if (ACTIVE_PROPOSAL == true) { ?>
-                  <div class="col-md-3 form-group <?php if ($pr_orders_status == false) {
+                    <div class="col-md-3 form-group <?php if ($pr_orders_status == false) {
                                                       echo 'hide';
                                                     }; ?>">
                       <label for="project"><?php echo _l('project'); ?></label>
@@ -95,7 +95,7 @@
 
                   <?php if (ACTIVE_PROPOSAL == true) { ?>
 
-                    
+
 
                     <div class="col-md-3 form-group <?php if ($pr_orders_status == false) {
                                                       echo 'hide';
@@ -270,9 +270,9 @@
                     <th width="9%" align="left" class="available_quantity"><?php echo _l('Issued Quantity'); ?></th>
                     <th width="9%" align="left"><?php echo _l('Return Date'); ?></th>
                     <th width="11%" align="left"><?php echo _l('Reconciliation Date'); ?></th>
-                    <th width="8%" align="left" ><?php echo _l('Return Quantity'); ?></th>
-                    <th width="8%" align="left" ><?php echo _l('Used Quantity'); ?></th>
-                    <th width="8%" align="left" ><?php echo _l('Location'); ?></th>
+                    <th width="8%" align="left"><?php echo _l('Return Quantity'); ?></th>
+                    <th width="8%" align="left"><?php echo _l('Used Quantity'); ?></th>
+                    <th width="8%" align="left"><?php echo _l('Location'); ?></th>
                     <!-- <th align="center" width='1%'><i class="fa fa-cog"></i></th> -->
                   </tr>
                 </thead>
@@ -384,6 +384,52 @@
       $('#apply_to_all_value').val('0');
     });
   });
+
+  function toNum(val) {
+    var f = parseFloat(val);
+    return isNaN(f) ? 0 : f;
+  }
+
+  $(document).on('input change', 'input[name*="[return_quantity]"]', function() {
+    var $this = $(this);
+    var name = $this.attr('name'); // e.g. "newitems[0][return_quantity][228]"
+
+    // build the other two names
+    var issuedName = name.replace('[return_quantity]', '[issued_quantities]');
+    var usedName = name.replace('[return_quantity]', '[used_quantity]');
+
+    // grab their current values
+    var issuedVal = toNum($('input[name="' + issuedName + '"]').val());
+    var returnVal = toNum($this.val());
+
+    // find or create a warning span right after this input
+    var $warn = $this.siblings('.return-warning');
+    if (returnVal > issuedVal) {
+      // clamp it
+      $this.val(issuedVal.toFixed(2));
+      returnVal = issuedVal;
+
+      // show warning
+      if (!$warn.length) {
+        $("<span class='return-warning'>Return can't exceed issued</span>")
+          .css({
+            color: 'red',
+            'font-size': '0.9em',
+            'margin-left': '6px'
+          })
+          .insertAfter($this);
+      }
+    } else {
+      // remove warning if exists
+      $warn.remove();
+    }
+
+    // compute used = issued - returned
+    var usedVal = issuedVal - returnVal;
+    $('input[name="' + usedName + '"]').val(usedVal.toFixed(2));
+  });
+
+  
 </script>
 
 </html>
