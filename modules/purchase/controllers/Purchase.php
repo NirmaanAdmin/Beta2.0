@@ -865,8 +865,8 @@ class purchase extends AdminController
         $data['projects'] = $this->projects_model->get();
         $data['title']                 = _l('estimates');
         $data['bodyclass']             = 'estimates-total-manual';
-        $data['item_group'] = $this->purchase_model->get_commodity_group_add_commodity();
-        $data['item_sub_group'] = $this->purchase_model->get_sub_group();
+        $data['item_group'] = get_budget_head_project_wise();
+        $data['item_sub_group'] = get_budget_sub_head_project_wise();
         $this->load->view('quotations/manage', $data);
     }
 
@@ -979,9 +979,9 @@ class purchase extends AdminController
         $data['pur_request'] = $this->purchase_model->get_pur_request_by_status(2);
         $data['units'] = $this->purchase_model->get_units();
         $data['projects'] = $this->projects_model->get_items();
-        $data['commodity_groups_pur'] = $this->purchase_model->get_commodity_group_add_commodity();
-        $data['sub_groups_pur'] = $this->purchase_model->get_sub_group();
-        $data['area_pur'] = $this->purchase_model->get_area();
+        $data['commodity_groups_pur'] = get_budget_head_project_wise();
+        $data['sub_groups_pur'] = get_budget_sub_head_project_wise();
+        $data['area_pur'] = get_area_project_wise();
         $data['title']             = $title;
         $this->load->view('quotations/estimate', $data);
     }
