@@ -124,7 +124,7 @@
                                             <!-- Column Checkboxes -->
                                             <?php
                                             $columns = [
-                                                _l('stock_received_docket_code'),
+                                                _l('Docket code'),
                                                 _l('reference_purchase_order'),
                                                 _l('commodity_code'),
                                                 _l('description'),
@@ -160,7 +160,7 @@
                                         </div>
                                     </div>
                                     <?php render_datatable(array(
-                                        _l('stock_received_docket_code'),
+                                        _l('Docket code'),
                                         _l('reference_purchase_order'),
                                         _l('commodity_code'),
                                         _l('description'),

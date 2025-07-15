@@ -130,9 +130,9 @@ foreach ($rResult as $aRow) {
             }
             $_data = $name;
         } elseif ($aColumns[$i] == 'commodity_code') {
-            $_data = wh_get_item_variatiom($aRow['commodity_code']);
+            $_data = '<div style="width: 200px">'.wh_get_item_variatiom($aRow['commodity_code']).'</div>';
         } elseif ($aColumns[$i] == 'description') {
-            $_data = html_entity_decode($aRow['description']);
+            $_data = '<div style="width: 300px">'.html_entity_decode($aRow['description']).'</div>';
         } elseif ($aColumns[$i] == 'area') {
             $_data = get_area_name_by_id($aRow['area']);
         } elseif ($aColumns[$i] == 'po_quantities') {
