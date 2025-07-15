@@ -1587,7 +1587,7 @@ class Warehouse_model extends App_Model
 			}
 			$available_quantity = round($available_quantity, 2);
 
-			if(!empty($co_exist)) {
+			if (!empty($co_exist)) {
 				$updated_co_quantity = $this->get_changee_order_quantity($value['commodity_code'], $value['description'], $pur_order, 'pur_orders');
 				$available_quantity = $available_quantity + $updated_co_quantity;
 				$available_quantity = round($available_quantity, 2);
@@ -1632,14 +1632,14 @@ class Warehouse_model extends App_Model
 			}
 		}
 
-		if(!empty($co_exist)) {
+		if (!empty($co_exist)) {
 			$sql = 'select item_code as commodity_code, ' . db_prefix() . 'co_order_detail.description, ' . db_prefix() . 'co_order_detail.unit_id, unit_price, quantity as quantities, ' . db_prefix() . 'co_order_detail.tax as tax, into_money, (' . db_prefix() . 'co_order_detail.total-' . db_prefix() . 'co_order_detail.into_money) as tax_money, ' . db_prefix() . 'co_order_detail.total as goods_money, tax_rate, tax_value, ' . db_prefix() . 'co_order_detail.id as id, delivery_date, ' . db_prefix() . 'co_order_detail.area as area from ' . db_prefix() . 'co_order_detail
 			left join ' . db_prefix() . 'co_orders on ' . db_prefix() . 'co_orders.id =  ' . db_prefix() . 'co_order_detail.pur_order
 			left join ' . db_prefix() . 'items on ' . db_prefix() . 'co_order_detail.item_code =  ' . db_prefix() . 'items.id
 			left join ' . db_prefix() . 'taxes on ' . db_prefix() . 'taxes.id = ' . db_prefix() . 'co_order_detail.tax where ' . db_prefix() . 'co_orders.po_order_id = ' . $pur_order . ' and ' . db_prefix() . 'co_order_detail.tender_item = 1
 			GROUP BY ' . db_prefix() . 'co_order_detail.id';
 			$co_results = $this->db->query($sql)->result_array();
-			if(!empty($co_results)) {
+			if (!empty($co_results)) {
 				foreach ($co_results as $key => $value) {
 					$available_quantity = $value['quantities'];
 					$non_break_description = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $value['description']));
@@ -3220,10 +3220,10 @@ class Warehouse_model extends App_Model
 		$this->load->model('projects_model');
 		$this->load->model('staff_model');
 		$project_name = get_pur_order_project_name($get_project_id);
-		if(!empty($goods_receipt->pr_order_id)) {
+		if (!empty($goods_receipt->pr_order_id)) {
 			$get_all_order_details = get_all_po_details_in_warehouse($goods_receipt->pr_order_id);
 		}
-		if(!empty($goods_receipt->wo_order_id)) {
+		if (!empty($goods_receipt->wo_order_id)) {
 			$get_all_order_details = get_all_wo_details_in_warehouse($goods_receipt->wo_order_id);
 		}
 		$department_name = get_department_by_id($goods_receipt->department);
@@ -3262,10 +3262,10 @@ class Warehouse_model extends App_Model
 		$organization_info .= '<b>Project : </b>' . $project_name . '<br>';
 		$organization_info .= '<b>Department : </b>' . $department_name . '<br>';
 
-		if(!empty($goods_receipt->pr_order_id)) {
+		if (!empty($goods_receipt->pr_order_id)) {
 			$organization_info .= '<b>PO Name : </b>' . $get_all_order_details->pur_order_number . '-' . $get_all_order_details->pur_order_name  . '<br>';
 		}
-		if(!empty($goods_receipt->wo_order_id)) {
+		if (!empty($goods_receipt->wo_order_id)) {
 			$organization_info .= '<b>WO Name : </b>' . $get_all_order_details->wo_order_number . '-' . $get_all_order_details->wo_order_name  . '<br>';
 		}
 
@@ -4133,10 +4133,10 @@ class Warehouse_model extends App_Model
 		$address = get_option('invoice_company_address');
 		$tax_data = $this->get_html_tax_delivery($goods_delivery_id);
 		$get_dept = $this->get_department($goods_delivery->department);
-		if(!empty($goods_delivery->pr_order_id)) {
+		if (!empty($goods_delivery->pr_order_id)) {
 			$get_all_order_details = get_all_po_details_in_warehouse($goods_delivery->pr_order_id);
 		}
-		if(!empty($goods_delivery->wo_order_id)) {
+		if (!empty($goods_delivery->wo_order_id)) {
 			$get_all_order_details = get_all_wo_details_in_warehouse($goods_delivery->wo_order_id);
 		}
 		$budget_head = get_group_name_item($get_all_po_details->group_pur);
@@ -4184,10 +4184,10 @@ class Warehouse_model extends App_Model
 		//organization_info
 		$organization_info = '<div  class="bill_to_color">';
 		$organization_info .= '<b>' . _l('project') . ': ' . get_project_name_by_id($goods_delivery->project) . '</b><br />';
-		if(!empty($goods_delivery->pr_order_id)) {
+		if (!empty($goods_delivery->pr_order_id)) {
 			$organization_info .= '<b>PO Name : </b>' . $get_all_order_details->pur_order_number . '-' . $get_all_order_details->pur_order_name  . '<br>';
 		}
-		if(!empty($goods_delivery->wo_order_id)) {
+		if (!empty($goods_delivery->wo_order_id)) {
 			$organization_info .= '<b>WO Name : </b>' . $get_all_order_details->wo_order_number . '-' . $get_all_order_details->wo_order_name  . '<br>';
 		}
 		$organization_info .= '<b>' . _l('Issued By') . ':</b> ' . $staff_name->firstname . ' ' . $staff_name->lastname . '<br />';
@@ -20587,7 +20587,7 @@ class Warehouse_model extends App_Model
 					$available_quantity = $available_quantity - $total_quantity;
 				}
 
-				if(!empty($co_exist)) {
+				if (!empty($co_exist)) {
 					$updated_co_quantity = $this->get_changee_order_quantity($value['commodity_code'], $value['description'], $pur_order, 'pur_orders');
 					$available_quantity = $available_quantity + $updated_co_quantity;
 					$available_quantity = round($available_quantity, 2);
@@ -20606,14 +20606,14 @@ class Warehouse_model extends App_Model
 			}
 		}
 
-		if(!empty($co_exist)) {
+		if (!empty($co_exist)) {
 			$sql = 'select item_code as commodity_code, ' . db_prefix() . 'co_order_detail.description, ' . db_prefix() . 'co_order_detail.unit_id, unit_price, quantity as quantities, ' . db_prefix() . 'co_order_detail.tax as tax, into_money, (' . db_prefix() . 'co_order_detail.total-' . db_prefix() . 'co_order_detail.into_money) as tax_money, ' . db_prefix() . 'co_order_detail.total as goods_money, tax_rate, tax_value, ' . db_prefix() . 'co_order_detail.id as id, delivery_date, ' . db_prefix() . 'co_order_detail.area as area from ' . db_prefix() . 'co_order_detail
 			left join ' . db_prefix() . 'co_orders on ' . db_prefix() . 'co_orders.id =  ' . db_prefix() . 'co_order_detail.pur_order
 			left join ' . db_prefix() . 'items on ' . db_prefix() . 'co_order_detail.item_code =  ' . db_prefix() . 'items.id
 			left join ' . db_prefix() . 'taxes on ' . db_prefix() . 'taxes.id = ' . db_prefix() . 'co_order_detail.tax where ' . db_prefix() . 'co_orders.po_order_id = ' . $pur_order . ' and ' . db_prefix() . 'co_order_detail.tender_item = 1
 			GROUP BY ' . db_prefix() . 'co_order_detail.id';
 			$co_results = $this->db->query($sql)->result_array();
-			if(!empty($co_results)) {
+			if (!empty($co_results)) {
 				foreach ($co_results as $key => $value) {
 					$available_quantity = (float)$value['quantities'];
 					$non_break_description = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $value['description']));
@@ -21319,7 +21319,7 @@ class Warehouse_model extends App_Model
 		return $goods_code;
 	}
 
-	public function create_stock_reconciliation_row_template($warehouse_data = [], $name = '', $commodity_name = '', $warehouse_id = '', $vendor_quantity = '', $quantities = '', $unit_name = '', $unit_price = '', $taxname = '',  $commodity_code = '', $unit_id = '', $vendor_id = '', $tax_rate = '', $total_money = '', $discount = '', $discount_money = '', $total_after_discount = '', $guarantee_period = '', $issued_date = '', $lot_number = '', $note = '',  $sub_total = '', $tax_name = '', $tax_id = '', $item_key = '', $is_edit = false, $is_purchase_order = false, $serial_number = '', $without_checking_warehouse = 0, $description = '', $quantities_json = '', $area = '', $returnable = '', $returnable_date = '', $return_quantity = '', $location = '', $reconciliation_date = '')
+	public function create_stock_reconciliation_row_template($warehouse_data = [], $name = '', $commodity_name = '', $warehouse_id = '', $vendor_quantity = '', $quantities = '', $unit_name = '', $unit_price = '', $taxname = '',  $commodity_code = '', $unit_id = '', $vendor_id = '', $tax_rate = '', $total_money = '', $discount = '', $discount_money = '', $total_after_discount = '', $guarantee_period = '', $issued_date = '', $lot_number = '', $note = '',  $sub_total = '', $tax_name = '', $tax_id = '', $item_key = '', $is_edit = false, $is_purchase_order = false, $serial_number = '', $without_checking_warehouse = 0, $description = '', $quantities_json = '', $area = '', $returnable = '', $returnable_date = '', $return_quantity = '', $location = '', $reconciliation_date = '', $used_quantity = '')
 	{
 
 
@@ -21416,7 +21416,7 @@ class Warehouse_model extends App_Model
 			$name_used_quantity = $name . '[used_quantity]';
 			$name_location = $name . '[location]';
 			$name_reconciliation_date = $name . '[reconciliation_date]';
-			$warehouse_id_name_attr = ["onchange" => "get_available_quantity('" . $name_commodity_code . "','" . $name_warehouse_id . "','" . $name_available_quantity . "');", "data-none-selected-text" => _l('warehouse_name'), 'data-from_stock_id' => 'invoice'];
+			$warehouse_id_name_attr = ["onchange" => "get_available_quantity('" . $name_commodity_code . "','" . $name_warehouse_id . "','" . $name_available_quantity . "');", "data-none-selected-text" => _l('warehouse_name'), 'data-from_stock_id' => 'invoice', 'disabled' => true];
 			$array_available_quantity_attr = ['onblur' => 'wh_calculate_total();', 'onchange' => 'wh_calculate_total();', 'min' => '0.0', 'step' => 'any',  'data-available_quantity' => (float)$available_quantity, 'readonly' => true];
 			if ($is_purchase_order) {
 				$array_qty_attr = ['onblur' => 'wh_calculate_total();', 'onchange' => 'wh_calculate_total();', 'min' => '0.0', 'step' => 'any',  'data-quantity' => (float)$quantities, 'readonly' => true];
@@ -21464,10 +21464,12 @@ class Warehouse_model extends App_Model
 
 		$row .= '<td class="">' . render_textarea($name_commodity_name, '', $commodity_name, ['rows' => 2, 'placeholder' => _l('item_description_placeholder'), 'readonly' => true]) . '</td>';
 		$row .= '<td class="">' . render_textarea($name_description, '', $description, ['rows' => 2, 'placeholder' => _l('item_description'), 'readonly' => true]) . '</td>';
-		$row .= '<td class="area">' . get_inventory_area_list($name_area, $area) . '</td>';
+		$row .= '<td class="area">' . get_inventory_reconcilliation_area_list($name_area, $area) . '</td>';
+		$row .= '<td class="hide area">' . render_input($name_area, '', $area) . '</td>';
+		$row .= '<td class="hide area">' . render_input($name_warehouse_id, '', 1) . '</td>';
 		$row .= '<td class="warehouse_select">' .
-			render_select($name_warehouse_id, $warehouse_data, array('warehouse_id', 'warehouse_name'), '', $warehouse_id, $warehouse_id_name_attr, ["data-none-selected-text" => _l('warehouse_name')], 'no-margin') .
-			render_input($name_note, '', $note, 'text', ['placeholder' => _l('commodity_notes')], [], 'no-margin', 'input-transparent text-left') .
+			render_select($name_warehouse_id, $warehouse_data, array('warehouse_id', 'warehouse_name'), '', 1, $warehouse_id_name_attr, ["data-none-selected-text" => _l('warehouse_name')], 'no-margin') .
+			render_input($name_note, '', $note, 'text', ['placeholder' => _l('commodity_notes'), 'readonly' => true], [], 'no-margin', 'input-transparent text-left') .
 			'</td>';
 
 		if ($is_edit == false) {
@@ -21709,13 +21711,11 @@ class Warehouse_model extends App_Model
 
 	public function add_stock_reconciliation($data, $id = false)
 	{
-
 		$goods_deliveries = [];
 		if (isset($data['newitems'])) {
 			$goods_deliveries = $data['newitems'];
 			unset($data['newitems']);
 		}
-
 		if (isset($data['vendor_quantity_val'])) {
 			unset($data['vendor_quantity_val']);
 		}
@@ -21894,7 +21894,6 @@ class Warehouse_model extends App_Model
 
 		return $insert_id > 0 ? $insert_id : false;
 	}
-
 	public function get_stock_reconciliation($id)
 	{
 		if (is_numeric($id)) {
@@ -22322,15 +22321,16 @@ class Warehouse_model extends App_Model
 	}
 
 	public function get_changee_order_quantity($item_code, $description, $order_id, $type)
-    {
-        $updated_co_quantity = 0;
-        $non_break_description = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $description));
-        $this->db->select(db_prefix() . 'co_order_detail.*, 
+	{
+		$updated_co_quantity = 0;
+		$non_break_description = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $description));
+		$this->db->select(
+			db_prefix() . 'co_order_detail.*, 
 		    (
 		        ' . db_prefix() . 'co_order_detail.quantity - ' . db_prefix() . 'co_order_detail.original_quantity
 		    ) AS quantity_difference'
 		);
-        $this->db->select("
+		$this->db->select("
             REPLACE(
                 REPLACE(
                     REPLACE(
@@ -22339,26 +22339,26 @@ class Warehouse_model extends App_Model
                 '<br />', ''),
             '<br/>', '') AS non_break_description
         ");
-        $this->db->join(db_prefix() . 'co_orders', db_prefix() . 'co_orders.id = ' . db_prefix() . 'co_order_detail.pur_order', 'left');
-        if($type == "pur_orders") {
-            $this->db->where(db_prefix() . 'co_orders.po_order_id', $order_id);
-        }
-        if($type == "wo_orders") {
-            $this->db->where(db_prefix() . 'co_orders.wo_order_id', $order_id);
-        }
-        $this->db->where(db_prefix() . 'co_orders.approve_status', 2);
-        $this->db->where(db_prefix() . 'co_order_detail.item_code', $item_code);
-        $this->db->group_by(db_prefix() . 'co_order_detail.id');
-        $this->db->having('non_break_description', $non_break_description);
-        $co_order_detail = $this->db->get(db_prefix() . 'co_order_detail')->result_array();
-        if(!empty($co_order_detail)) {
-            $updated_co_quantity = array_sum(array_column($co_order_detail, 'quantity_difference'));
-        }
+		$this->db->join(db_prefix() . 'co_orders', db_prefix() . 'co_orders.id = ' . db_prefix() . 'co_order_detail.pur_order', 'left');
+		if ($type == "pur_orders") {
+			$this->db->where(db_prefix() . 'co_orders.po_order_id', $order_id);
+		}
+		if ($type == "wo_orders") {
+			$this->db->where(db_prefix() . 'co_orders.wo_order_id', $order_id);
+		}
+		$this->db->where(db_prefix() . 'co_orders.approve_status', 2);
+		$this->db->where(db_prefix() . 'co_order_detail.item_code', $item_code);
+		$this->db->group_by(db_prefix() . 'co_order_detail.id');
+		$this->db->having('non_break_description', $non_break_description);
+		$co_order_detail = $this->db->get(db_prefix() . 'co_order_detail')->result_array();
+		if (!empty($co_order_detail)) {
+			$updated_co_quantity = array_sum(array_column($co_order_detail, 'quantity_difference'));
+		}
 
-        return $updated_co_quantity;
-    }
+		return $updated_co_quantity;
+	}
 
-    /**
+	/**
 	 * get vendor ajax
 	 * @param  integer $wo_orders_id
 	 * @return object
@@ -22455,7 +22455,7 @@ class Warehouse_model extends App_Model
 			}
 			$available_quantity = round($available_quantity, 2);
 
-			if(!empty($co_exist)) {
+			if (!empty($co_exist)) {
 				$updated_co_quantity = $this->get_changee_order_quantity($value['commodity_code'], $value['description'], $wo_order, 'wo_orders');
 				$available_quantity = $available_quantity + $updated_co_quantity;
 				$available_quantity = round($available_quantity, 2);
@@ -22500,14 +22500,14 @@ class Warehouse_model extends App_Model
 			}
 		}
 
-		if(!empty($co_exist)) {
+		if (!empty($co_exist)) {
 			$sql = 'select item_code as commodity_code, ' . db_prefix() . 'co_order_detail.description, ' . db_prefix() . 'co_order_detail.unit_id, unit_price, quantity as quantities, ' . db_prefix() . 'co_order_detail.tax as tax, into_money, (' . db_prefix() . 'co_order_detail.total-' . db_prefix() . 'co_order_detail.into_money) as tax_money, ' . db_prefix() . 'co_order_detail.total as goods_money, tax_rate, tax_value, ' . db_prefix() . 'co_order_detail.id as id, delivery_date, ' . db_prefix() . 'co_order_detail.area as area from ' . db_prefix() . 'co_order_detail
 			left join ' . db_prefix() . 'co_orders on ' . db_prefix() . 'co_orders.id =  ' . db_prefix() . 'co_order_detail.pur_order
 			left join ' . db_prefix() . 'items on ' . db_prefix() . 'co_order_detail.item_code =  ' . db_prefix() . 'items.id
 			left join ' . db_prefix() . 'taxes on ' . db_prefix() . 'taxes.id = ' . db_prefix() . 'co_order_detail.tax where ' . db_prefix() . 'co_orders.wo_order_id = ' . $wo_order . ' and ' . db_prefix() . 'co_order_detail.tender_item = 1
 			GROUP BY ' . db_prefix() . 'co_order_detail.id';
 			$co_results = $this->db->query($sql)->result_array();
-			if(!empty($co_results)) {
+			if (!empty($co_results)) {
 				foreach ($co_results as $key => $value) {
 					$available_quantity = $value['quantities'];
 					$non_break_description = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $value['description']));
@@ -22592,129 +22592,129 @@ class Warehouse_model extends App_Model
 	}
 
 	/**
-     * Get Stock Received dashboard
-     *
-     * @param  array  $data  Dashboard filter data
-     * @return array
-     */
-    public function get_stock_received_dashboard($data = array())
-    {
-        $response = array();
-        $vendors = isset($data['vendors']) ? $data['vendors'] : '';
-        $report_months = isset($data['report_months']) ? $data['report_months'] : '';
-        $report_from = isset($data['report_from']) ? $data['report_from'] : '';
-        $report_to = isset($data['report_to']) ? $data['report_to'] : '';
-        $this->load->model('currencies_model');
-        $this->load->model('purchase/purchase_model');
-        $base_currency = $this->currencies_model->get_base_currency();
-        if ($request->currency != 0 && $request->currency != null) {
-            $base_currency = pur_get_currency_by_id($request->currency);
-        }
+	 * Get Stock Received dashboard
+	 *
+	 * @param  array  $data  Dashboard filter data
+	 * @return array
+	 */
+	public function get_stock_received_dashboard($data = array())
+	{
+		$response = array();
+		$vendors = isset($data['vendors']) ? $data['vendors'] : '';
+		$report_months = isset($data['report_months']) ? $data['report_months'] : '';
+		$report_from = isset($data['report_from']) ? $data['report_from'] : '';
+		$report_to = isset($data['report_to']) ? $data['report_to'] : '';
+		$this->load->model('currencies_model');
+		$this->load->model('purchase/purchase_model');
+		$base_currency = $this->currencies_model->get_base_currency();
+		if ($request->currency != 0 && $request->currency != null) {
+			$base_currency = pur_get_currency_by_id($request->currency);
+		}
 
-        $response['total_receipts'] = $response['total_received_po'] = $response['total_po'] = $response['total_quantity_received'] = $response['total_client_supply'] = $response['total_bought_out_items'] = $response['fully_documented'] = $response['incompleted'] = 0;
-        $response['line_order_date'] = $response['line_order_total'] = array(); 
-        $response['bar_top_vendor_name'] = $response['bar_top_vendor_value'] = array();
-        $default_project = get_default_project();
+		$response['total_receipts'] = $response['total_received_po'] = $response['total_po'] = $response['total_quantity_received'] = $response['total_client_supply'] = $response['total_bought_out_items'] = $response['fully_documented'] = $response['incompleted'] = 0;
+		$response['line_order_date'] = $response['line_order_total'] = array();
+		$response['bar_top_vendor_name'] = $response['bar_top_vendor_value'] = array();
+		$default_project = get_default_project();
 
-        $custom_date_select = $this->purchase_model->get_where_report_period(db_prefix() . 'goods_receipt.date_add');
-        if(!empty($custom_date_select)) {
-        	$custom_date_select = str_replace("AND (", "", $custom_date_select);
-        	$custom_date_select = str_replace(")", "", $custom_date_select);
-        }
+		$custom_date_select = $this->purchase_model->get_where_report_period(db_prefix() . 'goods_receipt.date_add');
+		if (!empty($custom_date_select)) {
+			$custom_date_select = str_replace("AND (", "", $custom_date_select);
+			$custom_date_select = str_replace(")", "", $custom_date_select);
+		}
 
-        $this->db->select(
-		    db_prefix() . 'pur_orders.id, ' .
-		    db_prefix() . 'pur_orders.vendor, ' .
-		    db_prefix() . 'pur_orders.order_date'
+		$this->db->select(
+			db_prefix() . 'pur_orders.id, ' .
+				db_prefix() . 'pur_orders.vendor, ' .
+				db_prefix() . 'pur_orders.order_date'
 		);
-        $this->db->from(db_prefix() . 'pur_orders');
-        if (!empty($vendors) && is_array($vendors)) {
-            $this->db->where_in(db_prefix() . 'pur_orders.vendor', $vendors);
-        }
-        $pur_orders = $this->db->get()->result_array();
+		$this->db->from(db_prefix() . 'pur_orders');
+		if (!empty($vendors) && is_array($vendors)) {
+			$this->db->where_in(db_prefix() . 'pur_orders.vendor', $vendors);
+		}
+		$pur_orders = $this->db->get()->result_array();
 
-        $this->db->select(
-		    db_prefix() . 'goods_receipt.id, ' .
-		    db_prefix() . 'goods_receipt.pr_order_id, ' .
-		    db_prefix() . 'goods_receipt.supplier_code, ' .
-		    db_prefix() . 'goods_receipt.kind, ' .
-		    db_prefix() . 'goods_receipt.date_add, ' .
-		    'SUM(' . db_prefix() . 'goods_receipt_detail.quantities) AS total_quantity'
+		$this->db->select(
+			db_prefix() . 'goods_receipt.id, ' .
+				db_prefix() . 'goods_receipt.pr_order_id, ' .
+				db_prefix() . 'goods_receipt.supplier_code, ' .
+				db_prefix() . 'goods_receipt.kind, ' .
+				db_prefix() . 'goods_receipt.date_add, ' .
+				'SUM(' . db_prefix() . 'goods_receipt_detail.quantities) AS total_quantity'
 		);
-        $this->db->from(db_prefix() . 'goods_receipt');
-        $this->db->join(
-            db_prefix() . 'goods_receipt_detail',
-            db_prefix() . 'goods_receipt_detail.goods_receipt_id = ' . db_prefix() . 'goods_receipt.id',
-            'left'
-        );
-        if (!empty($vendors) && is_array($vendors)) {
-            $this->db->where_in(db_prefix() . 'goods_receipt.supplier_code', $vendors);
-        }
-        if (!empty($custom_date_select)) {
-        	$this->db->where($custom_date_select);
-        }
-        if (!empty($default_project)) {
-            $this->db->where(db_prefix() . 'goods_receipt.project', $default_project);
-        }
-        $this->db->group_by(db_prefix() . 'goods_receipt.id');
-        $this->db->order_by(db_prefix() . 'goods_receipt.date_add', 'asc');
-        $goods_receipt = $this->db->get()->result_array();
+		$this->db->from(db_prefix() . 'goods_receipt');
+		$this->db->join(
+			db_prefix() . 'goods_receipt_detail',
+			db_prefix() . 'goods_receipt_detail.goods_receipt_id = ' . db_prefix() . 'goods_receipt.id',
+			'left'
+		);
+		if (!empty($vendors) && is_array($vendors)) {
+			$this->db->where_in(db_prefix() . 'goods_receipt.supplier_code', $vendors);
+		}
+		if (!empty($custom_date_select)) {
+			$this->db->where($custom_date_select);
+		}
+		if (!empty($default_project)) {
+			$this->db->where(db_prefix() . 'goods_receipt.project', $default_project);
+		}
+		$this->db->group_by(db_prefix() . 'goods_receipt.id');
+		$this->db->order_by(db_prefix() . 'goods_receipt.date_add', 'asc');
+		$goods_receipt = $this->db->get()->result_array();
 
-        if (!empty($pur_orders)) {
-        	$response['total_po'] = count($pur_orders);
-        }
+		if (!empty($pur_orders)) {
+			$response['total_po'] = count($pur_orders);
+		}
 
-        if (!empty($goods_receipt)) {
-            $response['total_receipts'] = count($goods_receipt);
-            $response['total_received_po'] = count(
-		        array_unique(
-		            array_column(
-		                array_filter($goods_receipt, fn($item) => !empty($item['pr_order_id'])),
-		                'pr_order_id'
-		            )
-		        )
-		    );
-		    $response['total_quantity_received'] = number_format(array_sum(array_column($goods_receipt, 'total_quantity')), 2, '.', '');
-		    $response['total_client_supply'] = count(array_filter($goods_receipt, function ($item) {
-                return isset($item['kind']) && $item['kind'] == "Client Supply";
-            }));
-            $response['total_bought_out_items'] = count(array_filter($goods_receipt, function ($item) {
-                return isset($item['kind']) && $item['kind'] == "Bought out items";
-            }));
+		if (!empty($goods_receipt)) {
+			$response['total_receipts'] = count($goods_receipt);
+			$response['total_received_po'] = count(
+				array_unique(
+					array_column(
+						array_filter($goods_receipt, fn($item) => !empty($item['pr_order_id'])),
+						'pr_order_id'
+					)
+				)
+			);
+			$response['total_quantity_received'] = number_format(array_sum(array_column($goods_receipt, 'total_quantity')), 2, '.', '');
+			$response['total_client_supply'] = count(array_filter($goods_receipt, function ($item) {
+				return isset($item['kind']) && $item['kind'] == "Client Supply";
+			}));
+			$response['total_bought_out_items'] = count(array_filter($goods_receipt, function ($item) {
+				return isset($item['kind']) && $item['kind'] == "Bought out items";
+			}));
 
-            $line_order_total = array();
-            $bar_top_vendors = array();
-            foreach ($goods_receipt as $key => $value) {
-            	$month = date('M-y', strtotime($value['date_add']));
-                if (!isset($line_order_total[$month])) {
-                    $line_order_total[$month] = 0;
-                }
-                $line_order_total[$month]++;
+			$line_order_total = array();
+			$bar_top_vendors = array();
+			foreach ($goods_receipt as $key => $value) {
+				$month = date('M-y', strtotime($value['date_add']));
+				if (!isset($line_order_total[$month])) {
+					$line_order_total[$month] = 0;
+				}
+				$line_order_total[$month]++;
 
-                $vendor_id = $value['supplier_code'];
-                if (!isset($bar_top_vendors[$vendor_id])) {
-                    $bar_top_vendors[$vendor_id]['name'] = get_vendor_company_name($vendor_id);
-                    $bar_top_vendors[$vendor_id]['value'] = 0;
-                }
-                $bar_top_vendors[$vendor_id]['value']++;
-            }
+				$vendor_id = $value['supplier_code'];
+				if (!isset($bar_top_vendors[$vendor_id])) {
+					$bar_top_vendors[$vendor_id]['name'] = get_vendor_company_name($vendor_id);
+					$bar_top_vendors[$vendor_id]['value'] = 0;
+				}
+				$bar_top_vendors[$vendor_id]['value']++;
+			}
 
-            if (!empty($line_order_total)) {
-                $response['line_order_date'] = array_keys($line_order_total);
-                $response['line_order_total'] = array_values($line_order_total);
-            }
+			if (!empty($line_order_total)) {
+				$response['line_order_date'] = array_keys($line_order_total);
+				$response['line_order_total'] = array_values($line_order_total);
+			}
 
-            if (!empty($bar_top_vendors)) {
-                usort($bar_top_vendors, function ($a, $b) {
-                    return $b['value'] <=> $a['value'];
-                });
-                $bar_top_vendors = array_slice($bar_top_vendors, 0, 10);
-                $response['bar_top_vendor_name'] = array_column($bar_top_vendors, 'name');
-                $response['bar_top_vendor_value'] = array_column($bar_top_vendors, 'value');
-            }
-        }
+			if (!empty($bar_top_vendors)) {
+				usort($bar_top_vendors, function ($a, $b) {
+					return $b['value'] <=> $a['value'];
+				});
+				$bar_top_vendors = array_slice($bar_top_vendors, 0, 10);
+				$response['bar_top_vendor_name'] = array_column($bar_top_vendors, 'name');
+				$response['bar_top_vendor_value'] = array_column($bar_top_vendors, 'value');
+			}
+		}
 
-        // Get total distinct goods_receipt_id from documentation table
+		// Get total distinct goods_receipt_id from documentation table
 		$this->db->select('COUNT(*) as total_received');
 		$this->db->from(db_prefix() . 'goods_receipt_documentation');
 		$total_received_row = $this->db->get()->row_array();
@@ -22746,69 +22746,70 @@ class Warehouse_model extends App_Model
 			$response['incompleted'] = round(($incomplete_count / $total_received) * 100);
 		}
 
-        return $response;
-    }
+		return $response;
+	}
 
-    /**
-     * Get Stock Received dashboard
-     *
-     * @param  array  $data  Dashboard filter data
-     * @return array
-     */
-    public function get_stock_issued_dashboard($data = array())
-    {
-        $response = array();
-        $vendors = isset($data['vendors']) ? $data['vendors'] : '';
-        $report_months = isset($data['report_months']) ? $data['report_months'] : '';
-        $report_from = isset($data['report_from']) ? $data['report_from'] : '';
-        $report_to = isset($data['report_to']) ? $data['report_to'] : '';
-        $this->load->model('currencies_model');
-        $base_currency = $this->currencies_model->get_base_currency();
-        if ($request->currency != 0 && $request->currency != null) {
-            $base_currency = pur_get_currency_by_id($request->currency);
-        }
+	/**
+	 * Get Stock Received dashboard
+	 *
+	 * @param  array  $data  Dashboard filter data
+	 * @return array
+	 */
+	public function get_stock_issued_dashboard($data = array())
+	{
+		$response = array();
+		$vendors = isset($data['vendors']) ? $data['vendors'] : '';
+		$report_months = isset($data['report_months']) ? $data['report_months'] : '';
+		$report_from = isset($data['report_from']) ? $data['report_from'] : '';
+		$report_to = isset($data['report_to']) ? $data['report_to'] : '';
+		$this->load->model('currencies_model');
+		$base_currency = $this->currencies_model->get_base_currency();
+		if ($request->currency != 0 && $request->currency != null) {
+			$base_currency = pur_get_currency_by_id($request->currency);
+		}
 
-        $response['total_issued_quantity'] = $response['total_issued_entries'] = $response['total_returnable_items'] = $response['non_returnable_ratio'] = $response['returnable_ratio'] = 0;
-        $response['bar_top_material_name'] = $response['bar_top_material_value'] = array();
-        $response['line_order_date'] = $response['line_order_total'] = array(); 
-        $default_project = get_default_project();
+		$response['total_issued_quantity'] = $response['total_issued_entries'] = $response['total_returnable_items'] = $response['non_returnable_ratio'] = $response['returnable_ratio'] = 0;
+		$response['bar_top_material_name'] = $response['bar_top_material_value'] = array();
+		$response['line_order_date'] = $response['line_order_total'] = array();
+		$default_project = get_default_project();
 
-        $this->db->select('id, date_add');
-        $this->db->from(db_prefix() . 'goods_delivery');
-        if (!empty($default_project)) {
-            $this->db->where(db_prefix() . 'goods_delivery.project', $default_project);
-        }
-        $this->db->order_by(db_prefix() . 'goods_delivery.date_add', 'asc');
-        $goods_delivery = $this->db->get()->result_array();
+		$this->db->select('id, date_add');
+		$this->db->from(db_prefix() . 'goods_delivery');
+		if (!empty($default_project)) {
+			$this->db->where(db_prefix() . 'goods_delivery.project', $default_project);
+		}
+		$this->db->order_by(db_prefix() . 'goods_delivery.date_add', 'asc');
+		$goods_delivery = $this->db->get()->result_array();
 
-        $this->db->select('
+		$this->db->select(
+			'
             ' . db_prefix() . 'goods_delivery_detail.id,
             ' . db_prefix() . 'goods_delivery_detail.commodity_name,
             ' . db_prefix() . 'goods_delivery_detail.quantities,
             ' . db_prefix() . 'goods_delivery_detail.returnable,
             ' . db_prefix() . 'goods_delivery.date_add'
-        );
-        $this->db->join(
-            db_prefix() . 'goods_delivery',
-            db_prefix() . 'goods_delivery.id = ' . db_prefix() . 'goods_delivery_detail.goods_delivery_id',
-            'left'
-        );
-        $this->db->from(db_prefix() . 'goods_delivery_detail');
-        if (!empty($default_project)) {
-            $this->db->where(db_prefix() . 'goods_delivery.project', $default_project);
-        }
-        $this->db->group_by(db_prefix() . 'goods_delivery_detail.id');
-        $this->db->order_by(db_prefix() . 'goods_delivery_detail.id', 'asc');
-        $goods_delivery_detail = $this->db->get()->result_array();
+		);
+		$this->db->join(
+			db_prefix() . 'goods_delivery',
+			db_prefix() . 'goods_delivery.id = ' . db_prefix() . 'goods_delivery_detail.goods_delivery_id',
+			'left'
+		);
+		$this->db->from(db_prefix() . 'goods_delivery_detail');
+		if (!empty($default_project)) {
+			$this->db->where(db_prefix() . 'goods_delivery.project', $default_project);
+		}
+		$this->db->group_by(db_prefix() . 'goods_delivery_detail.id');
+		$this->db->order_by(db_prefix() . 'goods_delivery_detail.id', 'asc');
+		$goods_delivery_detail = $this->db->get()->result_array();
 
-        if (!empty($goods_delivery)) {
-        	$response['total_issued_entries'] = count($goods_delivery);
-        }
+		if (!empty($goods_delivery)) {
+			$response['total_issued_entries'] = count($goods_delivery);
+		}
 
-        if (!empty($goods_delivery_detail)) {
-        	$response['total_issued_quantity'] = number_format(array_sum(array_column($goods_delivery_detail, 'quantities')), 2, '.', '');
-        	$total_returnable_items = count(array_filter($goods_delivery_detail, function($item) {
-			    return isset($item['returnable']) && $item['returnable'] == 1;
+		if (!empty($goods_delivery_detail)) {
+			$response['total_issued_quantity'] = number_format(array_sum(array_column($goods_delivery_detail, 'quantities')), 2, '.', '');
+			$total_returnable_items = count(array_filter($goods_delivery_detail, function ($item) {
+				return isset($item['returnable']) && $item['returnable'] == 1;
 			}));
 			$response['total_returnable_items'] = $total_returnable_items;
 			$total_items = count($goods_delivery_detail);
@@ -22817,45 +22818,45 @@ class Warehouse_model extends App_Model
 			$line_order_total = array();
 			foreach ($goods_delivery_detail as $item) {
 				$commodity_name = $item['commodity_name'];
-                if (!isset($bar_top_materials[$commodity_name])) {
-                    $bar_top_materials[$commodity_name]['name'] = $commodity_name;
-                    $bar_top_materials[$commodity_name]['value'] = 0;
-                }
-                $bar_top_materials[$commodity_name]['value'] += (float) $item['quantities'];
+				if (!isset($bar_top_materials[$commodity_name])) {
+					$bar_top_materials[$commodity_name]['name'] = $commodity_name;
+					$bar_top_materials[$commodity_name]['value'] = 0;
+				}
+				$bar_top_materials[$commodity_name]['value'] += (float) $item['quantities'];
 
-                $month = date('M-y', strtotime($item['date_add']));
-                if (!isset($line_order_total[$month])) {
-                    $line_order_total[$month] = 0;
-                }
-                $line_order_total[$month] += (float) $item['quantities'];
+				$month = date('M-y', strtotime($item['date_add']));
+				if (!isset($line_order_total[$month])) {
+					$line_order_total[$month] = 0;
+				}
+				$line_order_total[$month] += (float) $item['quantities'];
 			}
 
 			if (!empty($bar_top_materials)) {
-                usort($bar_top_materials, function ($a, $b) {
-                    return $b['value'] <=> $a['value'];
-                });
-                $bar_top_materials = array_slice($bar_top_materials, 0, 10);
-                $response['bar_top_material_name'] = array_column($bar_top_materials, 'name');
-                $response['bar_top_material_value'] = array_column($bar_top_materials, 'value');
-            }
+				usort($bar_top_materials, function ($a, $b) {
+					return $b['value'] <=> $a['value'];
+				});
+				$bar_top_materials = array_slice($bar_top_materials, 0, 10);
+				$response['bar_top_material_name'] = array_column($bar_top_materials, 'name');
+				$response['bar_top_material_value'] = array_column($bar_top_materials, 'value');
+			}
 
-            if (!empty($line_order_total)) {
-                $response['line_order_date'] = array_keys($line_order_total);
-                $response['line_order_total'] = array_values($line_order_total);
-            }
+			if (!empty($line_order_total)) {
+				$response['line_order_date'] = array_keys($line_order_total);
+				$response['line_order_total'] = array_values($line_order_total);
+			}
 
-            $percentage_utilized = 0;
-            if ($total_items > 0) {
+			$percentage_utilized = 0;
+			if ($total_items > 0) {
 				$percentage_utilized = round(($total_returnable_items / $total_items) * 100);
 			}
 			$response['returnable_ratio'] = $percentage_utilized;
 			$response['non_returnable_ratio'] = 100 - $response['returnable_ratio'];
 		}
-        
-        return $response;
-    }
 
-    /**
+		return $response;
+	}
+
+	/**
 	 * get wo order delivered
 	 * @return [type] 
 	 */
@@ -22934,7 +22935,7 @@ class Warehouse_model extends App_Model
 					$available_quantity = $available_quantity - $total_quantity;
 				}
 
-				if(!empty($co_exist)) {
+				if (!empty($co_exist)) {
 					$updated_co_quantity = $this->get_changee_order_quantity($value['commodity_code'], $value['description'], $wo_order, 'wo_orders');
 					$available_quantity = $available_quantity + $updated_co_quantity;
 					$available_quantity = round($available_quantity, 2);
@@ -22953,14 +22954,14 @@ class Warehouse_model extends App_Model
 			}
 		}
 
-		if(!empty($co_exist)) {
+		if (!empty($co_exist)) {
 			$sql = 'select item_code as commodity_code, ' . db_prefix() . 'co_order_detail.description, ' . db_prefix() . 'co_order_detail.unit_id, unit_price, quantity as quantities, ' . db_prefix() . 'co_order_detail.tax as tax, into_money, (' . db_prefix() . 'co_order_detail.total-' . db_prefix() . 'co_order_detail.into_money) as tax_money, ' . db_prefix() . 'co_order_detail.total as goods_money, tax_rate, tax_value, ' . db_prefix() . 'co_order_detail.id as id, delivery_date, ' . db_prefix() . 'co_order_detail.area as area from ' . db_prefix() . 'co_order_detail
 			left join ' . db_prefix() . 'co_orders on ' . db_prefix() . 'co_orders.id =  ' . db_prefix() . 'co_order_detail.pur_order
 			left join ' . db_prefix() . 'items on ' . db_prefix() . 'co_order_detail.item_code =  ' . db_prefix() . 'items.id
 			left join ' . db_prefix() . 'taxes on ' . db_prefix() . 'taxes.id = ' . db_prefix() . 'co_order_detail.tax where ' . db_prefix() . 'co_orders.wo_order_id = ' . $wo_order . ' and ' . db_prefix() . 'co_order_detail.tender_item = 1
 			GROUP BY ' . db_prefix() . 'co_order_detail.id';
 			$co_results = $this->db->query($sql)->result_array();
-			if(!empty($co_results)) {
+			if (!empty($co_results)) {
 				foreach ($co_results as $key => $value) {
 					$available_quantity = (float)$value['quantities'];
 					$non_break_description = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $value['description']));
