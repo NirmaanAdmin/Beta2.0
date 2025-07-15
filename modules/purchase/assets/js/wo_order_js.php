@@ -241,12 +241,6 @@ $(function(){
         var order_date = $(this).val();
         get_order_date(order_date);
       });
-
-      get_project_areas();
-
-      $("body").on('change', 'select[name="project"]', function () {
-        get_project_areas();
-      });
     });
 
 var lastAddedItemKey = null;
@@ -306,7 +300,6 @@ function coppy_pur_estimate(){
           $('body').find('#items-warning').remove();
           $("body").find('.dt-loader').remove();
           $('#item_select').selectpicker('val', '');
-          get_project_areas(data.area);
         }
     });
   }
@@ -1013,38 +1006,6 @@ function init_po_currency(id, callback) {
                 }
             });
     }
-}
-
-function get_project_areas(selected_area = '') {
-  var project = $('select[name="project"]').val();
-  if(project !== '' && $('input[name="isedit"]').length == 0) {
-    $.ajax({
-      url: admin_url + 'purchase/get_project_areas',
-      method: 'POST',
-      data: {project: project},
-      dataType: 'json',
-      success: function(response){
-          var options = '';
-          $.each(response, function(index, area) {
-            var selected = (selected_area !== '' && selected_area == area.id) ? ' selected' : '';
-            options += '<option value="'+ area.id +'"' + selected + '>'+ area.area_name +'</option>';
-          });
-          var $select = $('#project_area select');
-          $select.html(options);
-          $select.selectpicker('refresh');
-          
-          $('.invoice-item .main select[name="area"]').val('');
-          var $select = $('.invoice-item .main select[name="area"]');
-          $select.selectpicker('refresh');
-      },
-      error: function(){
-      }
-    });
-  } else if(project == '' && $('input[name="isedit"]').length == 0) {
-    var $select = $('#project_area select');
-    $select.html('');
-    $select.selectpicker('refresh');
-  }
 }
 
 </script>

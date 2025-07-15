@@ -72,12 +72,6 @@ $("input[name='currency_rate']").on('change', function () {
     });
 });
 
-get_project_areas();
-
-$("body").on('change', 'select[name="project"]', function () {
-  get_project_areas();
-});
-
 })(jQuery); 
 
 var lastAddedItemKey = null;
@@ -341,9 +335,7 @@ function pur_add_item_to_table(data, itemid) {
     pur_clear_item_preview_values('.invoice-item');
     $('body').find('#items-warning').remove();
     $("body").find('.dt-loader').remove();
-        $('#item_select').selectpicker('val', '');
-    get_project_areas(data.area);
-
+    $('#item_select').selectpicker('val', '');
     return true;
   });
   return false;
@@ -573,38 +565,6 @@ function init_pr_currency(id, callback) {
                 }
             });
     }
-}
-
-function get_project_areas(selected_area = '') {
-  var project = $('select[name="project"]').val();
-  if(project !== '' && $('input[name="isedit"]').length == 0) {
-    $.ajax({
-      url: admin_url + 'purchase/get_project_areas',
-      method: 'POST',
-      data: {project: project},
-      dataType: 'json',
-      success: function(response){
-          var options = '';
-          $.each(response, function(index, area) {
-            var selected = (selected_area !== '' && selected_area == area.id) ? ' selected' : '';
-            options += '<option value="'+ area.id +'"' + selected + '>'+ area.area_name +'</option>';
-          });
-          var $select = $('#project_area select');
-          $select.html(options);
-          $select.selectpicker('refresh');
-          
-          $('.invoice-item .main select[name="area"]').val('');
-          var $select = $('.invoice-item .main select[name="area"]');
-          $select.selectpicker('refresh');
-      },
-      error: function(){
-      }
-    });
-  } else if(project == '' && $('input[name="isedit"]').length == 0) {
-    var $select = $('#project_area select');
-    $select.html('');
-    $select.selectpicker('refresh');
-  }
 }
 
 </script>
