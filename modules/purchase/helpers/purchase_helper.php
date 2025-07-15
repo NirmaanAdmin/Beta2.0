@@ -3566,7 +3566,7 @@ function get_area_list($name_area, $area)
 {
     $CI = &get_instance();
     $CI->load->model('purchase_model');
-    $get_area = $CI->purchase_model->get_area();
+    $get_area = get_area_project_wise();
     $selected = !empty($area) ? $area : array();
     if (!is_array($selected)) {
         $selected = explode(",", $selected);
@@ -4623,7 +4623,7 @@ function get_area_project_wise($id = false)
         $default_project = get_default_project();
         $CI->db->select('*');
         $CI->db->from(db_prefix() . 'area');
-        $CI->db->where('(project_id IS NULL OR project_id = '.$default_project.')');
+        $CI->db->where('(project IS NULL OR project = '.$default_project.')');
         $CI->db->order_by('id', 'asc');
         return $CI->db->get()->result_array();
     }

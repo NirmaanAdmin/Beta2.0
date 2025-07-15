@@ -537,8 +537,8 @@ class purchase extends AdminController
         $data['departments'] = $this->departments_model->get();
         $data['vendor_contacts'] = $this->purchase_model->get_contacts();
         $data['projects'] = $this->projects_model->get();
-        $data['item_group'] = $this->purchase_model->get_commodity_group_add_commodity();
-        $data['item_sub_group'] = $this->purchase_model->get_sub_group();
+        $data['item_group'] = get_budget_head_project_wise();
+        $data['item_sub_group'] = get_budget_sub_head_project_wise();
         $data['requester'] = $this->staff_model->get('', ['active' => 1]);
 
         $this->load->view('purchase_request/manage', $data);
@@ -586,9 +586,9 @@ class purchase extends AdminController
             $data['title'] = _l('edit');
             $is_edit = true;
         }
-        $data['commodity_groups_pur_request'] = $this->purchase_model->get_commodity_group_add_commodity();
-        $data['sub_groups_pur_request'] = $this->purchase_model->get_sub_group();
-        $data['area_pur_request'] = $this->purchase_model->get_area();
+        $data['commodity_groups_pur_request'] = get_budget_head_project_wise();
+        $data['sub_groups_pur_request'] = get_budget_sub_head_project_wise();
+        $data['area_pur_request'] = get_area_project_wise();
         $data['base_currency'] = $this->currencies_model->get_base_currency();
 
         $purchase_request_row_template = $this->purchase_model->create_purchase_request_row_template();
@@ -13929,7 +13929,7 @@ class purchase extends AdminController
         $data['commodity_groups_pur'] = $this->purchase_model->get_commodity_group_add_commodity();
         $data['projects'] = $this->projects_model->get();
         $data['order_tracker_row_template'] = $this->purchase_model->create_unawarded_tracker_row_template();
-        $data['budget_head'] = $this->purchase_model->get_commodity_group_add_commodity();
+        $data['budget_head'] = get_budget_head_project_wise();
         $data['rli_filters'] = $this->purchase_model->get_all_rli_filters();
 
         $this->load->view('unawarded_tracker/manage', $data);
@@ -14983,8 +14983,8 @@ class purchase extends AdminController
         $data['departments'] = $this->departments_model->get();
         $data['vendor_contacts'] = $this->purchase_model->get_contacts();
         $data['projects'] = $this->projects_model->get();
-        $data['item_group'] = $this->purchase_model->get_commodity_group_add_commodity();
-        $data['item_sub_group'] = $this->purchase_model->get_sub_group();
+        $data['item_group'] = get_budget_head_project_wise();
+        $data['item_sub_group'] = get_budget_sub_head_project_wise();
         $data['requester'] = $this->staff_model->get('', ['active' => 1]);
 
         $this->load->view('purchase_tender/manage', $data);

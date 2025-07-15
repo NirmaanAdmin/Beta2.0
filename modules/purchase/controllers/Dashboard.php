@@ -18,7 +18,7 @@ class Dashboard extends AdminController
     {
         $this->load->model('projects_model');
         $data['vendors'] = $this->purchase_model->get_vendor();
-        $data['commodity_groups_pur'] = $this->purchase_model->get_commodity_group_add_commodity();
+        $data['commodity_groups_pur'] = get_budget_head_project_wise();
         $data['projects'] = $this->projects_model->get();
         $this->load->view('dashboard/dashboard', $data);
     }
