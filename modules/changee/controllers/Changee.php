@@ -1549,9 +1549,9 @@ class changee extends AdminController
         $data['vendors'] = $this->changee_model->get_vendor();
         $data['estimates'] = $this->changee_model->get_sale_estimate_for_pr();
         $data['units'] = $this->changee_model->get_units();
-        $data['commodity_groups_pur'] = $this->changee_model->get_commodity_group_add_commodity();
-        $data['sub_groups_pur'] = $this->changee_model->get_sub_group();
-        $data['area_pur'] = $this->changee_model->get_area();
+        $data['commodity_groups_pur'] = get_budget_head_project_wise();
+        $data['sub_groups_pur'] = get_budget_sub_head_project_wise();
+        $data['area_pur'] = get_area_project_wise();
         $data['pr_orders'] = get_po_order();
         $data['wo_orders'] = get_wo_order();
 
