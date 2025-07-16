@@ -20379,7 +20379,7 @@ class Purchase_model extends App_Model
             $this->db->update(
                 db_prefix() . 'pur_invoices',
                 [
-                    'vendor' => $pur_order->vendor,
+                    // 'vendor' => $pur_order->vendor,
                     'project_id' => $pur_order->project,
                     'pur_order' => $data['pur_order'],
                     'wo_order' => null,
@@ -20392,7 +20392,7 @@ class Purchase_model extends App_Model
             $this->db->update(
                 db_prefix() . 'pur_invoices',
                 [
-                    'vendor' => $wo_order->vendor,
+                    // 'vendor' => $wo_order->vendor,
                     'project_id' => $wo_order->project,
                     'wo_order' => $data['wo_order'],
                     'pur_order' => null,
@@ -20405,7 +20405,7 @@ class Purchase_model extends App_Model
             $this->db->update(
                 db_prefix() . 'pur_invoices',
                 [
-                    'vendor' => $order_tracker->vendor,
+                    // 'vendor' => $order_tracker->vendor,
                     'order_tracker_id' => $data['order_tracker'],
                     'pur_order' => null,
                     'wo_order' => null
