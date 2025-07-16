@@ -46,7 +46,7 @@
                               </select>
                             </div>
                             <div class="col-md-3">
-                              <select name="delivery_status" id="delivery_status" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('delivery_status_new'); ?>">
+                              <select name="delivery_status" id="delivery_status" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('reconciliation_status_new'); ?>">
                                   <option value=""></option>
                                   <option value="ready_to_deliver"><?php echo _l('wh_ready_to_deliver_new'); ?></option>
                                   <option value="delivery_in_progress"><?php echo _l('wh_delivery_in_progress_new'); ?></option>
@@ -62,13 +62,13 @@
                     <br/>
                     <?php render_datatable(array(
                         _l('id'),
-                        _l('goods_delivery_code_new'),
+                        _l('Reconciliation Voucher Code'),
                         _l('reference_purchase_order'),
                         _l('Reconciliation Date'),
                         // _l('invoices'),
                         // _l('staff_id'),
                         _l('status_label'),
-                        _l('delivery_status_new'),
+                        _l('Reconciliation Status'),
                         _l('options'),
                         ),'table_manage_delivery',['delivery_sm' => 'delivery_sm']); ?>
 

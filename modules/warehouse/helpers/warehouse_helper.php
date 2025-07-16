@@ -1746,6 +1746,62 @@ function delivery_list_status($status = '')
     return $statuses;
 }
 
+
+function reconcilliation_list_status($status = '')
+{
+
+    $statuses = [
+
+        [
+            'id'             => 'ready_to_deliver',
+            'color'          => '#03A9F4',
+            'name'           => _l('wh_ready_to_reconcile_new'),
+            'order'          => 2,
+            'filter_default' => true,
+        ],
+        [
+            'id'             => 'delivery_in_progress',
+            'color'          => '#2196f3',
+            'name'           => _l('wh_reconciliation_in_progress_new'),
+            'order'          => 3,
+            'filter_default' => true,
+        ],
+        [
+            'id'             => 'delivered',
+            'color'          => '#3db8da',
+            'name'           => _l('wh_reconciled_new'),
+            'order'          => 4,
+            'filter_default' => true,
+        ],
+        [
+            'id'             => 'received',
+            'color'          => '#84c529',
+            'name'           => _l('wh_received'),
+            'order'          => 5,
+            'filter_default' => false,
+        ],
+        [
+            'id'             => 'returned',
+            'color'          => '#d71a1a',
+            'name'           => _l('wh_returned'),
+            'order'          => 6,
+            'filter_default' => false,
+        ],
+        [
+            'id'             => 'not_delivered',
+            'color'          => '#ffa500',
+            'name'           => _l('wh_not_delivered_new'),
+            'order'          => 7,
+            'filter_default' => false,
+        ],
+    ];
+
+    usort($statuses, function ($a, $b) {
+        return $a['order'] - $b['order'];
+    });
+
+    return $statuses;
+}
 /**
  * packing list status
  * @param  string $status 
@@ -1816,11 +1872,14 @@ function packing_list_status($status = '')
  */
 function render_delivery_status_html($id, $type, $status_value = '', $ChangeStatus = true)
 {
-    $status          = get_delivery_status_by_id($status_value, $type);
+    $status = get_delivery_status_by_id($status_value, $type);
 
     if ($type == 'delivery') {
         $task_statuses = delivery_list_status();
-    } else {
+    } elseif ($type == 'reconciliation') {
+        $task_statuses = reconcilliation_list_status();
+    }
+    else {
         $task_statuses = packing_list_status();
     }
     $outputStatus    = '';

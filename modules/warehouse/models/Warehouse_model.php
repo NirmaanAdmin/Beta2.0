@@ -17032,6 +17032,12 @@ class Warehouse_model extends App_Model
 
 				$this->check_update_shipment_when_delivery_note_approval($id, $status, 'delivery_status_mark');
 			}
+		} elseif ($type == 'reconciliation') {
+			$this->db->where('id', $id);
+			$this->db->update(db_prefix() . 'stock_reconciliation', ['delivery_status' => $status]);
+			if ($this->db->affected_rows() > 0) {
+				$status_f = true;
+			}
 		} elseif ($type == 'packing_list') {
 			$this->db->where('id', $id);
 			$this->db->update(db_prefix() . 'wh_packing_lists', ['delivery_status' => $status]);
@@ -23032,5 +23038,345 @@ class Warehouse_model extends App_Model
 		$arr_wo_order['additional_discount'] = 0;
 
 		return $arr_wo_order;
+	}
+
+	public function get_stock_reconcile_export_pdf_html($goods_delivery_id)
+	{
+		$this->load->model('currencies_model');
+		$base_currency = $this->currencies_model->get_base_currency();
+		// get_goods_receipt
+		$goods_delivery = $this->get_stock_reconciliation($goods_delivery_id);
+		// get_goods_receipt_detail
+		$goods_delivery_detail = $this->get_stock_reconciliation_detail($goods_delivery_id);
+		$company_name = get_option('invoice_company_name');
+		$address = get_option('invoice_company_address');
+		$tax_data = $this->get_html_tax_delivery($goods_delivery_id);
+		$get_dept = $this->get_department($goods_delivery->department);
+		if (!empty($goods_delivery->pr_order_id)) {
+			$get_all_order_details = get_all_po_details_in_warehouse($goods_delivery->pr_order_id);
+		}
+		if (!empty($goods_delivery->wo_order_id)) {
+			$get_all_order_details = get_all_wo_details_in_warehouse($goods_delivery->wo_order_id);
+		}
+		$budget_head = get_group_name_item($get_all_po_details->group_pur);
+
+		$this->load->model('staff_model');
+		$staff_name = $this->staff_model->get($goods_delivery->addedfrom);
+
+		$day = date('d', strtotime($goods_delivery->date_add));
+		$month = date('m', strtotime($goods_delivery->date_add));
+		$year = date('Y', strtotime($goods_delivery->date_add));
+		$warehouse_lotnumber_bottom_infor_option = get_warehouse_option('goods_delivery_pdf_display_warehouse_lotnumber_bottom_infor');
+
+		$customer_name = '';
+		if ($goods_delivery) {
+			if (is_numeric($goods_delivery->customer_code)) {
+				$customer_value = $this->clients_model->get($goods_delivery->customer_code);
+				if ($customer_value) {
+					$customer_name .= $customer_value->company;
+
+					$customer_value->client = $customer_value;
+					$customer_value->clientid = $customer_value->userid;
+				}
+			}
+		}
+
+
+
+		$html = '';
+
+		$html .= '<table class="table">
+		<tbody>
+		<tr>
+		<td rowspan="2" width="50%" class="text-left">' . pdf_logo_url() . '</td>
+		<td class="text_right_weight "><h3>' . mb_strtoupper(_l('delivery')) . '</h3></td>
+		</tr>
+
+		<tr>
+		<td class="text_right">#' . $goods_delivery->goods_delivery_code . '</td>
+		</tr>
+		</tbody>
+		</table>
+		<br><br><br>
+		';
+
+		//organization_info
+		$organization_info = '<div  class="bill_to_color">';
+		$organization_info .= '<b>' . _l('project') . ': ' . get_project_name_by_id($goods_delivery->project) . '</b><br />';
+		if (!empty($goods_delivery->pr_order_id)) {
+			$organization_info .= '<b>PO Name : </b>' . $get_all_order_details->pur_order_number . '-' . $get_all_order_details->pur_order_name  . '<br>';
+		}
+		if (!empty($goods_delivery->wo_order_id)) {
+			$organization_info .= '<b>WO Name : </b>' . $get_all_order_details->wo_order_number . '-' . $get_all_order_details->wo_order_name  . '<br>';
+		}
+		$organization_info .= '<b>' . _l('Issued By') . ':</b> ' . $staff_name->firstname . ' ' . $staff_name->lastname . '<br />';
+
+
+		$organization_info .= format_organization_info_name();
+
+		$organization_info .= '</div>';
+
+
+		$bill_to = '';
+		$ship_to = '';
+		if (isset($customer_value)) {
+			// Bill to
+			$bill_to .= '<b>' . _l('Bill to') . '</b>';
+			$bill_to .= '<div class="bill_to_color">';
+			$bill_to .= format_customer_info($customer_value, 'invoice', 'billing');
+			$bill_to .= '</div>';
+
+			// ship to to
+			$ship_to .= '<br /><b>' . _l('ship_to') . '</b>';
+			$ship_to .= '<div  class="bill_to_color">';
+			$ship_to .= format_customer_info($customer_value, 'invoice', 'shipping');
+			$ship_to .= '</div>';
+		}
+
+		$invoice_date = '<br /><b>' . _l('department') . ' : ' . $get_dept->name . '</b><br />';
+		//invoice_data_date
+		$invoice_date .= '<br /><b>Issued Date: ' . _d($goods_delivery->date_add) . '</b><br />';
+
+		if (is_numeric($goods_delivery->invoice_id) && $goods_delivery->invoice_id != 0) {
+			$invoice_date .= '<b>' . _l('invoice_no') . ': ' . format_invoice_number($goods_delivery->invoice_id) . '</b>';
+		}
+		$budget_head = '<b>' . _l('budget_head') . ':</b> ' . $budget_head->name . '<br />';
+
+		$html .= '<table class="table">
+		<tbody>
+		<tr>
+		<td rowspan="2" width="50%" class="text-left">' . $organization_info . '</td>
+		<td rowspan="2" width="50%" class="text_right">' . $bill_to . '</td>
+		</tr>
+		</tbody>
+		</table>
+		';
+		$html .= '<table class="table">
+		<tbody>
+		<tr>
+		<td rowspan="2" width="50%" class="text-left"></td>
+		<td rowspan="2" width="50%" class="text_right">' . $invoice_date . $budget_head . '</td>
+		</tr>
+		</tbody>
+		</table>
+		
+		';
+		$html .= '<table class="table" style="font-size: 13px">
+        <thead>
+            <tr>
+                <th class="thead-dark">' . _l('Commodity Code') . '</th>
+                <th class="thead-dark">' . _l('Item Description') . '</th>
+                <th class="thead-dark">' . _l('area') . '</th>';
+		if ($warehouse_lotnumber_bottom_infor_option == 1) {
+			$html .= '<th class="thead-dark">' . _l('warehouse_name') . '</th>';
+		}
+		$html .= '<th class="thead-dark">' . _l('Issued Quantity') . '</th>
+                <th class="thead-dark">' . _l('Return Date') . '</th>
+                <th class="thead-dark">' . _l('Reconciliation Date') . '</th>
+                <th class="thead-dark">' . _l('Return Quantity') . '</th>
+                <th class="thead-dark">' . _l('Used Quantity') . '</th>
+                <th class="thead-dark">' . _l('Location') . '</th>
+            </tr>
+        </thead>
+        <tbody>';
+
+		$subtotal = 0;
+
+		foreach ($goods_delivery_detail as $delivery_key => $delivery_value) {
+			$available_quantity = (isset($delivery_value)) ? $delivery_value['available_quantity'] : '';
+			$total_money = (isset($delivery_value)) ? $delivery_value['total_money'] : '';
+			$discount = (isset($delivery_value)) ? $delivery_value['discount'] : '';
+			$discount_money = (isset($delivery_value)) ? $delivery_value['discount_money'] : '';
+			$guarantee_period = (isset($delivery_value) ? _d($delivery_value['guarantee_period']) : '');
+
+			$quantities = (isset($delivery_value)) ? $delivery_value['quantities'] : '';
+			$unit_price = (isset($delivery_value)) ? $delivery_value['unit_price'] : '';
+			$total_after_discount = (isset($delivery_value)) ? $delivery_value['total_after_discount'] : '';
+
+			$commodity_code = get_commodity_name($delivery_value['commodity_code']) != null ? get_commodity_name($delivery_value['commodity_code'])->commodity_code : '';
+			$commodity_name = get_commodity_name($delivery_value['commodity_code']) != null ? get_commodity_name($delivery_value['commodity_code'])->description : '';
+			$subtotal += (float)$delivery_value['quantities'] * (float)$delivery_value['unit_price'];
+			$item_subtotal = (float)$delivery_value['quantities'] * (float)$delivery_value['unit_price'];
+
+			$warehouse_name = '';
+
+			if (isset($delivery_value['warehouse_id']) && ($delivery_value['warehouse_id'] != '')) {
+				$arr_warehouse = explode(',', $delivery_value['warehouse_id']);
+
+				$str = '';
+				if (count($arr_warehouse) > 0) {
+
+					foreach ($arr_warehouse as $wh_key => $warehouseid) {
+						$str = '';
+						if ($warehouseid != '' && $warehouseid != '0') {
+
+							$team = get_warehouse_name($warehouseid);
+							if ($team) {
+								$value = $team != null ? get_object_vars($team)['warehouse_name'] : '';
+
+								if (strlen($str) > 0) {
+									$str .= ',<span class="label label-tag tag-id-1"><span class="tag">' . $value . '</span></span>';
+								} else {
+									$str .= '<span class="label label-tag tag-id-1"><span class="tag">' . $value . '</span></span>';
+								}
+
+								$warehouse_name .= $str;
+								if ($wh_key % 3 == 0) {
+									$warehouse_name .= '<br/>';
+								}
+							}
+						}
+					}
+				} else {
+					$warehouse_name = '';
+				}
+			}
+
+			$unit_name = '';
+			if (is_numeric($delivery_value['unit_id'])) {
+				$unit_name = get_unit_type($delivery_value['unit_id']) != null ? get_unit_type($delivery_value['unit_id'])->unit_name : '';
+			}
+
+			$lot_number = '';
+			if (($delivery_value['lot_number'] != null) && ($delivery_value['lot_number'] != '')) {
+				$array_lot_number = explode(',', $delivery_value['lot_number']);
+				foreach ($array_lot_number as $key => $lot_value) {
+					if ($key % 2 == 0) {
+						$lot_number .= $lot_value;
+					} else {
+						$lot_number .= ' : ' . $lot_value . ' ';
+					}
+				}
+			}
+
+			$commodity_name = $delivery_value['commodity_name'];
+			if (strlen($commodity_name) == 0) {
+				$commodity_name = wh_get_item_variatiom($delivery_value['commodity_code']);
+			}
+
+			$all_issued_quantities = '';
+			if (!empty($delivery_value['issued_quantities'])) {
+				$issued_quantities_json = json_decode($delivery_value['issued_quantities'], true);
+				foreach ($issued_quantities_json as $key => $value) {
+					$all_issued_quantities .= get_vendor_name($key) . ": <b style='font-weight: 700'>" . $value . "</b>,";
+				}
+				$all_issued_quantities = rtrim($all_issued_quantities, ',');
+			}
+
+			$all_returnable_date = '';
+			if (!empty($delivery_value['returnable_date'])) {
+				$returnable_date_json = json_decode($delivery_value['returnable_date'], true);
+				foreach ($returnable_date_json as $key => $value) {
+					$all_returnable_date .= get_vendor_name($key) . ": <b style='font-weight: 700'>" . _d($value) . "</b>";
+				}
+				$all_returnable_date = rtrim($all_returnable_date, '');
+			}
+
+			$all_reconciliation_date = '';
+			if (!empty($delivery_value['reconciliation_date'])) {
+				$reconciliation_date_json = json_decode($delivery_value['reconciliation_date'], true);
+				foreach ($reconciliation_date_json as $key => $value) {
+					$all_reconciliation_date .= get_vendor_name($key) . ": <b style='font-weight: 700'>" . _d($value) . "</b>";
+				}
+				$all_reconciliation_date = rtrim($all_reconciliation_date, '');
+			}
+
+			$all_return_quantity = '';
+			if (!empty($delivery_value['return_quantity'])) {
+				$return_quantity_json = json_decode($delivery_value['return_quantity'], true);
+				foreach ($return_quantity_json as $key => $value) {
+					$all_return_quantity .= get_vendor_name($key) . ": <b style='font-weight: 700'>" . $value . "</b>";
+				}
+				$all_return_quantity = rtrim($all_return_quantity, '');
+			}
+
+			$all_used_quantity = '';
+			if (!empty($delivery_value['used_quantity'])) {
+				$used_quantity_json = json_decode($delivery_value['used_quantity'], true);
+				foreach ($used_quantity_json as $key => $value) {
+					$all_used_quantity .= get_vendor_name($key) . ": <b style='font-weight: 700'>" . $value . "</b>";
+				}
+				$all_used_quantity = rtrim($all_used_quantity, '');
+			}
+
+			$all_location = '';
+			if (!empty($delivery_value['location'])) {
+				$location_json = json_decode($delivery_value['location'], true);
+				foreach ($location_json as $key => $value) {
+					$all_location .= get_vendor_name($key) . ": <b style='font-weight: 700'>" . $value . "</b>";
+				}
+				$all_location = rtrim($all_location, '');
+			}
+
+			$html .= '<tr>
+                <td class="td_style_r_ep_l"><b>' . html_entity_decode($commodity_code) . '</b></td>
+                <td align="left" style="font-size: 12px">' . html_entity_decode($commodity_name) . '</td>
+                <td align="left" style="font-size: 12px">' . get_area_name_by_id($delivery_value['area']) . '</td>';
+			if ($warehouse_lotnumber_bottom_infor_option == 1) {
+				$html .= '<td class="td_style_r_ep_l"><b>' . html_entity_decode($warehouse_name) . '</b></td>';
+			}
+			$html .= '<td class="small_rows">' . html_entity_decode($all_issued_quantities) . '</td>
+                <td><b>' . $all_returnable_date . '</b></td>
+                <td><b>' . $all_reconciliation_date . '</b></td>
+                <td class="small_rows"><b>' . $all_return_quantity . '</b></td>
+                <td class="small_rows"><b>' . $all_used_quantity . '</b></td>
+                <td class="small_rows"><b>' . $all_location . '</b></td>
+            </tr>';
+		}
+
+		$html .= '</tbody>
+    </table>
+    <br><br><br>
+    <br><br>';
+
+		$after_discount = isset($goods_delivery) ?  $goods_delivery->after_discount : 0;
+		$shipping_fee = isset($goods_delivery) ?  $goods_delivery->shipping_fee : 0;
+		if ($goods_delivery->after_discount == null) {
+			$after_discount = $goods_delivery->total_money;
+		}
+		$total_discount = 0;
+		if (isset($goods_delivery)) {
+			$total_discount += (float)$goods_delivery->total_discount  + (float)$goods_delivery->additional_discount;
+		}
+
+
+		if ($warehouse_lotnumber_bottom_infor_option == 1) {
+			$html .= '<table class="table">
+			<tbody>
+			<tr>
+			<td class="fw_width50" style="width: 90%;"><h4>Issuer</h4></td>
+		
+			<td class="fw_width50" style="width: 50%;"><h4>Receiver</h4></td>
+
+			</tr>
+			<tr>
+			<td class="fw_width50 fstyle" style="width: 85%;">' . _l('sign_full_name') . '</td>
+			
+			<td class="fw_width50 fstyle" style="width: 50%;">' . _l('sign_full_name') . '</td>
+			</tr
+
+			</tbody>
+			</table>';
+		}
+
+		$html .= '
+
+		<br>
+		<br>
+		<br>
+		<br>
+		<table class="table">
+		<tbody>
+		<tr>';
+
+
+		$html .= '<link href="' . FCPATH . 'modules/warehouse/assets/css/pdf_style.css' . '"  rel="stylesheet" type="text/css" />';
+
+		return $html;
+	}
+
+	public function stock_export_reconcile_pdf($delivery)
+	{
+		return app_pdf('delivery', module_dir_path(WAREHOUSE_MODULE_NAME, 'libraries/pdf/Delivery_reconcile_pdf.php'), $delivery);
 	}
 }

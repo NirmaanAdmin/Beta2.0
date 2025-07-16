@@ -714,7 +714,7 @@ class warehouse extends AdminController
 				}
 				redirect(admin_url('warehouse/manage_purchase/' . $mess));
 			} else {
-				
+
 				$id = $this->input->post('id');
 				$mess = $this->warehouse_model->update_goods_receipt($data);
 
@@ -730,7 +730,7 @@ class warehouse extends AdminController
 				redirect(admin_url('warehouse/manage_purchase/' . $id));
 			}
 		}
-		
+
 		//get vaule render dropdown select
 		$data['commodity_code_name'] = $this->warehouse_model->get_commodity_code_name();
 		$data['units_code_name'] = $this->warehouse_model->get_units_code_name();
@@ -739,7 +739,7 @@ class warehouse extends AdminController
 		$data['title'] = 'Stock Received';
 
 		$data['commodity_codes'] = $this->warehouse_model->get_commodity();
-		
+
 		$data['warehouses'] = $this->warehouse_model->get_warehouse();
 		if (get_status_modules_wh('purchase')) {
 			$this->load->model('purchase/purchase_model');
@@ -3165,7 +3165,7 @@ class warehouse extends AdminController
 				$sTable = db_prefix() . 'wh_loss_adjustment';
 				$join = [];
 
-				if(get_default_project()) {
+				if (get_default_project()) {
 					$where[] = 'AND project = "' . get_default_project() . '"';
 				}
 
@@ -7094,9 +7094,16 @@ class warehouse extends AdminController
 		$success = $this->warehouse_model->delivery_status_mark_as($status, $id, $type);
 		$message = '';
 
-		if ($success) {
-			$message = _l('wh_change_delivery_status_successfully');
+		if ($type == 'reconciliation') {
+			if ($success) {
+				$message = _l('wh_change_reconciliation_status_successfully');
+			}
+		} else {
+			if ($success) {
+				$message = _l('wh_change_delivery_status_successfully');
+			}
 		}
+
 		echo json_encode([
 			'success'  => $success,
 			'message'  => $message
@@ -9636,7 +9643,7 @@ class warehouse extends AdminController
 
 	public function goods_receipt_documentetion($goods_receipt_id)
 	{
-		$data = $this->input->post(); 
+		$data = $this->input->post();
 
 		// Call the model function and check its return value
 		$success = $this->warehouse_model->add_goods_documentetion($data, $goods_receipt_id);
@@ -9845,7 +9852,7 @@ class warehouse extends AdminController
 							$without_checking_warehouse = $get_commodity->without_checking_warehouse;
 						}
 
-						$stock_reconciliation_row_template .= $this->warehouse_model->create_stock_reconciliation_row_template($warehouse_data, 'items[' . $index_receipt . ']', $commodity_name, $delivery_detail['warehouse_id'], $delivery_detail['issued_quantities'], $delivery_detail['quantities'], $unit_name, $delivery_detail['unit_price'], $taxname, $delivery_detail['commodity_code'], $delivery_detail['unit_id'], $delivery_detail['vendor_id'], $delivery_detail['tax_rate'], $delivery_detail['total_money'], $delivery_detail['discount'], $delivery_detail['discount_money'], $delivery_detail['total_after_discount'], $delivery_detail['guarantee_period'], $delivery_detail['issued_date'], $lot_number, $delivery_detail['note'], $delivery_detail['sub_total'], $delivery_detail['tax_name'], $delivery_detail['tax_id'], $delivery_detail['id'], true, $is_purchase_order, $delivery_detail['serial_number'], $without_checking_warehouse, $delivery_detail['description'], $delivery_detail['quantities_json'], $delivery_detail['area'], $delivery_detail['returnable'], $delivery_detail['returnable_date'], $delivery_detail['return_quantity'], $delivery_detail['location'], $delivery_detail['reconciliation_date'],$delivery_detail['used_quantity']);
+						$stock_reconciliation_row_template .= $this->warehouse_model->create_stock_reconciliation_row_template($warehouse_data, 'items[' . $index_receipt . ']', $commodity_name, $delivery_detail['warehouse_id'], $delivery_detail['issued_quantities'], $delivery_detail['quantities'], $unit_name, $delivery_detail['unit_price'], $taxname, $delivery_detail['commodity_code'], $delivery_detail['unit_id'], $delivery_detail['vendor_id'], $delivery_detail['tax_rate'], $delivery_detail['total_money'], $delivery_detail['discount'], $delivery_detail['discount_money'], $delivery_detail['total_after_discount'], $delivery_detail['guarantee_period'], $delivery_detail['issued_date'], $lot_number, $delivery_detail['note'], $delivery_detail['sub_total'], $delivery_detail['tax_name'], $delivery_detail['tax_id'], $delivery_detail['id'], true, $is_purchase_order, $delivery_detail['serial_number'], $without_checking_warehouse, $delivery_detail['description'], $delivery_detail['quantities_json'], $delivery_detail['area'], $delivery_detail['returnable'], $delivery_detail['returnable_date'], $delivery_detail['return_quantity'], $delivery_detail['location'], $delivery_detail['reconciliation_date'], $delivery_detail['used_quantity']);
 					}
 				}
 			}
@@ -9969,22 +9976,22 @@ class warehouse extends AdminController
 	}
 
 	public function get_stock_received_dashboard()
-    {
-        $data = $this->input->post();
-        $result = $this->warehouse_model->get_stock_received_dashboard($data);
-        echo json_encode($result);
-        die;
-    }
+	{
+		$data = $this->input->post();
+		$result = $this->warehouse_model->get_stock_received_dashboard($data);
+		echo json_encode($result);
+		die;
+	}
 
-    public function get_stock_issued_dashboard()
-    {
-        $data = $this->input->post();
-        $result = $this->warehouse_model->get_stock_issued_dashboard($data);
-        echo json_encode($result);
-        die;
-    }
+	public function get_stock_issued_dashboard()
+	{
+		$data = $this->input->post();
+		$result = $this->warehouse_model->get_stock_issued_dashboard($data);
+		echo json_encode($result);
+		die;
+	}
 
-    /**
+	/**
 	 * goods delivery copy wo order
 	 * @param  integer $wo_order
 	 * @return json encode
@@ -9996,5 +10003,34 @@ class warehouse extends AdminController
 			'result' => $wo_order_detail['result'] ? $wo_order_detail['result'] : '',
 			'additional_discount' => $wo_order_detail['additional_discount'] ? $wo_order_detail['additional_discount'] : '',
 		]);
+	}
+
+	public function stock_reconcile_export_pdf($id)
+	{
+		if (!$id) {
+			redirect(admin_url('warehouse/manage_goods_delivery/manage_delivery'));
+		}
+
+		$stock_export = $this->warehouse_model->get_stock_reconcile_export_pdf_html($id);
+
+		try {
+			$pdf = $this->warehouse_model->stock_export_reconcile_pdf($stock_export);
+		} catch (Exception $e) {
+			echo html_entity_decode($e->getMessage());
+			die;
+		}
+
+		$type = 'D';
+		ob_end_clean();
+
+		if ($this->input->get('output_type')) {
+			$type = $this->input->get('output_type');
+		}
+
+		if ($this->input->get('print')) {
+			$type = 'I';
+		}
+
+		$pdf->Output('goods_delivery_' . strtotime(date('Y-m-d H:i:s')) . '.pdf', $type);
 	}
 }
