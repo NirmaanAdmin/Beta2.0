@@ -758,3 +758,6 @@ $lang['wh_ready_to_reconcile_new']  = 'Ready To Reconcile';
 $lang['wh_reconciliation_in_progress_new']  = 'Reconciliation In Progress';
 $lang['wh_reconciled_new']  = 'Reconciled';
 $lang['reconciliation_status_new']  = 'Reconciliation status';
+$lang['stock_export_info']  = 'Reconciliation voucher details';
+$lang['reconciliation_output_slip']  = 'Reconciliation Issued';
+$lang['goods_reconciliation_code']  = 'Reconciliation voucher code';

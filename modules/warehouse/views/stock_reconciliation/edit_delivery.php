@@ -36,7 +36,7 @@
                     </div>
                     <div class="col-md-4">
                       <p>
-                      <h2 class="bold text-center"><?php echo mb_strtoupper(_l('export_output_slip')); ?></h2>
+                      <h2 class="bold text-center"><?php echo mb_strtoupper(_l('reconciliation_output_slip')); ?></h2>
                       </p>
                     </div>
                     <div class="col-md-4">
@@ -49,12 +49,10 @@
                       <br>
                       <div class="row">
                         <div class="col-md-3 pull-right">
-                          <!-- <p><span class="bold"><?php echo _l('debit'); ?>: </span>.....................</p>
-                          <p><span class="bold"><?php echo _l('credit'); ?>: </span>.....................</p> -->
                         </div>
                         <div class="col-md-4 pull-right">
                           <p><span class="span-font-style"><?php echo _l('days') . ' ' . $day . ' ' . _l('month') . ' ' . $month . ' ' . _l('year') . ' ' . $year; ?></p>
-                          <p><span class="bold"><?php echo _l('goods_delivery_code'); ?>: </span><?php echo html_entity_decode($goods_delivery->goods_delivery_code) ?></p>
+                          <p><span class="bold"><?php echo _l('goods_reconciliation_code'); ?>: </span><?php echo html_entity_decode($goods_delivery->goods_delivery_code) ?></p>
                         </div>
                       </div>
                     </div>
@@ -73,22 +71,7 @@
                           }
                         }
                         ?>
-                        <!-- <tr>
-                          <td class="bold td-width"><?php echo _l('Buyer'); ?></td>
-                          <td><?php echo html_entity_decode($goods_delivery->to_); ?></td>
-                        </tr>
-                        <tr>
-                          <td class="bold"><?php echo _l('customer_name'); ?></td>
-                          <td><?php echo html_entity_decode($customer_name); ?></td>
-                        </tr>
-                        <tr>
-                          <td class="bold"><?php echo _l('address'); ?></td>
-                          <td><?php echo html_entity_decode($goods_delivery->address); ?></td>
-                        </tr>
-                        <tr>
-                          <td class="bold"><?php echo _l('note_'); ?></td>
-                          <td><?php echo html_entity_decode($goods_delivery->description); ?></td>
-                        </tr> -->
+
 
                         <?php
                         if (($goods_delivery->invoice_id != '') && ($goods_delivery->invoice_id != 0)) { ?>
@@ -128,11 +111,11 @@
                                                                                                                                                                                     echo ' PDF';
                                                                                                                                                                                   } ?> <span class="caret"></span></a>
                               <ul class="dropdown-menu dropdown-menu-right">
-                                <li class="hidden-xs"><a href="<?php echo admin_url('warehouse/stock_export_pdf/' . $goods_delivery->id . '?output_type=I'); ?>"><?php echo _l('view_pdf'); ?></a></li>
-                                <li class="hidden-xs"><a href="<?php echo admin_url('warehouse/stock_export_pdf/' . $goods_delivery->id . '?output_type=I'); ?>" target="_blank"><?php echo _l('view_pdf_in_new_window'); ?></a></li>
-                                <li><a href="<?php echo admin_url('warehouse/stock_export_pdf/' . $goods_delivery->id); ?>"><?php echo _l('download'); ?></a></li>
+                                <li class="hidden-xs"><a href="<?php echo admin_url('warehouse/stock_reconcile_export_pdf/' . $goods_delivery->id . '?output_type=I'); ?>"><?php echo _l('view_pdf'); ?></a></li>
+                                <li class="hidden-xs"><a href="<?php echo admin_url('warehouse/stock_reconcile_export_pdf/' . $goods_delivery->id . '?output_type=I'); ?>" target="_blank"><?php echo _l('view_pdf_in_new_window'); ?></a></li>
+                                <li><a href="<?php echo admin_url('warehouse/stock_reconcile_export_pdf/' . $goods_delivery->id); ?>"><?php echo _l('download'); ?></a></li>
                                 <li>
-                                  <a href="<?php echo admin_url('warehouse/stock_export_pdf/' . $goods_delivery->id . '?print=true'); ?>" target="_blank">
+                                  <a href="<?php echo admin_url('warehouse/stock_reconcile_export_pdf/' . $goods_delivery->id . '?print=true'); ?>" target="_blank">
                                     <?php echo _l('print'); ?>
                                   </a>
                                 </li>
@@ -152,45 +135,44 @@
                       <table class="table table-bordered">
                         <tbody>
                           <tr>
-                            <th colspan="1">#</th>
+                            <th align="center">#</th>
                             <th colspan="1"><?php echo _l('commodity_code') ?></th>
+                            <th colspan="1"><?php echo _l('item_description') ?></th>
+                            <th colspan="1"><?php echo _l('area') ?></th>
                             <th colspan="1"><?php echo _l('warehouse_name') ?></th>
-                            <th colspan="1"><?php echo _l('unit_name') ?></th>
-                            <th colspan="1" class="text-center"><?php echo _l('quantity') ?></th>
-                            <!-- <th align="right" colspan="1"><?php echo _l('rate') ?></th>
-                            <th align="right" colspan="1"><?php echo _l('subtotal') ?></th>
-                            <th align="right" colspan="1"><?php echo _l('subtotal_after_tax') ?></th>
-                            <th align="right" colspan="1"><?php echo _l('discount(%)') . '(%)' ?></th>
-                            <th align="right" colspan="1"><?php echo _l('discount(money)') ?></th> -->
-                            <th align="right" colspan="1"><?php echo _l('lot_number') ?></th>
-                            <!-- <th align="right" colspan="1"><?php echo _l('total_money') ?></th> -->
-                            <!-- <th align="right" colspan="1"><?php echo _l('guarantee_period') ?></th> -->
+                            <th colspan="1"><?php echo _l('Issued Quantity') ?></th>
+                            <th colspan="1"><?php echo _l('Return Date') ?></th>
+                            <th colspan="1" c><?php echo _l('Reconciliation Date') ?></th>
+                            <th colspan="1"><?php echo _l('Return Quantity') ?></th>
+                            <th colspan="1"><?php echo _l('Used Quantity') ?></th>
+                            <th colspan="1"><?php echo _l('Location') ?></th>
 
                           </tr>
-                          
-                          <?php $subtotal = 0; ?>
-                          <?php foreach (json_decode($goods_delivery_detail) as $receipt_key => $receipt_value) {
-                            $receipt_key++;
-                            $quantities = (isset($receipt_value) ? $receipt_value->quantities : '');
-                            $unit_price = (isset($receipt_value) ? $receipt_value->unit_price : '');
-                            $total_money = (isset($receipt_value) ? $receipt_value->total_money : '');
-                            $discount = (isset($receipt_value) ? $receipt_value->discount : '');
-                            $discount_money = (isset($receipt_value) ? $receipt_value->discount_money : '');
-                            $total_after_discount = (isset($receipt_value) ? $receipt_value->total_after_discount : '');
 
-                            $guarantee_period = (isset($receipt_value) ? _d($receipt_value->guarantee_period) : '');
+                          <?php $subtotal = 0;
+                          foreach ($goods_delivery_detail as $delivery => $delivery_value) {
+                            $delivery++;
+                            $available_quantity = (isset($delivery_value) ? $delivery_value['available_quantity'] : '');
+                            $total_money = (isset($delivery_value) ? $delivery_value['total_money'] : '');
+                            $discount = (isset($delivery_value) ? $delivery_value['discount'] : '');
+                            $discount_money = (isset($delivery_value) ? $delivery_value['discount_money'] : '');
+                            $guarantee_period = (isset($delivery_value) ? _d($delivery_value['guarantee_period']) : '');
 
-                            $available_quantity = (isset($receipt_value) ? $receipt_value->available_quantity : '');
+                            $quantities = (isset($delivery_value) ? $delivery_value['quantities'] : '');
+                            $unit_price = (isset($delivery_value) ? $delivery_value['unit_price'] : '');
+                            $total_after_discount = (isset($delivery_value) ? $delivery_value['total_after_discount'] : '');
 
-                            $commodity_code = get_commodity_name($receipt_value->commodity_code) != null ? get_commodity_name($receipt_value->commodity_code)->commodity_code : '';
-                            $commodity_name = get_commodity_name($receipt_value->commodity_code) != null ? get_commodity_name($receipt_value->commodity_code)->description : '';
+                            $commodity_code = get_commodity_name($delivery_value['commodity_code']) != null ? get_commodity_name($delivery_value['commodity_code'])->commodity_code : '';
+                            $commodity_name = get_commodity_name($delivery_value['commodity_code']) != null ? get_commodity_name($delivery_value['commodity_code'])->description : '';
+                            $subtotal += (float)$delivery_value['quantities'] * (float)$delivery_value['unit_price'];
+                            $item_subtotal = (float)$delivery_value['quantities'] * (float)$delivery_value['unit_price'];
+
+
 
                             $warehouse_name = '';
-                            $subtotal += (float)$receipt_value->quantities * (float)$receipt_value->unit_price;
-                            $item_subtotal = (float)$receipt_value->quantities * (float)$receipt_value->unit_price;
 
-                            if (isset($receipt_value->warehouse_id) && ($receipt_value->warehouse_id != '')) {
-                              $arr_warehouse = explode(',', $receipt_value->warehouse_id);
+                            if (isset($delivery_value['warehouse_id']) && ($delivery_value['warehouse_id'] != '')) {
+                              $arr_warehouse = explode(',', $delivery_value['warehouse_id']);
 
                               $str = '';
                               if (count($arr_warehouse) > 0) {
@@ -218,47 +200,107 @@
                             }
 
 
+
                             $unit_name = '';
-                            if (isset($receipt_value->unit_id) && ($receipt_value->unit_id != '')) {
-                              $unit_name = get_unit_type($receipt_value->unit_id) != null ? get_unit_type($receipt_value->unit_id)->unit_name : '';
+                            if (is_numeric($delivery_value['unit_id'])) {
+                              $unit_name = get_unit_type($delivery_value['unit_id']) != null ? get_unit_type($delivery_value['unit_id'])->unit_name : '';
                             }
 
                             $lot_number = '';
-                            if (($receipt_value->lot_number != null) && ($receipt_value->lot_number != '')) {
-                              // Decode the JSON string into an associative array
-                              $data = json_decode($receipt_value->lot_number, true);
+                            if (($delivery_value['lot_number'] != null) && ($delivery_value['lot_number'] != '')) {
+                              $array_lot_number = explode(',', $delivery_value['lot_number']);
+                              foreach ($array_lot_number as $key => $lot_value) {
 
-                              // Extract and print the value
-                              if (!empty($data)) {
-                                foreach ($data as $key => $value) {
-                                  $lot_number =  $value; // Output: bhjbjhb4555
+                                if ($key % 2 == 0) {
+                                  $lot_number .= $lot_value;
+                                } else {
+                                  $lot_number .= ' : ' . $lot_value . ' ';
                                 }
                               }
                             }
 
-                            $commodity_name = $receipt_value->commodity_name;
+                            $commodity_name = $delivery_value['commodity_name'];
                             if (strlen($commodity_name) == 0) {
-                              $commodity_name = wh_get_item_variatiom($receipt_value->commodity_code);
+                              $commodity_name = wh_get_item_variatiom($delivery_value['commodity_code']);
+                            }
+
+
+                            $all_issued_quantities = '';
+                            if (!empty($delivery_value['issued_quantities'])) {
+                              $issued_quantities_json = json_decode($delivery_value['issued_quantities'], true);
+
+                              foreach ($issued_quantities_json as $key => $value) {
+                                $all_issued_quantities .= get_vendor_name($key) . ": <strong style='font-weight: 700'>" . $value . "<strong>,</br>";
+                              }
+                              $all_issued_quantities = rtrim($all_issued_quantities, ',</br>');
+                            }
+
+                            $all_returnable_date = '';
+                            if (!empty($delivery_value['returnable_date'])) {
+                              $returnable_date_json = json_decode($delivery_value['returnable_date'], true);
+
+                              foreach ($returnable_date_json as $key => $value) {
+                                $all_returnable_date .= get_vendor_name($key) . ": <strong style='font-weight: 700'>" . $value . "<strong>,</br>";
+                              }
+                              $all_returnable_date = rtrim($all_returnable_date, ',</br>');
+                            }
+
+                            $all_reconciliation_date = '';
+                            if (!empty($delivery_value['reconciliation_date'])) {
+                              $reconciliation_date_json = json_decode($delivery_value['reconciliation_date'], true);
+
+                              foreach ($reconciliation_date_json as $key => $value) {
+                                $all_reconciliation_date .= get_vendor_name($key) . ": <strong style='font-weight: 700'>" . $value . "<strong>,</br>";
+                              }
+                              $all_reconciliation_date = rtrim($all_reconciliation_date, ',</br>');
+                            }
+
+                            $all_return_quantity = '';
+                            if (!empty($delivery_value['return_quantity'])) {
+                              $return_quantity_json = json_decode($delivery_value['return_quantity'], true);
+
+                              foreach ($return_quantity_json as $key => $value) {
+                                $all_return_quantity .= get_vendor_name($key) . ": <strong style='font-weight: 700'>" . $value . "<strong>,</br>";
+                              }
+                              $all_return_quantity = rtrim($all_return_quantity, ',</br>');
+                            }
+
+                            $all_used_quantity = '';
+                            if (!empty($delivery_value['used_quantity'])) {
+                              $used_quantity_json = json_decode($delivery_value['used_quantity'], true);
+
+                              foreach ($used_quantity_json as $key => $value) {
+                                $all_used_quantity .= get_vendor_name($key) . ": <strong style='font-weight: 700'>" . $value . "<strong>,</br>";
+                              }
+                              $all_used_quantity = rtrim($all_used_quantity, ',</br>');
+                            }
+
+                            $all_location = '';
+                            if (!empty($delivery_value['location'])) {
+                              $location_json = json_decode($delivery_value['location'], true);
+
+                              foreach ($location_json as $key => $value) {
+                                $all_location .= get_vendor_name($key) . ": <strong style='font-weight: 700'>" . $value . "<strong>,</br>";
+                              }
+                              $all_location = rtrim($all_location, ',</br>');
                             }
 
                           ?>
-                            <tr>
-                              <td><?php echo html_entity_decode($receipt_key) ?></td>
-                              <td><?php echo html_entity_decode($commodity_name) ?></td>
-                              <td><?php echo html_entity_decode($warehouse_name) ?></td>
-                              <td><?php echo html_entity_decode($unit_name) ?></td>
-                              <td class="text-right"><?php echo html_entity_decode($quantities) ?></td>
-                              <!-- <td class="text-right"><?php echo app_format_money((float)$unit_price, '') ?></td>
-                 <td class="text-right"><?php echo app_format_money((float)$item_subtotal, '') ?></td>
-                 <td class="text-right"><?php echo app_format_money((float)$total_money, '') ?></td>
-                 <td class="text-right"><?php echo app_format_money((float)$discount, '') ?></td>
-                 <td class="text-right"><?php echo app_format_money((float)$discount_money, '') ?></td> -->
-                              <td class="text-right"><?php echo html_entity_decode($lot_number) ?></td>
-                              <!-- <td class="text-right"><?php echo app_format_money((float)$total_after_discount, '') ?></td> -->
-                              <!-- <td class="text-right"><?php echo html_entity_decode($guarantee_period) ?></td> -->
 
+                            <tr>
+                              <td><?php echo html_entity_decode($delivery) ?></td>
+                              <td><?php echo html_entity_decode($commodity_name) ?></td>
+                              <td><?php echo html_entity_decode($delivery_value['description']) ?></td>
+                              <td><?php echo get_area_name_by_id($delivery_value['area']); ?></td>
+                              <td><?php echo html_entity_decode($warehouse_name) ?></td>
+                              <td><?php echo html_entity_decode($all_issued_quantities) ?></td>
+                              <td><?php echo html_entity_decode($all_returnable_date) ?></td>
+                              <td><?php echo html_entity_decode($all_reconciliation_date) ?></td>
+                              <td><?php echo html_entity_decode($all_return_quantity) ?></td>
+                              <td><?php echo html_entity_decode($all_used_quantity) ?></td>
+                              <td><?php echo html_entity_decode($all_location) ?></td>
                             </tr>
-                          <?php } ?>
+                          <?php  } ?>
                         </tbody>
                       </table>
 
@@ -266,56 +308,7 @@
 
                     </div>
 
-                    <!-- <div class="row pull-right mbot10">
-                      <div class="col-md-12 ">
-                        <table class="table">
-                          <tbody>
-                            <tr>
-                              <td class="bold width_27"><?php echo _l('subtotal')  ?> :</td>
-                              <td><?php echo app_format_money((float)$subtotal, $base_currency); ?></td>
-                            </tr>
-                            <?php if (isset($goods_delivery) && $tax_data['html_currency'] != '') {
-                              echo html_entity_decode($tax_data['html_currency']);
-                            } ?>
-                            <tr>
-                              <?php
-                              $total_discount = 0;
-                              if (isset($goods_delivery)) {
-                                $total_discount += (float)$goods_delivery->total_discount  + (float)$goods_delivery->additional_discount;
-                              }
-                              ?>
-                              <td class="bold width_27"><?php echo  _l('total_discount')  ?>:</td>
-                              <td><?php echo app_format_money((float)$total_discount, $base_currency); ?></td>
-                            </tr>
-                            <tr id="shipping_fee">
-                              <?php
-                              $shipping_fee = 0;
-                              if (isset($goods_delivery)) {
-                                $shipping_fee = (float)$goods_delivery->shipping_fee;
-                              }
-                              ?>
-                              <td class="bold"><?php echo _l('wh_shipping_fee'); ?>:</td>
-                              <td><?php echo app_format_money((float)$shipping_fee, $base_currency); ?></td>
-                            </tr>
-                            <tr>
-                              <td class="bold width_27"><?php echo  _l('total_money')  ?> :</td>
-                              <?php
-                              $after_discount = isset($goods_delivery) ?  $goods_delivery->after_discount : 0;
-                              if ($goods_delivery->after_discount == null) {
-                                $after_discount = $goods_delivery->total_money;
-                              }
-                              ?>
-                              <td><?php echo app_format_money((float)$after_discount, $base_currency); ?></td>
-                            </tr>
 
-
-                            <tr></tr>
-
-                          </tbody>
-                        </table>
-                      </div>
-
-                    </div> -->
 
 
 
@@ -683,7 +676,7 @@
 
 
 <?php init_tail(); ?>
-<?php require 'modules/warehouse/assets/js/edit_delivery_js.php'; ?>
+<?php require 'modules/warehouse/assets/js/edit_reconciliation_js.php'; ?>
 </body>
 
 </html>

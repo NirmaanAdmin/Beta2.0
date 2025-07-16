@@ -10033,4 +10033,46 @@ class warehouse extends AdminController
 
 		$pdf->Output('goods_delivery_' . strtotime(date('Y-m-d H:i:s')) . '.pdf', $type);
 	}
+
+	public function edit_reconcile($id)
+	{
+		//check exist
+		$goods_delivery = $this->warehouse_model->get_stock_reconciliation($id);
+		if (!$goods_delivery) {
+			blank_page('Stock export Not Found', 'danger');
+		}
+
+		//approval
+		$send_mail_approve = $this->session->userdata("send_mail_approve");
+		if ((isset($send_mail_approve)) && $send_mail_approve != '') {
+			$data['send_mail_approve'] = $send_mail_approve;
+			$this->session->unset_userdata("send_mail_approve");
+		}
+
+		$data['get_staff_sign'] = $this->warehouse_model->get_staff_sign($id, 2);
+
+		$data['check_approve_status'] = $this->warehouse_model->check_approval_details($id, 2);
+		$data['list_approve_status'] = $this->warehouse_model->get_list_approval_details($id, 2);
+		$data['payslip_log'] = $this->warehouse_model->get_activity_log($id, 2);
+
+		//get vaule render dropdown select
+		$data['commodity_code_name'] = $this->warehouse_model->get_commodity_code_name();
+		$data['units_code_name'] = $this->warehouse_model->get_units_code_name();
+		$data['units_warehouse_name'] = $this->warehouse_model->get_warehouse_code_name();
+
+		$data['goods_delivery_detail'] = $this->warehouse_model->get_stock_reconciliation_detail($id);
+
+		$data['goods_delivery'] = $goods_delivery;
+		$data['taxes'] = $this->warehouse_model->get_taxes();
+		$data['tax_data'] = $this->warehouse_model->get_html_tax_delivery($id);
+
+		$data['title'] = _l('stock_export_info');
+		$check_appr = $this->warehouse_model->get_approve_setting('2');
+		$data['check_appr'] = $check_appr;
+		$this->load->model('currencies_model');
+		$base_currency = $this->currencies_model->get_base_currency();
+		$data['base_currency'] = $base_currency;
+
+		$this->load->view('stock_reconciliation/edit_delivery', $data);
+	}
 }
