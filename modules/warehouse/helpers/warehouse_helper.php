@@ -1872,7 +1872,13 @@ function packing_list_status($status = '')
  */
 function render_delivery_status_html($id, $type, $status_value = '', $ChangeStatus = true)
 {
-    $status = get_delivery_status_by_id($status_value, $type);
+    if($type == 'reconciliation'){
+        $status = get_reconciliation_status_by_id($status_value, $type);
+    }else{
+        $status = get_delivery_status_by_id($status_value, $type);
+    }
+
+    
 
     if ($type == 'delivery') {
         $task_statuses = delivery_list_status();
@@ -1922,6 +1928,40 @@ function get_delivery_status_by_id($id, $type)
 {
     $CI       = &get_instance();
     $statuses = delivery_list_status();
+
+    if ($type == 'delivery') {
+        $status = [
+            'id'         => 0,
+            'color'   => '#989898',
+            'color' => '#989898',
+            'name'       => _l('wh_ready_for_packing'),
+            'order'      => 1,
+        ];
+    } else {
+        $status = [
+            'id'         => 0,
+            'color'   => '#989898',
+            'color' => '#989898',
+            'name'       => _l('wh_ready_to_deliver'),
+            'order'      => 1,
+        ];
+    }
+
+    foreach ($statuses as $s) {
+        if ($s['id'] == $id) {
+            $status = $s;
+
+            break;
+        }
+    }
+
+    return $status;
+}
+
+function get_reconciliation_status_by_id($id, $type)
+{
+    $CI       = &get_instance();
+    $statuses = reconcilliation_list_status();
 
     if ($type == 'delivery') {
         $status = [
