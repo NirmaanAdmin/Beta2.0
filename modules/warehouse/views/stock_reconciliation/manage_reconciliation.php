@@ -48,9 +48,9 @@
                             <div class="col-md-3">
                               <select name="delivery_status" id="delivery_status" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('reconciliation_status_new'); ?>">
                                   <option value=""></option>
-                                  <option value="ready_to_deliver"><?php echo _l('wh_ready_to_deliver_new'); ?></option>
-                                  <option value="delivery_in_progress"><?php echo _l('wh_delivery_in_progress_new'); ?></option>
-                                  <option value="delivered"><?php echo _l('wh_delivered_new'); ?></option>
+                                  <option value="ready_to_deliver"><?php echo _l('wh_ready_to_reconcile_new'); ?></option>
+                                  <option value="delivery_in_progress"><?php echo _l('wh_reconciliation_in_progress_new'); ?></option>
+                                  <option value="delivered"><?php echo _l('wh_reconciled_new'); ?></option>
                                   <option value="received"><?php echo _l('wh_received'); ?></option>
                                   <option value="returned"><?php echo _l('wh_returned'); ?></option>
                                   <option value="not_delivered"><?php echo _l('wh_not_delivered_new'); ?></option>
