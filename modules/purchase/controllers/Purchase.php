@@ -11231,6 +11231,12 @@ class purchase extends AdminController
                 db_prefix() . 'goods_receipt_detail.est_delivery_date as est_delivery_date',
                 db_prefix() . 'goods_receipt_detail.delivery_date as delivery_date',
                 db_prefix() . 'goods_receipt_detail.production_status as production_status',
+                "(CASE 
+                    WHEN COALESCE(agg.total_po_quantities, 0) = COALESCE(agg.total_quantities, 0) THEN '2'
+                    WHEN COALESCE(agg.total_quantities, 0) = 0 THEN '0'
+                    WHEN COALESCE(agg.total_quantities, 0) > 0 THEN '1'
+                    ELSE '0'
+                END) AS delivery_status"
             ];
             $where = [];
 
@@ -11240,6 +11246,14 @@ class purchase extends AdminController
             $join         = [];
             $join         = [
                 'INNER JOIN ' . db_prefix() . 'goods_receipt ON ' . db_prefix() . 'goods_receipt.id = ' . db_prefix() . 'goods_receipt_detail.goods_receipt_id',
+                'LEFT JOIN (
+                    SELECT 
+                        goods_receipt_id, 
+                        SUM(po_quantities) AS total_po_quantities, 
+                        SUM(quantities) AS total_quantities
+                    FROM ' . db_prefix() . 'goods_receipt_detail
+                    GROUP BY goods_receipt_id
+                ) AS agg ON agg.goods_receipt_id = ' . db_prefix() . 'goods_receipt_detail.goods_receipt_id'
             ];
 
             // Initialize filter variables
@@ -11299,6 +11313,25 @@ class purchase extends AdminController
                 array_push($where, 'AND ' . db_prefix() . 'goods_receipt_detail.production_status IN (' . implode(',', $productionStatusFilters) . ')');
             }
 
+            if ($this->input->post('delivery')) {
+                $delivery = $this->input->post('delivery');
+                if ($delivery == "undelivered") {
+                    array_push($where, 'AND ( 
+                        COALESCE(agg.total_po_quantities, 0) != COALESCE(agg.total_quantities, 0) 
+                        AND COALESCE(agg.total_quantities, 0) = 0
+                    )');
+                } else if ($delivery == "partially_delivered") {
+                    array_push($where, 'AND ( 
+                        COALESCE(agg.total_po_quantities, 0) != COALESCE(agg.total_quantities, 0) 
+                        AND COALESCE(agg.total_quantities, 0) > 0
+                    )');
+                } else if ($delivery == "completely_delivered") {
+                    array_push($where, 'AND (
+                        COALESCE(agg.total_po_quantities, 0) = COALESCE(agg.total_quantities, 0)
+                    )');
+                }
+            }
+
             $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where);
 
             $select1 = [
@@ -11312,6 +11345,7 @@ class purchase extends AdminController
                 db_prefix() . 'pur_order_detail.est_delivery_date as est_delivery_date',
                 db_prefix() . 'pur_order_detail.delivery_date as delivery_date',
                 db_prefix() . 'pur_order_detail.production_status as production_status',
+                '0 AS delivery_status',
             ];
             $where1 = [];
 
@@ -11334,6 +11368,15 @@ class purchase extends AdminController
             // Handle Production Status Filter for second query
             if (!empty($productionStatusFilters)) {
                 array_push($where1, 'AND ' . db_prefix() . 'pur_order_detail.production_status IN (' . implode(',', $productionStatusFilters) . ')');
+            }
+
+            if ($this->input->post('delivery')) {
+                $delivery = $this->input->post('delivery');
+                if ($delivery == "undelivered") {
+                    array_push($where1, 'AND 0 = 0');
+                } else {
+                    array_push($where1, 'AND 1 = 0');
+                }
             }
 
             $result1 = data_tables_init($aColumns1, $sIndexColumn1, $sTable1, $join1, $where1);
@@ -11406,38 +11449,48 @@ class purchase extends AdminController
                 $row[] = !empty($aRow['est_delivery_date']) ? date('d M, Y', strtotime($aRow['est_delivery_date'])) : '-';
                 $row[] = !empty($aRow['delivery_date']) ? date('d M, Y', strtotime($aRow['delivery_date'])) : '-';
 
+                $delivery_status = '';
+                if ($aRow['delivery_status'] == 0) {
+                    $delivery_status = _l('undelivered');
+                } else if ($aRow['delivery_status'] == 1) {
+                    $delivery_status = _l('partially_delivered');
+                } else {
+                    $delivery_status = _l('completely_delivered');
+                }
+                $row[] = $delivery_status;
+
                 $tracker[] = $row;
             }
 
             // Grouped data array
-            $grouped_data = [];
-            foreach ($tracker as $row) {
-                $group = $row[0];
-                if (!isset($grouped_data[$group])) {
-                    $grouped_data[$group][] = [
-                        "group_name" => '<span class="group-name-cell" style="text-align: center !important; display: block">' . $group . '</span>'
-                    ];
-                }
-                $grouped_data[$group][] = $row;
-            }
+            // $grouped_data = [];
+            // foreach ($tracker as $row) {
+            //     $group = $row[0];
+            //     if (!isset($grouped_data[$group])) {
+            //         $grouped_data[$group][] = [
+            //             "group_name" => '<span class="group-name-cell" style="text-align: center !important; display: block">' . $group . '</span>'
+            //         ];
+            //     }
+            //     $grouped_data[$group][] = $row;
+            // }
 
             // Flatten grouped data for DataTables
-            $flattened_data = [];
-            foreach ($grouped_data as $group_rows) {
-                foreach ($group_rows as $row) {
-                    unset($row[0]);
-                    $row = array_values($row);
-                    if (count($row) === 1) {
-                        for ($i = 1; $i <= 8; $i++) {
-                            $row[$i] = "";
-                        }
-                        ksort($row);
-                    }
-                    $flattened_data[] = $row;
-                }
-            }
+            // $flattened_data = [];
+            // foreach ($grouped_data as $group_rows) {
+            //     foreach ($group_rows as $row) {
+            //         unset($row[0]);
+            //         $row = array_values($row);
+            //         if (count($row) === 1) {
+            //             for ($i = 1; $i <= 8; $i++) {
+            //                 $row[$i] = "";
+            //             }
+            //             ksort($row);
+            //         }
+            //         $flattened_data[] = $row;
+            //     }
+            // }
 
-            $output['aaData'] = $flattened_data;
+            $output['aaData'] = $tracker;
 
             echo json_encode($output);
             die();

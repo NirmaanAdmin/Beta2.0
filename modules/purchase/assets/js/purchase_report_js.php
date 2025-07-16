@@ -34,6 +34,7 @@
       "department": '[name="department[]"]',
       "wo_department": '[name="wo_department[]"]',
       "production_status": '[name="production_status[]"]',
+      "delivery": '[name="delivery"]',
     }
 
     $('select[name="products_services"]').on('change', function() {

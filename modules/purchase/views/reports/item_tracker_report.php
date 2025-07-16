@@ -39,6 +39,14 @@
       echo render_select('production_status[]', $pruduction_statuses, array('id', 'name'), '', [], array('data-width' => '100%', 'data-none-selected-text' => _l('production_status'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
       ?>
    </div>
+   <div class="col-md-3 form-group">
+     <select name="delivery" id="delivery" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('delivery_status'); ?>">
+         <option value=""></option>
+         <option value="undelivered"><?php echo _l('undelivered'); ?></option>
+         <option value="partially_delivered"><?php echo _l('partially_delivered'); ?></option>
+         <option value="completely_delivered"><?php echo _l('completely_delivered'); ?></option>
+     </select>
+   </div>
    <div class="row">
       <div class="col-md-4">
          <div class="form-group">
@@ -50,6 +58,7 @@
    <table class="table table-item-tracker-report scroll-responsive">
       <thead>
          <tr>
+            <th><?php echo _l('purchase_order'); ?></th>
             <th><?php echo _l('Uniclass Code'); ?></th>
             <th><?php echo _l('decription'); ?></th>
             <th><?php echo _l('po_quantity'); ?></th>
@@ -59,6 +68,7 @@
             <th><?php echo _l('payment_date'); ?></th>
             <th><?php echo _l('est_delivery_date'); ?></th>
             <th><?php echo _l('delivery_date'); ?></th>
+            <th><?php echo _l('delivery_status'); ?></th>
          </tr>
       </thead>
       <tbody></tbody>
