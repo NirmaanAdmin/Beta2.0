@@ -22643,4 +22643,186 @@ class Purchase_model extends App_Model
         $this->db->having('non_break_description', $non_break_description);
         return $this->db->get(db_prefix() . 'itemable')->row();
     }
+
+    /**
+     * Get purchase tracker dashboard
+     *
+     * @param  array  $data  Dashboard filter data
+     * @return array
+     */
+    public function get_purchase_tracker_charts($data = array())
+    {
+        $response = array();
+        $kind = isset($data['kind']) ? $data['kind'] : '';
+        $delivery = isset($data['delivery']) ? $data['delivery'] : '';
+        $vendors = isset($data['vendors']) ? $data['vendors'] : '';
+        $group_pur = isset($data['group_pur']) ? $data['group_pur'] : '';
+        $tracker_status = isset($data['tracker_status']) ? $data['tracker_status'] : '';
+        $production_status = isset($data['production_status']) ? $data['production_status'] : '';
+        $date_add = isset($data['date_add']) ? $data['date_add'] : '';
+
+        $response['total_po'] = $response['average_lead_time'] = $response['percentage_delivered'] = $response['average_advance_payments'] = $response['shop_drawings_approval'] = 0;
+        $response['bar_status_name'] = $response['bar_status_value'] = array();
+        $response['pie_category_name'] = $response['pie_category_value'] = array();
+        $response['delivery_performance_labels'] = $response['delivery_performance_values'] = array();
+
+        $aColumns = [
+            'goods_receipt_code',
+            'pr_order_id',
+            'commodity_code',
+            'description',
+            'area',
+            'po_quantities',
+            'quantities',
+            'supplier_name',
+            'kind',
+            'date_add',
+            'imp_local_status',
+            'tracker_status',
+            'production_status',
+            'payment_date',
+            'est_delivery_date',
+            'delivery_date',
+            'remarks',
+            'lead_time_days',
+            'advance_payment',
+            'shop_submission',
+            'shop_approval',
+            'actual_remarks',
+        ];
+        $join = [];
+        $where = [];
+
+        if (!empty($date_add)) {
+            $day_vouchers = to_sql_date($date_add);
+            $where[] = 'AND date_add <= "' . $day_vouchers . '"';
+        }
+
+        if (!empty($kind)) {
+            $where[] = 'AND kind = "' . $kind . '"';
+        }
+
+        if (!empty($delivery)) {
+            if ($delivery == "undelivered") {
+                $where[] = 'AND delivery_status = "0"';
+            } else if ($delivery == "partially_delivered") {
+                $where[] = 'AND delivery_status = "1"';
+            } else if ($delivery == "completely_delivered") {
+                $where[] = 'AND delivery_status = "2"';
+            } else {
+                $where[] = 'AND delivery_status = "0"';
+            }
+        }
+
+        if (!empty($vendors)) {
+            $where[] = 'AND supplier_name IN (' . implode(',', $vendors) . ')';
+        }
+
+        if (!empty($group_pur)) {
+            $where[] = 'AND group_pur IN (' . implode(',', $group_pur) . ')';
+        }
+
+        if (!empty($tracker_status)) {
+            $where[] = 'AND tracker_status IN (' . implode(',', $tracker_status) . ')';
+        }
+
+        if (!empty($production_status)) {
+            $where[] = 'AND production_status IN (' . implode(',', $production_status) . ')';
+        }
+
+        if(get_default_project()) {
+            $where[] = 'AND project = "' . get_default_project() . '"';
+        }
+
+        $result = data_tables_actual_purchase_tracker_init($aColumns, $join, $where, [
+            'id',
+            'unit_id',
+            'item_detail_id',
+            'type'
+        ]);
+        if(!empty($result)) {
+            $result = $result['rResult'];
+            $all_records = count($result);
+            $response['total_po'] = count(
+                array_unique(
+                    array_column(
+                        array_filter($result, fn($item) => !empty($item['pr_order_id'])),
+                        'pr_order_id'
+                    )
+                )
+            );
+            $total_lead_time = count(array_filter($result, fn($item) => !empty($item['lead_time_days'])));
+            $sum_lead_time = array_reduce($result, function ($carry, $item) {
+                return $carry + (is_numeric($item['lead_time_days']) ? (int)$item['lead_time_days'] : 0);
+            }, 0);
+            if($total_lead_time > 0) {
+                $response['average_lead_time'] = $sum_lead_time / $total_lead_time;
+            }
+
+            $all_schedule_count = count(array_filter($result, function ($item) {
+                return !empty($item['delivery_date']) && !empty($item['est_delivery_date']);
+            }));
+            $est_delivery_count = count(array_filter($result, function ($item) {
+                return !empty($item['est_delivery_date']) 
+                && !empty($item['delivery_date']) 
+                && strtotime($item['est_delivery_date']) >= strtotime($item['delivery_date']);
+            }));
+            $response['percentage_delivered'] = $all_schedule_count > 0 ? round(($est_delivery_count / $all_schedule_count) * 100) : 0;
+
+            $total_advance_payment = count(array_filter($result, fn($item) => !empty($item['advance_payment'])));
+            $sum_advance_payment = array_reduce($result, function ($carry, $item) {
+                return $carry + (is_numeric($item['advance_payment']) ? (int)$item['advance_payment'] : 0);
+            }, 0);
+            if($total_advance_payment > 0) {
+                $response['average_advance_payments'] = $sum_advance_payment / $total_advance_payment;
+            }
+
+            $total_shop_approval = count(array_filter($result, function ($item) {
+                return !empty($item['shop_approval']);
+            }));
+            $response['shop_drawings_approval'] = $all_records > 0 ? round(($total_shop_approval / $all_records) * 100, 2) : 0;
+
+            $all_statuses = get_purchase_tracker_status();
+            $bar_status = array();
+            foreach ($all_statuses as $status) {
+                if($status['id'] != 1) {
+                    $bar_status[$status['id']] = [
+                        'name'  => $status['name'],
+                        'value' => 0
+                    ];
+                }
+            }
+            foreach ($result as $key => $value) {
+                $tracker_status = $value['tracker_status'];
+                if (isset($bar_status[$tracker_status])) {
+                    $bar_status[$tracker_status]['value'] += 1;
+                }
+            }
+            if (!empty($bar_status)) {
+                usort($bar_status, function ($a, $b) {
+                    return $b['value'] <=> $a['value'];
+                });
+                $response['bar_status_name'] = array_column($bar_status, 'name');
+                $response['bar_status_value'] = array_column($bar_status, 'value');
+            }
+
+            $category_grouped = array_reduce($result, function ($carry, $item) {
+                $group = !empty($item['kind']) ? $item['kind'] : 'None';
+                if (!isset($carry[$group])) {
+                    $carry[$group] = 0;
+                }
+                $carry[$group]++;
+                return $carry;
+            }, []);
+            if (!empty($category_grouped)) {
+                $response['pie_category_name'] = array_keys($category_grouped);
+                $response['pie_category_value'] = array_values($category_grouped);
+            }
+
+            $response['delivery_performance_labels'] = ['On-Time', 'Delayed'];
+            $response['delivery_performance_values'] = [$response['percentage_delivered'], round(100 - $response['percentage_delivered'])];
+        }
+
+        return $response;
+    }
 }

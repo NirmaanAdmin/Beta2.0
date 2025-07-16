@@ -15239,4 +15239,12 @@ class purchase extends AdminController
     {
         $this->app->get_table_data(module_views_path('purchase', 'manage_goods_receipt/table_manage_actual_goods_receipt'));
     }
+
+    public function get_purchase_tracker_charts()
+    {
+        $data = $this->input->post();
+        $result = $this->purchase_model->get_purchase_tracker_charts($data);
+        echo json_encode($result);
+        die;
+    }
 }

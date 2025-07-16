@@ -4629,7 +4629,7 @@ function get_area_project_wise($id = false)
     }
 }
 
-function get_purchase_tracker_status()
+function get_purchase_tracker_status($tracker_status_id = '')
 {
     $tracker_status = [
         ['id' => 1, 'name' => _l('not_set')],
@@ -4639,6 +4639,10 @@ function get_purchase_tracker_status()
         ['id' => 5, 'name' => _l('POI')],
         ['id' => 6, 'name' => _l('PIR')],
     ];
+    if(!empty($tracker_status_id)) {
+        $key = array_search($tracker_status_id, array_column($tracker_status, 'id'));
+        return $key !== false ? $tracker_status[$key]['name'] : '';
+    }
     return $tracker_status;
 }
 

@@ -11,6 +11,16 @@
         z-index: 99999;
         left: 190px
     }
+    .n_width {
+        width: 20% !important;
+    }
+    .dashboard_stat_title {
+        font-size: 19px;
+        font-weight: bold;
+    }
+    .dashboard_stat_value {
+        font-size: 19px;
+    }
 </style>
 <div id="wrapper">
     <div class="content">
@@ -26,8 +36,123 @@
                                     <hr />
                                 </div>
                             </div>
+                            <div class="col-md-3">
+                               <button class="btn btn-info display-block" type="button" data-toggle="collapse" data-target="#pt-charts-section" aria-expanded="true" aria-controls="pt-charts-section">
+                                  <?php echo _l('Purchase Tracker Charts'); ?> <i class="fa fa-chevron-down toggle-icon"></i>
+                               </button>
+                            </div>
                         </div>
-                        <div class="row">
+
+                        <div id="pt-charts-section" class="collapse in">
+                            <div class="row">
+                                <div class="col-md-12 mtop20">
+                                  <div class="row">
+                                    <div class="quick-stats-invoices col-md-3 tw-mb-2 sm:tw-mb-0 n_width">
+                                      <div class="top_stats_wrapper">
+                                        <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                          <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                            <span class="tw-truncate dashboard_stat_title">Total PO</span>
+                                          </div>
+                                          <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                                        </div>
+                                        <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                                          <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                            <span class="tw-truncate dashboard_stat_value total_po"></span>
+                                          </div>
+                                          <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div class="quick-stats-invoices col-md-3 tw-mb-2 sm:tw-mb-0 n_width">
+                                      <div class="top_stats_wrapper">
+                                        <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                          <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                            <span class="tw-truncate dashboard_stat_title">Average Lead Time (Days)</span>
+                                          </div>
+                                          <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                                        </div>
+                                        <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                                          <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                            <span class="tw-truncate dashboard_stat_value average_lead_time"></span>
+                                          </div>
+                                          <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div class="quick-stats-invoices col-md-3 tw-mb-2 sm:tw-mb-0 n_width">
+                                      <div class="top_stats_wrapper">
+                                        <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                          <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                            <span class="tw-truncate dashboard_stat_title">% Delivered (On Time)</span>
+                                          </div>
+                                          <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                                        </div>
+                                        <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                                          <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                            <span class="tw-truncate dashboard_stat_value percentage_delivered"></span>
+                                          </div>
+                                          <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div class="quick-stats-invoices col-md-3 tw-mb-2 sm:tw-mb-0 n_width">
+                                      <div class="top_stats_wrapper">
+                                        <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                          <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                            <span class="tw-truncate dashboard_stat_title">% Advance Payments Made</span>
+                                          </div>
+                                          <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                                        </div>
+                                        <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                                          <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                            <span class="tw-truncate dashboard_stat_value average_advance_payments"></span>
+                                          </div>
+                                          <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div class="quick-stats-invoices col-md-3 tw-mb-2 sm:tw-mb-0 n_width">
+                                      <div class="top_stats_wrapper">
+                                        <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                          <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                            <span class="tw-truncate dashboard_stat_title">% Shop Drawings Approval</span>
+                                          </div>
+                                          <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                                        </div>
+                                        <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                                          <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                            <span class="tw-truncate dashboard_stat_value shop_drawings_approval"></span>
+                                          </div>
+                                          <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                            </div>
+                            <div class="row mtop20">
+                                <div class="col-md-4">
+                                  <p class="mbot15 dashboard_stat_title">PO Status Breakdown</p>
+                                  <div style="width: 100%; height: 400px;">
+                                    <canvas id="barChartPOStatus"></canvas>
+                                  </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <p class="mbot15 dashboard_stat_title">Procurement by Category</p>
+                                    <div style="width: 100%; height: 450px; display: flex; justify-content: left;">
+                                       <canvas id="pieChartForCategory"></canvas>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                  <p class="mbot15 dashboard_stat_title">Delivery Performance</p>
+                                  <div style="width: 100%; height: 450px;">
+                                    <canvas id="pieChartDeliveryPerformance"></canvas>
+                                  </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mtop20">
                             <div class="col-md-1 pull-right">
                                 <a href="#" class="btn btn-default pull-right btn-with-tooltip toggle-small-view hidden-xs" onclick="toggle_small_view_proposal(' .purchase_sm','#purchase_sm_view'); return false;" data-toggle="tooltip" title="<?php echo _l('invoices_toggle_table_tooltip'); ?>"><i class="fa fa-angle-double-left"></i></a>
                             </div>
@@ -354,9 +479,18 @@
         $('.dropdown-menu').on('click', function(e) {
             e.stopPropagation();
         });
+
+        $('#pt-charts-section').on('shown.bs.collapse', function () {
+         $('.toggle-icon').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+        });
+
+        $('#pt-charts-section').on('hidden.bs.collapse', function () {
+         $('.toggle-icon').removeClass('fa-chevron-down').addClass('fa-chevron-up');
+        });
     });
 </script>
 <?php require 'modules/warehouse/assets/js/view_purchase_js.php'; ?>
+<script src="<?php echo module_dir_url(PURCHASE_MODULE_NAME, 'assets/plugins/charts/chart.js'); ?>?v=<?php echo PURCHASE_REVISION; ?>"></script>
 </body>
 
 </html>

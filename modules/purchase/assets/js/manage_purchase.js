@@ -93,6 +93,172 @@ $('select[name="production_status[]"]').on('change', function () {
         table_manage_actual_goods_receipt.DataTable().ajax.reload();
     }
 });
+
+$(document).on('change', 'select[name="kind"], select[name="delivery"], select[name="vendors[]"], select[name="group_pur[]"], select[name="tracker_status[]"], select[name="production_status[]"], input[name="date_add"]', function() {
+    get_purchase_tracker_dashboard();
+});
+
+get_purchase_tracker_dashboard();
+
+function get_purchase_tracker_dashboard() {
+  "use strict";
+
+  var data = {
+    kind: $('select[name="kind"]').val(),
+    delivery: $('select[name="delivery"]').val(),
+    vendors: $('select[name="vendors[]"]').val(),
+    group_pur: $('select[name="group_pur[]"]').val(),
+    tracker_status: $('select[name="tracker_status[]"]').val(),
+    production_status: $('select[name="production_status[]"]').val(),
+    date_add: $('input[name="date_add"]').val(),
+  }
+
+  $.post(admin_url + 'purchase/get_purchase_tracker_charts', data).done(function(response){
+    response = JSON.parse(response);
+
+    // Update value summaries
+    $('.total_po').text(response.total_po);
+    $('.average_lead_time').text(response.average_lead_time);
+    $('.percentage_delivered').text(response.percentage_delivered+'%');
+    $('.average_advance_payments').text(response.average_advance_payments+'%');
+    $('.shop_drawings_approval').text(response.shop_drawings_approval+'%');
+
+    // PO Status Breakdown
+    var statusBarCtx = document.getElementById('barChartPOStatus').getContext('2d');
+    var statusLabels = response.bar_status_name;
+    var statusData = response.bar_status_value;
+
+    if (window.barTopPOStatus) {
+      barTopPOStatus.data.labels = statusLabels;
+      barTopPOStatus.data.datasets[0].data = statusData;
+      barTopPOStatus.update();
+    } else {
+      window.barTopPOStatus = new Chart(statusBarCtx, {
+        type: 'bar',
+        data: {
+          labels: statusLabels,
+          datasets: [{
+            label: 'Value',
+            data: statusData,
+            backgroundColor: 'rgba(153, 102, 255, 0.7)',
+            borderColor: 'rgba(153, 102, 255, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            x: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Value'
+              }
+            },
+            y: {
+              ticks: {
+                autoSkip: false
+              },
+              title: {
+                display: true,
+                text: 'Status'
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // PIE CHART - Procurement by Category
+    var categoryPieCtx = document.getElementById('pieChartForCategory').getContext('2d');
+    var categoryData = response.pie_category_value;
+    var categoryLabels = response.pie_category_name;
+
+    if (window.categoryChart) {
+      categoryChart.data.labels = categoryLabels;
+      categoryChart.data.datasets[0].data = categoryData;
+      categoryChart.update();
+    } else {
+      window.categoryChart = new Chart(categoryPieCtx, {
+        type: 'pie',
+        data: {
+          labels: categoryLabels,
+          datasets: [{
+            data: categoryData,
+            backgroundColor: categoryLabels.map((_, i) => `hsl(${i * 35 % 360}, 70%, 60%)`),
+            borderColor: '#fff',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return context.label + ': ' + context.formattedValue;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // PIE CHART
+    var deliveryPerformancePieCtx = document.getElementById('pieChartDeliveryPerformance').getContext('2d');
+    var deliveryPerformancePieLabels = response.delivery_performance_labels;
+    var deliveryPerformancePieData = response.delivery_performance_values;
+
+    if (window.deliveryPerformancePieChart) {
+      deliveryPerformancePieChart.data.labels = deliveryPerformancePieLabels;
+      deliveryPerformancePieChart.data.datasets[0].data = deliveryPerformancePieData;
+      deliveryPerformancePieChart.update();
+    } else {
+      window.deliveryPerformancePieChart = new Chart(deliveryPerformancePieCtx, {
+        type: 'pie',
+        data: {
+          labels: deliveryPerformancePieLabels,
+          datasets: [{
+            data: deliveryPerformancePieData,
+            backgroundColor: ['#00008B', '#1E90FF'],
+            borderColor: '#fff',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  var label = context.label || '';
+                  var value = context.formattedValue;
+                  return `${label}: ${value}%`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+  });
+}
+
 init_goods_receipt();
 function init_goods_receipt(id) {
     "use strict";
