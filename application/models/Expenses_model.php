@@ -961,8 +961,8 @@ class Expenses_model extends App_Model
 
         $response['total_expenses'] = $response['total_average_expenses'] = $response['total_expenses_without_receipts'] = 0;
         $response['line_order_date'] = $response['line_order_total'] = array();
-        $response['pie_project_name'] = $response['pie_project_value'] = array();
         $response['pie_category_name'] = $response['pie_category_value'] = array();
+        $response['bar_top_vendor_name'] = $response['bar_top_vendor_value'] = array();
         $default_project = get_default_project();
 
         $this->db->select(
@@ -974,6 +974,7 @@ class Expenses_model extends App_Model
             db_prefix() . 'expenses.date, ' .
             db_prefix() . 'files.file_name, ' .
             db_prefix() . 'expenses.amount, ' .
+            db_prefix() . 'expenses.vendor, ' .
             db_prefix() . 'expenses_categories.name as category_name'
         );
         $this->db->from(db_prefix() . 'expenses');
@@ -1013,27 +1014,25 @@ class Expenses_model extends App_Model
             ));
 
             $line_order_total = array();
+            $bar_top_vendors = array();
             foreach ($expenses as $key => $value) {
                 $month = date('M-y', strtotime($value['date']));
                 if (!isset($line_order_total[$month])) {
                     $line_order_total[$month] = 0;
                 }
                 $line_order_total[$month] += $value['amount'];
+
+                $vendor = $value['vendor'];
+                if (!isset($bar_top_vendors[$vendor])) {
+                    $bar_top_vendors[$vendor]['name'] = get_vendor_company_name($vendor);
+                    $bar_top_vendors[$vendor]['value'] = 0;
+                }
+                $bar_top_vendors[$vendor]['value'] += $value['amount'];
             }
 
             if (!empty($line_order_total)) {
                 $response['line_order_date'] = array_keys($line_order_total);
                 $response['line_order_total'] = array_values($line_order_total);
-            }
-
-            $project_grouped = array_reduce($expenses, function ($carry, $item) {
-                $group = get_project_name_by_id($item['project_id']);
-                $carry[$group] = ($carry[$group] ?? 0) + (float) $item['amount'];
-                return $carry;
-            }, []);
-            if (!empty($project_grouped)) {
-                $response['pie_project_name'] = array_keys($project_grouped);
-                $response['pie_project_value'] = array_values($project_grouped);
             }
 
             $category_grouped = array_reduce($expenses, function ($carry, $item) {
@@ -1044,6 +1043,15 @@ class Expenses_model extends App_Model
             if (!empty($category_grouped)) {
                 $response['pie_category_name'] = array_keys($category_grouped);
                 $response['pie_category_value'] = array_values($category_grouped);
+            }
+
+            if (!empty($bar_top_vendors)) {
+                usort($bar_top_vendors, function ($a, $b) {
+                    return $b['value'] <=> $a['value'];
+                });
+                $bar_top_vendors = array_slice($bar_top_vendors, 0, 10);
+                $response['bar_top_vendor_name'] = array_column($bar_top_vendors, 'name');
+                $response['bar_top_vendor_value'] = array_column($bar_top_vendors, 'value');
             }
         }
 
