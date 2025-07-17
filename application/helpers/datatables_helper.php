@@ -1393,8 +1393,8 @@ function data_tables_init_union_for_reports($aColumns, $sIndexColumn, $combinedT
             ELSE '1'
         END AS delivery_status,
         CASE 
-            WHEN DATEDIFF(CURDATE(), po.order_date) > 30 THEN 'high'
-            WHEN DATEDIFF(CURDATE(), po.order_date) > 15 THEN 'medium'
+            WHEN DATEDIFF(CURDATE(), po.order_date) > 90 THEN 'high'
+            WHEN DATEDIFF(CURDATE(), po.order_date) > 30 THEN 'medium'
             ELSE 'low'
         END AS risk_level
     FROM tblpur_orders po
