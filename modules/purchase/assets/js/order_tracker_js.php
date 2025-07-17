@@ -365,6 +365,20 @@
             e.stopPropagation();
         });
 
+        $('#ot-charts-section').on('shown.bs.collapse', function () {
+         $('.toggle-icon').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+        });
+
+        $('#ot-charts-section').on('hidden.bs.collapse', function () {
+         $('.toggle-icon').removeClass('fa-chevron-down').addClass('fa-chevron-up');
+        });
+
+        $(document).on('change', 'select[name="type[]"], select[name="rli_filter"], select[name="vendors[]"], select[name="kind"], select[name="budget_head"], select[name="order_type_filter"], select[name="projects[]"], select[name="aw_unw_order_status[]"]', function() {
+            get_order_tracker_dashboard();
+        });
+
+        get_order_tracker_dashboard();
+
         // Function to collect and save preferences via AJAX
         function saveColumnPreferences() {
             var preferences = {};
@@ -652,4 +666,30 @@
                 }, false);
             });
     });
+
+    function get_order_tracker_dashboard() {
+      "use strict";
+
+      var data = {
+        type: $('select[name="type[]"]').val(),
+        rli_filter: $('select[name="rli_filter"]').val(),
+        vendors: $('select[name="vendors[]"]').val(),
+        kind: $('select[name="kind"]').val(),
+        budget_head: $('select[name="budget_head"]').val(),
+        order_type_filter: $('select[name="order_type_filter"]').val(),
+        projects: $('select[name="projects[]"]').val(),
+        aw_unw_order_status: $('select[name="aw_unw_order_status[]"]').val(),
+      }
+
+      $.post(admin_url + 'purchase/get_order_tracker_charts', data).done(function(response){
+        response = JSON.parse(response);
+
+        // Update value summaries
+        $('.cost_to_complete').text(response.cost_to_complete);
+        $('.rev_contract_value').text(response.rev_contract_value);
+        $('.percentage_utilized').text(response.percentage_utilized + '%');
+        $('.budgeted_procurement_net_value').text(response.budgeted_procurement_net_value);
+
+      });
+    }
 </script>

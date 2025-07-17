@@ -15336,4 +15336,12 @@ class purchase extends AdminController
             die();
         }
     }
+
+    public function get_order_tracker_charts()
+    {
+        $data = $this->input->post();
+        $result = $this->purchase_model->get_order_tracker_charts($data);
+        echo json_encode($result);
+        die;
+    }
 }

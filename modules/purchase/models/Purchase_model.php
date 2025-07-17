@@ -22920,4 +22920,215 @@ class Purchase_model extends App_Model
         }
         return $output;
     }
+
+    /**
+     * Get order tracker dashboard
+     *
+     * @param  array  $data  Dashboard filter data
+     * @return array
+     */
+    public function get_order_tracker_charts($data = array())
+    {
+        $response = array();
+        $this->load->model('currencies_model');
+        $base_currency = $this->currencies_model->get_base_currency();
+        $type = isset($data['type']) ? $data['type'] : '';
+        $rli_filter = isset($data['rli_filter']) ? $data['rli_filter'] : '';
+        $vendors = isset($data['vendors']) ? $data['vendors'] : '';
+        $kind = isset($data['kind']) ? $data['kind'] : '';
+        $budget_head = isset($data['budget_head']) ? $data['budget_head'] : '';
+        $order_type_filter = isset($data['order_type_filter']) ? $data['order_type_filter'] : '';
+        $projects = isset($data['projects']) ? $data['projects'] : '';
+        $aw_unw_order_status = isset($data['aw_unw_order_status']) ? $data['aw_unw_order_status'] : '';
+
+        $response['cost_to_complete'] = $response['rev_contract_value'] = $response['percentage_utilized'] = $response['budgeted_procurement_net_value'] = 0;
+
+        $aColumns = [
+           'aw_unw_order_status',
+           'order_name',
+           'vendor',
+           'order_date',
+           'completion_date',
+           'budget',
+           'total',
+           'co_total',
+           'total_rev_contract_value',
+           'anticipate_variation',
+           'cost_to_complete',
+           'vendor_submitted_amount_without_tax',
+           'project',
+           'rli_filter',
+           'kind',
+           'group_name',
+           'remarks',
+        ];
+        $sIndexColumn = 'id';
+        $sTable = "(
+            SELECT 
+                " . db_prefix() . "pur_orders.id,
+                " . db_prefix() . "pur_orders.pur_order_name as order_name,
+                " . db_prefix() . "pur_orders.vendor,
+                " . db_prefix() . "pur_orders.order_date,
+                " . db_prefix() . "pur_orders.total,
+                " . db_prefix() . "pur_orders.group_name
+            FROM " . db_prefix() . "pur_orders
+            UNION ALL
+            SELECT 
+                " . db_prefix() . "wo_orders.id,
+                " . db_prefix() . "wo_orders.wo_order_name as order_name,
+                " . db_prefix() . "wo_orders.vendor,
+                " . db_prefix() . "wo_orders.order_date,
+                " . db_prefix() . "wo_orders.total,
+                " . db_prefix() . "wo_orders.group_name
+            FROM " . db_prefix() . "wo_orders
+        ) as combined_orders";
+        $join = [
+           'LEFT JOIN ' . db_prefix() . 'assets_group ON ' . db_prefix() . 'assets_group.group_id = combined_orders.group_pur',
+        ];
+        $where = [];
+        if (!empty($type)) {
+           $where_type = '';
+           foreach ($type as $t) {
+              if ($t != '') {
+                 if ($where_type == '') {
+                    $where_type .= ' AND (source_table  = "' . $t . '"';
+                 } else {
+                    $where_type .= ' or source_table  = "' . $t . '"';
+                 }
+              }
+           }
+           if ($where_type != '') {
+              $where_type .= ')';
+              array_push($where, $where_type);
+           }
+        }
+        if (!empty($order_type_filter)) {
+           $where_order_type = '';
+           if ($order_type_filter == 'created') {
+              if ($where_order_type == '') {
+                 $where_order_type .= ' AND (source_table  = "order_tracker"';
+              }
+           }
+           if ($order_type_filter == 'fetched') {
+              if ($where_order_type == '') {
+                 $where_order_type .= ' AND (source_table  = "pur_orders"';
+                 $where_order_type .= ' or source_table = "wo_orders"';
+              }
+           }
+           if ($where_order_type != '') {
+              $where_order_type .= ')';
+              array_push($where, $where_order_type);
+           }
+        }
+        if (!empty($vendors)) {
+           $where_vendors = '';
+           foreach ($vendors as $t) {
+              if ($t != '') {
+                 if ($where_vendors == '') {
+                    $where_vendors .= ' AND (vendor_id = "' . $t . '"';
+                 } else {
+                    $where_vendors .= ' or vendor_id = "' . $t . '"';
+                 }
+              }
+           }
+           if ($where_vendors != '') {
+              $where_vendors .= ')';
+              array_push($where, $where_vendors);
+           }
+        }
+        if (!empty($budget_head)) {
+           $where_budget_head = '';
+           if ($budget_head != '') {
+              if ($where_budget_head == '') {
+                 $where_budget_head .= ' AND (group_pur = "' . $budget_head . '"';
+              } else {
+                 $where_budget_head .= ' or group_pur = "' . $budget_head . '"';
+              }
+           }
+           if ($where_budget_head != '') {
+              $where_budget_head .= ')';
+              array_push($where, $where_budget_head);
+           }
+        }
+        if (!empty($rli_filter)) {
+           $where_rli_filter = '';
+           if ($rli_filter != '') {
+              if ($where_rli_filter == '') {
+                 $where_rli_filter .= ' AND (rli_filter = "' . $rli_filter . '"';
+              } else {
+                 $where_rli_filter .= ' or rli_filter = "' . $rli_filter . '"';
+              }
+           }
+           if ($where_rli_filter != '') {
+              $where_rli_filter .= ')';
+              array_push($where, $where_rli_filter);
+           }
+        }
+        if (!empty($kind)) {
+           $where_kind = '';
+           if ($kind != '') {
+              if ($where_kind == '') {
+                 $where_kind .= ' AND (kind = "' . $kind . '"';
+              } else {
+                 $where_kind .= ' or kind = "' . $kind . '"';
+              }
+           }
+           if ($where_kind != '') {
+              $where_kind .= ')';
+              array_push($where, $where_kind);
+           }
+        }
+        if (!empty($projects)) {
+           $where_project = '';
+           foreach ($projects as $t) {
+              if ($t != '') {
+                 if ($where_project == '') {
+                    $where_project .= ' AND (project_id = "' . $t . '"';
+                 } else {
+                    $where_project .= ' or project_id = "' . $t . '"';
+                 }
+              }
+           }
+           if ($where_project != '') {
+              $where_project .= ')';
+              array_push($where, $where_project);
+           }
+        }
+        if (!empty($aw_unw_order_status)) {
+           $where_aw_unw_order_status = '';
+           foreach ($aw_unw_order_status as $t) {
+              if ($t != '') {
+                 if ($where_aw_unw_order_status == '') {
+                    $where_aw_unw_order_status .= ' AND (aw_unw_order_status = "' . $t . '"';
+                 } else {
+                    $where_aw_unw_order_status .= ' or aw_unw_order_status = "' . $t . '"';
+                 }
+              }
+           }
+           if ($where_aw_unw_order_status != '') {
+              $where_aw_unw_order_status .= ')';
+              array_push($where, $where_aw_unw_order_status);
+           }
+        }
+
+        $result = data_tables_init_union($aColumns, $sIndexColumn, $sTable, $join, $where);
+        $output  = $result['output'];
+        $result = $result['rResult'];
+        $cost_to_complete = 0;
+        if (!empty($result)) {
+            $cost_to_complete = array_sum(array_column($result, 'cost_to_complete'));
+        }
+        $response['cost_to_complete'] = app_format_money($cost_to_complete, $base_currency);
+        $rev_contract_value = 0;
+        if (!empty($result)) {
+            $rev_contract_value = array_sum(array_column($result, 'total_rev_contract_value'));
+        }
+        $response['rev_contract_value'] = app_format_money($rev_contract_value, $base_currency);
+        if ($cost_to_complete > 0) {
+            $response['percentage_utilized'] = round(($rev_contract_value / $cost_to_complete) * 100);
+        }
+        $response['budgeted_procurement_net_value'] = app_format_money(($cost_to_complete - $rev_contract_value), $base_currency);
+
+        return $response;
+    }
 }
