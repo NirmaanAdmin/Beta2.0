@@ -116,10 +116,10 @@
                           </div>
                         </div>
                         <div class="col-md-4">
-                            <p class="mbot15 dashboard_stat_title" style="font-size: 18px; font-weight: bold;">Pie Chart for Invoice per Project</p>
-                            <div style="width: 100%; height: 450px; display: flex; justify-content: left;">
-                               <canvas id="pieChartForProject"></canvas>
-                            </div>
+                          <p class="mbot15 dashboard_stat_title" style="font-size: 18px; font-weight: bold;">Top 10 Vendors by Amount</p>
+                          <div style="width: 100%; height: 400px;">
+                            <canvas id="barChartTopVendors"></canvas>
+                          </div>
                         </div>
                         <div class="col-md-4">
                             <p class="mbot15 dashboard_stat_title" style="font-size: 18px; font-weight: bold;">Pie Chart for Invoice per Status</p>

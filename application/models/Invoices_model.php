@@ -2396,8 +2396,8 @@ class Invoices_model extends App_Model
 
         $response['total_invoices_raised'] = $response['total_invoiced_amount'] = $response['average_invoice_value'] = 0;
         $response['line_order_date'] = $response['line_order_total'] = array();
-        $response['pie_project_name'] = $response['pie_project_value'] = array();
         $response['pie_status_name'] = $response['pie_status_value'] = array();
+        $response['bar_top_vendor_name'] = $response['bar_top_vendor_value'] = array();
         $default_project = get_default_project();
 
         $this->db->select('id, total, date, project_id, status');
@@ -2433,16 +2433,6 @@ class Invoices_model extends App_Model
                 $response['line_order_total'] = array_values($line_order_total);
             }
 
-            $project_grouped = array_reduce($invoices, function ($carry, $item) {
-                $group = get_project_name_by_id($item['project_id']);
-                $carry[$group] = ($carry[$group] ?? 0) + (float) $item['total'];
-                return $carry;
-            }, []);
-            if (!empty($project_grouped)) {
-                $response['pie_project_name'] = array_keys($project_grouped);
-                $response['pie_project_value'] = array_values($project_grouped);
-            }
-
             $status_grouped = array_reduce($invoices, function ($carry, $item) {
                 $group = format_invoice_status($item['status'], '', false);
                 $carry[$group] = ($carry[$group] ?? 0) + (float) $item['total'];
@@ -2451,6 +2441,46 @@ class Invoices_model extends App_Model
             if (!empty($status_grouped)) {
                 $response['pie_status_name'] = array_keys($status_grouped);
                 $response['pie_status_value'] = array_values($status_grouped);
+            }
+
+            $invoices_ids = array_column($invoices, 'id');
+            $this->db->select(
+                db_prefix() . 'pur_invoices.vendor, ' .
+                db_prefix() . 'itemable.qty, ' .
+                db_prefix() . 'itemable.rate, (' .
+                db_prefix() . 'itemable.qty * ' . db_prefix() . 'itemable.rate) AS amount'
+            );
+            $this->db->from(db_prefix() . 'itemable');
+            $this->db->join(
+                db_prefix() . 'pur_invoices',
+                db_prefix() . 'pur_invoices.id = ' . db_prefix() . 'itemable.vbt_id',
+                'left'
+            );
+            $this->db->where(db_prefix() . 'itemable.vbt_id IS NOT NULL', null, false);
+            $this->db->where_in(db_prefix() . 'itemable.rel_id', $invoices_ids);
+            $this->db->where(db_prefix() . 'itemable.rel_type', 'invoice');
+            $this->db->group_by(db_prefix() . 'itemable.id');
+            $this->db->order_by(db_prefix() . 'itemable.id', 'asc');
+            $itemable = $this->db->get()->result_array();
+
+            $bar_top_vendors = array();
+            if(!empty($itemable)) {
+                foreach ($itemable as $key => $value) {
+                    $vendor = $value['vendor'];
+                    if (!isset($bar_top_vendors[$vendor])) {
+                        $bar_top_vendors[$vendor]['name'] = get_vendor_company_name($vendor);
+                        $bar_top_vendors[$vendor]['value'] = 0;
+                    }
+                    $bar_top_vendors[$vendor]['value'] += $value['amount'];
+                }
+            }
+            if (!empty($bar_top_vendors)) {
+                usort($bar_top_vendors, function ($a, $b) {
+                    return $b['value'] <=> $a['value'];
+                });
+                $bar_top_vendors = array_slice($bar_top_vendors, 0, 10);
+                $response['bar_top_vendor_name'] = array_column($bar_top_vendors, 'name');
+                $response['bar_top_vendor_value'] = array_column($bar_top_vendors, 'value');
             }
         }
 

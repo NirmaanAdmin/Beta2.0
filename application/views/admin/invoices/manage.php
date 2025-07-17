@@ -97,44 +97,58 @@ $(document).ready(function() {
 	      });
 	    }
 
-	    // PIE CHART - Pie Chart for Invoice per Project
-	    var projectPieCtx = document.getElementById('pieChartForProject').getContext('2d');
-	    var projectData = response.pie_project_value;
-	    var projectLabels = response.pie_project_name;
+	   // BAR CHART - Top 10 Vendors by Amount
+      var vendorBarCtx = document.getElementById('barChartTopVendors').getContext('2d');
+      var vendorLabels = response.bar_top_vendor_name;
+      var vendorData = response.bar_top_vendor_value;
 
-	    if (window.poByProjectChart) {
-	      poByProjectChart.data.labels = projectLabels;
-	      poByProjectChart.data.datasets[0].data = projectData;
-	      poByProjectChart.update();
-	    } else {
-	      window.poByProjectChart = new Chart(projectPieCtx, {
-	        type: 'pie',
-	        data: {
-	          labels: projectLabels,
-	          datasets: [{
-	            data: projectData,
-	            backgroundColor: projectLabels.map((_, i) => `hsl(${i * 35 % 360}, 70%, 60%)`),
-	            borderColor: '#fff',
-	            borderWidth: 1
-	          }]
-	        },
-	        options: {
-	          responsive: true,
-	          plugins: {
-	            legend: {
-	              position: 'bottom'
-	            },
-	            tooltip: {
-	              callbacks: {
-	                label: function(context) {
-	                  return context.label + ': ' + context.formattedValue;
-	                }
-	              }
-	            }
-	          }
-	        }
-	      });
-	    }
+      if (window.barTopVendorsChart) {
+        barTopVendorsChart.data.labels = vendorLabels;
+        barTopVendorsChart.data.datasets[0].data = vendorData;
+        barTopVendorsChart.update();
+      } else {
+        window.barTopVendorsChart = new Chart(vendorBarCtx, {
+          type: 'bar',
+          data: {
+            labels: vendorLabels,
+            datasets: [{
+              label: 'Amount',
+              data: vendorData,
+              backgroundColor: 'rgba(153, 102, 255, 0.7)',
+              borderColor: 'rgba(153, 102, 255, 1)',
+              borderWidth: 1
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false
+              }
+            },
+            scales: {
+              x: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Amount'
+                }
+              },
+              y: {
+                ticks: {
+                  autoSkip: false
+                },
+                title: {
+                  display: true,
+                  text: 'Vendors'
+                }
+              }
+            }
+          }
+        });
+      }
 
 	    // PIE CHART - Pie Chart for Invoice per Status
 	    var statusPieCtx = document.getElementById('pieChartForStatus').getContext('2d');
