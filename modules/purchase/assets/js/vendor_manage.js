@@ -13,6 +13,8 @@
            tAPI.ajax.reload();
        });
 
+	get_vendors_dashboard();
+
 })(jQuery);
 
 function staff_bulk_actions(){
@@ -56,4 +58,131 @@ function purchase_delete_bulk_action(event) {
 		}
 
 	}
+}
+
+function get_vendors_dashboard() {
+  "use strict";
+
+  var data = {}
+
+  $.post(admin_url + 'purchase/get_vendors_charts', data).done(function(response){
+    response = JSON.parse(response);
+
+    // Update value summaries
+    $('.total_vendors').text(response.total_vendors);
+    $('.total_active').text(response.total_active);
+    $('.total_inactive').text(response.total_inactive);
+    $('.onboarded_this_week').text(response.onboarded_this_week);
+
+    // PO Status Breakdown
+    var stateBarCtx = document.getElementById('barChartState').getContext('2d');
+    var stateLabels = response.bar_state_name;
+    var stateData = response.bar_state_value;
+
+    if (window.barTopPOStatus) {
+      barTopPOStatus.data.labels = stateLabels;
+      barTopPOStatus.data.datasets[0].data = stateData;
+      barTopPOStatus.update();
+    } else {
+      window.barTopPOStatus = new Chart(stateBarCtx, {
+        type: 'bar',
+        data: {
+          labels: stateLabels,
+          datasets: [{
+            label: 'Value',
+            data: stateData,
+            backgroundColor: 'rgba(153, 102, 255, 0.7)',
+            borderColor: 'rgba(153, 102, 255, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            x: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Value'
+              }
+            },
+            y: {
+              ticks: {
+                autoSkip: false
+              },
+              title: {
+                display: true,
+                text: 'States'
+              }
+            }
+          }
+        }
+      });
+   }
+
+   // PIE CHART - Vendors by Categor
+    var categoryPieCtx = document.getElementById('pieChartForCategory').getContext('2d');
+    var categoryData = response.pie_category_value;
+    var categoryLabels = response.pie_category_name;
+
+    if (window.categoryChart) {
+      categoryChart.data.labels = categoryLabels;
+      categoryChart.data.datasets[0].data = categoryData;
+      categoryChart.update();
+    } else {
+      window.categoryChart = new Chart(categoryPieCtx, {
+        type: 'pie',
+        data: {
+          labels: categoryLabels,
+          datasets: [{
+            data: categoryData,
+            backgroundColor: categoryLabels.map((_, i) => `hsl(${i * 35 % 360}, 70%, 60%)`),
+            borderColor: '#fff',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return context.label + ': ' + context.formattedValue;
+                }
+              }
+            }
+          }
+        }
+      });
+   }
+
+   vendors_missing_info();
+
+  });
+}
+
+var fnServerParams;
+
+function vendors_missing_info() {
+  "use strict";
+  var table_missing_info = $('.table-missing-info');
+  if ($.fn.DataTable.isDataTable('.table-missing-info')) {
+    $('.table-missing-info').DataTable().destroy();
+  }
+  initDataTable('.table-missing-info', admin_url + 'purchase/vendors_missing_info', false, false, fnServerParams, [0, 'asc'], true);
+  $.each(fnServerParams, function(i, obj) {
+    $('select' + obj).on('change', function() {
+      table_missing_info.DataTable().ajax.reload();
+    });
+  });
 }

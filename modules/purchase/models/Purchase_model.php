@@ -22825,4 +22825,93 @@ class Purchase_model extends App_Model
 
         return $response;
     }
+
+    /**
+     * Get vendors dashboard
+     *
+     * @param  array  $data  Dashboard filter data
+     * @return array
+     */
+    public function get_vendors_charts($data = array())
+    {
+        $response = array();
+        
+        $response['total_vendors'] = $response['total_active'] = $response['total_inactive'] = $response['onboarded_this_week'] = 0;
+        $response['bar_state_name'] = $response['bar_state_value'] = array();
+        $response['pie_category_name'] = $response['pie_category_value'] = array();
+
+        $this->db->select('userid, active, state, category, datecreated');
+        $this->db->from(db_prefix() . 'pur_vendor');
+        $pur_vendors = $this->db->get()->result_array();
+
+        if(!empty($pur_vendors)) {
+            $response['total_vendors'] = count($pur_vendors);
+            $response['total_active'] = count(array_filter($pur_vendors, function ($item) {
+                return isset($item['active']) && $item['active'] == 1;
+            }));
+            $response['total_inactive'] = count(array_filter($pur_vendors, function ($item) {
+                return isset($item['active']) && $item['active'] == 0;
+            }));
+            $sevenDaysAgo = strtotime('-7 days');
+            $response['onboarded_this_week'] = count(array_filter($pur_vendors, function ($item) use ($sevenDaysAgo) {
+                return strtotime($item['datecreated']) >= $sevenDaysAgo;
+            }));
+
+            $bar_top_states = array();
+            foreach ($pur_vendors as $item) {
+                $state = !empty($item['state']) ? $item['state'] : 'None';
+                if (!isset($bar_top_states[$state])) {
+                    $bar_top_states[$state]['name'] = $state;
+                    $bar_top_states[$state]['value'] = 0;
+                }
+                $bar_top_states[$state]['value'] += 1;
+            }
+            if (!empty($bar_top_states)) {
+                usort($bar_top_states, function ($a, $b) {
+                    return $b['value'] <=> $a['value'];
+                });
+                $bar_top_states = array_slice($bar_top_states, 0, 10);
+                $response['bar_state_name'] = array_column($bar_top_states, 'name');
+                $response['bar_state_value'] = array_column($bar_top_states, 'value');
+            }
+
+            $grouped = array_reduce($pur_vendors, function ($carry, $item) {
+                $items_group = $this->get_vendor_category($item['category']);
+                $group = !empty($item['category']) ? $items_group->category_name : 'None';
+                $carry[$group] = ($carry[$group] ?? 0) + 1;
+                return $carry;
+            }, []);
+            if (!empty($grouped)) {
+                $response['pie_category_name'] = array_keys($grouped);
+                $response['pie_category_value'] = array_values($grouped);
+            }
+        }
+
+        return $response;
+    }
+
+    public function vendors_missing_info()
+    {
+        $aColumns = [
+            'userid',
+            'company',
+        ];
+        $sIndexColumn = 'userid';
+        $sTable       = db_prefix() . 'pur_vendor';
+        $join         = [];
+        $where = [];
+        array_push($where, 'AND com_email IS NULL AND pan_number IS NULL AND vat IS NULL AND phonenumber IS NULL AND website IS NULL AND category IS NULL AND address IS NULL AND city IS NULL AND state IS NULL AND zip IS NULL AND bank_detail IS NULL AND preferred_location IS NULL');
+
+        $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where);
+        $output  = $result['output'];
+        $rResult = $result['rResult'];
+        
+        foreach ($rResult as $key => $aRow) {
+            $row = [];
+            $row[] = $aRow['userid'];
+            $row[] = '<a href="' . admin_url('purchase/vendor/' . $aRow['userid']) . '">' . $aRow['company'] . '</a>';
+            $output['aaData'][] = $row;
+        }
+        return $output;
+    }
 }

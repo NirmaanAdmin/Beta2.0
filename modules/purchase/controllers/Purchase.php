@@ -15247,4 +15247,19 @@ class purchase extends AdminController
         echo json_encode($result);
         die;
     }
+
+    public function get_vendors_charts()
+    {
+        $data = $this->input->post();
+        $result = $this->purchase_model->get_vendors_charts($data);
+        echo json_encode($result);
+        die;
+    }
+
+    public function vendors_missing_info()
+    {
+        $output = $this->purchase_model->vendors_missing_info();
+        echo json_encode($output);
+        die();
+    }
 }

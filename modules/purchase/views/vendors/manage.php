@@ -2,10 +2,20 @@
 <?php init_head(); ?>
 <style>
    .show_hide_columns {
-      position: absolute;
-      z-index: 5000;
-      left: 291px;
-      top: 99px;
+     position: absolute;
+     z-index: 99999;
+     left: 291px;
+     top: 792px;
+   }
+   .n_width {
+      width: 33.33% !important;
+   }
+   .dashboard_stat_title {
+      font-size: 19px;
+      font-weight: bold;
+   }
+   .dashboard_stat_value {
+      font-size: 19px;
    }
 </style>
 <div id="wrapper">
@@ -49,6 +59,13 @@
 
 
                            <?php } ?>
+                           <a href="javascript:void(0);" class="btn btn-info pull-left mright5"
+                              data-toggle="collapse"
+                              data-target="#vendors-charts-section"
+                              aria-expanded="true"
+                              aria-controls="vendors-charts-section">
+                              <?php echo _l('Vendors Charts'); ?> <i class="fa fa-chevron-down toggle-icon"></i>
+                           </a>
                         </div>
                      </div>
                      <div class="col-md-8">
@@ -112,6 +129,91 @@
                            <a href="<?php echo site_url('purchase/vendors_portal'); ?>" target="_blank" class="btn btn-info mright5">
                               <?php echo _l('vendor_login'); ?>
                            </a>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div id="vendors-charts-section" class="collapse in">
+                     <div class="row">
+                       <div class="col-md-12 mtop20">
+                         <div class="row">
+                           <div class="quick-stats-invoices col-md-3 tw-mb-2 sm:tw-mb-0 n_width">
+                             <div class="top_stats_wrapper">
+                               <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                 <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                   <span class="tw-truncate dashboard_stat_title">Total Vendors</span>
+                                 </div>
+                                 <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                               </div>
+                               <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                                 <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                   <span class="tw-truncate dashboard_stat_value total_vendors"></span>
+                                 </div>
+                                 <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                               </div>
+                             </div>
+                           </div>
+                           <div class="quick-stats-invoices col-md-3 tw-mb-2 sm:tw-mb-0 n_width">
+                             <div class="top_stats_wrapper">
+                               <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                 <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                   <span class="tw-truncate dashboard_stat_title">Active / Inactive</span>
+                                 </div>
+                                 <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                               </div>
+                               <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                                 <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                   <span class="tw-truncate dashboard_stat_value total_active"></span>  /  <span class="tw-truncate dashboard_stat_value total_inactive"></span>
+                                 </div>
+                                 <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                               </div>
+                             </div>
+                           </div>
+                           <div class="quick-stats-invoices col-md-3 tw-mb-2 sm:tw-mb-0 n_width">
+                             <div class="top_stats_wrapper">
+                               <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                 <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                   <span class="tw-truncate dashboard_stat_title">Onboarded this week</span>
+                                 </div>
+                                 <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                               </div>
+                               <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                                 <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                   <span class="tw-truncate dashboard_stat_value onboarded_this_week"></span>
+                                 </div>
+                                 <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                               </div>
+                             </div>
+                           </div>
+                         </div>
+                       </div>
+                     </div>
+                     <div class="row mtop20">
+                        <div class="col-md-4">
+                         <p class="mbot15 dashboard_stat_title">Top 10 Vendors by State</p>
+                         <div style="width: 100%; height: 500px;">
+                           <canvas id="barChartState"></canvas>
+                         </div>
+                        </div>
+                        <div class="col-md-4">
+                           <p class="mbot15 dashboard_stat_title">Vendors by Category</p>
+                           <div style="width: 100%; height: 500px; display: flex; justify-content: left;">
+                              <canvas id="pieChartForCategory"></canvas>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <p class="mbot15 dashboard_stat_title">Missing Info</p>
+                           <div class="scroll-wrapper" style="max-height: 461px; overflow-y: auto;overflow-x: clip;">
+                              <table class="table table-missing-info">
+                                <thead>
+                                  <tr>
+                                    <th>#</th>
+                                    <th><?php echo _l('clients_list_company'); ?></th>
+                                  </tr>
+                                </thead>
+                                <tbody></tbody>
+                              </table>
+                           </div>
                         </div>
                      </div>
                   </div>
@@ -268,8 +370,17 @@
       $('.dropdown-menu').on('click', function(e) {
          e.stopPropagation();
       });
+
+      $('#vendors-charts-section').on('shown.bs.collapse', function () {
+         $('.toggle-icon').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+      });
+
+      $('#vendors-charts-section').on('hidden.bs.collapse', function () {
+         $('.toggle-icon').removeClass('fa-chevron-down').addClass('fa-chevron-up');
+      });
    });
 </script>
+<script src="<?php echo module_dir_url(PURCHASE_MODULE_NAME, 'assets/plugins/charts/chart.js'); ?>?v=<?php echo PURCHASE_REVISION; ?>"></script>
 </body>
 
 </html>
