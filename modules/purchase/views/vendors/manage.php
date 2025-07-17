@@ -45,7 +45,7 @@
             <div class="panel_s">
                <div class="panel-body">
                   <div class="row">
-                     <div class="col-md-4">
+                     <div class="col-md-5">
                         <div class="_buttons">
                            <?php if (has_permission('purchase_vendors', '', 'create')) { ?>
                               <a href="<?php echo admin_url('purchase/vendor'); ?>" class="btn btn-info mright5 test pull-left display-block">
@@ -68,7 +68,7 @@
                            </a>
                         </div>
                      </div>
-                     <div class="col-md-8">
+                     <div class="col-md-7">
 
                         <div class="btn-group pull-right btn-with-tooltip-group _filter_data" data-toggle="tooltip" data-title="<?php echo _l('filter_by'); ?>">
                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
