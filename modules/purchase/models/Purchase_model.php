@@ -22881,6 +22881,9 @@ class Purchase_model extends App_Model
                 $carry[$group] = ($carry[$group] ?? 0) + 1;
                 return $carry;
             }, []);
+            if (isset($grouped['None'])) {
+                unset($grouped['None']);
+            }
             if (!empty($grouped)) {
                 $response['pie_category_name'] = array_keys($grouped);
                 $response['pie_category_value'] = array_values($grouped);
