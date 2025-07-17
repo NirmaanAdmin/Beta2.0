@@ -288,7 +288,7 @@
     if ($.fn.DataTable.isDataTable('.table-po-wo-aging-report')) {
       $('.table-po-wo-aging-report').DataTable().destroy();
     }
-    initDataTable('.table-po-wo-aging-report', admin_url + 'purchase/po_wo_aging_report', false, false, fnServerParams, [5,'asc'], true);
+    initDataTable('.table-po-wo-aging-report', admin_url + 'purchase/po_wo_aging_report', false, false, fnServerParams, [5,'asc']);
     $.each(fnServerParams, function(i, obj) {
       $('select' + obj).on('change', function() {
         table_po_wo_campaign.DataTable().ajax.reload()
