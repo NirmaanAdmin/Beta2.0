@@ -22866,6 +22866,9 @@ class Purchase_model extends App_Model
                 }
                 $bar_top_states[$state]['value'] += 1;
             }
+            if (isset($bar_top_states['None'])) {
+                unset($bar_top_states['None']);
+            }
             if (!empty($bar_top_states)) {
                 usort($bar_top_states, function ($a, $b) {
                     return $b['value'] <=> $a['value'];
