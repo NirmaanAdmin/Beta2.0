@@ -139,7 +139,7 @@ foreach ($rResult as $aRow) {
                 break;
 
             case 'delivery_status':
-                $_data = render_delivery_status_html($aRow['id'], 'delivery', $aRow['delivery_status']);
+                $_data = render_delivery_status_html($aRow['id'], 'reconciliation', $aRow['delivery_status']);
                 break;
 
             case 'pr_order_id':
@@ -152,16 +152,16 @@ foreach ($rResult as $aRow) {
                 $pdf = '<div class="btn-group display-flex" >';
                 $pdf .= '<a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-file-pdf"></i><span class="caret"></span></a>';
                 $pdf .= '<ul class="dropdown-menu dropdown-menu-right">';
-                $pdf .= '<li class="hidden-xs"><a href="' . admin_url('warehouse/stock_export_pdf/' . $aRow['id'] . '?output_type=I') . '">' . _l('view_pdf') . '</a></li>';
-                $pdf .= '<li class="hidden-xs"><a href="' . admin_url('warehouse/stock_export_pdf/' . $aRow['id'] . '?output_type=I') . '" target="_blank">' . _l('view_pdf_in_new_window') . '</a></li>';
-                $pdf .= '<li><a href="' . admin_url('warehouse/stock_export_pdf/' . $aRow['id']) . '">' . _l('download') . '</a></li>';
-                $pdf .= '<li><a href="' . admin_url('warehouse/stock_export_pdf/' . $aRow['id'] . '?print=true') . '" target="_blank">' . _l('print') . '</a></li>';
+                $pdf .= '<li class="hidden-xs"><a href="' . admin_url('warehouse/stock_reconcile_export_pdf/' . $aRow['id'] . '?output_type=I') . '">' . _l('view_pdf') . '</a></li>';
+                $pdf .= '<li class="hidden-xs"><a href="' . admin_url('warehouse/stock_reconcile_export_pdf/' . $aRow['id'] . '?output_type=I') . '" target="_blank">' . _l('view_pdf_in_new_window') . '</a></li>';
+                $pdf .= '<li><a href="' . admin_url('warehouse/stock_reconcile_export_pdf/' . $aRow['id']) . '">' . _l('download') . '</a></li>';
+                $pdf .= '<li><a href="' . admin_url('warehouse/stock_reconcile_export_pdf/' . $aRow['id'] . '?print=true') . '" target="_blank">' . _l('print') . '</a></li>';
                 $pdf .= '</ul>';
 
 
                 // Add the View/Edit button
                 if (has_permission("warehouse", "", "edit")) {
-                    $pdf .= '<a href="' . admin_url("warehouse/edit_delivery/" . $aRow['id']) . '" class="btn btn-default btn-with-tooltip" data-toggle="tooltip" title="' . _l("view") . '" data-placement="bottom"><i class="fa fa-eye"></i></a>';
+                    $pdf .= '<a href="' . admin_url("warehouse/edit_reconcile/" . $aRow['id']) . '" class="btn btn-default btn-with-tooltip" data-toggle="tooltip" title="' . _l("view") . '" data-placement="bottom"><i class="fa fa-eye"></i></a>';
                 }
 
                 $pdf .= '</div>';

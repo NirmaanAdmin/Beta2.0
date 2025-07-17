@@ -25,11 +25,8 @@
 
 							</div>
 							<div class="col-md-4 border-right">
-								<h4 class="no-margin font-medium"><i class="fa fa-area-chart" aria-hidden="true"></i> <?php echo _l('charts_based_report'); ?></h4>
-								<hr />
-								<p><a href="#" class="font-medium" onclick="init_report(this,'statistics_number_of_purchase_orders'); return false;"><i class="fa fa-caret-down" aria-hidden="true"></i> <?php echo _l('purchase_statistics_by_number_of_purchase_orders'); ?></a></p>
+								<p><a href="#" class="font-medium" onclick="init_report(this,'po_wo_aging_report'); return false;"><i class="fa fa-caret-down" aria-hidden="true"></i> <?php echo _l('po_wo_aging_report'); ?></a></p>
 								<hr class="hr-10" />
-								<p><a href="#" class="font-medium" onclick="init_report(this,'statistics_cost_of_purchase_orders'); return false;"><i class="fa fa-caret-down" aria-hidden="true"></i> <?php echo _l('purchase_statistics_by_cost'); ?></a></p>
 							</div>
 							<div class="col-md-4">
 								<?php if (isset($currencies)) { ?>
@@ -100,6 +97,12 @@
 
 									</select>
 								</div>
+								<hr />
+								<h4 class="no-margin font-medium"><i class="fa fa-area-chart" aria-hidden="true"></i> <?php echo _l('charts_based_report'); ?></h4>
+								<hr />
+								<p><a href="#" class="font-medium" onclick="init_report(this,'statistics_number_of_purchase_orders'); return false;"><i class="fa fa-caret-down" aria-hidden="true"></i> <?php echo _l('purchase_statistics_by_number_of_purchase_orders'); ?></a></p>
+								<hr class="hr-10" />
+								<p><a href="#" class="font-medium" onclick="init_report(this,'statistics_cost_of_purchase_orders'); return false;"><i class="fa fa-caret-down" aria-hidden="true"></i> <?php echo _l('purchase_statistics_by_cost'); ?></a></p>
 							</div>
 						</div>
 
@@ -139,6 +142,9 @@
 							</div>
 							<div class="col-md-12">
 								<?php $this->load->view('wo_report'); ?>
+							</div>
+							<div class="col-md-12">
+								<?php $this->load->view('po_wo_aging_report'); ?>
 							</div>
 						</div>
 					</div>

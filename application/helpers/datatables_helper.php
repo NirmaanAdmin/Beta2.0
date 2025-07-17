@@ -261,7 +261,7 @@ function data_tables_init($aColumns, $sIndexColumn, $sTable, $join = [], $where 
         $havingSet = 'HAVING ' . $having;
     }
 
-   $resultQuery = '
+    $resultQuery = '
     SELECT ' . str_replace(' , ', ' ', implode(', ', $allColumns)) . ' ' . $additionalColumns . "
     FROM $sTable
     " . $join . "
@@ -1315,6 +1315,212 @@ function data_tables_actual_purchase_tracker_init($aColumns, $join = [], $where 
     $sLimit
     ";
 
+    $rResult = hooks()->apply_filters(
+        'datatables_sql_query_results',
+        $CI->db->query($resultQuery)->result_array(),
+        [
+            'table' => $sTable,
+            'limit' => $sLimit,
+            'order' => $sOrder,
+        ]
+    );
+
+    /* Data set length after filtering */
+    $iFilteredTotal = $CI->db->query("
+        SELECT COUNT(*) as iFilteredTotal
+        FROM $sTable
+        $join
+        $sWhere
+        $where
+        $sGroupBy
+    ")->row()->iFilteredTotal;
+
+    if (startsWith($where, 'AND')) {
+        $where = 'WHERE ' . substr($where, 3);
+    }
+
+    /* Total data set length */
+    $iTotal = $CI->db->query("SELECT COUNT(*) as iTotal FROM $sTable $join $where")->row()->iTotal;
+
+    return [
+        'rResult' => $rResult,
+        'output' => [
+            'draw' => $data['draw'] ? intval($data['draw']) : 0,
+            'iTotalRecords' => $iTotal,
+            'iTotalDisplayRecords' => $iFilteredTotal,
+            'aaData' => [],
+        ],
+    ];
+}
+
+function data_tables_init_union_for_reports($aColumns, $sIndexColumn, $combinedTables, $join = [], $where = [], $additionalSelect = [], $sGroupBy = '', $searchAs = [], $having = '', $module = '')
+{
+    $CI = &get_instance();
+    $data = $CI->input->post();
+
+    /*
+     * Paging
+     */
+    $sLimit = '';
+    if ((is_numeric($CI->input->post('start'))) && $CI->input->post('length') != '-1') {
+        $sLimit = 'LIMIT ' . intval($CI->input->post('start')) . ', ' . intval($CI->input->post('length'));
+    }
+
+    // Combine `tblpur_orders` and `tblwo_orders` into one derived table with vendor `company` and `kind`
+    $sTable = "(
+    SELECT 
+        po.id,
+        po.pur_order_number AS order_number,
+        po.pur_order_name AS order_name,
+        pv.company AS vendor,
+        pv.userid AS vendor_id,
+        po.order_date,
+        pr.id as project_id,
+        'pur_orders' AS source_table,
+        DATEDIFF(CURDATE(), po.order_date) AS days_since_issued,
+        CASE 
+            WHEN (SELECT COALESCE(SUM(grd.quantities), 0) 
+                 FROM tblgoods_receipt_detail grd 
+                 JOIN tblgoods_receipt gr ON gr.id = grd.goods_receipt_id 
+                 WHERE gr.pr_order_id = po.id) = 0 THEN '0'
+            WHEN (SELECT COALESCE(SUM(grd.quantities), 0) 
+                 FROM tblgoods_receipt_detail grd 
+                 JOIN tblgoods_receipt gr ON gr.id = grd.goods_receipt_id 
+                 WHERE gr.pr_order_id = po.id) >= 
+                 (SELECT COALESCE(SUM(pod.quantity), 0) 
+                  FROM tblpur_order_detail pod 
+                  WHERE pod.pur_order = po.id) THEN '2'
+            ELSE '1'
+        END AS delivery_status,
+        CASE 
+            WHEN DATEDIFF(CURDATE(), po.order_date) > 30 THEN 'high'
+            WHEN DATEDIFF(CURDATE(), po.order_date) > 15 THEN 'medium'
+            ELSE 'low'
+        END AS risk_level
+    FROM tblpur_orders po
+    LEFT JOIN tblpur_vendor pv ON pv.userid = po.vendor
+    LEFT JOIN tblprojects pr ON pr.id = po.project
+    WHERE  (
+        (SELECT COALESCE(SUM(grd.quantities), 0) 
+         FROM tblgoods_receipt_detail grd 
+         JOIN tblgoods_receipt gr ON gr.id = grd.goods_receipt_id 
+         WHERE gr.pr_order_id = po.id) = 0
+        OR
+        (SELECT COALESCE(SUM(grd.quantities), 0) 
+         FROM tblgoods_receipt_detail grd 
+         JOIN tblgoods_receipt gr ON gr.id = grd.goods_receipt_id 
+         WHERE gr.pr_order_id = po.id) < 
+         (SELECT COALESCE(SUM(pod.quantity), 0) 
+          FROM tblpur_order_detail pod 
+          WHERE pod.pur_order = po.id)
+    )
+) AS combined_orders";
+
+    $allColumns = [];
+    foreach ($aColumns as $column) {
+        if (strpos($column, ' as ') !== false) {
+            // Extract alias and real column name
+            $aliasColumn = strbefore($column, ' as');
+            $aliasName = strafter($column, ' as ');
+            $allColumns[] = "$aliasColumn AS $aliasName";
+        } else {
+            $allColumns[] = $column;
+        }
+    }
+
+    /*
+     * Ordering
+     */
+    $sOrder = '';
+    if ($CI->input->post('order')) {
+        $sOrder = 'ORDER BY ';
+        foreach ($CI->input->post('order') as $key => $val) {
+            $columnName = $aColumns[intval($data['order'][$key]['column'])];
+            $dir = strtoupper($data['order'][$key]['dir']);
+            $type = $data['order'][$key]['type'] ?? null;
+
+            if (!in_array($dir, ['ASC', 'DESC'])) {
+                $dir = 'ASC';
+            }
+
+            if (strpos($columnName, ' as ') !== false) {
+                $columnName = strbefore($columnName, ' as');
+            }
+
+            if ($type === 'text') {
+                $sOrder .= "CONVERT($columnName USING utf8) COLLATE utf8_general_ci $dir, ";
+            } elseif ($type === 'number') {
+                $sOrder .= "CAST($columnName AS SIGNED) $dir, ";
+            } elseif ($type === 'date_picker') {
+                $sOrder .= "CAST($columnName AS DATE) $dir, ";
+            } elseif ($type === 'date_picker_time') {
+                $sOrder .= "CAST($columnName AS DATETIME) $dir, ";
+            } else {
+                $sOrder .= "$columnName $dir, ";
+            }
+        }
+        $sOrder = rtrim($sOrder, ', ');
+    }
+
+    /*
+     * Filtering
+     */
+    $sWhere = '';
+    if ((isset($data['search'])) && $data['search']['value'] != '') {
+        $search_value = trim($data['search']['value']);
+        $sWhere = 'WHERE (';
+
+        foreach ($aColumns as $i => $column) {
+            $columnName = strpos($column, ' as ') !== false ? strbefore($column, ' as') : $column;
+
+            if (isset($data['columns'][$i]) && $data['columns'][$i]['searchable'] == 'true') {
+                $sWhere .= "CONVERT($columnName USING utf8) LIKE '%" . $CI->db->escape_like_str($search_value) . "%' ESCAPE '!' OR ";
+            }
+        }
+
+        $sWhere = substr($sWhere, 0, -3) . ')';
+    }
+
+    /*
+     * SQL Queries
+     */
+    $additionalColumns = '';
+    if (count($additionalSelect) > 0) {
+        $additionalColumns = ',' . implode(',', $additionalSelect);
+    }
+
+    $where = implode(' ', $where);
+
+    if ($sWhere == '') {
+        $where = trim($where);
+        if (startsWith($where, 'AND') || startsWith($where, 'OR')) {
+            if (startsWith($where, 'OR')) {
+                $where = substr($where, 2);
+            } else {
+                $where = substr($where, 3);
+            }
+            $where = 'WHERE ' . $where;
+        }
+    }
+
+    $join = implode(' ', $join);
+
+    $havingSet = '';
+    if (!empty($having)) {
+        $havingSet = 'HAVING ' . $having;
+    }
+
+    $resultQuery = "
+    SELECT " . str_replace(' , ', ' ', implode(', ', $allColumns)) . " $additionalColumns
+    FROM $sTable
+    $join
+    $sWhere
+    $where
+    $sGroupBy
+    $havingSet
+    $sOrder
+    $sLimit
+    ";
     $rResult = hooks()->apply_filters(
         'datatables_sql_query_results',
         $CI->db->query($resultQuery)->result_array(),

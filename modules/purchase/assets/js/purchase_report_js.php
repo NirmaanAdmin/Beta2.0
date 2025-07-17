@@ -3,7 +3,7 @@
     report_from_choose, report_po, report_pur_inv,report_wo,
     fnServerParams,
     statistics_number_of_purchase_orders,
-    statistics_cost_of_purchase_orders, report_item_tracker;
+    statistics_cost_of_purchase_orders, report_item_tracker, po_wo_report_aging;
   var report_from = $('input[name="report-from"]');
   var report_to = $('input[name="report-to"]');
   var date_range = $('#date-range');
@@ -18,6 +18,7 @@
     statistics_cost_of_purchase_orders = $('#cost-purchase-orders-report');
     report_from_choose = $('#report-time');
     report_item_tracker = $('#list_item_tracker_report');
+    po_wo_report_aging = $('#po_wo_aging_report');
     fnServerParams = {
       "products_services": '[name="products_services"]',
       "report_months": '[name="months-report"]',
@@ -184,6 +185,7 @@
     statistics_cost_of_purchase_orders.addClass('hide');
     statistics_number_of_purchase_orders.addClass('hide');
     report_item_tracker.addClass('hide');
+    po_wo_report_aging.addClass('hide');
 
     $('select[name="months-report"]').selectpicker('val', 'this_month');
     // Clear custom date picker
@@ -212,6 +214,8 @@
       report_pur_inv.removeClass('hide');
     } else if (type == 'item_tracker_report') {
       report_item_tracker.removeClass('hide');
+    } else if(type == 'po_wo_aging_report') {
+      po_wo_report_aging.removeClass('hide');
     }
 
     gen_reports();
@@ -272,6 +276,22 @@
     $.each(fnServerParams, function(i, obj) {
       $('select' + obj).on('change', function() {
         table_rec_campaign.DataTable().ajax.reload()
+          .columns.adjust()
+          .responsive.recalc();
+      });
+    });
+  }
+
+  function po_wo_aging_report() {
+    "use strict";
+    var table_po_wo_campaign = $('.table-po-wo-aging-report');
+    if ($.fn.DataTable.isDataTable('.table-po-wo-aging-report')) {
+      $('.table-po-wo-aging-report').DataTable().destroy();
+    }
+    initDataTable('.table-po-wo-aging-report', admin_url + 'purchase/po_wo_aging_report', false, false, fnServerParams, [5,'asc'], true);
+    $.each(fnServerParams, function(i, obj) {
+      $('select' + obj).on('change', function() {
+        table_po_wo_campaign.DataTable().ajax.reload()
           .columns.adjust()
           .responsive.recalc();
       });
@@ -456,6 +476,8 @@
       purchase_inv_report();
     } else if (!report_item_tracker.hasClass('hide')) {
       item_tracker_report();
+    } else if (!po_wo_report_aging.hasClass('hide')) {
+      po_wo_aging_report();
     }
   }
 </script>

@@ -15068,7 +15068,7 @@ class purchase extends AdminController
         if (!$data['pur_tender']) {
             show_404();
         }
-        
+
         $data['pur_tender_detail'] = $this->purchase_model->get_pur_tender_detail($id);
         $data['title'] = $data['pur_tender']->pur_tn_name;
         $data['departments'] = $this->departments_model->get();
@@ -15261,5 +15261,79 @@ class purchase extends AdminController
         $output = $this->purchase_model->vendors_missing_info();
         echo json_encode($output);
         die();
+    }
+    public function po_wo_aging_report()
+    {
+        if ($this->input->is_ajax_request()) {
+            $this->load->model('currencies_model');
+
+            $select = [
+                'order_number',
+                'vendor',
+                'order_date',
+                'delivery_status',
+                'days_since_issued',
+                'risk_level',
+            ];
+            $where = [];
+
+            $aColumns     = $select;
+            $sIndexColumn = 'id';
+
+            $result = data_tables_init_union_for_reports($aColumns, $sIndexColumn, '', [], $where, [
+                'id',
+                'order_name',
+                'source_table',
+            ]);
+
+            $output  = $result['output'];
+            $rResult = $result['rResult'];
+
+            foreach ($rResult as $aRow) {
+                $row = [];
+
+                $row[] = '<a href="' . admin_url('purchase/purchase_order/' . $aRow['id']) . '" target="_blank">' . $aRow['order_number'] . '-' . $aRow['order_name'] . '</a>';
+                $row[] = '<a href="' . admin_url('purchase/vendor/' . $aRow['vendor']) . '" target="_blank">' . $aRow['vendor'] . '</a>';
+
+                $row[] = date('d M, Y', strtotime($aRow['order_date']));
+
+                // Delivery Status
+                $deliveryStatus = '';
+                switch ($aRow['delivery_status']) {
+                    case '0':
+                        $deliveryStatus = '<span class="label label-danger">' . _l('Not Delivered') . '</span>';
+                        break;
+                    case '1':
+                        $deliveryStatus = '<span class="label label-warning">' . _l('partially_delivered') . '</span>';
+                        break;
+                    case '2':
+                        $deliveryStatus = '<span class="label label-success">' . _l('Full Delivered') . '</span>';
+                        break;
+                    default:
+                        $deliveryStatus = '<span class="label label-default">' . _l('unknown') . '</span>';
+                }
+                $row[] = $deliveryStatus;
+
+                // Days Since Issued
+                $daysSinceIssued = $aRow['days_since_issued'];
+                $row[] = $daysSinceIssued;
+
+                // Risk Level
+                $riskLevel = '';
+                if ($daysSinceIssued > 90) {
+                    $riskLevel = '<span class="label label-danger">' . _l('High') . '</span>';
+                } elseif ($daysSinceIssued > 30) {
+                    $riskLevel = '<span class="label label-warning">' . _l('Medium') . '</span>';
+                } else {
+                    $riskLevel = '<span class="label label-success">' . _l('Low') . '</span>';
+                }
+                $row[] = $riskLevel;
+
+                $output['aaData'][] = $row;
+            }
+
+            echo json_encode($output);
+            die();
+        }
     }
 }
