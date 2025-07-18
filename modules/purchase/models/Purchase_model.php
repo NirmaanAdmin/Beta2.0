@@ -22940,8 +22940,11 @@ class Purchase_model extends App_Model
         $order_type_filter = isset($data['order_type_filter']) ? $data['order_type_filter'] : '';
         $projects = isset($data['projects']) ? $data['projects'] : '';
         $aw_unw_order_status = isset($data['aw_unw_order_status']) ? $data['aw_unw_order_status'] : '';
-
         $response['cost_to_complete'] = $response['rev_contract_value'] = $response['percentage_utilized'] = $response['budgeted_procurement_net_value'] = 0;
+        $response['pie_status_name'] = $response['pie_status_value'] = array();
+        $response['budgeted_actual_category_labels'] = $response['budgeted_category_value'] = $response['actual_category_value'] = array();
+        $response['line_order_date'] = $response['line_order_total'] = array();
+        $response['co_tracker_data'] = $response['contractor_tracker'] = array();
 
         $aColumns = [
            'aw_unw_order_status',
@@ -23111,9 +23114,12 @@ class Purchase_model extends App_Model
            }
         }
 
+        $_POST['order'][0]['column'] = 3;
+        $_POST['order'][0]['dir'] = 'asc';
         $result = data_tables_init_union($aColumns, $sIndexColumn, $sTable, $join, $where);
         $output  = $result['output'];
         $result = $result['rResult'];
+
         $cost_to_complete = 0;
         if (!empty($result)) {
             $cost_to_complete = array_sum(array_column($result, 'cost_to_complete'));
@@ -23128,6 +23134,131 @@ class Purchase_model extends App_Model
             $response['percentage_utilized'] = round(($rev_contract_value / $cost_to_complete) * 100);
         }
         $response['budgeted_procurement_net_value'] = app_format_money(($cost_to_complete - $rev_contract_value), $base_currency);
+
+        if(!empty($result)) {
+            $grouped = array_reduce($result, function ($carry, $item) {
+                $group = get_aw_unw_order_status($item['aw_unw_order_status']);
+                $carry[$group] = ($carry[$group] ?? 0) + 1;
+                return $carry;
+            }, []);
+            if (!empty($grouped)) {
+                $response['pie_status_name'] = array_keys($grouped);
+                $response['pie_status_value'] = array_values($grouped);
+            }
+
+            $grouped_filter = array_values(array_reduce($result, function ($carry, $item) {
+                $key = trim($item['group_name']);
+                $carry[$key]['group_name'] = $key;
+                $carry[$key]['cost_to_complete'] = ($carry[$key]['cost_to_complete'] ?? 0) + (float)$item['cost_to_complete'];
+                $carry[$key]['total_rev_contract_value'] = ($carry[$key]['total_rev_contract_value'] ?? 0) + (float)$item['total_rev_contract_value'];
+                return $carry;
+            }, []));
+
+            if (!empty($grouped_filter)) {
+                foreach ($grouped_filter as $key => $value) {
+                    $response['budgeted_actual_category_labels'][] = $value['group_name'];
+                    $response['budgeted_category_value'][] = $value['cost_to_complete'];
+                    $response['actual_category_value'][] = $value['total_rev_contract_value'];
+                }
+            }
+
+            $line_order_total = array();
+            foreach ($result as $key => $value) {
+                if (!empty($value['order_date'])) {
+                    $timestamp = strtotime($value['order_date']);
+                    if ($timestamp !== false && $timestamp > 0) {
+                        $month = date('M-y', $timestamp);
+                        if (!isset($line_order_total[$month])) {
+                            $line_order_total[$month] = 0;
+                        }
+                        $line_order_total[$month] += 1;
+                    }
+                }
+            }
+            if (!empty($line_order_total)) {
+                $response['line_order_date'] = array_keys($line_order_total);
+                $response['line_order_total'] = array_values($line_order_total);
+            }
+
+            $co_tracker_data = array_slice(array_multisort($col = array_column($filtered = array_filter($result, fn($v) => !empty($v['co_total']) && $v['co_total'] != 0), 'total_rev_contract_value'), SORT_DESC, $filtered) ? $filtered : [], 0, 10);
+
+            $response['co_tracker_data'] = '
+                <div class="table-responsive s_table">
+                  <table class="table items table-bordered">
+                    <thead>
+                      <tr>
+                        <th align="left">Order Name</th>
+                        <th align="right">Original Value</th>
+                        <th align="right">CO Amount</th>
+                        <th align="right">Revised Value</th>
+                      </tr>
+                    </thead>
+                    <tbody>';
+            if (!empty($co_tracker_data)) {
+                foreach ($co_tracker_data as $row) {
+                    $response['co_tracker_data'] .= '
+                  <tr>
+                    <td align="left">' . $row['order_name'] . '</td>
+                    <td align="right">' . app_format_money($row['total'], $base_currency) . '</td>
+                    <td align="right">' . app_format_money($row['co_total'], $base_currency) . '</td>
+                    <td align="right">' . app_format_money($row['total_rev_contract_value'], $base_currency) . '</td>
+                  </tr>';
+                }
+            } else {
+                $response['co_tracker_data'] .= '
+                  <tr>
+                    <td colspan="4" align="center">No data available</td>
+                  </tr>';
+            }
+            $response['co_tracker_data'] .= '
+                </tbody>
+              </table>
+            </div>';
+
+            $contractor_tracker_data = array_values(array_reduce(array_filter($result, fn($v) => !empty($v['vendor'])), function($carry, $item) {
+                $vendor = $item['vendor'];
+                if (!isset($carry[$vendor])) {
+                    $carry[$vendor] = ['vendor' => $vendor, 'total' => 0, 'vendor_submitted_amount_without_tax' => 0];
+                }
+                $carry[$vendor]['total'] += (float)$item['total'];
+                $carry[$vendor]['vendor_submitted_amount_without_tax'] += (float)$item['vendor_submitted_amount_without_tax'];
+                return $carry;
+            }, []));
+            if(!empty($contractor_tracker_data)) {
+                $contractor_tracker_data = array_slice(array_multisort($col = array_column($filtered = array_filter($contractor_tracker_data, fn($v) => !empty($v['vendor_submitted_amount_without_tax']) && $v['vendor_submitted_amount_without_tax'] != 0), 'total'), SORT_DESC, $filtered) ? $filtered : [], 0, 10);
+            }
+
+            $response['contractor_tracker'] = '
+                <div class="table-responsive s_table">
+                  <table class="table items table-bordered">
+                    <thead>
+                      <tr>
+                        <th align="left">Contractor</th>
+                        <th align="right">Contract Value</th>
+                        <th align="right">Certified Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>';
+            if (!empty($contractor_tracker_data)) {
+                foreach ($contractor_tracker_data as $row) {
+                    $response['contractor_tracker'] .= '
+                  <tr>
+                    <td align="left">' . $row['vendor'] . '</td>
+                    <td align="right">' . app_format_money($row['total'], $base_currency) . '</td>
+                    <td align="right">' . app_format_money($row['vendor_submitted_amount_without_tax'], $base_currency) . '</td>
+                  </tr>';
+                }
+            } else {
+                $response['contractor_tracker'] .= '
+                  <tr>
+                    <td colspan="3" align="center">No data available</td>
+                  </tr>';
+            }
+            $response['contractor_tracker'] .= '
+                </tbody>
+              </table>
+            </div>';
+        }
 
         return $response;
     }

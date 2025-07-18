@@ -4656,3 +4656,17 @@ function get_purchase_tracker_production_status()
     ];
     return $production_status;
 }
+
+function get_aw_unw_order_status($id = '')
+{
+    $status_labels_aw_uw = [
+        1 => ['label' => 'success', 'table' => 'awarded', 'text' => _l('Awarded')],
+        2 => ['label' => 'default', 'table' => 'unawarded', 'text' => _l('Unawarded')],
+        3 => ['label' => 'warning', 'table' => 'awarded_by_ril', 'text' => _l('Awarded by RIL')],
+    ];
+    if(!empty($id)) {
+        return $status_labels_aw_uw[$id]['text'];
+    }
+
+    return $status_labels_aw_uw;
+}

@@ -667,6 +667,9 @@
             });
     });
 
+    var budgetedVsActualCategory;
+    var lineChartOverTime;
+
     function get_order_tracker_dashboard() {
       "use strict";
 
@@ -689,6 +692,165 @@
         $('.rev_contract_value').text(response.rev_contract_value);
         $('.percentage_utilized').text(response.percentage_utilized + '%');
         $('.budgeted_procurement_net_value').text(response.budgeted_procurement_net_value);
+        $('.co_tracker_data').html(response.co_tracker_data);
+        $('.contractor_tracker').html(response.contractor_tracker);
+
+        // PIE CHART - Order Status Distribution
+        var statusPieCtx = document.getElementById('pieChartForStatus').getContext('2d');
+        var statusData = response.pie_status_value;
+        var statusLabels = response.pie_status_name;
+
+        if (window.statusChart) {
+          statusChart.data.labels = statusLabels;
+          statusChart.data.datasets[0].data = statusData;
+          statusChart.update();
+        } else {
+          window.statusChart = new Chart(statusPieCtx, {
+            type: 'pie',
+            data: {
+              labels: statusLabels,
+              datasets: [{
+                data: statusData,
+                backgroundColor: [
+                  'rgba(75, 192, 192, 0.7)',
+                  'rgba(255, 206, 86, 0.7)',
+                  'rgba(255, 99, 132, 0.7)'
+                ],
+                borderColor: [
+                  'rgba(75, 192, 192, 1)',
+                  'rgba(255, 206, 86, 1)',
+                  'rgba(255, 99, 132, 1)'
+                ],
+                borderWidth: 1
+              }]
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: {
+                  position: 'bottom'
+                },
+                tooltip: {
+                  callbacks: {
+                    label: function(context) {
+                      return context.label + ': ' + context.formattedValue;
+                    }
+                  }
+                }
+              }
+            }
+          });
+        }
+
+        // COLUMN CHART - Budgeted vs Actual Procurement by Category
+        var barCtx = document.getElementById('budgetedVsActualCategory').getContext('2d');
+        var barData = {
+          labels: response.budgeted_actual_category_labels,
+          datasets: [{
+              label: 'Budgeted',
+              data: response.budgeted_category_value,
+              backgroundColor: '#00008B',
+              borderColor: '#00008B',
+              borderWidth: 1
+            },
+            {
+              label: 'Actual',
+              data: response.actual_category_value,
+              backgroundColor: '#1E90FF',
+              borderColor: '#1E90FF',
+              borderWidth: 1
+            }
+          ]
+        };
+
+        if (budgetedVsActualCategory) {
+          budgetedVsActualCategory.data.labels = barData.labels;
+          budgetedVsActualCategory.data.datasets[0].data = barData.datasets[0].data;
+          budgetedVsActualCategory.data.datasets[1].data = barData.datasets[1].data;
+          budgetedVsActualCategory.update();
+        } else {
+          budgetedVsActualCategory = new Chart(barCtx, {
+            type: 'bar',
+            data: barData,
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  position: 'bottom'
+                }
+              },
+              scales: {
+                x: {
+                  title: {
+                    display: false,
+                    text: 'Order Date'
+                  }
+                },
+                y: {
+                  beginAtZero: true,
+                  title: {
+                    display: false,
+                    text: 'Amount'
+                  }
+                }
+              }
+            }
+          });
+        }
+
+        // LINE CHART - Order Value Over Time
+        var lineCtx = document.getElementById('lineChartOverTime').getContext('2d');
+
+        if (lineChartOverTime) {
+          lineChartOverTime.data.labels = response.line_order_date;
+          lineChartOverTime.data.datasets[0].data = response.line_order_total;
+          lineChartOverTime.update();
+        } else {
+          lineChartOverTime = new Chart(lineCtx, {
+            type: 'line',
+            data: {
+              labels: response.line_order_date,
+              datasets: [{
+                label: 'Order Value',
+                data: response.line_order_total,
+                fill: false,
+                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                tension: 0.3
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  display: true,
+                  position: 'bottom'
+                },
+                tooltip: {
+                  mode: 'index',
+                  intersect: false
+                }
+              },
+              scales: {
+                x: {
+                  title: {
+                    display: true,
+                    text: 'Month'
+                  }
+                },
+                y: {
+                  beginAtZero: true,
+                  title: {
+                    display: true,
+                    text: 'Order Value'
+                  }
+                }
+              }
+            }
+          });
+        }
 
       });
     }

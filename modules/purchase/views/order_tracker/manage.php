@@ -170,6 +170,36 @@
                          </div>
                        </div>
                   </div>
+                  <div class="row mtop20">
+                     <div class="col-md-4">
+                        <p class="mbot15 dashboard_stat_title">Order Status Distribution</p>
+                        <div style="width: 100%; height: 450px; display: flex; justify-content: left;">
+                           <canvas id="pieChartForStatus"></canvas>
+                        </div>
+                     </div>
+                     <div class="col-md-4">
+                        <p class="mbot15 dashboard_stat_title">Budgeted vs Actual Procurement by Category</p>
+                        <div style="width: 100%; height: 450px;">
+                           <canvas id="budgetedVsActualCategory"></canvas>
+                        </div>
+                     </div>
+                     <div class="col-md-4">
+                        <p class="mbot15 dashboard_stat_title">Order Value Over Time</p>
+                        <div style="width: 100%; height: 400px;">
+                          <canvas id="lineChartOverTime"></canvas>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="row mtop20">
+                     <div class="col-md-6">
+                        <p class="mbot15 dashboard_stat_title">Chnage Order Impact Tracker</p>
+                        <div class="co_tracker_data"></div>
+                     </div>
+                     <div class="col-md-6">
+                        <p class="mbot15 dashboard_stat_title">Contractor Performance Tracker</p>
+                        <div class="contractor_tracker"></div>
+                     </div>
+                  </div>
                </div>
 
                <div class="row all_ot_filters">
