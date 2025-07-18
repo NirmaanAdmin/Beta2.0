@@ -23172,13 +23172,17 @@ class Purchase_model extends App_Model
                 if (!empty($value['order_date'])) {
                     $timestamp = strtotime($value['order_date']);
                     if ($timestamp !== false && $timestamp > 0) {
-                        $month = date('Y-m', $timestamp); // Use Y-m for proper sorting
-                        if (!isset($line_order_total[$month])) {
-                            $line_order_total[$month] = 0;
-                        }
-                        $line_order_total[$month] += $value['total_rev_contract_value'];
+                        $month = date('Y-m', $timestamp);
+                    } elseif ($timestamp === false || $timestamp <= 0) {
+                        $month = date('Y') . '-01';
                     }
+                } else {
+                    $month = date('Y') . '-01';
                 }
+                if (!isset($line_order_total[$month])) {
+                    $line_order_total[$month] = 0;
+                }
+                $line_order_total[$month] += $value['total_rev_contract_value'];
             }
 
             if (!empty($line_order_total)) {
