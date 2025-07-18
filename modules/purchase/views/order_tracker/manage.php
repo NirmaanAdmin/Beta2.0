@@ -184,7 +184,7 @@
                         </div>
                      </div>
                      <div class="col-md-4">
-                        <p class="mbot15 dashboard_stat_title">Order Value Over Time</p>
+                        <p class="mbot15 dashboard_stat_title">Total Order Value Over Time</p>
                         <div style="width: 100%; height: 400px;">
                           <canvas id="lineChartOverTime"></canvas>
                         </div>
@@ -192,7 +192,7 @@
                   </div>
                   <div class="row mtop20">
                      <div class="col-md-6">
-                        <p class="mbot15 dashboard_stat_title">Chnage Order Impact Tracker</p>
+                        <p class="mbot15 dashboard_stat_title">Change Order Impact Tracker</p>
                         <div class="co_tracker_data"></div>
                      </div>
                      <div class="col-md-6">
