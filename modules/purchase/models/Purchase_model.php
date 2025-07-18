@@ -23137,10 +23137,15 @@ class Purchase_model extends App_Model
 
         if(!empty($result)) {
             $grouped = array_reduce($result, function ($carry, $item) {
-                $group = get_aw_unw_order_status($item['aw_unw_order_status']);
+                $group = isset($item['aw_unw_order_status']) && in_array($item['aw_unw_order_status'], [1, 2, 3])
+                    ? get_aw_unw_order_status($item['aw_unw_order_status'])
+                    : 'None';
                 $carry[$group] = ($carry[$group] ?? 0) + 1;
                 return $carry;
             }, []);
+            if(isset($grouped['None'])) {
+                unset($grouped['None']);
+            }
             if (!empty($grouped)) {
                 $response['pie_status_name'] = array_keys($grouped);
                 $response['pie_status_value'] = array_values($grouped);
@@ -23167,16 +23172,25 @@ class Purchase_model extends App_Model
                 if (!empty($value['order_date'])) {
                     $timestamp = strtotime($value['order_date']);
                     if ($timestamp !== false && $timestamp > 0) {
-                        $month = date('M-y', $timestamp);
+                        $month = date('Y-m', $timestamp); // Use Y-m for proper sorting
                         if (!isset($line_order_total[$month])) {
                             $line_order_total[$month] = 0;
                         }
-                        $line_order_total[$month] += 1;
+                        $line_order_total[$month] += $value['total_rev_contract_value'];
                     }
                 }
             }
+
             if (!empty($line_order_total)) {
-                $response['line_order_date'] = array_keys($line_order_total);
+                ksort($line_order_total);
+                $cumulative = 0;
+                foreach ($line_order_total as $month => $value) {
+                    $cumulative += $value;
+                    $line_order_total[$month] = $cumulative;
+                }
+                $response['line_order_date'] = array_map(function ($month) {
+                    return date('M-y', strtotime($month . '-01'));
+                }, array_keys($line_order_total));
                 $response['line_order_total'] = array_values($line_order_total);
             }
 
