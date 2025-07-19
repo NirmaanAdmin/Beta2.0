@@ -530,11 +530,11 @@
                     .find("textarea[name='order_scope'], textarea[name$='[order_scope]']")
                     .val();
                 console.log(scopeVal);
-                if (!scopeVal) {
-                    alert_float("danger", "Order Scope is required in row " + (index + 1) + "!");
-                    isValid = false;
-                    return false; // break out of .each
-                }
+                // if (!scopeVal) {
+                //     alert_float("danger", "Order Scope is required in row " + (index + 1) + "!");
+                //     isValid = false;
+                //     return false; // break out of .each
+                // }
             });
 
             if (!isValid) return;
