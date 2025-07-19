@@ -317,6 +317,14 @@ function purchase_module_init_menu_items()
         ]);
     }
 
+    $CI->app_menu->add_sidebar_children_item('purchase', [
+        'slug'     => 'billing_reports',
+        'name'     => _l('reports'),
+        'icon'     => '',
+        'href'     => admin_url('purchase/billing_reports'),
+        'position' => 10,
+    ]);
+
     if (has_permission('purchase_invoices', '', 'view') || has_permission('purchase_invoices', '', 'view_own')) {
         $CI->app_menu->add_sidebar_children_item('purchase', [
             'slug' => 'purchase-invoices',

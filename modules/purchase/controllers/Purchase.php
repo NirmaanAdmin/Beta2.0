@@ -15344,4 +15344,28 @@ class purchase extends AdminController
         echo json_encode($result);
         die;
     }
+
+    /**
+     * { Billing reports }
+     * 
+     * @return view
+     */
+    public function billing_reports()
+    {
+        $this->load->model('currencies_model');
+        $data['currencies'] = $this->currencies_model->get();
+        $data['departments'] = $this->departments_model->get();
+        $data['title'] = _l('Billing reports');
+        $this->load->view('billing_reports/manage_report', $data);
+    }
+
+    public function billing_summary_report()
+    {
+        $this->app->get_table_data(module_views_path('purchase', 'billing_reports/table_summary_report'));
+    }
+
+    public function billing_aging_report()
+    {
+        $this->app->get_table_data(module_views_path('purchase', 'billing_reports/table_aging_report'));
+    }
 }
