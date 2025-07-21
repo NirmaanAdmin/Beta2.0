@@ -14,8 +14,8 @@
 								<hr class="hr-10" />
 								<p><a href="#" class="font-medium" onclick="init_report(this,'aging_report'); return false;"><i class="fa fa-caret-down" aria-hidden="true"></i> <?php echo _l('Billing Status Aging Report'); ?></a></p>
 								<hr class="hr-10" />
-								<p><a href="#" class="font-medium hide" onclick="init_report(this,'mapping_report'); return false;"><i class="fa fa-caret-down" aria-hidden="true"></i> <?php echo _l('Vendor Billing vs Client Invoice Mapping Report'); ?></a></p>
-								<hr class="hr-10 hide" />
+								<p><a href="#" class="font-medium" onclick="init_report(this,'mapping_report'); return false;"><i class="fa fa-caret-down" aria-hidden="true"></i> <?php echo _l('Vendor Billing vs Client Invoice Mapping Report'); ?></a></p>
+								<hr class="hr-10" />
 								<p><a href="#" class="font-medium hide" onclick="init_report(this,'invoicing_report'); return false;"><i class="fa fa-caret-down" aria-hidden="true"></i> <?php echo _l('Project-wise Invoicing Report'); ?></a></p>
 								<hr class="hr-10 hide" />
 								<p><a href="#" class="font-medium hide" onclick="init_report(this,'client_aging_report'); return false;"><i class="fa fa-caret-down" aria-hidden="true"></i> <?php echo _l('Client Invoice Aging Report'); ?></a></p>

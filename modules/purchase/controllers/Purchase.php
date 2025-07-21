@@ -15425,4 +15425,19 @@ class purchase extends AdminController
             die();
         }
     }
+
+    public function billing_mapping_report()
+    {
+        $this->app->get_table_data(module_views_path('purchase', 'billing_reports/table_mapping_report'));
+    }
+
+    public function billing_invoicing_report()
+    {
+        $this->app->get_table_data(module_views_path('purchase', 'billing_reports/table_invoicing_report'));
+    }
+
+    public function billing_client_aging_report()
+    {
+        $this->app->get_table_data(module_views_path('purchase', 'billing_reports/table_client_aging_report'));
+    }
 }

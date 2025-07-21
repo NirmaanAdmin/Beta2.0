@@ -3,14 +3,11 @@
    <table class="table table-mapping-report scroll-responsive">
       <thead>
          <tr>
-            <th><?php echo _l('purchase_order'); ?></th>
-            <th><?php echo _l('date'); ?></th>
-            <th><?php echo _l('department'); ?></th>
-            <th><?php echo _l('vendor'); ?></th>
-            <th><?php echo _l('approval_status'); ?></th>
-            <th><?php echo _l('po_value'); ?></th>
-            <th><?php echo _l('tax_value'); ?></th>
-            <th><?php echo _l('po_value_included_tax'); ?></th>
+            <th><?php echo _l('Vendor Invoice No'); ?></th>
+            <th><?php echo _l('Vendor Name'); ?></th>
+            <th><?php echo _l('Linked Client Invoice'); ?></th>
+            <th><?php echo _l('Vendor Amount'); ?></th>
+            <th><?php echo _l('Status'); ?></th>
          </tr>
       </thead>
       <tbody></tbody>

@@ -136,7 +136,7 @@
     if ($.fn.DataTable.isDataTable('.table-mapping-report')) {
       $('.table-mapping-report').DataTable().destroy();
     }
-    initDataTable('.table-mapping-report', admin_url + 'purchase/billing_summary_report', false, false, fnServerParams, [1,'desc']);
+    initDataTable('.table-mapping-report', admin_url + 'purchase/billing_mapping_report', false, false, fnServerParams, [3,'desc']);
     $.each(fnServerParams, function(i, obj) {
       $('select' + obj).on('change', function() {
         table_mapping_report.DataTable().ajax.reload();
@@ -150,7 +150,7 @@
     if ($.fn.DataTable.isDataTable('.table-invoicing-report')) {
       $('.table-invoicing-report').DataTable().destroy();
     }
-    initDataTable('.table-invoicing-report', admin_url + 'purchase/billing_summary_report', false, false, fnServerParams, [1,'desc']);
+    initDataTable('.table-invoicing-report', admin_url + 'purchase/billing_invoicing_report', false, false, fnServerParams, [1,'desc']);
     $.each(fnServerParams, function(i, obj) {
       $('select' + obj).on('change', function() {
         table_invoicing_report.DataTable().ajax.reload();
@@ -164,7 +164,7 @@
     if ($.fn.DataTable.isDataTable('.table-client-aging-report')) {
       $('.table-client-aging-report').DataTable().destroy();
     }
-    initDataTable('.table-client-aging-report', admin_url + 'purchase/billing_summary_report', false, false, fnServerParams, [1,'desc']);
+    initDataTable('.table-client-aging-report', admin_url + 'purchase/billing_client_aging_report', false, false, fnServerParams, [2,'desc']);
     $.each(fnServerParams, function(i, obj) {
       $('select' + obj).on('change', function() {
         table_client_aging_report.DataTable().ajax.reload();

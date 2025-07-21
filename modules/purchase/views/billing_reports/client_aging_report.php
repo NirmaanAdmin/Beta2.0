@@ -3,14 +3,12 @@
    <table class="table table-client-aging-report scroll-responsive">
       <thead>
          <tr>
-            <th><?php echo _l('purchase_order'); ?></th>
-            <th><?php echo _l('date'); ?></th>
-            <th><?php echo _l('department'); ?></th>
-            <th><?php echo _l('vendor'); ?></th>
-            <th><?php echo _l('approval_status'); ?></th>
-            <th><?php echo _l('po_value'); ?></th>
-            <th><?php echo _l('tax_value'); ?></th>
-            <th><?php echo _l('po_value_included_tax'); ?></th>
+            <th><?php echo _l('Invoice No'); ?></th>
+            <th><?php echo _l('Project Name'); ?></th>
+            <th><?php echo _l('Invoice Date'); ?></th>
+            <th><?php echo _l('Amount Due'); ?></th>
+            <th><?php echo _l('Days Outstanding'); ?></th>
+            <th><?php echo _l('Status'); ?></th>
          </tr>
       </thead>
       <tbody></tbody>
