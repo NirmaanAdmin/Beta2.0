@@ -15495,13 +15495,13 @@ class purchase extends AdminController
                     if ($deliveryDate > $estDate) {
                         $interval = $deliveryDate->diff($estDate);
                         $delay = $interval->format('%a days');
-                        $status = 'Delayed';
+                        $status = '<span class="label label-warning">Delayed</span>';
                     } else {
                         $delay = '0 days';
-                        $status = 'On Time';
+                        $status = '<span class="label label-success">On Time</span>';
                     }
                 } elseif (!empty($aRow['est_delivery_date']) && empty($aRow['delivery_date'])) {
-                    $status = 'Pending';
+                    $status = '<span class="label label-danger">Pending</span>';
                 }
 
                 $row[] = $delay;
