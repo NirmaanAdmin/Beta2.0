@@ -15368,4 +15368,61 @@ class purchase extends AdminController
     {
         $this->app->get_table_data(module_views_path('purchase', 'billing_reports/table_aging_report'));
     }
+
+    public function payment_certificate_summary_report()
+    {
+        if ($this->input->is_ajax_request()) {
+            $this->load->model('currencies_model');
+
+            $select = [
+                'pur_order_number',
+                'vendor',
+                'order_date',
+                'total',
+                '(SELECT SUM(po_this_bill) FROM ' . db_prefix() . 'payment_certificate WHERE ' . db_prefix() . 'payment_certificate.po_id = ' . db_prefix() . 'pur_orders.id) as pc_total',
+                '1',
+                '2',
+            ];
+            $where = [];
+
+            $aColumns     = $select;
+            $sIndexColumn = 'id';
+            $sTable       = db_prefix() . 'pur_orders';
+            $join         = [
+                'LEFT JOIN ' . db_prefix() . 'pur_vendor ON ' . db_prefix() . 'pur_vendor.userid = ' . db_prefix() . 'pur_orders.vendor',
+            ];
+
+            $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [
+                db_prefix() . 'pur_orders.id as id',
+                db_prefix() . 'pur_orders.pur_order_name as pur_order_name',
+                db_prefix() . 'pur_vendor.company',
+                db_prefix() . 'pur_orders.total',
+            ]);
+
+            $output  = $result['output'];
+            $rResult = $result['rResult'];
+
+            foreach ($rResult as $aRow) {
+                $row = [];
+
+                $row[] = '<a href="' . admin_url('purchase/purchase_order/' . $aRow['id']) . '" target="_blank">' . $aRow['pur_order_number'] . '-' . $aRow['pur_order_name'] . '</a>';
+                $row[] = '<a href="' . admin_url('purchase/vendor/' . $aRow['vendor']) . '" target="_blank">' . $aRow['company'] . '</a>';
+
+                $po_total = $aRow['total'];
+                $pc_total = $aRow['pc_total'] ? $aRow['pc_total'] : 0;
+                $balance = $po_total - $pc_total;
+                $paid_percentage = $po_total > 0 ? round(($pc_total / $po_total) * 100, 2) : 0;
+
+                $row[] = app_format_money($po_total, '₹');
+                $row[] = app_format_money($pc_total, '₹');
+                $row[] = app_format_money($balance, '₹');
+                $row[] = $paid_percentage . '%';
+
+                $output['aaData'][] = $row;
+            }
+
+            echo json_encode($output);
+            die();
+        }
+    }
 }

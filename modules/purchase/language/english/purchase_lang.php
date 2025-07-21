@@ -957,3 +957,4 @@ $lang['purchase_tender'] = 'Tendering';
 $lang['management_remarks'] = 'Management Remarks';
 $lang['procurement_remarks'] = 'Procurement Remarks';
 $lang['po_wo_aging_report'] = 'PO Aging Report';
+$lang['payment_certificate_summary_report']= 'Payment Certificate Summary';
