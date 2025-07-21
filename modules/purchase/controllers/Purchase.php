@@ -15377,7 +15377,6 @@ class purchase extends AdminController
             $select = [
                 'pur_order_number',
                 'vendor',
-                'order_date',
                 'total',
                 '(SELECT SUM(po_this_bill) FROM ' . db_prefix() . 'payment_certificate WHERE ' . db_prefix() . 'payment_certificate.po_id = ' . db_prefix() . 'pur_orders.id) as pc_total',
                 '1',
@@ -15439,5 +15438,80 @@ class purchase extends AdminController
     public function billing_client_aging_report()
     {
         $this->app->get_table_data(module_views_path('purchase', 'billing_reports/table_client_aging_report'));
+    }
+
+    
+
+    public function delivery_performance_report()
+    {
+        if ($this->input->is_ajax_request()) {
+            $this->load->model('currencies_model');
+
+            $select = [
+                'tblitems.description as item_name',
+                'vendor',
+                db_prefix() . 'pur_order_detail.est_delivery_date as est_delivery_date',
+                db_prefix() . 'pur_order_detail.delivery_date as delivery_date',
+                '1',
+                '2',
+            ];
+            $where = [
+                'WHERE ' . db_prefix() . 'pur_order_detail.est_delivery_date IS NOT NULL'
+            ];
+
+            $aColumns     = $select;
+            $sIndexColumn = 'id';
+            $sTable       = db_prefix() . 'pur_order_detail';
+            $join         = [
+                
+                'LEFT JOIN ' . db_prefix() . 'items ON ' . db_prefix() . 'items.id = ' . db_prefix() . 'pur_order_detail.item_code',
+                'LEFT JOIN ' . db_prefix() . 'pur_orders ON ' . db_prefix() . 'pur_orders.id = ' . db_prefix() . 'pur_order_detail.pur_order',
+                'LEFT JOIN ' . db_prefix() . 'pur_vendor ON ' . db_prefix() . 'pur_vendor.userid = ' . db_prefix() . 'pur_orders.vendor',
+            ];
+
+            $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [
+                db_prefix() . 'pur_vendor.company',
+            ]);
+
+            $output  = $result['output'];
+            $rResult = $result['rResult'];
+            foreach ($rResult as $aRow) {
+                $row = [];
+
+                $row[] = $aRow['item_name'];
+                $row[] = '<a href="' . admin_url('purchase/vendor/' . $aRow['vendor']) . '" target="_blank">' . $aRow['company'] . '</a>';
+
+                $row[] = date('d M, Y', strtotime($aRow['est_delivery_date']));
+                $row[] = !empty($aRow['delivery_date']) ?  date('d M, Y', strtotime($aRow['delivery_date'])) : '';
+
+                // Calculate delay days
+                $delay = '';
+                $status = '';
+
+                if (!empty($aRow['est_delivery_date']) && !empty($aRow['delivery_date'])) {
+                    $estDate = new DateTime($aRow['est_delivery_date']);
+                    $deliveryDate = new DateTime($aRow['delivery_date']);
+
+                    if ($deliveryDate > $estDate) {
+                        $interval = $deliveryDate->diff($estDate);
+                        $delay = $interval->format('%a days');
+                        $status = 'Delayed';
+                    } else {
+                        $delay = '0 days';
+                        $status = 'On Time';
+                    }
+                } elseif (!empty($aRow['est_delivery_date']) && empty($aRow['delivery_date'])) {
+                    $status = 'Pending';
+                }
+
+                $row[] = $delay;
+                $row[] = $status;
+
+                $output['aaData'][] = $row;
+            }
+
+            echo json_encode($output);
+            die();
+        }
     }
 }

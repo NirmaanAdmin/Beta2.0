@@ -29,6 +29,8 @@
 								<hr class="hr-10" />
 								<p><a href="#" class="font-medium" onclick="init_report(this,'payment_certificate_summary_report'); return false;"><i class="fa fa-caret-down" aria-hidden="true"></i> <?php echo _l('payment_certificate_summary_report'); ?></a></p>
 								<hr class="hr-10" />
+								<p><a href="#" class="font-medium" onclick="init_report(this,'delivery_performance_report'); return false;"><i class="fa fa-caret-down" aria-hidden="true"></i> <?php echo _l('delivery_performance_report'); ?></a></p>
+								<hr class="hr-10" />
 							</div>
 							<div class="col-md-4">
 								<?php if (isset($currencies)) { ?>
@@ -150,6 +152,9 @@
 							</div>
 							<div class="col-md-12">
 								<?php $this->load->view('payment_certificate_summary_report'); ?>
+							</div>
+							<div class="col-md-12">
+								<?php $this->load->view('delivery_performance_report'); ?>
 							</div>
 						</div>
 					</div>

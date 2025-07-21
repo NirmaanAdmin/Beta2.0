@@ -3,7 +3,7 @@
     report_from_choose, report_po, report_pur_inv, report_wo,
     fnServerParams,
     statistics_number_of_purchase_orders,
-    statistics_cost_of_purchase_orders, report_item_tracker, po_wo_report_aging, payment_certificate_report_summary;
+    statistics_cost_of_purchase_orders, report_item_tracker, po_wo_report_aging, payment_certificate_report_summary, delivery_report_performance;
   var report_from = $('input[name="report-from"]');
   var report_to = $('input[name="report-to"]');
   var date_range = $('#date-range');
@@ -20,6 +20,7 @@
     report_item_tracker = $('#list_item_tracker_report');
     po_wo_report_aging = $('#po_wo_aging_report');
     payment_certificate_report_summary = $('#payment_certificate_summary_report');
+    delivery_report_performance = $('#delivery_performance_report');
     fnServerParams = {
       "products_services": '[name="products_services"]',
       "report_months": '[name="months-report"]',
@@ -188,6 +189,7 @@
     report_item_tracker.addClass('hide');
     po_wo_report_aging.addClass('hide');
     payment_certificate_report_summary.addClass('hide');
+    delivery_report_performance.addClass('hide');
 
     $('select[name="months-report"]').selectpicker('val', 'this_month');
     // Clear custom date picker
@@ -220,6 +222,8 @@
       po_wo_report_aging.removeClass('hide');
     } else if (type == 'payment_certificate_summary_report') {
       payment_certificate_report_summary.removeClass('hide');
+    } else if (type == 'delivery_performance_report') {
+      delivery_report_performance.removeClass('hide');
     }
 
     gen_reports();
@@ -309,10 +313,27 @@
     if ($.fn.DataTable.isDataTable('.table-payment-certificate-summary-report')) {
       $('.table-payment-certificate-summary-report').DataTable().destroy();
     }
-    initDataTable('.table-payment-certificate-summary-report', admin_url + 'purchase/payment_certificate_summary_report', false, false, fnServerParams, [4, 'desc']);
+    initDataTable('.table-payment-certificate-summary-report', admin_url + 'purchase/payment_certificate_summary_report', false, false, fnServerParams, [4, 'asc']);
     $.each(fnServerParams, function(i, obj) {
       $('select' + obj).on('change', function() {
         table_payment_certificate_summary.DataTable().ajax.reload()
+          .columns.adjust()
+          .responsive.recalc();
+      });
+    });
+  }
+
+  
+  function delivery_performance_report() {
+    "use strict";
+    var table_delivery_performance = $('.table-delivery-performance-report');
+    if ($.fn.DataTable.isDataTable('.table-delivery-performance-report')) {
+      $('.table-delivery-performance-report').DataTable().destroy();
+    }
+    initDataTable('.table-delivery-performance-report', admin_url + 'purchase/delivery_performance_report', false, false, fnServerParams, [2, 'desc']);
+    $.each(fnServerParams, function(i, obj) {
+      $('select' + obj).on('change', function() {
+        table_delivery_performance.DataTable().ajax.reload()
           .columns.adjust()
           .responsive.recalc();
       });
@@ -500,6 +521,8 @@
       po_wo_aging_report();
     } else if (!payment_certificate_report_summary.hasClass('hide')) {
       payment_certificate_summary_report();
+    } else if(!delivery_report_performance.hasClass('hide')) {
+      delivery_performance_report();
     }
   }
 </script>
