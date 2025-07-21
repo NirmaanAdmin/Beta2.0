@@ -15471,6 +15471,7 @@ class purchase extends AdminController
 
             $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [
                 db_prefix() . 'pur_vendor.company',
+                db_prefix() . 'items.commodity_code',
             ]);
 
             $output  = $result['output'];
@@ -15478,7 +15479,7 @@ class purchase extends AdminController
             foreach ($rResult as $aRow) {
                 $row = [];
 
-                $row[] = $aRow['item_name'];
+                $row[] = $aRow['commodity_code'] . '-' . $aRow['item_name'];
                 $row[] = '<a href="' . admin_url('purchase/vendor/' . $aRow['vendor']) . '" target="_blank">' . $aRow['company'] . '</a>';
 
                 $row[] = date('d M, Y', strtotime($aRow['est_delivery_date']));
