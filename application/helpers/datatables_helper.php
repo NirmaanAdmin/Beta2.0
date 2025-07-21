@@ -325,136 +325,138 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
 
     // Combine `tblpur_orders` and `tblwo_orders` into one derived table with vendor `company` and `kind`
     $sTable = "(
-        SELECT DISTINCT
-            po.id,
-            po.aw_unw_order_status as aw_unw_order_status,
-            po.pur_order_number AS order_number,
-            po.pur_order_name AS order_name,
-            po.rli_filter,
-            pv.company AS vendor,
-            pv.userid AS vendor_id,
-            po.order_date,
-            po.completion_date,
-            po.budget,
-            po.order_value,
-            po.total AS total,
-            IFNULL(co_sum.co_total, 0) AS co_total,
-            (po.subtotal + IFNULL(co_sum.co_total, 0)) AS total_rev_contract_value, 
-            po.anticipate_variation,
-            (IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0))) AS cost_to_complete,
-            COALESCE(inv_po_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
-            po.group_pur,
-            po.kind,
-            po.remarks AS remarks,
-            po.subtotal as subtotal,
-            pr.name as project,
-            pr.id as project_id,
-            'pur_orders' AS source_table
-        FROM tblpur_orders po
-        LEFT JOIN tblpur_vendor pv ON pv.userid = po.vendor
-        LEFT JOIN (
-            SELECT po_order_id, SUM(co_value) AS co_total
-            FROM tblco_orders
-            WHERE po_order_id IS NOT NULL
-            GROUP BY po_order_id
-        ) AS co_sum ON co_sum.po_order_id = po.id
-        LEFT JOIN tblprojects pr ON pr.id = po.project
-        LEFT JOIN (
-        SELECT
-            pur_order,
-            SUM(vendor_submitted_amount_without_tax) AS vendor_submitted_amount_without_tax
-            FROM tblpur_invoices
-            WHERE pur_order IS NOT NULL AND payment_status IN (5,6,7)
-            GROUP BY pur_order
-        ) AS inv_po_sum
-            ON inv_po_sum.pur_order = po.id
-    
-        UNION ALL
-    
-        SELECT DISTINCT
-            wo.id,
-            wo.aw_unw_order_status as aw_unw_order_status,
-            wo.wo_order_number AS order_number,
-            wo.wo_order_name AS order_name,
-            wo.rli_filter,
-            pv.company AS vendor,
-            pv.userid AS vendor_id,
-            wo.order_date,
-            wo.completion_date,
-            wo.budget,
-            wo.order_value,
-            wo.total AS total,
-            IFNULL(co_sum.co_total, 0) AS co_total,
-            (wo.subtotal + IFNULL(co_sum.co_total, 0)) AS total_rev_contract_value,
-            wo.anticipate_variation,
-            (IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0))) AS cost_to_complete,
-            COALESCE(inv_wo_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
-            wo.group_pur,
-            wo.kind,
-            wo.remarks AS remarks,
-            wo.subtotal as subtotal,
-            pr.name as project,
-            pr.id as project_id,
-            'wo_orders' AS source_table
-        FROM tblwo_orders wo
-        LEFT JOIN tblpur_vendor pv ON pv.userid = wo.vendor
-        LEFT JOIN (
-            SELECT wo_order_id, SUM(co_value) AS co_total
-            FROM tblco_orders
-            WHERE wo_order_id IS NOT NULL
-            GROUP BY wo_order_id
-        ) AS co_sum ON co_sum.wo_order_id = wo.id
-        LEFT JOIN tblprojects pr ON pr.id = wo.project
-        LEFT JOIN (
-        SELECT
-            wo_order,
-            SUM(vendor_submitted_amount_without_tax) AS vendor_submitted_amount_without_tax
-            FROM tblpur_invoices
-            WHERE wo_order IS NOT NULL AND payment_status IN (5,6,7)
-            GROUP BY wo_order
-        ) AS inv_wo_sum
-            ON inv_wo_sum.wo_order = wo.id
-    
-        UNION ALL
-    
-        SELECT DISTINCT
-            t.id,
-            t.aw_unw_order_status as aw_unw_order_status,
-            t.pur_order_number AS order_number,
-            t.pur_order_name AS order_name,
-            t.rli_filter,
-            pv.company AS vendor,
-            pv.userid AS vendor_id,
-            t.order_date,
-            t.completion_date,
-            t.budget,
-            t.order_value,
-            t.total AS total,
-            t.co_total AS co_total,
-            (t.total + IFNULL(t.co_total, 0)) AS total_rev_contract_value,
-            t.anticipate_variation,
-            (IFNULL(t.anticipate_variation, 0) + (t.total + IFNULL(t.co_total, 0))) AS cost_to_complete,
-            COALESCE(inv_ot_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
-            t.group_pur,
-            t.kind,
-            t.remarks AS remarks,
-            t.subtotal as subtotal,
-            pr.name as project,
-            pr.id as project_id,
-            'order_tracker' AS source_table
-        FROM tblpur_order_tracker t
-        LEFT JOIN tblpur_vendor pv ON pv.userid = t.vendor
-        LEFT JOIN tblprojects pr ON pr.id = t.project
-        LEFT JOIN (
-        SELECT
-            order_tracker_id ,
-            SUM(vendor_submitted_amount_without_tax) AS vendor_submitted_amount_without_tax
-            FROM tblpur_invoices
-            WHERE order_tracker_id  IS NOT NULL AND payment_status IN (5,6,7)
-            GROUP BY order_tracker_id 
-        ) AS inv_ot_sum
-            ON inv_ot_sum.order_tracker_id = t.id
-    ) AS combined_orders";
+    SELECT DISTINCT
+        po.id,
+        po.aw_unw_order_status as aw_unw_order_status,
+        po.pur_order_number AS order_number,
+        po.pur_order_name AS order_name,
+        po.rli_filter,
+        pv.company AS vendor,
+        pv.userid AS vendor_id,
+        po.order_date,
+        po.completion_date,
+        po.budget,
+        po.order_value,
+        po.total AS total,
+        IFNULL(co_sum.co_total, 0) AS co_total,
+        (po.subtotal + IFNULL(co_sum.co_total, 0)) AS total_rev_contract_value, 
+        po.anticipate_variation,
+        (IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0))) AS cost_to_complete,
+        COALESCE(inv_po_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
+        po.group_pur,
+        po.kind,
+        po.remarks AS remarks,
+        po.subtotal as subtotal,
+        pr.name as project,
+        pr.id as project_id,
+        'pur_orders' AS source_table
+    FROM tblpur_orders po
+    LEFT JOIN tblpur_vendor pv ON pv.userid = po.vendor
+    LEFT JOIN (
+        SELECT po_order_id, SUM(co_value) AS co_total
+        FROM tblco_orders
+        WHERE po_order_id IS NOT NULL
+        GROUP BY po_order_id
+    ) AS co_sum ON co_sum.po_order_id = po.id
+    LEFT JOIN tblprojects pr ON pr.id = po.project
+    LEFT JOIN (
+    SELECT
+        pur_order,
+        SUM(vendor_submitted_amount_without_tax) AS vendor_submitted_amount_without_tax
+        FROM tblpur_invoices
+        WHERE pur_order IS NOT NULL AND payment_status IN (5,6,7)
+        GROUP BY pur_order
+    ) AS inv_po_sum
+        ON inv_po_sum.pur_order = po.id
+    WHERE po.approve_status = 2
+
+    UNION ALL
+
+    SELECT DISTINCT
+        wo.id,
+        wo.aw_unw_order_status as aw_unw_order_status,
+        wo.wo_order_number AS order_number,
+        wo.wo_order_name AS order_name,
+        wo.rli_filter,
+        pv.company AS vendor,
+        pv.userid AS vendor_id,
+        wo.order_date,
+        wo.completion_date,
+        wo.budget,
+        wo.order_value,
+        wo.total AS total,
+        IFNULL(co_sum.co_total, 0) AS co_total,
+        (wo.subtotal + IFNULL(co_sum.co_total, 0)) AS total_rev_contract_value,
+        wo.anticipate_variation,
+        (IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0))) AS cost_to_complete,
+        COALESCE(inv_wo_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
+        wo.group_pur,
+        wo.kind,
+        wo.remarks AS remarks,
+        wo.subtotal as subtotal,
+        pr.name as project,
+        pr.id as project_id,
+        'wo_orders' AS source_table
+    FROM tblwo_orders wo
+    LEFT JOIN tblpur_vendor pv ON pv.userid = wo.vendor
+    LEFT JOIN (
+        SELECT wo_order_id, SUM(co_value) AS co_total
+        FROM tblco_orders
+        WHERE wo_order_id IS NOT NULL
+        GROUP BY wo_order_id
+    ) AS co_sum ON co_sum.wo_order_id = wo.id
+    LEFT JOIN tblprojects pr ON pr.id = wo.project
+    LEFT JOIN (
+    SELECT
+        wo_order,
+        SUM(vendor_submitted_amount_without_tax) AS vendor_submitted_amount_without_tax
+        FROM tblpur_invoices
+        WHERE wo_order IS NOT NULL AND payment_status IN (5,6,7)
+        GROUP BY wo_order
+    ) AS inv_wo_sum
+        ON inv_wo_sum.wo_order = wo.id
+    WHERE wo.approve_status = 2
+
+    UNION ALL
+
+    SELECT DISTINCT
+        t.id,
+        t.aw_unw_order_status as aw_unw_order_status,
+        t.pur_order_number AS order_number,
+        t.pur_order_name AS order_name,
+        t.rli_filter,
+        pv.company AS vendor,
+        pv.userid AS vendor_id,
+        t.order_date,
+        t.completion_date,
+        t.budget,
+        t.order_value,
+        t.total AS total,
+        t.co_total AS co_total,
+        (t.total + IFNULL(t.co_total, 0)) AS total_rev_contract_value,
+        t.anticipate_variation,
+        (IFNULL(t.anticipate_variation, 0) + (t.total + IFNULL(t.co_total, 0))) AS cost_to_complete,
+        COALESCE(inv_ot_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
+        t.group_pur,
+        t.kind,
+        t.remarks AS remarks,
+        t.subtotal as subtotal,
+        pr.name as project,
+        pr.id as project_id,
+        'order_tracker' AS source_table
+    FROM tblpur_order_tracker t
+    LEFT JOIN tblpur_vendor pv ON pv.userid = t.vendor
+    LEFT JOIN tblprojects pr ON pr.id = t.project
+    LEFT JOIN (
+    SELECT
+        order_tracker_id ,
+        SUM(vendor_submitted_amount_without_tax) AS vendor_submitted_amount_without_tax
+        FROM tblpur_invoices
+        WHERE order_tracker_id  IS NOT NULL AND payment_status IN (5,6,7)
+        GROUP BY order_tracker_id 
+    ) AS inv_ot_sum
+        ON inv_ot_sum.order_tracker_id = t.id
+) AS combined_orders";
 
 
     $allColumns = [];
@@ -1760,9 +1762,9 @@ function data_tables_init_for_billing_invoicing_reports($aColumns, $sIndexColumn
                 WHEN (COALESCE(SUM(pi.final_certified_amount), 0) - COALESCE(SUM(it.qty * it.rate), 0)) = COALESCE(SUM(pi.final_certified_amount), 0) THEN 'Unpaid'
                 ELSE 'Partial'
             END AS status
-        FROM ".db_prefix()."pur_invoices pi
-        LEFT JOIN ".db_prefix()."projects pr ON pr.id = pi.project_id
-        LEFT JOIN ".db_prefix()."itemable it ON it.vbt_id = pi.id
+        FROM " . db_prefix() . "pur_invoices pi
+        LEFT JOIN " . db_prefix() . "projects pr ON pr.id = pi.project_id
+        LEFT JOIN " . db_prefix() . "itemable it ON it.vbt_id = pi.id
         GROUP BY pi.project_id
     ) AS combined_orders";
 
