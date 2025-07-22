@@ -21435,7 +21435,7 @@ class Purchase_model extends App_Model
         $file_html = '';
         $rel_id = $input['rel_id'];
         $this->load->model('warehouse/warehouse_model');
-        $attachments = $this->warehouse_model->get_inventory_shop_drawing_attachments('goods_receipt_shop_d', $rel_id);
+        $attachments = $this->warehouse_model->get_inventory_shop_drawing_attachments_new('goods_receipt_shop_d', $rel_id);
 
         if (count($attachments) > 0) {
             $file_html .= '<p class="bold text-muted">' . _l('customer_attachments') . '</p>';

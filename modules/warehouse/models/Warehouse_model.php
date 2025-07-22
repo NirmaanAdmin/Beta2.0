@@ -1353,11 +1353,11 @@ class Warehouse_model extends App_Model
 				unset($inventory_receipt['order']);
 				unset($inventory_receipt['tax_select']);
 				$inventory_receipt['area'] = !empty($inventory_receipt['area']) ? implode(',', $inventory_receipt['area']) : NULL;
-				if(isset($inventory_receipt['id'])) {
+				if (isset($inventory_receipt['id'])) {
 					$pur_order_detail_id = $inventory_receipt['id'];
 					$this->db->where('id', $pur_order_detail_id);
 					$pur_order_detail = $this->db->get(db_prefix() . 'pur_order_detail')->row();
-					if(!empty($pur_order_detail)) {
+					if (!empty($pur_order_detail)) {
 						$inventory_receipt['delivery_date'] = $pur_order_detail->delivery_date;
 						$inventory_receipt['payment_date'] = $pur_order_detail->payment_date;
 						$inventory_receipt['est_delivery_date'] = $pur_order_detail->est_delivery_date;
@@ -21300,7 +21300,94 @@ class Warehouse_model extends App_Model
 		$attachments = $this->db->get(db_prefix() . 'invetory_files')->result_array();
 		return $attachments;
 	}
-	public function get_inventory_shop_drawing_attachments($related, $id)
+
+	public function get_inventory_shop_drawing_attachments($related, $id, $pur_tracker)
+	{
+		if ($pur_tracker == 'true') {
+			// First try to get attachments directly with the original ID
+			$this->db->where('rel_id', $id);
+			$this->db->where('rel_type', $related);
+			$this->db->order_by('dateadded', 'desc');
+			$attachments = $this->db->get(db_prefix() . 'invetory_files')->result_array();
+
+			if (count($attachments) > 0) {
+				return $attachments;
+			}
+
+			// If no attachments found, try to find related records through goods receipt and purchase order
+			$this->db->select('goods_receipt_id, commodity_code, description');
+			$this->db->where('id', $id);
+			$goods_receipt_detail = $this->db->get(db_prefix() . 'goods_receipt_detail')->row();
+
+			if ($goods_receipt_detail && $goods_receipt_detail->goods_receipt_id) {
+				// Get pr_order_id from goods receipt
+				$this->db->select('pr_order_id');
+				$this->db->where('id', $goods_receipt_detail->goods_receipt_id);
+				$goods_receipt = $this->db->get(db_prefix() . 'goods_receipt')->row();
+
+				if ($goods_receipt && $goods_receipt->pr_order_id) {
+					$rawDesc = $goods_receipt_detail->description ?? '';
+					$cleanDesc = strip_tags(
+						str_replace(
+							["\r", "\n", "<br />", "<br/>"],
+							'',
+							$rawDesc
+						)
+					);
+
+					// 2) start building your query
+					$this->db
+						->select('id')
+						->from(db_prefix() . 'pur_order_detail')
+						->where('pur_order', $goods_receipt->pr_order_id);
+
+					if (! empty($goods_receipt_detail->commodity_code)) {
+						$this->db->where('item_code', $goods_receipt_detail->commodity_code);
+					}
+
+					if ($cleanDesc !== '') {
+						// apply the same strip‑break logic to the DB column
+						$expr  = "REPLACE(";
+						$expr .= "REPLACE(";
+						$expr .= "REPLACE(";
+						$expr .= "REPLACE(`description`, '\r', ''),";
+						$expr .= " '\n', ''),";
+						$expr .= " '<br />', ''),";
+						$expr .= " '<br/>', '')";
+
+						// CI will generate: ... WHERE REPLACE(...)= 'yourCleanDesc'
+						$this->db->where("$expr =", $cleanDesc);
+					}
+
+					$pur_order_detail = $this->db->get()->row();
+
+					if ($pur_order_detail) {
+						// Try to get attachments with the new rel_id
+						$this->db->where('rel_id', $pur_order_detail->id);
+						$this->db->where('rel_type', $related);
+						$attachments = $this->db->get(db_prefix() . 'invetory_files')->result_array();
+
+						if (count($attachments) > 0) {
+							return $attachments;
+						}
+					}
+				}
+			}
+
+			return []; // Return empty array if no attachments found at all
+
+		} elseif ($pur_tracker == 'false') {
+			// Original logic for false case
+			$this->db->where('rel_id', $id);
+			$this->db->where('rel_type', $related);
+			$this->db->order_by('dateadded', 'desc');
+			$attachments = $this->db->get(db_prefix() . 'invetory_files')->result_array();
+			return $attachments;
+		}
+
+		return []; // Default return if neither condition is met
+	}
+	public function get_inventory_shop_drawing_attachments_new($related, $id)
 	{
 		$this->db->where('rel_id', $id);
 		$this->db->where('rel_type', $related);

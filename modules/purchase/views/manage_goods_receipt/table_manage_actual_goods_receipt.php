@@ -302,7 +302,8 @@ foreach ($rResult as $aRow) {
                 </span>
             </div>';
         } elseif ($aColumns[$i] == 2) {
-            $attachments = $this->ci->warehouse_model->get_inventory_shop_drawing_attachments('goods_receipt_shop_d', $aRow['item_detail_id']);
+            $true =  ($aRow['type'] == 1 ? 'true' : 'false');
+            $attachments = $this->ci->warehouse_model->get_inventory_shop_drawing_attachments('goods_receipt_shop_d', $aRow['item_detail_id'],$true);
             if (!empty($attachments)) {
                 $_data = '<a href="javascript:void(0)" onclick="view_purchase_tracker_attachments(' . $aRow['item_detail_id'] . '); return false;" class="btn btn-info btn-icon">View Files</a>';
             } else {

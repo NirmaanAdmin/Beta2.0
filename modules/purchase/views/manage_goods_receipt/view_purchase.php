@@ -539,17 +539,33 @@
                                 </div>
                               </td>
                               <td>
+
                                 <?php
-                                $this->load->model('warehouse/warehouse_model');
-                                $attachments = $this->warehouse_model->get_inventory_shop_drawing_attachments('goods_receipt_shop_d', $receipt_value['id']);
-                                $file_html = '';
-                                if (!empty($attachments)) {
-                                 $file_html = '<a href="javascript:void(0)" onclick="view_purchase_tracker_attachments(' . $receipt_value['id'] . '); return false;" class="btn btn-info btn-icon">View Files</a>';
-                                }else{
+
+                                if (json_encode($purchase_tracker) == 'true') {
+                                  $this->load->model('warehouse/warehouse_model');
+                                  $attachments = $this->warehouse_model->get_inventory_shop_drawing_attachments('goods_receipt_shop_d', $receipt_value['id'], true);
                                   $file_html = '';
+                                  if (!empty($attachments)) {
+                                    $file_html = '<a href="javascript:void(0)" onclick="view_purchase_tracker_attachments(' . $attachments[0]['rel_id'] . '); return false;" class="btn btn-info btn-icon">View Files</a>';
+                                  } else {
+                                    $file_html = '';
+                                  }
+
+                                  echo $file_html;
+                                } else {
+                                  $this->load->model('warehouse/warehouse_model');
+                                  $attachments = $this->warehouse_model->get_inventory_shop_drawing_attachments('goods_receipt_shop_d', $receipt_value['id'], false);
+                                  $file_html = '';
+                                  if (!empty($attachments)) {
+                                    $file_html = '<a href="javascript:void(0)" onclick="view_purchase_tracker_attachments(' . $receipt_value['id'] . '); return false;" class="btn btn-info btn-icon">View Files</a>';
+                                  } else {
+                                    $file_html = '';
+                                  }
+
+                                  echo $file_html;
                                 }
-                              
-                                echo $file_html;  
+
 
                                 ?>
                               </td>
@@ -638,22 +654,22 @@
   </div>
 </div>
 <div class="modal fade" id="viewpurchaseorderAttachmentModal" tabindex="-1" role="dialog">
-   <div class="modal-dialog" role="document" style="width: 70%;">
-      <div class="modal-content">
-         <div class="modal-header">
-            <h4 class="modal-title"><?php echo _l('attachment'); ?></h4>
-            <button type="button" class="close" data-dismiss="modal">&times;</button>
-         </div>
-         <div class="modal-body">
-            <div class="row">
-               <div class="col-md-12">
-                  <div class="view_purchase_attachment_modal">
-                  </div>
-               </div>
-            </div>
-         </div>
+  <div class="modal-dialog" role="document" style="width: 70%;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title"><?php echo _l('attachment'); ?></h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
       </div>
-   </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="view_purchase_attachment_modal">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 <div id="purchase_tracker_file_data"></div>
 <?php require 'modules/warehouse/assets/js/view_purchase_js.php'; ?>
