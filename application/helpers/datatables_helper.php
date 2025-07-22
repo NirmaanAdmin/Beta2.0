@@ -1587,7 +1587,7 @@ function data_tables_init_for_billing_summary_reports($aColumns, $sIndexColumn, 
                 ELSE 0 
             END AS paid_percentage,
             MAX(pi.invoice_date) AS last_bill_date
-        FROM tblpur_invoices pi
+        FROM (SELECT * FROM tblpur_invoices WHERE project_id = ".get_default_project().") pi
         LEFT JOIN tblitemable it ON it.vbt_id = pi.id
         LEFT JOIN tblpur_vendor pv ON pv.userid = pi.vendor
         LEFT JOIN tblexpenses ex ON ex.vbt_id = pi.id
@@ -1762,7 +1762,7 @@ function data_tables_init_for_billing_invoicing_reports($aColumns, $sIndexColumn
                 WHEN (COALESCE(SUM(pi.final_certified_amount), 0) - COALESCE(SUM(it.qty * it.rate), 0)) = COALESCE(SUM(pi.final_certified_amount), 0) THEN 'Unpaid'
                 ELSE 'Partial'
             END AS status
-        FROM " . db_prefix() . "pur_invoices pi
+        FROM (SELECT * FROM tblpur_invoices WHERE project_id = ".get_default_project().") pi
         LEFT JOIN " . db_prefix() . "projects pr ON pr.id = pi.project_id
         LEFT JOIN " . db_prefix() . "itemable it ON it.vbt_id = pi.id
         GROUP BY pi.project_id

@@ -28,7 +28,7 @@ if ($custom_date_select != '') {
     }
     $where[] = $custom_date_select;
 }
-$where[] = 'AND (inv.id IS NULL OR pi.payment_status IN (0, 2, 3, 4))';
+$where[] = 'AND pi.project_id = '.get_default_project().' AND (inv.id IS NULL OR pi.payment_status IN (0, 2, 3, 4))';
 
 $additionalSelect = [
     'pv.userid as vendor_id'

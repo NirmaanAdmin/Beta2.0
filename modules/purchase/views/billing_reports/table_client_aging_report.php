@@ -32,6 +32,7 @@ if ($custom_date_select != '') {
     }
     $where[] = $custom_date_select;
 }
+$where[] = 'AND inv.project_id = '.get_default_project().'';
 
 $additionalSelect = [
     'pr.id as project_id',
