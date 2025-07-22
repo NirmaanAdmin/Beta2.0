@@ -21902,6 +21902,7 @@ class Purchase_model extends App_Model
         if (!empty($group_pur) && is_array($group_pur)) {
             $this->db->where_in(db_prefix() . 'pur_request.group_pur', $group_pur);
         }
+        $this->db->order_by('request_date', 'asc');
         $pur_request = $this->db->get(db_prefix() . 'pur_request')->result_array();
 
         if (!empty($pur_request)) {
