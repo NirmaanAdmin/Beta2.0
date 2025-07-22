@@ -559,8 +559,8 @@ function get_vbt_dashboard() {
           datasets: [{
             label: 'Total Certified Value',
             data: vendorData,
-            backgroundColor: 'rgba(153, 102, 255, 0.7)',
-            borderColor: 'rgba(153, 102, 255, 1)',
+            backgroundColor: '#1E90FF',
+            borderColor: '#1E90FF',
             borderWidth: 1
           }]
         },
