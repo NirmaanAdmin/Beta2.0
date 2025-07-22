@@ -21891,11 +21891,11 @@ class Purchase_model extends App_Model
         }
 
         $response['total_purchase_requests'] = $response['total_approved_requests'] = $response['total_draft_requests'] = $response['total_closed_requests'] = 0;
-        $response['project_name'] = $response['project_value'] = array();
         $response['budget_head_name'] = $response['budget_head_value'] = array();
         $response['department_name'] = $response['department_value'] = array();
+        $response['line_order_date'] = $response['line_order_total'] = array();
 
-        $this->db->select('id, pur_rq_code, status, total, total_tax, group_pur, project, department');
+        $this->db->select('id, pur_rq_code, status, total, total_tax, group_pur, project, department, request_date');
         if (!empty($projects) && is_array($projects)) {
             $this->db->where_in(db_prefix() . 'pur_request.project', $projects);
         }
@@ -21916,18 +21916,17 @@ class Purchase_model extends App_Model
                 return isset($item['status']) && $item['status'] == 4;
             }));
 
-            $project_grouped = array_reduce($pur_request, function ($carry, $item) {
-                $items_group = get_project_name_by_id($item['project']);
-                $group = !empty($items_group) ? $items_group : '';
-                if (!isset($carry[$group])) {
-                    $carry[$group] = 0;
+            $line_order_total = array();
+            foreach ($pur_request as $key => $value) {
+                $month = date('M-y', strtotime($value['request_date']));
+                if (!isset($line_order_total[$month])) {
+                    $line_order_total[$month] = 0;
                 }
-                $carry[$group]++;
-                return $carry;
-            }, []);
-            if (!empty($project_grouped)) {
-                $response['project_name'] = array_keys($project_grouped);
-                $response['project_value'] = array_values($project_grouped);
+                $line_order_total[$month] += 1;
+            }
+            if (!empty($line_order_total)) {
+                $response['line_order_date'] = array_keys($line_order_total);
+                $response['line_order_total'] = array_values($line_order_total);
             }
 
             $group_pur_grouped = array_reduce($pur_request, function ($carry, $item) {

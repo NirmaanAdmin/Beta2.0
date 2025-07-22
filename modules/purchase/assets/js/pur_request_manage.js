@@ -186,6 +186,8 @@ function change_pr_approve_status(status, id) {
   }
 }
 
+var lineChartOverTime;
+
 function get_purchase_request_dashboard() {
   "use strict";
 
@@ -203,46 +205,51 @@ function get_purchase_request_dashboard() {
     $('.total_draft_requests').text(response.total_draft_requests);
     $('.total_closed_requests').text(response.total_closed_requests);
 
-    var projectCtx = document.getElementById('doughnutChartProject').getContext('2d');
-    var projectLabels = response.project_name;
-    var projectData = response.project_value;
-    var backgroundColors = [];
-    var borderColors = [];
-    for (var i = 0; i < projectLabels.length; i++) {
-      var hue = (i * 45) % 360;
-      backgroundColors.push(`hsl(${hue}, 70%, 70%)`);
-      borderColors.push(`hsl(${hue}, 70%, 50%)`);
-    }
-
-    if (window.projectChart) {
-      projectChart.data.labels = projectLabels;
-      projectChart.data.datasets[0].data = projectData;
-      projectChart.data.datasets[0].backgroundColor = backgroundColors;
-      projectChart.data.datasets[0].borderColor = borderColors;
-      projectChart.update();
+    // Purchase Request per month
+    var lineCtx = document.getElementById('lineChartOverTime').getContext('2d');
+    if (lineChartOverTime) {
+      lineChartOverTime.data.labels = response.line_order_date;
+      lineChartOverTime.data.datasets[0].data = response.line_order_total;
+      lineChartOverTime.update();
     } else {
-      window.projectChart = new Chart(projectCtx, {
-        type: 'doughnut',
+      lineChartOverTime = new Chart(lineCtx, {
+        type: 'line',
         data: {
-          labels: projectLabels,
+          labels: response.line_order_date,
           datasets: [{
-            data: projectData,
-            backgroundColor: backgroundColors,
-            borderColor: borderColors,
-            borderWidth: 1
+            label: 'Total Purchase Request',
+            data: response.line_order_total,
+            fill: false,
+            borderColor: 'rgba(54, 162, 235, 1)',
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            tension: 0.3
           }]
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
           plugins: {
             legend: {
+              display: true,
               position: 'bottom'
             },
             tooltip: {
-              callbacks: {
-                label: function(context) {
-                  return context.label + ': ' + context.formattedValue;
-                }
+              mode: 'index',
+              intersect: false
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Month'
+              }
+            },
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Total Purchase Request'
               }
             }
           }
