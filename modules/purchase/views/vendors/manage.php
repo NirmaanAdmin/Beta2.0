@@ -195,13 +195,13 @@
                            <canvas id="barChartState"></canvas>
                          </div>
                         </div>
-                        <div class="col-md-4">
-                           <p class="mbot15 dashboard_stat_title">Vendors by Category</p>
-                           <div style="width: 100%; height: 500px; display: flex; justify-content: left;">
-                              <canvas id="pieChartForCategory"></canvas>
+                        <div class="col-md-5">
+                           <p class="mbot15 dashboard_stat_title">Top 10 Vendors by Category</p>
+                           <div style="width: 100%; height: 500px;">
+                              <canvas id="barChartCategory"></canvas>
                            </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                            <p class="mbot15 dashboard_stat_title">Missing Info</p>
                            <div class="scroll-wrapper" style="max-height: 461px; overflow-y: auto;overflow-x: clip;">
                               <table class="table table-missing-info">

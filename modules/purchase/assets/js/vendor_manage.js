@@ -74,7 +74,7 @@ function get_vendors_dashboard() {
     $('.total_inactive').text(response.total_inactive);
     $('.onboarded_this_week').text(response.onboarded_this_week);
 
-    // PO Status Breakdown
+    // Top 10 Vendors by State
     var stateBarCtx = document.getElementById('barChartState').getContext('2d');
     var stateLabels = response.bar_state_name;
     var stateData = response.bar_state_value;
@@ -91,8 +91,8 @@ function get_vendors_dashboard() {
           datasets: [{
             label: 'Value',
             data: stateData,
-            backgroundColor: 'rgba(153, 102, 255, 0.7)',
-            borderColor: 'rgba(153, 102, 255, 1)',
+            backgroundColor: '#00008B',
+            borderColor: '#00008B',
             borderWidth: 1
           }]
         },
@@ -127,44 +127,57 @@ function get_vendors_dashboard() {
       });
    }
 
-   // PIE CHART - Vendors by Categor
-    var categoryPieCtx = document.getElementById('pieChartForCategory').getContext('2d');
-    var categoryData = response.pie_category_value;
-    var categoryLabels = response.pie_category_name;
+   // Top 10 Vendors by Category
+    var categoryBarCtx = document.getElementById('barChartCategory').getContext('2d');
+    var categoryLabels = response.bar_category_name;
+    var categoryData = response.bar_category_value;
 
-    if (window.categoryChart) {
-      categoryChart.data.labels = categoryLabels;
-      categoryChart.data.datasets[0].data = categoryData;
-      categoryChart.update();
+    if (window.barTopPOCategory) {
+      barTopPOCategory.data.labels = categoryLabels;
+      barTopPOCategory.data.datasets[0].data = categoryData;
+      barTopPOCategory.update();
     } else {
-      window.categoryChart = new Chart(categoryPieCtx, {
-        type: 'pie',
-        data: {
-          labels: categoryLabels,
-          datasets: [{
-            data: categoryData,
-            backgroundColor: categoryLabels.map((_, i) => `hsl(${i * 35 % 360}, 70%, 60%)`),
-            borderColor: '#fff',
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              position: 'bottom'
-            },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  return context.label + ': ' + context.formattedValue;
-                }
+        window.barTopPOCategory = new Chart(categoryBarCtx, {
+          type: 'bar',
+          data: {
+              labels: categoryLabels,
+              datasets: [{
+                  label: 'Value',
+                  data: categoryData,
+                  backgroundColor: '#1E90FF',
+                  borderColor: '#1E90FF',
+                  borderWidth: 1
+              }]
+          },
+          options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                  legend: {
+                      display: false
+                  }
+              },
+              scales: {
+                  x: {
+                      ticks: {
+                          autoSkip: false
+                      },
+                      title: {
+                          display: true,
+                          text: 'Category'
+                      }
+                  },
+                  y: {
+                      beginAtZero: true,
+                      title: {
+                          display: true,
+                          text: 'Value'
+                      }
+                  }
               }
-            }
           }
-        }
       });
-   }
+    }
 
    vendors_missing_info();
 

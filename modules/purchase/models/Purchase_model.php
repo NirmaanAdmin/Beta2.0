@@ -22838,7 +22838,7 @@ class Purchase_model extends App_Model
         
         $response['total_vendors'] = $response['total_active'] = $response['total_inactive'] = $response['onboarded_this_week'] = 0;
         $response['bar_state_name'] = $response['bar_state_value'] = array();
-        $response['pie_category_name'] = $response['pie_category_value'] = array();
+        $response['bar_category_name'] = $response['bar_category_value'] = array();
 
         $this->db->select('userid, active, state, category, datecreated');
         $this->db->from(db_prefix() . 'pur_vendor');
@@ -22858,6 +22858,7 @@ class Purchase_model extends App_Model
             }));
 
             $bar_top_states = array();
+            $bar_top_category = array();
             foreach ($pur_vendors as $item) {
                 $state = !empty($item['state']) ? $item['state'] : 'None';
                 if (!isset($bar_top_states[$state])) {
@@ -22865,6 +22866,14 @@ class Purchase_model extends App_Model
                     $bar_top_states[$state]['value'] = 0;
                 }
                 $bar_top_states[$state]['value'] += 1;
+
+                $category_group = $this->get_vendor_category($item['category']);
+                $category = !empty($item['category']) ? $category_group->category_name : 'None';
+                if (!isset($bar_top_category[$category])) {
+                    $bar_top_category[$category]['name'] = $category;
+                    $bar_top_category[$category]['value'] = 0;
+                }
+                $bar_top_category[$category]['value'] += 1;
             }
             if (isset($bar_top_states['None'])) {
                 unset($bar_top_states['None']);
@@ -22877,19 +22886,16 @@ class Purchase_model extends App_Model
                 $response['bar_state_name'] = array_column($bar_top_states, 'name');
                 $response['bar_state_value'] = array_column($bar_top_states, 'value');
             }
-
-            $grouped = array_reduce($pur_vendors, function ($carry, $item) {
-                $items_group = $this->get_vendor_category($item['category']);
-                $group = !empty($item['category']) ? $items_group->category_name : 'None';
-                $carry[$group] = ($carry[$group] ?? 0) + 1;
-                return $carry;
-            }, []);
-            if (isset($grouped['None'])) {
-                unset($grouped['None']);
+            if (isset($bar_top_category['None'])) {
+                unset($bar_top_category['None']);
             }
-            if (!empty($grouped)) {
-                $response['pie_category_name'] = array_keys($grouped);
-                $response['pie_category_value'] = array_values($grouped);
+            if (!empty($bar_top_category)) {
+                usort($bar_top_category, function ($a, $b) {
+                    return $b['value'] <=> $a['value'];
+                });
+                $bar_top_category = array_slice($bar_top_category, 0, 10);
+                $response['bar_category_name'] = array_column($bar_top_category, 'name');
+                $response['bar_category_value'] = array_column($bar_top_category, 'value');
             }
         }
 
