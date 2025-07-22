@@ -112,7 +112,7 @@ $module_name = 'payment_certificate'; ?>
                                      </div>
                                    </div>
                                  </div>
-                               </div>
+                              </div>
                            </div>
                         </div>
                         <div class="row mtop20">

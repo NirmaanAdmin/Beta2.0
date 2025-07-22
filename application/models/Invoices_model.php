@@ -2421,7 +2421,16 @@ class Invoices_model extends App_Model
 
             $line_order_total = array();
             foreach ($invoices as $key => $value) {
-                $month = date('M-y', strtotime($value['date']));
+                if (!empty($value['date'])) {
+                    $timestamp = strtotime($value['date']);
+                    if ($timestamp !== false && $timestamp > 0) {
+                        $month = date('Y-m', $timestamp);
+                    } elseif ($timestamp === false || $timestamp <= 0) {
+                        $month = date('Y') . '-01';
+                    }
+                } else {
+                    $month = date('Y') . '-01';
+                }
                 if (!isset($line_order_total[$month])) {
                     $line_order_total[$month] = 0;
                 }
@@ -2429,7 +2438,15 @@ class Invoices_model extends App_Model
             }
 
             if (!empty($line_order_total)) {
-                $response['line_order_date'] = array_keys($line_order_total);
+                ksort($line_order_total);
+                $cumulative = 0;
+                foreach ($line_order_total as $month => $value) {
+                    $cumulative += $value;
+                    $line_order_total[$month] = $cumulative;
+                }
+                $response['line_order_date'] = array_map(function ($month) {
+                    return date('M-y', strtotime($month . '-01'));
+                }, array_keys($line_order_total));
                 $response['line_order_total'] = array_values($line_order_total);
             }
 
