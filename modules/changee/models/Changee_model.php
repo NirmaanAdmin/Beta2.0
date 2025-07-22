@@ -14959,7 +14959,7 @@ class Changee_model extends App_Model
 
         $response['total_co_value'] = $response['approved_co_value'] = $response['draft_co_value'] = $response['draft_co_count'] = $response['approved_co_count'] = $response['rejected_co_count'] = 0;
         $response['pie_budget_name'] = $response['pie_tax_value'] = array();
-        $response['department_name'] = $response['department_value'] = array();
+        $response['line_order_date'] = $response['line_order_total'] = array();
 
         $this->db->select('id, pur_order_number, approve_status, total, order_date, total_tax, group_pur, vendor, project, department');
         if (!empty($vendors) && is_array($vendors)) {
@@ -14968,6 +14968,7 @@ class Changee_model extends App_Model
         if (!empty($projects) && is_array($projects)) {
             $this->db->where_in(db_prefix() . 'co_orders.project', $projects);
         }
+        $this->db->order_by('order_date', 'asc');
         $co_orders = $this->db->get(db_prefix() . 'co_orders')->result_array();
 
         if (!empty($co_orders)) {
@@ -14995,7 +14996,9 @@ class Changee_model extends App_Model
             }
             $response['approved_co_value'] = app_format_money($approved_co_value, $base_currency->symbol);
 
-            $total_co_value = $draft_co_value + $approved_co_value;
+            $total_co_value = array_reduce($co_orders, function ($carry, $item) {
+                return $carry + (float)$item['total'];
+            }, 0);
             $response['total_co_value'] = app_format_money($total_co_value, $base_currency->symbol);
 
             $response['draft_co_count'] = count(array_filter($co_orders, function ($item) {
@@ -15021,18 +15024,35 @@ class Changee_model extends App_Model
                 }
             }
 
-            $department_grouped = array_reduce($co_orders, function ($carry, $item) {
-                $items_group = $this->departments_model->get($item['department']);
-                $group = !empty($items_group) ? $items_group->name : 'None';
-                if (!isset($carry[$group])) {
-                    $carry[$group] = 0;
+            $line_order_total = array();
+            foreach ($co_orders as $key => $value) {
+                if (!empty($value['order_date'])) {
+                    $timestamp = strtotime($value['order_date']);
+                    if ($timestamp !== false && $timestamp > 0) {
+                        $month = date('Y-m', $timestamp);
+                    } elseif ($timestamp === false || $timestamp <= 0) {
+                        $month = date('Y') . '-01';
+                    }
+                } else {
+                    $month = date('Y') . '-01';
                 }
-                $carry[$group]++;
-                return $carry;
-            }, []);
-            if (!empty($department_grouped)) {
-                $response['department_name'] = array_keys($department_grouped);
-                $response['department_value'] = array_values($department_grouped);
+                if (!isset($line_order_total[$month])) {
+                    $line_order_total[$month] = 0;
+                }
+                $line_order_total[$month] += $value['total'];
+            }
+
+            if (!empty($line_order_total)) {
+                ksort($line_order_total);
+                $cumulative = 0;
+                foreach ($line_order_total as $month => $value) {
+                    $cumulative += $value;
+                    $line_order_total[$month] = $cumulative;
+                }
+                $response['line_order_date'] = array_map(function ($month) {
+                    return date('M-y', strtotime($month . '-01'));
+                }, array_keys($line_order_total));
+                $response['line_order_total'] = array_values($line_order_total);
             }
         }
 
