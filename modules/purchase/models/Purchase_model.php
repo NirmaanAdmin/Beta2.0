@@ -21674,8 +21674,9 @@ class Purchase_model extends App_Model
             $base_currency = pur_get_currency_by_id($request->currency);
         }
 
-        $response['total_po_value'] = $response['approved_po_value'] = $response['draft_po_value'] = $response['draft_po_count'] = $response['approved_po_count'] = $response['rejected_po_count'] = $response['completely_delivered_status'] = $response['partially_delivered_status'] = $response['undelivered_status'] = 0;
+        $response['total_po_value'] = $response['approved_po_value'] = $response['draft_po_value'] = $response['draft_po_count'] = $response['approved_po_count'] = $response['rejected_po_count'] = 0;
         $response['pie_budget_name'] = $response['pie_tax_value'] = array();
+        $response['line_order_date'] = $response['line_order_total'] = array();
 
         $this->db->select('id, pur_order_number, approve_status, total, order_date, total_tax, group_pur, vendor, project');
         if (!empty($vendors) && is_array($vendors)) {
@@ -21687,6 +21688,7 @@ class Purchase_model extends App_Model
         if (!empty($group_pur) && is_array($group_pur)) {
             $this->db->where_in(db_prefix() . 'pur_orders.group_pur', $group_pur);
         }
+        $this->db->order_by('order_date', 'asc');
         $pur_orders = $this->db->get(db_prefix() . 'pur_orders')->result_array();
 
         if (!empty($pur_orders)) {
@@ -21740,30 +21742,35 @@ class Purchase_model extends App_Model
                 }
             }
 
-            foreach ($pur_orders as $item) {
-                $po_id = $item['id'];
-                $this->db->select('id');
-                $this->db->where('pr_order_id', $po_id);
-                $goods_receipt = $this->db->get(db_prefix() . 'goods_receipt')->result_array();
-                if (!empty($goods_receipt)) {
-                    $gr_ids = array_column($goods_receipt, 'id');
-                    $this->db->select('po_quantities, quantities, est_delivery_date, delivery_date');
-                    $this->db->where_in('goods_receipt_id', $gr_ids);
-                    $goods_receipt_detail = $this->db->get(db_prefix() . 'goods_receipt_detail')->result_array();
-                    if (!empty($goods_receipt_detail)) {
-                        $po_qty = array_sum(array_column($goods_receipt_detail, 'po_quantities'));
-                        $rec_qty = array_sum(array_column($goods_receipt_detail, 'quantities'));
-                        if ($rec_qty == 0) {
-                            $response['undelivered_status']++;
-                        } elseif ($rec_qty > 0 && $rec_qty < $po_qty) {
-                            $response['partially_delivered_status']++;
-                        } elseif ($rec_qty >= $po_qty) {
-                            $response['completely_delivered_status']++;
-                        }
+            $line_order_total = array();
+            foreach ($pur_orders as $key => $value) {
+                if (!empty($value['order_date'])) {
+                    $timestamp = strtotime($value['order_date']);
+                    if ($timestamp !== false && $timestamp > 0) {
+                        $month = date('Y-m', $timestamp);
+                    } elseif ($timestamp === false || $timestamp <= 0) {
+                        $month = date('Y') . '-01';
                     }
                 } else {
-                    $response['undelivered_status']++;
+                    $month = date('Y') . '-01';
                 }
+                if (!isset($line_order_total[$month])) {
+                    $line_order_total[$month] = 0;
+                }
+                $line_order_total[$month] += $value['total'];
+            }
+
+            if (!empty($line_order_total)) {
+                ksort($line_order_total);
+                $cumulative = 0;
+                foreach ($line_order_total as $month => $value) {
+                    $cumulative += $value;
+                    $line_order_total[$month] = $cumulative;
+                }
+                $response['line_order_date'] = array_map(function ($month) {
+                    return date('M-y', strtotime($month . '-01'));
+                }, array_keys($line_order_total));
+                $response['line_order_total'] = array_values($line_order_total);
             }
         }
 

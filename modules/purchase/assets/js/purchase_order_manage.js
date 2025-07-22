@@ -220,6 +220,7 @@ function change_delivery_status(status, id) {
 }
 
 var pieChartPOStatus;
+var lineChartOverTime;
 
 function get_purchase_order_dashboard() {
   "use strict";
@@ -315,49 +316,51 @@ function get_purchase_order_dashboard() {
       });
     }
 
-    // DOUGHNUT CHART - Delivery Status
-    var deliveryCtx = document.getElementById('doughnutChartDeliveryStatus').getContext('2d');
-    var deliveryLabels = ['Completely Delivered', 'Partially Delivered', 'Undelivered'];
-    var deliveryData = [
-      response.completely_delivered_status, 
-      response.partially_delivered_status, 
-      response.undelivered_status
-    ];
-
-    if (window.deliveryStatusChart) {
-      deliveryStatusChart.data.datasets[0].data = deliveryData;
-      deliveryStatusChart.update();
+    // Total Amount Over Time
+    var lineCtx = document.getElementById('lineChartOverTime').getContext('2d');
+    if (lineChartOverTime) {
+      lineChartOverTime.data.labels = response.line_order_date;
+      lineChartOverTime.data.datasets[0].data = response.line_order_total;
+      lineChartOverTime.update();
     } else {
-      window.deliveryStatusChart = new Chart(deliveryCtx, {
-        type: 'doughnut',
+      lineChartOverTime = new Chart(lineCtx, {
+        type: 'line',
         data: {
-          labels: deliveryLabels,
+          labels: response.line_order_date,
           datasets: [{
-            data: deliveryData,
-            backgroundColor: [
-              'rgba(40, 167, 69, 0.7)',    // Green - Complete
-              'rgba(255, 193, 7, 0.7)',    // Yellow - Partial
-              'rgba(220, 53, 69, 0.7)'     // Red - None
-            ],
-            borderColor: [
-              'rgba(40, 167, 69, 1)',
-              'rgba(255, 193, 7, 1)',
-              'rgba(220, 53, 69, 1)'
-            ],
-            borderWidth: 1
+            label: 'Amount',
+            data: response.line_order_total,
+            fill: false,
+            borderColor: 'rgba(54, 162, 235, 1)',
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            tension: 0.3
           }]
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
           plugins: {
             legend: {
+              display: true,
               position: 'bottom'
             },
             tooltip: {
-              callbacks: {
-                label: function(context) {
-                  return context.label + ': ' + context.formattedValue;
-                }
+              mode: 'index',
+              intersect: false
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Month'
+              }
+            },
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Amount'
               }
             }
           }
