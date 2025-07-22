@@ -189,8 +189,24 @@
                   <?php echo render_textarea('address', 'client_address', $value); ?>
                   <?php $value = (isset($client) ? $client->city : ''); ?>
                   <?php echo render_input('city', 'client_city', $value); ?>
-                  <?php $value = (isset($client) ? $client->state : ''); ?>
-                  <?php echo render_input('state', 'client_state', $value); ?>
+                  <?php
+                  $states = [
+                      'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
+                      'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand',
+                      'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur',
+                      'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab',
+                      'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura',
+                      'Uttar Pradesh', 'Uttarakhand', 'West Bengal', 'Andaman and Nicobar Islands',
+                      'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu', 'Delhi',
+                      'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry'
+                  ];
+                  $state_options = [];
+                  foreach ($states as $state) {
+                     $state_options[] = ['id' => $state, 'name' => $state];
+                  }
+                  $selected = isset($client) ? $client->state : '';
+                  echo render_select('state', $state_options, ['id', 'name'], 'client_state', $selected);
+                  ?>
                   <?php $value = (isset($client) ? $client->zip : ''); ?>
                   <?php echo render_input('zip', 'client_postal_code', $value); ?>
                   <?php $countries = get_all_countries();
