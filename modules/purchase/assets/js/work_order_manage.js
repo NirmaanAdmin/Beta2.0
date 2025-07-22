@@ -231,6 +231,7 @@ function change_delivery_status(status, id){
 }
 
 var pieChartWOStatus;
+var lineChartOverTime;
 
 function get_work_order_dashboard() {
   "use strict";
@@ -326,38 +327,51 @@ function get_work_order_dashboard() {
       });
     }
 
-    // PIE CHART - Pie Chart for WO per Department
-    var departmentPieCtx = document.getElementById('pieChartForDepartment').getContext('2d');
-    var departmentData = response.department_value;
-    var departmentLabels = response.department_name;
-
-    if (window.departmentChart) {
-      departmentChart.data.labels = departmentLabels;
-      departmentChart.data.datasets[0].data = departmentData;
-      departmentChart.update();
+    // Total Amount Over Time
+    var lineCtx = document.getElementById('lineChartOverTime').getContext('2d');
+    if (lineChartOverTime) {
+      lineChartOverTime.data.labels = response.line_order_date;
+      lineChartOverTime.data.datasets[0].data = response.line_order_total;
+      lineChartOverTime.update();
     } else {
-      window.departmentChart = new Chart(departmentPieCtx, {
-        type: 'pie',
+      lineChartOverTime = new Chart(lineCtx, {
+        type: 'line',
         data: {
-          labels: departmentLabels,
+          labels: response.line_order_date,
           datasets: [{
-            data: departmentData,
-            backgroundColor: departmentLabels.map((_, i) => `hsl(${i * 35 % 360}, 70%, 60%)`),
-            borderColor: '#fff',
-            borderWidth: 1
+            label: 'Amount',
+            data: response.line_order_total,
+            fill: false,
+            borderColor: 'rgba(54, 162, 235, 1)',
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            tension: 0.3
           }]
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
           plugins: {
             legend: {
+              display: true,
               position: 'bottom'
             },
             tooltip: {
-              callbacks: {
-                label: function(context) {
-                  return context.label + ': ' + context.formattedValue;
-                }
+              mode: 'index',
+              intersect: false
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Month'
+              }
+            },
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Amount'
               }
             }
           }

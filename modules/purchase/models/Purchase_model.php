@@ -21716,7 +21716,9 @@ class Purchase_model extends App_Model
             }
             $response['approved_po_value'] = app_format_money($approved_po_value, $base_currency->symbol);
 
-            $total_po_value = $draft_po_value + $approved_po_value;
+            $total_po_value = array_reduce($pur_orders, function ($carry, $item) {
+                return $carry + (float)$item['total'];
+            }, 0);
             $response['total_po_value'] = app_format_money($total_po_value, $base_currency->symbol);
 
             $response['draft_po_count'] = count(array_filter($pur_orders, function ($item) {
@@ -21798,7 +21800,7 @@ class Purchase_model extends App_Model
 
         $response['total_wo_value'] = $response['approved_wo_value'] = $response['draft_wo_value'] = $response['draft_wo_count'] = $response['approved_wo_count'] = $response['rejected_wo_count'] = 0;
         $response['pie_budget_name'] = $response['pie_tax_value'] = array();
-        $response['department_name'] = $response['department_value'] = array();
+        $response['line_order_date'] = $response['line_order_total'] = array();
 
         $this->db->select('id, wo_order_number, approve_status, total, order_date, total_tax, group_pur, vendor, project, department');
         if (!empty($vendors) && is_array($vendors)) {
@@ -21810,6 +21812,7 @@ class Purchase_model extends App_Model
         if (!empty($group_pur) && is_array($group_pur)) {
             $this->db->where_in(db_prefix() . 'wo_orders.group_pur', $group_pur);
         }
+        $this->db->order_by('order_date', 'asc');
         $wo_orders = $this->db->get(db_prefix() . 'wo_orders')->result_array();
 
         if (!empty($wo_orders)) {
@@ -21837,7 +21840,9 @@ class Purchase_model extends App_Model
             }
             $response['approved_wo_value'] = app_format_money($approved_wo_value, $base_currency->symbol);
 
-            $total_wo_value = $draft_wo_value + $approved_wo_value;
+            $total_wo_value = array_reduce($wo_orders, function ($carry, $item) {
+                return $carry + (float)$item['total'];
+            }, 0);
             $response['total_wo_value'] = app_format_money($total_wo_value, $base_currency->symbol);
 
             $response['draft_wo_count'] = count(array_filter($wo_orders, function ($item) {
@@ -21861,18 +21866,35 @@ class Purchase_model extends App_Model
                 $response['pie_total_value'] = array_values($grouped);
             }
 
-            $department_grouped = array_reduce($wo_orders, function ($carry, $item) {
-                $items_group = $this->departments_model->get($item['department']);
-                $group = !empty($items_group) ? $items_group->name : 'None';
-                if (!isset($carry[$group])) {
-                    $carry[$group] = 0;
+            $line_order_total = array();
+            foreach ($wo_orders as $key => $value) {
+                if (!empty($value['order_date'])) {
+                    $timestamp = strtotime($value['order_date']);
+                    if ($timestamp !== false && $timestamp > 0) {
+                        $month = date('Y-m', $timestamp);
+                    } elseif ($timestamp === false || $timestamp <= 0) {
+                        $month = date('Y') . '-01';
+                    }
+                } else {
+                    $month = date('Y') . '-01';
                 }
-                $carry[$group]++;
-                return $carry;
-            }, []);
-            if (!empty($department_grouped)) {
-                $response['department_name'] = array_keys($department_grouped);
-                $response['department_value'] = array_values($department_grouped);
+                if (!isset($line_order_total[$month])) {
+                    $line_order_total[$month] = 0;
+                }
+                $line_order_total[$month] += $value['total'];
+            }
+
+            if (!empty($line_order_total)) {
+                ksort($line_order_total);
+                $cumulative = 0;
+                foreach ($line_order_total as $month => $value) {
+                    $cumulative += $value;
+                    $line_order_total[$month] = $cumulative;
+                }
+                $response['line_order_date'] = array_map(function ($month) {
+                    return date('M-y', strtotime($month . '-01'));
+                }, array_keys($line_order_total));
+                $response['line_order_total'] = array_values($line_order_total);
             }
         }
 
