@@ -102,7 +102,7 @@ function get_payment_certificate_dashboard() {
         data: {
           labels: response.line_order_date,
           datasets: [{
-            label: 'Certified Value',
+            label: 'Total Certified Value',
             data: response.line_order_total,
             fill: false,
             borderColor: 'rgba(54, 162, 235, 1)',
@@ -134,7 +134,7 @@ function get_payment_certificate_dashboard() {
               beginAtZero: true,
               title: {
                 display: true,
-                text: 'Certified Value'
+                text: 'Total Certified Value'
               }
             }
           }
