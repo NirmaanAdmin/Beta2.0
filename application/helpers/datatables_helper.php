@@ -1574,6 +1574,11 @@ function data_tables_init_for_billing_summary_reports($aColumns, $sIndexColumn, 
         $sLimit = 'LIMIT ' . intval($CI->input->post('start')) . ', ' . intval($CI->input->post('length'));
     }
 
+    $invoice_subquery = 'SELECT * FROM ' . db_prefix() . 'pur_invoices';
+    if ($CI->input->post('summary_project')) {
+        $invoice_subquery .= ' WHERE project_id = ' . $CI->input->post('summary_project');
+    }
+
     $sTable = "(
         SELECT 
             pv.userid AS vendor_id,
@@ -1587,7 +1592,7 @@ function data_tables_init_for_billing_summary_reports($aColumns, $sIndexColumn, 
                 ELSE 0 
             END AS paid_percentage,
             MAX(pi.invoice_date) AS last_bill_date
-        FROM (SELECT * FROM tblpur_invoices WHERE project_id = ".get_default_project().") pi
+        FROM ($invoice_subquery) pi
         LEFT JOIN tblitemable it ON it.vbt_id = pi.id
         LEFT JOIN tblpur_vendor pv ON pv.userid = pi.vendor
         LEFT JOIN tblexpenses ex ON ex.vbt_id = pi.id
@@ -1750,6 +1755,11 @@ function data_tables_init_for_billing_invoicing_reports($aColumns, $sIndexColumn
         $sLimit = 'LIMIT ' . intval($CI->input->post('start')) . ', ' . intval($CI->input->post('length'));
     }
 
+    $invoice_subquery = 'SELECT * FROM ' . db_prefix() . 'pur_invoices';
+    if ($CI->input->post('invoicing_project')) {
+        $invoice_subquery .= ' WHERE project_id = ' . $CI->input->post('invoicing_project');
+    }
+
     $sTable = "(
         SELECT 
             pi.project_id AS project_id,
@@ -1762,7 +1772,7 @@ function data_tables_init_for_billing_invoicing_reports($aColumns, $sIndexColumn
                 WHEN (COALESCE(SUM(pi.final_certified_amount), 0) - COALESCE(SUM(it.qty * it.rate), 0)) = COALESCE(SUM(pi.final_certified_amount), 0) THEN 'Unpaid'
                 ELSE 'Partial'
             END AS status
-        FROM (SELECT * FROM tblpur_invoices WHERE project_id = ".get_default_project().") pi
+        FROM ($invoice_subquery) pi
         LEFT JOIN " . db_prefix() . "projects pr ON pr.id = pi.project_id
         LEFT JOIN " . db_prefix() . "itemable it ON it.vbt_id = pi.id
         GROUP BY pi.project_id

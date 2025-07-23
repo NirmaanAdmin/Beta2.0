@@ -34,6 +34,14 @@ if ($custom_date_select != '') {
 }
 $where[] = 'AND inv.project_id = '.get_default_project().'';
 
+if ($this->ci->input->post('client_aging_project')) {
+    array_push($where, 'AND inv.project_id = '.$this->ci->input->post('client_aging_project').'');
+}
+
+if ($this->ci->input->post('client_aging_status') && count($this->ci->input->post('client_aging_status')) > 0) {
+    array_push($where, 'AND inv.status IN (' . implode(',', $this->ci->input->post('client_aging_status')) . ')');
+}
+
 $additionalSelect = [
     'pr.id as project_id',
 ];

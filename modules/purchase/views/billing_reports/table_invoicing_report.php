@@ -11,7 +11,18 @@ $where = [];
 $this->ci->load->model('purchase/purchase_model');
 $custom_date_select = $this->ci->purchase_model->get_where_report_period('last_bill_date');
 if ($custom_date_select != '') {
-    array_push($where, $custom_date_select);
+    $custom_date_select = trim($custom_date_select);
+    if (!startsWith($custom_date_select, 'AND')) {
+        $custom_date_select = 'AND ' . $custom_date_select;
+    }
+    $where[] = $custom_date_select;
+}
+
+if ($this->ci->input->post('invoicing_status') && count($this->ci->input->post('invoicing_status')) > 0) {
+    $statuses = array_map(function($status) {
+        return "'" . trim($status) . "'";
+    }, $this->ci->input->post('invoicing_status'));
+    $where[] = 'AND status IN (' . implode(',', $statuses) . ')';
 }
 
 $aColumns     = $select;

@@ -28,7 +28,20 @@ if ($custom_date_select != '') {
     }
     $where[] = $custom_date_select;
 }
-$where[] = 'AND pi.project_id = '.get_default_project().' AND (inv.id IS NULL OR pi.payment_status IN (0, 2, 3, 4))';
+$where[] = 'AND (inv.id IS NULL OR pi.payment_status IN (0, 2, 3, 4))';
+
+if ($this->ci->input->post('aging_project')) {
+    array_push($where, 'AND pi.project_id = '.$this->ci->input->post('aging_project').'');
+}
+
+if ($this->ci->input->post('aging_vendor') && count($this->ci->input->post('aging_vendor')) > 0
+) {
+    array_push($where, 'AND pv.userid IN (' . implode(',', $this->ci->input->post('aging_vendor')) . ')');
+}
+
+if ($this->ci->input->post('aging_status') && count($this->ci->input->post('aging_status')) > 0) {
+    array_push($where, 'AND pi.payment_status IN (' . implode(',', $this->ci->input->post('aging_status')) . ')');
+}
 
 $additionalSelect = [
     'pv.userid as vendor_id'

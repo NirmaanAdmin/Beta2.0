@@ -12,7 +12,36 @@ $where = [];
 $this->ci->load->model('purchase/purchase_model');
 $custom_date_select = $this->ci->purchase_model->get_where_report_period('last_bill_date');
 if ($custom_date_select != '') {
-    array_push($where, $custom_date_select);
+    $custom_date_select = trim($custom_date_select);
+    if (!startsWith($custom_date_select, 'AND')) {
+        $custom_date_select = 'AND ' . $custom_date_select;
+    }
+    $where[] = $custom_date_select;
+}
+
+if ($this->ci->input->post('summary_vendor') && count($this->ci->input->post('summary_vendor')) > 0
+) {
+    array_push($where, 'AND vendor_id IN (' . implode(',', $this->ci->input->post('summary_vendor')) . ')');
+}
+
+if ($this->ci->input->post('summary_status') && count($this->ci->input->post('summary_status')) > 0) {
+    $status_conditions = [];
+    foreach ($this->ci->input->post('summary_status') as $status) {
+        switch ($status) {
+            case '1':
+                $status_conditions[] = 'paid_percentage = 0';
+                break;
+            case '2':
+                $status_conditions[] = 'paid_percentage > 0 AND paid_percentage < 100';
+                break;
+            case '3':
+                $status_conditions[] = 'paid_percentage = 100';
+                break;
+        }
+    }
+    if (!empty($status_conditions)) {
+        $where[] = 'AND (' . implode(' OR ', $status_conditions) . ')';
+    }
 }
 
 $aColumns     = $select;

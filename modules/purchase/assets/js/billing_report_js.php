@@ -17,6 +17,19 @@
       "report_to": '[name="report-to"]',
       "year_requisition": "[name='year_requisition']",
       "report_currency": '[name="currency"]',
+      "summary_project": '[name="summary_project"]',
+      "summary_vendor": '[name="summary_vendor[]"]',
+      "summary_status": '[name="summary_status[]"]',
+      "aging_project": '[name="aging_project"]',
+      "aging_vendor": '[name="aging_vendor[]"]',
+      "aging_status": '[name="aging_status[]"]',
+      "mapping_project": '[name="mapping_project"]',
+      "mapping_vendor": '[name="mapping_vendor[]"]',
+      "mapping_status": '[name="mapping_status[]"]',
+      "invoicing_project": '[name="invoicing_project"]',
+      "invoicing_status": '[name="invoicing_status[]"]',
+      "client_aging_project": '[name="client_aging_project"]',
+      "client_aging_status": '[name="client_aging_status[]"]',
     }
 
     $('select[name="currency"]').on('change', function() {
@@ -30,6 +43,58 @@
     });
 
     $('select[name="year_requisition"]').on('change', function() {
+      gen_reports();
+    });
+
+    $('select[name="summary_project"]').on('change', function() {
+      gen_reports();
+    });
+
+    $('select[name="summary_vendor[]"]').on('change', function() {
+      gen_reports();
+    });
+
+    $('select[name="summary_status[]"]').on('change', function() {
+      gen_reports();
+    });
+
+    $('select[name="aging_project"]').on('change', function() {
+      gen_reports();
+    });
+
+    $('select[name="aging_vendor[]"]').on('change', function() {
+      gen_reports();
+    });
+
+    $('select[name="aging_status[]"]').on('change', function() {
+      gen_reports();
+    });
+
+    $('select[name="mapping_project"]').on('change', function() {
+      gen_reports();
+    });
+
+    $('select[name="mapping_vendor[]"]').on('change', function() {
+      gen_reports();
+    });
+
+    $('select[name="mapping_status[]"]').on('change', function() {
+      gen_reports();
+    });
+
+    $('select[name="invoicing_project"]').on('change', function() {
+      gen_reports();
+    });
+
+    $('select[name="invoicing_status[]"]').on('change', function() {
+      gen_reports();
+    });
+
+    $('select[name="client_aging_project"]').on('change', function() {
+      gen_reports();
+    });
+
+    $('select[name="client_aging_status[]"]').on('change', function() {
       gen_reports();
     });
    
