@@ -299,8 +299,8 @@ function get_stock_received_dashboard() {
           datasets: [{
             label: 'Receipts',
             data: vendorData,
-            backgroundColor: 'rgba(153, 102, 255, 0.7)',
-            borderColor: 'rgba(153, 102, 255, 1)',
+            backgroundColor: '#1E90FF',
+            borderColor: '#1E90FF',
             borderWidth: 1
           }]
         },
