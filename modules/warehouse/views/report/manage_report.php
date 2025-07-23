@@ -28,8 +28,5 @@
       </div>
   </div>
 </div>
-<?php init_tail(); ?>
-<?php require 'modules/warehouse/assets/js/inventory_inside_js.php';?>
-<?php require 'modules/warehouse/assets/js/warranty_period_report_js.php';?>
 </body>
 </html>

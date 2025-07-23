@@ -761,3 +761,5 @@ $lang['reconciliation_status_new']  = 'Reconciliation status';
 $lang['stock_export_info']  = 'Reconciliation voucher details';
 $lang['reconciliation_output_slip']  = 'Stock Reconciliation Slip';
 $lang['goods_reconciliation_code']  = 'Reconciliation voucher code';
+$lang['goods_receipt_register']  = 'Goods Receipt Register';
+$lang['material_issue_report']  = 'Material Issue Report';

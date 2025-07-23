@@ -1818,40 +1818,23 @@ class warehouse extends AdminController
 		$data['group'] = $this->input->get('group');
 
 		$data['title'] = _l('als_report');
-		$data['tab'][] = 'stock_summary_report';
-		// $data['tab'][] = 'inventory_inside';
-		$data['tab'][] = 'inventory_valuation_report';
-		$data['tab'][] = 'warranty_period_report';
+		$data['tab'][] = 'goods_receipt_register';
+		// $data['tab'][] = 'material_issue_report';
 		$data['tab'][] = 'vendor_allocation_report';
 
 		switch ($data['group']) {
-			case 'stock_summary_report':
-				$data['title'] = _l('stock_summary_report');
-
+			case 'goods_receipt_register':
+				$data['title'] = _l('goods_receipt_register');
 				break;
-			case 'inventory_valuation_report':
-				$data['title'] = _l('inventory_valuation_report');
-
+			case 'material_issue_report':
+				$data['title'] = _l('material_issue_report');
 				break;
-			case 'inventory_inside':
-				$data['title'] = _l('inventory_inside');
-
-				break;
-
-			case 'warranty_period_report':
-				$data['title'] = _l('wh_warranty_period_report');
-
-				break;
-
 			case 'vendor_allocation_report':
 				$data['title'] = _l('vendor_allocation_report');
-
 				break;
-
-
 			default:
-				$data['title'] = _l('stock_summary_report');
-				$data['group'] = 'stock_summary_report';
+				$data['title'] = _l('goods_receipt_register');
+				$data['group'] = 'goods_receipt_register';
 				break;
 		}
 		$data['ajaxItems'] = false;
@@ -10074,5 +10057,23 @@ class warehouse extends AdminController
 		$data['base_currency'] = $base_currency;
 
 		$this->load->view('stock_reconciliation/edit_delivery', $data);
+	}
+
+	/**
+	 * table goods receipt register
+	 * @return [type] 
+	 */
+	public function table_goods_receipt_register()
+	{
+		$this->app->get_table_data(module_views_path('warehouse', 'report/table_goods_receipt_register'));
+	}
+
+	/**
+	 * table material issue report
+	 * @return [type] 
+	 */
+	public function table_material_issue_report()
+	{
+		$this->app->get_table_data(module_views_path('warehouse', 'report/table_material_issue_report'));
 	}
 }

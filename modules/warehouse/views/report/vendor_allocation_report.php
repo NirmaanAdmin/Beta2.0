@@ -1,6 +1,5 @@
-<div class="col-md-12">
-  <?php echo form_open_multipart(admin_url('warehouse/vendor_allocation_report_pdf'), array('id'=>'print_allocation_report')); ?>
-  <div class="row">
+<?php echo form_open_multipart(admin_url('warehouse/vendor_allocation_report_pdf'), array('id'=>'print_allocation_report')); ?>
+<div class="row">
     <div class="col-md-2">
       <?php echo render_date_input('from_date','from_date',date('Y-m-d',strtotime('-30 day',strtotime(date('Y-m-d'))))); ?>
     </div>
@@ -21,9 +20,10 @@
     <div class="col-md-1" >
       <a href="#" onclick="get_data_vendor_allocation_report(); return false;" class="btn btn-info button-pdf-margin-top" ><?php echo _l('_filter'); ?></a>
     </div>
-  </div>
-  <?php echo form_close(); ?>
 </div>
+<?php echo form_close(); ?>
+
+<br/>
 
 <hr class="hr-panel-heading" />
 <div class="col-md-12" id="report">
@@ -32,3 +32,7 @@
       </div>
     </div>
 </div>
+<?php init_tail(); ?>
+<?php echo '<script src="' . module_dir_url(WAREHOUSE_MODULE_NAME, 'assets/js/vendor_allocation_report.js').'?v=' . REVISION.'"></script>'; ?>
+</body>
+</html>
