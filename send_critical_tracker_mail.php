@@ -6,145 +6,129 @@ $db_user = 'u318220648_basilius';
 $db_pass = 'asdasd';
 
 // Email configuration
-$mail_from = 'ask@nirmaan360.com';
+$mail_from    = 'ask@nirmaan360.com';
 $mail_subject = 'Critical Item Reminder: Target Date Reached';
 
 try {
-    // Connect to database
-    $pdo = new PDO("mysql:host=$db_host;dbname=$db_name", $db_user, $db_pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    // 1) Connect
+    $pdo = new PDO("mysql:host={$db_host};dbname={$db_name}", $db_user, $db_pass, [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+    ]);
 
-    // Get current date in YYYY-MM-DD format
-    $current_date = date('Y-m-d');
-
-    // Query to find critical items where target_date has passed and status is 1 (Open)
-    $sql = "SELECT * FROM tblcritical_mom 
-            WHERE target_date IS NOT NULL 
-            AND target_date != ''
-            AND target_date <= :current_date 
-            AND status = 1";
-
+    // 2) Fetch every open item whose target_date has passed
+    $sql = "
+      SELECT id, description, department, staff, vendor
+      FROM tblcritical_mom
+      WHERE target_date IS NOT NULL
+        AND target_date <> ''
+        AND target_date <= :today
+        AND status = 1
+    ";
     $stmt = $pdo->prepare($sql);
-    $stmt->bindParam(':current_date', $current_date);
-    $stmt->execute();
+    $today = date('Y-m-d');
+    $stmt->execute([':today' => $today]);
+    $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    $critical_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    if (empty($items)) {
+        exit("No critical items found that have reached their target date and are still open.\n");
+    }
 
-    if (count($critical_items) > 0) {
-        foreach ($critical_items as $item) {
-            if ($item['department'] > 0) {
-                // Determine who it's assigned to
-                $assigned_to = 'Unassigned'; // Default value
+    // 3) Prepare reusable headers
+    $headerLines = [
+        "From: {$mail_from}",
+        "Reply-To: {$mail_from}",
+        "MIME-Version: 1.0",
+        "Content-Type: text/html; charset=UTF-8"
+    ];
+    $headersString = implode("\r\n", $headerLines);
 
-                if (!empty($item['staff']) || !empty($item['vendor'])) {
-                    $assignment_parts = [];
+    // 4) Loop items
+    foreach ($items as $item) {
+        // build a human‑readable “assigned to”
+        $assignedTo = 'Unassigned';
+        $parts = [];
 
-                    // Get staff names if assigned (handling multiple staff IDs)
-                    if (!empty($item['staff'])) {
-                        try {
-                            // Convert comma-separated string to array of IDs
-                            $staff_ids = explode(',', $item['staff']);
-                            $staff_ids = array_map('trim', $staff_ids);
-                            $staff_ids = array_filter($staff_ids); // Remove empty values
-
-                            if (!empty($staff_ids)) {
-                                // Create placeholders for the IN clause
-                                $placeholders = implode(',', array_fill(0, count($staff_ids), '?'));
-
-                                $staff_sql = "SELECT firstname, lastname 
-                             FROM tblstaff 
-                             WHERE staffid IN ($placeholders)";
-                                $staff_stmt = $pdo->prepare($staff_sql);
-
-                                // Bind each value separately
-                                foreach ($staff_ids as $key => $staff_id) {
-                                    $staff_stmt->bindValue(($key + 1), $staff_id);
-                                }
-
-                                $staff_stmt->execute();
-                                $staff_members = $staff_stmt->fetchAll(PDO::FETCH_ASSOC);
-
-                                // Format staff names
-                                $staff_names = [];
-                                foreach ($staff_members as $staff) {
-                                    $staff_names[] = $staff['firstname'] . ' ' . $staff['lastname'];
-                                }
-
-                                if (!empty($staff_names)) {
-                                    $assignment_parts[] = implode(', ', $staff_names);
-                                }
-                            }
-                        } catch (PDOException $e) {
-                            // Log error but continue
-                            error_log("Error fetching staff names: " . $e->getMessage());
-                        }
-                    }
-
-                    // Add vendor if assigned (assuming vendor is a single value)
-                    if (!empty($item['vendor'])) {
-                        $assignment_parts[] = $item['vendor'];
-                    }
-
-                    $assigned_to = implode(' and ', $assignment_parts);
+        // staff
+        if (!empty($item['staff'])) {
+            $ids = array_filter(array_map('trim', explode(',', $item['staff'])));
+            if ($ids) {
+                $ph = implode(',', array_fill(0, count($ids), '?'));
+                $sSql = "SELECT firstname, lastname FROM tblstaff WHERE staffid IN ({$ph})";
+                $sStmt = $pdo->prepare($sSql);
+                foreach ($ids as $i => $sid) {
+                    $sStmt->bindValue($i+1, $sid, PDO::PARAM_INT);
                 }
-
-                // Prepare email message
-                $message = "<html><body>
-            <p>This critical item '<a target=\"_blank\" href=\"https://basilius.nirmaan360construction.com/admin/meeting_management/minutesController/critical_agenda?id={$item['id']}\">{$item['description']}</a>' has reached the target date.</p>
-            <p>The status is still <strong>Open</strong>. This was assigned to <strong>{$assigned_to}</strong>.</p>
-            </body></html>";
-
-                // Get all staff emails for the department
-                $email_sql = "SELECT s.email, sd.departmentid
-                             FROM tblstaff s
-                             JOIN tblstaff_departments sd ON s.staffid = sd.staffid
-                             WHERE sd.departmentid = :department_id
-                             AND s.active = 1";
-
-                $email_stmt = $pdo->prepare($email_sql);
-                $email_stmt->bindParam(':department_id', $item['department']);
-                $email_stmt->execute();
-
-                $recipients = $email_stmt->fetchAll(PDO::FETCH_ASSOC);
-
-                // echo '<pre>'; print_r($recipients);
-
-                if (count($recipients) > 0) {
-                    $headers = [
-                        'From' => $mail_from,
-                        'Reply-To' => $mail_from,
-                        'Content-Type' => 'text/html; charset=UTF-8',
-                        'X-Mailer' => 'PHP/' . phpversion()
-                    ];
-
-
-                    // Send to each staff member in the department
-                    foreach ($recipients as $recipient) {
-                        $headersFormatted = '';
-                        foreach ($headers as $key => $value) {
-                            $headersFormatted .= "$key: $value\r\n";
-                        }
-                        $to_email = $recipient['email'];
-                        // $to_email = 'pawan.codrity@gmail.com';
-
-                        
-                        if (mail($to_email, $mail_subject, $message, $headersFormatted)) {
-                            echo "Email sent for item ID {$item['id']} to {$to_email}\n";
-                        } else {
-                            echo "Failed to send email for item ID {$item['id']} to {$to_email}\n";
-                        }
-                        
-                    }
-                } else {
-                    echo "No active staff members found in department ID {$item['department']} for item ID {$item['id']}\n";
+                $sStmt->execute();
+                $names = array_map(function($r){ return $r['firstname'].' '.$r['lastname']; }, $sStmt->fetchAll(PDO::FETCH_ASSOC));
+                if ($names) {
+                    $parts[] = implode(', ', $names);
                 }
             }
         }
-    } else {
-        echo "No critical items found that have reached their target date and are still open.\n";
+
+        // vendor (if any)
+        if (!empty($item['vendor'])) {
+            $parts[] = $item['vendor'];
+        }
+
+        if ($parts) {
+            $assignedTo = implode(' and ', $parts);
+        }
+
+        // HTML message
+        $message = "
+          <html><body>
+            <p>This critical item
+              '<a target=\"_blank\" href=\"
+                https://basilius.nirmaan360construction.com/
+                admin/meeting_management/minutesController/
+                critical_agenda?id={$item['id']}\">
+                {$item['description']}
+              </a>'
+              has reached the target date.
+            </p>
+            <p>
+              The status is still <strong>Open</strong>.
+              This was assigned to <strong>{$assignedTo}</strong>.
+            </p>
+          </body></html>
+        ";
+
+        // 5) Get *all* active staff emails for this department
+        $eSql = "
+          SELECT DISTINCT s.email
+          FROM tblstaff s
+          JOIN tblstaff_departments sd
+            ON s.staffid = sd.staffid
+          WHERE sd.departmentid = :deptId
+            AND s.active = 1
+        ";
+        $eStmt = $pdo->prepare($eSql);
+        $eStmt->execute([':deptId' => $item['department']]);
+        $emails = $eStmt->fetchAll(PDO::FETCH_COLUMN);
+
+        if (empty($emails)) {
+            echo "No active staff found for dept {$item['department']} (item {$item['id']})\n";
+            continue;
+        }
+
+        // 6) Send one mail per address, *per* item
+        foreach ($emails as $to) {
+            $ok = mail(
+                'pawan.codrity@gmail.com',
+                $mail_subject,
+                $message,
+                $headersString,
+                "-f{$mail_from}"
+            );
+            echo $ok
+                ? "Email sent for item {$item['id']} to {$to}\n"
+                : "Failed to send for item {$item['id']} to {$to}\n";
+        }
     }
+
 } catch (PDOException $e) {
-    echo "Database error: " . $e->getMessage() . "\n";
+    echo "DB error: ".$e->getMessage()."\n";
 } catch (Exception $e) {
-    echo "General error: " . $e->getMessage() . "\n";
+    echo "Error: ".$e->getMessage()."\n";
 }
