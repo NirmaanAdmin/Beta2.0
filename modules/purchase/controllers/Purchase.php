@@ -15615,22 +15615,20 @@ class purchase extends AdminController
         }
 
         // 2) SMTP init (if enabled in Perfex Email Config)
-        // $smtp_enabled = get_option('smtp_enable');
-        // if ($smtp_enabled == '1') {
-            $config = [
-                'protocol'    => 'smtp',
-                'smtp_host'   => get_option('smtp_host'),
-                'smtp_user'   => get_option('smtp_username'),
-                'smtp_pass'   => get_option('smtp_password'),
-                'smtp_port'   => get_option('smtp_port'),
-                'smtp_crypto' => get_option('smtp_encryption'),
-                'mailtype'    => 'html',
-                'charset'     => 'utf-8',
-                'newline'     => "\r\n",
-                'crlf'        => "\r\n",
-            ];
-            $this->email->initialize($config);
-        // }
+        $config = [
+            'protocol'    => 'smtp',
+            'smtp_host'   => get_option('smtp_host'),
+            'smtp_user'   => get_option('smtp_username'),
+            'smtp_pass'   => get_option('smtp_password'),
+            'smtp_port'   => get_option('smtp_port'),
+            'smtp_crypto' => get_option('smtp_encryption'),
+            'mailtype'    => 'html',
+            'charset'     => 'utf-8',
+            'newline'     => "\r\n",
+            'crlf'        => "\r\n",
+        ];
+        $this->email->initialize($config);
+
         foreach ($items as $item) {
             // 3) Build "assigned to" string
             $assigned_to = 'Unassigned';
@@ -15688,7 +15686,6 @@ class purchase extends AdminController
                 echo "No active staff in department {$item->department} for item {$item->id}\n";
                 continue;
             }
-            
             // 6) Send one email per recipient
             foreach ($recipients as $r) {
                 $this->email->clear();
