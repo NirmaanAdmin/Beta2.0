@@ -3,7 +3,7 @@
 $db_host = 'localhost';
 $db_name = 'u318220648_basilius';
 $db_user = 'u318220648_basilius';
-$db_pass = 'Nirmaan@1234';
+$db_pass = 'asdasd';
 
 // Email configuration
 $mail_from = 'ask@nirmaan360.com';
