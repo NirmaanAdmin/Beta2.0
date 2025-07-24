@@ -15615,18 +15615,21 @@ class purchase extends AdminController
         }
 
         // 2) SMTP init (if enabled in Perfex Email Config)
-        $config = [
-            'protocol'    => 'smtp',
-            'smtp_host'   => get_option('smtp_host'),
-            'smtp_user'   => get_option('smtp_username'),
-            'smtp_pass'   => get_option('smtp_password'),
-            'smtp_port'   => get_option('smtp_port'),
-            'smtp_crypto' => get_option('smtp_encryption'),
-            'mailtype'    => 'html',
-            'charset'     => 'utf-8',
-            'newline'     => "\r\n",
-            'crlf'        => "\r\n",
-        ];
+         $config = [
+        'protocol'     => 'smtp',
+        'smtp_host'    => get_option('smtp_host'),
+        'smtp_user'    => get_option('smtp_username'),
+        'smtp_pass'    => get_option('smtp_password'),
+        'smtp_port'    => get_option('smtp_port'),
+        'smtp_crypto'  => get_option('smtp_encryption'), // 'tls' or 'ssl'
+        'mailtype'     => 'html',
+        'charset'      => 'utf-8',
+        'newline'      => "\r\n",
+        'crlf'         => "\r\n",
+        'wordwrap'     => true,
+        'smtp_timeout' => 30,      // give it up to 30 seconds
+        'validation'   => true     // validate email addresses
+    ];
         $this->email->initialize($config);
 
         foreach ($items as $item) {
