@@ -7,7 +7,7 @@ $db_pass = 'Nirmaan@1234';
 
 // Email configuration
 $mail_from    = 'ask@nirmaan360.com';
-$mail_subject = 'Critical Item Reminder: Target Date Reached';
+$mail_subject = 'Critical Item Reminder: Target Date Reached [TEST]'; // Added [TEST] to subject for identification
 
 try {
     // 1) Connect
@@ -51,7 +51,7 @@ try {
 
         // staff
         if (!empty($item['staff'])) {
-            $ids = array_filter(array_map('trim', explode(',', $item['staff'])));
+            $ids = array_filter(array_map('trim', explode(',', $item['staff']));
             if ($ids) {
                 $ph = implode(',', array_fill(0, count($ids), '?'));
                 $sSql = "SELECT firstname, lastname FROM tblstaff WHERE staffid IN ({$ph})";
@@ -78,9 +78,10 @@ try {
             $assignedTo = implode(' and ', $parts);
         }
 
-        // HTML message
+        // HTML message - added TEST indicator
         $message = "
           <html><body>
+            <h3 style='color:red'>TEST EMAIL - This would normally be sent to department staff</h3>
             <p>This critical item
               '<a target=\"_blank\" href=\"
                 https://basilius.nirmaan360construction.com/
@@ -94,7 +95,7 @@ try {
               The status is still <strong>Open</strong>.
               This was assigned to <strong>{$assignedTo}</strong>.
             </p>
-          </body></html>
+            <p><strong>Original intended recipients:</strong></p>
         ";
 
         // 5) Get *all* active staff emails for this department
@@ -115,11 +116,18 @@ try {
             continue;
         }
 
+        // Add original recipient list to message for testing
+        $message .= "<ul>";
+        foreach ($emails as $email) {
+            $message .= "<li>{$email}</li>";
+        }
+        $message .= "</ul></body></html>";
+
         // Track if any email was successfully sent
         $anyEmailSent = false;
 
-        // 6) Send one mail per address, *per* item
-        foreach ($emails as $to) {
+        // 6) Send one mail per address, *per* item (but all to test email)
+        foreach ($emails as $originalRecipient) {
             // build unique headers for each send
             $headers = [
                 "From: {$mail_from}",
@@ -129,13 +137,15 @@ try {
                 // make each Message-ID unique
                 "Message-ID: <" . uniqid('', true) . "@nirmaan360construction.com>",
                 // optional: update Date so it's never identical
-                "Date: " . date(DATE_RFC2822)
+                "Date: " . date(DATE_RFC2822),
+                // Add original intended recipient in headers for tracking
+                "X-Original-Recipient: {$originalRecipient}"
             ];
             $headersString = implode("\r\n", $headers);
 
-            // now send
+            // Send to test email instead of original recipient
             $sent = mail(
-                'pawan.codrity@gmail.com', // Changed from hardcoded email to dynamic $to
+                'pawan.codrity@gmail.com', // Hardcoded test email
                 $mail_subject,
                 $message,
                 $headersString,
@@ -144,19 +154,22 @@ try {
 
             if ($sent) {
                 $anyEmailSent = true;
-                echo "Email sent for item {$item['id']} to {$to}\n";
+                echo "TEST Email sent for item {$item['id']} (would go to {$originalRecipient})\n";
             } else {
-                echo "Failed to send for item {$item['id']} to {$to}\n";
+                echo "Failed to send TEST email for item {$item['id']} (would go to {$originalRecipient})\n";
             }
         }
 
-        // 7) Update notification status if any email was sent
+        // 7) DON'T update notification status during testing
+        // This allows you to run the test multiple times
+        /*
         if ($anyEmailSent) {
             $updateSql = "UPDATE tblcritical_mom SET notification_sent = 1 WHERE id = :id";
             $updateStmt = $pdo->prepare($updateSql);
             $updateStmt->execute([':id' => $item['id']]);
             echo "Marked item {$item['id']} as notified\n";
         }
+        */
     }
 } catch (PDOException $e) {
     echo "DB error: " . $e->getMessage() . "\n";
