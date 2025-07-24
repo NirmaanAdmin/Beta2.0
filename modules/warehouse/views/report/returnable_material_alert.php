@@ -17,6 +17,6 @@
 	</div>
 </div>
 <?php init_tail(); ?>
-<?php require 'modules/warehouse/assets/js/returnable_material_alert_js.php';?>
+<?php require 'modules/warehouse/assets/js/returnable_material_alert_js.php'; ?>
 </body>
 </html>

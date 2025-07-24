@@ -17,6 +17,6 @@
 	</div>
 </div>
 <?php init_tail(); ?>
-<?php require 'modules/warehouse/assets/js/stock_movement_ledger_js.php';?>
+<?php require 'modules/warehouse/assets/js/stock_movement_ledger_js.php'; ?>
 </body>
 </html>

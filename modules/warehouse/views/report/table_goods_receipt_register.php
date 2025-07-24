@@ -13,7 +13,7 @@ $select = [
     'grd.commodity_name',
     'grd.description',
     'supplier_code as vendor_id',
-    'grd.quantities',
+    'CAST(grd.quantities AS DECIMAL(10,2))',
     'gr.date_add',
     1,
     2,
@@ -43,6 +43,7 @@ $additionalSelect = [
         WHEN gr.wo_order_id IS NOT NULL THEN "wo"
         ELSE NULL 
      END as source_table',
+     'CAST(grd.quantities AS DECIMAL(10,2)) AS quantities',
 ];
 
 $sIndexColumn = 'grd.id';

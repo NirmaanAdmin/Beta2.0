@@ -1820,8 +1820,8 @@ class warehouse extends AdminController
 		$data['title'] = _l('als_report');
 		$data['tab'][] = 'goods_receipt_register';
 		$data['tab'][] = 'material_issue_report';
-		// $data['tab'][] = 'stock_movement_ledger';
-		// $data['tab'][] = 'returnable_material_alert';
+		$data['tab'][] = 'stock_movement_ledger';
+		$data['tab'][] = 'returnable_material_alert';
 		$data['tab'][] = 'vendor_allocation_report';
 
 		switch ($data['group']) {

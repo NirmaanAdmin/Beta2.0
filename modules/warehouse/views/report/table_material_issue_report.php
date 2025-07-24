@@ -17,7 +17,7 @@ $select = [
         WHEN gd.wo_order_id IS NOT NULL THEN wo.vendor 
         ELSE NULL 
      END as vendor_id',
-    'gdd.quantities',
+    'CAST(gdd.quantities AS DECIMAL(10,2))',
     'gd.date_add',
     'gdd.returnable',
     'srd.id as returned',
@@ -51,6 +51,7 @@ $additionalSelect = [
         WHEN gd.wo_order_id IS NOT NULL THEN "wo"
         ELSE NULL 
      END as source_table',
+     'CAST(gdd.quantities AS DECIMAL(10,2)) AS quantities',
 ];
 
 $sIndexColumn = 'gdd.id';

@@ -19,6 +19,6 @@
 	</div>
 </div>
 <?php init_tail(); ?>
-<?php require 'modules/warehouse/assets/js/material_issue_report_js.php';?>
+<?php require 'modules/warehouse/assets/js/material_issue_report_js.php'; ?>
 </body>
 </html>

@@ -21,6 +21,6 @@
 	</div>
 </div>
 <?php init_tail(); ?>
-<?php require 'modules/warehouse/assets/js/goods_receipt_register_js.php';?>
+<?php require 'modules/warehouse/assets/js/goods_receipt_register_js.php'; ?>
 </body>
 </html>
