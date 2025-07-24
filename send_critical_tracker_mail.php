@@ -51,7 +51,7 @@ try {
 
         // staff
         if (!empty($item['staff'])) {
-            $ids = array_filter(array_map('trim', explode(',', $item['staff']));
+            $ids = array_filter(array_map('trim', explode(',', $item['staff'])));
             if ($ids) {
                 $ph = implode(',', array_fill(0, count($ids), '?'));
                 $sSql = "SELECT firstname, lastname FROM tblstaff WHERE staffid IN ({$ph})";
