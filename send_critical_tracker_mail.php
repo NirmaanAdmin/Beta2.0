@@ -6,7 +6,7 @@ $db_user = 'u318220648_basilius';
 $db_pass = 'Nirmaan@1234';
 
 // Email configuration
-$mail_from = 'noreply@basilius.nirmaan360construction.com';
+$mail_from = 'ask@nirmaan360.com';
 $mail_subject = 'Critical Item Reminder: Target Date Reached';
 
 try {
@@ -116,8 +116,8 @@ try {
 
                     // Send to each staff member in the department
                     foreach ($recipients as $recipient) {
-                        // $to_email = $recipient['email'];
-                        $to_email = 'pawan.codrity@gmail.com';
+                        $to_email = $recipient['email'];
+                        // $to_email = 'pawan.codrity@gmail.com';
 
                         if (filter_var($to_email, FILTER_VALIDATE_EMAIL)) {
                             if (mail($to_email, $mail_subject, $message, $headers)) {
