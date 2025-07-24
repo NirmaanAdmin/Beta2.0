@@ -6,7 +6,7 @@ $db_user = 'root';
 $db_pass = 'root';
 
 // Email configuration
-$mail_from = 'noreply@yourdomain.com';
+$mail_from = 'noreply@basilius.nirmaan360construction.com';
 $mail_subject = 'Critical Item Reminder: Target Date Reached';
 
 try {
