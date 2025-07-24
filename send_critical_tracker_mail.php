@@ -107,7 +107,7 @@ try {
 
                 $recipients = $email_stmt->fetchAll(PDO::FETCH_ASSOC);
 
-                // echo '<pre>'; print_r($recipients); 
+                // echo '<pre>'; print_r($recipients);
 
                 if (count($recipients) > 0) {
                     $headers = [
@@ -124,8 +124,8 @@ try {
                         foreach ($headers as $key => $value) {
                             $headersFormatted .= "$key: $value\r\n";
                         }
-                        // $to_email = $recipient['email'];
-                        $to_email = 'pawan.codrity@gmail.com';
+                        $to_email = $recipient['email'];
+                        // $to_email = 'pawan.codrity@gmail.com';
 
 
                         if (mail($to_email, $mail_subject, $message, $headersFormatted)) {
@@ -138,6 +138,7 @@ try {
                         } else {
                             echo "Failed to send email for item ID {$item['id']} to {$to_email}\n";
                         }
+                        
                     }
                 } else {
                     echo "No active staff members found in department ID {$item['department']} for item ID {$item['id']}\n";
