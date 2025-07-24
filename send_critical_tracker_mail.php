@@ -91,7 +91,7 @@ try {
                 // Prepare email message
                 $message = "<html><body>
             <p>This critical item '<a target=\"_blank\" href=\"https://basilius.nirmaan360construction.com/admin/meeting_management/minutesController/critical_agenda\">{$item['description']}</a>' has reached the target date.</p>
-            <p>The status is still Open. This was assigned to {$assigned_to}.</p>
+            <p>The status is still <b>Open</b>. This was assigned to <b>{$assigned_to}</b>.</p>
             </body></html>";
 
                 // Get all staff emails for the department
