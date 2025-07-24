@@ -7,15 +7,19 @@ $db_pass = 'Nirmaan@1234';
 
 // Email configuration
 $mail_from    = 'ask@nirmaan360.com';
-$mail_subject = 'Critical Item Reminder: Target Date Reached [TEST]'; // Added [TEST] to subject for identification
+$mail_subject = 'Critical Item Reminder: Target Date Reached [TEST]';
+
+// Enable detailed error reporting
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
 try {
-    // 1) Connect
+    // 1) Connect to database
     $pdo = new PDO("mysql:host={$db_host};dbname={$db_name}", $db_user, $db_pass, [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
     ]);
 
-    // 2) Fetch every open item whose target_date has passed and hasn't been notified yet
+    // 2) Fetch critical items
     $sql = "
       SELECT id, description, department, staff, vendor
       FROM tblcritical_mom
@@ -34,22 +38,34 @@ try {
         exit("No critical items found that have reached their target date and are still open.\n");
     }
 
-    // 3) Prepare reusable headers
-    $headerLines = [
+    // 3) Test mail function first
+    $test_headers = [
         "From: {$mail_from}",
         "Reply-To: {$mail_from}",
         "MIME-Version: 1.0",
-        "Content-Type: text/html; charset=UTF-8"
+        "Content-Type: text/plain; charset=UTF-8"
     ];
-    $headersString = implode("\r\n", $headerLines);
+    $test_headers = implode("\r\n", $test_headers);
+    
+    $test_mail = mail(
+        'pawan.codrity@gmail.com',
+        'Mail Function Test',
+        'This is a test of the mail() function',
+        $test_headers,
+        "-f{$mail_from}"
+    );
+    
+    if (!$test_mail) {
+        throw new Exception("Basic mail() function test failed. Check your server's mail configuration.");
+    }
+    echo "Basic mail() function test passed.\n\n";
 
     // 4) Loop items
     foreach ($items as $item) {
-        // build a human‑readable "assigned to"
+        // [Previous code for building $assignedTo remains the same...]
         $assignedTo = 'Unassigned';
         $parts = [];
 
-        // staff
         if (!empty($item['staff'])) {
             $ids = array_filter(array_map('trim', explode(',', $item['staff'])));
             if ($ids) {
@@ -69,7 +85,6 @@ try {
             }
         }
 
-        // vendor (if any)
         if (!empty($item['vendor'])) {
             $parts[] = $item['vendor'];
         }
@@ -78,27 +93,18 @@ try {
             $assignedTo = implode(' and ', $parts);
         }
 
-        // HTML message - added TEST indicator
+        // HTML message (simplified for testing)
         $message = "
-          <html><body>
-            <h3 style='color:red'>TEST EMAIL - This would normally be sent to department staff</h3>
-            <p>This critical item
-              '<a target=\"_blank\" href=\"
-                https://basilius.nirmaan360construction.com/
-                admin/meeting_management/minutesController/
-                critical_agenda\">
-                {$item['description']}
-              </a>'
-              has reached the target date.
-            </p>
-            <p>
-              The status is still <strong>Open</strong>.
-              This was assigned to <strong>{$assignedTo}</strong>.
-            </p>
+        <html><body>
+            <h3>TEST EMAIL - Critical Item Reminder</h3>
+            <p><strong>Item ID:</strong> {$item['id']}</p>
+            <p><strong>Description:</strong> {$item['description']}</p>
+            <p><strong>Assigned To:</strong> {$assignedTo}</p>
             <p><strong>Original intended recipients:</strong></p>
+            <ul>
         ";
 
-        // 5) Get *all* active staff emails for this department
+        // 5) Get staff emails
         $eSql = "
           SELECT DISTINCT s.email
           FROM tblstaff s
@@ -116,60 +122,40 @@ try {
             continue;
         }
 
-        // Add original recipient list to message for testing
-        $message .= "<ul>";
+        // Add recipients to message
         foreach ($emails as $email) {
             $message .= "<li>{$email}</li>";
         }
         $message .= "</ul></body></html>";
 
-        // Track if any email was successfully sent
-        $anyEmailSent = false;
+        // 6) Send test email
+        $headers = [
+            "From: {$mail_from}",
+            "Reply-To: {$mail_from}",
+            "MIME-Version: 1.0",
+            "Content-Type: text/html; charset=UTF-8",
+            "X-Original-Recipient: " . implode(', ', $emails)
+        ];
+        $headers = implode("\r\n", $headers);
 
-        // 6) Send one mail per address, *per* item (but all to test email)
-        foreach ($emails as $originalRecipient) {
-            // build unique headers for each send
-            $headers = [
-                "From: {$mail_from}",
-                "Reply-To: {$mail_from}",
-                "MIME-Version: 1.0",
-                "Content-Type: text/html; charset=UTF-8",
-                // make each Message-ID unique
-                "Message-ID: <" . uniqid('', true) . "@nirmaan360construction.com>",
-                // optional: update Date so it's never identical
-                "Date: " . date(DATE_RFC2822),
-                // Add original intended recipient in headers for tracking
-                "X-Original-Recipient: {$originalRecipient}"
-            ];
-            $headersString = implode("\r\n", $headers);
+        $sent = mail(
+            'pawan.codrity@gmail.com',
+            $mail_subject . " - Item {$item['id']}",
+            $message,
+            $headers,
+            "-f{$mail_from}"
+        );
 
-            // Send to test email instead of original recipient
-            $sent = mail(
-                'pawan.codrity@gmail.com', // Hardcoded test email
-                $mail_subject,
-                $message,
-                $headersString,
-                "-f{$mail_from}"
-            );
-
-            if ($sent) {
-                $anyEmailSent = true;
-                echo "TEST Email sent for item {$item['id']} (would go to {$originalRecipient})\n";
-            } else {
-                echo "Failed to send TEST email for item {$item['id']} (would go to {$originalRecipient})\n";
-            }
+        if ($sent) {
+            echo "TEST Email successfully sent for item {$item['id']}\n";
+            echo "Would normally go to: " . implode(', ', $emails) . "\n\n";
+        } else {
+            // Get more detailed error information
+            $error = error_get_last();
+            echo "Failed to send TEST email for item {$item['id']}\n";
+            echo "Error: " . ($error['message'] ?? 'Unknown error') . "\n";
+            echo "Would normally go to: " . implode(', ', $emails) . "\n\n";
         }
-
-        // 7) DON'T update notification status during testing
-        // This allows you to run the test multiple times
-        /*
-        if ($anyEmailSent) {
-            $updateSql = "UPDATE tblcritical_mom SET notification_sent = 1 WHERE id = :id";
-            $updateStmt = $pdo->prepare($updateSql);
-            $updateStmt->execute([':id' => $item['id']]);
-            echo "Marked item {$item['id']} as notified\n";
-        }
-        */
     }
 } catch (PDOException $e) {
     echo "DB error: " . $e->getMessage() . "\n";
