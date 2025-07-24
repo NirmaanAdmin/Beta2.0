@@ -22305,6 +22305,131 @@ class Warehouse_model extends App_Model
 	}
 
 
+	// public function reconciliation_delivery_get_pur_order($pur_order)
+	// {
+	// 	$stock_reconciliation_row_template = '';
+	// 	// 1. Select the field(s) you need
+	// 	$this->db->select('*');
+
+	// 	// 2. Set goods_delivery as the FROM table
+	// 	$this->db->from(db_prefix() . 'goods_delivery');
+
+	// 	// 3. LEFT JOIN goods_delivery_detail on the delivery_id
+	// 	$this->db->join(
+	// 		db_prefix() . 'goods_delivery_detail',
+	// 		db_prefix() . 'goods_delivery_detail.goods_delivery_id = '
+	// 		. db_prefix() . 'goods_delivery.id',
+	// 		'left'
+	// 	);
+
+	// 	// 4. Add your filters
+	// 	$this->db->like(
+	// 		db_prefix() . 'goods_delivery_detail.description',
+	// 		$non_break_description
+	// 	);
+	// 	$this->db->where(
+	// 		db_prefix() . 'goods_delivery.approval',
+	// 		1
+	// 	);
+	// 	$this->db->where(
+	// 		db_prefix() . 'goods_delivery.pr_order_id',
+	// 		$pur_order
+	// 	);
+	// 	$this->db->where(
+	// 		db_prefix() . 'goods_delivery_detail.returnable',
+	// 		1
+	// 	);
+
+	// 	// 5. Execute
+	// 	$goods_delivery_description = $this->db->get()->result_array();
+	// 	$groupedItems = [];
+
+	// 	foreach ($goods_delivery_description as $delivery) {
+	// 		$commodityCode = $delivery['commodity_code'];
+
+	// 		// Skip if commodity_code is empty
+	// 		if (empty($commodityCode)) {
+	// 			continue;
+	// 		}
+
+	// 		// Initialize group if not exists
+	// 		if (!isset($groupedItems[$commodityCode])) {
+	// 			$groupedItems[$commodityCode] = [
+	// 				'commodity_code' => $delivery['commodity_code'],
+	// 				'commodity_name' => $delivery['commodity_name'],
+	// 				'description'   => $delivery['description'],
+	// 				'area'          => $delivery['area'],
+	// 				'warehouse_id'  => $delivery['warehouse_id'],
+	// 				'vendor_quantities' => [], // Stores summed quantities per vendor
+	// 				'returnable'     => $delivery['returnable'],
+	// 				'vendor_dates' => [],
+	// 				// Add other fields you need...
+	// 			];
+	// 		}
+
+	// 		// Process quantities_json if exists
+	// 		$quantitiesJson = $delivery['quantities_json'];
+	// 		if (!empty($quantitiesJson)) {
+	// 			$quantities = json_decode($quantitiesJson, true);
+
+	// 			foreach ($quantities as $vendorId => $quantity) {
+	// 				if (isset($groupedItems[$commodityCode]['vendor_quantities'][$vendorId])) {
+	// 					$groupedItems[$commodityCode]['vendor_quantities'][$vendorId] += (int)$quantity;
+	// 				} else {
+	// 					$groupedItems[$commodityCode]['vendor_quantities'][$vendorId] = (int)$quantity;
+	// 				}
+	// 			}
+	// 		}
+
+	// 		// Process returnable_date if exists
+	// 		$returnableDateJson = $delivery['returnable_date'];
+	// 		if (!empty($returnableDateJson)) {
+	// 			$returnableDates = json_decode($returnableDateJson, true);
+
+	// 			foreach ($returnableDates as $vendorId => $date) {
+
+
+	// 				if (isset($groupedItems[$commodityCode]['vendor_dates'][$vendorId])) {
+	// 					$groupedItems[$commodityCode]['vendor_dates'][$vendorId] = $date;
+	// 				} else {
+	// 					$groupedItems[$commodityCode]['vendor_dates'][$vendorId] = $date;
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// 	$warehouse_data = $this->warehouse_model->get_warehouse();
+	// 	// Convert to indexed array if needed
+	// 	$result = array_values($groupedItems);
+	// 	$index_receipt = 0;
+	// 	// echo '<pre>';
+	// 	// print_r($result);
+	// 	// die;
+	// 	foreach ($result as $key => $delivery_detail) {
+	// 		$unit_name = wh_get_unit_name($delivery_detail['unit_id']);
+	// 		$taxname = '';
+	// 		$expiry_date = null;
+	// 		$lot_number = $delivery_detail['lot_number'];
+	// 		$commodity_name = $delivery_detail['commodity_name'];
+	// 		$without_checking_warehouse = 0;
+
+	// 		if (strlen($commodity_name) == 0) {
+	// 			$commodity_name = wh_get_item_variatiom($delivery_detail['commodity_code']);
+	// 		}
+
+	// 		$get_commodity = $this->warehouse_model->get_commodity($delivery_detail['commodity_code']);
+	// 		if ($get_commodity) {
+	// 			$without_checking_warehouse = $get_commodity->without_checking_warehouse;
+	// 		}
+	// 		$stock_reconciliation_row_template .= $this->create_stock_reconciliation_row_template($warehouse_data, 'newitems[' . $index_receipt . ']', $commodity_name, $delivery_detail['warehouse_id'], $delivery_detail['vendor_quantities'], $delivery_detail['quantities'], $unit_name, $delivery_detail['unit_price'], $taxname, $delivery_detail['commodity_code'], $delivery_detail['unit_id'], $delivery_detail['vendor_id'], $delivery_detail['tax_rate'], $delivery_detail['total_money'], $delivery_detail['discount'], $delivery_detail['discount_money'], $delivery_detail['total_after_discount'], $delivery_detail['guarantee_period'], $delivery_detail['issued_date'], $lot_number, $delivery_detail['note'], $delivery_detail['sub_total'], $delivery_detail['tax_name'], $delivery_detail['tax_id'], $delivery_detail['id'], false, $is_purchase_order, $delivery_detail['serial_number'], $without_checking_warehouse, $delivery_detail['description'], $delivery_detail['quantities_json'], $delivery_detail['area'], '', $delivery_detail['vendor_dates'], '', '', '');
+	// 		$index_receipt++;
+	// 	}
+
+	// 	$arr_pur_resquest['result'] = $stock_reconciliation_row_template;
+	// 	$arr_pur_resquest['additional_discount'] = $additional_discount;
+	// 	$arr_pur_resquest['goods_delivery_exist'] = $goods_delivery_exist;
+
+	// 	return $arr_pur_resquest;
+	// }
 	public function reconciliation_delivery_get_pur_order($pur_order)
 	{
 		$stock_reconciliation_row_template = '';
@@ -22323,10 +22448,6 @@ class Warehouse_model extends App_Model
 		);
 
 		// 4. Add your filters
-		$this->db->like(
-			db_prefix() . 'goods_delivery_detail.description',
-			$non_break_description
-		);
 		$this->db->where(
 			db_prefix() . 'goods_delivery.approval',
 			1
@@ -22342,20 +22463,23 @@ class Warehouse_model extends App_Model
 
 		// 5. Execute
 		$goods_delivery_description = $this->db->get()->result_array();
-
 		$groupedItems = [];
 
 		foreach ($goods_delivery_description as $delivery) {
 			$commodityCode = $delivery['commodity_code'];
+			$description = $delivery['description'];
 
 			// Skip if commodity_code is empty
 			if (empty($commodityCode)) {
 				continue;
 			}
 
+			// Create a unique key combining commodity_code and description
+			$groupKey = $commodityCode . '|' . $description;
+
 			// Initialize group if not exists
-			if (!isset($groupedItems[$commodityCode])) {
-				$groupedItems[$commodityCode] = [
+			if (!isset($groupedItems[$groupKey])) {
+				$groupedItems[$groupKey] = [
 					'commodity_code' => $delivery['commodity_code'],
 					'commodity_name' => $delivery['commodity_name'],
 					'description'   => $delivery['description'],
@@ -22364,6 +22488,7 @@ class Warehouse_model extends App_Model
 					'vendor_quantities' => [], // Stores summed quantities per vendor
 					'returnable'     => $delivery['returnable'],
 					'vendor_dates' => [],
+					'unit_id' => $delivery['unit_id'],
 					// Add other fields you need...
 				];
 			}
@@ -22374,10 +22499,10 @@ class Warehouse_model extends App_Model
 				$quantities = json_decode($quantitiesJson, true);
 
 				foreach ($quantities as $vendorId => $quantity) {
-					if (isset($groupedItems[$commodityCode]['vendor_quantities'][$vendorId])) {
-						$groupedItems[$commodityCode]['vendor_quantities'][$vendorId] += (int)$quantity;
+					if (isset($groupedItems[$groupKey]['vendor_quantities'][$vendorId])) {
+						$groupedItems[$groupKey]['vendor_quantities'][$vendorId] += (int)$quantity;
 					} else {
-						$groupedItems[$commodityCode]['vendor_quantities'][$vendorId] = (int)$quantity;
+						$groupedItems[$groupKey]['vendor_quantities'][$vendorId] = (int)$quantity;
 					}
 				}
 			}
@@ -22388,23 +22513,20 @@ class Warehouse_model extends App_Model
 				$returnableDates = json_decode($returnableDateJson, true);
 
 				foreach ($returnableDates as $vendorId => $date) {
-
-
-					if (isset($groupedItems[$commodityCode]['vendor_dates'][$vendorId])) {
-						$groupedItems[$commodityCode]['vendor_dates'][$vendorId] = $date;
+					if (isset($groupedItems[$groupKey]['vendor_dates'][$vendorId])) {
+						$groupedItems[$groupKey]['vendor_dates'][$vendorId] = $date;
 					} else {
-						$groupedItems[$commodityCode]['vendor_dates'][$vendorId] = $date;
+						$groupedItems[$groupKey]['vendor_dates'][$vendorId] = $date;
 					}
 				}
 			}
 		}
+
 		$warehouse_data = $this->warehouse_model->get_warehouse();
 		// Convert to indexed array if needed
 		$result = array_values($groupedItems);
 		$index_receipt = 0;
-		// echo '<pre>';
-		// print_r($result);
-		// die;
+
 		foreach ($result as $key => $delivery_detail) {
 			$unit_name = wh_get_unit_name($delivery_detail['unit_id']);
 			$taxname = '';
@@ -22421,7 +22543,46 @@ class Warehouse_model extends App_Model
 			if ($get_commodity) {
 				$without_checking_warehouse = $get_commodity->without_checking_warehouse;
 			}
-			$stock_reconciliation_row_template .= $this->create_stock_reconciliation_row_template($warehouse_data, 'newitems[' . $index_receipt . ']', $commodity_name, $delivery_detail['warehouse_id'], $delivery_detail['vendor_quantities'], $delivery_detail['quantities'], $unit_name, $delivery_detail['unit_price'], $taxname, $delivery_detail['commodity_code'], $delivery_detail['unit_id'], $delivery_detail['vendor_id'], $delivery_detail['tax_rate'], $delivery_detail['total_money'], $delivery_detail['discount'], $delivery_detail['discount_money'], $delivery_detail['total_after_discount'], $delivery_detail['guarantee_period'], $delivery_detail['issued_date'], $lot_number, $delivery_detail['note'], $delivery_detail['sub_total'], $delivery_detail['tax_name'], $delivery_detail['tax_id'], $delivery_detail['id'], false, $is_purchase_order, $delivery_detail['serial_number'], $without_checking_warehouse, $delivery_detail['description'], $delivery_detail['quantities_json'], $delivery_detail['area'], '', $delivery_detail['vendor_dates'], '', '', '');
+
+			$stock_reconciliation_row_template .= $this->create_stock_reconciliation_row_template(
+				$warehouse_data,
+				'newitems[' . $index_receipt . ']',
+				$commodity_name,
+				$delivery_detail['warehouse_id'],
+				$delivery_detail['vendor_quantities'],
+				$delivery_detail['quantities'],
+				$unit_name,
+				$delivery_detail['unit_price'],
+				$taxname,
+				$delivery_detail['commodity_code'],
+				$delivery_detail['unit_id'],
+				$delivery_detail['vendor_id'],
+				$delivery_detail['tax_rate'],
+				$delivery_detail['total_money'],
+				$delivery_detail['discount'],
+				$delivery_detail['discount_money'],
+				$delivery_detail['total_after_discount'],
+				$delivery_detail['guarantee_period'],
+				$delivery_detail['issued_date'],
+				$lot_number,
+				$delivery_detail['note'],
+				$delivery_detail['sub_total'],
+				$delivery_detail['tax_name'],
+				$delivery_detail['tax_id'],
+				$delivery_detail['id'],
+				false,
+				$is_purchase_order,
+				$delivery_detail['serial_number'],
+				$without_checking_warehouse,
+				$delivery_detail['description'],
+				$delivery_detail['quantities_json'],
+				$delivery_detail['area'],
+				'',
+				$delivery_detail['vendor_dates'],
+				'',
+				'',
+				''
+			);
 			$index_receipt++;
 		}
 
@@ -22798,19 +22959,19 @@ class Warehouse_model extends App_Model
 			$bar_top_vendors = array();
 			foreach ($goods_receipt as $key => $value) {
 				if (!empty($value['date_add'])) {
-                    $timestamp = strtotime($value['date_add']);
-                    if ($timestamp !== false && $timestamp > 0) {
-                        $month = date('Y-m', $timestamp);
-                    } elseif ($timestamp === false || $timestamp <= 0) {
-                        $month = date('Y') . '-01';
-                    }
-                } else {
-                    $month = date('Y') . '-01';
-                }
-                if (!isset($line_order_total[$month])) {
-                    $line_order_total[$month] = 0;
-                }
-                $line_order_total[$month] += 1;
+					$timestamp = strtotime($value['date_add']);
+					if ($timestamp !== false && $timestamp > 0) {
+						$month = date('Y-m', $timestamp);
+					} elseif ($timestamp === false || $timestamp <= 0) {
+						$month = date('Y') . '-01';
+					}
+				} else {
+					$month = date('Y') . '-01';
+				}
+				if (!isset($line_order_total[$month])) {
+					$line_order_total[$month] = 0;
+				}
+				$line_order_total[$month] += 1;
 
 				$vendor_id = $value['supplier_code'];
 				if (!isset($bar_top_vendors[$vendor_id])) {
@@ -22821,17 +22982,17 @@ class Warehouse_model extends App_Model
 			}
 
 			if (!empty($line_order_total)) {
-                ksort($line_order_total);
-                $cumulative = 0;
-                foreach ($line_order_total as $month => $value) {
-                    $cumulative += $value;
-                    $line_order_total[$month] = $cumulative;
-                }
-                $response['line_order_date'] = array_map(function ($month) {
-                    return date('M-y', strtotime($month . '-01'));
-                }, array_keys($line_order_total));
-                $response['line_order_total'] = array_values($line_order_total);
-            }
+				ksort($line_order_total);
+				$cumulative = 0;
+				foreach ($line_order_total as $month => $value) {
+					$cumulative += $value;
+					$line_order_total[$month] = $cumulative;
+				}
+				$response['line_order_date'] = array_map(function ($month) {
+					return date('M-y', strtotime($month . '-01'));
+				}, array_keys($line_order_total));
+				$response['line_order_total'] = array_values($line_order_total);
+			}
 
 			if (!empty($bar_top_vendors)) {
 				usort($bar_top_vendors, function ($a, $b) {
@@ -22954,19 +23115,19 @@ class Warehouse_model extends App_Model
 				$bar_top_materials[$commodity_name]['value'] += (float) $item['quantities'];
 
 				if (!empty($item['date_add'])) {
-                    $timestamp = strtotime($item['date_add']);
-                    if ($timestamp !== false && $timestamp > 0) {
-                        $month = date('Y-m', $timestamp);
-                    } elseif ($timestamp === false || $timestamp <= 0) {
-                        $month = date('Y') . '-01';
-                    }
-                } else {
-                    $month = date('Y') . '-01';
-                }
-                if (!isset($line_order_total[$month])) {
-                    $line_order_total[$month] = 0;
-                }
-                $line_order_total[$month] += (float) $item['quantities'];
+					$timestamp = strtotime($item['date_add']);
+					if ($timestamp !== false && $timestamp > 0) {
+						$month = date('Y-m', $timestamp);
+					} elseif ($timestamp === false || $timestamp <= 0) {
+						$month = date('Y') . '-01';
+					}
+				} else {
+					$month = date('Y') . '-01';
+				}
+				if (!isset($line_order_total[$month])) {
+					$line_order_total[$month] = 0;
+				}
+				$line_order_total[$month] += (float) $item['quantities'];
 			}
 
 			if (!empty($bar_top_materials)) {
@@ -22979,17 +23140,17 @@ class Warehouse_model extends App_Model
 			}
 
 			if (!empty($line_order_total)) {
-                ksort($line_order_total);
-                $cumulative = 0;
-                foreach ($line_order_total as $month => $value) {
-                    $cumulative += $value;
-                    $line_order_total[$month] = $cumulative;
-                }
-                $response['line_order_date'] = array_map(function ($month) {
-                    return date('M-y', strtotime($month . '-01'));
-                }, array_keys($line_order_total));
-                $response['line_order_total'] = array_values($line_order_total);
-            }
+				ksort($line_order_total);
+				$cumulative = 0;
+				foreach ($line_order_total as $month => $value) {
+					$cumulative += $value;
+					$line_order_total[$month] = $cumulative;
+				}
+				$response['line_order_date'] = array_map(function ($month) {
+					return date('M-y', strtotime($month . '-01'));
+				}, array_keys($line_order_total));
+				$response['line_order_total'] = array_values($line_order_total);
+			}
 
 			$percentage_utilized = 0;
 			if ($total_items > 0) {

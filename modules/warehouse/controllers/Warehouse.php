@@ -9911,7 +9911,7 @@ class warehouse extends AdminController
 	{
 
 		$pur_request_detail = $this->warehouse_model->reconciliation_delivery_get_pur_order($pur_order);
-
+ 
 		echo json_encode([
 			'result' => $pur_request_detail['result'] ? $pur_request_detail['result'] : '',
 			'additional_discount' => $pur_request_detail['additional_discount'] ? $pur_request_detail['additional_discount'] : '',
