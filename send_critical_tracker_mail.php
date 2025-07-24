@@ -127,14 +127,9 @@ try {
                         $to_email = $recipient['email'];
                         // $to_email = 'pawan.codrity@gmail.com';
 
-
+                        
                         if (mail($to_email, $mail_subject, $message, $headersFormatted)) {
                             echo "Email sent for item ID {$item['id']} to {$to_email}\n";
-                            // Optional: Log that email was sent to prevent duplicate emails
-                            // $log_sql = "UPDATE tblcritical_mom SET reminder_sent = 1 WHERE id = :id";
-                            // $log_stmt = $pdo->prepare($log_sql);
-                            // $log_stmt->bindParam(':id', $item['id']);
-                            // $log_stmt->execute();
                         } else {
                             echo "Failed to send email for item ID {$item['id']} to {$to_email}\n";
                         }
