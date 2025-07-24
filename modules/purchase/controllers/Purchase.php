@@ -15615,21 +15615,21 @@ class purchase extends AdminController
         }
 
         // 2) SMTP init (if enabled in Perfex Email Config)
-         $config = [
-        'protocol'     => 'smtp',
-        'smtp_host'    => get_option('smtp_host'),
-        'smtp_user'    => get_option('smtp_username'),
-        'smtp_pass'    => get_option('smtp_password'),
-        'smtp_port'    => get_option('smtp_port'),
-        'smtp_crypto'  => get_option('smtp_encryption'), // 'tls' or 'ssl'
-        'mailtype'     => 'html',
-        'charset'      => 'utf-8',
-        'newline'      => "\r\n",
-        'crlf'         => "\r\n",
-        'wordwrap'     => true,
-        'smtp_timeout' => 30,      // give it up to 30 seconds
-        'validation'   => true     // validate email addresses
-    ];
+        $config = [
+            'protocol'     => 'smtp',
+            'smtp_host'    => get_option('smtp_host'),
+            'smtp_user'    => get_option('smtp_username'),
+            'smtp_pass'    => get_option('smtp_password'),
+            'smtp_port'    => get_option('smtp_port'),
+            'smtp_crypto'  => get_option('smtp_encryption'), // 'tls' or 'ssl'
+            'mailtype'     => 'html',
+            'charset'      => 'utf-8',
+            'newline'      => "\r\n",
+            'crlf'         => "\r\n",
+            'wordwrap'     => true,
+            'smtp_timeout' => 30,      // give it up to 30 seconds
+            'validation'   => true     // validate email addresses
+        ];
         $this->email->initialize($config);
 
         foreach ($items as $item) {
@@ -15691,19 +15691,25 @@ class purchase extends AdminController
             }
             // 6) Send one email per recipient
             foreach ($recipients as $r) {
-                $this->email->clear();
-                $this->email->from($mail_from, get_option('companyname'));
-                $this->email->to('pawan.codrity@gmail.com');
-                $this->email->subject($mail_subject);
-                $this->email->message($message);
-
-                if ($this->email->send()) {
-                    echo "Email sent for item {$item->id} to {'pawan.codrity@gmail.com'}\n";
-                } else {
-                    echo "Failed to send item {$item->id} to {'pawan.codrity@gmail.com'}: "
-                        . $this->email->print_debugger(['headers']) . "\n";
-                }
-            }
+    $this->email->clear(true); // TRUE clears attachments too
+    $this->email->from($mail_from, get_option('companyname'));
+    $this->email->to('pawan.codrity@gmail.com');
+    $this->email->subject($mail_subject . " [Item #{$item->id}]");
+    $this->email->message($message);
+    
+    // Add debug headers
+    $this->email->set_header('X-Debug-ItemID', $item->id);
+    $this->email->set_header('X-Debug-Time', date('c'));
+    
+    if (!$this->email->send()) {
+        // Get detailed error logs
+        $smtp_debug = $this->email->print_debugger(['headers', 'subject', 'recipients']);
+        log_activity("Email Failed: Item {$item->id} | " . $smtp_debug);
+        echo "FAILED: Item {$item->id} | " . $smtp_debug . "\n";
+    } else {
+        echo "SUCCESS: Item {$item->id} sent\n";
+    }
+}
         }
     }
 }
