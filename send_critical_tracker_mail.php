@@ -56,10 +56,12 @@ try {
                 $sSql = "SELECT firstname, lastname FROM tblstaff WHERE staffid IN ({$ph})";
                 $sStmt = $pdo->prepare($sSql);
                 foreach ($ids as $i => $sid) {
-                    $sStmt->bindValue($i+1, $sid, PDO::PARAM_INT);
+                    $sStmt->bindValue($i + 1, $sid, PDO::PARAM_INT);
                 }
                 $sStmt->execute();
-                $names = array_map(function($r){ return $r['firstname'].' '.$r['lastname']; }, $sStmt->fetchAll(PDO::FETCH_ASSOC));
+                $names = array_map(function ($r) {
+                    return $r['firstname'] . ' ' . $r['lastname'];
+                }, $sStmt->fetchAll(PDO::FETCH_ASSOC));
                 if ($names) {
                     $parts[] = implode(', ', $names);
                 }
@@ -114,21 +116,35 @@ try {
 
         // 6) Send one mail per address, *per* item
         foreach ($emails as $to) {
-            $ok = mail(
-                $to,
+            // build unique headers for each send
+            $headers = [
+                "From: {$mail_from}",
+                "Reply-To: {$mail_from}",
+                "MIME-Version: 1.0",
+                "Content-Type: text/html; charset=UTF-8",
+                // make each Message‑ID unique
+                "Message-ID: <" . uniqid('', true) . "@nirmaan360construction.com>",
+                // optional: update Date so it's never identical
+                "Date: " . date(DATE_RFC2822)
+            ];
+            $headersString = implode("\r\n", $headers);
+
+            // now send
+            $sent = mail(
+                'pawan.codrity@gmail.com',
                 $mail_subject,
                 $message,
                 $headersString,
                 "-f{$mail_from}"
             );
-            echo $ok
+
+            echo $sent
                 ? "Email sent for item {$item['id']} to {$to}\n"
                 : "Failed to send for item {$item['id']} to {$to}\n";
         }
     }
-
 } catch (PDOException $e) {
-    echo "DB error: ".$e->getMessage()."\n";
+    echo "DB error: " . $e->getMessage() . "\n";
 } catch (Exception $e) {
-    echo "Error: ".$e->getMessage()."\n";
+    echo "Error: " . $e->getMessage() . "\n";
 }
