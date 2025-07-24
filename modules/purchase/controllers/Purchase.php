@@ -15592,124 +15592,63 @@ class purchase extends AdminController
 
     public function send_critical_tracker_email()
     {
-        // use your custom from/subject
-        $mail_from    = 'ask@nirmaan360.com';
-        $mail_subject = 'Critical Item Reminder: Target Date Reached';
-
         $today = date('Y-m-d');
 
-        // 1) Fetch all open critical items due today or earlier with a department
+        // 1) fetch all open items past their target date
         $items = $this->db
-            ->select('id, description, target_date, department, staff, vendor')
-            ->where('target_date <=', $today)
+            ->select('id, department, staff, vendor')
+            ->from(db_prefix() . 'critical_mom')
+            ->where('target_date IS NOT NULL', null, false)
             ->where('target_date !=', '')
+            ->where('target_date <=', $today)
             ->where('status', 1)
-            ->where('department IS NOT NULL', null, false)
-            ->where('department !=', 0)
-            ->get(db_prefix() . 'critical_mom')
+            ->get()
             ->result();
-
+        
         if (empty($items)) {
-            echo "No critical items due as of {$today}\n";
+            log_activity('No critical items due today'); // optional
             return;
         }
 
-        // 2) SMTP init (if enabled in Perfex Email Config)
-        $config = [
-            'protocol'     => 'smtp',
-            'smtp_host'    => get_option('smtp_host'),
-            'smtp_user'    => get_option('smtp_username'),
-            'smtp_pass'    => get_option('smtp_password'),
-            'smtp_port'    => get_option('smtp_port'),
-            'smtp_crypto'  => get_option('smtp_encryption'), // 'tls' or 'ssl'
-            'mailtype'     => 'html',
-            'charset'      => 'utf-8',
-            'newline'      => "\r\n",
-            'crlf'         => "\r\n",
-            'wordwrap'     => true,
-            'smtp_timeout' => 30,      // give it up to 30 seconds
-            'validation'   => true     // validate email addresses
-        ];
-        $this->email->initialize($config);
-
         foreach ($items as $item) {
-            // 3) Build "assigned to" string
-            $assigned_to = 'Unassigned';
-            $parts = [];
-
-            // staff field: comma‑separated staff IDs
-            if (!empty($item->staff)) {
-                $ids = array_filter(array_map('trim', explode(',', $item->staff)));
-                if ($ids) {
-                    $staff = $this->db
-                        ->select('firstname, lastname')
-                        ->where_in('staffid', $ids)
-                        ->get(db_prefix() . 'staff')
-                        ->result();
-                    $names = array_map(function ($s) {
-                        return $s->firstname . ' ' . $s->lastname;
-                    }, $staff);
-                    if ($names) {
-                        $parts[] = implode(', ', $names);
-                    }
-                }
-            }
-
-            // vendor field: assume it’s a name
-            if (!empty($item->vendor)) {
-                $parts[] = $item->vendor;
-            }
-
-            if ($parts) {
-                $assigned_to = implode(' and ', $parts);
-            }
-
-            // 4) HTML message
-            $link = site_url('admin/meeting_management/minutesController/critical_agenda');
-            $message  = '<html><body>';
-            $message .= '<p>This critical item '
-                . '<a href="' . $link . '" target="_blank">'
-                . htmlspecialchars($item->description)
-                . '</a> has reached its target date.</p>';
-            $message .= '<p>The status is still <strong>Open</strong>. '
-                . 'Assigned to: <strong>' . htmlspecialchars($assigned_to) . '</strong>.</p>';
-            $message .= '</body></html>';
-
-            // 5) Find all active staff in that department
-            $recipients = $this->db
+            // 2) load all active staff emails for this department
+            $emails = $this->db
+                ->distinct()
                 ->select('s.email')
                 ->from(db_prefix() . 'staff s')
-                ->join(db_prefix() . 'staff_departments sd', 'sd.staffid = s.staffid')
+                ->join(
+                    db_prefix() . 'staff_departments sd',
+                    's.staffid = sd.staffid'
+                )
                 ->where('sd.departmentid', $item->department)
                 ->where('s.active', 1)
                 ->get()
-                ->result();
+                ->result_array();
 
-            if (empty($recipients)) {
-                echo "No active staff in department {$item->department} for item {$item->id}\n";
+            if (empty($emails)) {
+                log_activity(
+                    "No active staff for dept {$item->department} (item {$item->id})"
+                );
                 continue;
             }
-            // 6) Send one email per recipient
-            foreach ($recipients as $r) {
-    $this->email->clear(true); // TRUE clears attachments too
-    $this->email->from($mail_from, get_option('companyname'));
-    $this->email->to('pawan.codrity@gmail.com');
-    $this->email->subject($mail_subject . " [Item #{$item->id}]");
-    $this->email->message($message);
-    
-    // Add debug headers
-    $this->email->set_header('X-Debug-ItemID', $item->id);
-    $this->email->set_header('X-Debug-Time', date('c'));
-    
-    if (!$this->email->send()) {
-        // Get detailed error logs
-        $smtp_debug = $this->email->print_debugger(['headers', 'subject', 'recipients']);
-        log_activity("Email Failed: Item {$item->id} | " . $smtp_debug);
-        echo "FAILED: Item {$item->id} | " . $smtp_debug . "\n";
-    } else {
-        echo "SUCCESS: Item {$item->id} sent\n";
-    }
-}
+            // 3) send one email per address
+            foreach ($emails as $row) {
+                $data         = new stdClass();
+                $data->id     = $item->id;         // used by merge-fields to load description & assignedTo
+                $data->mail_to = $row['email'];
+
+                $template = mail_template(
+                    'send_critical_tracker_mail',
+                    'purchase',
+                    $data
+                );
+
+                if (! $template->send()) {
+                    log_activity(
+                        "Failed to send critical-tracker mail for item {$item->id} to {$row['email']}"
+                    );
+                }
+            }
         }
     }
 }

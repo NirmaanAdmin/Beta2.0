@@ -146,6 +146,7 @@ register_merge_fields('purchase/merge_fields/purchase_quotation_to_sender_merge_
 register_merge_fields('purchase/merge_fields/work_order_to_approver_merge_fields');
 register_merge_fields('purchase/merge_fields/work_order_to_sender_merge_fields');
 register_merge_fields('purchase/merge_fields/payment_certificate_to_approver_merge_fields');
+register_merge_fields('purchase/merge_fields/critical_tracker_target_date_merge_fields');
 
 
 hooks()->add_filter('other_merge_fields_available_for', 'purchase_register_other_merge_fields');
