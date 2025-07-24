@@ -89,9 +89,9 @@ try {
                 }
 
                 // Prepare email message
-                $message = "<html><body>
-            <p>This critical item '<a target=\"_blank\" href=\"https://basilius.nirmaan360construction.com/admin/meeting_management/minutesController/critical_agenda\">{$item['description']}</a>' has reached the target date.</p>
-            <p>The status is still Open. This was assigned to {$assigned_to}.</p>
+               $message = "<html><body>
+            <p>This critical item '<a target=\"_blank\" href=\"https://basilius.nirmaan360construction.com/admin/meeting_management/minutesController/critical_agenda?id={$item['id']}\">{$item['description']}</a>' has reached the target date.</p>
+            <p>The status is still <strong>Open</strong>. This was assigned to <strong>{$assigned_to}</strong>.</p>
             </body></html>";
 
                 // Get all staff emails for the department
@@ -106,7 +106,7 @@ try {
                 $email_stmt->execute();
 
                 $recipients = $email_stmt->fetchAll(PDO::FETCH_ASSOC);
-                
+
                 // echo '<pre>'; print_r($recipients); 
 
                 if (count($recipients) > 0) {
@@ -116,22 +116,19 @@ try {
 
                     // Send to each staff member in the department
                     foreach ($recipients as $recipient) {
-                        $to_email = $recipient['email'];
-                        // $to_email = 'pawan.codrity@gmail.com';
+                        // $to_email = $recipient['email'];
+                        $to_email = 'pawan.codrity@gmail.com';
 
-                        if (filter_var($to_email, FILTER_VALIDATE_EMAIL)) {
-                            if (mail($to_email, $mail_subject, $message, $headers)) {
-                                echo "Email sent for item ID {$item['id']} to {$to_email}\n";
-                                // Optional: Log that email was sent to prevent duplicate emails
-                                // $log_sql = "UPDATE tblcritical_mom SET reminder_sent = 1 WHERE id = :id";
-                                // $log_stmt = $pdo->prepare($log_sql);
-                                // $log_stmt->bindParam(':id', $item['id']);
-                                // $log_stmt->execute();
-                            } else {
-                                echo "Failed to send email for item ID {$item['id']} to {$to_email}\n";
-                            }
+
+                        if (mail($to_email, $mail_subject, $message, $headers)) {
+                            echo "Email sent for item ID {$item['id']} to {$to_email}\n";
+                            // Optional: Log that email was sent to prevent duplicate emails
+                            // $log_sql = "UPDATE tblcritical_mom SET reminder_sent = 1 WHERE id = :id";
+                            // $log_stmt = $pdo->prepare($log_sql);
+                            // $log_stmt->bindParam(':id', $item['id']);
+                            // $log_stmt->execute();
                         } else {
-                            echo "Invalid email address: {$to_email} for item ID {$item['id']}\n";
+                            echo "Failed to send email for item ID {$item['id']} to {$to_email}\n";
                         }
                     }
                 } else {
