@@ -15440,7 +15440,7 @@ class purchase extends AdminController
         $this->app->get_table_data(module_views_path('purchase', 'billing_reports/table_client_aging_report'));
     }
 
-    
+
 
     public function delivery_performance_report()
     {
@@ -15463,7 +15463,7 @@ class purchase extends AdminController
             $sIndexColumn = 'id';
             $sTable       = db_prefix() . 'pur_order_detail';
             $join         = [
-                
+
                 'LEFT JOIN ' . db_prefix() . 'items ON ' . db_prefix() . 'items.id = ' . db_prefix() . 'pur_order_detail.item_code',
                 'LEFT JOIN ' . db_prefix() . 'pur_orders ON ' . db_prefix() . 'pur_orders.id = ' . db_prefix() . 'pur_order_detail.pur_order',
                 'LEFT JOIN ' . db_prefix() . 'pur_vendor ON ' . db_prefix() . 'pur_vendor.userid = ' . db_prefix() . 'pur_orders.vendor',
@@ -15513,6 +15513,197 @@ class purchase extends AdminController
 
             echo json_encode($output);
             die();
+        }
+    }
+
+    public function procurement_milestone_summary_report()
+    {
+        if ($this->input->is_ajax_request()) {
+            $this->load->model('currencies_model');
+
+            $select = [
+                'tblitems.description as item_name',
+                'vendor',
+                db_prefix() . 'pur_order_detail.est_delivery_date as est_delivery_date',
+                db_prefix() . 'pur_order_detail.delivery_date as delivery_date',
+                '1',
+                '2',
+            ];
+            $where = [
+                'WHERE ' . db_prefix() . 'pur_order_detail.est_delivery_date IS NOT NULL'
+            ];
+
+            $aColumns     = $select;
+            $sIndexColumn = 'id';
+            $sTable       = db_prefix() . 'pur_order_detail';
+            $join         = [
+
+                'LEFT JOIN ' . db_prefix() . 'items ON ' . db_prefix() . 'items.id = ' . db_prefix() . 'pur_order_detail.item_code',
+                'LEFT JOIN ' . db_prefix() . 'pur_orders ON ' . db_prefix() . 'pur_orders.id = ' . db_prefix() . 'pur_order_detail.pur_order',
+                'LEFT JOIN ' . db_prefix() . 'pur_vendor ON ' . db_prefix() . 'pur_vendor.userid = ' . db_prefix() . 'pur_orders.vendor',
+            ];
+
+            $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [
+                db_prefix() . 'pur_vendor.company',
+                db_prefix() . 'items.commodity_code',
+            ]);
+
+            $output  = $result['output'];
+            $rResult = $result['rResult'];
+            foreach ($rResult as $aRow) {
+                $row = [];
+
+                $row[] = $aRow['commodity_code'] . '-' . $aRow['item_name'];
+                $row[] = '<a href="' . admin_url('purchase/vendor/' . $aRow['vendor']) . '" target="_blank">' . $aRow['company'] . '</a>';
+
+                $row[] = date('d M, Y', strtotime($aRow['est_delivery_date']));
+                $row[] = !empty($aRow['delivery_date']) ?  date('d M, Y', strtotime($aRow['delivery_date'])) : '';
+
+                // Calculate delay days
+                $delay = '';
+                $status = '';
+
+                if (!empty($aRow['est_delivery_date']) && !empty($aRow['delivery_date'])) {
+                    $estDate = new DateTime($aRow['est_delivery_date']);
+                    $deliveryDate = new DateTime($aRow['delivery_date']);
+
+                    if ($deliveryDate > $estDate) {
+                        $interval = $deliveryDate->diff($estDate);
+                        $delay = $interval->format('%a days');
+                        $status = '<span class="label label-warning">Delayed</span>';
+                    } else {
+                        $delay = '0 days';
+                        $status = '<span class="label label-success">On Time</span>';
+                    }
+                } elseif (!empty($aRow['est_delivery_date']) && empty($aRow['delivery_date'])) {
+                    $status = '<span class="label label-danger">Pending</span>';
+                }
+
+                $row[] = $delay;
+                $row[] = $status;
+
+                $output['aaData'][] = $row;
+            }
+
+            echo json_encode($output);
+            die();
+        }
+    }
+
+    public function send_critical_tracker_email()
+    {
+        // use your custom from/subject
+        $mail_from    = 'ask@nirmaan360.com';
+        $mail_subject = 'Critical Item Reminder: Target Date Reached';
+
+        $today = date('Y-m-d');
+
+        // 1) Fetch all open critical items due today or earlier with a department
+        $items = $this->db
+            ->select('id, description, target_date, department, staff, vendor')
+            ->where('target_date <=', $today)
+            ->where('target_date !=', '')
+            ->where('status', 1)
+            ->where('department IS NOT NULL', null, false)
+            ->where('department !=', 0)
+            ->get(db_prefix() . 'critical_mom')
+            ->result();
+
+        if (empty($items)) {
+            echo "No critical items due as of {$today}\n";
+            return;
+        }
+
+        // 2) SMTP init (if enabled in Perfex Email Config)
+        // $smtp_enabled = get_option('smtp_enable');
+        // if ($smtp_enabled == '1') {
+            $config = [
+                'protocol'    => 'smtp',
+                'smtp_host'   => get_option('smtp_host'),
+                'smtp_user'   => get_option('smtp_username'),
+                'smtp_pass'   => get_option('smtp_password'),
+                'smtp_port'   => get_option('smtp_port'),
+                'smtp_crypto' => get_option('smtp_encryption'),
+                'mailtype'    => 'html',
+                'charset'     => 'utf-8',
+                'newline'     => "\r\n",
+                'crlf'        => "\r\n",
+            ];
+            $this->email->initialize($config);
+        // }
+        foreach ($items as $item) {
+            // 3) Build "assigned to" string
+            $assigned_to = 'Unassigned';
+            $parts = [];
+
+            // staff field: comma‑separated staff IDs
+            if (!empty($item->staff)) {
+                $ids = array_filter(array_map('trim', explode(',', $item->staff)));
+                if ($ids) {
+                    $staff = $this->db
+                        ->select('firstname, lastname')
+                        ->where_in('staffid', $ids)
+                        ->get(db_prefix() . 'staff')
+                        ->result();
+                    $names = array_map(function ($s) {
+                        return $s->firstname . ' ' . $s->lastname;
+                    }, $staff);
+                    if ($names) {
+                        $parts[] = implode(', ', $names);
+                    }
+                }
+            }
+
+            // vendor field: assume it’s a name
+            if (!empty($item->vendor)) {
+                $parts[] = $item->vendor;
+            }
+
+            if ($parts) {
+                $assigned_to = implode(' and ', $parts);
+            }
+
+            // 4) HTML message
+            $link = site_url('admin/meeting_management/minutesController/critical_agenda');
+            $message  = '<html><body>';
+            $message .= '<p>This critical item '
+                . '<a href="' . $link . '" target="_blank">'
+                . htmlspecialchars($item->description)
+                . '</a> has reached its target date.</p>';
+            $message .= '<p>The status is still <strong>Open</strong>. '
+                . 'Assigned to: <strong>' . htmlspecialchars($assigned_to) . '</strong>.</p>';
+            $message .= '</body></html>';
+
+            // 5) Find all active staff in that department
+            $recipients = $this->db
+                ->select('s.email')
+                ->from(db_prefix() . 'staff s')
+                ->join(db_prefix() . 'staff_departments sd', 'sd.staffid = s.staffid')
+                ->where('sd.departmentid', $item->department)
+                ->where('s.active', 1)
+                ->get()
+                ->result();
+
+            if (empty($recipients)) {
+                echo "No active staff in department {$item->department} for item {$item->id}\n";
+                continue;
+            }
+            
+            // 6) Send one email per recipient
+            foreach ($recipients as $r) {
+                $this->email->clear();
+                $this->email->from($mail_from, get_option('companyname'));
+                $this->email->to('pawan.codrity@gmail.com');
+                $this->email->subject($mail_subject);
+                $this->email->message($message);
+
+                if ($this->email->send()) {
+                    echo "Email sent for item {$item->id} to {'pawan.codrity@gmail.com'}\n";
+                } else {
+                    echo "Failed to send item {$item->id} to {'pawan.codrity@gmail.com'}: "
+                        . $this->email->print_debugger(['headers']) . "\n";
+                }
+            }
         }
     }
 }
