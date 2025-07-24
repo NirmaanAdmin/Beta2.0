@@ -763,3 +763,5 @@ $lang['reconciliation_output_slip']  = 'Stock Reconciliation Slip';
 $lang['goods_reconciliation_code']  = 'Reconciliation voucher code';
 $lang['goods_receipt_register']  = 'Goods Receipt Register';
 $lang['material_issue_report']  = 'Material Issue Report';
+$lang['stock_movement_ledger']  = 'Stock Movement Ledger';
+$lang['returnable_material_alert']  = 'Returnable Material Alert Sheet';

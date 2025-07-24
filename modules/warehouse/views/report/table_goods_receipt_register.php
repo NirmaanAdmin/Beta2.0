@@ -12,11 +12,7 @@ $select = [
     'gr.goods_receipt_code',
     'grd.commodity_name',
     'grd.description',
-    'CASE 
-        WHEN gr.pr_order_id IS NOT NULL THEN po.vendor 
-        WHEN gr.wo_order_id IS NOT NULL THEN wo.vendor 
-        ELSE NULL 
-     END as vendor_id',
+    'supplier_code as vendor_id',
     'grd.quantities',
     'gr.date_add',
     1,

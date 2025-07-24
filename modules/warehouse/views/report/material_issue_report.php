@@ -8,6 +8,7 @@
 			_l('Descriptions'),
 			_l('Vendor'),
 			_l('Qty'),
+			_l('Issued On'),
 			_l('Return able'),
 			_l('Returned?'),
 			_l('Return Date'),

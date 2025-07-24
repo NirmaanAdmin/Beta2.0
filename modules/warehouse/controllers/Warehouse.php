@@ -1819,7 +1819,9 @@ class warehouse extends AdminController
 
 		$data['title'] = _l('als_report');
 		$data['tab'][] = 'goods_receipt_register';
-		// $data['tab'][] = 'material_issue_report';
+		$data['tab'][] = 'material_issue_report';
+		// $data['tab'][] = 'stock_movement_ledger';
+		// $data['tab'][] = 'returnable_material_alert';
 		$data['tab'][] = 'vendor_allocation_report';
 
 		switch ($data['group']) {
@@ -1828,6 +1830,12 @@ class warehouse extends AdminController
 				break;
 			case 'material_issue_report':
 				$data['title'] = _l('material_issue_report');
+				break;
+			case 'stock_movement_ledger':
+				$data['title'] = _l('stock_movement_ledger');
+				break;
+			case 'returnable_material_alert':
+				$data['title'] = _l('returnable_material_alert');
 				break;
 			case 'vendor_allocation_report':
 				$data['title'] = _l('vendor_allocation_report');
@@ -10075,5 +10083,23 @@ class warehouse extends AdminController
 	public function table_material_issue_report()
 	{
 		$this->app->get_table_data(module_views_path('warehouse', 'report/table_material_issue_report'));
+	}
+
+	/**
+	 * table stock movement ledger
+	 * @return [type] 
+	 */
+	public function table_stock_movement_ledger()
+	{
+		$this->app->get_table_data(module_views_path('warehouse', 'report/table_stock_movement_ledger'));
+	}
+
+	/**
+	 * table returnable material alert
+	 * @return [type] 
+	 */
+	public function table_returnable_material_alert()
+	{
+		$this->app->get_table_data(module_views_path('warehouse', 'report/table_returnable_material_alert'));
 	}
 }
