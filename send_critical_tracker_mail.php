@@ -112,7 +112,7 @@ try {
                 if (count($recipients) > 0) {
                     $headers = "From: $mail_from\r\n";
                     $headers .= "Reply-To: $mail_from\r\n";
-                    $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
+                    $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
 
                     // Send to each staff member in the department
                     foreach ($recipients as $recipient) {
