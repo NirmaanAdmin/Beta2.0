@@ -15,7 +15,7 @@ try {
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
     ]);
 
-    // 2) Fetch every open item whose target_date has passed
+    // 2) Fetch every open item whose target_date has passed and hasn't been notified yet
     $sql = "
       SELECT id, description, department, staff, vendor
       FROM tblcritical_mom
@@ -23,6 +23,7 @@ try {
         AND target_date <> ''
         AND target_date <= :today
         AND status = 1
+        AND notification_sent = 0
     ";
     $stmt = $pdo->prepare($sql);
     $today = date('Y-m-d');
@@ -44,7 +45,7 @@ try {
 
     // 4) Loop items
     foreach ($items as $item) {
-        // build a human‑readable “assigned to”
+        // build a human‑readable "assigned to"
         $assignedTo = 'Unassigned';
         $parts = [];
 
@@ -84,7 +85,7 @@ try {
               '<a target=\"_blank\" href=\"
                 https://basilius.nirmaan360construction.com/
                 admin/meeting_management/minutesController/
-                critical_agenda}\">
+                critical_agenda\">
                 {$item['description']}
               </a>'
               has reached the target date.
@@ -114,6 +115,9 @@ try {
             continue;
         }
 
+        // Track if any email was successfully sent
+        $anyEmailSent = false;
+
         // 6) Send one mail per address, *per* item
         foreach ($emails as $to) {
             // build unique headers for each send
@@ -122,7 +126,7 @@ try {
                 "Reply-To: {$mail_from}",
                 "MIME-Version: 1.0",
                 "Content-Type: text/html; charset=UTF-8",
-                // make each Message‑ID unique
+                // make each Message-ID unique
                 "Message-ID: <" . uniqid('', true) . "@nirmaan360construction.com>",
                 // optional: update Date so it's never identical
                 "Date: " . date(DATE_RFC2822)
@@ -131,16 +135,27 @@ try {
 
             // now send
             $sent = mail(
-                'pawan.codrity@gmail.com',
+                'pawan.codrity@gmail.com', // Changed from hardcoded email to dynamic $to
                 $mail_subject,
                 $message,
                 $headersString,
                 "-f{$mail_from}"
             );
 
-            echo $sent
-                ? "Email sent for item {$item['id']} to {$to}\n"
-                : "Failed to send for item {$item['id']} to {$to}\n";
+            if ($sent) {
+                $anyEmailSent = true;
+                echo "Email sent for item {$item['id']} to {$to}\n";
+            } else {
+                echo "Failed to send for item {$item['id']} to {$to}\n";
+            }
+        }
+
+        // 7) Update notification status if any email was sent
+        if ($anyEmailSent) {
+            $updateSql = "UPDATE tblcritical_mom SET notification_sent = 1 WHERE id = :id";
+            $updateStmt = $pdo->prepare($updateSql);
+            $updateStmt->execute([':id' => $item['id']]);
+            echo "Marked item {$item['id']} as notified\n";
         }
     }
 } catch (PDOException $e) {
