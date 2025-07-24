@@ -3,7 +3,7 @@
 $db_host = 'localhost';
 $db_name = 'u318220648_basilius';
 $db_user = 'u318220648_basilius';
-$db_pass = 'asdasd';
+$db_pass = 'Nirmaan@1234';
 
 // Email configuration
 $mail_from    = 'ask@nirmaan360.com';
@@ -82,7 +82,7 @@ try {
               '<a target=\"_blank\" href=\"
                 https://basilius.nirmaan360construction.com/
                 admin/meeting_management/minutesController/
-                critical_agenda?id={$item['id']}\">
+                critical_agenda}\">
                 {$item['description']}
               </a>'
               has reached the target date.
@@ -115,7 +115,7 @@ try {
         // 6) Send one mail per address, *per* item
         foreach ($emails as $to) {
             $ok = mail(
-                'pawan.codrity@gmail.com',
+                $to,
                 $mail_subject,
                 $message,
                 $headersString,
