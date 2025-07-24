@@ -1,9 +1,9 @@
 <?php
 // Database configuration
 $db_host = 'localhost';
-$db_name = 'basili';
-$db_user = 'root';
-$db_pass = 'root';
+$db_name = 'u318220648_basilius';
+$db_user = 'u318220648_basilius';
+$db_pass = 'Nirmaan@1234';
 
 // Email configuration
 $mail_from = 'noreply@basilius.nirmaan360construction.com';
