@@ -2,7 +2,6 @@
 <div class="widget" id="widget-<?php echo create_widget_id(); ?>" data-name="<?php echo _l('home_my_todo_items'); ?>">
     <div class="panel_s todo-panel">
         <div class="panel-body padding-10">
-            <div class="widget-dragger"></div>
             <div class="tw-flex tw-justify-between tw-items-center tw-p-1.5">
                 <p class="tw-font-medium tw-flex tw-items-center tw-mb-0 tw-space-x-1.5 rtl:tw-space-x-reverse">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"

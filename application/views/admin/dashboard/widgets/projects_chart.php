@@ -4,8 +4,6 @@
         <div class="col-md-12">
             <div class="panel_s">
                 <div class="panel-body padding-10">
-                    <div class="widget-dragger"></div>
-
                     <p
                         class="tw-font-medium tw-flex tw-items-center tw-mb-0 tw-space-x-1.5 rtl:tw-space-x-reverse tw-p-1.5">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"

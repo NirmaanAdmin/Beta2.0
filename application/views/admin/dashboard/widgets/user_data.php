@@ -2,7 +2,6 @@
 <div class="widget" id="widget-<?php echo create_widget_id(); ?>" data-name="<?php echo _l('user_widget'); ?>">
     <div class="panel_s user-data">
         <div class="panel-body home-activity">
-            <div class="widget-dragger"></div>
             <div class="horizontal-scrollable-tabs panel-full-width-tabs">
                 <div class="scroller scroller-left arrow-left"><i class="fa fa-angle-left"></i></div>
                 <div class="scroller scroller-right arrow-right"><i class="fa fa-angle-right"></i></div>

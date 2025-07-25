@@ -7,8 +7,6 @@
         <div class="col-md-12">
             <div class="panel_s events">
                 <div class="panel-body padding-10">
-                    <div class="widget-dragger"></div>
-
                     <p class="tw-font-medium tw-flex tw-items-center tw-justify-between tw-mb-0 tw-p-1.5">
                         <span class="tw-flex tw-items-center tw-space-x-1.5 rtl:tw-space-x-reverse">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"

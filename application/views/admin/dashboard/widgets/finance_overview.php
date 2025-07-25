@@ -28,7 +28,6 @@ switch (count(array_filter([$canViewInvoices, $canViewEstimates, $canViewProposa
     <div class="finance-summary">
         <div class="panel_s">
             <div class="panel-body padding-15">
-                <div class="widget-dragger"></div>
                 <div class="row home-summary">
                     <?php if ($canViewInvoices) { ?>
                     <div class="col-md-6 col-lg-<?php echo e($totalColumnsLg); ?> col-sm-6">

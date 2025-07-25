@@ -16,43 +16,25 @@
         <div class="row">
             <?php $this->load->view('admin/includes/alerts'); ?>
 
-            <?php hooks()->do_action('before_start_render_dashboard_content'); ?>
-
             <div class="clearfix"></div>
             
             <div class="col-md-12 mtop20" data-container="top-12">
-                <?php render_dashboard_widgets('top-12'); ?>
+                <?php $this->load->view('admin/dashboard/widgets/top_stats'); ?>
             </div>
 
-            <?php hooks()->do_action('after_dashboard_top_container'); ?>
-
-            
-            <div class="col-md-6" data-container="middle-right-6">
-                <?php render_dashboard_widgets('middle-right-6'); ?>
+            <div class="col-md-8 mtop20" data-container="left-8">
+                <?php $this->load->view('admin/dashboard/widgets/user_data'); ?>
+                <?php $this->load->view('admin/dashboard/widgets/finance_overview'); ?>
+                <?php $this->load->view('admin/dashboard/widgets/upcoming_events'); ?>
+                <?php $this->load->view('admin/dashboard/widgets/calendar'); ?>
             </div>
-
-            <?php hooks()->do_action('after_dashboard_half_container'); ?>
-
-            <div class="col-md-8" data-container="left-8">
-                <?php render_dashboard_widgets('left-8'); ?>
-            </div>
-            <div class="col-md-4" data-container="right-4">
-                <?php render_dashboard_widgets('right-4'); ?>
+            <div class="col-md-4 mtop20" data-container="right-4">
+                <?php $this->load->view('admin/dashboard/widgets/todos'); ?>
+                <?php $this->load->view('admin/dashboard/widgets/projects_chart'); ?>
+                <?php $this->load->view('admin/dashboard/widgets/projects_activity'); ?>
             </div>
 
             <div class="clearfix"></div>
-
-            <div class="col-md-4" data-container="bottom-left-4">
-                <?php render_dashboard_widgets('bottom-left-4'); ?>
-            </div>
-            <div class="col-md-4" data-container="bottom-middle-4">
-                <?php render_dashboard_widgets('bottom-middle-4'); ?>
-            </div>
-            <div class="col-md-4" data-container="bottom-right-4">
-                <?php render_dashboard_widgets('bottom-right-4'); ?>
-            </div>
-
-            <?php hooks()->do_action('after_dashboard'); ?>
         </div>
     </div>
 </div>
