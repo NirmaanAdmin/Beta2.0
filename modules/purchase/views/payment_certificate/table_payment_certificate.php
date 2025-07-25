@@ -19,7 +19,7 @@ $aColumns = [
     db_prefix() . 'payment_certificate' . '.order_date as order_date',
     db_prefix() . 'assets_group' . '.group_name as group_name',
     db_prefix() . 'payment_certificate' . '.approve_status as approve_status',
-    db_prefix() . 'payment_certificate' . '.approve_status as applied_to_vendor_bill',
+    db_prefix() . 'payment_certificate' . '.pur_invoice_id as applied_to_vendor_bill',
 ];
 
 $sIndexColumn = 'id';
@@ -154,7 +154,7 @@ foreach ($rResult as $aRow) {
             }
         } elseif ($aColumns[$i] == 'applied_to_vendor_bill') {
             $_data = '';
-            if ($aRow['approve_status'] == 2) {
+            if ($aRow['approve_status'] == 2 && empty($aRow['applied_to_vendor_bill'])) {
                 $_data = '<a href="' . admin_url('purchase/convert_pur_invoice_from_po/' . $aRow['id']) . '" class="btn btn-info convert-pur-invoice" target="_blank">' . _l('convert_to_vendor_bill') . '</a>';
             }
         } elseif ($aColumns[$i] == 'project') {

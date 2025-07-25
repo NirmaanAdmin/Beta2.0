@@ -12612,7 +12612,7 @@ class purchase extends AdminController
 
         if (empty($pur_invoice)) {
             $input['invoice_number'] = $invoice_number;
-            $input['vendor_invoice_number'] = $invoice_number;
+            $input['vendor_invoice_number'] = !empty($payment_certificate->invoice_ref) ? $payment_certificate->invoice_ref : NULL;
             $input['vendor'] = isset($pur_order->vendor) ? $pur_order->vendor : 0;
             $input['group_pur'] = isset($pur_order->group_pur) ? $pur_order->group_pur : 0;
             $input['description_services'] = '';
@@ -12641,7 +12641,7 @@ class purchase extends AdminController
         } else {
             $input['pur_order'] = !empty($payment_certificate->po_id) ? $payment_certificate->po_id : NULL;
             $input['wo_order'] = !empty($payment_certificate->wo_id) ? $payment_certificate->wo_id : NULL;
-            $input['vendor_invoice_number'] = $invoice_number;
+            $input['vendor_invoice_number'] = !empty($payment_certificate->invoice_ref) ? $payment_certificate->invoice_ref : NULL;
             $input['vendor'] = isset($pur_order->vendor) ? $pur_order->vendor : 0;
             $input['group_pur'] = isset($pur_order->group_pur) ? $pur_order->group_pur : 0;
             $input['project_id'] = isset($pur_order->project) ? $pur_order->project : 1;
