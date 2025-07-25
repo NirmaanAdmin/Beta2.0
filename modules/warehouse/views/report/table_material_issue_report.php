@@ -1,6 +1,7 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
+$this->ci->load->model('purchase/purchase_model');
 $base_currency = get_base_currency_pur();
 
 $select = [
@@ -37,7 +38,26 @@ $join = [
 ];
 
 $where = [];
+$custom_date_select = $this->ci->purchase_model->get_where_report_period('gd.date_add');
+if ($custom_date_select != '') {
+    $custom_date_select = trim($custom_date_select);
+    if (!startsWith($custom_date_select, 'AND')) {
+        $custom_date_select = 'AND ' . $custom_date_select;
+    }
+    $where[] = $custom_date_select;
+}
 $where[] = 'AND (gd.goods_delivery_code IS NOT NULL)';
+if ($this->ci->input->post('vendors') && count($this->ci->input->post('vendors')) > 0) {
+    $vendors = implode(',', array_map('intval', $this->ci->input->post('vendors')));
+    array_push($where, "AND 
+    (
+        CASE 
+            WHEN gd.pr_order_id IS NOT NULL THEN po.vendor 
+            WHEN gd.wo_order_id IS NOT NULL THEN wo.vendor 
+            ELSE NULL 
+        END
+    ) IN ($vendors)");
+}
 
 $additionalSelect = [
     'gd.id as goods_delivery_id',

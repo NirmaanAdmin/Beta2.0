@@ -1,6 +1,7 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
+$this->ci->load->model('purchase/purchase_model');
 $base_currency = get_base_currency_pur();
 
 $select = [
@@ -38,7 +39,20 @@ $join = [
 ];
 
 $where = [];
+$custom_date_select = $this->ci->purchase_model->get_where_report_period('gr.date_add');
+if ($custom_date_select != '') {
+    $custom_date_select = trim($custom_date_select);
+    if (!startsWith($custom_date_select, 'AND')) {
+        $custom_date_select = 'AND ' . $custom_date_select;
+    }
+    $where[] = $custom_date_select;
+}
 $where[] = 'AND (gr.goods_receipt_code IS NOT NULL)';
+
+if ($this->ci->input->post('vendors') && count($this->ci->input->post('vendors')) > 0
+) {
+    array_push($where, 'AND gr.supplier_code IN (' . implode(',', $this->ci->input->post('vendors')) . ')');
+}
 
 $additionalSelect = [
     'gr.id as goods_receipt_id',
