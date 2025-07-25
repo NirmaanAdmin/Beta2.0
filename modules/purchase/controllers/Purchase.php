@@ -15587,7 +15587,7 @@ class purchase extends AdminController
 
             echo json_encode($output);
             die();
-        }
+        } 
     }
 
     public function send_critical_tracker_email()
