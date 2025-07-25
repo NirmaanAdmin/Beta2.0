@@ -493,6 +493,7 @@ if (isset($invoice->scheduled_email) && $invoice->scheduled_email) { ?>
                                         <th width="15%" align="left"><?php echo _l('description_of_services'); ?></th>
                                         <th width="13%" align="left"><?php echo _l('vendor'); ?></th>
                                         <th width="13%" align="left"><?php echo _l('invoice_no'); ?></th>
+                                        <th width="13%" align="left"><?php echo _l('invoice_date'); ?></th>
                                         <th width="13%" align="left"><?php echo _l('rate_without_tax'); ?></th>
                                         <th width="10%" align="left"><?php echo _l('invoice_table_tax_heading'); ?></th>
                                         <th width="13%" align="left"><?php echo _l('invoice_table_amount_heading'); ?></th>
@@ -509,12 +510,13 @@ if (isset($invoice->scheduled_email) && $invoice->scheduled_email) { ?>
                                         foreach ($add_items as $item) {
                                             if($item['annexure'] == $annexure['id']) {
                                                 $vendor_name = '';
-                                                $invoice_no = '';
+                                                $invoice_no = $invoice_date = '';
                                                 if(!empty($item['vbt_id'])) {
                                                     $pur_invoices = get_pur_invoices($item['vbt_id']);
                                                     $vendor = get_vendor_details($pur_invoices->vendor);
                                                     $vendor_name = $vendor->company;
                                                     $invoice_no = $pur_invoices->vendor_invoice_number;
+                                                    $invoice_date = date('d M, Y', strtotime($pur_invoices->invoice_date));
                                                 }
                                                 $table_row = '<tr class="sortable item">';
                                                 $amount = ($item['rate'] * $item['qty']) + $item['tax'];
@@ -523,6 +525,7 @@ if (isset($invoice->scheduled_email) && $invoice->scheduled_email) { ?>
                                                 $table_row .= '<td>' . clear_textarea_breaks($item['long_description']) . '</td>';
                                                 $table_row .= '<td>'.$vendor_name.'</td>';
                                                 $table_row .= '<td>'.$invoice_no.'</td>';
+                                                $table_row .= '<td>' . $invoice_date . '</td>';
                                                 $table_row .= '<td>' . app_format_money($item['rate'],$base_currency) . '</td>';
                                                 $table_row .= '<td>' . app_format_money($item['tax'],$base_currency) . '</td>';
                                                 $table_row .= '<td>' . $amount . '</td>';
