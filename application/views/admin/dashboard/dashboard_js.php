@@ -334,4 +334,126 @@
         });
         return false
     }
+
+    get_order_tracker_dashboard();
+
+    var budgetedVsActualCategory;
+    var orderTrackerLineChartOverTime;
+
+    function get_order_tracker_dashboard() {
+      "use strict";
+      var data = {}
+      $.post(admin_url + 'purchase/get_order_tracker_charts', data).done(function(response){
+        response = JSON.parse(response);
+
+        // Total Order Value Over Time
+        var orderTrackerlineCtx = document.getElementById('orderTrackerLineChartOverTime').getContext('2d');
+        if (orderTrackerLineChartOverTime) {
+          orderTrackerLineChartOverTime.data.labels = response.line_order_date;
+          orderTrackerLineChartOverTime.data.datasets[0].data = response.line_order_total;
+          orderTrackerLineChartOverTime.update();
+        } else {
+          orderTrackerLineChartOverTime = new Chart(orderTrackerlineCtx, {
+            type: 'line',
+            data: {
+              labels: response.line_order_date,
+              datasets: [{
+                label: 'Order Value',
+                data: response.line_order_total,
+                fill: false,
+                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                tension: 0.3
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  display: true,
+                  position: 'bottom'
+                },
+                tooltip: {
+                  mode: 'index',
+                  intersect: false
+                }
+              },
+              scales: {
+                x: {
+                  title: {
+                    display: true,
+                    text: 'Month'
+                  }
+                },
+                y: {
+                  beginAtZero: true,
+                  title: {
+                    display: true,
+                    text: 'Order Value'
+                  }
+                }
+              }
+            }
+          });
+        }
+
+        // Budgeted vs Actual Procurement by Budget Head
+        var barCtx = document.getElementById('budgetedVsActualCategory').getContext('2d');
+        var barData = {
+          labels: response.budgeted_actual_category_labels,
+          datasets: [{
+              label: 'Budgeted',
+              data: response.budgeted_category_value,
+              backgroundColor: '#00008B',
+              borderColor: '#00008B',
+              borderWidth: 1
+            },
+            {
+              label: 'Actual',
+              data: response.actual_category_value,
+              backgroundColor: '#1E90FF',
+              borderColor: '#1E90FF',
+              borderWidth: 1
+            }
+          ]
+        };
+        if (budgetedVsActualCategory) {
+          budgetedVsActualCategory.data.labels = barData.labels;
+          budgetedVsActualCategory.data.datasets[0].data = barData.datasets[0].data;
+          budgetedVsActualCategory.data.datasets[1].data = barData.datasets[1].data;
+          budgetedVsActualCategory.update();
+        } else {
+          budgetedVsActualCategory = new Chart(barCtx, {
+            type: 'bar',
+            data: barData,
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  position: 'bottom'
+                }
+              },
+              scales: {
+                x: {
+                  title: {
+                    display: false,
+                    text: 'Order Date'
+                  }
+                },
+                y: {
+                  beginAtZero: true,
+                  title: {
+                    display: false,
+                    text: 'Amount'
+                  }
+                }
+              }
+            }
+          });
+        }
+
+      });
+    }
 </script>

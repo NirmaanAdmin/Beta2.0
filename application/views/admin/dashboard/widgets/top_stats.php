@@ -4,11 +4,11 @@
   width: 25% !important;
 }
 .dashboard_stat_title {
-  font-size: 19px;
+  font-size: 18px;
   font-weight: bold;
 }
 .dashboard_stat_value {
-  font-size: 19px;
+  font-size: 18px;
 }
 </style>
 <div class="widget relative" id="widget-<?php echo create_widget_id(); ?>" data-name="<?php echo _l('quick_stats'); ?>">
