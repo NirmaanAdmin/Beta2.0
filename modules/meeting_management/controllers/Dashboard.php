@@ -33,75 +33,147 @@ class Dashboard extends AdminController
     public function action_by_responsibility_tracker()
     {
         if ($this->input->is_ajax_request()) {
-            $this->load->model('staff_model');
+            // Get staff assignments (staffid is stored in staff column)
+            $this->db->select([
+                'tblcritical_mom.staff',
+                'CONCAT(staff.firstname, " ", staff.lastname) as assigned_to',
+                'COUNT(CASE WHEN tblcritical_mom.status = 1 THEN 1 END) as open_count',
+                'COUNT(CASE WHEN tblcritical_mom.status = 2 THEN 1 END) as closed_count',
+                'COUNT(*) as total'
+            ]);
+            $this->db->from('tblcritical_mom');
+            $this->db->join('tblstaff as staff', 'staff.staffid = tblcritical_mom.staff', 'left');
+            $this->db->where('tblcritical_mom.staff IS NOT NULL');
+            $this->db->group_by('tblcritical_mom.staff');
+            $staff_results = $this->db->get()->result_array();
 
-            // Get unique staff
-            $this->db->select("staff");
-            $this->db->from(db_prefix() . 'critical_mom');
-            $this->db->where("staff IS NOT NULL");
-            $this->db->group_by("staff");
-            $staff_list = $this->db->get()->result_array();
+            // Get vendor assignments (vendor name is stored in vendor column)
+            $this->db->select([
+                'tblcritical_mom.vendor as vendor_name',
+                'tblcritical_mom.vendor as assigned_to', // Using vendor name directly
+                'COUNT(CASE WHEN tblcritical_mom.status = 1 THEN 1 END) as open_count',
+                'COUNT(CASE WHEN tblcritical_mom.status = 2 THEN 1 END) as closed_count',
+                'COUNT(*) as total'
+            ]);
+            $this->db->from('tblcritical_mom');
+            $this->db->where('tblcritical_mom.vendor IS NOT NULL');
+            $this->db->where('tblcritical_mom.vendor !=', ''); // Exclude empty vendor names
+            $this->db->group_by('tblcritical_mom.vendor');
+            $vendor_results = $this->db->get()->result_array();
 
-            // Get unique vendors (vendor is name, not ID)
-            $this->db->select("vendor");
-            $this->db->from(db_prefix() . 'critical_mom');
-            $this->db->where("vendor IS NOT NULL");
-            $this->db->group_by("vendor");
-            $vendor_list = $this->db->get()->result_array();
+            // Combine results
+            $combined_results = array_merge($staff_results, $vendor_results);
 
-            $table_data = [];
+            // Prepare DataTable response
+            $output = [
+                'data' => [],
+                'recordsTotal' => count($combined_results),
+                'recordsFiltered' => count($combined_results),
+                'draw' => $this->input->post('draw')
+            ];
+            foreach ($combined_results as $row) {
+                $closed_percentage = $row['total'] > 0 ? round(($row['closed_count'] / $row['total']) * 100) : 0;
 
-            // Loop through staff
-            foreach ($staff_list as $row) {
-                $staff_id = $row['staff'];
+                // Determine if this is a staff or vendor record
+                $is_staff = isset($row['staff']);
 
-                // Count open items
-                $this->db->where('staff', $staff_id);
-                $this->db->where('status', 1);
-                $open = $this->db->count_all_results(db_prefix() . 'critical_mom');
+                $output['data'][] = [
+                    // Assigned To column
+                    $is_staff
+                        ? '<a href="' . admin_url('profile/' . $row['staff']) . '">' . $row['assigned_to'] . '</a>'
+                        : $row['vendor_name'], // Vendor name as plain text
 
-                // Count closed items
-                $this->db->where('staff', $staff_id);
-                $this->db->where('status', 2);
-                $closed = $this->db->count_all_results(db_prefix() . 'critical_mom');
+                    // Open count
+                    $row['open_count'],
 
-                $total = $open + $closed;
-                $closed_percent = $total > 0 ? round(($closed / $total) * 100, 2) : 0;
+                    // Closed count
+                    $row['closed_count'],
 
-                $table_data[] = [
-                    get_staff_full_name($staff_id),
-                    $open,
-                    $closed,
-                    $closed_percent . '%'
+                    // Closed percentage with color coding
+                    '<span class="' . ($closed_percentage >= 75 ? 'text-success' : ($closed_percentage >= 50 ? 'text-warning' : 'text-danger')) . '">'
+                        . $closed_percentage . '%</span>'
                 ];
             }
 
-            // Loop through vendors
-            foreach ($vendor_list as $row) {
-                $vendor_name = $row['vendor'];
+            echo json_encode($output);
+            die();
+        }
+    }
 
-                // Count open items
-                $this->db->where('vendor', $vendor_name);
-                $this->db->where('status', 1);
-                $open = $this->db->count_all_results(db_prefix() . 'critical_mom');
+    public function upcoming_deadlines()
+    {
+        if ($this->input->is_ajax_request()) {
+            $select = [
+                'tblcritical_mom.id',
+                'tblcritical_mom.description as description',
+                'tblcritical_mom.target_date as target_date',
+                'tblcritical_mom.staff',
+                'tblcritical_mom.vendor as vendor',
+                'tblcritical_mom.department',
+                'tblcritical_mom.area as area', // Include the area field
+                'tblstaff.firstname as staff_firstname',
+                'tblstaff.lastname as staff_lastname',
+                'tbldepartments.name as department_name'
+            ];
 
-                // Count closed items
-                $this->db->where('vendor', $vendor_name);
-                $this->db->where('status', 2);
-                $closed = $this->db->count_all_results(db_prefix() . 'critical_mom');
+            $aColumns = $select;
+            $sIndexColumn = 'id';
+            $sTable = 'tblcritical_mom';
 
-                $total = $open + $closed;
-                $closed_percent = $total > 0 ? round(($closed / $total) * 100, 2) : 0;
+            $join = [
+                'LEFT JOIN tblstaff ON tblstaff.staffid = tblcritical_mom.staff',
+                'LEFT JOIN tbldepartments ON tbldepartments.departmentid = tblcritical_mom.department'
+            ];
 
-                $table_data[] = [
-                    $vendor_name,
-                    $open,
-                    $closed,
-                    $closed_percent . '%'
+            $where = ['AND tblcritical_mom.target_date >= CURDATE()'];
+
+            $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, []);
+            $output = $result['output'];
+            $rResult = $result['rResult'];
+            foreach ($rResult as $aRow) {
+                // Department name
+                $department = !empty($aRow['department_name']) ? $aRow['department_name'] : _l('not_assigned');
+
+                // Action by (BOTH staff AND vendor if available)
+                $action_by = [];
+                if (!empty($aRow['staff'])) {
+                    $first = $aRow['staff_firstname'] ?? '';
+                    $last = $aRow['staff_lastname'] ?? '';
+                    $full_name = trim($first . ' ' . $last);
+                    $action_by[] = '<a href="' . admin_url('profile/' . $aRow['staff']) . '">' . $full_name . '</a>';
+                }
+                if (!empty($aRow['vendor'])) {
+                    $action_by[] = $aRow['vendor'];
+                }
+                $action_by_display = !empty($action_by) ? implode(', ', $action_by) : _l('not_assigned');
+
+                // Target date and badge (unchanged)
+                $target_date_raw = $aRow['target_date'] ?? null;
+                $target_date = $target_date_raw ? _d($target_date_raw) : '';
+                $date_display = $target_date;
+
+                if ($target_date_raw) {
+                    $today = new DateTime();
+                    $target = new DateTime($target_date_raw);
+                    $days_remaining = $today->diff($target)->days;
+
+                    if ($target >= $today && $days_remaining <= 7) {
+                        $badge_class = $days_remaining <= 3 ? 'label-danger' : 'label-warning';
+                        $date_display .= ' <span class="label ' . $badge_class . ' pull-right">' .
+                            _l('days_remaining', $days_remaining) . '</span>';
+                    }
+                }
+
+                $output['aaData'][] = [
+                    $department ?? '',
+                    $aRow['area'] ?? '',
+                    $aRow['description'] ?? '',
+                    $action_by_display ?? '', // Now shows BOTH staff & vendor if available
+                    $date_display ?? ''
                 ];
             }
 
-            echo json_encode(['aaData' => $table_data]);
+            echo json_encode($output);
             die();
         }
     }

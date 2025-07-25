@@ -213,7 +213,8 @@
         }
 
 
-        // action_by_responsibility_tracker();
+        action_by_responsibility_tracker();
+        upcoming_deadlines();
       });
     }
     var fnServerParams;
@@ -227,7 +228,16 @@
       if ($.fn.DataTable.isDataTable('.table-action-by-responsibility-tracker')) {
         $('.table-action-by-responsibility-tracker').DataTable().destroy();
       }
-      initDataTable('.table-action-by-responsibility-tracker', admin_url + 'meeting_management/action_by_responsibility_tracker', false, false, fnServerParams, undefined, true);
+      initDataTable('.table-action-by-responsibility-tracker', admin_url + 'meeting_management/dashboard/action_by_responsibility_tracker', false, false, fnServerParams, undefined, true);
+    }
+
+    function upcoming_deadlines() {
+      "use strict";
+      var table_upcoming_deadlines = $('.table-upcoming-deadlines');
+      if ($.fn.DataTable.isDataTable('.table-upcoming-deadlines')) {
+        $('.table-upcoming-deadlines').DataTable().destroy();
+      }
+      initDataTable('.table-upcoming-deadlines', admin_url + 'meeting_management/dashboard/upcoming_deadlines', false, false, fnServerParams, undefined, true);
     }
   })(jQuery);
 </script>

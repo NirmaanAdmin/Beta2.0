@@ -56,7 +56,8 @@
             </div>
           </div>
         </div>
-        <!-- <div class="col-md-12 mtop20">
+
+        <div class="col-md-6 mtop20" style="clear: both;">
           <div class="row">
             <p class="mbot15 dashboard_stat_title">Action By - Responsibility Tracker</p>
             <div class="scroll-wrapper" style="max-height: 750px; overflow-y: auto;">
@@ -74,7 +75,30 @@
             </div>
 
           </div>
-        </div> -->
+        </div>
+
+        <div class="col-md-5 mtop20" style="    margin-left: 10px;
+    width: 49%;">
+          <div class="row">
+            <p class="mbot15 dashboard_stat_title">Upcoming Deadlines</p>
+            <div class="scroll-wrapper" style="max-height: 750px; overflow-y: auto;">
+              <table class="table table-upcoming-deadlines">
+                <thead>
+                  <tr>
+                    <th><?php echo _l('Department'); ?></th>
+                    <th><?php echo _l('Area/Head'); ?></th>
+                    <th><?php echo _l('Description'); ?></th>
+                    <th><?php echo _l('Action By'); ?></th>
+                    <th><?php echo _l('Target Date'); ?></th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+
+          </div>
+        </div>
+
       </div>
     </div>
 
