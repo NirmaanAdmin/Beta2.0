@@ -2319,6 +2319,7 @@ class Invoices_model extends App_Model
                     <th>' . _l('description_of_services') . '</th>
                     <th>' . _l('vendor') . '</th>
                     <th>' . _l('invoice_no') . '</th>
+                    <th>' . _l('invoice_date') . '</th>
                     <th>' . _l('rate_without_tax') . '</th>
                     <th>' . _l('invoice_table_tax_heading') . '</th>
                     <th>' . _l('invoice_table_amount_heading') . '</th>
@@ -2337,11 +2338,13 @@ class Invoices_model extends App_Model
                         $itemid = $item['id'];
                         $vendor_name = '';
                         $invoice_no = '';
+                        $invoice_date = '';
                         if (!empty($item['vbt_id'])) {
                             $pur_invoices = get_pur_invoices($item['vbt_id']);
                             $vendor = get_vendor_details($pur_invoices->vendor);
                             $vendor_name = $vendor->company;
                             $invoice_no = $pur_invoices->vendor_invoice_number;
+                            $invoice_date = date('d M, Y', strtotime($pur_invoices->invoice_date)); 
                         }
                         $tblannexurehtml .= '
                         <tr>
@@ -2350,6 +2353,7 @@ class Invoices_model extends App_Model
                             <td>' . clear_textarea_breaks($item['long_description']) . '</td>
                             <td>' . $vendor_name . '</td>
                             <td>' . $invoice_no . '</td>
+                            <td>' . $invoice_date. '</td>
                             <td>' . str_replace(',', '', app_format_money($item['rate'], $invoice->currency_name, true)) . '</td>
                             <td>' . str_replace(',', '', app_format_money($total_tax, $invoice->currency_name, true)) . '</td>
                             <td>' . str_replace(',', '', app_format_money($amount, $invoice->currency_name, true)) . '</td>
@@ -2361,6 +2365,7 @@ class Invoices_model extends App_Model
                 $tblannexurehtml .= '
                   <tr>
                     <th>' . _l('total') . '</th>
+                    <th></th>
                     <th></th>
                     <th></th>
                     <th></th>
