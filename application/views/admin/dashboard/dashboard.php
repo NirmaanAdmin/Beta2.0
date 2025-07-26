@@ -5,6 +5,9 @@
   font-size: 17px;
   font-weight: bold;
 }
+.charts_stat_value {
+  font-size: 18px;
+}
 </style>
 <div id="wrapper">
     <div class="content">
@@ -21,6 +24,76 @@
                 <div class="panel_s">
                     <div class="panel-body padding-15">
                         <div class="row">
+                            <div class="col-md-6">
+                                <p class="mbot15 charts_stat_title">Cost vs Progress S-Curve</p>
+                                <div style="width: 100%; height: 400px;">
+                                  <canvas id="costvsProgressLineChartOverTime"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                              <div class="row">
+                                <div class="col-md-6 tw-mb-2 sm:tw-mb-0">
+                                  <div class="top_stats_wrapper">
+                                    <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                      <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                        <span class="tw-truncate charts_stat_title">Total Budgeted Procurement</span>
+                                      </div>
+                                    </div>
+                                    <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                                      <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                        <span class="tw-truncate charts_stat_value cost_to_complete"></span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="col-md-6 tw-mb-2 sm:tw-mb-0">
+                                  <div class="top_stats_wrapper">
+                                    <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                      <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                        <span class="tw-truncate charts_stat_title">Total Procured Till Date</span>
+                                      </div>
+                                    </div>
+                                    <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                                      <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                        <span class="tw-truncate charts_stat_value rev_contract_value"></span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="row mtop20">
+                                <div class="col-md-6 tw-mb-2 sm:tw-mb-0">
+                                  <div class="top_stats_wrapper">
+                                    <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                      <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                        <span class="tw-truncate charts_stat_title">Percentage of Budget Utilized</span>
+                                      </div>
+                                    </div>
+                                    <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                                      <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                        <span class="tw-truncate charts_stat_value percentage_utilized"></span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="col-md-6 tw-mb-2 sm:tw-mb-0">
+                                  <div class="top_stats_wrapper">
+                                    <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                      <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                        <span class="tw-truncate charts_stat_title">Net Remaining</span>
+                                      </div>
+                                    </div>
+                                    <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                                      <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                        <span class="tw-truncate charts_stat_value budgeted_procurement_net_value"></span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                        </div>
+                        <div class="row mtop20">
                             <div class="col-md-6">
                                 <p class="mbot15 charts_stat_title">Total Order Value Over Time</p>
                                 <div style="width: 100%; height: 400px;">

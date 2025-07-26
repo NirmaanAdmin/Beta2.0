@@ -22990,13 +22990,14 @@ class Purchase_model extends App_Model
         $kind = isset($data['kind']) ? $data['kind'] : '';
         $budget_head = isset($data['budget_head']) ? $data['budget_head'] : '';
         $order_type_filter = isset($data['order_type_filter']) ? $data['order_type_filter'] : '';
-        $projects = isset($data['projects']) ? $data['projects'] : '';
+        $projects = isset($data['projects']) ? $data['projects'] : [get_default_project()];
         $aw_unw_order_status = isset($data['aw_unw_order_status']) ? $data['aw_unw_order_status'] : '';
         $response['cost_to_complete'] = $response['rev_contract_value'] = $response['percentage_utilized'] = $response['budgeted_procurement_net_value'] = 0;
         $response['pie_status_name'] = $response['pie_status_value'] = array();
         $response['budgeted_actual_category_labels'] = $response['budgeted_category_value'] = $response['actual_category_value'] = array();
         $response['line_order_date'] = $response['line_order_total'] = array();
         $response['co_tracker_data'] = $response['contractor_tracker'] = array();
+        $response['scurve_order_date'] = $response['line_actual_cost_total'] = $response['line_planned_cost_total'] = array();
 
         $aColumns = [
            'aw_unw_order_status',
@@ -23248,6 +23249,63 @@ class Purchase_model extends App_Model
                     return date('M-y', strtotime($month . '-01'));
                 }, array_keys($line_order_total));
                 $response['line_order_total'] = array_values($line_order_total);
+            }
+
+            $monthly_total_rev = array();
+            $monthly_total_planned = array();
+            $monthly_cost_to_complete = array();
+            if (!empty($result)) {
+                foreach ($result as $value) {
+                    $timestamp = strtotime($value['order_date']);
+                    $month = ($timestamp && $timestamp > 0) ? date('Y-m', $timestamp) : date('Y') . '-01';
+                    if (!isset($monthly_total_rev[$month])) {
+                        $monthly_total_rev[$month] = 0;
+                        $monthly_total_planned[$month] = 0;
+                        $monthly_cost_to_complete[$month] = 0;
+                    }
+                    $monthly_total_rev[$month] += floatval($value['total_rev_contract_value']);
+                    $monthly_total_planned[$month] += floatval($value['total']);
+                    $monthly_cost_to_complete[$month] += floatval($value['cost_to_complete']);
+                }
+            }
+            $line_actual_percent = array();
+            $line_planned_percent = array();
+            if (!empty($monthly_cost_to_complete)) {
+                foreach ($monthly_cost_to_complete as $month => $cost) {
+                    if ($cost > 0) {
+                        $actual = ($monthly_total_rev[$month] / $cost) * 100;
+                        $planned = ($monthly_total_planned[$month] / $cost) * 100;
+                    } else {
+                        $actual = $planned = 0;
+                    }
+                    $line_actual_percent[$month] = round($actual, 2);
+                    $line_planned_percent[$month] = round($planned, 2);
+                }
+                ksort($line_actual_percent);
+                ksort($line_planned_percent);
+                $cumulative_actual = 0;
+                $cumulative_planned = 0;
+                foreach ($line_actual_percent as $month => $value) {
+                    $cumulative_actual += $value;
+                    $line_actual_percent[$month] = round($cumulative_actual, 2);
+                }
+                foreach ($line_planned_percent as $month => $value) {
+                    $cumulative_planned += $value;
+                    $line_planned_percent[$month] = round($cumulative_planned, 2);
+                }
+                $final_actual = end($line_actual_percent);
+                $final_planned = end($line_planned_percent);
+                foreach ($line_actual_percent as $month => $value) {
+                    $line_actual_percent[$month] = ($final_actual > 0) ? round(($value / $final_actual) * 100, 2) : 0;
+                }
+                foreach ($line_planned_percent as $month => $value) {
+                    $line_planned_percent[$month] = ($final_planned > 0) ? round(($value / $final_planned) * 100, 2) : 0;
+                }
+                $response['scurve_order_date'] = array_map(function ($month) {
+                    return date('M-y', strtotime($month . '-01'));
+                }, array_keys($line_actual_percent));
+                $response['line_actual_cost_total'] = array_values($line_actual_percent);
+                $response['line_planned_cost_total'] = array_values($line_planned_percent);
             }
 
             $co_tracker_data = array_slice(array_multisort($col = array_column($filtered = array_filter($result, fn($v) => !empty($v['co_total']) && $v['co_total'] != 0), 'total_rev_contract_value'), SORT_DESC, $filtered) ? $filtered : [], 0, 10);

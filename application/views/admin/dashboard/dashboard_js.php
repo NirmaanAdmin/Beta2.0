@@ -335,16 +335,86 @@
         return false
     }
 
-    get_order_tracker_dashboard();
-
     var budgetedVsActualCategory;
     var orderTrackerLineChartOverTime;
+    var costvsProgressLineChartOverTime;
+
+    get_order_tracker_dashboard();
 
     function get_order_tracker_dashboard() {
       "use strict";
       var data = {}
       $.post(admin_url + 'purchase/get_order_tracker_charts', data).done(function(response){
         response = JSON.parse(response);
+
+        // Update value summaries
+        $('.cost_to_complete').text(response.cost_to_complete);
+        $('.rev_contract_value').text(response.rev_contract_value);
+        $('.percentage_utilized').text(response.percentage_utilized + '%');
+        $('.budgeted_procurement_net_value').text(response.budgeted_procurement_net_value);
+
+        // Cost vs Progress S-Curve
+        var costvsProgresslineCtx = document.getElementById('costvsProgressLineChartOverTime').getContext('2d');
+        if (costvsProgressLineChartOverTime) {
+          costvsProgressLineChartOverTime.data.labels = response.scurve_order_date;
+          costvsProgressLineChartOverTime.data.datasets[0].data = response.line_actual_cost_total;
+          costvsProgressLineChartOverTime.data.datasets[1].data = response.line_planned_cost_total;
+          costvsProgressLineChartOverTime.update();
+        } else {
+          costvsProgressLineChartOverTime = new Chart(costvsProgresslineCtx, {
+            type: 'line',
+            data: {
+              labels: response.scurve_order_date,
+              datasets: [
+                {
+                  label: 'Actual Cost',
+                  data: response.line_actual_cost_total,
+                  fill: false,
+                  borderColor: 'rgba(54, 162, 235, 1)',
+                  backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                  tension: 0.3
+                },
+                {
+                  label: 'Planned Cost',
+                  data: response.line_planned_cost_total,
+                  fill: false,
+                  borderColor: 'rgba(255, 99, 132, 1)',
+                  backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                  tension: 0.3
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  display: true,
+                  position: 'bottom'
+                },
+                tooltip: {
+                  mode: 'index',
+                  intersect: false
+                }
+              },
+              scales: {
+                x: {
+                  title: {
+                    display: true,
+                    text: 'Month'
+                  }
+                },
+                y: {
+                  beginAtZero: true,
+                  title: {
+                    display: true,
+                    text: 'Percentage'
+                  }
+                }
+              }
+            }
+          });
+        }
 
         // Total Order Value Over Time
         var orderTrackerlineCtx = document.getElementById('orderTrackerLineChartOverTime').getContext('2d');
