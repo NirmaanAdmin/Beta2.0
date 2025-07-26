@@ -20618,6 +20618,35 @@ class Warehouse_model extends App_Model
 					$available_quantity = round($available_quantity, 2);
 				}
 
+				$this->db->select(db_prefix() . 'stock_reconciliation_detail.return_quantity');
+				$this->db->select("
+				    REPLACE(
+				        REPLACE(
+				            REPLACE(
+				                REPLACE(" . db_prefix() . "stock_reconciliation_detail.description, '\r', ''),
+				            '\n', ''),
+				        '<br />', ''),
+				    '<br/>', '') AS non_break_description
+				");
+				$this->db->where(db_prefix() . 'stock_reconciliation.approval', 1);
+				$this->db->where('pr_order_id', $pur_order);
+				$this->db->join(db_prefix() . 'stock_reconciliation', db_prefix() . 'stock_reconciliation.id = ' . db_prefix() . 'stock_reconciliation_detail.goods_delivery_id', 'left');
+				$this->db->group_by(db_prefix() . 'stock_reconciliation_detail.id');
+				$this->db->having('non_break_description', $non_break_description);
+				$stock_reconciliation_detail = $this->db->get(db_prefix() . 'stock_reconciliation_detail')->result_array();
+				if(!empty($stock_reconciliation_detail)) {
+					$stock_reconciliation_quantity = 0;
+					foreach ($stock_reconciliation_detail as $srkey => $srvalue) {
+						$return_quantity_json = $srvalue['return_quantity'];
+						if(!empty($return_quantity_json)) {
+							$return_quantity = json_decode($return_quantity_json, true);
+							$stock_reconciliation_quantity += array_sum($return_quantity);
+						}
+					}
+					$available_quantity = $available_quantity + $stock_reconciliation_quantity;
+					$available_quantity = round($available_quantity, 2);
+				}
+
 				if ($available_quantity > 0) {
 					$index++;
 					$unit_name = wh_get_unit_name($value['unit_id']);
