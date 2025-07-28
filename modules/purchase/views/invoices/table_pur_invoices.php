@@ -13,7 +13,8 @@ $vendors_filter_name = 'vendors';
 $billing_invoices_filter_name = 'billing_invoices';
 $budget_head_filter_name = 'budget_head';
 $billing_status_filter_name = 'billing_status';
-
+$order_tagged_filter_name = 'order_tagged';
+$order_tagged_detail_filter_name = 'order_tagged_detail';
 
 $aColumns = [
     0,
@@ -211,6 +212,53 @@ if (isset($billing_status)) {
     }
 }
 
+$order_tagged = $this->ci->input->post('order_tagged');
+if (isset($order_tagged) && $order_tagged !== '') {
+    $where_order_tagged = '';
+    $pur_order = db_prefix() . 'pur_invoices.pur_order';
+    $wo_order = db_prefix() . 'pur_invoices.wo_order';
+    $order_tracker = db_prefix() . 'pur_invoices.order_tracker_id';
+    if ($order_tagged == 1) {
+        $where_order_tagged .= " AND (
+            ($pur_order IS NOT NULL AND $pur_order != '' AND $pur_order != '0') OR 
+            ($wo_order IS NOT NULL AND $wo_order != '' AND $wo_order != '0') OR 
+            ($order_tracker IS NOT NULL AND $order_tracker != '' AND $order_tracker != '0')
+        )";
+    } elseif ($order_tagged == 2) {
+        $where_order_tagged .= " AND (
+            ($pur_order IS NULL OR $pur_order = '' OR $pur_order = '0') AND 
+            ($wo_order IS NULL OR $wo_order = '' OR $wo_order = '0') AND 
+            ($order_tracker IS NULL OR $order_tracker = '' OR $order_tracker = '0')
+        )";
+    }
+    if ($where_order_tagged !== '') {
+        array_push($where, $where_order_tagged);
+    }
+}
+
+$order_tagged_detail = $this->ci->input->post('order_tagged_detail');
+if (isset($order_tagged_detail) && is_array($order_tagged_detail) && !empty($order_tagged_detail)) {
+    $or_conditions = [];
+    foreach ($order_tagged_detail as $t) {
+        if (!empty($t)) {
+            if (strpos($t, 'po_') === 0) {
+                $id = str_replace('po_', '', $t);
+                $or_conditions[] = db_prefix() . "pur_invoices.pur_order = '$id'";
+            } elseif (strpos($t, 'wo_') === 0) {
+                $id = str_replace('wo_', '', $t);
+                $or_conditions[] = db_prefix() . "pur_invoices.wo_order = '$id'";
+            } elseif (strpos($t, 'ot_') === 0) {
+                $id = str_replace('ot_', '', $t);
+                $or_conditions[] = db_prefix() . "pur_invoices.order_tracker_id = '$id'";
+            }
+        }
+    }
+    if (!empty($or_conditions)) {
+        $where_order_tagged_detail = ' AND (' . implode(' OR ', $or_conditions) . ')';
+        array_push($where, $where_order_tagged_detail);
+    }
+}
+
 if(get_default_project()) {
     array_push($where, 'AND ' . db_prefix() . 'pur_invoices.project_id = '.get_default_project().'');
 }
@@ -233,8 +281,11 @@ update_module_filter($module_name, $budget_head_filter_name, $budget_head_filter
 $billing_status_filter_name_value = !empty($this->ci->input->post('billing_status')) ? $this->ci->input->post('billing_status') : NULL;
 update_module_filter($module_name, $billing_status_filter_name, $billing_status_filter_name_value);
 
+$order_tagged_filter_name_value = !empty($this->ci->input->post('order_tagged')) ? $this->ci->input->post('order_tagged') : NULL;
+update_module_filter($module_name, $order_tagged_filter_name, $order_tagged_filter_name_value);
 
-
+$order_tagged_detail_filter_name_value = !empty($this->ci->input->post('order_tagged_detail')) ? implode(',', $this->ci->input->post('order_tagged_detail')) : NULL;
+update_module_filter($module_name, $order_tagged_detail_filter_name, $order_tagged_detail_filter_name_value);
 
 $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [
     db_prefix() . 'pur_invoices.id as id',

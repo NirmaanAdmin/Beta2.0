@@ -23390,4 +23390,44 @@ class Purchase_model extends App_Model
 
         return $response;
     }
+
+    public function get_order_tagged_detail()
+    {
+        $response = [];
+        $this->db->select("GROUP_CONCAT(DISTINCT CONCAT('po_', " . db_prefix() . "pur_orders.id) SEPARATOR '_') as id", false);
+        $this->db->select(db_prefix() . "pur_orders.pur_order_number as name");
+        $this->db->from(db_prefix() . 'pur_invoices');
+        $this->db->join(db_prefix() . 'pur_orders', db_prefix() . 'pur_orders.id = ' . db_prefix() . 'pur_invoices.pur_order', 'left');
+        $this->db->where(db_prefix() . 'pur_invoices.pur_order !=', 0);
+        $this->db->where(db_prefix() . 'pur_invoices.pur_order IS NOT NULL', null, false);
+        $this->db->group_by(db_prefix() . 'pur_orders.id');
+        $pur_orders = $this->db->get()->result_array();
+        if (!empty($pur_orders)) {
+            $response = array_merge($response, $pur_orders);
+        }
+        $this->db->select("GROUP_CONCAT(DISTINCT CONCAT('wo_', " . db_prefix() . "wo_orders.id) SEPARATOR '_') as id", false);
+        $this->db->select(db_prefix() . "wo_orders.wo_order_number as name");
+        $this->db->from(db_prefix() . 'pur_invoices');
+        $this->db->join(db_prefix() . 'wo_orders', db_prefix() . 'wo_orders.id = ' . db_prefix() . 'pur_invoices.wo_order', 'left');
+        $this->db->where(db_prefix() . 'pur_invoices.wo_order !=', 0);
+        $this->db->where(db_prefix() . 'pur_invoices.wo_order IS NOT NULL', null, false);
+        $this->db->group_by(db_prefix() . 'wo_orders.id');
+        $wo_orders = $this->db->get()->result_array();
+        if (!empty($wo_orders)) {
+            $response = array_merge($response, $wo_orders);
+        }
+        $this->db->select("GROUP_CONCAT(DISTINCT CONCAT('ot_', " . db_prefix() . "pur_order_tracker.id) SEPARATOR '_') as id", false);
+        $this->db->select(db_prefix() . "pur_order_tracker.pur_order_name as name");
+        $this->db->from(db_prefix() . 'pur_invoices');
+        $this->db->join(db_prefix() . 'pur_order_tracker', db_prefix() . 'pur_order_tracker.id = ' . db_prefix() . 'pur_invoices.order_tracker_id', 'left');
+        $this->db->where(db_prefix() . 'pur_invoices.order_tracker_id !=', 0);
+        $this->db->where(db_prefix() . 'pur_invoices.order_tracker_id IS NOT NULL', null, false);
+        $this->db->group_by(db_prefix() . 'pur_order_tracker.id');
+        $pur_order_tracker = $this->db->get()->result_array();
+        if (!empty($pur_order_tracker)) {
+            $response = array_merge($response, $pur_order_tracker);
+        }
+
+        return $response;
+    }
 }

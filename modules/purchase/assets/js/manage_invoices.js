@@ -13,6 +13,8 @@ var expenseDropzone;
     "billing_invoices": "[name='billing_invoices']",
     "budget_head": "[name='budget_head']",
     "billing_status": "[name='billing_status']",
+    "order_tagged": "[name='order_tagged']",
+    "order_tagged_detail": "[name='order_tagged_detail[]']",
   };
 
   initDataTable(table_invoice, admin_url + 'purchase/table_pur_invoices', [], [0], Params, [5, 'desc']);
@@ -41,6 +43,12 @@ var expenseDropzone;
   });
   $(document).on('change', 'select[name="billing_status"]', function () {
     $('select[name="billing_status"]').selectpicker('refresh');
+  });
+  $(document).on('change', 'select[name="order_tagged"]', function () {
+    $('select[name="order_tagged"]').selectpicker('refresh');
+  });
+  $(document).on('change', 'select[name="order_tagged_detail[]"]', function () {
+    $('select[name="order_tagged_detail[]"]').selectpicker('refresh');
   });
 
   $(document).on('click', '.reset_vbt_all_filters', function () {
