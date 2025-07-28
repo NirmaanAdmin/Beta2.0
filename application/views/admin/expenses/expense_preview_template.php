@@ -107,6 +107,9 @@
                         class="btn btn-primary mleft10 pull-right"><?php echo e(format_invoice_number($invoice->id)). " (".$invoice->title.")"; ?></a>
                     <?php } ?>
                     <div class="pull-right">
+                        <?php if(empty($expense->vbt_id)) { ?>
+                            <a href="<?php echo admin_url('expenses/convert_pur_invoice_from_expense/' . $expense->id); ?>" class="btn btn-info convert-pur-invoice" target="_blank"><?php echo _l('convert_to_vendor_bill'); ?></a>
+                        <?php } ?>
                         <?php if (staff_can('edit',  'expenses')) { ?>
                         <a class="btn btn-default btn-with-tooltip"
                             href="<?php echo admin_url('expenses/expense/' . $expense->expenseid); ?>"

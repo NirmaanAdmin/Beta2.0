@@ -520,4 +520,52 @@ class Expenses extends AdminController
         echo json_encode($result);
         die;
     }
+
+    public function convert_pur_invoice_from_expense($id)
+    {
+        if (!$id) {
+            redirect(admin_url('expenses'));
+        }
+        $expense = $this->expenses_model->get($id);
+        if (empty($expense)) {
+            redirect(admin_url('expenses'));
+        }
+
+        $input = array();
+        $prefix = get_purchase_option('pur_inv_prefix');
+        $next_number = get_purchase_option('next_inv_number');
+        $invoice_number = $prefix . str_pad($next_number, 5, '0', STR_PAD_LEFT);
+        $group_pur = $this->expenses_model->find_budget_head_value($expense->category);
+        $vendor_submitted_amount_without_tax = !empty($expense->amount) ? $expense->amount : 0;
+        $taxrate1 = ($expense->amount * $expense->taxrate) / 100;
+        $taxrate2 = ($expense->amount * $expense->taxrate2) / 100;
+        $vendor_submitted_tax_amount = $taxrate1 + $taxrate2;
+        $vendor_submitted_amount = $vendor_submitted_amount_without_tax + $vendor_submitted_tax_amount;
+
+        $input['invoice_number'] = $invoice_number;
+        $input['vendor_invoice_number'] = NULL;
+        $input['vendor'] = !empty($expense->vendor) ? $expense->vendor : 0;
+        $input['group_pur'] = !empty($group_pur) ? $group_pur : 0;
+        $input['description_services'] = '';
+        $input['invoice_date'] = !empty($expense->date) ? $expense->date : date('Y-m-d');
+        $input['currency'] = 3;
+        $input['to_currency'] = 3;
+        $input['date_add'] = date('Y-m-d');
+        $input['payment_status'] = 0;
+        $input['project_id'] = !empty($expense->project_id) ? $expense->project_id : 1;
+        $input['vendor_submitted_amount_without_tax'] = $vendor_submitted_amount_without_tax;
+        $input['vendor_submitted_tax_amount'] = $vendor_submitted_tax_amount;
+        $input['vendor_submitted_amount'] = $vendor_submitted_amount;
+        $input['final_certified_amount'] = $vendor_submitted_amount;
+        $this->db->insert(db_prefix() . 'pur_invoices', $input);
+        $insert_id = $this->db->insert_id();
+        if ($insert_id) {
+            $this->db->where('option_name', 'next_inv_number');
+            $this->db->update(db_prefix() . 'purchase_option', ['option_val' =>  $next_number + 1]);
+        }
+        $this->db->where('id', $id);
+        $this->db->update(db_prefix() . 'expenses', ['vbt_id' => $insert_id]);
+        set_alert('success', _l('purchase_invoice') . ' ' . _l('added_successfully'));
+        redirect(admin_url('purchase/pur_invoice/' . $insert_id));
+    }
 }
