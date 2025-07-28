@@ -87,6 +87,7 @@ function meeting_management_module_init_menu_items()
         $CI->app_menu->add_sidebar_children_item('meeting_management_menu', [
             'slug'     => 'view-agendas',
             'name'     => _l('meeting_agenda'), // Menu name from language file
+            'icon' => 'fa fa-book',
             'href'     => admin_url('meeting_management/agendaController/index'), // Add module name in the URL
             'position' => 5,
         ]);
@@ -95,6 +96,7 @@ function meeting_management_module_init_menu_items()
         $CI->app_menu->add_sidebar_children_item('meeting_management_menu', [
             'slug'     => 'create-agenda',
             'name'     => _l('meeting_create_agenda'), // Menu name from language file
+            'icon' => 'fa fa-add',
             'href'     => admin_url('meeting_management/minutesController/convert_to_minutes'), // Add module name in the URL
             'position' => 5,
         ]);
@@ -102,6 +104,7 @@ function meeting_management_module_init_menu_items()
         $CI->app_menu->add_sidebar_children_item('meeting_management_menu', [
             'slug'     => 'critical-agenda',
             'name'     => _l('meeting_critical_agenda'), // Menu name from language file
+            'icon' => 'fa fa-exclamation-triangle',
             'href'     => admin_url('meeting_management/minutesController/critical_agenda'), // Add module name in the URL
             'position' => 5,
         ]);
