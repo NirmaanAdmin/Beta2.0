@@ -23466,7 +23466,7 @@ class Purchase_model extends App_Model
             $last_payment_certificate = $this->db->get(db_prefix() . 'payment_certificate')->row();
             if (!empty($last_payment_certificate)) {
                 $res = $this->get_payment_certificate_calc($last_payment_certificate->id);
-                $result['ot_previous'] = $res['ot_comulative'];
+                $result['ot_previous'] = $res['po_comulative'];
             }
         }
         return $result;

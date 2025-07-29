@@ -933,7 +933,7 @@
       'background-color': '#e9ecef',
       'pointer-events': 'none'
     });
-    var payment_certificate_id = <?php echo $payment_certificate_id; ?>;
+    var payment_certificate_id = <?php echo !empty($payment_certificate_id) ? $payment_certificate_id : 0; ?>;
     if(payment_certificate_id) {
       $('select[name="ot_id"]').parent('.bootstrap-select').css({
         'pointer-events': 'none',
