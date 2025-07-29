@@ -22018,6 +22018,7 @@ class Purchase_model extends App_Model
             ' . db_prefix() . 'payment_certificate.id,
             ' . db_prefix() . 'payment_certificate.po_id,
             ' . db_prefix() . 'payment_certificate.wo_id,
+            ' . db_prefix() . 'payment_certificate.ot_id,
             ' . db_prefix() . 'payment_certificate.approve_status,
             ' . db_prefix() . 'payment_certificate.group_pur,
             ' . db_prefix() . 'payment_certificate.vendor,
@@ -22025,6 +22026,7 @@ class Purchase_model extends App_Model
             (CASE 
                 WHEN ' . db_prefix() . 'payment_certificate.po_id IS NOT NULL THEN ' . db_prefix() . 'pur_orders.project 
                 WHEN ' . db_prefix() . 'payment_certificate.wo_id IS NOT NULL THEN ' . db_prefix() . 'wo_orders.project 
+                WHEN ' . db_prefix() . 'payment_certificate.ot_id IS NOT NULL THEN ' . db_prefix() . 'pur_order_tracker.project 
                 ELSE NULL 
              END) as project'
         );
@@ -22037,6 +22039,11 @@ class Purchase_model extends App_Model
         $this->db->join(
             db_prefix() . 'wo_orders',
             db_prefix() . 'wo_orders.id = ' . db_prefix() . 'payment_certificate.wo_id',
+            'left'
+        );
+        $this->db->join(
+            db_prefix() . 'pur_order_tracker',
+            db_prefix() . 'pur_order_tracker.id = ' . db_prefix() . 'payment_certificate.ot_id',
             'left'
         );
         if (!empty($vendors) && is_array($vendors)) {

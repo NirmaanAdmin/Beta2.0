@@ -58,6 +58,7 @@ if(get_status_modules_pur('hr_profile') == true){
 								4 => ['id' => 'wo_order', 'name' => _l('wo_order')],
 								5 => ['id' => 'po_payment_certificate', 'name' => _l('po_payment_certificate')],
 								6 => ['id' => 'wo_payment_certificate', 'name' => _l('wo_payment_certificate')],
+								7 => ['id' => 'ot_payment_certificate', 'name' => _l('ot_payment_certificate')],
 								1 => ['id' => 'pur_quotation', 'name' => _l('pur_quotation')],
 								0 => ['id' => 'pur_request', 'name' => _l('pur_request')],
 								3 => ['id' => 'payment_request', 'name' => _l('payment_request')],

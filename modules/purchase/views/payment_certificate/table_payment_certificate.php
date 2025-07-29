@@ -11,7 +11,8 @@ $aColumns = [
     db_prefix() . 'payment_certificate' . '.id as id',
     '(CASE 
         WHEN ' . db_prefix() . 'payment_certificate.po_id IS NOT NULL THEN ' . db_prefix() . 'pur_orders.project 
-        WHEN ' . db_prefix() . 'payment_certificate.wo_id IS NOT NULL THEN ' . db_prefix() . 'wo_orders.project 
+        WHEN ' . db_prefix() . 'payment_certificate.wo_id IS NOT NULL THEN ' . db_prefix() . 'wo_orders.project
+        WHEN ' . db_prefix() . 'payment_certificate.ot_id IS NOT NULL THEN ' . db_prefix() . 'pur_order_tracker.project 
         ELSE NULL 
      END) as project',
     'po_id',
@@ -31,6 +32,9 @@ $join = [
     'LEFT JOIN ' . db_prefix() . 'wo_orders 
     ON ' . db_prefix() . 'payment_certificate.wo_id IS NOT NULL 
     AND ' . db_prefix() . 'wo_orders.id = ' . db_prefix() . 'payment_certificate.wo_id',
+    'LEFT JOIN ' . db_prefix() . 'pur_order_tracker 
+    ON ' . db_prefix() . 'payment_certificate.ot_id IS NOT NULL 
+    AND ' . db_prefix() . 'pur_order_tracker.id = ' . db_prefix() . 'payment_certificate.ot_id',
     'LEFT JOIN ' . db_prefix() . 'pur_vendor 
     ON ' . db_prefix() . 'pur_vendor.userid = ' . db_prefix() . 'payment_certificate.vendor',
     'LEFT JOIN ' . db_prefix() . 'assets_group ON ' . db_prefix() . 'assets_group.group_id = ' . db_prefix() . 'payment_certificate.group_pur',
@@ -38,17 +42,42 @@ $join = [
 
 $where = [];
 if ($this->ci->input->post('vendors') && count($this->ci->input->post('vendors')) > 0) {
-    array_push($where, 'AND ((' . db_prefix() . 'payment_certificate.po_id IS NOT NULL AND ' . db_prefix() . 'pur_orders.vendor IN (' . implode(',', $this->ci->input->post('vendors')) . ')) OR (' . db_prefix() . 'payment_certificate.wo_id IS NOT NULL AND ' . db_prefix() . 'wo_orders.vendor IN (' . implode(',', $this->ci->input->post('vendors')) . ')))');
+    $vendors = implode(',', $this->ci->input->post('vendors'));
+    $where_vendors = 'AND (
+        (' . db_prefix() . 'payment_certificate.po_id IS NOT NULL AND ' . db_prefix() . 'pur_orders.vendor IN (' . $vendors . '))
+        OR
+        (' . db_prefix() . 'payment_certificate.wo_id IS NOT NULL AND ' . db_prefix() . 'wo_orders.vendor IN (' . $vendors . '))
+        OR
+        (' . db_prefix() . 'payment_certificate.ot_id IS NOT NULL AND ' . db_prefix() . 'pur_order_tracker.vendor IN (' . $vendors . '))
+    )';
+    array_push($where, $where_vendors);
 }
 
 if ($this->ci->input->post('group_pur') && count($this->ci->input->post('group_pur')) > 0) {
-    array_push($where, 'AND ((' . db_prefix() . 'payment_certificate.po_id IS NOT NULL AND ' . db_prefix() . 'pur_orders.group_pur IN (' . implode(',', $this->ci->input->post('group_pur')) . ')) OR (' . db_prefix() . 'payment_certificate.wo_id IS NOT NULL AND ' . db_prefix() . 'wo_orders.group_pur IN (' . implode(',', $this->ci->input->post('group_pur')) . ')))');
+    $group_pur = implode(',', $this->ci->input->post('group_pur'));
+    $where_group_pur = 'AND (
+        (' . db_prefix() . 'payment_certificate.po_id IS NOT NULL AND ' . db_prefix() . 'pur_orders.group_pur IN (' . $group_pur . '))
+        OR
+        (' . db_prefix() . 'payment_certificate.wo_id IS NOT NULL AND ' . db_prefix() . 'wo_orders.group_pur IN (' . $group_pur . '))
+        OR
+        (' . db_prefix() . 'payment_certificate.ot_id IS NOT NULL AND ' . db_prefix() . 'pur_order_tracker.group_pur IN (' . $group_pur . '))
+    )';
+    array_push($where, $where_group_pur);
 }
+
 if ($this->ci->input->post('approval_status') && count($this->ci->input->post('approval_status')) > 0) {
     array_push($where, 'AND (' . db_prefix() . 'payment_certificate.approve_status IN (' . implode(',', $this->ci->input->post('approval_status')) . '))');
 }
 if ($this->ci->input->post('projects') && count($this->ci->input->post('projects')) > 0) {
-    array_push($where, 'AND ((' . db_prefix() . 'payment_certificate.po_id IS NOT NULL AND ' . db_prefix() . 'pur_orders.project IN (' . implode(',', $this->ci->input->post('projects')) . ')) OR (' . db_prefix() . 'payment_certificate.wo_id IS NOT NULL AND ' . db_prefix() . 'wo_orders.project IN (' . implode(',', $this->ci->input->post('projects')) . ')))');
+    $projects = implode(',', $this->ci->input->post('projects'));
+    $where_projects = 'AND (
+        (' . db_prefix() . 'payment_certificate.po_id IS NOT NULL AND ' . db_prefix() . 'pur_orders.project IN (' . $projects . '))
+        OR
+        (' . db_prefix() . 'payment_certificate.wo_id IS NOT NULL AND ' . db_prefix() . 'wo_orders.project IN (' . $projects . '))
+        OR
+        (' . db_prefix() . 'payment_certificate.ot_id IS NOT NULL AND ' . db_prefix() . 'pur_order_tracker.project IN (' . $projects . '))
+    )';
+    array_push($where, $where_projects);
 }
 
 $vendors_filter_name_value = !empty($this->ci->input->post('vendors')) ? implode(',', $this->ci->input->post('vendors')) : NULL;
@@ -75,9 +104,11 @@ $result = data_tables_init(
         db_prefix() . 'payment_certificate.id',
         db_prefix() . 'payment_certificate.po_id',
         db_prefix() . 'payment_certificate.wo_id',
+        db_prefix() . 'payment_certificate.ot_id',
         db_prefix() . 'payment_certificate.approve_status',
         db_prefix() . 'payment_certificate.wo_number',
         db_prefix() . 'payment_certificate.po_number',
+        db_prefix() . 'payment_certificate.ot_number',
         db_prefix() . 'payment_certificate.vendor',
         db_prefix() . 'payment_certificate.group_pur',
     ],
@@ -118,6 +149,9 @@ foreach ($rResult as $aRow) {
             if (!empty($aRow['wo_id'])) {
                 $_data = '<a href="' . admin_url('purchase/wo_payment_certificate/' . $aRow['wo_id'] . '/' . $aRow['id']) . '" target="_blank">' . _l('view') . '</a>';
             }
+            if (!empty($aRow['ot_id'])) {
+                $_data = '<a href="' . admin_url('purchase/ot_payment_certificate/' . $aRow['ot_id'] . '/' . $aRow['id']) . '" target="_blank">' . _l('view') . '</a>';
+            }
         } elseif ($aColumns[$i] == 'po_id') {
             $_data = '';
             if (!empty($aRow['po_id'])) {
@@ -125,6 +159,9 @@ foreach ($rResult as $aRow) {
             }
             if (!empty($aRow['wo_id'])) {
                 $_data = '<a href="' . admin_url('purchase/work_order/' . $aRow['wo_id']) . '" target="_blank">' . $aRow['wo_number'] . '</a>';
+            }
+            if (!empty($aRow['ot_id'])) {
+                $_data = $aRow['ot_number'];
             }
         } elseif ($aColumns[$i] == 'company') {
             $_data = '<a href="' . admin_url('purchase/vendor/' . $aRow['vendor']) . '" >' . $aRow['company'] . '</a>';
