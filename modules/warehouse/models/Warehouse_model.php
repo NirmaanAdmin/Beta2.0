@@ -2555,140 +2555,238 @@ class Warehouse_model extends App_Model
 	 * @param  array $data
 	 * @return boolean
 	 */
+	// public function send_request_approve($data)
+	// {
+	// 	if (!isset($data['status'])) {
+	// 		$data['status'] = '';
+	// 	}
+	// 	$date_send = date('Y-m-d H:i:s');
+	// 	// $data_new = $this->get_approve_setting($data['rel_type'], $data['status']);
+	// 	// if(!$data_new){
+	// 	// 	return false;
+	// 	// }
+	// 	// $this->delete_approval_details($data['rel_id'], $data['rel_type']);
+	// 	// $list_staff = $this->staff_model->get();
+	// 	// $list = [];
+	// 	// $staff_addedfrom = $data['addedfrom'];
+	// 	$sender = get_staff_user_id();
+	// 	$project = 0;
+	// 	if ($data['rel_type'] == '1') {
+	// 		$module = $this->get_goods_receipt($data['rel_id']);
+	// 		$project = $module->project;
+	// 	}
+	// 	if ($data['rel_type'] == '2') {
+	// 		$module = $this->get_goods_delivery($data['rel_id']);
+	// 		$project = $module->project;
+	// 	}
+	// 	if ($data['rel_type'] == '4') {
+	// 		$module = $this->get_internal_delivery($data['rel_id']);
+	// 		$project = $module->project;
+	// 	}
+	// 	if ($data['rel_type'] == '3') {
+	// 		$module = $this->get_loss_adjustment($data['rel_id']);
+	// 		$project = $module->project;
+	// 	}
+	// 	echo '<pre>';print_r($data_new); exit;
+	// 	$data_new = $this->check_approval_setting($project, $data['rel_type'], 1);
+	// 	$this->load->model('purchase/purchase_model');
+	// 	$pur_order_data = $this->purchase_model->get_pur_order($module->pr_order_id);
+	// 	echo '<pre>';print_r($data_new); exit;
+	// 	foreach ($data_new as $key => $value) {
+	// 		$row = [];
+	// 		$row['action'] = 'approve';
+	// 		$row['staffid'] = $value['id'];
+	// 		$row['date_send'] = $date_send;
+	// 		$row['rel_id'] = $data['rel_id'];
+	// 		$row['rel_type'] = $data['rel_type'];
+	// 		$row['sender'] = $sender;
+	// 		$this->db->insert('tblwh_approval_details', $row);
+
+	// 		$this->db->where('rel_type', 'stock_import');
+	// 		$this->db->where('rel_id', $module->id);
+	// 		$existing_task = $this->db->get(db_prefix() . 'tasks')->row();
+
+	// 		if (!$existing_task) {
+	// 			if (($data['rel_type'] == '1')) {
+
+	// 				// Build the task name depending on the type
+	// 				if ($data['rel_type'] == '1') {
+	// 					$taskName = 'Review { ' . $module->goods_receipt_code . ' }{ ' . $pur_order_data->pur_order_number . ' }';
+	// 				}
+
+	// 				$taskData = [
+	// 					'name'      => $taskName,
+	// 					'is_public' => 1,
+	// 					'startdate' => _d(date('Y-m-d')),
+	// 					'duedate'   => _d(date('Y-m-d', strtotime('+3 day'))),
+	// 					'priority'  => 3,
+	// 					'rel_type'  => 'stock_import',
+	// 					'rel_id'    => $module->id,
+	// 					'category'  => $pur_order_data->group_pur,
+	// 					'price'     => $pur_order_data->total,
+	// 					'project_id' => $project,
+	// 				];
+	// 				$task_id =  $this->tasks_model->add($taskData);
+	// 				$assignss = [
+	// 					'staffid' => $value['id'],
+	// 					'taskid'  =>  $task_id
+	// 				];
+	// 				// $this->db->insert('tbltask_assigned', $assignss);
+	// 				$this->tasks_model->add_task_assignees([
+	// 					'taskid'   => $task_id,
+	// 					'assignee' => $value['id'],
+	// 				]);
+	// 			}
+	// 		}
+	// 	}
+
+	// 	// foreach ($data_new as $value) {
+	// 	// 	$row = [];
+
+	// 	// 	if ($value->approver !== 'staff') {
+	// 	// 		$value->staff_addedfrom = $staff_addedfrom;
+	// 	// 		$value->rel_type = $data['rel_type'];
+	// 	// 		$value->rel_id = $data['rel_id'];
+
+	// 	// 		$approve_value = $this->get_staff_id_by_approve_value($value, $value->approver);
+	// 	// 		if (is_numeric($approve_value)) {
+	// 	// 			$approve_value = $this->staff_model->get($approve_value)->email;
+	// 	// 		} else {
+
+	// 	// 			$this->db->where('rel_id', $data['rel_id']);
+	// 	// 			$this->db->where('rel_type', $data['rel_type']);
+	// 	// 			$this->db->delete('tblwh_approval_details');
+
+	// 	// 			return $value->approver;
+	// 	// 		}
+	// 	// 		$row['approve_value'] = $approve_value;
+
+	// 	// 		$staffid = $this->get_staff_id_by_approve_value($value, $value->approver);
+
+	// 	// 		if (empty($staffid)) {
+	// 	// 			$this->db->where('rel_id', $data['rel_id']);
+	// 	// 			$this->db->where('rel_type', $data['rel_type']);
+	// 	// 			$this->db->delete('tblwh_approval_details');
+
+	// 	// 			return $value->approver;
+	// 	// 		}
+
+	// 	// 		$row['action'] = $value->action;
+	// 	// 		$row['staffid'] = $staffid;
+	// 	// 		$row['date_send'] = $date_send;
+	// 	// 		$row['rel_id'] = $data['rel_id'];
+	// 	// 		$row['rel_type'] = $data['rel_type'];
+	// 	// 		$row['sender'] = $sender;
+	// 	// 		$this->db->insert('tblwh_approval_details', $row);
+
+	// 	// 	} else if ($value->approver == 'staff') {
+	// 	// 		$row['action'] = $value->action;
+	// 	// 		$row['staffid'] = $value->staff;
+	// 	// 		$row['date_send'] = $date_send;
+	// 	// 		$row['rel_id'] = $data['rel_id'];
+	// 	// 		$row['rel_type'] = $data['rel_type'];
+	// 	// 		$row['sender'] = $sender;
+
+	// 	// 		$this->db->insert('tblwh_approval_details', $row);
+	// 	// 	}
+	// 	// }
+	// 	return true;
+	// }
+
 	public function send_request_approve($data)
 	{
 		if (!isset($data['status'])) {
 			$data['status'] = '';
 		}
 		$date_send = date('Y-m-d H:i:s');
-		// $data_new = $this->get_approve_setting($data['rel_type'], $data['status']);
-		// if(!$data_new){
-		// 	return false;
-		// }
-		// $this->delete_approval_details($data['rel_id'], $data['rel_type']);
-		// $list_staff = $this->staff_model->get();
-		// $list = [];
-		// $staff_addedfrom = $data['addedfrom'];
 		$sender = get_staff_user_id();
 		$project = 0;
-		if ($data['rel_type'] == '1') {
+		$module = null;
+		$is_import = false;
+		$is_export = false;
+
+		// Handle different document types
+		if ($data['rel_type'] == '1') { // Goods receipt (import)
 			$module = $this->get_goods_receipt($data['rel_id']);
 			$project = $module->project;
-		}
-		if ($data['rel_type'] == '2') {
+			$is_import = true;
+		} elseif ($data['rel_type'] == '2') { // Goods delivery (export)
 			$module = $this->get_goods_delivery($data['rel_id']);
 			$project = $module->project;
-		}
-		if ($data['rel_type'] == '4') {
+			$is_export = true;
+		} elseif ($data['rel_type'] == '4') { // Internal delivery (export)
 			$module = $this->get_internal_delivery($data['rel_id']);
 			$project = $module->project;
-		}
-		if ($data['rel_type'] == '3') {
+			$is_export = true;
+		} elseif ($data['rel_type'] == '3') { // Loss adjustment
 			$module = $this->get_loss_adjustment($data['rel_id']);
 			$project = $module->project;
 		}
+
 		$data_new = $this->check_approval_setting($project, $data['rel_type'], 1);
-		$this->load->model('purchase/purchase_model');
-		$pur_order_data = $this->purchase_model->get_pur_order($module->pr_order_id);
+
+		// Load purchase model only if needed for imports
+		if ($is_import || $is_export) {
+			$this->load->model('purchase/purchase_model');
+			$pur_order_data = $this->purchase_model->get_pur_order($module->pr_order_id);
+		}
 
 		foreach ($data_new as $key => $value) {
-			$row = [];
-			$row['action'] = 'approve';
-			$row['staffid'] = $value['id'];
-			$row['date_send'] = $date_send;
-			$row['rel_id'] = $data['rel_id'];
-			$row['rel_type'] = $data['rel_type'];
-			$row['sender'] = $sender;
+			// Insert approval details
+			$row = [
+				'action' => 'approve',
+				'staffid' => $value['id'],
+				'date_send' => $date_send,
+				'rel_id' => $data['rel_id'],
+				'rel_type' => $data['rel_type'],
+				'sender' => $sender
+			];
 			$this->db->insert('tblwh_approval_details', $row);
 
-			$this->db->where('rel_type', 'stock_import');
+			// Determine task type and properties
+			$task_rel_type = $is_import ? 'stock_import' : 'stock_export';
+			$this->db->where('rel_type', $task_rel_type);
 			$this->db->where('rel_id', $module->id);
 			$existing_task = $this->db->get(db_prefix() . 'tasks')->row();
 
 			if (!$existing_task) {
-				if (($data['rel_type'] == '1')) {
+				$taskName = '';
+				$category = '';
+				$price = 0;
 
-					// Build the task name depending on the type
-					if ($data['rel_type'] == '1') {
-						$taskName = 'Review { ' . $module->goods_receipt_code . ' }{ ' . $pur_order_data->pur_order_number . ' }';
-					}
+				if ($is_import) {
+					$taskName = 'Review { ' . $module->goods_receipt_code . ' }{ ' . $pur_order_data->pur_order_number . ' }';
+					$category = $pur_order_data->group_pur;
+					$price = $pur_order_data->total;
+				} elseif ($is_export) {
+					$taskName = 'Review { ' . $module->goods_delivery_code . ' }{ ' . $pur_order_data->pur_order_number . ' }';
+					$category = isset($pur_order_data->group_pur) ? $pur_order_data->group_pur : '';
+					$price = isset($pur_order_data->total) ? $pur_order_data->total : 0;
+				}
 
+				if ($is_import || $is_export) {
 					$taskData = [
-						'name'      => $taskName,
+						'name' => $taskName,
 						'is_public' => 1,
 						'startdate' => _d(date('Y-m-d')),
-						'duedate'   => _d(date('Y-m-d', strtotime('+3 day'))),
-						'priority'  => 3,
-						'rel_type'  => 'stock_import',
-						'rel_id'    => $module->id,
-						'category'  => $pur_order_data->group_pur,
-						'price'     => $pur_order_data->total,
+						'duedate' => _d(date('Y-m-d', strtotime('+3 day'))),
+						'priority' => 3,
+						'rel_type' => $task_rel_type,
+						'rel_id' => $module->id,
+						'category' => $category,
+						'price' => $price,
 						'project_id' => $project,
 					];
-					$task_id =  $this->tasks_model->add($taskData);
-					$assignss = [
-						'staffid' => $value['id'],
-						'taskid'  =>  $task_id
-					];
-					// $this->db->insert('tbltask_assigned', $assignss);
+
+					$task_id = $this->tasks_model->add($taskData);
 					$this->tasks_model->add_task_assignees([
-						'taskid'   => $task_id,
+						'taskid' => $task_id,
 						'assignee' => $value['id'],
 					]);
 				}
 			}
 		}
 
-		// foreach ($data_new as $value) {
-		// 	$row = [];
-
-		// 	if ($value->approver !== 'staff') {
-		// 		$value->staff_addedfrom = $staff_addedfrom;
-		// 		$value->rel_type = $data['rel_type'];
-		// 		$value->rel_id = $data['rel_id'];
-
-		// 		$approve_value = $this->get_staff_id_by_approve_value($value, $value->approver);
-		// 		if (is_numeric($approve_value)) {
-		// 			$approve_value = $this->staff_model->get($approve_value)->email;
-		// 		} else {
-
-		// 			$this->db->where('rel_id', $data['rel_id']);
-		// 			$this->db->where('rel_type', $data['rel_type']);
-		// 			$this->db->delete('tblwh_approval_details');
-
-		// 			return $value->approver;
-		// 		}
-		// 		$row['approve_value'] = $approve_value;
-
-		// 		$staffid = $this->get_staff_id_by_approve_value($value, $value->approver);
-
-		// 		if (empty($staffid)) {
-		// 			$this->db->where('rel_id', $data['rel_id']);
-		// 			$this->db->where('rel_type', $data['rel_type']);
-		// 			$this->db->delete('tblwh_approval_details');
-
-		// 			return $value->approver;
-		// 		}
-
-		// 		$row['action'] = $value->action;
-		// 		$row['staffid'] = $staffid;
-		// 		$row['date_send'] = $date_send;
-		// 		$row['rel_id'] = $data['rel_id'];
-		// 		$row['rel_type'] = $data['rel_type'];
-		// 		$row['sender'] = $sender;
-		// 		$this->db->insert('tblwh_approval_details', $row);
-
-		// 	} else if ($value->approver == 'staff') {
-		// 		$row['action'] = $value->action;
-		// 		$row['staffid'] = $value->staff;
-		// 		$row['date_send'] = $date_send;
-		// 		$row['rel_id'] = $data['rel_id'];
-		// 		$row['rel_type'] = $data['rel_type'];
-		// 		$row['sender'] = $sender;
-
-		// 		$this->db->insert('tblwh_approval_details', $row);
-		// 	}
-		// }
 		return true;
 	}
 
@@ -3933,11 +4031,11 @@ class Warehouse_model extends App_Model
 			//send request approval
 			if ($save_and_send_request == 'true') {
 				/*check send request with type =2 , inventory delivery voucher*/
-				$check_r = $this->check_inventory_delivery_voucher(['rel_id' => $insert_id, 'rel_type' => '2']);
+				// $check_r = $this->check_inventory_delivery_voucher(['rel_id' => $insert_id, 'rel_type' => '2']);
 
-				if ($check_r['flag_export_warehouse'] == 1) {
-					$this->send_request_approve(['rel_id' => $insert_id, 'rel_type' => '2', 'addedfrom' => $data['addedfrom']]);
-				}
+				// if ($check_r['flag_export_warehouse'] == 1) {
+				$this->send_request_approve(['rel_id' => $insert_id, 'rel_type' => '2', 'addedfrom' => $data['addedfrom']]);
+				// }
 			}
 		}
 
@@ -20634,11 +20732,11 @@ class Warehouse_model extends App_Model
 				$this->db->group_by(db_prefix() . 'stock_reconciliation_detail.id');
 				$this->db->having('non_break_description', $non_break_description);
 				$stock_reconciliation_detail = $this->db->get(db_prefix() . 'stock_reconciliation_detail')->result_array();
-				if(!empty($stock_reconciliation_detail)) {
+				if (!empty($stock_reconciliation_detail)) {
 					$stock_reconciliation_quantity = 0;
 					foreach ($stock_reconciliation_detail as $srkey => $srvalue) {
 						$return_quantity_json = $srvalue['return_quantity'];
-						if(!empty($return_quantity_json)) {
+						if (!empty($return_quantity_json)) {
 							$return_quantity = json_decode($return_quantity_json, true);
 							$stock_reconciliation_quantity += array_sum($return_quantity);
 						}
