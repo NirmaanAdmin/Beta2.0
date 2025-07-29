@@ -50,6 +50,12 @@ $relTypeMap = [
         'approve_column' => 'approval',
         'approved_value' => 1
     ],
+    'stock_export' => [
+        'table' => 'tblgoods_delivery',
+        'id_column' => 'id',
+        'approve_column' => 'approval',
+        'approved_value' => 1
+    ],
     'wo_order' => [
         'table' => 'tblwo_orders',
         'id_column' => 'id',
