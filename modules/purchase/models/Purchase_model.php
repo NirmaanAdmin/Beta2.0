@@ -18664,9 +18664,12 @@ class Purchase_model extends App_Model
         if (!empty($module->wo_id)) {
             $pur_order = $this->get_wo_order($module->wo_id);
             $po_wo_id = $module->wo_id;
-        } else {
+        } else if(!empty($module->po_id)) {
             $pur_order = $this->get_pur_order($module->po_id);
             $po_wo_id = $module->po_id;
+        } else {
+            $pur_order = $this->get_order_tracker($module->ot_id);
+            $po_wo_id = $module->ot_id;
         }
         $project = $pur_order->project;
         $data_new = $this->check_approval_setting($project, $data['rel_type'], 1);
@@ -23436,5 +23439,113 @@ class Purchase_model extends App_Model
         }
 
         return $response;
+    }
+
+    public function get_all_created_order_tracker()
+    {
+        $this->db->order_by('id', 'desc');
+        return $this->db->get(db_prefix() . 'pur_order_tracker')->result_array();
+    }
+
+    public function get_ot_contract_data($ot_id, $payment_certificate_id = '', $cal = 1)
+    {
+        $result = array();
+        $payment_certificate = array();
+        $order_tracker = $this->get_order_tracker($ot_id);
+        $result['ot_name'] = $order_tracker->pur_order_name;
+        $result['ot_contract_amount'] = $order_tracker->total + $order_tracker->co_total;
+        $result['ot_previous'] = 0;
+        $result['ot_this_bill'] = 0;
+        $result['ot_comulative'] = 0;
+        if (empty($payment_certificate_id) && $cal == 1) {
+            $this->db->select('id');
+            $this->db->where('ot_id', $ot_id);
+            $this->db->where('approve_status', 2);
+            $this->db->order_by('id', 'DESC');
+            $this->db->limit(1);
+            $last_payment_certificate = $this->db->get(db_prefix() . 'payment_certificate')->row();
+            if (!empty($last_payment_certificate)) {
+                $res = $this->get_payment_certificate_calc($last_payment_certificate->id);
+                $result['ot_previous'] = $res['ot_comulative'];
+            }
+        }
+        return $result;
+    }
+
+    public function add_ot_payment_certificate($data)
+    {
+        unset($data['payment_certificate_id']);
+        $data['bill_received_on'] = to_sql_date($data['bill_received_on']);
+        if (!empty($data['bill_period_upto'])) {
+            $data['bill_period_upto'] = to_sql_date($data['bill_period_upto']);
+        }
+        if (!empty($data['order_date'])) {
+            $data['order_date'] = to_sql_date($data['order_date']);
+        }
+        $ot_id = $data['ot_id'];
+        $data['vendor'] = !empty($data['vendor']) ? $data['vendor'] : NULL;
+        $order_tracker = $this->get_order_tracker($ot_id);
+        $data['group_pur'] = !empty($order_tracker->group_pur) ? $order_tracker->group_pur : NULL;
+        if(isset($data['project'])) {
+            unset($data['project']);
+        }
+        if(isset($data['ot_previous'])) {
+            $data['po_previous'] = $data['ot_previous'];
+            unset($data['ot_previous']);
+        }
+        if(isset($data['ot_this_bill'])) {
+            $data['po_this_bill'] = $data['ot_this_bill'];
+            unset($data['ot_this_bill']);
+        }
+
+        $this->db->insert(db_prefix() . 'payment_certificate', $data);
+        $insert_id = $this->db->insert_id();
+        $this->log_pay_cer_activity($insert_id, 'pay_cert_activity_created');
+
+        $cron_email = array();
+        $cron_email_options = array();
+        $cron_email['type'] = "purchase";
+        $cron_email_options['rel_type'] = 'payment_certificate';
+        $cron_email_options['rel_name'] = 'payment_certificate';
+        $cron_email_options['insert_id'] = $insert_id;
+        $cron_email_options['user_id'] = get_staff_user_id();
+        $cron_email_options['status'] = 1;
+        $cron_email_options['approver'] = 'yes';
+        $cron_email_options['project'] = $order_tracker->project;
+        $cron_email_options['requester'] = get_staff_user_id();
+        $cron_email['options'] = json_encode($cron_email_options, true);
+        $this->db->insert(db_prefix() . 'cron_email', $cron_email);
+        $this->save_payment_certificate_files($insert_id);
+        return true;
+    }
+
+    public function update_ot_payment_certificate($data, $id)
+    {
+        unset($data['isedit']);
+        unset($data['payment_certificate_id']);
+        $data['bill_received_on'] = to_sql_date($data['bill_received_on']);
+        if (!empty($data['bill_period_upto'])) {
+            $data['bill_period_upto'] = to_sql_date($data['bill_period_upto']);
+        }
+        if (!empty($data['order_date'])) {
+            $data['order_date'] = to_sql_date($data['order_date']);
+        }
+        if(isset($data['project'])) {
+            unset($data['project']);
+        }
+        if(isset($data['ot_previous'])) {
+            $data['po_previous'] = $data['ot_previous'];
+            unset($data['ot_previous']);
+        }
+        if(isset($data['ot_this_bill'])) {
+            $data['po_this_bill'] = $data['ot_this_bill'];
+            unset($data['ot_this_bill']);
+        }
+        $data['vendor'] = !empty($data['vendor']) ? $data['vendor'] : NULL;
+        $this->db->where('id', $id);
+        $this->db->update(db_prefix() . 'payment_certificate', $data);
+        $this->log_pay_cer_activity($id, 'pay_cert_activity_updated');
+        $this->save_payment_certificate_files($id);
+        return true;
     }
 }

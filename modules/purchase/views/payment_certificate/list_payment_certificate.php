@@ -38,6 +38,9 @@ $module_name = 'payment_certificate'; ?>
                            <hr />
                         </div>
                         <div class="col-md-3">
+                           <a href="<?php echo admin_url('purchase/ot_payment_certificate'); ?>" class="btn btn-info pull-left mright10 display-block">
+                           <?php echo _l('new_payment_certificate'); ?>
+                           </a>
                            <button class="btn btn-info display-block" type="button" data-toggle="collapse" data-target="#pc-charts-section" aria-expanded="true" aria-controls="pc-charts-section">
                               <?php echo _l('Payment Certificate Charts'); ?> <i class="fa fa-chevron-down toggle-icon"></i>
                            </button>
@@ -280,7 +283,7 @@ $module_name = 'payment_certificate'; ?>
 
       // Handle individual column visibility toggling
       $('.toggle-column').on('change', function() {
-         var column = table.column($(this).val());
+         var column = table_payment_certificate.DataTable().column($(this).val());
          column.visible($(this).is(':checked'));
 
          // Sync "Select All" checkbox state
@@ -289,7 +292,7 @@ $module_name = 'payment_certificate'; ?>
       });
 
       // Sync checkboxes with column visibility on page load
-      table.columns().every(function(index) {
+      table_payment_certificate.DataTable().columns().every(function(index) {
          var column = this;
          $('.toggle-column[value="' + index + '"]').prop('checked', column.visible());
       });
@@ -300,6 +303,26 @@ $module_name = 'payment_certificate'; ?>
       });
 
    });
+</script>
+<script>
+   function send_payment_certificate_approve(id, rel_type){
+     "use strict";
+     var data = {};
+     data.rel_id = id;
+     data.rel_type = rel_type;
+     $("body").append('<div class="dt-loader"></div>');
+       $.post(admin_url + 'purchase/send_payment_certificate_approve', data).done(function(response){
+           response = JSON.parse(response);
+           $("body").find('.dt-loader').remove();
+           if (response.success === true || response.success == 'true') {
+               alert_float('success', response.message);
+               window.location.reload();
+           }else{
+             alert_float('warning', response.message);
+               window.location.reload();
+           }
+       });
+   }
 </script>
 <script src="<?php echo module_dir_url(PURCHASE_MODULE_NAME, 'assets/plugins/charts/chart.js'); ?>?v=<?php echo PURCHASE_REVISION; ?>"></script>
 </body>

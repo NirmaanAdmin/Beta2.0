@@ -106,9 +106,9 @@ $result = data_tables_init(
         db_prefix() . 'payment_certificate.wo_id',
         db_prefix() . 'payment_certificate.ot_id',
         db_prefix() . 'payment_certificate.approve_status',
-        db_prefix() . 'payment_certificate.wo_number',
-        db_prefix() . 'payment_certificate.po_number',
-        db_prefix() . 'payment_certificate.ot_number',
+        db_prefix() . 'wo_orders.wo_order_number as wo_number',
+        db_prefix() . 'pur_orders.pur_order_number as po_number',
+        db_prefix() . 'pur_order_tracker.pur_order_name as ot_number',
         db_prefix() . 'payment_certificate.vendor',
         db_prefix() . 'payment_certificate.group_pur',
     ],
@@ -171,12 +171,14 @@ foreach ($rResult as $aRow) {
             $_data = $aRow['group_name'];
         } elseif ($aColumns[$i] == 'approve_status') {
             $_data = '';
-            $list_approval_details = get_list_approval_details($aRow['id'], 'payment_certificate');
+            $list_approval_details = get_list_approval_details($aRow['id'], ['po_payment_certificate', 'wo_payment_certificate', 'ot_payment_certificate']);
             if (empty($list_approval_details)) {
                 if ($aRow['approve_status'] == 2) {
                     $_data = '<span class="label label-success">' . _l('approved') . '</span>';
                 } else if ($aRow['approve_status'] == 3) {
                     $_data = '<span class="label label-danger">' . _l('rejected') . '</span>';
+                } else if (!empty($aRow['ot_id'])) {
+                    $_data = '<a data-toggle="tooltip" data-loading-text="' . _l('wait_text') . '" class="btn btn-success lead-top-btn lead-view" data-placement="top" href="#" onclick="send_payment_certificate_approve(' . pur_html_entity_decode($aRow['id']) . ', \'ot_payment_certificate\'); return false;">' . _l('send_request_approve_pur') . '</a>';
                 } else {
                     $_data = '<span class="label label-primary">' . _l('send_request_approve_pur') . '</span>';
                 }

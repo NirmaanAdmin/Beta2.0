@@ -4103,7 +4103,11 @@ function get_list_approval_details($rel_id, $rel_type)
     $CI = &get_instance();
     $CI->db->select('*');
     $CI->db->where('rel_id', $rel_id);
-    $CI->db->where('rel_type', $rel_type);
+    if (is_array($rel_type)) {
+        $CI->db->where_in('rel_type', $rel_type);
+    } else {
+        $CI->db->where('rel_type', $rel_type);
+    }
     return $CI->db->get(db_prefix() . 'payment_certificate_details')->result_array();
 }
 

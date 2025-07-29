@@ -15652,4 +15652,62 @@ class purchase extends AdminController
             }
         }
     }
+
+    public function ot_payment_certificate($ot_id = '', $payment_certificate_id = '', $view = 0)
+    {
+        if ($this->input->post()) {
+            $pur_cert_data = $this->input->post();
+            if ($payment_certificate_id == '') {
+                $this->purchase_model->add_ot_payment_certificate($pur_cert_data);
+                set_alert('success', _l('added_successfully', _l('payment_certificate')));
+                redirect(admin_url('purchase/list_payment_certificate'));
+            } else {
+                $success = $this->purchase_model->update_ot_payment_certificate($pur_cert_data, $payment_certificate_id);
+                if ($success) {
+                    set_alert('success', _l('updated_successfully', _l('payment_certificate')));
+                }
+                redirect(admin_url('purchase/list_payment_certificate'));
+            }
+        }
+
+        if ($payment_certificate_id == '') {
+            $title = _l('create_new_payment_certificate');
+            $is_edit = false;
+        } else {
+            $data['payment_certificate'] = $this->purchase_model->get_payment_certificate($payment_certificate_id);
+            $title = _l('pur_cert_detail');
+            $data['attachments'] = $this->purchase_model->get_payment_certificate_attachments($payment_certificate_id);
+            $is_edit = true;
+        }
+
+        $this->load->model('currencies_model');
+        $data['base_currency'] = $this->currencies_model->get_base_currency();
+        $data['ot_id'] = $ot_id;
+        $data['payment_certificate_id'] = $payment_certificate_id;
+        $data['order_tracker'] = $this->purchase_model->get_order_tracker($ot_id);
+        $data['all_created_order_tracker'] = $this->purchase_model->get_all_created_order_tracker();
+        $data['title'] = $title;
+        $data['is_edit'] = $is_edit;
+        $data['is_view'] = $view;
+        $data['vendors'] = $this->purchase_model->get_vendor();
+        $data['projects'] = $this->projects_model->get_items();
+        $data['list_approve_status'] = $this->purchase_model->get_list_pay_cert_approval_details($payment_certificate_id, 'ot_payment_certificate');
+        $data['check_approve_status'] = $this->purchase_model->check_pay_cert_approval_details($payment_certificate_id, 'ot_payment_certificate');
+        $data['get_staff_sign'] = $this->purchase_model->get_pay_cert_staff_sign($payment_certificate_id, 'ot_payment_certificate');
+
+        $data['activity'] = $this->purchase_model->get_pay_cert_activity($payment_certificate_id);
+        $this->load->view('payment_certificate/ot_payment_certificate', $data);
+    }
+
+    public function get_order_tracker_detail($ot_id)
+    {
+        $order_tracker_detail = $this->purchase_model->get_order_tracker($ot_id);
+        echo json_encode($order_tracker_detail);
+    }
+
+    public function get_ot_contract_data($ot_id, $payment_certificate_id = '')
+    {
+        $ot_contract_data = $this->purchase_model->get_ot_contract_data($ot_id, $payment_certificate_id);
+        echo json_encode($ot_contract_data);
+    }
 }
