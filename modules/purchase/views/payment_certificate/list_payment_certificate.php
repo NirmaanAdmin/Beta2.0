@@ -305,11 +305,22 @@ $module_name = 'payment_certificate'; ?>
       });
 
       $(document).on('click', '.convert-pur-invoice', function(e) {
-       e.preventDefault();
-       var url = $(this).data('url');
-       if (confirm('Are you sure you want to convert this payment certificate to a vendor bill?')) {
-         window.open(url, '_blank');
-       }
+         e.preventDefault();
+         var url = $(this).data('url');
+         Swal.fire({
+            title: 'Are you sure?',
+            text: 'Do you want to convert this payment certificate to a vendor bill?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, convert it!',
+            cancelButtonText: 'Cancel'
+         }).then((result) => {
+            if (result.isConfirmed) {
+              window.open(url, '_blank');
+            }
+         });
       });
 
    });
