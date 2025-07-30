@@ -21,6 +21,7 @@ $aColumns = [
     db_prefix() . 'assets_group' . '.group_name as group_name',
     db_prefix() . 'payment_certificate' . '.approve_status as approve_status',
     db_prefix() . 'payment_certificate' . '.pur_invoice_id as applied_to_vendor_bill',
+    1,
 ];
 
 $sIndexColumn = 'id';
@@ -199,6 +200,18 @@ foreach ($rResult as $aRow) {
             }
         } elseif ($aColumns[$i] == 'project') {
             $_data = get_project_name_by_id($aRow['project']);
+        } elseif ($aColumns[$i] == 1) {
+            $pdf = '';
+            $pdf = '<div class="btn-group display-flex">';
+            $pdf .= '<a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-file-pdf"></i><span class="caret"></span></a>';
+            $pdf .= '<ul class="dropdown-menu dropdown-menu-right">';
+            $pdf .= '<li class="hidden-xs"><a href="' . admin_url('purchase/payment_certificate_pdf/' . $aRow['id'] . '?output_type=I') . '">' . _l('view_pdf') . '</a></li>';
+            $pdf .= '<li class="hidden-xs"><a href="' . admin_url('purchase/payment_certificate_pdf/' . $aRow['id'] . '?output_type=I') . '" target="_blank">' . _l('view_pdf_in_new_window') . '</a></li>';
+            $pdf .= '<li><a href="' . admin_url('purchase/payment_certificate_pdf/' . $aRow['id']) . '">' . _l('download') . '</a></li>';
+            $pdf .= '<li><a href="' . admin_url('purchase/payment_certificate_pdf/' . $aRow['id'] . '?print=true') . '" target="_blank">' . _l('print') . '</a></li>';
+            $pdf .= '</ul>';
+            $pdf .= '</div>';
+            $_data = $pdf;
         } else {
             if (strpos($aColumns[$i], 'date_picker_') !== false) {
                 $_data = (strpos($_data, ' ') !== false ? _dt($_data) : _d($_data));

@@ -205,7 +205,8 @@ $module_name = 'payment_certificate'; ?>
                               'order_date',
                               'group_pur',
                               'approval_status',
-                              'applied_to_vendor_bill'
+                              'applied_to_vendor_bill',
+                              _l('options')
                            ];
                            ?>
                            <div>
@@ -228,6 +229,7 @@ $module_name = 'payment_certificate'; ?>
                         _l('group_pur'),
                         _l('approval_status'),
                         _l('applied_to_vendor_bill'),
+                        _l('options'),
                      );
 
                      foreach ($custom_fields as $field) {

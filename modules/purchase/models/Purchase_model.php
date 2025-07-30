@@ -18330,6 +18330,11 @@ class Purchase_model extends App_Model
             $pur_order = $this->get_wo_order($payment_certificate->wo_id);
             $pur_order->pur_order_number = $pur_order->wo_order_number;
             $pur_order->pur_order_name = $pur_order->wo_order_name;
+        } else if (!empty($payment_certificate->ot_id)) {
+            $pur_order = $this->get_order_tracker($payment_certificate->ot_id);
+            $pur_order->pur_order_number = $pur_order->pur_order_name;
+            $pur_order->pur_order_name = $pur_order->pur_order_name;
+            $pur_order->order_date = $payment_certificate->order_date;
         } else {
             $pur_order = $this->get_pur_order($payment_certificate->po_id);
         }
@@ -18360,9 +18365,22 @@ class Purchase_model extends App_Model
         </table>
         <br>';
 
-        $po_no_title = !empty($payment_certificate->wo_id) ? _l('wo_no') : _l('po_no');
-        $wo_date_title = !empty($payment_certificate->wo_id) ? _l('wo_date') : _l('po_date');
-        $wo_description_title = !empty($payment_certificate->wo_id) ? _l('wo_description') : _l('po_description');
+        $po_no_title = '';
+        $wo_date_title = '';
+        $wo_description_title = '';
+        if(!empty($payment_certificate->po_id)) {
+            $po_no_title = _l('po_no');
+            $wo_date_title = _l('po_date');
+            $wo_description_title = _l('po_description');
+        } else if(!empty($payment_certificate->wo_id)) {
+            $po_no_title = _l('wo_no');
+            $wo_date_title = _l('wo_date');
+            $wo_description_title = _l('wo_description');
+        } else if(!empty($payment_certificate->ot_id)) {
+            $po_no_title = _l('Order Tracker Name');
+            $wo_date_title = _l('order_date');
+            $wo_description_title = _l('Order Tracker Description');
+        }
 
         $html .= '<table class="table" style="width: 100%" border="1" style="font-size:13px">
             <tbody>
