@@ -23566,4 +23566,11 @@ class Purchase_model extends App_Model
         $this->save_payment_certificate_files($id);
         return true;
     }
+
+    public function get_pc_with_vbt($id)
+    {
+        $this->db->where('id', $id);
+        $this->db->where('pur_invoice_id IS NOT NULL', null, false);
+        return $this->db->get(db_prefix() . 'payment_certificate')->row();
+    }
 }
