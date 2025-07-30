@@ -12600,11 +12600,14 @@ class purchase extends AdminController
             redirect(admin_url('purchase/list_payment_certificate'));
         }
 
-        if (!empty($payment_certificate->wo_id)) {
+        if (!empty($payment_certificate->po_id)) {
+            $pur_order = $this->purchase_model->get_pur_order($payment_certificate->po_id);
+            $order_name = $pur_order->pur_order_name;
+        } else if (!empty($payment_certificate->wo_id)) {
             $pur_order = $this->purchase_model->get_wo_order($payment_certificate->wo_id);
             $order_name = $pur_order->wo_order_name;
         } else {
-            $pur_order = $this->purchase_model->get_pur_order($payment_certificate->po_id);
+            $pur_order = $this->purchase_model->get_order_tracker($payment_certificate->ot_id);
             $order_name = $pur_order->pur_order_name;
         }
         $input = array();
@@ -12626,6 +12629,7 @@ class purchase extends AdminController
         $input['payment_status'] = 0;
         $input['pur_order'] = !empty($payment_certificate->po_id) ? $payment_certificate->po_id : NULL;
         $input['wo_order'] = !empty($payment_certificate->wo_id) ? $payment_certificate->wo_id : NULL;
+        $input['order_tracker_id'] = !empty($payment_certificate->ot_id) ? $payment_certificate->ot_id : NULL;
         $input['project_id'] = isset($pur_order->project) ? $pur_order->project : 1;
         $input['vendor_submitted_amount_without_tax'] = $payment_certificate_calc['sub_fg_3'];
         $input['vendor_submitted_tax_amount'] = $payment_certificate_calc['tot_app_tax_3'];
