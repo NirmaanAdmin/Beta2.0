@@ -78,6 +78,7 @@ return App_table::find('expenses')
             'tax2',
             'project_id',
             'recurring',
+            'vbt_id',
         ]);
         $output  = $result['output'];
         $rResult = $result['rResult'];
@@ -167,9 +168,13 @@ return App_table::find('expenses')
 
             $row[] = '<a href="' . admin_url('clients/client/' . $aRow['clientid']) . '">' . e($aRow['company']) . '</a>';
 
-            if ($aRow['invoiceid']) {
-                $invoice_data = get_invoice_data($aRow['invoiceid']);
-                $row[] = '<a href="' . admin_url('invoices/list_invoices/' . $aRow['invoiceid']) . '">' .$invoice_data->title . '</a>';
+            if ($aRow['vbt_id']) {
+                $pur_invoices = get_pur_invoices($aRow['vbt_id']);
+                if(!empty($pur_invoices)) {
+                    $row[] = '<a href="' . admin_url('purchase/purchase_invoice/' . $aRow['vbt_id']) . '" target="_blank">' .$pur_invoices->invoice_number . '</a>';
+                } else {
+                  $row[] = '';  
+                }
             } else {
                 $row[] = '';
             }
