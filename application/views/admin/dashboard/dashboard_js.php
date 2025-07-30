@@ -340,6 +340,7 @@
     var costvsProgressLineChartOverTime;
 
     get_order_tracker_dashboard();
+    get_vendors_dashboard();
 
     function get_order_tracker_dashboard() {
       "use strict";
@@ -524,6 +525,17 @@
           });
         }
 
+      });
+    }
+
+    function get_vendors_dashboard() {
+      "use strict";
+      var data = {}
+      $.post(admin_url + 'purchase/get_vendors_charts', data).done(function(response){
+        response = JSON.parse(response);
+        // Update value summaries
+        $('.total_vendors').text(response.total_vendors);
+        $('.onboarded_this_week').text(response.onboarded_this_week);
       });
     }
 </script>

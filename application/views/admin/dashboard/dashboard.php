@@ -91,6 +91,22 @@
                                   </div>
                                 </div>
                               </div>
+                              <div class="row mtop20">
+                                <div class="col-md-6 tw-mb-2 sm:tw-mb-0">
+                                  <div class="top_stats_wrapper">
+                                    <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                      <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                        <span class="tw-truncate charts_stat_title">Vendors onboarded this week</span>
+                                      </div>
+                                    </div>
+                                    <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                                      <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                        <span class="tw-truncate charts_stat_value onboarded_this_week"></span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
                             </div>
                         </div>
                         <div class="row mtop20">
