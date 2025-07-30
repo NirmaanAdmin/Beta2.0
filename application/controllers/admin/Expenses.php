@@ -530,6 +530,11 @@ class Expenses extends AdminController
         if (empty($expense)) {
             redirect(admin_url('expenses'));
         }
+        $expense_vbt = $this->expenses_model->get_expense_with_vbt($id);
+        if (!empty($expense_vbt)) {
+            set_alert('warning', 'This expense has already been converted to a vendor bill.');
+            redirect(admin_url('expenses'));
+        }
 
         $input = array();
         $prefix = get_purchase_option('pur_inv_prefix');
@@ -546,7 +551,7 @@ class Expenses extends AdminController
         $input['vendor_invoice_number'] = NULL;
         $input['vendor'] = !empty($expense->vendor) ? $expense->vendor : 0;
         $input['group_pur'] = !empty($group_pur) ? $group_pur : 0;
-        $input['description_services'] = '';
+        $input['description_services'] = !empty($expense->expense_name) ? $expense->expense_name : '';
         $input['invoice_date'] = !empty($expense->date) ? $expense->date : date('Y-m-d');
         $input['currency'] = 3;
         $input['to_currency'] = 3;

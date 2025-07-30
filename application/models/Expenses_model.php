@@ -1074,4 +1074,11 @@ class Expenses_model extends App_Model
 
         return $response;
     }
+
+    public function get_expense_with_vbt($id)
+    {
+        $this->db->where('id', $id);
+        $this->db->where('vbt_id IS NOT NULL', null, false);
+        return $this->db->get(db_prefix() . 'expenses')->row();
+    }
 }
