@@ -108,7 +108,9 @@
                     <?php } ?>
                     <div class="pull-right">
                         <?php if(empty($expense->vbt_id)) { ?>
-                            <a href="<?php echo admin_url('expenses/convert_pur_invoice_from_expense/' . $expense->id); ?>" class="btn btn-info convert-pur-invoice" target="_blank"><?php echo _l('convert_to_vendor_bill'); ?></a>
+                            <a href="<?php echo admin_url('expenses/convert_pur_invoice_from_expense/' . $expense->id); ?>" class="btn btn-info convert-pur-invoice" data-url="<?php echo admin_url('expenses/convert_pur_invoice_from_expense/' . $expense->id); ?>">
+                               <?php echo _l('convert_to_vendor_bill'); ?>
+                            </a>
                         <?php } ?>
                         <?php if (staff_can('edit',  'expenses')) { ?>
                         <a class="btn btn-default btn-with-tooltip"
@@ -441,6 +443,14 @@ $("body").on('change', 'select[name="applied_to_invoice"]', function () {
         }
     } else {
         alert_float('warning', "Please select the valid invoice." );
+    }
+});
+
+$(document).on('click', '.convert-pur-invoice', function(e) {
+    e.preventDefault();
+    var url = $(this).data('url');
+    if (confirm('Are you sure you want to convert this expense to a vendor bill?')) {
+        window.open(url, '_blank');
     }
 });
 

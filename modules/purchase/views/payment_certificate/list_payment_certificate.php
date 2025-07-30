@@ -302,6 +302,14 @@ $module_name = 'payment_certificate'; ?>
          e.stopPropagation();
       });
 
+      $(document).on('click', '.convert-pur-invoice', function(e) {
+       e.preventDefault();
+       var url = $(this).data('url');
+       if (confirm('Are you sure you want to convert this payment certificate to a vendor bill?')) {
+         window.open(url, '_blank');
+       }
+      });
+
    });
 </script>
 <script>
