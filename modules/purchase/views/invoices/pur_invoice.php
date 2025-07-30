@@ -491,6 +491,7 @@
 <?php require 'modules/purchase/assets/js/pur_invoice_js.php'; ?>
 <script>
 	$(document).ready(function() {
+		var expense_id = <?php echo isset($pur_invoice) ? $pur_invoice->expense_id : ''; ?>;
 		// Function to calculate sum and update input
 		function calculateSum() {
 			// Get the values from the input fields
@@ -523,8 +524,10 @@
 					$('select[name="vendor"]').val(response.vendor).trigger('change');
 					$('select[name="group_pur"]').val(response.group_pur).trigger('change');
 					$('select[name="project_id"]').val(response.project).trigger('change');
-					$('input[name="vendor_submitted_amount_without_tax"]').val(vendor_submitted_amount_without_tax).trigger('change');
-					$('input[name="vendor_submitted_tax_amount"]').val(response.total_tax).trigger('change');
+					if(empty(expense_id)) {
+						$('input[name="vendor_submitted_amount_without_tax"]').val(vendor_submitted_amount_without_tax).trigger('change');
+						$('input[name="vendor_submitted_tax_amount"]').val(response.total_tax).trigger('change');
+					}
 					$('textarea[name="description_services"]').val(response.pur_order_name);
 					calculateSum();
 					init_selectpicker();
@@ -535,8 +538,10 @@
 				$('select[name="vendor"]').val('').trigger('change');
 				$('select[name="group_pur"]').val('').trigger('change');
 				$('select[name="project_id"]').val('').trigger('change');
-				$('input[name="vendor_submitted_amount_without_tax"]').val('').trigger('change');
-				$('input[name="vendor_submitted_tax_amount"]').val('').trigger('change');
+				if(empty(expense_id)) {
+					$('input[name="vendor_submitted_amount_without_tax"]').val('').trigger('change');
+					$('input[name="vendor_submitted_tax_amount"]').val('').trigger('change');
+				}
 				$('textarea[name="description_services"]').val('');
 				calculateSum();
 				init_selectpicker();
@@ -557,8 +562,10 @@
 					$('select[name="vendor"]').val(response.vendor).trigger('change');
 					$('select[name="group_pur"]').val(response.group_pur).trigger('change');
 					$('select[name="project_id"]').val(response.project).trigger('change');
-					$('input[name="vendor_submitted_amount_without_tax"]').val(vendor_submitted_amount_without_tax).trigger('change');
-					$('input[name="vendor_submitted_tax_amount"]').val(response.total_tax).trigger('change');
+					if(empty(expense_id)) {
+						$('input[name="vendor_submitted_amount_without_tax"]').val(vendor_submitted_amount_without_tax).trigger('change');
+						$('input[name="vendor_submitted_tax_amount"]').val(response.total_tax).trigger('change');
+					}
 					$('textarea[name="description_services"]').val(response.wo_order_name);
 					calculateSum();
 					init_selectpicker();
@@ -569,8 +576,10 @@
 				$('select[name="vendor"]').val('').trigger('change');
 				$('select[name="group_pur"]').val('').trigger('change');
 				$('select[name="project_id"]').val('').trigger('change');
-				$('input[name="vendor_submitted_amount_without_tax"]').val('').trigger('change');
-				$('input[name="vendor_submitted_tax_amount"]').val('').trigger('change');
+				if(empty(expense_id)) {
+					$('input[name="vendor_submitted_amount_without_tax"]').val('').trigger('change');
+					$('input[name="vendor_submitted_tax_amount"]').val('').trigger('change');
+				}
 				$('textarea[name="description_services"]').val('');
 				calculateSum();
 				init_selectpicker();
@@ -589,7 +598,9 @@
 					$('select[name="wo_order"]').prop('disabled', true).selectpicker('refresh');
 					$('select[name="vendor"]').val(response.vendor).trigger('change');
 					$('select[name="group_pur"]').val(response.group_pur).trigger('change');
-					$('input[name="vendor_submitted_amount_without_tax"]').val(parseFloat(response.total)).trigger('change');
+					if(empty(expense_id)) {
+						$('input[name="vendor_submitted_amount_without_tax"]').val(parseFloat(response.total)).trigger('change');
+					}
 					calculateSum();
 					init_selectpicker();
 
@@ -600,8 +611,10 @@
 				$('select[name="vendor"]').val('').trigger('change');
 				$('select[name="group_pur"]').val('').trigger('change');
 				$('select[name="project_id"]').val('').trigger('change');
-				$('input[name="vendor_submitted_amount_without_tax"]').val('').trigger('change');
-				$('input[name="vendor_submitted_tax_amount"]').val('').trigger('change');
+				if(empty(expense_id)) {
+					$('input[name="vendor_submitted_amount_without_tax"]').val('').trigger('change');
+					$('input[name="vendor_submitted_tax_amount"]').val('').trigger('change');
+				}
 				$('textarea[name="description_services"]').val('');
 				calculateSum();
 				init_selectpicker();

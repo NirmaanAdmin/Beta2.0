@@ -171,7 +171,7 @@ return App_table::find('expenses')
             if ($aRow['vbt_id']) {
                 $pur_invoices = get_pur_invoices($aRow['vbt_id']);
                 if(!empty($pur_invoices)) {
-                    $row[] = '<a href="' . admin_url('purchase/purchase_invoice/' . $aRow['vbt_id']) . '" target="_blank">' .$pur_invoices->invoice_number . '</a>';
+                    $row[] = '<a href="' . admin_url('purchase/pur_invoice/' . $aRow['vbt_id']) . '" target="_blank">' .$pur_invoices->invoice_number . '</a>';
                 } else {
                   $row[] = '';  
                 }
