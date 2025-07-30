@@ -14949,7 +14949,7 @@ class Changee_model extends App_Model
     {
         $response = array();
         $vendors = isset($data['vendors']) ? $data['vendors'] : '';
-        $projects = isset($data['projects']) ? $data['projects'] : '';
+        $projects = isset($data['projects']) ? $data['projects'] : [get_default_project()];
         $this->load->model('currencies_model');
         $this->load->model('departments_model');
         $base_currency = $this->currencies_model->get_base_currency();

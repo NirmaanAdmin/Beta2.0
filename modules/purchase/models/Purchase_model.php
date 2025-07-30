@@ -21687,7 +21687,7 @@ class Purchase_model extends App_Model
     {
         $response = array();
         $vendors = isset($data['vendors']) ? $data['vendors'] : '';
-        $projects = isset($data['projects']) ? $data['projects'] : '';
+        $projects = isset($data['projects']) ? $data['projects'] : [get_default_project()];
         $group_pur = isset($data['group_pur']) ? $data['group_pur'] : '';
         $this->load->model('currencies_model');
         $base_currency = $this->currencies_model->get_base_currency();
@@ -21810,7 +21810,7 @@ class Purchase_model extends App_Model
     {
         $response = array();
         $vendors = isset($data['vendors']) ? $data['vendors'] : '';
-        $projects = isset($data['projects']) ? $data['projects'] : '';
+        $projects = isset($data['projects']) ? $data['projects'] : [get_default_project()];
         $group_pur = isset($data['group_pur']) ? $data['group_pur'] : '';
         $this->load->model('currencies_model');
         $this->load->model('departments_model');
@@ -21931,7 +21931,7 @@ class Purchase_model extends App_Model
     public function get_pr_charts($data = array())
     {
         $response = array();
-        $projects = isset($data['projects']) ? $data['projects'] : '';
+        $projects = isset($data['projects']) ? $data['projects'] : [get_default_project()];
         $group_pur = isset($data['group_pur']) ? $data['group_pur'] : '';
         $this->load->model('currencies_model');
         $this->load->model('departments_model');
@@ -21944,6 +21944,7 @@ class Purchase_model extends App_Model
         $response['budget_head_name'] = $response['budget_head_value'] = array();
         $response['department_name'] = $response['department_value'] = array();
         $response['line_order_date'] = $response['line_order_total'] = array();
+        $response['pie_status_name'] = $response['pie_status_value'] = array();
 
         $this->db->select('id, pur_rq_code, status, total, total_tax, group_pur, project, department, request_date');
         if (!empty($projects) && is_array($projects)) {
@@ -22006,6 +22007,17 @@ class Purchase_model extends App_Model
             if (!empty($department_grouped)) {
                 $response['department_name'] = array_keys($department_grouped);
                 $response['department_value'] = array_values($department_grouped);
+            }
+
+            $status_grouped = array_reduce($pur_request, function ($carry, $item) {
+                $group = get_status_approve_str($item['status']);
+                $carry[$group] = ($carry[$group] ?? 0) + 1;
+                return $carry;
+            }, []);
+
+            if (!empty($status_grouped)) {
+                $response['pie_status_name'] = array_keys($status_grouped);
+                $response['pie_status_value'] = array_values($status_grouped);
             }
         }
 

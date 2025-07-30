@@ -127,6 +127,50 @@
                 </div>
             </div>
 
+            <div class="col-md-12 mtop20">
+                <div class="panel_s">
+                    <div class="panel-body padding-15">
+                        <div class="row">
+                            <div class="col-md-4">
+                              <p class="mbot15 charts_stat_title">Pie Chart for PR Approval Status</p>
+                              <div style="width: 100%; height: 450px; display: flex; justify-content: left;">
+                                 <canvas id="pieChartForPRApprovalStatus"></canvas>
+                              </div>
+                            </div>
+                            <div class="col-md-4">
+                              <p class="mbot15 charts_stat_title">Pie Chart for PO Approval Status</p>
+                              <div style="width: 100%; height: 450px; display: flex; justify-content: left;">
+                                 <canvas id="pieChartForPOApprovalStatus"></canvas>
+                              </div>
+                            </div>
+                            <div class="col-md-4">
+                              <p class="mbot15 charts_stat_title">Pie Chart for WO Approval Status</p>
+                              <div style="width: 100%; height: 450px; display: flex; justify-content: left;">
+                                 <canvas id="pieChartForWOApprovalStatus"></canvas>
+                              </div>
+                            </div>
+                        </div>
+                        <div class="row mtop20">
+                            <div class="col-md-4">
+                              <p class="mbot15 charts_stat_title">Pie Chart for CO Approval Status</p>
+                              <div style="width: 100%; height: 450px; display: flex; justify-content: left;">
+                                 <canvas id="pieChartForCOApprovalStatus"></canvas>
+                              </div>
+                            </div>
+                            <div class="col-md-4">
+                              <p class="mbot15 charts_stat_title">Total Vendor Bills per Billing Status</p>
+                              <div style="width: 100%; height: 450px; display: flex; justify-content: left;">
+                                 <canvas id="pieChartForBillingStatus"></canvas>
+                              </div>
+                            </div>
+                            <div class="col-md-4">
+                              
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="col-md-8 mtop20" data-container="left-8">
                 <?php $this->load->view('admin/dashboard/widgets/user_data'); ?>
                 <?php $this->load->view('admin/dashboard/widgets/finance_overview'); ?>

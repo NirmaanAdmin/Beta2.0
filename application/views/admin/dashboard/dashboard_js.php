@@ -338,9 +338,19 @@
     var budgetedVsActualCategory;
     var orderTrackerLineChartOverTime;
     var costvsProgressLineChartOverTime;
+    var pieChartForPRApprovalStatus;
+    var pieChartForPOApprovalStatus;
+    var pieChartForWOApprovalStatus;
+    var pieChartForCOApprovalStatus;
+    var pieChartForBillingStatus;
 
     get_order_tracker_dashboard();
     get_vendors_dashboard();
+    get_purchase_request_dashboard();
+    get_purchase_order_dashboard();
+    get_work_order_dashboard();
+    get_change_order_dashboard();
+    get_vbt_dashboard();
 
     function get_order_tracker_dashboard() {
       "use strict";
@@ -536,6 +546,240 @@
         // Update value summaries
         $('.total_vendors').text(response.total_vendors);
         $('.onboarded_this_week').text(response.onboarded_this_week);
+      });
+    }
+
+    function get_purchase_request_dashboard() {
+      "use strict";
+      var data = {}
+      $.post(admin_url + 'purchase/get_pr_charts', data).done(function(response){
+        response = JSON.parse(response);
+        // Pie Chart for PO Approval Status
+        var prStatusPieCtx = document.getElementById('pieChartForPRApprovalStatus').getContext('2d');
+        var prStatusData = response.pie_status_value;
+        var prStatusLabels = response.pie_status_name;
+
+        if (pieChartForPRApprovalStatus) {
+          pieChartForPRApprovalStatus.data.labels = prStatusLabels;
+          pieChartForPRApprovalStatus.data.datasets[0].data = prStatusData;
+          pieChartForPRApprovalStatus.update();
+        } else {
+          pieChartForPRApprovalStatus = new Chart(prStatusPieCtx, {
+            type: 'pie',
+            data: {
+              labels: prStatusLabels,
+              datasets: [{
+                data: prStatusData,
+                backgroundColor: prStatusLabels.map((_, i) => `hsl(${i * 35 % 360}, 70%, 60%)`),
+                borderColor: '#fff',
+                borderWidth: 1
+              }]
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: {
+                  position: 'bottom'
+                },
+                tooltip: {
+                  callbacks: {
+                    label: function(context) {
+                      return context.label + ': ' + context.formattedValue;
+                    }
+                  }
+                }
+              }
+            }
+          });
+        }
+
+      });
+    }
+
+    function get_purchase_order_dashboard() {
+      "use strict";
+      var data = {};
+      $.post(admin_url + 'purchase/get_po_charts', data).done(function(response){
+        response = JSON.parse(response);
+
+        // Pie Chart for PO Approval Status
+        var poStatusCtx = document.getElementById('pieChartForPOApprovalStatus').getContext('2d');
+        var poStatusData = [response.approved_po_count, response.draft_po_count, response.rejected_po_count];
+        if (pieChartForPOApprovalStatus) {
+          pieChartForPOApprovalStatus.data.datasets[0].data = poStatusData;
+          pieChartForPOApprovalStatus.update();
+        } else {
+          pieChartForPOApprovalStatus = new Chart(poStatusCtx, {
+            type: 'pie',
+            data: {
+              labels: ['Approved', 'Draft', 'Rejected'],
+              datasets: [{
+                data: poStatusData,
+                backgroundColor: [
+                  'rgba(75, 192, 192, 0.7)',
+                  'rgba(255, 206, 86, 0.7)',
+                  'rgba(255, 99, 132, 0.7)'
+                ],
+                borderColor: [
+                  'rgba(75, 192, 192, 1)',
+                  'rgba(255, 206, 86, 1)',
+                  'rgba(255, 99, 132, 1)'
+                ],
+                borderWidth: 1
+              }]
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: {
+                  position: 'bottom'
+                }
+              }
+            }
+          });
+        }
+
+      });
+    }
+
+    function get_work_order_dashboard() {
+      "use strict";
+      var data = {}
+      $.post(admin_url + 'purchase/get_wo_charts', data).done(function(response){
+        response = JSON.parse(response);
+
+        // Pie Chart for WO Approval Status
+        var woStatusCtx = document.getElementById('pieChartForWOApprovalStatus').getContext('2d');
+        var woStatusData = [response.approved_wo_count, response.draft_wo_count, response.rejected_wo_count];
+
+        if (pieChartForWOApprovalStatus) {
+          pieChartForWOApprovalStatus.data.datasets[0].data = woStatusData;
+          pieChartForWOApprovalStatus.update();
+        } else {
+          pieChartForWOApprovalStatus = new Chart(woStatusCtx, {
+            type: 'pie',
+            data: {
+              labels: ['Approved', 'Draft', 'Rejected'],
+              datasets: [{
+                data: woStatusData,
+                backgroundColor: [
+                  'rgba(75, 192, 192, 0.7)',
+                  'rgba(255, 206, 86, 0.7)',
+                  'rgba(255, 99, 132, 0.7)'
+                ],
+                borderColor: [
+                  'rgba(75, 192, 192, 1)',
+                  'rgba(255, 206, 86, 1)',
+                  'rgba(255, 99, 132, 1)'
+                ],
+                borderWidth: 1
+              }]
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: {
+                  position: 'bottom'
+                }
+              }
+            }
+          });
+        }
+
+      });
+    }
+
+    function get_change_order_dashboard() {
+      "use strict";
+      var data = {}
+      $.post(admin_url + 'changee/get_co_charts', data).done(function(response){
+        response = JSON.parse(response);
+
+        // Pie Chart for CO Approval Status
+        var coStatusCtx = document.getElementById('pieChartForCOApprovalStatus').getContext('2d');
+        var coStatusData = [response.approved_co_count, response.draft_co_count, response.rejected_co_count];
+        if (pieChartForCOApprovalStatus) {
+          pieChartForCOApprovalStatus.data.datasets[0].data = coStatusData;
+          pieChartForCOApprovalStatus.update();
+        } else {
+          pieChartForCOApprovalStatus = new Chart(coStatusCtx, {
+            type: 'pie',
+            data: {
+              labels: ['Approved', 'Draft', 'Rejected'],
+              datasets: [{
+                data: coStatusData,
+                backgroundColor: [
+                  'rgba(75, 192, 192, 0.7)',
+                  'rgba(255, 206, 86, 0.7)',
+                  'rgba(255, 99, 132, 0.7)'
+                ],
+                borderColor: [
+                  'rgba(75, 192, 192, 1)',
+                  'rgba(255, 206, 86, 1)',
+                  'rgba(255, 99, 132, 1)'
+                ],
+                borderWidth: 1
+              }]
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: {
+                  position: 'bottom'
+                }
+              }
+            }
+          });
+        }
+
+      });
+    }
+
+    function get_vbt_dashboard() {
+      "use strict";
+      var data = {}
+      $.post(admin_url + 'purchase/get_vbt_dashboard', data).done(function(response){
+        response = JSON.parse(response);
+
+        // Total Vendor Bills per Billing Status
+        var billingStatusPieCtx = document.getElementById('pieChartForBillingStatus').getContext('2d');
+        var billingStatusData = response.pie_billing_value;
+        var billingStatusLabels = response.pie_billing_name;
+
+        if (pieChartForBillingStatus) {
+          pieChartForBillingStatus.data.labels = billingStatusLabels;
+          pieChartForBillingStatus.data.datasets[0].data = billingStatusData;
+          pieChartForBillingStatus.update();
+        } else {
+          pieChartForBillingStatus = new Chart(billingStatusPieCtx, {
+            type: 'pie',
+            data: {
+              labels: billingStatusLabels,
+              datasets: [{
+                data: billingStatusData,
+                backgroundColor: billingStatusLabels.map((_, i) => `hsl(${i * 35 % 360}, 70%, 60%)`),
+                borderColor: '#fff',
+                borderWidth: 1
+              }]
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: {
+                  position: 'bottom'
+                },
+                tooltip: {
+                  callbacks: {
+                    label: function(context) {
+                      return context.label + ': ' + context.formattedValue;
+                    }
+                  }
+                }
+              }
+            }
+          });
+        }
+
       });
     }
 </script>
