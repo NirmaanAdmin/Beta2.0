@@ -197,6 +197,8 @@ foreach ($rResult as $aRow) {
             if ($aRow['approve_status'] == 2 && empty($aRow['applied_to_vendor_bill'])) {
                 $_data = '<a href="' . admin_url('purchase/convert_pur_invoice_from_po/' . $aRow['id']) . '" class="btn btn-info convert-pur-invoice" data-url="' . admin_url('purchase/convert_pur_invoice_from_po/' . $aRow['id']) . '">' . _l('convert_to_vendor_bill') . '
                 </a>';
+            } else if(!empty($aRow['applied_to_vendor_bill'])) {
+                $_data = '<span class="btn btn-success">Converted</span>';
             }
         } elseif ($aColumns[$i] == 'project') {
             $_data = get_project_name_by_id($aRow['project']);

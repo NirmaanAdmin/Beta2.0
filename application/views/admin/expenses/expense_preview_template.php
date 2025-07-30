@@ -111,6 +111,8 @@
                             <a href="<?php echo admin_url('expenses/convert_pur_invoice_from_expense/' . $expense->id); ?>" class="btn btn-info convert-pur-invoice" data-url="<?php echo admin_url('expenses/convert_pur_invoice_from_expense/' . $expense->id); ?>">
                                <?php echo _l('convert_to_vendor_bill'); ?>
                             </a>
+                        <?php } else { ?>
+                            <span class="btn btn-success">Converted</span>
                         <?php } ?>
                         <?php if (staff_can('edit',  'expenses')) { ?>
                         <a class="btn btn-default btn-with-tooltip"
