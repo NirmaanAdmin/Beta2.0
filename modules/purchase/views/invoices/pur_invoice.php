@@ -491,7 +491,7 @@
 <?php require 'modules/purchase/assets/js/pur_invoice_js.php'; ?>
 <script>
 	$(document).ready(function() {
-		var expense_id = <?php echo isset($pur_invoice) ? $pur_invoice->expense_id : ''; ?>;
+		var expense_id = <?php echo isset($pur_invoice) && $pur_invoice->expense_id ? $pur_invoice->expense_id : 'null'; ?>;
 		// Function to calculate sum and update input
 		function calculateSum() {
 			// Get the values from the input fields
