@@ -151,7 +151,8 @@ $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [
     db_prefix() . 'pur_invoices.description_services',
     'ril.id as ril_invoice_id',
     'ril.title as ril_invoice_title',
-    '(ril_previous + ' . db_prefix() . 'invoicepaymentrecords.amount) AS ril_amount',
+    'IF(ril.total > 0, (' . db_prefix() . 'invoicepaymentrecords.amount * final_certified_amount) / ril.total, 0) AS ril_this_bill',
+    '(ril_previous + IF(ril.total > 0, (' . db_prefix() . 'invoicepaymentrecords.amount * final_certified_amount) / ril.total, 0)) AS ril_amount',
 ]);
 
 $output  = $result['output'];
