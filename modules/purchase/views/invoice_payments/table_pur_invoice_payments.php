@@ -35,12 +35,12 @@ $aColumns = [
 $sIndexColumn = 'id';
 $sTable       = db_prefix() . 'pur_invoices';
 $join         = [
-    'LEFT JOIN ' . db_prefix() . 'invoicepaymentrecords ON ' . db_prefix() . 'invoicepaymentrecords.pur_invoice = ' . db_prefix() . 'pur_invoices.id',
     'LEFT JOIN ' . db_prefix() . 'pur_contracts ON ' . db_prefix() . 'pur_contracts.id = ' . db_prefix() . 'pur_invoices.contract',
     'LEFT JOIN ' . db_prefix() . 'projects ON ' . db_prefix() . 'pur_invoices.project_id = ' . db_prefix() . 'projects.id',
     'LEFT JOIN ' . db_prefix() . 'items_groups ON ' . db_prefix() . 'pur_invoices.group_pur = ' . db_prefix() . 'items_groups.id',
     'LEFT JOIN ' . db_prefix() . 'itemable AS itm ON itm.vbt_id = ' . db_prefix() . 'pur_invoices.id AND itm.rel_type = "invoice"',
-    'LEFT JOIN ' . db_prefix() . 'invoices AS ril ON ril.id = itm.rel_id'
+    'LEFT JOIN ' . db_prefix() . 'invoices AS ril ON ril.id = itm.rel_id',
+    'LEFT JOIN ' . db_prefix() . 'invoicepaymentrecords ON ' . db_prefix() . 'invoicepaymentrecords.invoiceid = ril.id',
 ];
 
 $where = [];
@@ -62,8 +62,10 @@ if (
 if ($this->ci->input->post('billing_invoices') && $this->ci->input->post('billing_invoices') != '') {
     if ($this->ci->input->post('billing_invoices') == "to_be_converted") {
         array_push($where, 'AND (ril.id IS NULL)');
-    } else {
+    } else if($this->ci->input->post('billing_invoices') == "converted") {
         array_push($where, 'AND (ril.id IS NOT NULL)');
+    } else {
+        array_push($where, 'AND (ril.id = '.$this->ci->input->post('billing_invoices').')');
     }
 }
 
@@ -149,6 +151,7 @@ $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [
     db_prefix() . 'pur_invoices.description_services',
     'ril.id as ril_invoice_id',
     'ril.title as ril_invoice_title',
+    '(ril_previous + ' . db_prefix() . 'invoicepaymentrecords.amount) AS ril_amount',
 ]);
 
 $output  = $result['output'];

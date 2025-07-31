@@ -17494,6 +17494,7 @@ class Purchase_model extends App_Model
                 $input['invoiceid'] = $invoiceid;
                 $input['pur_invoice'] = $id;
                 $input[$column_name] = $column_value;
+                $input['date'] = date('Y-m-d');
                 $input['daterecorded'] = date('Y-m-d H:i:s');
                 $this->db->insert('tblinvoicepaymentrecords', $input);
             }

@@ -125,10 +125,13 @@
                               $billing_invoices_filter = get_module_filter($module_name, 'billing_invoices');
                               $billing_invoices_filter_val = !empty($billing_invoices_filter) ? $billing_invoices_filter->filter_value : '';
                               ?>
-                              <select name="billing_invoices" class="selectpicker" data-width="100%" data-none-selected-text="<?php echo _l('pur_invoices'); ?>" data-actions-box="true">
+                              <select name="billing_invoices" class="selectpicker" data-width="100%" data-none-selected-text="<?php echo _l('pur_invoices'); ?>" data-actions-box="true" data-live-search="true">
                                  <option value=""></option>
                                  <option value="to_be_converted" <?php echo ($billing_invoices_filter_val == 'to_be_converted') ? 'selected' : ''; ?>>To Be Converted</option>
                                  <option value="converted" <?php echo ($billing_invoices_filter_val == 'converted') ? 'selected' : ''; ?>>Converted</option>
+                                 <?php foreach ($billing_invoices as $invoice) { ?>
+                                    <option value="<?php echo $invoice['id']; ?>" <?php echo ($billing_invoices_filter_val == $invoice['id']) ? 'selected' : ''; ?>><?php echo $invoice['value']; ?></option>
+                                 <?php } ?>
                               </select>
                            </div>
 
