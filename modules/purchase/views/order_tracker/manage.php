@@ -238,7 +238,7 @@
                      <select name="rli_filter" class="selectpicker" data-width="100%" data-none-selected-text="<?php echo _l('rli_filter'); ?>" data-actions-box="true">
                         <option value=""></option>
                         <option value="None">None</option>
-                        <?php foreach ($rli_filters as $rli) { ?>
+                        <?php foreach ($rli_filters as $rli) { ?> 
                            <option value="<?php echo $rli['id']; ?>" <?php echo ($rli_filter_val == $rli['id']) ? 'selected' : ''; ?>><?php echo $rli['name']; ?></option>
                         <?php } ?>
                      </select>

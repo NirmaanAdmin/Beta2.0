@@ -397,7 +397,6 @@ foreach ($rResult as $aRow) {
       } elseif ($column == 'rli_filter') {
          // Define an array of statuses with their corresponding labels and table attributes
          $status_labels = [
-            0 => ['label' => 'danger', 'table' => 'provided_by_ril', 'text' => _l('provided_by_ril')],
             1 => ['label' => 'success', 'table' => 'new_item_service_been_addded_as_per_instruction', 'text' => _l('new_item_service_been_addded_as_per_instruction')],
             2 => ['label' => 'info', 'table' => 'due_to_spec_change_then_original_cost', 'text' => _l('due_to_spec_change_then_original_cost')],
             3 => ['label' => 'warning', 'table' => 'deal_slip', 'text' => _l('deal_slip')],
@@ -408,6 +407,7 @@ foreach ($rResult as $aRow) {
             8 => ['label' => 'orange', 'table' => 'common_services_in_ghj_scope', 'text' => _l('common_services_in_ghj_scope')],
             9 => ['label' => 'green', 'table' => 'common_services_in_ril_scope', 'text' => _l('common_services_in_ril_scope')],
             10 => ['label' => 'default', 'table' => 'due_to_site_specfic_constraint', 'text' => _l('due_to_site_specfic_constraint')],
+            11 => ['label' => 'danger', 'table' => 'provided_by_ril', 'text' => _l('provided_by_ril')],
          ];
          // Start generating the HTML
          $rli_filter = '';

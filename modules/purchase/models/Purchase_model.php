@@ -17897,6 +17897,7 @@ class Purchase_model extends App_Model
             8 => ['id' => 8, 'name' => _l('common_services_in_ghj_scope')],
             9 => ['id' => 9, 'name' => _l('common_services_in_ril_scope')],
             10 => ['id' => 10, 'name' => _l('due_to_site_specfic_constraint')],
+            11 => ['id' => 11, 'name' => _l('provided_by_ril')],
         ];
     }
 
