@@ -94,6 +94,22 @@
                                          </div>
                                        </div>
                                     </div>
+                                    <div class="quick-stats-invoices col-md-3 tw-mb-2 sm:tw-mb-0 n_width">
+                                       <div class="top_stats_wrapper">
+                                         <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                           <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                             <span class="tw-truncate dashboard_stat_title" style="font-size: 19px; font-weight: bold;">Total Untagged Expenses</span>
+                                           </div>
+                                           <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                                         </div>
+                                         <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                                           <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                             <span class="tw-truncate dashboard_stat_value total_untagged_expenses" style="font-size: 19px; font-weight: bold;"></span>
+                                           </div>
+                                           <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                                         </div>
+                                       </div>
+                                    </div>
                                 </div>
                                 <div class="row mtop20">
                                     <div class="col-md-4">
@@ -253,6 +269,7 @@ $(function() {
             $('.total_expenses').text(response.total_expenses);
             $('.total_average_expenses').text(response.total_average_expenses);
             $('.total_expenses_without_receipts').text(response.total_expenses_without_receipts);
+            $('.total_untagged_expenses').text(response.total_untagged_expenses);
 
             // LINE CHART - Certified Value Over Time
             var lineCtx = document.getElementById('lineChartOverTime').getContext('2d');

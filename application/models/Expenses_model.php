@@ -959,7 +959,7 @@ class Expenses_model extends App_Model
             $base_currency = pur_get_currency_by_id($request->currency);
         }
 
-        $response['total_expenses'] = $response['total_average_expenses'] = $response['total_expenses_without_receipts'] = 0;
+        $response['total_expenses'] = $response['total_average_expenses'] = $response['total_expenses_without_receipts'] = $response['total_untagged_expenses'] = 0;
         $response['line_order_date'] = $response['line_order_total'] = array();
         $response['pie_category_name'] = $response['pie_category_value'] = array();
         $response['bar_top_vendor_name'] = $response['bar_top_vendor_value'] = array();
@@ -975,6 +975,7 @@ class Expenses_model extends App_Model
             db_prefix() . 'files.file_name, ' .
             db_prefix() . 'expenses.amount, ' .
             db_prefix() . 'expenses.vendor, ' .
+            db_prefix() . 'expenses.vbt_id, ' .
             db_prefix() . 'expenses_categories.name as category_name'
         );
         $this->db->from(db_prefix() . 'expenses');
@@ -1011,6 +1012,9 @@ class Expenses_model extends App_Model
             ));
             $response['total_expenses_without_receipts'] = count(array_filter($expenses, fn($item) =>
                 empty($item['file_name'])
+            ));
+            $response['total_untagged_expenses'] = count(array_filter($expenses, fn($item) =>
+                empty($item['vbt_id'])
             ));
 
             $line_order_total = array();
