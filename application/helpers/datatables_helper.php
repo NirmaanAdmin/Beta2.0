@@ -344,7 +344,7 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         (IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0))) AS cost_to_complete,
         COALESCE(inv_po_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
         po.group_pur,
-        po.kind,
+        po.kind, 
         po.remarks AS remarks,
         po.subtotal as subtotal,
         pr.name as project,
@@ -364,7 +364,6 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         pur_order,
         SUM(vendor_submitted_amount_without_tax) AS vendor_submitted_amount_without_tax
         FROM tblpur_invoices
-        WHERE pur_order IS NOT NULL AND payment_status IN (5,6,7)
         GROUP BY pur_order
     ) AS inv_po_sum
         ON inv_po_sum.pur_order = po.id
@@ -411,7 +410,6 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         wo_order,
         SUM(vendor_submitted_amount_without_tax) AS vendor_submitted_amount_without_tax
         FROM tblpur_invoices
-        WHERE wo_order IS NOT NULL AND payment_status IN (5,6,7)
         GROUP BY wo_order
     ) AS inv_wo_sum
         ON inv_wo_sum.wo_order = wo.id
@@ -452,7 +450,6 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         order_tracker_id ,
         SUM(vendor_submitted_amount_without_tax) AS vendor_submitted_amount_without_tax
         FROM tblpur_invoices
-        WHERE order_tracker_id  IS NOT NULL AND payment_status IN (5,6,7)
         GROUP BY order_tracker_id 
     ) AS inv_ot_sum
         ON inv_ot_sum.order_tracker_id = t.id
