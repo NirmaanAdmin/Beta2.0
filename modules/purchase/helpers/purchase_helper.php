@@ -4674,3 +4674,29 @@ function get_aw_unw_order_status($id = '')
 
     return $status_labels_aw_uw;
 }
+
+function get_payment_certificate_status_str($id, $approve_status, $ot_id)
+{
+    $status = '';
+    $list_approval_details = get_list_approval_details($id, ['po_payment_certificate', 'wo_payment_certificate', 'ot_payment_certificate']);
+    if (empty($list_approval_details)) {
+        if ($approve_status == 2) {
+            $status = _l('approved');
+        } else if ($approve_status == 3) {
+            $status = _l('rejected');
+        } else if (!empty($ot_id)) {
+            $status = _l('send_request_approve_pur');
+        } else {
+            $status = _l('send_request_approve_pur');
+        }
+    } else if ($approve_status == 1) {
+        $status = _l('pur_draft');
+    } else if ($approve_status == 2) {
+        $status = _l('approved');
+    } else if ($approve_status == 3) {
+        $status = _l('rejected');
+    } else {
+        $status = '';
+    }
+    return $status;
+}

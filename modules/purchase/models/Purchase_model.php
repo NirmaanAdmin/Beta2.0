@@ -22034,7 +22034,7 @@ class Purchase_model extends App_Model
     {
         $response = array();
         $vendors = isset($data['vendors']) ? $data['vendors'] : '';
-        $projects = isset($data['projects']) ? $data['projects'] : '';
+        $projects = isset($data['projects']) ? $data['projects'] : [get_default_project()];
         $group_pur = isset($data['group_pur']) ? $data['group_pur'] : '';
         $this->load->model('currencies_model');
         $base_currency = $this->currencies_model->get_base_currency();
@@ -22045,6 +22045,7 @@ class Purchase_model extends App_Model
         $response['total_purchase_orders'] = $response['total_work_orders'] = $response['total_certified_value'] = $response['approved_payment_certificates'] = 0;
         $response['bar_top_vendor_name'] = $response['bar_top_vendor_value'] = array();
         $response['line_order_date'] = $response['line_order_total'] = array();
+        $response['pie_status_name'] = $response['pie_status_value'] = array();
 
         $this->db->select(
             '
@@ -22168,6 +22169,17 @@ class Purchase_model extends App_Model
                     return date('M-y', strtotime($month . '-01'));
                 }, array_keys($line_order_total));
                 $response['line_order_total'] = array_values($line_order_total);
+            }
+
+            $status_grouped = array_reduce($payment_certificate, function ($carry, $item) {
+                $group = get_payment_certificate_status_str($item['id'], $item['approve_status'], $item['ot_id']);
+                $carry[$group] = ($carry[$group] ?? 0) + 1;
+                return $carry;
+            }, []);
+
+            if (!empty($status_grouped)) {
+                $response['pie_status_name'] = array_keys($status_grouped);
+                $response['pie_status_value'] = array_values($status_grouped);
             }
         }
 

@@ -164,7 +164,10 @@
                               </div>
                             </div>
                             <div class="col-md-4">
-                              
+                              <p class="mbot15 charts_stat_title">Pie Chart for Payment Certificate Approval Status</p>
+                              <div style="width: 100%; height: 450px; display: flex; justify-content: left;">
+                                 <canvas id="pieChartForPCApprovalStatus"></canvas>
+                              </div>
                             </div>
                         </div>
                     </div>

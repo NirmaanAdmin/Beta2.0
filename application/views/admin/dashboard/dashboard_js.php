@@ -343,6 +343,7 @@
     var pieChartForWOApprovalStatus;
     var pieChartForCOApprovalStatus;
     var pieChartForBillingStatus;
+    var pieChartForPCApprovalStatus;
 
     get_order_tracker_dashboard();
     get_vendors_dashboard();
@@ -351,6 +352,7 @@
     get_work_order_dashboard();
     get_change_order_dashboard();
     get_vbt_dashboard();
+    get_payment_certificate_dashboard();
 
     function get_order_tracker_dashboard() {
       "use strict";
@@ -758,6 +760,54 @@
               datasets: [{
                 data: billingStatusData,
                 backgroundColor: billingStatusLabels.map((_, i) => `hsl(${i * 35 % 360}, 70%, 60%)`),
+                borderColor: '#fff',
+                borderWidth: 1
+              }]
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: {
+                  position: 'bottom'
+                },
+                tooltip: {
+                  callbacks: {
+                    label: function(context) {
+                      return context.label + ': ' + context.formattedValue;
+                    }
+                  }
+                }
+              }
+            }
+          });
+        }
+
+      });
+    }
+
+    function get_payment_certificate_dashboard() {
+      "use strict";
+      var data = {}
+      $.post(admin_url + 'purchase/get_pc_charts', data).done(function(response){
+        response = JSON.parse(response);
+
+        // Pie Chart for Payment Certificate Approval Status
+        var pcStatusPieCtx = document.getElementById('pieChartForPCApprovalStatus').getContext('2d');
+        var pcStatusData = response.pie_status_value;
+        var pcStatusLabels = response.pie_status_name;
+
+        if (pieChartForPCApprovalStatus) {
+          pieChartForPCApprovalStatus.data.labels = pcStatusLabels;
+          pieChartForPCApprovalStatus.data.datasets[0].data = pcStatusData;
+          pieChartForPCApprovalStatus.update();
+        } else {
+          pieChartForPCApprovalStatus = new Chart(pcStatusPieCtx, {
+            type: 'pie',
+            data: {
+              labels: pcStatusLabels,
+              datasets: [{
+                data: pcStatusData,
+                backgroundColor: pcStatusLabels.map((_, i) => `hsl(${i * 35 % 360}, 70%, 60%)`),
                 borderColor: '#fff',
                 borderWidth: 1
               }]
