@@ -2000,24 +2000,40 @@ class document_management_model extends app_model
 
 		// ===== 2. SEARCH FOR FILES (in current folder + subfolders) =====
 		// NOTE: We explicitly exclude folders here so that Step 2 (folder search) does not duplicate them.
+		$default_project = (int) get_default_project();
+		$this->db->select(db_prefix() . 'dmg_items.*, parent.project_id AS master_project_id');
+		$this->db->from(db_prefix() . 'dmg_items');
+		$this->db->join(
+		    db_prefix() . 'dmg_items AS parent',
+		    'parent.id = ' . db_prefix() . 'dmg_items.master_id',
+		    'left'
+		);
 		$this->db->group_start();
-		$this->db->where_in('parent_id', $searchable_folder_ids);
+		$this->db->where_in(db_prefix() . 'dmg_items.parent_id', $searchable_folder_ids);
 		if (!$folder_id) {
-			$this->db->or_where('parent_id IS NULL'); // Include root items
+		    $this->db->or_where(db_prefix() . 'dmg_items.parent_id IS NULL');
 		}
 		$this->db->group_end();
-
-		// <---- Add this line to filter out any folder-type records -->
-		$this->db->where('filetype !=', 'folder');
-
-		$this->db->like('name', $query);
-		$fileResults = $this->db->get(db_prefix() . 'dmg_items')->result();
+		$this->db->where(db_prefix() . 'dmg_items.filetype !=', 'folder');
+		$this->db->like(db_prefix() . 'dmg_items.name', $query);
+		$this->db->group_by(db_prefix() . 'dmg_items.id');
+		$this->db->having("(master_project_id = $default_project OR master_project_id = 0)");
+		$fileResults = $this->db->get()->result();
 
 		// ===== 3. SEARCH FOR FOLDERS (only direct children of $folder_id) =====
-		$this->db->where('filetype', 'folder');
-		$this->db->where('parent_id', $folder_id);
-		$this->db->like('name', $query);
-		$folderResults = $this->db->get(db_prefix() . 'dmg_items')->result();
+		$this->db->select(db_prefix() . 'dmg_items.*, parent.project_id AS master_project_id');
+		$this->db->from(db_prefix() . 'dmg_items');
+		$this->db->join(
+		    db_prefix() . 'dmg_items AS parent',
+		    'parent.id = ' . db_prefix() . 'dmg_items.master_id',
+		    'left'
+		);
+		$this->db->where(db_prefix() . 'dmg_items.filetype', 'folder');
+		$this->db->where(db_prefix() . 'dmg_items.parent_id', $folder_id);
+		$this->db->like(db_prefix() . 'dmg_items.name', $query);
+		$this->db->group_by(db_prefix() . 'dmg_items.id');
+		$this->db->having("(master_project_id = $default_project OR master_project_id = 0)");
+		$folderResults = $this->db->get()->result();
 
 		// ===== 4. TRACK ALL FOLDER IDs THAT ARE PARENTS OF FILES =====
 		$allFolderIdsInResults = [];

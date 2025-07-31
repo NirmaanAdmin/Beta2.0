@@ -2561,10 +2561,19 @@ class drawing_management_model extends app_model
 
 	public function searchFilesAndFolders($query)
 	{
-
-		// Fetch all items matching the search query
-		$this->db->like('name', $query);
-		$query = $this->db->get(db_prefix() . 'dms_items');
+		$default_project = get_default_project();
+		$default_project = (int) $default_project;
+		$this->db->select(db_prefix() . 'dms_items.*, parent.project_id AS master_project_id');
+		$this->db->from(db_prefix() . 'dms_items');
+		$this->db->like(db_prefix() . 'dms_items.name', $query);
+		$this->db->join(
+		    db_prefix() . 'dms_items AS parent',
+		    'parent.id = ' . db_prefix() . 'dms_items.master_id',
+		    'left'
+		);
+		$this->db->group_by(db_prefix() . 'dms_items.id');
+		$this->db->having("(master_project_id = $default_project OR master_project_id = 0)");
+		$query = $this->db->get();
 		$results = $query->result();
 
 		// Fetch root folder (folder without a parent_id)
