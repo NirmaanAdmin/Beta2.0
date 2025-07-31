@@ -23480,6 +23480,10 @@ class Purchase_model extends App_Model
             $response = array_merge($response, $pur_order_tracker);
         }
 
+        $response = array_values(array_filter($response, function($item) {
+            return !empty($item['id']);
+        }));
+
         return $response;
     }
 

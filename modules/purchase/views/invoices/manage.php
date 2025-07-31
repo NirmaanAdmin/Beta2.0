@@ -268,7 +268,7 @@
                            ['id' => 2, 'name' => _l('No')]
                         ];
                         ?>
-                        <select name="order_tagged" class="selectpicker" data-width="100%" data-none-selected-text="<?php echo _l('Order Tagged'); ?>" data-actions-box="true">
+                        <select name="order_tagged" class="selectpicker" data-width="100%" data-none-selected-text="<?php echo _l('Tagged'); ?>" data-actions-box="true">
                            <option value=""></option>
                            <?php foreach ($order_tagged as $value) { ?>
                               <option value="<?php echo $value['id']; ?>" <?php echo ($order_tagged_filter_val == $value['id']) ? 'selected' : ''; ?>><?php echo $value['name']; ?></option>
@@ -279,7 +279,7 @@
                         <?php
                         $order_tagged_detail_filter = get_module_filter($module_name, 'order_tagged_detail');
                         $order_tagged_detail_filter_val = !empty($order_tagged_detail_filter) ? explode(",", $order_tagged_detail_filter->filter_value) : '';
-                        echo render_select('order_tagged_detail[]', $order_tagged_detail, array('id', 'name'), '', $order_tagged_detail_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('Order Tagged Detail'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
+                        echo render_select('order_tagged_detail[]', $order_tagged_detail, array('id', 'name'), '', $order_tagged_detail_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('Tagged Detail'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
                         ?>
                      </div>
                      <div class="col-md-1 form-group">
