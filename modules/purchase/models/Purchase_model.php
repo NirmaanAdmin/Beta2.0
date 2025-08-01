@@ -23033,7 +23033,7 @@ class Purchase_model extends App_Model
      * @param  array  $data  Dashboard filter data
      * @return array
      */
-    public function get_order_tracker_charts($data = array())
+     public function get_order_tracker_charts($data = array())
     {
         $response = array();
         $this->load->model('currencies_model');
@@ -23046,7 +23046,7 @@ class Purchase_model extends App_Model
         $order_type_filter = isset($data['order_type_filter']) ? $data['order_type_filter'] : '';
         $projects = isset($data['projects']) ? $data['projects'] : [get_default_project()];
         $aw_unw_order_status = isset($data['aw_unw_order_status']) ? $data['aw_unw_order_status'] : '';
-        $response['cost_to_complete'] = $response['rev_contract_value'] = $response['percentage_utilized'] = $response['budgeted_procurement_net_value'] = 0;
+        $response['cost_to_complete'] = $response['rev_contract_value'] = $response['anticipate_variation'] = $response['percentage_utilized'] = $response['percentage_anticipate_variation'] = $response['budgeted_procurement_net_value'] = $response['unawarded_capex'] = $response['work_done_value'] = 0;
         $response['pie_status_name'] = $response['pie_status_value'] = array();
         $response['budgeted_actual_category_labels'] = $response['budgeted_category_value'] = $response['actual_category_value'] = array();
         $response['line_order_date'] = $response['line_order_total'] = array();
@@ -23055,23 +23055,23 @@ class Purchase_model extends App_Model
         $response['line_certified_date'] = $response['line_certified_total'] = array();
 
         $aColumns = [
-           'aw_unw_order_status',
-           'order_name',
-           'vendor',
-           'order_date',
-           'completion_date',
-           'budget',
-           'total',
-           'co_total',
-           'total_rev_contract_value',
-           'anticipate_variation',
-           'cost_to_complete',
-           'vendor_submitted_amount_without_tax',
-           'project',
-           'rli_filter',
-           'kind',
-           'group_name',
-           'remarks',
+            'aw_unw_order_status',
+            'order_name',
+            'vendor',
+            'order_date',
+            'completion_date',
+            'budget',
+            'total',
+            'co_total',
+            'total_rev_contract_value',
+            'anticipate_variation',
+            'cost_to_complete',
+            'vendor_submitted_amount_without_tax',
+            'project',
+            'rli_filter',
+            'kind',
+            'group_name',
+            'remarks',
         ];
         $sIndexColumn = 'id';
         $sTable = "(
@@ -23094,132 +23094,132 @@ class Purchase_model extends App_Model
             FROM " . db_prefix() . "wo_orders
         ) as combined_orders";
         $join = [
-           'LEFT JOIN ' . db_prefix() . 'assets_group ON ' . db_prefix() . 'assets_group.group_id = combined_orders.group_pur',
+            'LEFT JOIN ' . db_prefix() . 'assets_group ON ' . db_prefix() . 'assets_group.group_id = combined_orders.group_pur',
         ];
         $where = [];
         if (!empty($type)) {
-           $where_type = '';
-           foreach ($type as $t) {
-              if ($t != '') {
-                 if ($where_type == '') {
-                    $where_type .= ' AND (source_table  = "' . $t . '"';
-                 } else {
-                    $where_type .= ' or source_table  = "' . $t . '"';
-                 }
-              }
-           }
-           if ($where_type != '') {
-              $where_type .= ')';
-              array_push($where, $where_type);
-           }
+            $where_type = '';
+            foreach ($type as $t) {
+                if ($t != '') {
+                    if ($where_type == '') {
+                        $where_type .= ' AND (source_table  = "' . $t . '"';
+                    } else {
+                        $where_type .= ' or source_table  = "' . $t . '"';
+                    }
+                }
+            }
+            if ($where_type != '') {
+                $where_type .= ')';
+                array_push($where, $where_type);
+            }
         }
         if (!empty($order_type_filter)) {
-           $where_order_type = '';
-           if ($order_type_filter == 'created') {
-              if ($where_order_type == '') {
-                 $where_order_type .= ' AND (source_table  = "order_tracker"';
-              }
-           }
-           if ($order_type_filter == 'fetched') {
-              if ($where_order_type == '') {
-                 $where_order_type .= ' AND (source_table  = "pur_orders"';
-                 $where_order_type .= ' or source_table = "wo_orders"';
-              }
-           }
-           if ($where_order_type != '') {
-              $where_order_type .= ')';
-              array_push($where, $where_order_type);
-           }
+            $where_order_type = '';
+            if ($order_type_filter == 'created') {
+                if ($where_order_type == '') {
+                    $where_order_type .= ' AND (source_table  = "order_tracker"';
+                }
+            }
+            if ($order_type_filter == 'fetched') {
+                if ($where_order_type == '') {
+                    $where_order_type .= ' AND (source_table  = "pur_orders"';
+                    $where_order_type .= ' or source_table = "wo_orders"';
+                }
+            }
+            if ($where_order_type != '') {
+                $where_order_type .= ')';
+                array_push($where, $where_order_type);
+            }
         }
         if (!empty($vendors)) {
-           $where_vendors = '';
-           foreach ($vendors as $t) {
-              if ($t != '') {
-                 if ($where_vendors == '') {
-                    $where_vendors .= ' AND (vendor_id = "' . $t . '"';
-                 } else {
-                    $where_vendors .= ' or vendor_id = "' . $t . '"';
-                 }
-              }
-           }
-           if ($where_vendors != '') {
-              $where_vendors .= ')';
-              array_push($where, $where_vendors);
-           }
+            $where_vendors = '';
+            foreach ($vendors as $t) {
+                if ($t != '') {
+                    if ($where_vendors == '') {
+                        $where_vendors .= ' AND (vendor_id = "' . $t . '"';
+                    } else {
+                        $where_vendors .= ' or vendor_id = "' . $t . '"';
+                    }
+                }
+            }
+            if ($where_vendors != '') {
+                $where_vendors .= ')';
+                array_push($where, $where_vendors);
+            }
         }
         if (!empty($budget_head)) {
-           $where_budget_head = '';
-           if ($budget_head != '') {
-              if ($where_budget_head == '') {
-                 $where_budget_head .= ' AND (group_pur = "' . $budget_head . '"';
-              } else {
-                 $where_budget_head .= ' or group_pur = "' . $budget_head . '"';
-              }
-           }
-           if ($where_budget_head != '') {
-              $where_budget_head .= ')';
-              array_push($where, $where_budget_head);
-           }
+            $where_budget_head = '';
+            if ($budget_head != '') {
+                if ($where_budget_head == '') {
+                    $where_budget_head .= ' AND (group_pur = "' . $budget_head . '"';
+                } else {
+                    $where_budget_head .= ' or group_pur = "' . $budget_head . '"';
+                }
+            }
+            if ($where_budget_head != '') {
+                $where_budget_head .= ')';
+                array_push($where, $where_budget_head);
+            }
         }
         if (!empty($rli_filter)) {
-           $where_rli_filter = '';
-           if ($rli_filter != '') {
-              if ($where_rli_filter == '') {
-                 $where_rli_filter .= ' AND (rli_filter = "' . $rli_filter . '"';
-              } else {
-                 $where_rli_filter .= ' or rli_filter = "' . $rli_filter . '"';
-              }
-           }
-           if ($where_rli_filter != '') {
-              $where_rli_filter .= ')';
-              array_push($where, $where_rli_filter);
-           }
+            $where_rli_filter = '';
+            if ($rli_filter != '') {
+                if ($where_rli_filter == '') {
+                    $where_rli_filter .= ' AND (rli_filter = "' . $rli_filter . '"';
+                } else {
+                    $where_rli_filter .= ' or rli_filter = "' . $rli_filter . '"';
+                }
+            }
+            if ($where_rli_filter != '') {
+                $where_rli_filter .= ')';
+                array_push($where, $where_rli_filter);
+            }
         }
         if (!empty($kind)) {
-           $where_kind = '';
-           if ($kind != '') {
-              if ($where_kind == '') {
-                 $where_kind .= ' AND (kind = "' . $kind . '"';
-              } else {
-                 $where_kind .= ' or kind = "' . $kind . '"';
-              }
-           }
-           if ($where_kind != '') {
-              $where_kind .= ')';
-              array_push($where, $where_kind);
-           }
+            $where_kind = '';
+            if ($kind != '') {
+                if ($where_kind == '') {
+                    $where_kind .= ' AND (kind = "' . $kind . '"';
+                } else {
+                    $where_kind .= ' or kind = "' . $kind . '"';
+                }
+            }
+            if ($where_kind != '') {
+                $where_kind .= ')';
+                array_push($where, $where_kind);
+            }
         }
         if (!empty($projects)) {
-           $where_project = '';
-           foreach ($projects as $t) {
-              if ($t != '') {
-                 if ($where_project == '') {
-                    $where_project .= ' AND (project_id = "' . $t . '"';
-                 } else {
-                    $where_project .= ' or project_id = "' . $t . '"';
-                 }
-              }
-           }
-           if ($where_project != '') {
-              $where_project .= ')';
-              array_push($where, $where_project);
-           }
+            $where_project = '';
+            foreach ($projects as $t) {
+                if ($t != '') {
+                    if ($where_project == '') {
+                        $where_project .= ' AND (project_id = "' . $t . '"';
+                    } else {
+                        $where_project .= ' or project_id = "' . $t . '"';
+                    }
+                }
+            }
+            if ($where_project != '') {
+                $where_project .= ')';
+                array_push($where, $where_project);
+            }
         }
         if (!empty($aw_unw_order_status)) {
-           $where_aw_unw_order_status = '';
-           foreach ($aw_unw_order_status as $t) {
-              if ($t != '') {
-                 if ($where_aw_unw_order_status == '') {
-                    $where_aw_unw_order_status .= ' AND (aw_unw_order_status = "' . $t . '"';
-                 } else {
-                    $where_aw_unw_order_status .= ' or aw_unw_order_status = "' . $t . '"';
-                 }
-              }
-           }
-           if ($where_aw_unw_order_status != '') {
-              $where_aw_unw_order_status .= ')';
-              array_push($where, $where_aw_unw_order_status);
-           }
+            $where_aw_unw_order_status = '';
+            foreach ($aw_unw_order_status as $t) {
+                if ($t != '') {
+                    if ($where_aw_unw_order_status == '') {
+                        $where_aw_unw_order_status .= ' AND (aw_unw_order_status = "' . $t . '"';
+                    } else {
+                        $where_aw_unw_order_status .= ' or aw_unw_order_status = "' . $t . '"';
+                    }
+                }
+            }
+            if ($where_aw_unw_order_status != '') {
+                $where_aw_unw_order_status .= ')';
+                array_push($where, $where_aw_unw_order_status);
+            }
         }
 
         $_POST['order'][0]['column'] = 3;
@@ -23242,8 +23242,31 @@ class Purchase_model extends App_Model
             $response['percentage_utilized'] = round(($rev_contract_value / $cost_to_complete) * 100);
         }
         $response['budgeted_procurement_net_value'] = app_format_money(($cost_to_complete - $rev_contract_value), $base_currency);
+        $anticipate_variation = 0;
+        if (!empty($result)) {
+            $anticipate_variation = array_sum(array_column($result, 'anticipate_variation'));
+        }
+        if ($cost_to_complete > 0) {
+            $response['percentage_anticipated'] = round(($anticipate_variation / $cost_to_complete) * 100);
+        }
+        $response['anticipate_variation'] = app_format_money($anticipate_variation, $base_currency);
+        $work_done_value = 0;
+        if (!empty($result)) {
+            $work_done_value = array_sum(array_column($result, 'vendor_submitted_amount_without_tax'));
+        }
+        $response['work_done_value'] = app_format_money($work_done_value, $base_currency);
 
-        if(!empty($result)) {
+        $unawarded_capex= 0;
+        if (!empty($result)) {
+            // Filter records where aw_unw_order_status = 2 before summing
+            $filtered_result = array_filter($result, function ($item) {
+                return isset($item['aw_unw_order_status']) && $item['aw_unw_order_status'] == 2;
+            });
+            $unawarded_capex = array_sum(array_column($filtered_result, 'cost_to_complete'));
+        }
+        $response['unawarded_capex'] = app_format_money($unawarded_capex, $base_currency);
+
+        if (!empty($result)) {
             $grouped = array_reduce($result, function ($carry, $item) {
                 $group = isset($item['aw_unw_order_status']) && in_array($item['aw_unw_order_status'], [1, 2, 3])
                     ? get_aw_unw_order_status($item['aw_unw_order_status'])
@@ -23251,7 +23274,7 @@ class Purchase_model extends App_Model
                 $carry[$group] = ($carry[$group] ?? 0) + 1;
                 return $carry;
             }, []);
-            if(isset($grouped['None'])) {
+            if (isset($grouped['None'])) {
                 unset($grouped['None']);
             }
             if (!empty($grouped)) {
@@ -23417,7 +23440,7 @@ class Purchase_model extends App_Model
               </table>
             </div>';
 
-            $contractor_tracker_data = array_values(array_reduce(array_filter($result, fn($v) => !empty($v['vendor'])), function($carry, $item) {
+            $contractor_tracker_data = array_values(array_reduce(array_filter($result, fn($v) => !empty($v['vendor'])), function ($carry, $item) {
                 $vendor = $item['vendor'];
                 if (!isset($carry[$vendor])) {
                     $carry[$vendor] = ['vendor' => $vendor, 'total' => 0, 'vendor_submitted_amount_without_tax' => 0];
@@ -23426,7 +23449,7 @@ class Purchase_model extends App_Model
                 $carry[$vendor]['vendor_submitted_amount_without_tax'] += (float)$item['vendor_submitted_amount_without_tax'];
                 return $carry;
             }, []));
-            if(!empty($contractor_tracker_data)) {
+            if (!empty($contractor_tracker_data)) {
                 $contractor_tracker_data = array_slice(array_multisort($col = array_column($filtered = array_filter($contractor_tracker_data, fn($v) => !empty($v['vendor_submitted_amount_without_tax']) && $v['vendor_submitted_amount_without_tax'] != 0), 'total'), SORT_DESC, $filtered) ? $filtered : [], 0, 10);
             }
 

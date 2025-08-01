@@ -691,8 +691,12 @@
         // Update value summaries
         $('.cost_to_complete').text(response.cost_to_complete);
         $('.rev_contract_value').text(response.rev_contract_value);
-        $('.percentage_utilized').text(response.percentage_utilized + '%');
+        $('.percentage_utilized').text(response.percentage_utilized + '% Of CTC');
         $('.budgeted_procurement_net_value').text(response.budgeted_procurement_net_value);
+        $('.anticipate_variation').text(response.anticipate_variation);
+        $('.percentage_anticipate_variation').text(response.percentage_anticipated + '% Of CTC');
+        $('.unawarded_capex').text(response.unawarded_capex);
+        $('.work_done_value').text(response.work_done_value);
 
         // PIE CHART - Order Status Distribution
         var statusPieCtx = document.getElementById('pieChartForStatus').getContext('2d');

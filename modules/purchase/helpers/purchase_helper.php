@@ -4595,7 +4595,7 @@ function get_budget_head_project_wise($id = false)
         $default_project = get_default_project();
         $CI->db->select('*');
         $CI->db->from(db_prefix() . 'items_groups');
-        $CI->db->where('(project_id IS NULL OR project_id = '.$default_project.')');
+        $CI->db->where('(project_id IS NULL OR project_id = ' . $default_project . ')');
         $CI->db->order_by('id', 'asc');
         return $CI->db->get()->result_array();
     }
@@ -4611,7 +4611,7 @@ function get_budget_sub_head_project_wise($id = false)
         $default_project = get_default_project();
         $CI->db->select('*');
         $CI->db->from(db_prefix() . 'wh_sub_group');
-        $CI->db->where('(project_id IS NULL OR project_id = '.$default_project.')');
+        $CI->db->where('(project_id IS NULL OR project_id = ' . $default_project . ')');
         $CI->db->order_by('id', 'asc');
         return $CI->db->get()->result_array();
     }
@@ -4627,7 +4627,7 @@ function get_area_project_wise($id = false)
         $default_project = get_default_project();
         $CI->db->select('*');
         $CI->db->from(db_prefix() . 'area');
-        $CI->db->where('(project IS NULL OR project = '.$default_project.')');
+        $CI->db->where('(project IS NULL OR project = ' . $default_project . ')');
         $CI->db->order_by('id', 'asc');
         return $CI->db->get()->result_array();
     }
@@ -4643,7 +4643,7 @@ function get_purchase_tracker_status($tracker_status_id = '')
         ['id' => 5, 'name' => _l('POI')],
         ['id' => 6, 'name' => _l('PIR')],
     ];
-    if(!empty($tracker_status_id)) {
+    if (!empty($tracker_status_id)) {
         $key = array_search($tracker_status_id, array_column($tracker_status, 'id'));
         return $key !== false ? $tracker_status[$key]['name'] : '';
     }
@@ -4668,7 +4668,7 @@ function get_aw_unw_order_status($id = '')
         2 => ['label' => 'default', 'table' => 'unawarded', 'text' => _l('Unawarded')],
         3 => ['label' => 'warning', 'table' => 'awarded_by_ril', 'text' => _l('Awarded by RIL')],
     ];
-    if(!empty($id)) {
+    if (!empty($id)) {
         return $status_labels_aw_uw[$id]['text'];
     }
 
@@ -4699,4 +4699,49 @@ function get_payment_certificate_status_str($id, $approve_status, $ot_id)
         $status = '';
     }
     return $status;
+}
+
+/**
+ * Get invoice totals (either total amount or amount due)
+ * 
+ * @param string $type 'total' or 'total_due'
+ * @param array $params Optional filters (clientid, project_id, etc.)
+ * @return mixed Returns amount or formatted string if $formatted=true
+ */
+function get_invoice_amount($type)
+{
+    $ci = &get_instance();
+
+    $select = '';
+    if ($type === 'total') {
+        $select = 'SUM(total) as amount';
+    } elseif ($type === 'total_due') {
+        $select = 'SUM(
+            (SELECT 
+                ROUND(
+                    inv.total
+                    - IFNULL((SELECT SUM(p.amount) FROM ' . db_prefix() . 'invoicepaymentrecords p WHERE p.invoiceid = inv.id), 0)
+                    - IFNULL((SELECT SUM(c.amount) FROM ' . db_prefix() . 'credits c WHERE c.invoice_id = inv.id), 0),
+                2)
+            FROM ' . db_prefix() . 'invoices inv
+            WHERE inv.id = ' . db_prefix() . 'invoices.id)
+        ) as amount';
+    } else {
+        return 0;
+    }
+    $project_id = get_default_project();
+    if (isset($project_id) && $project_id) {
+        $ci->db->where('project_id', $project_id);
+    }
+    $ci->db->select($select);
+    $ci->db->from(db_prefix() . 'invoices');
+    $ci->db->join(db_prefix() . 'currencies', db_prefix() . 'currencies.id = ' . db_prefix() . 'invoices.currency', 'left');
+
+    $query = $ci->db->get();
+    $result = $query->row();
+
+    $amount = $result ? (float)$result->amount : 0;
+
+
+    return $amount;
 }

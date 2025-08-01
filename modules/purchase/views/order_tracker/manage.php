@@ -61,13 +61,16 @@
       /* Adjust the size as needed */
       height: 100px;
    }
+
    .n_width {
       width: 25% !important;
    }
+
    .dashboard_stat_title {
       font-size: 19px;
       font-weight: bold;
    }
+
    .dashboard_stat_value {
       font-size: 19px;
    }
@@ -93,82 +96,170 @@
                      <button class="btn btn-info pull-left mright10 display-block" style="margin-right: 10px;" data-toggle="modal" data-target="#addNewRowModal">
                         <i class="fa fa-plus"></i> <?php echo _l('New'); ?>
                      </button>
-                     <button class="btn btn-info pull-left mleft10 display-block" type="button" data-toggle="collapse" data-target="#ot-charts-section" aria-expanded="true"aria-controls="ot-charts-section">
-                     <?php echo _l('Order Tracker Charts'); ?> <i class="fa fa-chevron-down toggle-icon"></i>
+                     <button class="btn btn-info pull-left mleft10 display-block" type="button" data-toggle="collapse" data-target="#ot-charts-section" aria-expanded="true" aria-controls="ot-charts-section">
+                        <?php echo _l('Order Tracker Charts'); ?> <i class="fa fa-chevron-down toggle-icon"></i>
                      </button>
                   </div>
                </div>
 
                <div id="ot-charts-section" class="collapse in">
                   <div class="row">
-                       <div class="col-md-12 mtop20">
-                         <div class="row">
-                           <div class="quick-stats-invoices col-md-3 tw-mb-2 sm:tw-mb-0 n_width">
-                             <div class="top_stats_wrapper">
-                               <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
-                                 <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
-                                   <span class="tw-truncate dashboard_stat_title">Total Budgeted Procurement</span>
+                     <div class="col-md-12 mtop20">
+                        <div class="row">
+                           <div class="quick-stats-invoices col-md-4 tw-mb-2 sm:tw-mb-0 ">
+                              <div class="top_stats_wrapper">
+                                 <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                    <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                       <span class="tw-truncate dashboard_stat_title">Cost To Complete</span>
+                                    </div>
+                                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
                                  </div>
-                                 <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
-                               </div>
-                               <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
-                                 <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
-                                   <span class="tw-truncate dashboard_stat_value cost_to_complete"></span>
+                                 <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                                    <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                       <span class="tw-truncate dashboard_stat_value cost_to_complete"></span>
+                                    </div>
+                                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
                                  </div>
-                                 <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
-                               </div>
-                             </div>
+                              </div>
                            </div>
-                           <div class="quick-stats-invoices col-md-3 tw-mb-2 sm:tw-mb-0 n_width">
-                             <div class="top_stats_wrapper">
-                               <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
-                                 <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
-                                   <span class="tw-truncate dashboard_stat_title">Total Procured Till Date</span>
+                           <div class="quick-stats-invoices col-md-4 tw-mb-2 sm:tw-mb-0 ">
+                              <div class="top_stats_wrapper">
+                                 <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                    <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                       <span class="tw-truncate dashboard_stat_title">Ordered</span>
+                                    </div>
+                                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
                                  </div>
-                                 <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
-                               </div>
-                               <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
-                                 <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
-                                   <span class="tw-truncate dashboard_stat_value rev_contract_value"></span>
+                                 <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                                    <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                       <span class="tw-truncate dashboard_stat_value rev_contract_value"></span>&nbsp;
+                                       (<span class="tw-truncate dashboard_stat_value percentage_utilized" style="font-size: 10px !important;"></span>)
+                                    </div>
+                                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
                                  </div>
-                                 <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
-                               </div>
-                             </div>
+                              </div>
                            </div>
-                           <div class="quick-stats-invoices col-md-3 tw-mb-2 sm:tw-mb-0 n_width">
-                             <div class="top_stats_wrapper">
-                               <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
-                                 <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
-                                   <span class="tw-truncate dashboard_stat_title">Percentage of Budget Utilized</span>
+
+                           <!-- <div class="quick-stats-invoices col-md-4 tw-mb-2 sm:tw-mb-0 ">
+                              <div class="top_stats_wrapper">
+                                 <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                    <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                       <span class="tw-truncate dashboard_stat_title">Net Remaining</span>
+                                    </div>
+                                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
                                  </div>
-                                 <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
-                               </div>
-                               <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
-                                 <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
-                                   <span class="tw-truncate dashboard_stat_value percentage_utilized"></span>
+                                 <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                                    <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                       <span class="tw-truncate dashboard_stat_value budgeted_procurement_net_value"></span>
+                                    </div>
+                                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
                                  </div>
-                                 <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
-                               </div>
-                             </div>
+                              </div>
+                           </div> -->
+                           <div class="quick-stats-invoices col-md-4 tw-mb-2 sm:tw-mb-0 ">
+                              <div class="top_stats_wrapper">
+                                 <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                    <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                       <span class="tw-truncate dashboard_stat_title">Anticipate Variation</span>
+                                    </div>
+                                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                                 </div>
+                                 <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                                    <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                       <span class="tw-truncate dashboard_stat_value anticipate_variation"></span>
+                                       &nbsp;(<span class="tw-truncate dashboard_stat_value percentage_anticipate_variation" style="font-size: 10px !important;"></span>)
+                                    </div>
+                                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                                 </div>
+                              </div>
                            </div>
-                           <div class="quick-stats-invoices col-md-3 tw-mb-2 sm:tw-mb-0 n_width">
-                             <div class="top_stats_wrapper">
-                               <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
-                                 <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
-                                   <span class="tw-truncate dashboard_stat_title">Net Remaining</span>
+                        </div>
+                     </div>
+                  </div>
+                  <div class="row">
+                     <div class="col-md-12 mtop20">
+                        <div class="row">
+
+                           <div class="quick-stats-invoices col-md-3 tw-mb-2 sm:tw-mb-0 ">
+                              <div class="top_stats_wrapper">
+                                 <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                    <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                       <span class="tw-truncate dashboard_stat_title">Unawarded Capex</span>
+                                    </div>
+                                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
                                  </div>
-                                 <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
-                               </div>
-                               <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
-                                 <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
-                                   <span class="tw-truncate dashboard_stat_value budgeted_procurement_net_value"></span>
+                                 <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                                    <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                       <span class="tw-truncate dashboard_stat_value unawarded_capex"></span>
+                                    </div>
+                                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
                                  </div>
-                                 <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
-                               </div>
-                             </div>
+                              </div>
                            </div>
-                         </div>
-                       </div>
+
+                           <div class="quick-stats-invoices col-md-3 tw-mb-2 sm:tw-mb-0 ">
+                              <div class="top_stats_wrapper">
+                                 <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                    <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                       <span class="tw-truncate dashboard_stat_title">Work Done Value</span>
+                                       &nbsp;(<span class="tw-truncate" style="font-size: 10px !important;">BIL Certified Value</span>)
+                                    </div>
+                                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                                 </div>
+                                 <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                                    <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                       <span class="tw-truncate dashboard_stat_value work_done_value"></span>
+
+                                    </div>
+                                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                                 </div>
+                              </div>
+                           </div>
+
+                           <div class="quick-stats-invoices col-md-3 tw-mb-2 sm:tw-mb-0 ">
+                              <div class="top_stats_wrapper">
+                                 <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                    <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                       <span class="tw-truncate dashboard_stat_title">Certified By RIL</span>
+                                    </div>
+                                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                                 </div>
+                                 <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                                    <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                       <span class="tw-truncate dashboard_stat_value certified_by_ril"><?php $total = get_invoice_amount('total');
+                                                                                                         echo app_format_money($total, '₹');
+                                                                                                         ?></span>
+
+                                    </div>
+                                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                                 </div>
+                              </div>
+                           </div>
+
+                           <div class="quick-stats-invoices col-md-3 tw-mb-2 sm:tw-mb-0 ">
+                              <div class="top_stats_wrapper">
+                                 <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                    <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                       <span class="tw-truncate dashboard_stat_title">Payment Due</span>
+                                    </div>
+                                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                                 </div>
+                                 <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                                    <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                       <span class="tw-truncate dashboard_stat_value certified_by_ril"><?php $total = get_invoice_amount('total_due');
+                                                                                                         echo app_format_money($total, '₹');
+                                                                                                         ?></span>
+
+                                    </div>
+                                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                                 </div>
+                              </div>
+                           </div>
+
+
+
+                        </div>
+                     </div>
                   </div>
                   <div class="row mtop20">
                      <div class="col-md-4">
@@ -186,7 +277,7 @@
                      <div class="col-md-4">
                         <p class="mbot15 dashboard_stat_title">Total Order Value Over Time</p>
                         <div style="width: 100%; height: 400px;">
-                          <canvas id="lineChartOverTime"></canvas>
+                           <canvas id="lineChartOverTime"></canvas>
                         </div>
                      </div>
                   </div>
@@ -194,7 +285,7 @@
                      <div class="col-md-12">
                         <p class="mbot15 dashboard_stat_title">Total Certified Amount Over Period of Time</p>
                         <div style="width: 100%; height: 400px;">
-                          <canvas id="lineChartCertifiedOverTime"></canvas>
+                           <canvas id="lineChartCertifiedOverTime"></canvas>
                         </div>
                      </div>
                   </div>
@@ -236,7 +327,7 @@
                      <select name="rli_filter" class="selectpicker" data-width="100%" data-none-selected-text="<?php echo _l('rli_filter'); ?>" data-actions-box="true">
                         <option value=""></option>
                         <option value="None">None</option>
-                        <?php foreach ($rli_filters as $rli) { ?> 
+                        <?php foreach ($rli_filters as $rli) { ?>
                            <option value="<?php echo $rli['id']; ?>" <?php echo ($rli_filter_val == $rli['id']) ? 'selected' : ''; ?>><?php echo $rli['name']; ?></option>
                         <?php } ?>
                      </select>
@@ -537,10 +628,10 @@
 </div>
 <div id="order_tracker_file_data"></div>
 
-   <?php init_tail(); ?>
-   <?php require 'modules/purchase/assets/js/import_excel_items_order_tracker_js.php'; ?>
-   <?php require 'modules/purchase/assets/js/order_tracker_js.php'; ?>
-   <script src="<?php echo module_dir_url(PURCHASE_MODULE_NAME, 'assets/plugins/charts/chart.js'); ?>?v=<?php echo PURCHASE_REVISION; ?>"></script>
-   </body>
+<?php init_tail(); ?>
+<?php require 'modules/purchase/assets/js/import_excel_items_order_tracker_js.php'; ?>
+<?php require 'modules/purchase/assets/js/order_tracker_js.php'; ?>
+<script src="<?php echo module_dir_url(PURCHASE_MODULE_NAME, 'assets/plugins/charts/chart.js'); ?>?v=<?php echo PURCHASE_REVISION; ?>"></script>
+</body>
 
-   </html>
+</html>
