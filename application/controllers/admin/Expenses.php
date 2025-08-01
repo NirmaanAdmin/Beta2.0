@@ -27,15 +27,17 @@ class Expenses extends AdminController
 
         $this->load->model('payment_modes_model');
         $this->load->model('expenses_model');
+        $this->load->model('purchase/purchase_model');
         $data['payment_modes'] = $this->payment_modes_model->get('', [], true);
         $data['expenseid']     = $id;
         $data['categories']    = $this->expenses_model->get_category();
         $data['years']         = $this->expenses_model->get_expenses_years();
-        $data['table']         = App_table::find('expenses');
+        $data['vendors']       = $this->purchase_model->get_vendor();
+        // $data['table']         = App_table::find('expenses');
         $data['title']         = _l('expenses');
         $expenses_model = $this->expenses_model->get('', [], 'category_name', true);
 
-        // Initialize chart data array
+        // Initialize chart data array 
         $chart_data = [];
 
         // Format the result into Highcharts-friendly format
@@ -49,6 +51,12 @@ class Expenses extends AdminController
         $data['chart_data'] = $chart_data;
 
         $this->load->view('admin/expenses/manage', $data);
+    }
+
+    public function table_expenses(){
+        if ($this->input->is_ajax_request()) {
+            $this->app->get_table_data('expenses_new');
+        }
     }
 
     public function get_expenses_chart_data_type_wise()
