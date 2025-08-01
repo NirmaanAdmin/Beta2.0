@@ -669,6 +669,7 @@
 
     var budgetedVsActualCategory;
     var lineChartOverTime;
+    var lineChartCertifiedOverTime;
 
     function get_order_tracker_dashboard() {
       "use strict";
@@ -692,8 +693,6 @@
         $('.rev_contract_value').text(response.rev_contract_value);
         $('.percentage_utilized').text(response.percentage_utilized + '%');
         $('.budgeted_procurement_net_value').text(response.budgeted_procurement_net_value);
-        $('.co_tracker_data').html(response.co_tracker_data);
-        $('.contractor_tracker').html(response.contractor_tracker);
 
         // PIE CHART - Order Status Distribution
         var statusPieCtx = document.getElementById('pieChartForStatus').getContext('2d');
@@ -845,6 +844,59 @@
                   title: {
                     display: true,
                     text: 'Order Value'
+                  }
+                }
+              }
+            }
+          });
+        }
+
+        // LINE CHART - Total Certified Amount Over Period of Time
+        var lineCertifiedCtx = document.getElementById('lineChartCertifiedOverTime').getContext('2d');
+
+        if (lineChartCertifiedOverTime) {
+          lineChartCertifiedOverTime.data.labels = response.line_certified_date;
+          lineChartCertifiedOverTime.data.datasets[0].data = response.line_certified_total;
+          lineChartCertifiedOverTime.update();
+        } else {
+          lineChartCertifiedOverTime = new Chart(lineCertifiedCtx, {
+            type: 'line',
+            data: {
+              labels: response.line_certified_date,
+              datasets: [{
+                label: 'Total Certified Amount',
+                data: response.line_certified_total,
+                fill: false,
+                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                tension: 0.3
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  display: true,
+                  position: 'bottom'
+                },
+                tooltip: {
+                  mode: 'index',
+                  intersect: false
+                }
+              },
+              scales: {
+                x: {
+                  title: {
+                    display: true,
+                    text: 'Month'
+                  }
+                },
+                y: {
+                  beginAtZero: true,
+                  title: {
+                    display: true,
+                    text: 'Total Certified Amount'
                   }
                 }
               }

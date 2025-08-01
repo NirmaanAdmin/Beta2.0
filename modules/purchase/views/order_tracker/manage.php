@@ -191,13 +191,11 @@
                      </div>
                   </div>
                   <div class="row mtop20">
-                     <div class="col-md-6">
-                        <p class="mbot15 dashboard_stat_title">Change Order Impact Tracker</p>
-                        <div class="co_tracker_data"></div>
-                     </div>
-                     <div class="col-md-6">
-                        <p class="mbot15 dashboard_stat_title">Contractor Performance Tracker</p>
-                        <div class="contractor_tracker"></div>
+                     <div class="col-md-12">
+                        <p class="mbot15 dashboard_stat_title">Total Certified Amount Over Period of Time</p>
+                        <div style="width: 100%; height: 400px;">
+                          <canvas id="lineChartCertifiedOverTime"></canvas>
+                        </div>
                      </div>
                   </div>
                </div>

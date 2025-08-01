@@ -23052,6 +23052,7 @@ class Purchase_model extends App_Model
         $response['line_order_date'] = $response['line_order_total'] = array();
         $response['co_tracker_data'] = $response['contractor_tracker'] = array();
         $response['scurve_order_date'] = $response['line_actual_cost_total'] = $response['line_planned_cost_total'] = array();
+        $response['line_certified_date'] = $response['line_certified_total'] = array();
 
         $aColumns = [
            'aw_unw_order_status',
@@ -23275,6 +23276,7 @@ class Purchase_model extends App_Model
             }
 
             $line_order_total = array();
+            $line_certified_total = array();
             foreach ($result as $key => $value) {
                 if (!empty($value['order_date'])) {
                     $timestamp = strtotime($value['order_date']);
@@ -23290,6 +23292,11 @@ class Purchase_model extends App_Model
                     $line_order_total[$month] = 0;
                 }
                 $line_order_total[$month] += $value['total_rev_contract_value'];
+
+                if (!isset($line_certified_total[$month])) {
+                    $line_certified_total[$month] = 0;
+                }
+                $line_certified_total[$month] += $value['vendor_submitted_amount_without_tax'];
             }
 
             if (!empty($line_order_total)) {
@@ -23303,6 +23310,19 @@ class Purchase_model extends App_Model
                     return date('M-y', strtotime($month . '-01'));
                 }, array_keys($line_order_total));
                 $response['line_order_total'] = array_values($line_order_total);
+            }
+
+            if (!empty($line_certified_total)) {
+                ksort($line_certified_total);
+                $cumulative = 0;
+                foreach ($line_certified_total as $month => $value) {
+                    $cumulative += $value;
+                    $line_certified_total[$month] = $cumulative;
+                }
+                $response['line_certified_date'] = array_map(function ($month) {
+                    return date('M-y', strtotime($month . '-01'));
+                }, array_keys($line_certified_total));
+                $response['line_certified_total'] = array_values($line_certified_total);
             }
 
             $monthly_total_rev = array();
