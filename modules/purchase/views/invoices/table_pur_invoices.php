@@ -34,7 +34,7 @@ $aColumns = [
     4,
     'vendor_note',
     db_prefix() . 'pur_invoices.id as inv_id',
-    'adminnote',
+    db_prefix() . 'pur_invoices.adminnote',
 ];
 
 $sIndexColumn = 'id';
@@ -44,6 +44,9 @@ $join         = [
     'LEFT JOIN ' . db_prefix() . 'projects ON ' . db_prefix() . 'pur_invoices.project_id = ' . db_prefix() . 'projects.id',
     'LEFT JOIN ' . db_prefix() . 'items_groups ON ' . db_prefix() . 'pur_invoices.group_pur = ' . db_prefix() . 'items_groups.id',
     'LEFT JOIN ' . db_prefix() . 'pur_vendor ON ' . db_prefix() . 'pur_vendor.userid = ' . db_prefix() . 'pur_invoices.vendor',
+    'LEFT JOIN ' . db_prefix() . 'itemable AS itm ON itm.vbt_id = ' . db_prefix() . 'pur_invoices.id AND itm.rel_type = "invoice"',
+    'LEFT JOIN ' . db_prefix() . 'invoices AS ril ON ril.id = itm.rel_id',
+    'LEFT JOIN ' . db_prefix() . 'invoicepaymentrecords AS ip ON ip.invoiceid = ril.id',
 ];
 
 $i = 0;
@@ -155,24 +158,14 @@ if (isset($vendors)) {
     }
 }
 
-$billing_invoices = $this->ci->input->post('billing_invoices');
-if (isset($billing_invoices) && !empty($billing_invoices)) {
-    $where_billing_invoices = '';
-    if ($billing_invoices == "None") {
-        $where_billing_invoices .= ' AND (' . db_prefix() . 'pur_invoices.expense_convert = 0';
+if ($this->ci->input->post('billing_invoices') && $this->ci->input->post('billing_invoices') != '') {
+    if ($this->ci->input->post('billing_invoices') == "None") {
+        array_push($where, 'AND (ril.id IS NULL)');
     } else {
-        $billing_invoice_array = get_expenses_data_by_pur_invoices($billing_invoices);
-        if (!empty($billing_invoice_array)) {
-            $billing_invoice_array = explode(",", $billing_invoice_array->vbt_ids);
-            $where_billing_invoices .= ' AND (' . db_prefix() . 'pur_invoices.id IN (' . implode(',', $billing_invoice_array) . ')';
-        }
-    }
-
-    if ($where_billing_invoices != '') {
-        $where_billing_invoices .= ')';
-        array_push($where, $where_billing_invoices);
+        array_push($where, 'AND (ril.id = '.$this->ci->input->post('billing_invoices').')');
     }
 }
+
 $budget_head = $this->ci->input->post('budget_head');
 if (isset($budget_head)) {
 
@@ -292,7 +285,7 @@ $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [
     '(SELECT GROUP_CONCAT(name SEPARATOR ",") FROM ' . db_prefix() . 'taggables JOIN ' . db_prefix() . 'tags ON ' . db_prefix() . 'taggables.tag_id = ' . db_prefix() . 'tags.id WHERE rel_id = ' . db_prefix() . 'pur_invoices.id and rel_type="pur_invoice" ORDER by tag_order ASC) as tags',
     'contract_number',
     'invoice_number',
-    'currency',
+    db_prefix() . 'pur_invoices.currency',
     'expense_convert',
     db_prefix() . 'pur_invoices.wo_order',
     db_prefix() . 'items_groups.name',
@@ -601,7 +594,7 @@ foreach ($rResult as $aRow) {
                 }
             }
             $_data = $expense_convert;
-        } elseif ($aColumns[$i] == 'adminnote') {
+        } elseif ($aColumns[$i] == db_prefix() . 'pur_invoices.adminnote') {
             // $_data = '<input type="date" class="form-control invoice-date-input" value="' . $aRow['invoice_date'] . '" data-id="' . $aRow['id'] . '">';
 
             $_data = '<textarea class="form-control adminnote-input"  data-id="' . $aRow['id'] . '">' . $aRow['adminnote'] . '</textarea>';
