@@ -547,7 +547,8 @@ class timesheets extends AdminController
 		$job_position = $data['job_position'];
 
 		$data['month'] = date('m-Y', strtotime($date_ts));
-		$data['check_latch_timesheet'] = $this->timesheets_model->check_latch_timesheet($data['month']);
+		// $data['check_latch_timesheet'] = $this->timesheets_model->check_latch_timesheet($data['month']);
+		$data['check_latch_timesheet'] = false; // Temporarily set to false for testing
 		$staff = '';
 		if (isset($data['staff'])) {
 			$staff = $data['staff'];
