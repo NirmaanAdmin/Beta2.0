@@ -15704,4 +15704,12 @@ class purchase extends AdminController
         $ot_contract_data = $this->purchase_model->get_ot_contract_data($ot_id, $payment_certificate_id);
         echo json_encode($ot_contract_data);
     }
+
+    public function get_vpt_dashboard()
+    {
+        $data = $this->input->post();
+        $result = $this->purchase_model->get_vpt_dashboard($data);
+        echo json_encode($result);
+        die;
+    }
 }

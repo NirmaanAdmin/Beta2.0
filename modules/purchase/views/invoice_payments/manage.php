@@ -65,6 +65,16 @@
       position: relative;
       top: -6px;
   }
+  .n_width {
+      width: 33% !important;
+   }
+   .dashboard_stat_title {
+      font-size: 19px;
+      font-weight: bold;
+   }
+   .dashboard_stat_value {
+      font-size: 19px;
+   }
 </style>
 <?php $module_name = 'vendor_billing_payments'; ?>
 <div id="wrapper">
@@ -80,6 +90,85 @@
                      </div>
                   </div>
                   <div class="row">
+                     <div class="_buttons col-md-12">
+                        <button class="btn btn-info pull-left display-block" type="button" data-toggle="collapse" data-target="#vpt-charts-section" aria-expanded="true"aria-controls="vpt-charts-section">
+                         <?php echo _l('Vendor Payment Tracker Charts'); ?> <i class="fa fa-chevron-down toggle-icon"></i>
+                        </button>
+                     </div>
+                  </div>
+
+                  <div id="vpt-charts-section" class="collapse in">
+                     <div class="row">
+                        <div class="col-md-12 mtop20">
+                           <div class="row">
+                              <div class="quick-stats-invoices col-md-3 tw-mb-2 sm:tw-mb-0 n_width">
+                                <div class="top_stats_wrapper">
+                                  <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                    <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                      <span class="tw-truncate dashboard_stat_title">Total Billed</span>
+                                    </div>
+                                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                                  </div>
+                                  <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                                    <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                      <span class="tw-truncate dashboard_stat_value total_billed"></span>
+                                    </div>
+                                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="quick-stats-invoices col-md-3 tw-mb-2 sm:tw-mb-0 n_width">
+                                <div class="top_stats_wrapper">
+                                  <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                    <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                      <span class="tw-truncate dashboard_stat_title">Total Paid</span>
+                                    </div>
+                                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                                  </div>
+                                  <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                                    <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                      <span class="tw-truncate dashboard_stat_value total_paid"></span>
+                                    </div>
+                                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="quick-stats-invoices col-md-3 tw-mb-2 sm:tw-mb-0 n_width">
+                                <div class="top_stats_wrapper">
+                                  <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                    <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                      <span class="tw-truncate dashboard_stat_title">Total Unpaid</span>
+                                    </div>
+                                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                                  </div>
+                                  <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                                    <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                      <span class="tw-truncate dashboard_stat_value total_unpaid"></span>
+                                    </div>
+                                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                                  </div>
+                                </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <div class="row mtop20">
+                        <div class="col-md-4">
+                           <p class="mbot15 dashboard_stat_title">Vendor wise Payments Summary</p>
+                           <div style="width: 100%; height: 500px;">
+                             <canvas id="barChartTopVendors"></canvas>
+                           </div>
+                        </div>
+                        <div class="col-md-4">
+                           <p class="mbot15 dashboard_stat_title">Budget Head Utilization</p>
+                           <div style="width: 100%; height: 500px;">
+                             <canvas id="barChartTopBudgetHead"></canvas>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div class="row mtop20">
                         <div class="vbt_all_filters">
 
                            <div class="col-md-2">
@@ -371,6 +460,14 @@
             }
          });
       }
+
+      $('#vpt-charts-section').on('shown.bs.collapse', function () {
+         $('.toggle-icon').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+      });
+
+      $('#vpt-charts-section').on('hidden.bs.collapse', function () {
+         $('.toggle-icon').removeClass('fa-chevron-down').addClass('fa-chevron-up');
+      });
    });
 
    function uploadfilecsv() {
@@ -419,5 +516,6 @@
    // Initialize the DataTable
    var table_pur_invoice_payments = $('.table-table_pur_invoice_payments').DataTable();
 </script>
+<script src="<?php echo module_dir_url(PURCHASE_MODULE_NAME, 'assets/plugins/charts/chart.js'); ?>?v=<?php echo PURCHASE_REVISION; ?>"></script>
 </body>
 </html>

@@ -23623,4 +23623,124 @@ class Purchase_model extends App_Model
         $this->db->where('pur_invoice_id IS NOT NULL', null, false);
         return $this->db->get(db_prefix() . 'payment_certificate')->row();
     }
+
+    /**
+     * Get  Vendor Payment Tracker dashboard
+     *
+     * @param  array  $data  Dashboard filter data
+     * @return array
+     */
+    public function get_vpt_dashboard($data = array())
+    {
+        $response = array();
+        $from_date = isset($data['from_date']) ? $data['from_date'] : '';
+        $to_date = isset($data['to_date']) ? $data['to_date'] : '';
+        $vendors = isset($data['vendors']) ? $data['vendors'] : '';
+        $group_pur = isset($data['group_pur']) ? $data['group_pur'] : '';
+        $billing_invoices = isset($data['billing_invoices']) ? $data['billing_invoices'] : '';
+        $bil_payment_status = isset($data['bil_payment_status']) ? $data['bil_payment_status'] : '';
+        $this->load->model('currencies_model');
+        $base_currency = $this->currencies_model->get_base_currency();
+        if ($request->currency != 0 && $request->currency != null) {
+            $base_currency = pur_get_currency_by_id($request->currency);
+        }
+
+        $response['total_billed'] = $response['total_paid'] = $response['total_unpaid'] = 0;
+        $response['bar_top_vendor_name'] = $response['bar_top_vendor_value'] = array();
+        $default_project = get_default_project();
+
+        $this->db->select([
+            'pi.id',
+            'pi.vendor',
+            'pi.group_pur',
+            'pi.final_certified_amount',
+            'IF(ril.total > 0, ip.amount * pi.final_certified_amount / ril.total, 0) AS ril_this_bill'
+        ]);
+
+        $this->db->from(db_prefix() . 'pur_invoices as pi');
+        $this->db->join(
+            db_prefix() . 'itemable as itm',
+            'itm.vbt_id = pi.id AND itm.rel_type = "invoice"',
+            'left'
+        );
+        $this->db->join(
+            db_prefix() . 'invoices as ril',
+            'ril.id = itm.rel_id',
+            'left'
+        );
+        $this->db->join(
+            '(SELECT invoiceid, 
+                      SUM(amount) AS amount, 
+                      SUM(ril_previous) AS ril_previous, 
+                      SUM(ril_amount) AS ril_amount, 
+                      MAX(date) AS date
+               FROM ' . db_prefix() . 'invoicepaymentrecords
+               GROUP BY invoiceid
+            ) AS ip',
+            'ip.invoiceid = ril.id',
+            'left'
+        );
+        if (!empty($vendors) && is_array($vendors)) {
+            $this->db->where_in('pi.vendor', $vendors);
+        }
+        if (!empty($group_pur)) {
+            $this->db->where('pi.group_pur', $group_pur);
+        }
+        if (!empty($default_project)) {
+            $this->db->where('pi.project_id', $default_project);
+        }
+        $this->db->group_by('pi.id');
+        $pur_invoices = $this->db->get()->result_array();
+
+        if (!empty($pur_invoices)) {
+            $total_billed = array_reduce($pur_invoices, function ($carry, $item) {
+                return $carry + (float)$item['final_certified_amount'];
+            }, 0);
+            $response['total_billed'] = app_format_money($total_billed, $base_currency->symbol);
+            $total_paid = array_reduce($pur_invoices, function ($carry, $item) {
+                return $carry + (float)$item['ril_this_bill'];
+            }, 0);
+            $response['total_paid'] = app_format_money($total_paid, $base_currency->symbol);
+            $total_unpaid = $total_billed - $total_paid;
+            $response['total_unpaid'] = app_format_money($total_unpaid, $base_currency->symbol);
+
+            $bar_top_vendors = array();
+            $bar_top_budget_head = array();
+            foreach ($pur_invoices as $item) {
+                $vendor_id = $item['vendor'];
+                if (!isset($bar_top_vendors[$vendor_id])) {
+                    $bar_top_vendors[$vendor_id]['name'] = get_vendor_company_name($vendor_id);
+                    $bar_top_vendors[$vendor_id]['value'] = 0;
+                }
+                $bar_top_vendors[$vendor_id]['value'] += (float) $item['ril_this_bill'];
+
+                $group_pur = $item['group_pur'];
+                if (!isset($bar_top_budget_head[$group_pur])) {
+                    $budget_head = get_group_name_item($item['group_pur']);
+                    $bar_top_budget_head[$group_pur]['name'] = $budget_head->name;
+                    $bar_top_budget_head[$group_pur]['value'] = 0;
+                }
+                $bar_top_budget_head[$group_pur]['value'] += (float) $item['ril_this_bill'];
+            }
+            if (!empty($bar_top_vendors)) {
+                usort($bar_top_vendors, function ($a, $b) {
+                    return $b['value'] <=> $a['value'];
+                });
+                $bar_top_vendors = array_slice($bar_top_vendors, 0, 10);
+                $response['bar_top_vendor_name'] = array_column($bar_top_vendors, 'name');
+                $response['bar_top_vendor_value'] = array_column($bar_top_vendors, 'value');
+            }
+
+            if (!empty($bar_top_budget_head)) {
+                usort($bar_top_budget_head, function ($a, $b) {
+                    return $b['value'] <=> $a['value'];
+                });
+                $bar_top_budget_head = array_slice($bar_top_budget_head, 0, 10);
+                $response['bar_top_budget_head_name'] = array_column($bar_top_budget_head, 'name');
+                $response['bar_top_budget_head_value'] = array_column($bar_top_budget_head, 'value');
+            }
+        }
+
+        return $response;
+    }
 }

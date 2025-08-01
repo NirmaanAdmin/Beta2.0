@@ -13,21 +13,15 @@
   initDataTable(table_invoice, admin_url + 'purchase/table_pur_invoice_payments', [], [], Params, [5, 'desc']);
   $.each(Params, function (i, obj) {
     $('select' + obj).on('change', function () {
-      table_invoice.DataTable().ajax.reload()
-        .columns.adjust()
-        .responsive.recalc();
+      table_invoice.DataTable().ajax.reload();
     });
   });
 
   $('input[name="from_date"]').on('change', function () {
-    table_invoice.DataTable().ajax.reload()
-      .columns.adjust()
-      .responsive.recalc();
+    table_invoice.DataTable().ajax.reload();
   });
   $('input[name="to_date"]').on('change', function () {
-    table_invoice.DataTable().ajax.reload()
-      .columns.adjust()
-      .responsive.recalc();
+    table_invoice.DataTable().ajax.reload();
   });
 
   $(document).on('change', 'select[name="vendor_ft[]"]', function () {
@@ -47,8 +41,15 @@
     var filterArea = $('.vbt_all_filters');
     filterArea.find('input').val("");
     filterArea.find('select').selectpicker("val", "");
-    table_invoice.DataTable().ajax.reload().columns.adjust().responsive.recalc();
+    table_invoice.DataTable().ajax.reload();
+    get_vpt_dashboard();
   });
+
+  $(document).on('change', 'input[name="from_date"], input[name="to_date"], select[name="vendor_ft[]"], select[name="budget_head"], select[name="billing_invoices"], select[name="bil_payment_status"]', function() {
+    get_vpt_dashboard();
+  });
+
+  get_vpt_dashboard();
 
   $('.table-table_pur_invoice_payments').on('draw.dt', function () {
     var reportsTable = $(this).DataTable();
@@ -285,3 +286,136 @@
   });
 
 })(jQuery);
+
+var barTopVendorsChart;
+var barChartTopBudgetHead;
+
+function get_vpt_dashboard() {
+  "use strict";
+
+  var data = {
+    from_date: $('input[name="from_date"]').val(),
+    to_date: $('input[name="to_date"]').val(),
+    vendors: $('select[name="vendor_ft[]"]').val(),
+    group_pur: $('select[name="budget_head"]').val(),
+    billing_invoices: $('select[name="billing_invoices"]').val(),
+    bil_payment_status: $('select[name="bil_payment_status"]').val(),
+  }
+
+  $.post(admin_url + 'purchase/get_vpt_dashboard', data).done(function(response){
+    response = JSON.parse(response);
+
+    // Update value summaries
+    $('.total_billed').text(response.total_billed);
+    $('.total_paid').text(response.total_paid);
+    $('.total_unpaid').text(response.total_unpaid);
+
+    // BAR CHART - Vendor wise Payments Summary
+    var vendorBarCtx = document.getElementById('barChartTopVendors').getContext('2d');
+    var vendorLabels = response.bar_top_vendor_name;
+    var vendorData = response.bar_top_vendor_value;
+
+    if (barTopVendorsChart) {
+      barTopVendorsChart.data.labels = vendorLabels;
+      barTopVendorsChart.data.datasets[0].data = vendorData;
+      barTopVendorsChart.update();
+    } else {
+      barTopVendorsChart = new Chart(vendorBarCtx, {
+        type: 'bar',
+        data: {
+          labels: vendorLabels,
+          datasets: [{
+            label: 'Payments',
+            data: vendorData,
+            backgroundColor: '#1E90FF',
+            borderColor: '#1E90FF',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            x: {
+              ticks: {
+                autoSkip: false,
+                maxRotation: 45,
+                minRotation: 0
+              },
+              title: {
+                display: true,
+                text: 'Vendors'
+              }
+            },
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Payments'
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // BAR CHART - Budget Head Utilization
+    var budgetHeadBarCtx = document.getElementById('barChartTopBudgetHead').getContext('2d');
+    var budgetHeadLabels = response.bar_top_budget_head_name;
+    var budgetHeadData = response.bar_top_budget_head_value;
+
+    if (barChartTopBudgetHead) {
+      barChartTopBudgetHead.data.labels = budgetHeadLabels;
+      barChartTopBudgetHead.data.datasets[0].data = budgetHeadData;
+      barChartTopBudgetHead.update();
+    } else {
+      barChartTopBudgetHead = new Chart(budgetHeadBarCtx, {
+        type: 'bar',
+        data: {
+          labels: budgetHeadLabels,
+          datasets: [{
+            label: 'Total Certified Value',
+            data: budgetHeadData,
+            backgroundColor: '#1E90FF',
+            borderColor: '#1E90FF',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            x: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Total Certified Value'
+              }
+            },
+            y: {
+              ticks: {
+                autoSkip: false
+              },
+              title: {
+                display: true,
+                text: 'Vendors'
+              }
+            }
+          }
+        }
+      });
+    }
+
+  });
+}
