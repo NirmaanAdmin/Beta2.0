@@ -46,7 +46,6 @@ $join         = [
     'LEFT JOIN ' . db_prefix() . 'pur_vendor ON ' . db_prefix() . 'pur_vendor.userid = ' . db_prefix() . 'pur_invoices.vendor',
     'LEFT JOIN ' . db_prefix() . 'itemable AS itm ON itm.vbt_id = ' . db_prefix() . 'pur_invoices.id AND itm.rel_type = "invoice"',
     'LEFT JOIN ' . db_prefix() . 'invoices AS ril ON ril.id = itm.rel_id',
-    'LEFT JOIN ' . db_prefix() . 'invoicepaymentrecords AS ip ON ip.invoiceid = ril.id',
 ];
 
 $i = 0;

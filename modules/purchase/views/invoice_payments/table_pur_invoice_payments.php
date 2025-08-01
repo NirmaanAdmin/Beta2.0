@@ -26,8 +26,8 @@ $aColumns = [
     'bil_total',
     5,
     'ril_previous',
-    db_prefix() . 'invoicepaymentrecords.amount as ril_this_bill',
-    db_prefix() . 'invoicepaymentrecords.date as ril_date',
+    'ip.amount as ril_this_bill',
+    'ip.date as ril_date',
     'ril_amount',
     'payment_remarks',
 ];
@@ -40,7 +40,15 @@ $join         = [
     'LEFT JOIN ' . db_prefix() . 'items_groups ON ' . db_prefix() . 'pur_invoices.group_pur = ' . db_prefix() . 'items_groups.id',
     'LEFT JOIN ' . db_prefix() . 'itemable AS itm ON itm.vbt_id = ' . db_prefix() . 'pur_invoices.id AND itm.rel_type = "invoice"',
     'LEFT JOIN ' . db_prefix() . 'invoices AS ril ON ril.id = itm.rel_id',
-    'LEFT JOIN ' . db_prefix() . 'invoicepaymentrecords ON ' . db_prefix() . 'invoicepaymentrecords.invoiceid = ril.id',
+    'LEFT JOIN (
+        SELECT invoiceid, 
+        SUM(amount) AS amount, 
+        SUM(ril_previous) AS ril_previous, 
+        SUM(ril_amount) AS ril_amount, 
+        MAX(date) AS date
+        FROM ' . db_prefix() . 'invoicepaymentrecords
+        GROUP BY invoiceid
+    ) AS ip ON ip.invoiceid = ril.id',
 ];
 
 $where = [];
@@ -151,8 +159,8 @@ $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [
     db_prefix() . 'pur_invoices.description_services',
     'ril.id as ril_invoice_id',
     'ril.title as ril_invoice_title',
-    'IF(ril.total > 0, (' . db_prefix() . 'invoicepaymentrecords.amount * final_certified_amount) / ril.total, 0) AS ril_this_bill',
-    '(ril_previous + IF(ril.total > 0, (' . db_prefix() . 'invoicepaymentrecords.amount * final_certified_amount) / ril.total, 0)) AS ril_amount',
+    'IF(ril.total > 0, (ip.amount * final_certified_amount) / ril.total, 0) AS ril_this_bill',
+    '(ril_previous + IF(ril.total > 0, (ip.amount * final_certified_amount) / ril.total, 0)) AS ril_amount',
 ]);
 
 $output  = $result['output'];
@@ -248,13 +256,13 @@ foreach ($rResult as $aRow) {
             } else {
                 $_data = '';
             }
-        } elseif ($aColumns[$i] == db_prefix() . 'invoicepaymentrecords.amount as ril_this_bill') {
+        } elseif ($aColumns[$i] == 'ip.amount as ril_this_bill') {
             if(!empty($ril_invoice_link)) {
                 $_data = '<span class="ril-this-bill-display" data-id="' . $aRow['id'] . '">' .app_format_money($aRow['ril_this_bill'], $base_currency->symbol) .'</span>';
             } else {
                 $_data = '';
             }
-        } elseif ($aColumns[$i] == db_prefix() . 'invoicepaymentrecords.date as ril_date') {
+        } elseif ($aColumns[$i] == 'ip.date as ril_date') {
             if(!empty($ril_invoice_link)) {
                 $_data = '<input type="date" class="form-control ril-date-input" value="' . $aRow['ril_date'] . '" data-id="' . $aRow['id'] . '" style="width: 138px">';
             } else {
