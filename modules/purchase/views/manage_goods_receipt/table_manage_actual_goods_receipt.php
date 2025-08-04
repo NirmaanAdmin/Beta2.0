@@ -10,6 +10,7 @@ $aColumns = [
     'area',
     'po_quantities',
     'quantities',
+    'remaining_quantities',
     'supplier_name',
     'kind',
     'date_add',
@@ -147,6 +148,12 @@ foreach ($rResult as $aRow) {
               $unit_name = (get_unit_type($aRow['unit_id']) != null && isset(get_unit_type($aRow['unit_id'])->unit_name)) ? get_unit_type($aRow['unit_id'])->unit_name : '';
             }
             $_data = html_entity_decode($aRow['quantities']) . ' ' . html_entity_decode($unit_name);
+        } elseif ($aColumns[$i] == 'remaining_quantities') {
+            $unit_name = '';
+            if (is_numeric($aRow['unit_id'])) {
+              $unit_name = (get_unit_type($aRow['unit_id']) != null && isset(get_unit_type($aRow['unit_id'])->unit_name)) ? get_unit_type($aRow['unit_id'])->unit_name : '';
+            }
+            $_data = html_entity_decode($aRow['remaining_quantities']) . ' ' . html_entity_decode($unit_name);
         } elseif ($aColumns[$i] == 'supplier_name') {
             $_data = wh_get_vendor_company_name($aRow['supplier_name']);
         } elseif ($aColumns[$i] == 'kind') {

@@ -18,7 +18,7 @@ initDataTable(table_manage_goods_receipt, admin_url + 'purchase/table_manage_goo
 
 var table_manage_actual_goods_receipt = $('.table-table_manage_actual_goods_receipt');
 
-initDataTable(table_manage_actual_goods_receipt, admin_url + 'purchase/table_manage_actual_goods_receipt', [], [], GoodsreceiptParams, [9, 'desc']);
+initDataTable(table_manage_actual_goods_receipt, admin_url + 'purchase/table_manage_actual_goods_receipt', [], [], GoodsreceiptParams, [10, 'desc']);
 
 $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
     var activeTabId = $('.tracker-pane.active').attr('id');
