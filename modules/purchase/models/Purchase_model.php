@@ -23670,6 +23670,7 @@ class Purchase_model extends App_Model
 
         $response['total_billed'] = $response['total_paid'] = $response['total_unpaid'] = 0;
         $response['bar_top_vendor_name'] = $response['bar_top_vendor_value'] = array();
+        $response['vendor_order_date'] = $response['line_vendor_billing_total'] = $response['line_vendor_payment_total'] = array();
         $default_project = get_default_project();
 
         $this->db->select([
@@ -23677,6 +23678,7 @@ class Purchase_model extends App_Model
             'pi.vendor',
             'pi.group_pur',
             'pi.final_certified_amount',
+            'pi.invoice_date',
             'IF(ril.total > 0, ip.amount * pi.final_certified_amount / ril.total, 0) AS ril_this_bill'
         ]);
 
@@ -23713,6 +23715,7 @@ class Purchase_model extends App_Model
             $this->db->where('pi.project_id', $default_project);
         }
         $this->db->group_by('pi.id');
+        $this->db->order_by('pi.invoice_date', 'asc');
         $pur_invoices = $this->db->get()->result_array();
 
         if (!empty($pur_invoices)) {
@@ -23762,6 +23765,38 @@ class Purchase_model extends App_Model
                 $response['bar_top_budget_head_name'] = array_column($bar_top_budget_head, 'name');
                 $response['bar_top_budget_head_value'] = array_column($bar_top_budget_head, 'value');
             }
+
+            $line_vendor_billing_total = [];
+            $line_vendor_payment_total = [];
+            foreach ($pur_invoices as $value) {
+                $month = date('Y-m', strtotime($value['invoice_date']));
+                if (!isset($line_vendor_billing_total[$month])) {
+                    $line_vendor_billing_total[$month] = 0;
+                }
+                $line_vendor_billing_total[$month] += (float)$value['final_certified_amount'];
+                if (!isset($line_vendor_payment_total[$month])) {
+                    $line_vendor_payment_total[$month] = 0;
+                }
+                $line_vendor_payment_total[$month] += (float)$value['ril_this_bill'];
+            }
+            $all_months = array_unique(array_merge(array_keys($line_vendor_billing_total), array_keys($line_vendor_payment_total)));
+            sort($all_months);
+            $cumulative_billing = 0;
+            $cumulative_payment = 0;
+            $billing_data = [];
+            $payment_data = [];
+            $formatted_months = [];
+            foreach ($all_months as $month) {
+                $cumulative_billing += $line_vendor_billing_total[$month] ?? 0;
+                $cumulative_payment += $line_vendor_payment_total[$month] ?? 0;
+                $billing_data[] = $cumulative_billing;
+                $payment_data[] = $cumulative_payment;
+                $formatted_months[] = date('M-y', strtotime($month . '-01'));
+            }
+            $response['vendor_order_date'] = $formatted_months;
+            $response['line_vendor_billing_total'] = $billing_data;
+            $response['line_vendor_payment_total'] = $payment_data;
+
         }
 
         return $response;

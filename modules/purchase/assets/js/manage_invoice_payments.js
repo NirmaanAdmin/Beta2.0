@@ -289,6 +289,7 @@
 
 var barTopVendorsChart;
 var barChartTopBudgetHead;
+var vendorLineChartOverTime;
 
 function get_vpt_dashboard() {
   "use strict";
@@ -410,6 +411,75 @@ function get_vpt_dashboard() {
               title: {
                 display: true,
                 text: 'Vendors'
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Vendor Billing vs Vendor Payment Timeline
+    var vendorlineCtx = document.getElementById('vendorLineChartOverTime').getContext('2d');
+    if (vendorLineChartOverTime) {
+      vendorLineChartOverTime.data.labels = response.vendor_order_date;
+      vendorLineChartOverTime.data.datasets[0].data = response.line_vendor_billing_total;
+      vendorLineChartOverTime.data.datasets[1].data = response.line_vendor_payment_total;
+      vendorLineChartOverTime.update();
+    } else {
+      vendorLineChartOverTime = new Chart(vendorlineCtx, {
+        type: 'line',
+        data: {
+          labels: response.vendor_order_date,
+          datasets: [
+            {
+              label: 'Vendor Billing',
+              data: response.line_vendor_billing_total,
+              fill: false,
+              borderColor: '#00008B',
+              backgroundColor: '#00008B',
+              tension: 0.3
+            },
+            {
+              label: 'Vendor Payment',
+              data: response.line_vendor_payment_total,
+              fill: false,
+              borderColor: '#1E90FF',
+              backgroundColor: '#1E90FF',
+              tension: 0.3
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'bottom'
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Month'
+              },
+              grid: {
+                display: false
+              }
+            },
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Value'
+              },
+              grid: {
+                display: false
               }
             }
           }

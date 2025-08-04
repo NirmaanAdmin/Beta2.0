@@ -165,6 +165,12 @@
                              <canvas id="barChartTopBudgetHead"></canvas>
                            </div>
                         </div>
+                        <div class="col-md-4">
+                           <p class="mbot15 dashboard_stat_title">Vendor Billing vs Vendor Payment Timeline</p>
+                           <div style="width: 100%; height: 500px;">
+                             <canvas id="vendorLineChartOverTime"></canvas>
+                           </div>
+                        </div>
                      </div>
                   </div>
 
