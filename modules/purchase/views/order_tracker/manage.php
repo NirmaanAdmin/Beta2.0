@@ -227,7 +227,6 @@
                                  <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
                                     <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
                                        <span class="tw-truncate dashboard_stat_value certified_by_ril"></span>
-
                                  </div>
                                  <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
                                  </div>
