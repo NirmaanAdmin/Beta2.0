@@ -346,6 +346,7 @@ function get_order_tracker_dashboard() {
     $('.percentage_anticipate_variation').text(response.percentage_anticipated + '% Of CTC');
     $('.unawarded_capex').text(response.unawarded_capex);
     $('.work_done_value').text(response.work_done_value);
+    $('.certified_by_ril').text(response.certified_by_ril);
 
     // PIE CHART - Order Status Distribution
     var statusPieCtx = document.getElementById('pieChartForStatus').getContext('2d');

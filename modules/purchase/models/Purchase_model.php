@@ -23261,6 +23261,12 @@ class Purchase_model extends App_Model
         }
         $response['work_done_value'] = app_format_money($work_done_value, $base_currency);
 
+        $certified_by_ril = 0;
+        if (!empty($result)) {
+            $certified_by_ril = array_sum(array_column($result, 'vendor_submitted_amount_without_tax'));
+        }
+        $response['certified_by_ril'] = app_format_money($certified_by_ril, $base_currency);
+
         $unawarded_capex= 0;
         if (!empty($result)) {
             // Filter records where aw_unw_order_status = 2 before summing

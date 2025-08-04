@@ -226,12 +226,10 @@
                                  </div>
                                  <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
                                     <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
-                                       <span class="tw-truncate dashboard_stat_value certified_by_ril"><?php $total = get_invoice_amount('total');
-                                                                                                         echo app_format_money($total, '₹');
-                                                                                                         ?></span>
+                                       <span class="tw-truncate dashboard_stat_value certified_by_ril"></span>
 
-                                    </div>
-                                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                                 </div>
+                                 <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
                                  </div>
                               </div>
                            </div>
@@ -441,7 +439,7 @@
                               _l('total_rev_contract_value'),
                               _l('anticipate_variation'),
                               _l('cost_to_complete'),
-                              _l('final_certified_amount'),
+                              'Total Certified Amount By BIL',
                               _l('attachment_upload'),
                               _l('attachment_download'),
                               _l('project'),
@@ -490,7 +488,7 @@
                                  <th><?php echo _l('total_rev_contract_value'); ?></th>
                                  <th><?php echo _l('anticipate_variation'); ?></th>
                                  <th><?php echo _l('cost_to_complete'); ?></th>
-                                 <th><?php echo _l('final_certified_amount'); ?></th>
+                                 <th>Total Certified Amount By BIL</th>
                                  <th><?php echo _l('attachment_upload'); ?></th>
                                  <th><?php echo _l('attachment_download'); ?></th>
                                  <th><?php echo _l('project'); ?></th>
@@ -586,7 +584,7 @@
                               <th align="left"><?php echo _l('committed_contract_amount'); ?></th>
                               <th align="left"><?php echo _l('change_order_amount'); ?></th>
                               <th align="left"><?php echo _l('anticipate_variation'); ?></th>
-                              <th align="left"><?php echo _l('final_certified_amount'); ?></th>
+                              <th align="left">Total Certified Amount By BIL</th>
                               <th align="left"><?php echo _l('project'); ?></th>
                               <th align="left"><?php echo _l('category'); ?></th>
                               <th align="left"><?php echo _l('group_pur'); ?></th>
