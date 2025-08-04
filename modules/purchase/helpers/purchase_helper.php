@@ -4733,6 +4733,9 @@ function get_invoice_amount($type)
     if (isset($project_id) && $project_id) {
         $ci->db->where('project_id', $project_id);
     }
+    if ($type === 'total') {
+        $ci->db->where_in('status', [2, 3]);
+    }
     $ci->db->select($select);
     $ci->db->from(db_prefix() . 'invoices');
     $ci->db->join(db_prefix() . 'currencies', db_prefix() . 'currencies.id = ' . db_prefix() . 'invoices.currency', 'left');

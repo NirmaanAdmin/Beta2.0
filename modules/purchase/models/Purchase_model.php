@@ -23244,7 +23244,12 @@ class Purchase_model extends App_Model
         $response['budgeted_procurement_net_value'] = app_format_money(($cost_to_complete - $rev_contract_value), $base_currency);
         $anticipate_variation = 0;
         if (!empty($result)) {
-            $anticipate_variation = array_sum(array_column($result, 'anticipate_variation'));
+            $anticipate_variation_result = array_filter($result, function ($item) {
+                return isset($item['aw_unw_order_status']) && in_array($item['aw_unw_order_status'], [1, 3]);
+            });
+            if(!empty($anticipate_variation_result)) {
+                $anticipate_variation = array_sum(array_column($anticipate_variation_result, 'anticipate_variation'));
+            }
         }
         if ($cost_to_complete > 0) {
             $response['percentage_anticipated'] = round(($anticipate_variation / $cost_to_complete) * 100);
