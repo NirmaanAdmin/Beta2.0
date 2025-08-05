@@ -11527,6 +11527,8 @@ class purchase extends AdminController
         $purOrdersReturn0 = [];
         $productionStatusFilters = [];
 
+
+
         // Process vendor filters
         if ($this->input->post('vendor')) {
             $vendor_ids = $this->input->post('vendor');
@@ -11568,6 +11570,13 @@ class purchase extends AdminController
                 $productionStatusFilters = [$productionStatusFilters];
             }
         }
+
+
+        $custom_date_select_goods = $this->get_where_report_period(db_prefix() . 'goods_receipt.date_add');
+        if ($custom_date_select_goods != '') {
+            array_push($where, $custom_date_select_goods);
+        }
+        
 
         // Apply filters to first query
         if (!empty($purOrdersVendor1)) {
@@ -11620,6 +11629,10 @@ class purchase extends AdminController
         $join1 = [
             'INNER JOIN ' . db_prefix() . 'pur_orders ON ' . db_prefix() . 'pur_orders.id = ' . db_prefix() . 'pur_order_detail.pur_order',
         ];
+        $custom_date_select_pur = $this->get_where_report_period(db_prefix() . 'pur_orders.order_date');
+        if ($custom_date_select_pur != '') {
+            array_push($where1, $custom_date_select_pur);
+        }
 
         // Apply filters to second query
         if (!empty($purOrdersReturn0)) {
@@ -11793,6 +11806,8 @@ class purchase extends AdminController
         echo json_encode($output);
         die();
     }
+
+
 
     public function update_vendor_invoice_number()
     {
