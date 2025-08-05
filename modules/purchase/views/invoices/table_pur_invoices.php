@@ -305,20 +305,13 @@ $footer_data = [
     'total_invoice_amount' => 0,
 ];
 $invoice_ids = '';
+$base_currency = get_base_currency_pur();
 
 $this->ci->load->model('purchase/purchase_model');
 $sr = 1 + $this->ci->input->post('start');
 foreach ($rResult as $aRow) {
     $row = [];
-
     for ($i = 0; $i < count($aColumns); $i++) {
-
-
-        $base_currency = get_base_currency_pur();
-        if ($aRow['currency'] != 0) {
-            $base_currency = pur_get_currency_by_id($aRow['currency']);
-        }
-
         if (strpos($aColumns[$i], 'as') !== false && !isset($aRow[$aColumns[$i]])) {
             $_data = $aRow[strafter($aColumns[$i], 'as ')];
         } else {

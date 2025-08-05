@@ -19986,7 +19986,8 @@ class Purchase_model extends App_Model
             (po.subtotal + IFNULL(co.co_value, 0)) AS total_rev_contract_value, 
             po.anticipate_variation,
             (IFNULL(po.anticipate_variation,0) + (po.subtotal + IFNULL(co.co_value,0))) AS cost_to_complete,
-            COALESCE(inv_po_sum.final_certified_amount,0) AS final_certified_amount,
+            COALESCE(inv_po_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
+            COALESCE(inv_po_sum.ril_certified_amount, 0) AS ril_certified_amount,
             po.kind,
             po.remarks              AS remarks,
             po.subtotal             AS subtotal,
@@ -19998,10 +19999,24 @@ class Purchase_model extends App_Model
         LEFT JOIN tblco_orders co    ON co.po_order_id = po.id
         LEFT JOIN tblprojects pr     ON pr.id = po.project
         LEFT JOIN (
-            SELECT pur_order, SUM(final_certified_amount) AS final_certified_amount
-            FROM tblpur_invoices
-            WHERE pur_order IS NOT NULL
-            GROUP BY pur_order
+        SELECT
+            pi.pur_order,
+            SUM(pi.vendor_submitted_amount_without_tax) AS vendor_submitted_amount_without_tax,
+            SUM(
+                CASE 
+                    WHEN ril.total > 0 THEN (ip.amount * pi.vendor_submitted_amount_without_tax) / ril.total
+                    ELSE 0
+                END
+            ) AS ril_certified_amount
+            FROM tblpur_invoices pi
+            LEFT JOIN tblitemable itm ON itm.vbt_id = pi.id AND itm.rel_type = 'invoice'
+            LEFT JOIN tblinvoices ril ON ril.id = itm.rel_id
+            LEFT JOIN (
+                SELECT invoiceid, SUM(amount) AS amount
+                FROM tblinvoicepaymentrecords
+                GROUP BY invoiceid
+            ) ip ON ip.invoiceid = ril.id
+            GROUP BY pi.pur_order
         ) AS inv_po_sum ON inv_po_sum.pur_order = po.id
 
         UNION ALL
@@ -20024,7 +20039,8 @@ class Purchase_model extends App_Model
             (wo.subtotal + IFNULL(co.co_value, 0)) AS total_rev_contract_value,
             wo.anticipate_variation,
             (IFNULL(wo.anticipate_variation,0) + (wo.subtotal + IFNULL(co.co_value,0))) AS cost_to_complete,
-            COALESCE(inv_wo_sum.final_certified_amount,0) AS final_certified_amount,
+            COALESCE(inv_wo_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
+            COALESCE(inv_wo_sum.ril_certified_amount, 0) AS ril_certified_amount,
             wo.kind,
             wo.remarks             AS remarks,
             wo.subtotal            AS subtotal,
@@ -20036,10 +20052,24 @@ class Purchase_model extends App_Model
         LEFT JOIN tblco_orders co    ON co.wo_order_id = wo.id
         LEFT JOIN tblprojects pr     ON pr.id = wo.project
         LEFT JOIN (
-            SELECT wo_order, SUM(final_certified_amount) AS final_certified_amount
-            FROM tblpur_invoices
-            WHERE wo_order IS NOT NULL
-            GROUP BY wo_order
+            SELECT
+                pi.wo_order,
+                SUM(pi.vendor_submitted_amount_without_tax) AS vendor_submitted_amount_without_tax,
+                SUM(
+                    CASE 
+                        WHEN ril.total > 0 THEN (ip.amount * pi.vendor_submitted_amount_without_tax) / ril.total
+                        ELSE 0
+                    END
+                ) AS ril_certified_amount
+            FROM tblpur_invoices pi
+            LEFT JOIN tblitemable itm ON itm.vbt_id = pi.id AND itm.rel_type = 'invoice'
+            LEFT JOIN tblinvoices ril ON ril.id = itm.rel_id
+            LEFT JOIN (
+                SELECT invoiceid, SUM(amount) AS amount
+                FROM tblinvoicepaymentrecords
+                GROUP BY invoiceid
+            ) ip ON ip.invoiceid = ril.id
+            GROUP BY pi.wo_order
         ) AS inv_wo_sum ON inv_wo_sum.wo_order = wo.id
 
         UNION ALL
@@ -20062,7 +20092,8 @@ class Purchase_model extends App_Model
             (t.total + IFNULL(t.co_total, 0)) AS total_rev_contract_value,
             t.anticipate_variation,
             (IFNULL(t.anticipate_variation,0) + (t.total + IFNULL(t.co_total,0))) AS cost_to_complete,
-            t.final_certified_amount                AS final_certified_amount,
+            COALESCE(inv_ot_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
+            COALESCE(inv_ot_sum.ril_certified_amount, 0) AS ril_certified_amount,
             t.kind,
             t.remarks             AS remarks,
             t.subtotal            AS subtotal,
@@ -20072,6 +20103,26 @@ class Purchase_model extends App_Model
         FROM tblpur_order_tracker t
         LEFT JOIN tblpur_vendor pv   ON pv.userid = t.vendor
         LEFT JOIN tblprojects pr     ON pr.id = t.project
+        LEFT JOIN (
+            SELECT
+                pi.order_tracker_id,
+                SUM(pi.vendor_submitted_amount_without_tax) AS vendor_submitted_amount_without_tax,
+                SUM(
+                    CASE 
+                        WHEN ril.total > 0 THEN (ip.amount * pi.vendor_submitted_amount_without_tax) / ril.total
+                        ELSE 0
+                    END
+                ) AS ril_certified_amount
+            FROM tblpur_invoices pi
+            LEFT JOIN tblitemable itm ON itm.vbt_id = pi.id AND itm.rel_type = 'invoice'
+            LEFT JOIN tblinvoices ril ON ril.id = itm.rel_id
+            LEFT JOIN (
+                SELECT invoiceid, SUM(amount) AS amount
+                FROM tblinvoicepaymentrecords
+                GROUP BY invoiceid
+            ) ip ON ip.invoiceid = ril.id
+            GROUP BY pi.order_tracker_id
+        ) AS inv_ot_sum ON inv_ot_sum.order_tracker_id = t.id
         ";
 
         // 2) Load any user‑saved filters
@@ -23067,7 +23118,7 @@ class Purchase_model extends App_Model
             'total_rev_contract_value',
             'anticipate_variation',
             'cost_to_complete',
-            'final_certified_amount',
+            'vendor_submitted_amount_without_tax',
             'ril_certified_amount',
             'project',
             'rli_filter',
@@ -23259,7 +23310,7 @@ class Purchase_model extends App_Model
         $response['anticipate_variation'] = app_format_money($anticipate_variation, $base_currency);
         $work_done_value = 0;
         if (!empty($result)) {
-            $work_done_value = array_sum(array_column($result, 'final_certified_amount'));
+            $work_done_value = array_sum(array_column($result, 'vendor_submitted_amount_without_tax'));
         }
         $response['work_done_value'] = app_format_money($work_done_value, $base_currency);
 
@@ -23334,7 +23385,7 @@ class Purchase_model extends App_Model
                 if (!isset($line_certified_total[$month])) {
                     $line_certified_total[$month] = 0;
                 }
-                $line_certified_total[$month] += $value['final_certified_amount'];
+                $line_certified_total[$month] += $value['vendor_submitted_amount_without_tax'];
             }
 
             if (!empty($line_order_total)) {
@@ -23419,85 +23470,6 @@ class Purchase_model extends App_Model
                 $response['line_actual_cost_total'] = array_values($line_actual_percent);
                 $response['line_planned_cost_total'] = array_values($line_planned_percent);
             }
-
-            $co_tracker_data = array_slice(array_multisort($col = array_column($filtered = array_filter($result, fn($v) => !empty($v['co_total']) && $v['co_total'] != 0), 'total_rev_contract_value'), SORT_DESC, $filtered) ? $filtered : [], 0, 10);
-
-            $response['co_tracker_data'] = '
-                <div class="table-responsive s_table">
-                  <table class="table items table-bordered">
-                    <thead>
-                      <tr>
-                        <th align="left">Order Name</th>
-                        <th align="right">Original Value</th>
-                        <th align="right">CO Amount</th>
-                        <th align="right">Revised Value</th>
-                      </tr>
-                    </thead>
-                    <tbody>';
-            if (!empty($co_tracker_data)) {
-                foreach ($co_tracker_data as $row) {
-                    $response['co_tracker_data'] .= '
-                  <tr>
-                    <td align="left">' . $row['order_name'] . '</td>
-                    <td align="right">' . app_format_money($row['total'], $base_currency) . '</td>
-                    <td align="right">' . app_format_money($row['co_total'], $base_currency) . '</td>
-                    <td align="right">' . app_format_money($row['total_rev_contract_value'], $base_currency) . '</td>
-                  </tr>';
-                }
-            } else {
-                $response['co_tracker_data'] .= '
-                  <tr>
-                    <td colspan="4" align="center">No data available</td>
-                  </tr>';
-            }
-            $response['co_tracker_data'] .= '
-                </tbody>
-              </table>
-            </div>';
-
-            $contractor_tracker_data = array_values(array_reduce(array_filter($result, fn($v) => !empty($v['vendor'])), function ($carry, $item) {
-                $vendor = $item['vendor'];
-                if (!isset($carry[$vendor])) {
-                    $carry[$vendor] = ['vendor' => $vendor, 'total' => 0, 'final_certified_amount' => 0];
-                }
-                $carry[$vendor]['total'] += (float)$item['total'];
-                $carry[$vendor]['final_certified_amount'] += (float)$item['final_certified_amount'];
-                return $carry;
-            }, []));
-            if (!empty($contractor_tracker_data)) {
-                $contractor_tracker_data = array_slice(array_multisort($col = array_column($filtered = array_filter($contractor_tracker_data, fn($v) => !empty($v['final_certified_amount']) && $v['final_certified_amount'] != 0), 'total'), SORT_DESC, $filtered) ? $filtered : [], 0, 10);
-            }
-
-            $response['contractor_tracker'] = '
-                <div class="table-responsive s_table">
-                  <table class="table items table-bordered">
-                    <thead>
-                      <tr>
-                        <th align="left">Contractor</th>
-                        <th align="right">Contract Value</th>
-                        <th align="right">Certified Amount</th>
-                      </tr>
-                    </thead>
-                    <tbody>';
-            if (!empty($contractor_tracker_data)) {
-                foreach ($contractor_tracker_data as $row) {
-                    $response['contractor_tracker'] .= '
-                  <tr>
-                    <td align="left">' . $row['vendor'] . '</td>
-                    <td align="right">' . app_format_money($row['total'], $base_currency) . '</td>
-                    <td align="right">' . app_format_money($row['final_certified_amount'], $base_currency) . '</td>
-                  </tr>';
-                }
-            } else {
-                $response['contractor_tracker'] .= '
-                  <tr>
-                    <td colspan="3" align="center">No data available</td>
-                  </tr>';
-            }
-            $response['contractor_tracker'] .= '
-                </tbody>
-              </table>
-            </div>';
         }
 
         return $response;

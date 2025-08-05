@@ -342,7 +342,7 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         (po.subtotal + IFNULL(co_sum.co_total, 0)) AS total_rev_contract_value, 
         po.anticipate_variation,
         (IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0))) AS cost_to_complete,
-        COALESCE(inv_po_sum.final_certified_amount, 0) AS final_certified_amount,
+        COALESCE(inv_po_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
         COALESCE(inv_po_sum.ril_certified_amount, 0) AS ril_certified_amount,
         po.group_pur,
         po.kind, 
@@ -363,10 +363,10 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
     LEFT JOIN (
         SELECT
             pi.pur_order,
-            SUM(pi.final_certified_amount) AS final_certified_amount,
+            SUM(pi.vendor_submitted_amount_without_tax) AS vendor_submitted_amount_without_tax,
             SUM(
                 CASE 
-                    WHEN ril.total > 0 THEN (ip.amount * pi.final_certified_amount) / ril.total
+                    WHEN ril.total > 0 THEN (ip.amount * pi.vendor_submitted_amount_without_tax) / ril.total
                     ELSE 0
                 END
             ) AS ril_certified_amount
@@ -401,7 +401,7 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         (wo.subtotal + IFNULL(co_sum.co_total, 0)) AS total_rev_contract_value,
         wo.anticipate_variation,
         (IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0))) AS cost_to_complete,
-        COALESCE(inv_wo_sum.final_certified_amount, 0) AS final_certified_amount,
+        COALESCE(inv_wo_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
         COALESCE(inv_wo_sum.ril_certified_amount, 0) AS ril_certified_amount,
         wo.group_pur,
         wo.kind,
@@ -422,10 +422,10 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
     LEFT JOIN (
         SELECT
             pi.wo_order,
-            SUM(pi.final_certified_amount) AS final_certified_amount,
+            SUM(pi.vendor_submitted_amount_without_tax) AS vendor_submitted_amount_without_tax,
             SUM(
                 CASE 
-                    WHEN ril.total > 0 THEN (ip.amount * pi.final_certified_amount) / ril.total
+                    WHEN ril.total > 0 THEN (ip.amount * pi.vendor_submitted_amount_without_tax) / ril.total
                     ELSE 0
                 END
             ) AS ril_certified_amount
@@ -460,7 +460,7 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         (t.total + IFNULL(t.co_total, 0)) AS total_rev_contract_value,
         t.anticipate_variation,
         (IFNULL(t.anticipate_variation, 0) + (t.total + IFNULL(t.co_total, 0))) AS cost_to_complete,
-        COALESCE(inv_ot_sum.final_certified_amount, 0) AS final_certified_amount,
+        COALESCE(inv_ot_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
         COALESCE(inv_ot_sum.ril_certified_amount, 0) AS ril_certified_amount,
         t.group_pur,
         t.kind,
@@ -475,10 +475,10 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
     LEFT JOIN (
         SELECT
             pi.order_tracker_id,
-            SUM(pi.final_certified_amount) AS final_certified_amount,
+            SUM(pi.vendor_submitted_amount_without_tax) AS vendor_submitted_amount_without_tax,
             SUM(
                 CASE 
-                    WHEN ril.total > 0 THEN (ip.amount * pi.final_certified_amount) / ril.total
+                    WHEN ril.total > 0 THEN (ip.amount * pi.vendor_submitted_amount_without_tax) / ril.total
                     ELSE 0
                 END
             ) AS ril_certified_amount

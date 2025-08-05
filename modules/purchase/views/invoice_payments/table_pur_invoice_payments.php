@@ -79,11 +79,11 @@ if ($this->ci->input->post('billing_invoices') && $this->ci->input->post('billin
 
 if ($this->ci->input->post('bil_payment_status') && $this->ci->input->post('bil_payment_status') != '') {
     if ($this->ci->input->post('bil_payment_status') == "paid") {
-        array_push($where, 'AND (final_certified_amount = IF(ril.total > 0, (ip.amount * final_certified_amount) / ril.total, 0))');
+        array_push($where, 'AND (vendor_submitted_amount_without_tax = IF(ril.total > 0, (ip.amount * vendor_submitted_amount_without_tax) / ril.total, 0))');
     } else if ($this->ci->input->post('bil_payment_status') == "partially_paid") {
-        $where[] = 'AND (final_certified_amount > IF(ril.total > 0, (ip.amount * final_certified_amount) / ril.total, 0) AND (IF(ril.total > 0, (ip.amount * final_certified_amount) / ril.total, 0) != 0 AND IF(ril.total > 0, (ip.amount * final_certified_amount) / ril.total, 0) IS NOT NULL))';
+        $where[] = 'AND (vendor_submitted_amount_without_tax > IF(ril.total > 0, (ip.amount * vendor_submitted_amount_without_tax) / ril.total, 0) AND (IF(ril.total > 0, (ip.amount * vendor_submitted_amount_without_tax) / ril.total, 0) != 0 AND IF(ril.total > 0, (ip.amount * vendor_submitted_amount_without_tax) / ril.total, 0) IS NOT NULL))';
     } else {
-        array_push($where, 'AND (IF(ril.total > 0, (ip.amount * final_certified_amount) / ril.total, 0) = 0 OR IF(ril.total > 0, (ip.amount * final_certified_amount) / ril.total, 0) IS NULL)');
+        array_push($where, 'AND (IF(ril.total > 0, (ip.amount * vendor_submitted_amount_without_tax) / ril.total, 0) = 0 OR IF(ril.total > 0, (ip.amount * vendor_submitted_amount_without_tax) / ril.total, 0) IS NULL)');
     }
 }
 
@@ -159,8 +159,8 @@ $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [
     db_prefix() . 'pur_invoices.description_services',
     'ril.id as ril_invoice_id',
     'ril.title as ril_invoice_title',
-    'IF(ril.total > 0, (ip.amount * final_certified_amount) / ril.total, 0) AS ril_this_bill',
-    '(ril_previous + IF(ril.total > 0, (ip.amount * final_certified_amount) / ril.total, 0)) AS ril_amount',
+    'IF(ril.total > 0, (ip.amount * vendor_submitted_amount_without_tax) / ril.total, 0) AS ril_this_bill',
+    '(ril_previous + IF(ril.total > 0, (ip.amount * vendor_submitted_amount_without_tax) / ril.total, 0)) AS ril_amount',
 ]);
 
 $output  = $result['output'];
@@ -179,19 +179,13 @@ $footer_data = [
     'total_ril_this_bill' => 0,
     'total_ril_amount' => 0,
 ];
+$base_currency = get_base_currency_pur();
 
 $this->ci->load->model('purchase/purchase_model');
 $sr = 1 + $this->ci->input->post('start');
 foreach ($rResult as $aRow) {
     $row = [];
-
     for ($i = 0; $i < count($aColumns); $i++) {
-
-        $base_currency = get_base_currency_pur();
-        if ($aRow['currency'] != 0) {
-            $base_currency = pur_get_currency_by_id($aRow['currency']);
-        }
-
         $ril_invoice_link = '';
         // $ril_invoice_item = get_ril_invoice_item($aRow['id']);
         // if(!empty($ril_invoice_item)) {

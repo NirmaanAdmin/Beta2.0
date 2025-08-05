@@ -26,7 +26,7 @@ $aColumns = [
    'total_rev_contract_value',
    'anticipate_variation',
    'cost_to_complete',
-   'final_certified_amount',
+   'vendor_submitted_amount_without_tax',
    'ril_certified_amount',
    1,
    2,
@@ -264,7 +264,7 @@ $result = data_tables_init_union($aColumns, $sIndexColumn, $sTable, $join, $wher
    'total_rev_contract_value',
    'anticipate_variation',
    'cost_to_complete',
-   'final_certified_amount',
+   'vendor_submitted_amount_without_tax',
    'kind',
    'group_name',
    'remarks',
@@ -293,6 +293,7 @@ $footer_data = [
 $this->ci->load->model('purchase/purchase_model');
 $vendor_list  = $this->ci->purchase_model->get_vendor();
 $vendor_by_id       = array_column($vendor_list,  null, 'userid');
+$base_currency = get_base_currency_pur();
 
 $sr = 1;
 foreach ($rResult as $aRow) {
@@ -303,7 +304,6 @@ foreach ($rResult as $aRow) {
       // Process specific columns
       if ($column == 'total') {
          if ($aRow['source_table']  == "order_tracker") {
-            $base_currency = get_base_currency_pur();
             $_data = app_format_money($aRow['total'], $base_currency->symbol);
 
             // Check if total exists in the database
@@ -320,7 +320,6 @@ foreach ($rResult as $aRow) {
                          data-type="' . $aRow['source_table'] . '">';
             }
          } else {
-            $base_currency = get_base_currency_pur();
             $_data = app_format_money($aRow['subtotal'], $base_currency->symbol);
          }
       } elseif ($column == 'order_name') {
@@ -461,7 +460,6 @@ foreach ($rResult as $aRow) {
                          data-type="' . $aRow['source_table'] . '">';
          }
       } elseif ($column == 'co_total') {
-         // $base_currency = get_base_currency_pur();
          // $_data = app_format_money($aRow['co_total'], $base_currency->symbol);
 
          // Check if anticipate_variation exists in the database
@@ -493,7 +491,6 @@ foreach ($rResult as $aRow) {
             $_data = '<span style="font-style: italic;font-size: 12px;">Values will be fetched directly from the change order module</span>';
          }
       } elseif ($column == 'total_rev_contract_value') {
-         $base_currency = get_base_currency_pur();
          $_data = app_format_money($aRow['total_rev_contract_value'], $base_currency->symbol);
       } elseif ($column == 'anticipate_variation') {
          // Check if anticipate_variation exists in the database
@@ -510,16 +507,12 @@ foreach ($rResult as $aRow) {
                      data-type="' . $aRow['source_table'] . '">';
          }
       } elseif ($column == 'cost_to_complete') {
-         $base_currency = get_base_currency_pur();
          $_data = app_format_money($aRow['cost_to_complete'], $base_currency->symbol);
-      } elseif ($column == 'final_certified_amount') {
-         // Format final_certified_amount to display as currency
-         // $_data = app_format_money($aRow['final_certified_amount'], '₹');
-
-         if (!empty($aRow['final_certified_amount']) && $aRow['final_certified_amount'] != 0) {
+      } elseif ($column == 'vendor_submitted_amount_without_tax') {
+         if (!empty($aRow['vendor_submitted_amount_without_tax']) && $aRow['vendor_submitted_amount_without_tax'] != 0) {
 
             $_data = '<span class=  data-id="' . $aRow['id'] . '" data-type="' . $aRow['source_table'] . '">' .
-               app_format_money($aRow['final_certified_amount'], '₹') .
+               app_format_money($aRow['vendor_submitted_amount_without_tax'], '₹') .
                '</span>';
          } else {
             // Render as an editable input if no value exists
@@ -567,7 +560,6 @@ foreach ($rResult as $aRow) {
          }
       }
       //  elseif ($column == 'order_value') {
-      //    $base_currency = get_base_currency_pur();
       //    $_data = '<span class="order-value-display" data-id="' . $aRow['id'] . '" data-type="' . $aRow['source_table'] . '">' . app_format_money($aRow['order_value'], $base_currency->symbol) . '</span>';
       // }
       elseif ($column == 'aw_unw_order_status') {
@@ -706,7 +698,7 @@ foreach ($rResult as $aRow) {
    $footer_data['total_rev_contract_value'] += $aRow['total_rev_contract_value'];
    $footer_data['total_anticipate_variation'] += $aRow['anticipate_variation'];
    $footer_data['total_cost_to_complete'] += $aRow['cost_to_complete'];
-   $footer_data['total_final_certified_amount'] += $aRow['final_certified_amount'];
+   $footer_data['total_final_certified_amount'] += $aRow['vendor_submitted_amount_without_tax'];
    $footer_data['total_ril_certified_amount'] += $aRow['ril_certified_amount'];
    $output['aaData'][] = $row;
    $sr++;
