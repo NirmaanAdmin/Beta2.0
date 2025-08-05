@@ -226,7 +226,7 @@
                                  </div>
                                  <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
                                     <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
-                                       <span class="tw-truncate dashboard_stat_value certified_by_ril"></span>
+                                       <span class="tw-truncate dashboard_stat_value ril_certified_amount"></span>
                                  </div>
                                  <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
                                  </div>
@@ -243,17 +243,12 @@
                                  </div>
                                  <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
                                     <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
-                                       <span class="tw-truncate dashboard_stat_value certified_by_ril"><?php $total = get_invoice_amount('total_due');
-                                                                                                         echo app_format_money($total, '₹');
-                                                                                                         ?></span>
-
-                                    </div>
-                                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                                       <span class="tw-truncate dashboard_stat_value total_payment_due"></span>
+                                 </div>
+                                 <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
                                  </div>
                               </div>
                            </div>
-
-
 
                         </div>
                      </div>
@@ -439,6 +434,7 @@
                               _l('anticipate_variation'),
                               _l('cost_to_complete'),
                               'Total Certified Amount By BIL',
+                              'RIL Certified Amount',
                               _l('attachment_upload'),
                               _l('attachment_download'),
                               _l('project'),
@@ -488,6 +484,7 @@
                                  <th><?php echo _l('anticipate_variation'); ?></th>
                                  <th><?php echo _l('cost_to_complete'); ?></th>
                                  <th>Total Certified Amount By BIL</th>
+                                 <th>RIL Certified Amount</th>
                                  <th><?php echo _l('attachment_upload'); ?></th>
                                  <th><?php echo _l('attachment_download'); ?></th>
                                  <th><?php echo _l('project'); ?></th>
@@ -513,6 +510,7 @@
                               <td class="total_anticipate_variation"></td>
                               <td class="total_cost_to_complete"></td>
                               <td class="total_final_certified_amount"></td>
+                              <td class="total_ril_certified_amount"></td>
                               <td></td>
                               <td></td>
                               <td></td>

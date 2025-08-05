@@ -26,7 +26,8 @@ $aColumns = [
    'total_rev_contract_value',
    'anticipate_variation',
    'cost_to_complete',
-   'vendor_submitted_amount_without_tax',
+   'final_certified_amount',
+   'ril_certified_amount',
    1,
    2,
    'project',
@@ -263,7 +264,7 @@ $result = data_tables_init_union($aColumns, $sIndexColumn, $sTable, $join, $wher
    'total_rev_contract_value',
    'anticipate_variation',
    'cost_to_complete',
-   'vendor_submitted_amount_without_tax',
+   'final_certified_amount',
    'kind',
    'group_name',
    'remarks',
@@ -287,6 +288,7 @@ $footer_data = [
    'total_anticipate_variation' => 0,
    'total_cost_to_complete' => 0,
    'total_final_certified_amount' => 0,
+   'total_ril_certified_amount' => 0,
 ];
 $this->ci->load->model('purchase/purchase_model');
 $vendor_list  = $this->ci->purchase_model->get_vendor();
@@ -510,19 +512,21 @@ foreach ($rResult as $aRow) {
       } elseif ($column == 'cost_to_complete') {
          $base_currency = get_base_currency_pur();
          $_data = app_format_money($aRow['cost_to_complete'], $base_currency->symbol);
-      } elseif ($column == 'vendor_submitted_amount_without_tax') {
+      } elseif ($column == 'final_certified_amount') {
          // Format final_certified_amount to display as currency
          // $_data = app_format_money($aRow['final_certified_amount'], '₹');
 
-         if (!empty($aRow['vendor_submitted_amount_without_tax']) && $aRow['vendor_submitted_amount_without_tax'] != 0) {
+         if (!empty($aRow['final_certified_amount']) && $aRow['final_certified_amount'] != 0) {
 
             $_data = '<span class=  data-id="' . $aRow['id'] . '" data-type="' . $aRow['source_table'] . '">' .
-               app_format_money($aRow['vendor_submitted_amount_without_tax'], '₹') .
+               app_format_money($aRow['final_certified_amount'], '₹') .
                '</span>';
          } else {
             // Render as an editable input if no value exists
             $_data = '<span style="font-style: italic;font-size: 12px;">Values will be fetched directly from the vendor billing tracker</span>';
          }
+      } elseif ($column == 'ril_certified_amount') {
+         $_data = '<span class=  data-id="' . $aRow['id'] . '" data-type="' . $aRow['source_table'] . '">' . app_format_money($aRow['ril_certified_amount'], '₹') . '</span>';
       } elseif ($column == 1) {
          $_data = '
             <div class="input-group" style="width: 100%;">
@@ -702,7 +706,8 @@ foreach ($rResult as $aRow) {
    $footer_data['total_rev_contract_value'] += $aRow['total_rev_contract_value'];
    $footer_data['total_anticipate_variation'] += $aRow['anticipate_variation'];
    $footer_data['total_cost_to_complete'] += $aRow['cost_to_complete'];
-   $footer_data['total_final_certified_amount'] += $aRow['vendor_submitted_amount_without_tax'];
+   $footer_data['total_final_certified_amount'] += $aRow['final_certified_amount'];
+   $footer_data['total_ril_certified_amount'] += $aRow['ril_certified_amount'];
    $output['aaData'][] = $row;
    $sr++;
 }

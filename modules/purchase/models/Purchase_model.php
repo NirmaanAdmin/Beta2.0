@@ -23066,7 +23066,8 @@ class Purchase_model extends App_Model
             'total_rev_contract_value',
             'anticipate_variation',
             'cost_to_complete',
-            'vendor_submitted_amount_without_tax',
+            'final_certified_amount',
+            'ril_certified_amount',
             'project',
             'rli_filter',
             'kind',
@@ -23257,15 +23258,17 @@ class Purchase_model extends App_Model
         $response['anticipate_variation'] = app_format_money($anticipate_variation, $base_currency);
         $work_done_value = 0;
         if (!empty($result)) {
-            $work_done_value = array_sum(array_column($result, 'vendor_submitted_amount_without_tax'));
+            $work_done_value = array_sum(array_column($result, 'final_certified_amount'));
         }
         $response['work_done_value'] = app_format_money($work_done_value, $base_currency);
 
-        $certified_by_ril = 0;
+        $ril_certified_amount = 0;
         if (!empty($result)) {
-            $certified_by_ril = array_sum(array_column($result, 'vendor_submitted_amount_without_tax'));
+            $ril_certified_amount = array_sum(array_column($result, 'ril_certified_amount'));
         }
-        $response['certified_by_ril'] = app_format_money($certified_by_ril, $base_currency);
+        $response['ril_certified_amount'] = app_format_money($ril_certified_amount, $base_currency);
+        $total_payment_due = $work_done_value - $ril_certified_amount;
+        $response['total_payment_due'] = app_format_money($total_payment_due, $base_currency);
 
         $unawarded_capex= 0;
         if (!empty($result)) {
@@ -23330,7 +23333,7 @@ class Purchase_model extends App_Model
                 if (!isset($line_certified_total[$month])) {
                     $line_certified_total[$month] = 0;
                 }
-                $line_certified_total[$month] += $value['vendor_submitted_amount_without_tax'];
+                $line_certified_total[$month] += $value['final_certified_amount'];
             }
 
             if (!empty($line_order_total)) {
@@ -23454,14 +23457,14 @@ class Purchase_model extends App_Model
             $contractor_tracker_data = array_values(array_reduce(array_filter($result, fn($v) => !empty($v['vendor'])), function ($carry, $item) {
                 $vendor = $item['vendor'];
                 if (!isset($carry[$vendor])) {
-                    $carry[$vendor] = ['vendor' => $vendor, 'total' => 0, 'vendor_submitted_amount_without_tax' => 0];
+                    $carry[$vendor] = ['vendor' => $vendor, 'total' => 0, 'final_certified_amount' => 0];
                 }
                 $carry[$vendor]['total'] += (float)$item['total'];
-                $carry[$vendor]['vendor_submitted_amount_without_tax'] += (float)$item['vendor_submitted_amount_without_tax'];
+                $carry[$vendor]['final_certified_amount'] += (float)$item['final_certified_amount'];
                 return $carry;
             }, []));
             if (!empty($contractor_tracker_data)) {
-                $contractor_tracker_data = array_slice(array_multisort($col = array_column($filtered = array_filter($contractor_tracker_data, fn($v) => !empty($v['vendor_submitted_amount_without_tax']) && $v['vendor_submitted_amount_without_tax'] != 0), 'total'), SORT_DESC, $filtered) ? $filtered : [], 0, 10);
+                $contractor_tracker_data = array_slice(array_multisort($col = array_column($filtered = array_filter($contractor_tracker_data, fn($v) => !empty($v['final_certified_amount']) && $v['final_certified_amount'] != 0), 'total'), SORT_DESC, $filtered) ? $filtered : [], 0, 10);
             }
 
             $response['contractor_tracker'] = '
@@ -23481,7 +23484,7 @@ class Purchase_model extends App_Model
                   <tr>
                     <td align="left">' . $row['vendor'] . '</td>
                     <td align="right">' . app_format_money($row['total'], $base_currency) . '</td>
-                    <td align="right">' . app_format_money($row['vendor_submitted_amount_without_tax'], $base_currency) . '</td>
+                    <td align="right">' . app_format_money($row['final_certified_amount'], $base_currency) . '</td>
                   </tr>';
                 }
             } else {

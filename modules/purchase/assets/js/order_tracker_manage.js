@@ -113,6 +113,7 @@ var expenseDropzone;
         $(this).find('tfoot td.total_anticipate_variation').html(sums.total_anticipate_variation);
         $(this).find('tfoot td.total_cost_to_complete').html(sums.total_cost_to_complete);
         $(this).find('tfoot td.total_final_certified_amount').html(sums.total_final_certified_amount);
+        $(this).find('tfoot td.total_ril_certified_amount').html(sums.total_ril_certified_amount);
     });
     $('.buttons-collection').hide()
 
@@ -346,7 +347,8 @@ function get_order_tracker_dashboard() {
     $('.percentage_anticipate_variation').text(response.percentage_anticipated + '% Of CTC');
     $('.unawarded_capex').text(response.unawarded_capex);
     $('.work_done_value').text(response.work_done_value);
-    $('.certified_by_ril').text(response.certified_by_ril);
+    $('.ril_certified_amount').text(response.ril_certified_amount);
+    $('.total_payment_due').text(response.total_payment_due);
 
     // PIE CHART - Order Status Distribution
     var statusPieCtx = document.getElementById('pieChartForStatus').getContext('2d');

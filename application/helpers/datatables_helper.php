@@ -342,7 +342,8 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         (po.subtotal + IFNULL(co_sum.co_total, 0)) AS total_rev_contract_value, 
         po.anticipate_variation,
         (IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0))) AS cost_to_complete,
-        COALESCE(inv_po_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
+        COALESCE(inv_po_sum.final_certified_amount, 0) AS final_certified_amount,
+        COALESCE(inv_po_sum.ril_certified_amount, 0) AS ril_certified_amount,
         po.group_pur,
         po.kind, 
         po.remarks AS remarks,
@@ -360,13 +361,25 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
     ) AS co_sum ON co_sum.po_order_id = po.id
     LEFT JOIN tblprojects pr ON pr.id = po.project
     LEFT JOIN (
-    SELECT
-        pur_order,
-        SUM(vendor_submitted_amount_without_tax) AS vendor_submitted_amount_without_tax
-        FROM tblpur_invoices
-        GROUP BY pur_order
-    ) AS inv_po_sum
-        ON inv_po_sum.pur_order = po.id
+        SELECT
+            pi.pur_order,
+            SUM(pi.final_certified_amount) AS final_certified_amount,
+            SUM(
+                CASE 
+                    WHEN ril.total > 0 THEN (ip.amount * pi.final_certified_amount) / ril.total
+                    ELSE 0
+                END
+            ) AS ril_certified_amount
+        FROM tblpur_invoices pi
+        LEFT JOIN tblitemable itm ON itm.vbt_id = pi.id AND itm.rel_type = 'invoice'
+        LEFT JOIN tblinvoices ril ON ril.id = itm.rel_id
+        LEFT JOIN (
+            SELECT invoiceid, SUM(amount) AS amount
+            FROM tblinvoicepaymentrecords
+            GROUP BY invoiceid
+        ) ip ON ip.invoiceid = ril.id
+        GROUP BY pi.pur_order
+    ) AS inv_po_sum ON inv_po_sum.pur_order = po.id
     WHERE po.approve_status = 2
 
     UNION ALL
@@ -388,7 +401,8 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         (wo.subtotal + IFNULL(co_sum.co_total, 0)) AS total_rev_contract_value,
         wo.anticipate_variation,
         (IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0))) AS cost_to_complete,
-        COALESCE(inv_wo_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
+        COALESCE(inv_wo_sum.final_certified_amount, 0) AS final_certified_amount,
+        COALESCE(inv_wo_sum.ril_certified_amount, 0) AS ril_certified_amount,
         wo.group_pur,
         wo.kind,
         wo.remarks AS remarks,
@@ -406,13 +420,25 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
     ) AS co_sum ON co_sum.wo_order_id = wo.id
     LEFT JOIN tblprojects pr ON pr.id = wo.project
     LEFT JOIN (
-    SELECT
-        wo_order,
-        SUM(vendor_submitted_amount_without_tax) AS vendor_submitted_amount_without_tax
-        FROM tblpur_invoices
-        GROUP BY wo_order
-    ) AS inv_wo_sum
-        ON inv_wo_sum.wo_order = wo.id
+        SELECT
+            pi.wo_order,
+            SUM(pi.final_certified_amount) AS final_certified_amount,
+            SUM(
+                CASE 
+                    WHEN ril.total > 0 THEN (ip.amount * pi.final_certified_amount) / ril.total
+                    ELSE 0
+                END
+            ) AS ril_certified_amount
+        FROM tblpur_invoices pi
+        LEFT JOIN tblitemable itm ON itm.vbt_id = pi.id AND itm.rel_type = 'invoice'
+        LEFT JOIN tblinvoices ril ON ril.id = itm.rel_id
+        LEFT JOIN (
+            SELECT invoiceid, SUM(amount) AS amount
+            FROM tblinvoicepaymentrecords
+            GROUP BY invoiceid
+        ) ip ON ip.invoiceid = ril.id
+        GROUP BY pi.wo_order
+    ) AS inv_wo_sum ON inv_wo_sum.wo_order = wo.id
     WHERE wo.approve_status = 2
 
     UNION ALL
@@ -434,7 +460,8 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         (t.total + IFNULL(t.co_total, 0)) AS total_rev_contract_value,
         t.anticipate_variation,
         (IFNULL(t.anticipate_variation, 0) + (t.total + IFNULL(t.co_total, 0))) AS cost_to_complete,
-        COALESCE(inv_ot_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
+        COALESCE(inv_ot_sum.final_certified_amount, 0) AS final_certified_amount,
+        COALESCE(inv_ot_sum.ril_certified_amount, 0) AS ril_certified_amount,
         t.group_pur,
         t.kind,
         t.remarks AS remarks,
@@ -446,13 +473,25 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
     LEFT JOIN tblpur_vendor pv ON pv.userid = t.vendor
     LEFT JOIN tblprojects pr ON pr.id = t.project
     LEFT JOIN (
-    SELECT
-        order_tracker_id ,
-        SUM(vendor_submitted_amount_without_tax) AS vendor_submitted_amount_without_tax
-        FROM tblpur_invoices
-        GROUP BY order_tracker_id 
-    ) AS inv_ot_sum
-        ON inv_ot_sum.order_tracker_id = t.id
+        SELECT
+            pi.order_tracker_id,
+            SUM(pi.final_certified_amount) AS final_certified_amount,
+            SUM(
+                CASE 
+                    WHEN ril.total > 0 THEN (ip.amount * pi.final_certified_amount) / ril.total
+                    ELSE 0
+                END
+            ) AS ril_certified_amount
+        FROM tblpur_invoices pi
+        LEFT JOIN tblitemable itm ON itm.vbt_id = pi.id AND itm.rel_type = 'invoice'
+        LEFT JOIN tblinvoices ril ON ril.id = itm.rel_id
+        LEFT JOIN (
+            SELECT invoiceid, SUM(amount) AS amount
+            FROM tblinvoicepaymentrecords
+            GROUP BY invoiceid
+        ) ip ON ip.invoiceid = ril.id
+        GROUP BY pi.order_tracker_id
+    ) AS inv_ot_sum ON inv_ot_sum.order_tracker_id = t.id
 ) AS combined_orders";
 
 
