@@ -271,7 +271,7 @@ function data_tables_init($aColumns, $sIndexColumn, $sTable, $join = [], $where 
     $havingSet
     $sOrder
     $sLimit
-    ";   
+    ";
     $rResult = hooks()->apply_filters(
         'datatables_sql_query_results',
         $CI->db->query($resultQuery)->result_array(),
@@ -1454,7 +1454,7 @@ function data_tables_init_union_for_reports($aColumns, $sIndexColumn, $combinedT
           FROM tblpur_order_detail pod 
           WHERE pod.pur_order = po.id)
     )
-) AS combined_orders";
+    ) AS combined_orders";
 
     $allColumns = [];
     foreach ($aColumns as $column) {

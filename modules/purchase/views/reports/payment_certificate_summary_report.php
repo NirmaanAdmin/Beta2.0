@@ -8,15 +8,18 @@
    }
 </style>
 <div id="payment_certificate_summary_report" class="hide">
-   
-   <div class="row">
-      <div class="col-md-4">
-         <div class="form-group">
 
-         </div>
-      </div>
-      <div class="clearfix"></div>
+   <div class="col-md-3 form-group">
+      <select name="vendors[]" id="vendor" class="selectpicker" multiple="true" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('vendor'); ?>">
+         <option value=""></option>
+         <?php
+         $vendor = get_pur_vendor_list();
+         foreach ($vendor as $vendors) { ?>
+            <option value="<?php echo $vendors['userid']; ?>"><?php echo  $vendors['company']; ?></option>
+         <?php  } ?>
+      </select>
    </div>
+   <div class="clearfix"></div>
    <table class="table table-payment-certificate-summary-report scroll-responsive">
       <thead>
          <tr>

@@ -8,14 +8,24 @@
    }
 </style>
 <div id="delivery_performance_report" class="hide">
-   
-   <div class="row">
-      <div class="col-md-4">
-         <div class="form-group">
+   <div class="col-md-3 form-group">
+      <select name="vendor_ids[]" id="vendor" class="selectpicker" multiple="true" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('vendor'); ?>">
+         <option value=""></option>
+         <?php
+         $vendor = get_pur_vendor_list();
+         foreach ($vendor as $vendors) { ?>
+            <option value="<?php echo $vendors['userid']; ?>"><?php echo  $vendors['company']; ?></option>
+         <?php  } ?>
+      </select>
+   </div>
 
-         </div>
-      </div>
-      <div class="clearfix"></div>
+   <div class="col-md-3 form-group">
+         <select name="delivery_status_filter" id="delivery_status_filter" class="form-control selectpicker" plcaceholder="<?php echo _l('delivery_status'); ?>" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('delivery_status'); ?>">
+            <option value=""></option>
+            <option value="on_time"><?php echo _l('On Time'); ?></option>
+            <option value="delayed"><?php echo _l('Delayed'); ?></option>
+            <option value="pending"><?php echo _l('Pending'); ?></option>
+         </select>
    </div>
    <table class="table table-delivery-performance-report scroll-responsive">
       <thead>

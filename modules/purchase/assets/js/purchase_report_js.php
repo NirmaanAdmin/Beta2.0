@@ -38,6 +38,12 @@
       "wo_department": '[name="wo_department[]"]',
       "production_status": '[name="production_status[]"]',
       "delivery": '[name="delivery"]',
+      "vendor": '[name="vendors[]"]',
+      "vendor_id": '[name="vendor_id[]"]',
+      "delivery_status": '[name="delivery_status[]"]',
+      "risk": '[name="risk[]"]',
+      "vendor_ids" : '[name="vendor_ids[]"]',
+      "delivery_status_filter": '[name="delivery_status_filter"]'
     }
 
     $('select[name="products_services"]').on('change', function() {
@@ -317,8 +323,7 @@
     $.each(fnServerParams, function(i, obj) {
       $('select' + obj).on('change', function() {
         table_payment_certificate_summary.DataTable().ajax.reload()
-          .columns.adjust()
-          .responsive.recalc();
+          .columns.adjust();
       });
     });
   }

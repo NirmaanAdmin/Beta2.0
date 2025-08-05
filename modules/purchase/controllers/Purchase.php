@@ -11576,7 +11576,7 @@ class purchase extends AdminController
         if ($custom_date_select_goods != '') {
             array_push($where, $custom_date_select_goods);
         }
-        
+
 
         // Apply filters to first query
         if (!empty($purOrdersVendor1)) {
@@ -15601,7 +15601,35 @@ class purchase extends AdminController
                 'risk_level',
             ];
             $where = [];
+            if ($this->input->post('vendor_id') && $this->input->post('vendor_id') != '') {
+                $vendor_id = $this->input->post('vendor_id');
+                array_push($where, 'AND vendor_id IN (' . implode(',', $vendor_id) . ')');
+            }
 
+            if ($this->input->post('delivery_status') && $this->input->post('delivery_status') != '') {
+                $delivery_status = $this->input->post('delivery_status');
+                array_push($where, 'AND delivery_status IN (' . implode(',', $delivery_status) . ')');
+            }
+
+            if ($this->input->post('risk') && $this->input->post('risk') != '') {
+                $risk_levels = $this->input->post('risk');
+                $risk_mapping = [
+                    '1' => 'low',
+                    '2' => 'medium',
+                    '3' => 'high'
+                ];
+
+                $filter_values = [];
+                foreach ($risk_levels as $risk) {
+                    if (isset($risk_mapping[$risk])) {
+                        $filter_values[] = "'" . $risk_mapping[$risk] . "'";
+                    }
+                }
+
+                if (!empty($filter_values)) {
+                    array_push($where, 'AND risk_level IN (' . implode(',', $filter_values) . ')');
+                }
+            }
             $aColumns     = $select;
             $sIndexColumn = 'id';
 
@@ -15709,6 +15737,16 @@ class purchase extends AdminController
             ];
             $where = [];
 
+            $custom_date_select_pur = $this->get_where_report_period(db_prefix() . 'pur_orders.order_date');
+            if ($custom_date_select_pur != '') {
+                array_push($where, $custom_date_select_pur);
+            }
+
+            if ($this->input->post('vendor') && $this->input->post('vendor') != '') {
+                $vendor_id = $this->input->post('vendor');
+                array_push($where, 'AND ' . db_prefix() . 'pur_orders.vendor IN (' . implode(',', $vendor_id) . ')');
+            }
+
             $aColumns     = $select;
             $sIndexColumn = 'id';
             $sTable       = db_prefix() . 'pur_orders';
@@ -15793,6 +15831,34 @@ class purchase extends AdminController
                 'LEFT JOIN ' . db_prefix() . 'pur_orders ON ' . db_prefix() . 'pur_orders.id = ' . db_prefix() . 'pur_order_detail.pur_order',
                 'LEFT JOIN ' . db_prefix() . 'pur_vendor ON ' . db_prefix() . 'pur_vendor.userid = ' . db_prefix() . 'pur_orders.vendor',
             ];
+
+            $custom_date_select_pur = $this->get_where_report_period(db_prefix() . 'pur_orders.order_date');
+            if ($custom_date_select_pur != '') {
+                array_push($where, $custom_date_select_pur);
+            }
+            //add vendor filter
+            if ($this->input->post('vendor_ids') && $this->input->post('vendor_ids') != '') {
+                $vendor_id = $this->input->post('vendor_ids');
+                array_push($where, 'AND ' . db_prefix() . 'pur_orders.vendor IN (' . implode(',', $vendor_id) . ')');
+            }
+
+            // Add delivery status filter
+            if ($this->input->post('delivery_status_filter') && $this->input->post('delivery_status_filter') != '') {
+                $status_filter = $this->input->post('delivery_status_filter');
+
+                switch ($status_filter) {
+                    case 'delayed':
+                        array_push($where, 'AND ' . db_prefix() . 'pur_order_detail.delivery_date > ' . db_prefix() . 'pur_order_detail.est_delivery_date');
+                        break;
+                    case 'on_time':
+                        array_push($where, 'AND ' . db_prefix() . 'pur_order_detail.delivery_date <= ' . db_prefix() . 'pur_order_detail.est_delivery_date');
+                        array_push($where, 'AND ' . db_prefix() . 'pur_order_detail.delivery_date IS NOT NULL');
+                        break;
+                    case 'pending':
+                        array_push($where, 'AND ' . db_prefix() . 'pur_order_detail.delivery_date IS NULL');
+                        break;
+                }
+            }
 
             $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [
                 db_prefix() . 'pur_vendor.company',
