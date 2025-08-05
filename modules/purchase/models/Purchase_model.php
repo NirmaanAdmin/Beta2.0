@@ -18370,15 +18370,15 @@ class Purchase_model extends App_Model
         $po_no_title = '';
         $wo_date_title = '';
         $wo_description_title = '';
-        if(!empty($payment_certificate->po_id)) {
+        if (!empty($payment_certificate->po_id)) {
             $po_no_title = _l('po_no');
             $wo_date_title = _l('po_date');
             $wo_description_title = _l('po_description');
-        } else if(!empty($payment_certificate->wo_id)) {
+        } else if (!empty($payment_certificate->wo_id)) {
             $po_no_title = _l('wo_no');
             $wo_date_title = _l('wo_date');
             $wo_description_title = _l('wo_description');
-        } else if(!empty($payment_certificate->ot_id)) {
+        } else if (!empty($payment_certificate->ot_id)) {
             $po_no_title = _l('Order Tracker Name');
             $wo_date_title = _l('order_date');
             $wo_description_title = _l('Order Tracker Description');
@@ -18684,7 +18684,7 @@ class Purchase_model extends App_Model
         if (!empty($module->wo_id)) {
             $pur_order = $this->get_wo_order($module->wo_id);
             $po_wo_id = $module->wo_id;
-        } else if(!empty($module->po_id)) {
+        } else if (!empty($module->po_id)) {
             $pur_order = $this->get_pur_order($module->po_id);
             $po_wo_id = $module->po_id;
         } else {
@@ -19968,161 +19968,172 @@ class Purchase_model extends App_Model
     {
         // 1) Build the base UNION ALL query
         $baseSql = "
-        SELECT DISTINCT
-            po.id,
-            po.aw_unw_order_status AS aw_unw_order_status,
-            po.pur_order_number     AS order_number,
-            po.pur_order_name       AS order_name,
-            po.rli_filter,
-            po.group_pur            AS group_pur,
-            pv.company              AS vendor,
-            pv.userid               AS vendor_id,
-            po.order_date,
-            po.completion_date,
-            po.budget,
-            po.order_value,
-            po.total                AS total,
-            co.co_value             AS co_total,
-            (po.subtotal + IFNULL(co.co_value, 0)) AS total_rev_contract_value, 
-            po.anticipate_variation,
-            (IFNULL(po.anticipate_variation,0) + (po.subtotal + IFNULL(co.co_value,0))) AS cost_to_complete,
-            COALESCE(inv_po_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
-            COALESCE(inv_po_sum.ril_certified_amount, 0) AS ril_certified_amount,
-            po.kind,
-            po.remarks              AS remarks,
-            po.subtotal             AS subtotal,
-            pr.name                 AS project,
-            pr.id                   AS project_id,
-            'pur_orders'            AS source_table
-        FROM tblpur_orders po
-        LEFT JOIN tblpur_vendor pv   ON pv.userid = po.vendor
-        LEFT JOIN tblco_orders co    ON co.po_order_id = po.id
-        LEFT JOIN tblprojects pr     ON pr.id = po.project
-        LEFT JOIN (
         SELECT
-            pi.pur_order,
-            SUM(pi.vendor_submitted_amount_without_tax) AS vendor_submitted_amount_without_tax,
-            SUM(
-                CASE 
-                    WHEN ril.total > 0 THEN (ip.amount * pi.vendor_submitted_amount_without_tax) / ril.total
-                    ELSE 0
-                END
-            ) AS ril_certified_amount
-            FROM tblpur_invoices pi
-            LEFT JOIN tblitemable itm ON itm.vbt_id = pi.id AND itm.rel_type = 'invoice'
-            LEFT JOIN tblinvoices ril ON ril.id = itm.rel_id
-            LEFT JOIN (
-                SELECT invoiceid, SUM(amount) AS amount
-                FROM tblinvoicepaymentrecords
-                GROUP BY invoiceid
-            ) ip ON ip.invoiceid = ril.id
-            GROUP BY pi.pur_order
-        ) AS inv_po_sum ON inv_po_sum.pur_order = po.id
+    po.id,
+    po.aw_unw_order_status AS aw_unw_order_status,
+    po.pur_order_number AS order_number,
+    po.pur_order_name AS order_name,
+    po.rli_filter,
+    po.group_pur AS group_pur,
+    pv.company AS vendor,
+    pv.userid AS vendor_id,
+    po.order_date,
+    po.completion_date,
+    po.budget,
+    po.order_value,
+    po.total AS total,
+    IFNULL(co.co_total, 0) AS co_total,
+    (po.subtotal + IFNULL(co.co_total, 0)) AS total_rev_contract_value, 
+    po.anticipate_variation,
+    (IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co.co_total, 0))) AS cost_to_complete,
+    COALESCE(inv_po_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
+    COALESCE(inv_po_sum.ril_certified_amount, 0) AS ril_certified_amount,
+    po.kind,
+    po.remarks AS remarks,
+    po.subtotal AS subtotal,
+    pr.name AS project,
+    pr.id AS project_id,
+    'pur_orders' AS source_table
+FROM tblpur_orders po
+LEFT JOIN tblpur_vendor pv ON pv.userid = po.vendor
+LEFT JOIN (
+    SELECT po_order_id, SUM(co_value) AS co_total
+    FROM tblco_orders
+    GROUP BY po_order_id
+) co ON co.po_order_id = po.id
+LEFT JOIN tblprojects pr ON pr.id = po.project
+LEFT JOIN (
+    SELECT
+        pi.pur_order,
+        SUM(pi.vendor_submitted_amount_without_tax) AS vendor_submitted_amount_without_tax,
+        SUM(
+            CASE 
+                WHEN ril.total > 0 THEN (ip.amount * pi.vendor_submitted_amount_without_tax) / ril.total
+                ELSE 0
+            END
+        ) AS ril_certified_amount
+    FROM tblpur_invoices pi
+    LEFT JOIN tblitemable itm ON itm.vbt_id = pi.id AND itm.rel_type = 'invoice'
+    LEFT JOIN tblinvoices ril ON ril.id = itm.rel_id
+    LEFT JOIN (
+        SELECT invoiceid, SUM(amount) AS amount
+        FROM tblinvoicepaymentrecords
+        GROUP BY invoiceid
+    ) ip ON ip.invoiceid = ril.id
+    GROUP BY pi.pur_order
+) AS inv_po_sum ON inv_po_sum.pur_order = po.id
+WHERE po.approve_status = 2
 
-        UNION ALL
+UNION ALL
 
-        SELECT DISTINCT
-            wo.id,
-            wo.aw_unw_order_status AS aw_unw_order_status,
-            wo.wo_order_number     AS order_number,
-            wo.wo_order_name       AS order_name,
-            wo.rli_filter,
-            wo.group_pur           AS group_pur,
-            pv.company             AS vendor,
-            pv.userid              AS vendor_id,
-            wo.order_date,
-            wo.completion_date,
-            wo.budget,
-            wo.order_value,
-            wo.total               AS total,
-            co.co_value            AS co_total,
-            (wo.subtotal + IFNULL(co.co_value, 0)) AS total_rev_contract_value,
-            wo.anticipate_variation,
-            (IFNULL(wo.anticipate_variation,0) + (wo.subtotal + IFNULL(co.co_value,0))) AS cost_to_complete,
-            COALESCE(inv_wo_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
-            COALESCE(inv_wo_sum.ril_certified_amount, 0) AS ril_certified_amount,
-            wo.kind,
-            wo.remarks             AS remarks,
-            wo.subtotal            AS subtotal,
-            pr.name                AS project,
-            pr.id                  AS project_id,
-            'wo_orders'            AS source_table
-        FROM tblwo_orders wo
-        LEFT JOIN tblpur_vendor pv   ON pv.userid = wo.vendor
-        LEFT JOIN tblco_orders co    ON co.wo_order_id = wo.id
-        LEFT JOIN tblprojects pr     ON pr.id = wo.project
-        LEFT JOIN (
-            SELECT
-                pi.wo_order,
-                SUM(pi.vendor_submitted_amount_without_tax) AS vendor_submitted_amount_without_tax,
-                SUM(
-                    CASE 
-                        WHEN ril.total > 0 THEN (ip.amount * pi.vendor_submitted_amount_without_tax) / ril.total
-                        ELSE 0
-                    END
-                ) AS ril_certified_amount
-            FROM tblpur_invoices pi
-            LEFT JOIN tblitemable itm ON itm.vbt_id = pi.id AND itm.rel_type = 'invoice'
-            LEFT JOIN tblinvoices ril ON ril.id = itm.rel_id
-            LEFT JOIN (
-                SELECT invoiceid, SUM(amount) AS amount
-                FROM tblinvoicepaymentrecords
-                GROUP BY invoiceid
-            ) ip ON ip.invoiceid = ril.id
-            GROUP BY pi.wo_order
-        ) AS inv_wo_sum ON inv_wo_sum.wo_order = wo.id
+SELECT
+    wo.id,
+    wo.aw_unw_order_status AS aw_unw_order_status,
+    wo.wo_order_number AS order_number,
+    wo.wo_order_name AS order_name,
+    wo.rli_filter,
+    wo.group_pur AS group_pur,
+    pv.company AS vendor,
+    pv.userid AS vendor_id,
+    wo.order_date,
+    wo.completion_date,
+    wo.budget,
+    wo.order_value,
+    wo.total AS total,
+    IFNULL(co.co_total, 0) AS co_total,
+    (wo.subtotal + IFNULL(co.co_total, 0)) AS total_rev_contract_value,
+    wo.anticipate_variation,
+    (IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co.co_total, 0))) AS cost_to_complete,
+    COALESCE(inv_wo_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
+    COALESCE(inv_wo_sum.ril_certified_amount, 0) AS ril_certified_amount,
+    wo.kind,
+    wo.remarks AS remarks,
+    wo.subtotal AS subtotal,
+    pr.name AS project,
+    pr.id AS project_id,
+    'wo_orders' AS source_table
+FROM tblwo_orders wo
+LEFT JOIN tblpur_vendor pv ON pv.userid = wo.vendor
+LEFT JOIN (
+    SELECT wo_order_id, SUM(co_value) AS co_total
+    FROM tblco_orders
+    GROUP BY wo_order_id
+) co ON co.wo_order_id = wo.id
+LEFT JOIN tblprojects pr ON pr.id = wo.project
+LEFT JOIN (
+    SELECT
+        pi.wo_order,
+        SUM(pi.vendor_submitted_amount_without_tax) AS vendor_submitted_amount_without_tax,
+        SUM(
+            CASE 
+                WHEN ril.total > 0 THEN (ip.amount * pi.vendor_submitted_amount_without_tax) / ril.total
+                ELSE 0
+            END
+        ) AS ril_certified_amount
+    FROM tblpur_invoices pi
+    LEFT JOIN tblitemable itm ON itm.vbt_id = pi.id AND itm.rel_type = 'invoice'
+    LEFT JOIN tblinvoices ril ON ril.id = itm.rel_id
+    LEFT JOIN (
+        SELECT invoiceid, SUM(amount) AS amount
+        FROM tblinvoicepaymentrecords
+        GROUP BY invoiceid
+    ) ip ON ip.invoiceid = ril.id
+    GROUP BY pi.wo_order
+) AS inv_wo_sum ON inv_wo_sum.wo_order = wo.id
+WHERE wo.approve_status = 2
 
-        UNION ALL
+UNION ALL
 
-        SELECT DISTINCT
-            t.id,
-            t.aw_unw_order_status  AS aw_unw_order_status,
-            t.pur_order_number     AS order_number,
-            t.pur_order_name       AS order_name,
-            t.rli_filter,
-            t.group_pur            AS group_pur,
-            pv.company             AS vendor,
-            pv.userid              AS vendor_id,
-            t.order_date,
-            t.completion_date,
-            t.budget,
-            t.order_value,
-            t.total                AS total,
-            t.co_total             AS co_total,
-            (t.total + IFNULL(t.co_total, 0)) AS total_rev_contract_value,
-            t.anticipate_variation,
-            (IFNULL(t.anticipate_variation,0) + (t.total + IFNULL(t.co_total,0))) AS cost_to_complete,
-            COALESCE(inv_ot_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
-            COALESCE(inv_ot_sum.ril_certified_amount, 0) AS ril_certified_amount,
-            t.kind,
-            t.remarks             AS remarks,
-            t.subtotal            AS subtotal,
-            pr.name                AS project,
-            pr.id                  AS project_id,
-            'order_tracker'       AS source_table
-        FROM tblpur_order_tracker t
-        LEFT JOIN tblpur_vendor pv   ON pv.userid = t.vendor
-        LEFT JOIN tblprojects pr     ON pr.id = t.project
-        LEFT JOIN (
-            SELECT
-                pi.order_tracker_id,
-                SUM(pi.vendor_submitted_amount_without_tax) AS vendor_submitted_amount_without_tax,
-                SUM(
-                    CASE 
-                        WHEN ril.total > 0 THEN (ip.amount * pi.vendor_submitted_amount_without_tax) / ril.total
-                        ELSE 0
-                    END
-                ) AS ril_certified_amount
-            FROM tblpur_invoices pi
-            LEFT JOIN tblitemable itm ON itm.vbt_id = pi.id AND itm.rel_type = 'invoice'
-            LEFT JOIN tblinvoices ril ON ril.id = itm.rel_id
-            LEFT JOIN (
-                SELECT invoiceid, SUM(amount) AS amount
-                FROM tblinvoicepaymentrecords
-                GROUP BY invoiceid
-            ) ip ON ip.invoiceid = ril.id
-            GROUP BY pi.order_tracker_id
-        ) AS inv_ot_sum ON inv_ot_sum.order_tracker_id = t.id
+SELECT
+    t.id,
+    t.aw_unw_order_status AS aw_unw_order_status,
+    t.pur_order_number AS order_number,
+    t.pur_order_name AS order_name,
+    t.rli_filter,
+    t.group_pur AS group_pur,
+    pv.company AS vendor,
+    pv.userid AS vendor_id,
+    t.order_date,
+    t.completion_date,
+    t.budget,
+    t.order_value,
+    t.total AS total,
+    t.co_total AS co_total,
+    (t.total + IFNULL(t.co_total, 0)) AS total_rev_contract_value,
+    t.anticipate_variation,
+    (IFNULL(t.anticipate_variation, 0) + (t.total + IFNULL(t.co_total, 0))) AS cost_to_complete,
+    COALESCE(inv_ot_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
+    COALESCE(inv_ot_sum.ril_certified_amount, 0) AS ril_certified_amount,
+    t.kind,
+    t.remarks AS remarks,
+    t.subtotal AS subtotal,
+    pr.name AS project,
+    pr.id AS project_id,
+    'order_tracker' AS source_table
+FROM tblpur_order_tracker t
+LEFT JOIN tblpur_vendor pv ON pv.userid = t.vendor
+LEFT JOIN tblprojects pr ON pr.id = t.project
+LEFT JOIN (
+    SELECT
+        pi.order_tracker_id,
+        SUM(pi.vendor_submitted_amount_without_tax) AS vendor_submitted_amount_without_tax,
+        SUM(
+            CASE 
+                WHEN ril.total > 0 THEN (ip.amount * pi.vendor_submitted_amount_without_tax) / ril.total
+                ELSE 0
+            END
+        ) AS ril_certified_amount
+    FROM tblpur_invoices pi
+    LEFT JOIN tblitemable itm ON itm.vbt_id = pi.id AND itm.rel_type = 'invoice'
+    LEFT JOIN tblinvoices ril ON ril.id = itm.rel_id
+    LEFT JOIN (
+        SELECT invoiceid, SUM(amount) AS amount
+        FROM tblinvoicepaymentrecords
+        GROUP BY invoiceid
+    ) ip ON ip.invoiceid = ril.id
+    GROUP BY pi.order_tracker_id
+) AS inv_ot_sum ON inv_ot_sum.order_tracker_id = t.id
+ 
         ";
 
         // 2) Load any user‑saved filters
@@ -20177,6 +20188,7 @@ class Purchase_model extends App_Model
                     break;
             }
         }
+        // echo '<pre>'; print_r($whereClauses); echo '</pre>';exit;
         // 4) If there are filters, wrap the base query and apply them
         if (!empty($whereClauses)) {
             $sql = "
@@ -22882,7 +22894,7 @@ class Purchase_model extends App_Model
             $where[] = 'AND production_status IN (' . implode(',', $production_status) . ')';
         }
 
-        if(get_default_project()) {
+        if (get_default_project()) {
             $where[] = 'AND project = "' . get_default_project() . '"';
         }
 
@@ -22892,7 +22904,7 @@ class Purchase_model extends App_Model
             'item_detail_id',
             'type'
         ]);
-        if(!empty($result)) {
+        if (!empty($result)) {
             $result = $result['rResult'];
             $all_records = count($result);
             $response['total_po'] = count(
@@ -22907,7 +22919,7 @@ class Purchase_model extends App_Model
             $sum_lead_time = array_reduce($result, function ($carry, $item) {
                 return $carry + (is_numeric($item['lead_time_days']) ? (int)$item['lead_time_days'] : 0);
             }, 0);
-            if($total_lead_time > 0) {
+            if ($total_lead_time > 0) {
                 $response['average_lead_time'] = $sum_lead_time / $total_lead_time;
             }
 
@@ -22915,9 +22927,9 @@ class Purchase_model extends App_Model
                 return !empty($item['delivery_date']) && !empty($item['est_delivery_date']);
             }));
             $est_delivery_count = count(array_filter($result, function ($item) {
-                return !empty($item['est_delivery_date']) 
-                && !empty($item['delivery_date']) 
-                && strtotime($item['est_delivery_date']) >= strtotime($item['delivery_date']);
+                return !empty($item['est_delivery_date'])
+                    && !empty($item['delivery_date'])
+                    && strtotime($item['est_delivery_date']) >= strtotime($item['delivery_date']);
             }));
             $response['percentage_delivered'] = $all_schedule_count > 0 ? round(($est_delivery_count / $all_schedule_count) * 100) : 0;
 
@@ -22925,7 +22937,7 @@ class Purchase_model extends App_Model
             $sum_advance_payment = array_reduce($result, function ($carry, $item) {
                 return $carry + (is_numeric($item['advance_payment']) ? (int)$item['advance_payment'] : 0);
             }, 0);
-            if($total_advance_payment > 0) {
+            if ($total_advance_payment > 0) {
                 $response['average_advance_payments'] = $sum_advance_payment / $total_advance_payment;
             }
 
@@ -22937,7 +22949,7 @@ class Purchase_model extends App_Model
             $all_statuses = get_purchase_tracker_status();
             $bar_status = array();
             foreach ($all_statuses as $status) {
-                if($status['id'] != 1) {
+                if ($status['id'] != 1) {
                     $bar_status[$status['id']] = [
                         'name'  => $status['name'],
                         'value' => 0
@@ -22987,7 +22999,7 @@ class Purchase_model extends App_Model
     public function get_vendors_charts($data = array())
     {
         $response = array();
-        
+
         $response['total_vendors'] = $response['total_active'] = $response['total_inactive'] = $response['onboarded_this_week'] = 0;
         $response['bar_state_name'] = $response['bar_state_value'] = array();
         $response['bar_category_name'] = $response['bar_category_value'] = array();
@@ -22996,7 +23008,7 @@ class Purchase_model extends App_Model
         $this->db->from(db_prefix() . 'pur_vendor');
         $pur_vendors = $this->db->get()->result_array();
 
-        if(!empty($pur_vendors)) {
+        if (!empty($pur_vendors)) {
             $response['total_vendors'] = count($pur_vendors);
             $response['total_active'] = count(array_filter($pur_vendors, function ($item) {
                 return isset($item['active']) && $item['active'] == 1;
@@ -23069,7 +23081,7 @@ class Purchase_model extends App_Model
         $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where);
         $output  = $result['output'];
         $rResult = $result['rResult'];
-        
+
         foreach ($rResult as $key => $aRow) {
             $row = [];
             $row[] = $aRow['userid'];
@@ -23085,7 +23097,7 @@ class Purchase_model extends App_Model
      * @param  array  $data  Dashboard filter data
      * @return array
      */
-     public function get_order_tracker_charts($data = array())
+    public function get_order_tracker_charts($data = array())
     {
         $response = array();
         $this->load->model('currencies_model');
@@ -23300,7 +23312,7 @@ class Purchase_model extends App_Model
             $anticipate_variation_result = array_filter($result, function ($item) {
                 return isset($item['aw_unw_order_status']) && in_array($item['aw_unw_order_status'], [1, 3]);
             });
-            if(!empty($anticipate_variation_result)) {
+            if (!empty($anticipate_variation_result)) {
                 $anticipate_variation = array_sum(array_column($anticipate_variation_result, 'anticipate_variation'));
             }
         }
@@ -23322,7 +23334,7 @@ class Purchase_model extends App_Model
         $total_payment_due = $work_done_value - $ril_certified_amount;
         $response['total_payment_due'] = app_format_money($total_payment_due, $base_currency);
 
-        $unawarded_capex= 0;
+        $unawarded_capex = 0;
         if (!empty($result)) {
             // Filter records where aw_unw_order_status = 2 before summing
             $filtered_result = array_filter($result, function ($item) {
@@ -23512,7 +23524,7 @@ class Purchase_model extends App_Model
             $response = array_merge($response, $pur_order_tracker);
         }
 
-        $response = array_values(array_filter($response, function($item) {
+        $response = array_values(array_filter($response, function ($item) {
             return !empty($item['id']);
         }));
 
@@ -23564,14 +23576,14 @@ class Purchase_model extends App_Model
         $data['vendor'] = !empty($data['vendor']) ? $data['vendor'] : NULL;
         $order_tracker = $this->get_order_tracker($ot_id);
         $data['group_pur'] = !empty($order_tracker->group_pur) ? $order_tracker->group_pur : NULL;
-        if(isset($data['project'])) {
+        if (isset($data['project'])) {
             unset($data['project']);
         }
-        if(isset($data['ot_previous'])) {
+        if (isset($data['ot_previous'])) {
             $data['po_previous'] = $data['ot_previous'];
             unset($data['ot_previous']);
         }
-        if(isset($data['ot_this_bill'])) {
+        if (isset($data['ot_this_bill'])) {
             $data['po_this_bill'] = $data['ot_this_bill'];
             unset($data['ot_this_bill']);
         }
@@ -23608,14 +23620,14 @@ class Purchase_model extends App_Model
         if (!empty($data['order_date'])) {
             $data['order_date'] = to_sql_date($data['order_date']);
         }
-        if(isset($data['project'])) {
+        if (isset($data['project'])) {
             unset($data['project']);
         }
-        if(isset($data['ot_previous'])) {
+        if (isset($data['ot_previous'])) {
             $data['po_previous'] = $data['ot_previous'];
             unset($data['ot_previous']);
         }
-        if(isset($data['ot_this_bill'])) {
+        if (isset($data['ot_this_bill'])) {
             $data['po_this_bill'] = $data['ot_this_bill'];
             unset($data['ot_this_bill']);
         }
@@ -23783,7 +23795,6 @@ class Purchase_model extends App_Model
             $response['vendor_order_date'] = $formatted_months;
             $response['line_vendor_billing_total'] = $billing_data;
             $response['line_vendor_payment_total'] = $payment_data;
-
         }
 
         return $response;
