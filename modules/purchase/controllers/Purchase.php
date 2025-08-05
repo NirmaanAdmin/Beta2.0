@@ -6593,7 +6593,7 @@ class purchase extends AdminController
 
         // Define an array of statuses with their corresponding labels and texts
         $status_labels = [
-           
+
             1 => ['label' => 'label-success', 'table' => 'new_item_service_been_addded_as_per_instruction', 'text' => _l('new_item_service_been_addded_as_per_instruction')],
             2 => ['label' => 'label-info', 'table' => 'due_to_spec_change_then_original_cost', 'text' => _l('due_to_spec_change_then_original_cost')],
             3 => ['label' => 'label-warning', 'table' => 'deal_slip', 'text' => _l('deal_slip')],
@@ -6605,7 +6605,7 @@ class purchase extends AdminController
             9 => ['label' => 'label-green', 'table' => 'common_services_in_ghj_scope', 'text' => _l('common_services_in_ril_scope')],
             10 => ['label' => 'label-default', 'table' => 'due_to_site_specfic_constraint', 'text' => _l('due_to_site_specfic_constraint')],
             11 => ['label' => 'label-danger', 'table' => 'provided_by_ril', 'text' => _l('provided_by_ril')],
-            
+
         ];
         $success = $this->purchase_model->change_rli_filter($status, $id, $table_name);
         $message = $success ? _l('change_rli_filter_successfully') : _l('change_rli_filter_fail');
@@ -10966,7 +10966,7 @@ class purchase extends AdminController
         $data['projects'] = $this->projects_model->get();
         $data['order_tracker_row_template'] = $this->purchase_model->create_order_tracker_row_template();
         $data['budget_head'] = get_budget_head_project_wise();
-        $data['rli_filters'] = $this->purchase_model->get_all_rli_filters(); 
+        $data['rli_filters'] = $this->purchase_model->get_all_rli_filters();
         $data['sub_groups_pur'] = $this->purchase_model->get_sub_group();
         $this->load->view('order_tracker/manage', $data);
     }
@@ -11220,263 +11220,578 @@ class purchase extends AdminController
      *  
      *  @return json
      */
+    // public function item_tracker_report()
+    // {
+    //     if ($this->input->is_ajax_request()) {
+
+    //         // 1st query: Goods Receipt Details
+    //         $select = [
+    //             db_prefix() . 'goods_receipt_detail.id as id',
+    //             db_prefix() . 'goods_receipt_detail.goods_receipt_id as goods_receipt_id',
+    //             db_prefix() . 'goods_receipt_detail.commodity_name as commodity_name',
+    //             db_prefix() . 'goods_receipt_detail.description as description',
+    //             db_prefix() . 'goods_receipt_detail.quantities as quantities',
+    //             db_prefix() . 'goods_receipt_detail.po_quantities as po_quantities',
+    //             db_prefix() . 'goods_receipt_detail.payment_date as payment_date',
+    //             db_prefix() . 'goods_receipt_detail.est_delivery_date as est_delivery_date',
+    //             db_prefix() . 'goods_receipt_detail.delivery_date as delivery_date',
+    //             db_prefix() . 'goods_receipt_detail.production_status as production_status',
+    //             "(CASE 
+    //                 WHEN COALESCE(agg.total_po_quantities, 0) = COALESCE(agg.total_quantities, 0) THEN '2'
+    //                 WHEN COALESCE(agg.total_quantities, 0) = 0 THEN '0'
+    //                 WHEN COALESCE(agg.total_quantities, 0) > 0 THEN '1'
+    //                 ELSE '0'
+    //             END) AS delivery_status"
+    //         ];
+    //         $where = [];
+
+    //         $aColumns     = $select;
+    //         $sIndexColumn = 'id';
+    //         $sTable       = db_prefix() . 'goods_receipt_detail';
+    //         $join         = [
+    //             'INNER JOIN ' . db_prefix() . 'goods_receipt ON ' . db_prefix() . 'goods_receipt.id = ' . db_prefix() . 'goods_receipt_detail.goods_receipt_id',
+    //             'LEFT JOIN (
+    //                 SELECT 
+    //                     goods_receipt_id, 
+    //                     SUM(po_quantities) AS total_po_quantities, 
+    //                     SUM(quantities) AS total_quantities
+    //                 FROM ' . db_prefix() . 'goods_receipt_detail
+    //                 GROUP BY goods_receipt_id
+    //             ) AS agg ON agg.goods_receipt_id = ' . db_prefix() . 'goods_receipt_detail.goods_receipt_id'
+    //         ];
+
+    //         $purOrdersVendor1 = [];
+    //         $purOrdersVendor2 = [];
+    //         $purOrdersReturn1 = [];
+    //         $purOrdersReturn0 = [];
+    //         $productionStatusFilters = [];
+
+    //         if ($this->input->post('vendor')) {
+    //             foreach ($this->input->post('vendor') as $vendor_id) {
+    //                 $status = get_vendor_goods_status($vendor_id);
+    //                 if ($status == 1) {
+    //                     $purOrdersVendor1[] = $vendor_id;
+    //                 } elseif ($status == 0) {
+    //                     $purOrdersVendor2[] = $vendor_id;
+    //                 }
+    //             }
+    //         }
+
+    //         if ($this->input->post('pur_order')) {
+    //             foreach ($this->input->post('pur_order') as $pur_order_id) {
+    //                 $status = get_pur_order_goods_status($pur_order_id);
+    //                 if ($status == 1) {
+    //                     $purOrdersReturn1[] = $pur_order_id;
+    //                 } elseif ($status == 0) {
+    //                     $purOrdersReturn0[] = $pur_order_id;
+    //                 }
+    //             }
+    //         }
+
+    //         if ($this->input->post('production_status')) {
+    //             $productionStatusFilters = $this->input->post('production_status');
+    //             if (!is_array($productionStatusFilters)) {
+    //                 $productionStatusFilters = [$productionStatusFilters];
+    //             }
+    //         }
+
+    //         if ($purOrdersVendor1) {
+    //             $where[] = 'AND ' . db_prefix() . 'goods_receipt.supplier_code IN (' . implode(',', $purOrdersVendor1) . ')';
+    //         }
+    //         if ($purOrdersReturn1) {
+    //             $where[] = 'AND ' . db_prefix() . 'goods_receipt.pr_order_id IN (' . implode(',', $purOrdersReturn1) . ')';
+    //         }
+    //         if (!empty($productionStatusFilters)) {
+    //             $where[] = 'AND ' . db_prefix() . 'goods_receipt_detail.production_status IN (' . implode(',', $productionStatusFilters) . ')';
+    //         }
+    //         if ($this->input->post('delivery')) {
+    //             $delivery = $this->input->post('delivery');
+    //             if ($delivery == "undelivered") {
+    //                 $where[] = 'AND (COALESCE(agg.total_po_quantities, 0) != COALESCE(agg.total_quantities, 0) AND COALESCE(agg.total_quantities, 0) = 0)';
+    //             } elseif ($delivery == "partially_delivered") {
+    //                 $where[] = 'AND (COALESCE(agg.total_po_quantities, 0) != COALESCE(agg.total_quantities, 0) AND COALESCE(agg.total_quantities, 0) > 0)';
+    //             } elseif ($delivery == "completely_delivered") {
+    //                 $where[] = 'AND (COALESCE(agg.total_po_quantities, 0) = COALESCE(agg.total_quantities, 0))';
+    //             }
+    //         }
+
+    //         $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where);
+
+    //         // 2nd Query: Pur Order Details
+    //         $select1 = [
+    //             db_prefix() . 'pur_order_detail.id as id',
+    //             db_prefix() . 'pur_order_detail.pur_order as pur_order',
+    //             db_prefix() . 'pur_order_detail.item_name as commodity_name',
+    //             db_prefix() . 'pur_order_detail.description as description',
+    //             db_prefix() . 'pur_order_detail.quantity as quantities',
+    //             db_prefix() . 'pur_order_detail.po_quantities as po_quantities',
+    //             db_prefix() . 'pur_order_detail.payment_date as payment_date',
+    //             db_prefix() . 'pur_order_detail.est_delivery_date as est_delivery_date',
+    //             db_prefix() . 'pur_order_detail.delivery_date as delivery_date',
+    //             db_prefix() . 'pur_order_detail.production_status as production_status',
+    //             '0 AS delivery_status',
+    //         ];
+    //         $where1 = [];
+
+    //         $aColumns1     = $select1;
+    //         $sIndexColumn1 = 'id';
+    //         $sTable1       = db_prefix() . 'pur_order_detail';
+    //         $join1         = [
+    //             'INNER JOIN ' . db_prefix() . 'pur_orders ON ' . db_prefix() . 'pur_orders.id = ' . db_prefix() . 'pur_order_detail.pur_order',
+    //         ];
+    //         $where1[] = 'AND ' . db_prefix() . 'pur_orders.goods_id = 0';
+
+    //         if ($purOrdersReturn0) {
+    //             $where1[] = 'AND ' . db_prefix() . 'pur_orders.id IN (' . implode(',', $purOrdersReturn0) . ')';
+    //         }
+    //         if ($purOrdersVendor2) {
+    //             $where1[] = 'AND ' . db_prefix() . 'pur_orders.vendor IN (' . implode(',', $purOrdersVendor2) . ')';
+    //         }
+    //         if (!empty($productionStatusFilters)) {
+    //             $where1[] = 'AND ' . db_prefix() . 'pur_order_detail.production_status IN (' . implode(',', $productionStatusFilters) . ')';
+    //         }
+    //         if ($this->input->post('delivery')) {
+    //             $delivery = $this->input->post('delivery');
+    //             if ($delivery == "undelivered") {
+    //                 $where1[] = 'AND 0 = 0';
+    //             } else {
+    //                 $where1[] = 'AND 1 = 0';
+    //             }
+    //         }
+
+    //         $result1 = data_tables_init($aColumns1, $sIndexColumn1, $sTable1, $join1, $where1);
+
+    //         // Merge results
+    //         $output  = $result['output'];
+    //         $rResult0 = isset($result['rResult']) && is_array($result['rResult']) ? $result['rResult'] : [];
+    //         $rResult1 = isset($result1['rResult']) && is_array($result1['rResult']) ? $result1['rResult'] : [];
+
+    //         if (!empty($purOrdersReturn0) && !empty($purOrdersReturn1)) {
+    //             $rResult = array_merge($rResult0, $rResult1);
+    //         } elseif ($purOrdersReturn1) {
+    //             $rResult = $rResult0;
+    //         } elseif ($purOrdersReturn0) {
+    //             $rResult = $rResult1;
+    //         } else {
+    //             $rResult = array_merge($rResult0, $rResult1);
+    //         }
+
+    //         $totalRecords0 = $result['output']['iTotalRecords'];
+    //         $totalRecords1 = $result1['output']['iTotalRecords'];
+    //         $totalFiltered0 = $result['output']['iTotalDisplayRecords'];
+    //         $totalFiltered1 = $result1['output']['iTotalDisplayRecords'];
+
+    //         $output['iTotalRecords'] = $totalRecords0 + $totalRecords1;
+    //         $output['iTotalDisplayRecords'] = $totalFiltered0 + $totalFiltered1;
+
+    //         $tracker = [];
+
+    //         foreach ($rResult as $aRow) {
+    //             $row = [];
+    //             $goods_receipt = get_goods_receipt_code($aRow['goods_receipt_id']);
+    //             if ($goods_receipt && $goods_receipt->pr_order_id > 0) {
+    //                 $row[] = get_pur_order_name($goods_receipt->pr_order_id);
+    //             } else {
+    //                 $row[] = get_pur_order_name($aRow['pur_order']);
+    //             }
+
+    //             $row[] = $aRow['commodity_name'];
+    //             $row[] = $aRow['description'];
+
+    //             if ($goods_receipt && $goods_receipt->pr_order_id > 0) {
+    //                 $row[] = isset($aRow['po_quantities']) ? app_format_number($aRow['po_quantities']) : '-';
+    //             } else {
+    //                 $row[] = isset($aRow['quantities']) ? app_format_number($aRow['quantities']) : '-';
+    //             }
+
+    //             if ($goods_receipt && $goods_receipt->pr_order_id > 0) {
+    //                 $row[] = app_format_number($aRow['quantities']);
+    //             } else {
+    //                 $row[] = isset($aRow['po_quantities']) ? app_format_number($aRow['po_quantities']) : '-';
+    //             }
+
+    //             $remaining_quantities = '-';
+    //             if ($goods_receipt && $goods_receipt->pr_order_id > 0) {
+    //                 $remaining_quantities = $aRow['po_quantities'] - $aRow['quantities'];
+    //             } elseif (isset($aRow['quantities'])) {
+    //                 $remaining_quantities = app_format_number($aRow['quantities']);
+    //             }
+    //             $row[] = app_format_number($remaining_quantities);
+
+    //             $production_status = '';
+    //             if ($aRow['production_status'] > 0) {
+    //                 if ($aRow['production_status'] == 1) {
+    //                     $production_status = _l('not_started');
+    //                 } elseif ($aRow['production_status'] == 2) {
+    //                     $production_status = _l('on_going');
+    //                 } elseif ($aRow['production_status'] == 3) {
+    //                     $production_status = _l('approved');
+    //                 }
+    //             }
+    //             $row[] = $production_status;
+
+    //             $row[] = !empty($aRow['payment_date']) ? date('d M, Y', strtotime($aRow['payment_date'])) : '-';
+    //             $row[] = !empty($aRow['est_delivery_date']) ? date('d M, Y', strtotime($aRow['est_delivery_date'])) : '-';
+    //             $row[] = !empty($aRow['delivery_date']) ? date('d M, Y', strtotime($aRow['delivery_date'])) : '-';
+
+    //             if ($aRow['delivery_status'] == 0) {
+    //                 $delivery_status = _l('undelivered');
+    //             } elseif ($aRow['delivery_status'] == 1) {
+    //                 $delivery_status = _l('partially_delivered');
+    //             } else {
+    //                 $delivery_status = _l('completely_delivered');
+    //             }
+    //             $row[] = $delivery_status;
+
+    //             $tracker[] = $row;
+    //         }
+
+    //         // $grouped_data = [];
+    //         // foreach ($tracker as $row) {
+    //         //     $group = $row[0];
+    //         //     if (!isset($grouped_data[$group])) {
+    //         //         $grouped_data[$group][] = [
+    //         //             "group_name" => '<span class="group-name-cell" style="text-align: center !important; display: block">' . $group . '</span>'
+    //         //         ];
+    //         //     }
+    //         //     $grouped_data[$group][] = $row;
+    //         // }
+
+    //         // $flattened_data = [];
+    //         // foreach ($grouped_data as $group_rows) {
+    //         //     foreach ($group_rows as $row) {
+    //         //         unset($row[0]);
+    //         //         $row = array_values($row);
+    //         //         if (count($row) === 1) {
+    //         //             for ($i = 1; $i <= 8; $i++) {
+    //         //                 $row[$i] = "";
+    //         //             }
+    //         //             ksort($row);
+    //         //         }
+    //         //         $flattened_data[] = $row;
+    //         //     }
+    //         // }
+
+    //         $output['aaData'] = $tracker;
+
+    //         echo json_encode($output);
+    //         die();
+    //     }
+    // }
+
     public function item_tracker_report()
     {
-        if ($this->input->is_ajax_request()) {
-
-            // 1st query: Goods Receipt Details
-            $select = [
-                db_prefix() . 'goods_receipt_detail.id as id',
-                db_prefix() . 'goods_receipt_detail.goods_receipt_id as goods_receipt_id',
-                db_prefix() . 'goods_receipt_detail.commodity_name as commodity_name',
-                db_prefix() . 'goods_receipt_detail.description as description',
-                db_prefix() . 'goods_receipt_detail.quantities as quantities',
-                db_prefix() . 'goods_receipt_detail.po_quantities as po_quantities',
-                db_prefix() . 'goods_receipt_detail.payment_date as payment_date',
-                db_prefix() . 'goods_receipt_detail.est_delivery_date as est_delivery_date',
-                db_prefix() . 'goods_receipt_detail.delivery_date as delivery_date',
-                db_prefix() . 'goods_receipt_detail.production_status as production_status',
-                "(CASE 
-                    WHEN COALESCE(agg.total_po_quantities, 0) = COALESCE(agg.total_quantities, 0) THEN '2'
-                    WHEN COALESCE(agg.total_quantities, 0) = 0 THEN '0'
-                    WHEN COALESCE(agg.total_quantities, 0) > 0 THEN '1'
-                    ELSE '0'
-                END) AS delivery_status"
-            ];
-            $where = [];
-
-            $aColumns     = $select;
-            $sIndexColumn = 'id';
-            $sTable       = db_prefix() . 'goods_receipt_detail';
-            $join         = [
-                'INNER JOIN ' . db_prefix() . 'goods_receipt ON ' . db_prefix() . 'goods_receipt.id = ' . db_prefix() . 'goods_receipt_detail.goods_receipt_id',
-                'LEFT JOIN (
-                    SELECT 
-                        goods_receipt_id, 
-                        SUM(po_quantities) AS total_po_quantities, 
-                        SUM(quantities) AS total_quantities
-                    FROM ' . db_prefix() . 'goods_receipt_detail
-                    GROUP BY goods_receipt_id
-                ) AS agg ON agg.goods_receipt_id = ' . db_prefix() . 'goods_receipt_detail.goods_receipt_id'
-            ];
-
-            $purOrdersVendor1 = [];
-            $purOrdersVendor2 = [];
-            $purOrdersReturn1 = [];
-            $purOrdersReturn0 = [];
-            $productionStatusFilters = [];
-
-            if ($this->input->post('vendor')) {
-                foreach ($this->input->post('vendor') as $vendor_id) {
-                    $status = get_vendor_goods_status($vendor_id);
-                    if ($status == 1) {
-                        $purOrdersVendor1[] = $vendor_id;
-                    } elseif ($status == 0) {
-                        $purOrdersVendor2[] = $vendor_id;
-                    }
-                }
-            }
-
-            if ($this->input->post('pur_order')) {
-                foreach ($this->input->post('pur_order') as $pur_order_id) {
-                    $status = get_pur_order_goods_status($pur_order_id);
-                    if ($status == 1) {
-                        $purOrdersReturn1[] = $pur_order_id;
-                    } elseif ($status == 0) {
-                        $purOrdersReturn0[] = $pur_order_id;
-                    }
-                }
-            }
-
-            if ($this->input->post('production_status')) {
-                $productionStatusFilters = $this->input->post('production_status');
-                if (!is_array($productionStatusFilters)) {
-                    $productionStatusFilters = [$productionStatusFilters];
-                }
-            }
-
-            if ($purOrdersVendor1) {
-                $where[] = 'AND ' . db_prefix() . 'goods_receipt.supplier_code IN (' . implode(',', $purOrdersVendor1) . ')';
-            }
-            if ($purOrdersReturn1) {
-                $where[] = 'AND ' . db_prefix() . 'goods_receipt.pr_order_id IN (' . implode(',', $purOrdersReturn1) . ')';
-            }
-            if (!empty($productionStatusFilters)) {
-                $where[] = 'AND ' . db_prefix() . 'goods_receipt_detail.production_status IN (' . implode(',', $productionStatusFilters) . ')';
-            }
-            if ($this->input->post('delivery')) {
-                $delivery = $this->input->post('delivery');
-                if ($delivery == "undelivered") {
-                    $where[] = 'AND (COALESCE(agg.total_po_quantities, 0) != COALESCE(agg.total_quantities, 0) AND COALESCE(agg.total_quantities, 0) = 0)';
-                } elseif ($delivery == "partially_delivered") {
-                    $where[] = 'AND (COALESCE(agg.total_po_quantities, 0) != COALESCE(agg.total_quantities, 0) AND COALESCE(agg.total_quantities, 0) > 0)';
-                } elseif ($delivery == "completely_delivered") {
-                    $where[] = 'AND (COALESCE(agg.total_po_quantities, 0) = COALESCE(agg.total_quantities, 0))';
-                }
-            }
-
-            $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where);
-
-            // 2nd Query: Pur Order Details
-            $select1 = [
-                db_prefix() . 'pur_order_detail.id as id',
-                db_prefix() . 'pur_order_detail.pur_order as pur_order',
-                db_prefix() . 'pur_order_detail.item_name as commodity_name',
-                db_prefix() . 'pur_order_detail.description as description',
-                db_prefix() . 'pur_order_detail.quantity as quantities',
-                db_prefix() . 'pur_order_detail.po_quantities as po_quantities',
-                db_prefix() . 'pur_order_detail.payment_date as payment_date',
-                db_prefix() . 'pur_order_detail.est_delivery_date as est_delivery_date',
-                db_prefix() . 'pur_order_detail.delivery_date as delivery_date',
-                db_prefix() . 'pur_order_detail.production_status as production_status',
-                '0 AS delivery_status',
-            ];
-            $where1 = [];
-
-            $aColumns1     = $select1;
-            $sIndexColumn1 = 'id';
-            $sTable1       = db_prefix() . 'pur_order_detail';
-            $join1         = [
-                'INNER JOIN ' . db_prefix() . 'pur_orders ON ' . db_prefix() . 'pur_orders.id = ' . db_prefix() . 'pur_order_detail.pur_order',
-            ];
-            $where1[] = 'AND ' . db_prefix() . 'pur_orders.goods_id = 0';
-
-            if ($purOrdersReturn0) {
-                $where1[] = 'AND ' . db_prefix() . 'pur_orders.id IN (' . implode(',', $purOrdersReturn0) . ')';
-            }
-            if ($purOrdersVendor2) {
-                $where1[] = 'AND ' . db_prefix() . 'pur_orders.vendor IN (' . implode(',', $purOrdersVendor2) . ')';
-            }
-            if (!empty($productionStatusFilters)) {
-                $where1[] = 'AND ' . db_prefix() . 'pur_order_detail.production_status IN (' . implode(',', $productionStatusFilters) . ')';
-            }
-            if ($this->input->post('delivery')) {
-                $delivery = $this->input->post('delivery');
-                if ($delivery == "undelivered") {
-                    $where1[] = 'AND 0 = 0';
-                } else {
-                    $where1[] = 'AND 1 = 0';
-                }
-            }
-
-            $result1 = data_tables_init($aColumns1, $sIndexColumn1, $sTable1, $join1, $where1);
-
-            // Merge results
-            $output  = $result['output'];
-            $rResult0 = isset($result['rResult']) && is_array($result['rResult']) ? $result['rResult'] : [];
-            $rResult1 = isset($result1['rResult']) && is_array($result1['rResult']) ? $result1['rResult'] : [];
-
-            if (!empty($purOrdersReturn0) && !empty($purOrdersReturn1)) {
-                $rResult = array_merge($rResult0, $rResult1);
-            } elseif ($purOrdersReturn1) {
-                $rResult = $rResult0;
-            } elseif ($purOrdersReturn0) {
-                $rResult = $rResult1;
-            } else {
-                $rResult = array_merge($rResult0, $rResult1);
-            }
-
-            $totalRecords0 = $result['output']['iTotalRecords'];
-            $totalRecords1 = $result1['output']['iTotalRecords'];
-            $totalFiltered0 = $result['output']['iTotalDisplayRecords'];
-            $totalFiltered1 = $result1['output']['iTotalDisplayRecords'];
-
-            $output['iTotalRecords'] = $totalRecords0 + $totalRecords1;
-            $output['iTotalDisplayRecords'] = $totalFiltered0 + $totalFiltered1;
-
-            $tracker = [];
-
-            foreach ($rResult as $aRow) {
-                $row = [];
-                $goods_receipt = get_goods_receipt_code($aRow['goods_receipt_id']);
-                if ($goods_receipt && $goods_receipt->pr_order_id > 0) {
-                    $row[] = get_pur_order_name($goods_receipt->pr_order_id);
-                } else {
-                    $row[] = get_pur_order_name($aRow['pur_order']);
-                }
-
-                $row[] = $aRow['commodity_name'];
-                $row[] = $aRow['description'];
-
-                if ($goods_receipt && $goods_receipt->pr_order_id > 0) {
-                    $row[] = isset($aRow['po_quantities']) ? app_format_number($aRow['po_quantities']) : '-';
-                } else {
-                    $row[] = isset($aRow['quantities']) ? app_format_number($aRow['quantities']) : '-';
-                }
-
-                if ($goods_receipt && $goods_receipt->pr_order_id > 0) {
-                    $row[] = app_format_number($aRow['quantities']);
-                } else {
-                    $row[] = isset($aRow['po_quantities']) ? app_format_number($aRow['po_quantities']) : '-';
-                }
-
-                $remaining_quantities = '-';
-                if ($goods_receipt && $goods_receipt->pr_order_id > 0) {
-                    $remaining_quantities = $aRow['po_quantities'] - $aRow['quantities'];
-                } elseif (isset($aRow['quantities'])) {
-                    $remaining_quantities = app_format_number($aRow['quantities']);
-                }
-                $row[] = app_format_number($remaining_quantities);
-
-                $production_status = '';
-                if ($aRow['production_status'] > 0) {
-                    if ($aRow['production_status'] == 1) {
-                        $production_status = _l('not_started');
-                    } elseif ($aRow['production_status'] == 2) {
-                        $production_status = _l('on_going');
-                    } elseif ($aRow['production_status'] == 3) {
-                        $production_status = _l('approved');
-                    }
-                }
-                $row[] = $production_status;
-
-                $row[] = !empty($aRow['payment_date']) ? date('d M, Y', strtotime($aRow['payment_date'])) : '-';
-                $row[] = !empty($aRow['est_delivery_date']) ? date('d M, Y', strtotime($aRow['est_delivery_date'])) : '-';
-                $row[] = !empty($aRow['delivery_date']) ? date('d M, Y', strtotime($aRow['delivery_date'])) : '-';
-
-                if ($aRow['delivery_status'] == 0) {
-                    $delivery_status = _l('undelivered');
-                } elseif ($aRow['delivery_status'] == 1) {
-                    $delivery_status = _l('partially_delivered');
-                } else {
-                    $delivery_status = _l('completely_delivered');
-                }
-                $row[] = $delivery_status;
-
-                $tracker[] = $row;
-            }
-
-            // $grouped_data = [];
-            // foreach ($tracker as $row) {
-            //     $group = $row[0];
-            //     if (!isset($grouped_data[$group])) {
-            //         $grouped_data[$group][] = [
-            //             "group_name" => '<span class="group-name-cell" style="text-align: center !important; display: block">' . $group . '</span>'
-            //         ];
-            //     }
-            //     $grouped_data[$group][] = $row;
-            // }
-
-            // $flattened_data = [];
-            // foreach ($grouped_data as $group_rows) {
-            //     foreach ($group_rows as $row) {
-            //         unset($row[0]);
-            //         $row = array_values($row);
-            //         if (count($row) === 1) {
-            //             for ($i = 1; $i <= 8; $i++) {
-            //                 $row[$i] = "";
-            //             }
-            //             ksort($row);
-            //         }
-            //         $flattened_data[] = $row;
-            //     }
-            // }
-
-            $output['aaData'] = $tracker;
-
-            echo json_encode($output);
-            die();
+        if (!$this->input->is_ajax_request()) {
+            return;
         }
+
+        // 1st query: Goods Receipt Details
+        $select = [
+            db_prefix() . 'goods_receipt_detail.id as id',
+            db_prefix() . 'goods_receipt_detail.goods_receipt_id as goods_receipt_id',
+            db_prefix() . 'goods_receipt_detail.commodity_name as commodity_name',
+            db_prefix() . 'goods_receipt_detail.description as description',
+            db_prefix() . 'goods_receipt_detail.quantities as quantities',
+            db_prefix() . 'goods_receipt_detail.po_quantities as po_quantities',
+            db_prefix() . 'goods_receipt_detail.payment_date as payment_date',
+            db_prefix() . 'goods_receipt_detail.est_delivery_date as est_delivery_date',
+            db_prefix() . 'goods_receipt_detail.delivery_date as delivery_date',
+            db_prefix() . 'goods_receipt_detail.production_status as production_status',
+            "(CASE 
+            WHEN COALESCE(agg.total_po_quantities, 0) = COALESCE(agg.total_quantities, 0) THEN '2'
+            WHEN COALESCE(agg.total_quantities, 0) = 0 THEN '0'
+            WHEN COALESCE(agg.total_quantities, 0) > 0 THEN '1'
+            ELSE '0'
+        END) AS delivery_status"
+        ];
+
+        $where = [];
+        $aColumns = $select;
+        $sIndexColumn = 'id';
+        $sTable = db_prefix() . 'goods_receipt_detail';
+        $join = [
+            'INNER JOIN ' . db_prefix() . 'goods_receipt ON ' . db_prefix() . 'goods_receipt.id = ' . db_prefix() . 'goods_receipt_detail.goods_receipt_id',
+            'LEFT JOIN (
+            SELECT 
+                goods_receipt_id, 
+                SUM(po_quantities) AS total_po_quantities, 
+                SUM(quantities) AS total_quantities
+            FROM ' . db_prefix() . 'goods_receipt_detail
+            GROUP BY goods_receipt_id
+        ) AS agg ON agg.goods_receipt_id = ' . db_prefix() . 'goods_receipt_detail.goods_receipt_id'
+        ];
+
+        $purOrdersVendor1 = [];
+        $purOrdersVendor2 = [];
+        $purOrdersReturn1 = [];
+        $purOrdersReturn0 = [];
+        $productionStatusFilters = [];
+
+        // Process vendor filters
+        if ($this->input->post('vendor')) {
+            $vendor_ids = $this->input->post('vendor');
+            if (!is_array($vendor_ids)) {
+                $vendor_ids = [$vendor_ids];
+            }
+
+            foreach ($vendor_ids as $vendor_id) {
+                $status = get_vendor_goods_status($vendor_id);
+                if ($status == 1) {
+                    $purOrdersVendor1[] = $vendor_id;
+                } elseif ($status == 0) {
+                    $purOrdersVendor2[] = $vendor_id;
+                }
+            }
+        }
+
+        // Process purchase order filters
+        if ($this->input->post('pur_order')) {
+            $pur_order_ids = $this->input->post('pur_order');
+            if (!is_array($pur_order_ids)) {
+                $pur_order_ids = [$pur_order_ids];
+            }
+
+            foreach ($pur_order_ids as $pur_order_id) {
+                $status = get_pur_order_goods_status($pur_order_id);
+                if ($status == 1) {
+                    $purOrdersReturn1[] = $pur_order_id;
+                } elseif ($status == 0) {
+                    $purOrdersReturn0[] = $pur_order_id;
+                }
+            }
+        }
+
+        // Process production status filters
+        if ($this->input->post('production_status')) {
+            $productionStatusFilters = $this->input->post('production_status');
+            if (!is_array($productionStatusFilters)) {
+                $productionStatusFilters = [$productionStatusFilters];
+            }
+        }
+
+        // Apply filters to first query
+        if (!empty($purOrdersVendor1)) {
+            $where[] = 'AND ' . db_prefix() . 'goods_receipt.supplier_code IN (' . implode(',', array_map('intval', $purOrdersVendor1)) . ')';
+        }
+        if (!empty($purOrdersReturn1)) {
+            $where[] = 'AND ' . db_prefix() . 'goods_receipt.pr_order_id IN (' . implode(',', array_map('intval', $purOrdersReturn1)) . ')';
+        }
+        if (!empty($productionStatusFilters)) {
+            $where[] = 'AND ' . db_prefix() . 'goods_receipt_detail.production_status IN (' . implode(',', array_map('intval', $productionStatusFilters)) . ')';
+        }
+
+        // Process delivery status filter
+        if ($this->input->post('delivery')) {
+            $delivery = $this->input->post('delivery');
+            switch ($delivery) {
+                case "undelivered":
+                    $where[] = 'AND (COALESCE(agg.total_po_quantities, 0) != COALESCE(agg.total_quantities, 0) AND COALESCE(agg.total_quantities, 0) = 0)';
+                    break;
+                case "partially_delivered":
+                    $where[] = 'AND (COALESCE(agg.total_po_quantities, 0) != COALESCE(agg.total_quantities, 0) AND COALESCE(agg.total_quantities, 0) > 0)';
+                    break;
+                case "completely_delivered":
+                    $where[] = 'AND (COALESCE(agg.total_po_quantities, 0) = COALESCE(agg.total_quantities, 0))';
+                    break;
+            }
+        }
+
+        $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where);
+
+        // 2nd Query: Pur Order Details
+        $select1 = [
+            db_prefix() . 'pur_order_detail.id as id',
+            db_prefix() . 'pur_order_detail.pur_order as pur_order',
+            db_prefix() . 'pur_order_detail.item_name as commodity_name',
+            db_prefix() . 'pur_order_detail.description as description',
+            db_prefix() . 'pur_order_detail.quantity as quantities',
+            db_prefix() . 'pur_order_detail.po_quantities as po_quantities',
+            db_prefix() . 'pur_order_detail.payment_date as payment_date',
+            db_prefix() . 'pur_order_detail.est_delivery_date as est_delivery_date',
+            db_prefix() . 'pur_order_detail.delivery_date as delivery_date',
+            db_prefix() . 'pur_order_detail.production_status as production_status',
+            '0 AS delivery_status',
+        ];
+
+        $where1 = ['AND ' . db_prefix() . 'pur_orders.goods_id = 0'];
+        $aColumns1 = $select1;
+        $sIndexColumn1 = 'id';
+        $sTable1 = db_prefix() . 'pur_order_detail';
+        $join1 = [
+            'INNER JOIN ' . db_prefix() . 'pur_orders ON ' . db_prefix() . 'pur_orders.id = ' . db_prefix() . 'pur_order_detail.pur_order',
+        ];
+
+        // Apply filters to second query
+        if (!empty($purOrdersReturn0)) {
+            $where1[] = 'AND ' . db_prefix() . 'pur_orders.id IN (' . implode(',', array_map('intval', $purOrdersReturn0)) . ')';
+        }
+        if (!empty($purOrdersVendor2)) {
+            $where1[] = 'AND ' . db_prefix() . 'pur_orders.vendor IN (' . implode(',', array_map('intval', $purOrdersVendor2)) . ')';
+        }
+        if (!empty($productionStatusFilters)) {
+            $where1[] = 'AND ' . db_prefix() . 'pur_order_detail.production_status IN (' . implode(',', array_map('intval', $productionStatusFilters)) . ')';
+        }
+
+        // Process delivery status filter for second query
+        if ($this->input->post('delivery')) {
+            $delivery = $this->input->post('delivery');
+            if ($delivery != "undelivered") {
+                $where1[] = 'AND 1 = 0';
+            }
+        }
+
+        $result1 = data_tables_init($aColumns1, $sIndexColumn1, $sTable1, $join1, $where1);
+
+        // Merge results
+        $output = $result['output'];
+        $rResult0 = isset($result['rResult']) && is_array($result['rResult']) ? $result['rResult'] : [];
+        $rResult1 = isset($result1['rResult']) && is_array($result1['rResult']) ? $result1['rResult'] : [];
+
+        // Determine which results to use based on filters
+        // Determine which results to use based on filters and set record counts accordingly
+        $rResult = [];
+        $totalRecords = 0;
+        $totalDisplayRecords = 0;
+
+        // Case 1: Both types of purchase orders are filtered (status 0 and 1)
+        if (!empty($purOrdersReturn0) && !empty($purOrdersReturn1)) {
+            $rResult = array_merge($rResult0, $rResult1);
+            $totalRecords = ($result['output']['iTotalRecords'] ?? 0) + ($result1['output']['iTotalRecords'] ?? 0);
+            $totalDisplayRecords = ($result['output']['iTotalDisplayRecords'] ?? 0) + ($result1['output']['iTotalDisplayRecords'] ?? 0);
+        }
+        // Case 2: Only purchase orders with status 1 are filtered
+        elseif (!empty($purOrdersReturn1)) {
+            $rResult = $rResult0;
+            $totalRecords = $result['output']['iTotalRecords'] ?? 0;
+            $totalDisplayRecords = $result['output']['iTotalDisplayRecords'] ?? 0;
+        }
+        // Case 3: Only purchase orders with status 0 are filtered
+        elseif (!empty($purOrdersReturn0)) {
+            $rResult = $rResult1;
+            $totalRecords = $result1['output']['iTotalRecords'] ?? 0;
+            $totalDisplayRecords = $result1['output']['iTotalDisplayRecords'] ?? 0;
+        }
+        // Case 4: No purchase order filters, check vendor filters
+        else {
+            // If both types of vendors are filtered (status 1 and 0)
+            if (!empty($purOrdersVendor1) && !empty($purOrdersVendor2)) {
+                $rResult = array_merge($rResult0, $rResult1);
+                $totalRecords = ($result['output']['iTotalRecords'] ?? 0) + ($result1['output']['iTotalRecords'] ?? 0);
+                $totalDisplayRecords = ($result['output']['iTotalDisplayRecords'] ?? 0) + ($result1['output']['iTotalDisplayRecords'] ?? 0);
+            }
+            // If only vendors with status 1 are filtered
+            elseif (!empty($purOrdersVendor1)) {
+                $rResult = $rResult0;
+                $totalRecords = $result['output']['iTotalRecords'] ?? 0;
+                $totalDisplayRecords = $result['output']['iTotalDisplayRecords'] ?? 0;
+            }
+            // If only vendors with status 0 are filtered
+            elseif (!empty($purOrdersVendor2)) {
+                $rResult = $rResult1;
+                $totalRecords = $result1['output']['iTotalRecords'] ?? 0;
+                $totalDisplayRecords = $result1['output']['iTotalDisplayRecords'] ?? 0;
+            }
+            // No filters at all - show everything
+            else {
+                $rResult = array_merge($rResult0, $rResult1);
+                $totalRecords = ($result['output']['iTotalRecords'] ?? 0) + ($result1['output']['iTotalRecords'] ?? 0);
+                $totalDisplayRecords = ($result['output']['iTotalDisplayRecords'] ?? 0) + ($result1['output']['iTotalDisplayRecords'] ?? 0);
+            }
+        }
+
+        // Update the output with the correct counts
+        $output['iTotalRecords'] = $totalRecords;
+        $output['iTotalDisplayRecords'] = $totalDisplayRecords;
+
+        $tracker = [];
+
+        foreach ($rResult as $aRow) {
+            $row = [];
+
+            // Get goods receipt info if available
+            $goods_receipt = isset($aRow['goods_receipt_id']) ? get_goods_receipt_code($aRow['goods_receipt_id']) : null;
+
+            // Purchase Order Name
+            if ($goods_receipt && !empty($goods_receipt->pr_order_id)) {
+                $row[] = get_pur_order_name($goods_receipt->pr_order_id);
+            } elseif (isset($aRow['pur_order'])) {
+                $row[] = get_pur_order_name($aRow['pur_order']);
+            } else {
+                $row[] = '';
+            }
+
+            // Item details
+            $row[] = $aRow['commodity_name'] ?? '';
+            $row[] = $aRow['description'] ?? '';
+
+            // Quantities
+            if ($goods_receipt && !empty($goods_receipt->pr_order_id)) {
+                $row[] = isset($aRow['po_quantities']) ? app_format_number($aRow['po_quantities']) : '-';
+            } else {
+                $row[] = isset($aRow['quantities']) ? app_format_number($aRow['quantities']) : '-';
+            }
+
+            if ($goods_receipt && !empty($goods_receipt->pr_order_id)) {
+                $row[] = app_format_number($aRow['quantities']);
+            } else {
+                $row[] = isset($aRow['po_quantities']) ? app_format_number($aRow['po_quantities']) : '-';
+            }
+
+            // Remaining quantities
+            $remaining_quantities = '-';
+            if ($goods_receipt && !empty($goods_receipt->pr_order_id)) {
+                $remaining_quantities = ($aRow['po_quantities'] ?? 0) - ($aRow['quantities'] ?? 0);
+            } elseif (isset($aRow['quantities'])) {
+                $remaining_quantities = $aRow['quantities'];
+            }
+            $row[] = app_format_number($remaining_quantities);
+
+            // Production status
+            $production_status = '';
+            if (!empty($aRow['production_status'])) {
+                switch ($aRow['production_status']) {
+                    case 1:
+                        $production_status = _l('not_started');
+                        break;
+                    case 2:
+                        $production_status = _l('on_going');
+                        break;
+                    case 3:
+                        $production_status = _l('approved');
+                        break;
+                }
+            }
+            $row[] = $production_status;
+
+            // Dates
+            $row[] = !empty($aRow['payment_date']) ? date('d M, Y', strtotime($aRow['payment_date'])) : '-';
+            $row[] = !empty($aRow['est_delivery_date']) ? date('d M, Y', strtotime($aRow['est_delivery_date'])) : '-';
+            $row[] = !empty($aRow['delivery_date']) ? date('d M, Y', strtotime($aRow['delivery_date'])) : '-';
+
+            // Delivery status
+            $delivery_status = '';
+            if (isset($aRow['delivery_status'])) {
+                switch ($aRow['delivery_status']) {
+                    case 0:
+                        $delivery_status = _l('undelivered');
+                        break;
+                    case 1:
+                        $delivery_status = _l('partially_delivered');
+                        break;
+                    case 2:
+                        $delivery_status = _l('completely_delivered');
+                        break;
+                }
+            }
+            $row[] = $delivery_status;
+
+            $tracker[] = $row;
+        }
+
+        $output['aaData'] = $tracker;
+
+        echo json_encode($output);
+        die();
     }
 
     public function update_vendor_invoice_number()
@@ -13422,7 +13737,7 @@ class purchase extends AdminController
                 }
             }
             $status_labels = [
-               
+
                 1 => ['label' => 'success', 'table' => 'new_item_service_been_addded_as_per_instruction', 'text' => _l('new_item_service_been_addded_as_per_instruction')],
                 2 => ['label' => 'info', 'table' => 'due_to_spec_change_then_original_cost', 'text' => _l('due_to_spec_change_then_original_cost')],
                 3 => ['label' => 'warning', 'table' => 'deal_slip', 'text' => _l('deal_slip')],
@@ -13433,7 +13748,7 @@ class purchase extends AdminController
                 8 => ['label' => 'orange', 'table' => 'common_services_in_ghj_scope', 'text' => _l('common_services_in_ghj_scope')],
                 9 => ['label' => 'green', 'table' => 'common_services_in_ril_scope', 'text' => _l('common_services_in_ril_scope')],
                 10 => ['label' => 'default', 'table' => 'due_to_site_specfic_constraint', 'text' => _l('due_to_site_specfic_constraint')],
-               11 => ['label' => 'danger', 'table' => 'provided_by_ril', 'text' => _l('provided_by_ril')],
+                11 => ['label' => 'danger', 'table' => 'provided_by_ril', 'text' => _l('provided_by_ril')],
             ];
             if ($row['source_table'] == "order_tracker") {
                 $contract_amount =  app_format_money($row['total'] ?? 0, '');
@@ -14225,7 +14540,7 @@ class purchase extends AdminController
             }
 
             $status_labels = [
-               
+
                 1 => ['label' => 'success', 'table' => 'new_item_service_been_addded_as_per_instruction', 'text' => _l('new_item_service_been_addded_as_per_instruction')],
                 2 => ['label' => 'info', 'table' => 'due_to_spec_change_then_original_cost', 'text' => _l('due_to_spec_change_then_original_cost')],
                 3 => ['label' => 'warning', 'table' => 'deal_slip', 'text' => _l('deal_slip')],
@@ -14236,7 +14551,7 @@ class purchase extends AdminController
                 8 => ['label' => 'orange', 'table' => 'common_services_in_ghj_scope', 'text' => _l('common_services_in_ghj_scope')],
                 9 => ['label' => 'green', 'table' => 'common_services_in_ril_scope', 'text' => _l('common_services_in_ril_scope')],
                 10 => ['label' => 'default', 'table' => 'due_to_site_specfic_constraint', 'text' => _l('due_to_site_specfic_constraint')],
-                11=> ['label' => 'danger', 'table' => 'provided_by_ril', 'text' => _l('provided_by_ril')],
+                11 => ['label' => 'danger', 'table' => 'provided_by_ril', 'text' => _l('provided_by_ril')],
             ];
             if ($row['source_table'] == "order_tracker") {
                 $contract_amount =  app_format_money($row['total'] ?? 0, '');
@@ -14333,7 +14648,7 @@ class purchase extends AdminController
 
         // Define an array of statuses with their corresponding labels and texts
         $status_labels = [
-            
+
             1 => ['label' => 'label-success', 'table' => 'new_item_service_been_addded_as_per_instruction', 'text' => _l('new_item_service_been_addded_as_per_instruction')],
             2 => ['label' => 'label-info', 'table' => 'due_to_spec_change_then_original_cost', 'text' => _l('due_to_spec_change_then_original_cost')],
             3 => ['label' => 'label-warning', 'table' => 'deal_slip', 'text' => _l('deal_slip')],
@@ -15582,7 +15897,7 @@ class purchase extends AdminController
 
             echo json_encode($output);
             die();
-        } 
+        }
     }
 
     public function send_critical_tracker_email()
@@ -15599,7 +15914,7 @@ class purchase extends AdminController
             ->where('status', 1)
             ->get()
             ->result();
-        
+
         if (empty($items)) {
             log_activity('No critical items due today'); // optional
             return;
