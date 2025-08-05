@@ -434,6 +434,7 @@
                               _l('anticipate_variation'),
                               _l('cost_to_complete'),
                               'Total Certified Amount By BIL',
+                              'Yield',
                               'RIL Certified Amount',
                               _l('attachment_upload'),
                               _l('attachment_download'),
@@ -484,6 +485,7 @@
                                  <th><?php echo _l('anticipate_variation'); ?></th>
                                  <th><?php echo _l('cost_to_complete'); ?></th>
                                  <th>Total Certified Amount By BIL</th>
+                                 <th>Yield</th>
                                  <th>RIL Certified Amount</th>
                                  <th><?php echo _l('attachment_upload'); ?></th>
                                  <th><?php echo _l('attachment_download'); ?></th>
@@ -510,6 +512,7 @@
                               <td class="total_anticipate_variation"></td>
                               <td class="total_cost_to_complete"></td>
                               <td class="total_final_certified_amount"></td>
+                              <td></td>
                               <td class="total_ril_certified_amount"></td>
                               <td></td>
                               <td></td>

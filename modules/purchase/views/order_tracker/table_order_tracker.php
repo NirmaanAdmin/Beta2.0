@@ -27,6 +27,7 @@ $aColumns = [
    'anticipate_variation',
    'cost_to_complete',
    'vendor_submitted_amount_without_tax',
+   3,
    'ril_certified_amount',
    1,
    2,
@@ -518,6 +519,20 @@ foreach ($rResult as $aRow) {
             // Render as an editable input if no value exists
             $_data = '<span style="font-style: italic;font-size: 12px;">Values will be fetched directly from the vendor billing tracker</span>';
          }
+      } elseif ($column == 3) {
+         $ctc = $aRow['cost_to_complete'];
+         $bil = $aRow['vendor_submitted_amount_without_tax'];
+         $ril = $aRow['ril_certified_amount'];
+
+         $_data = ($bil == 0 && $ril == 0)
+            ? '<span class="label label-default">None</span>'
+            : ($ctc > $bil && $ctc > $ril
+               ? '<span class="label label-success">Profit</span>'
+               : ($ctc < $bil || $ctc < $ril
+                  ? '<span class="label label-danger">Loss</span>'
+                  : ($ctc == $bil || $ctc == $ril ? '<span class="label label-warning">Neutral</span>' : '')
+               )
+            );
       } elseif ($column == 'ril_certified_amount') {
          $_data = '<span class=  data-id="' . $aRow['id'] . '" data-type="' . $aRow['source_table'] . '">' . app_format_money($aRow['ril_certified_amount'], '₹') . '</span>';
       } elseif ($column == 1) {
