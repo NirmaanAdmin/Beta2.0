@@ -2936,6 +2936,12 @@ class purchase extends AdminController
                 'total_money',
             ];
             $where = [];
+
+            $project_id = get_default_project();
+            if ($project_id != '') {
+                array_push($where, 'AND project = ' . $project_id);
+            }
+
             $custom_date_select = $this->get_where_report_period(db_prefix() . 'pur_orders.order_date');
             if ($custom_date_select != '') {
                 array_push($where, $custom_date_select);
@@ -4690,6 +4696,10 @@ class purchase extends AdminController
             }
 
 
+            $project_id = get_default_project();
+            if ($project_id != '') {
+                array_push($where, 'AND project = ' . $project_id);
+            }
 
             $currency = $this->currencies_model->get_base_currency();
             $aColumns     = $select;
@@ -4789,6 +4799,10 @@ class purchase extends AdminController
                 'total',
             ];
             $where = [];
+            $project_id = get_default_project();
+            if ($project_id != '') {
+                array_push($where, 'AND project = ' . $project_id);
+            }
             $custom_date_select = $this->get_where_report_period(db_prefix() . 'pur_orders.order_date');
             if ($custom_date_select != '') {
                 array_push($where, $custom_date_select);
@@ -4906,6 +4920,10 @@ class purchase extends AdminController
                 'total',
             ];
             $where = [];
+            $project_id = get_default_project();
+            if ($project_id != '') {
+                array_push($where, 'AND project = ' . $project_id);
+            }
             $custom_date_select = $this->get_where_report_period(db_prefix() . 'wo_orders.order_date');
             if ($custom_date_select != '') {
                 array_push($where, $custom_date_select);
@@ -11527,7 +11545,11 @@ class purchase extends AdminController
         $purOrdersReturn0 = [];
         $productionStatusFilters = [];
 
-
+        // Add project filter
+        $project_id = get_default_project();
+        if ($project_id != '') {
+            array_push($where, 'AND project = ' . $project_id);
+        }
 
         // Process vendor filters
         if ($this->input->post('vendor')) {
@@ -11643,6 +11665,11 @@ class purchase extends AdminController
         }
         if (!empty($productionStatusFilters)) {
             $where1[] = 'AND ' . db_prefix() . 'pur_order_detail.production_status IN (' . implode(',', array_map('intval', $productionStatusFilters)) . ')';
+        }
+
+        $project_id = get_default_project();
+        if ($project_id != '') {
+            array_push($where1, 'AND project = ' . $project_id);
         }
 
         // Process delivery status filter for second query
@@ -15601,6 +15628,11 @@ class purchase extends AdminController
                 'risk_level',
             ];
             $where = [];
+            // Add project filter
+            $project_id = get_default_project();
+            if ($project_id != '') {
+                array_push($where, 'AND project_id = ' . $project_id);
+            }
             if ($this->input->post('vendor_id') && $this->input->post('vendor_id') != '') {
                 $vendor_id = $this->input->post('vendor_id');
                 array_push($where, 'AND vendor_id IN (' . implode(',', $vendor_id) . ')');
@@ -15737,6 +15769,12 @@ class purchase extends AdminController
             ];
             $where = [];
 
+            $project_id = get_default_project();
+
+            // Add project filter
+            if ($project_id != '') {
+                array_push($where, 'AND ' . db_prefix() . 'pur_orders.project = ' . $project_id);
+            }
             $custom_date_select_pur = $this->get_where_report_period(db_prefix() . 'pur_orders.order_date');
             if ($custom_date_select_pur != '') {
                 array_push($where, $custom_date_select_pur);
@@ -15842,6 +15880,12 @@ class purchase extends AdminController
                 array_push($where, 'AND ' . db_prefix() . 'pur_orders.vendor IN (' . implode(',', $vendor_id) . ')');
             }
 
+            $project_id = get_default_project();
+
+            // Add project filter
+            if ($project_id != '') {
+                array_push($where, 'AND ' . db_prefix() . 'pur_orders.project = ' . $project_id);
+            }
             // Add delivery status filter
             if ($this->input->post('delivery_status_filter') && $this->input->post('delivery_status_filter') != '') {
                 $status_filter = $this->input->post('delivery_status_filter');
