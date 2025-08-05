@@ -79,11 +79,11 @@ if ($this->ci->input->post('billing_invoices') && $this->ci->input->post('billin
 
 if ($this->ci->input->post('bil_payment_status') && $this->ci->input->post('bil_payment_status') != '') {
     if ($this->ci->input->post('bil_payment_status') == "paid") {
-        array_push($where, 'AND (payment_status = "paid")');
+        array_push($where, 'AND (final_certified_amount = IF(ril.total > 0, (ip.amount * final_certified_amount) / ril.total, 0))');
     } else if ($this->ci->input->post('bil_payment_status') == "partially_paid") {
-        array_push($where, 'AND (payment_status = "partially_paid")');
+        $where[] = 'AND (final_certified_amount > IF(ril.total > 0, (ip.amount * final_certified_amount) / ril.total, 0) AND (IF(ril.total > 0, (ip.amount * final_certified_amount) / ril.total, 0) != 0 AND IF(ril.total > 0, (ip.amount * final_certified_amount) / ril.total, 0) IS NOT NULL))';
     } else {
-        array_push($where, 'AND (payment_status != "partially_paid" AND payment_status != "paid")');
+        array_push($where, 'AND (IF(ril.total > 0, (ip.amount * final_certified_amount) / ril.total, 0) = 0 OR IF(ril.total > 0, (ip.amount * final_certified_amount) / ril.total, 0) IS NULL)');
     }
 }
 
