@@ -15043,12 +15043,6 @@ class Changee_model extends App_Model
             }
 
             if (!empty($line_order_total)) {
-                ksort($line_order_total);
-                $cumulative = 0;
-                foreach ($line_order_total as $month => $value) {
-                    $cumulative += $value;
-                    $line_order_total[$month] = $cumulative;
-                }
                 $response['line_order_date'] = array_map(function ($month) {
                     return date('M-y', strtotime($month . '-01'));
                 }, array_keys($line_order_total));
