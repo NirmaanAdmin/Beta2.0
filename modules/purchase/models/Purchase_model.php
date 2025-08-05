@@ -22217,6 +22217,7 @@ class Purchase_model extends App_Model
             ' . db_prefix() . 'pur_invoices.group_pur,
             ' . db_prefix() . 'pur_invoices.project_id,
             ' . db_prefix() . 'pur_invoices.final_certified_amount,
+            ' . db_prefix() . 'pur_invoices.vendor_submitted_amount_without_tax,
             ' . db_prefix() . 'pur_invoices.pur_order,
             ' . db_prefix() . 'pur_invoices.wo_order,
             ' . db_prefix() . 'pur_invoices.order_tracker_id,
@@ -22264,7 +22265,7 @@ class Purchase_model extends App_Model
                 fn($item) =>
                 empty($item['ril_invoice_id'])
             ));
-            $total_pending_amount_to_be_invoice = array_sum(array_column(array_filter($pur_invoices, fn($item) => empty($item['ril_invoice_id'])), 'final_certified_amount'));
+            $total_pending_amount_to_be_invoice = array_sum(array_column(array_filter($pur_invoices, fn($item) => empty($item['ril_invoice_id'])), 'vendor_submitted_amount_without_tax'));
             $response['total_pending_amount_to_be_invoice'] = app_format_money($total_pending_amount_to_be_invoice, $base_currency->symbol);
 
             $bar_top_vendors = array();
