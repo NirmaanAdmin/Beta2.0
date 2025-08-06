@@ -675,6 +675,40 @@ function get_pur_order_name($id)
     return $name;
 }
 
+
+function get_work_order_name($id)
+{
+    $name = '';
+    $CI = &get_instance();
+
+    $CI->db->select('po.wo_order_number, po.wo_order_name, v.company as vendor_name');
+    $CI->db->from(db_prefix() . 'wo_orders AS po');
+    $CI->db->join(db_prefix() . 'pur_vendor AS v', 'v.userid = po.vendor', 'left');
+    $CI->db->where('po.id', $id);
+
+    $pur_order = $CI->db->get()->row();
+
+    if ($pur_order) {
+        // Extract only up to the 3rd dash (remove trailing -CONT-XXXX)
+        $parts = explode('-', $pur_order->wo_order_number);
+
+        // Combine first 3 parts only if they exist
+        if (count($parts) >= 3) {
+            $trimmed_order_number = implode('-', array_slice($parts, 0, 3));
+        } else {
+            $trimmed_order_number = $pur_order->wo_order_number;
+        }
+
+        // Final output format: #PO-00001-Nov-2024 (Vendor Name)
+        $name .= $trimmed_order_number;
+
+        if (!empty($pur_order->vendor_name)) {
+            $name .= '-' . $pur_order->vendor_name . ' - ' . $pur_order->wo_order_name;
+        }
+    }
+
+    return $name;
+}
 function get_pur_order_project_id($id)
 {
     $project = '';
@@ -1872,20 +1906,19 @@ function packing_list_status($status = '')
  */
 function render_delivery_status_html($id, $type, $status_value = '', $ChangeStatus = true)
 {
-    if($type == 'reconciliation'){
+    if ($type == 'reconciliation') {
         $status = get_reconciliation_status_by_id($status_value, $type);
-    }else{
+    } else {
         $status = get_delivery_status_by_id($status_value, $type);
     }
 
-    
+
 
     if ($type == 'delivery') {
         $task_statuses = delivery_list_status();
     } elseif ($type == 'reconciliation') {
         $task_statuses = reconcilliation_list_status();
-    }
-    else {
+    } else {
         $task_statuses = packing_list_status();
     }
     $outputStatus    = '';
@@ -2326,11 +2359,8 @@ function get_inventory_area_list($name_area, $area)
 }
 
 
-function handle_purchase_tracker_attachments_array($related, $id)
+function handle_purchase_tracker_attachments_array($path)
 {
-
-    $path = WAREHOUSE_MODULE_UPLOAD_FOLDER . '/purchase_tracker/' . $related . '/' . $id . '/';
-
     $uploaded_files = [];
     if (!is_dir($path)) {
         mkdir($path, 0755, true);
@@ -2350,7 +2380,6 @@ function handle_purchase_tracker_attachments_array($related, $id)
 
         _file_attachments_index_fix('attachments');
         for ($i = 0; $i < count($_FILES['attachments']['name']); $i++) {
-
             // Get the temp file path
             $tmpFilePath = $_FILES['attachments']['tmp_name'][$i];
             // Make sure we have a filepath
@@ -2396,7 +2425,8 @@ function get_documentation_yes_or_no($id, $checklist_id)
     return $row ? 'Yes' : 'No';
 }
 
-function get_issued_code($issued_id){
+function get_issued_code($issued_id)
+{
     $CI = &get_instance();
     $CI->db->select('goods_delivery_code');
     $CI->db->from(db_prefix() . 'goods_delivery');
@@ -2408,7 +2438,8 @@ function get_issued_code($issued_id){
     return '';
 }
 
-function get_return_details_status($goods_delivery_id,$past_date_count) {
+function get_return_details_status($goods_delivery_id, $past_date_count)
+{
     $CI = &get_instance();
 
     // Step 1: Get the pr_order_id using goods_delivery_id
@@ -2431,8 +2462,8 @@ function get_return_details_status($goods_delivery_id,$past_date_count) {
         // Optional: Return array or status
         if (!empty($data)) {
             return 'Returned'; // or return $data;
-        }elseif ($past_date_count > 0 && empty($data)) {
-           return 'Delayed';
+        } elseif ($past_date_count > 0 && empty($data)) {
+            return 'Delayed';
         } else {
             return 'To Be Returned';
         }
@@ -2492,5 +2523,5 @@ function get_inventory_reconcilliation_area_list($name_area, $area)
     if (!is_array($selected)) {
         $selected = explode(",", $selected);
     }
-    return render_select($name_area, $get_area, array('id', 'area_name'), '', $selected, ['multiple' => true, 'disabled' => true ], ['id' => 'project_area'], '', '', false);
+    return render_select($name_area, $get_area, array('id', 'area_name'), '', $selected, ['multiple' => true, 'disabled' => true], ['id' => 'project_area'], '', '', false);
 }

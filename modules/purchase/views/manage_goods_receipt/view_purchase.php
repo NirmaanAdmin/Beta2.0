@@ -89,24 +89,52 @@
                         </td>
                       </tr>
 
-                  <?php   }
+                    <?php   } elseif ($goods_receipt->wo_order_id != '' && $goods_receipt->wo_order_id != 0) { ?>
+
+                      <tr class="project-overview">
+                        <td class="bold"><?php echo _l('reference_work_order'); ?></td>
+                        <td>
+                          <a href="<?php echo admin_url('purchase/work_order/' . $goods_receipt->wo_order_id) ?>"><?php echo get_work_order_name($goods_receipt->wo_order_id) ?></a>
+
+                        </td>
+                      </tr>
+
+                    <?php   }
                   }
+                  if ($goods_receipt->pr_order_id != '' && $goods_receipt->pr_order_id != 0) { ?>
+                    <tr class="project-overview">
+                      <td class="bold"><?php echo _l('group_pur'); ?></td>
+                      <td><?php echo get_group_name_by_id($pur_order->group_pur); ?></td>
+                    </tr>
+
+                    <tr class="project-overview">
+                      <td class="bold"><?php echo _l('po_date'); ?></td>
+                      <td><?php echo date('d M, Y', strtotime($pur_order->order_date)); ?></td>
+                    </tr>
+
+                    <tr class="project-overview">
+                      <td class="bold"><?php echo _l('po_amount'); ?></td>
+                      <td><?php echo app_format_money($pur_order->total, $base_currency); ?></td>
+                    </tr>
+                  <?php  } elseif ($goods_receipt->wo_order_id != '' && $goods_receipt->wo_order_id != 0) { ?>
+                    <tr class="project-overview">
+                      <td class="bold"><?php echo _l('group_pur'); ?></td>
+                      <td><?php echo get_group_name_by_id($wo_order->group_pur); ?></td>
+                    </tr>
+
+                    <tr class="project-overview">
+                      <td class="bold"><?php echo _l('WO Date'); ?></td>
+                      <td><?php echo date('d M, Y', strtotime($wo_order->order_date)); ?></td>
+                    </tr>
+
+                    <tr class="project-overview">
+                      <td class="bold"><?php echo _l('WO Amount'); ?></td>
+                      <td><?php echo app_format_money($wo_order->total, $base_currency); ?></td>
+                    </tr>
+                  <?php  }
                   ?>
 
-                  <tr class="project-overview">
-                    <td class="bold"><?php echo _l('group_pur'); ?></td>
-                    <td><?php echo get_group_name_by_id($pur_order->group_pur); ?></td>
-                  </tr>
 
-                  <tr class="project-overview">
-                    <td class="bold"><?php echo _l('po_date'); ?></td>
-                    <td><?php echo date('d-m-Y', strtotime($pur_order->order_date)); ?></td>
-                  </tr>
-
-                  <tr class="project-overview">
-                    <td class="bold"><?php echo _l('po_amount'); ?></td>
-                    <td><?php echo app_format_money($pur_order->total, $base_currency); ?></td>
-                  </tr>
 
                   <?php
                   if (isset($purchase_tracker)) { ?>
@@ -265,8 +293,9 @@
                               foreach ($production_labels as $key => $status) {
                                 if ($key != $receipt_value['production_status']) {
                                   $purchase_tracker_json = htmlspecialchars(json_encode($purchase_tracker ?? false), ENT_QUOTES, 'UTF-8');
+                                  $purOrder = (isset($pur_order) ? 'true' : 'false');
                                   $production_status .= '<li>
-                                      <a href="#" onclick="change_production_status(' . $key . ', ' . $receipt_value['id'] . ', ' . $purchase_tracker_json . '); return false;"> 
+                                      <a href="#" onclick="change_production_status(' . $key . ', ' . $receipt_value['id'] . ', ' . $purchase_tracker_json . ', ' . $purOrder . '); return false;"> 
                                           ' . $status['text'] . '
                                       </a>
                                   </li>';
@@ -296,8 +325,9 @@
                               foreach ($imp_local_labels as $key => $status) {
                                 if ($key != $receipt_value['imp_local_status']) {
                                   $imp_local_status_json = htmlspecialchars(json_encode($purchase_tracker ?? false), ENT_QUOTES, 'UTF-8');
+                                  $purOrder = (isset($pur_order) ? 'true' : 'false');
                                   $imp_local_status .= '<li>
-                                      <a href="#" onclick="change_imp_local_status(' . $key . ', ' . $receipt_value['id'] . ', ' . $imp_local_status_json . '); return false;"> 
+                                      <a href="#" onclick="change_imp_local_status(' . $key . ', ' . $receipt_value['id'] . ', ' . $imp_local_status_json . ', ' . $purOrder . '); return false;"> 
                                           ' . $status['text'] . '
                                       </a>
                                   </li>';
@@ -329,8 +359,9 @@
                               foreach ($tracker_status_labels as $key => $status) {
                                 if ($key != $receipt_value['tracker_status']) {
                                   $tracker_status_json = htmlspecialchars(json_encode($purchase_tracker ?? false), ENT_QUOTES, 'UTF-8');
+                                  $purOrder = (isset($pur_order) ? 'true' : 'false');
                                   $tracker_status .= '<li>
-                                      <a href="#" onclick="change_tracker_status(' . $key . ', ' . $receipt_value['id'] . ', ' . $tracker_status_json . '); return false;"> 
+                                      <a href="#" onclick="change_tracker_status(' . $key . ', ' . $receipt_value['id'] . ', ' . $tracker_status_json . ', ' . $purOrder . '); return false;"> 
                                           ' . $status['text'] . '
                                       </a>
                                   </li>';
@@ -359,6 +390,7 @@
                                   value="' . $payment_date . '"
                                   data-id="' . $receipt_value['id'] . '"
                                   data-tracker=\'' . (isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false') . '\'
+                                  data-purorder="' . (isset($pur_order) ? 'true' : 'false') . '"
                                   ">';
                                 ?>
                               </td>
@@ -368,6 +400,7 @@
                                   value="' . $est_delivery_date . '"
                                   data-id="' . $receipt_value['id'] . '"
                                   data-tracker=\'' . (isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false') . '\'
+                                  data-purorder="' . (isset($pur_order) ? 'true' : 'false') . '"
                                   ">';
                                 ?>
                               </td>
@@ -377,10 +410,11 @@
                                   value="' . $delivery_date . '"
                                   data-id="' . $receipt_value['id'] . '"
                                   data-tracker=\'' . (isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false') . '\'
+                                  data-purorder="' . (isset($pur_order) ? 'true' : 'false') . '"
                                   ">';
                                 ?>
                               </td>
-                              <td><?php echo '<textarea style="width: 154px;height: 50px;" class="form-control  remarks-input" data-id="' . $receipt_value['id'] . '" data-tracker=\'' . (isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false') . '\'>' . $remarks . '</textarea>' ?></td>
+                              <td><?php echo '<textarea style="width: 154px;height: 50px;" class="form-control  remarks-input" data-id="' . $receipt_value['id'] . '" data-tracker=\'' . (isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false') . '\' data-purorder="' . (isset($pur_order) ? 'true' : 'false') . '">' . $remarks . '</textarea>' ?></td>
                             </tr>
                           <?php  } ?>
                         </tbody>
@@ -512,12 +546,12 @@
                               <td><?php echo html_entity_decode($description) ?></td>
                               <td>
                                 <div class="form-group">
-                                  <input type="number" id="lead_time_days" name="lead_time_days" class="form-control" min="0" max="100" value="<?php echo $lead_time_days; ?>" data-id="<?php echo $receipt_value['id']; ?>" data-tracker='<?php echo isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false'; ?>'>
+                                  <input type="number" id="lead_time_days" name="lead_time_days" class="form-control" min="0" max="100" value="<?php echo $lead_time_days; ?>" data-id="<?php echo $receipt_value['id']; ?>" data-tracker='<?php echo isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false'; ?>' data-purOrder=<?php echo (isset($pur_order) ? 'true' : 'false') ?>>
                                 </div>
                               </td>
                               <td>
                                 <div class="form-group">
-                                  <input type="number" id="advance_payment" name="advance_payment" class="form-control" min="0" max="100" value="<?php echo $advance_payment; ?>" data-id="<?php echo $receipt_value['id']; ?>" data-tracker='<?php echo isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false'; ?>'>
+                                  <input type="number" id="advance_payment" name="advance_payment" class="form-control" min="0" max="100" value="<?php echo $advance_payment; ?>" data-id="<?php echo $receipt_value['id']; ?>" data-tracker='<?php echo isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false'; ?>' data-purOrder=<?php echo (isset($pur_order) ? 'true' : 'false') ?>>
                                 </div>
                               </td>
                               <td>
@@ -532,6 +566,8 @@
                                     <button type="button"
                                       class="btn btn-success upload_shop_drawings_attachments"
                                       data-id="<?php echo $receipt_value['id']; ?>"
+                                      data-purOrder="<?php echo (isset($pur_order) ? 'true' : 'false'); ?>"
+                                      data-workOrder="<?php echo (isset($wo_order) ? 'true' : 'false'); ?>"
                                       title="Upload Attachments">
                                       <i class="fa fa-upload"></i>
                                     </button>
@@ -542,41 +578,39 @@
 
                                 <?php
 
-                                if (json_encode($purchase_tracker) == 'true') {
-                                  $this->load->model('warehouse/warehouse_model');
-                                  $attachments = $this->warehouse_model->get_inventory_shop_drawing_attachments('goods_receipt_shop_d', $receipt_value['id'], true);
-                                  $file_html = '';
-                                  if (!empty($attachments)) {
-                                    $file_html = '<a href="javascript:void(0)" onclick="view_purchase_tracker_attachments(' . $attachments[0]['rel_id'] . '); return false;" class="btn btn-info btn-icon">View Files</a>';
-                                  } else {
-                                    $file_html = '';
-                                  }
+                                $this->load->model('warehouse/warehouse_model');
+                                $file_html = '';
+                                $view_type = null;
 
-                                  echo $file_html;
-                                } else {
-                                  $this->load->model('warehouse/warehouse_model');
-                                  $attachments = $this->warehouse_model->get_inventory_shop_drawing_attachments('goods_receipt_shop_d', $receipt_value['id'], false);
-                                  $file_html = '';
-                                  if (!empty($attachments)) {
-                                    $file_html = '<a href="javascript:void(0)" onclick="view_purchase_tracker_attachments(' . $receipt_value['id'] . '); return false;" class="btn btn-info btn-icon">View Files</a>';
-                                  } else {
-                                    $file_html = '';
-                                  }
-
-                                  echo $file_html;
+                                if (isset($pur_order) && $pur_order > 0) {
+                                  $view_type = 'purchase_orders';
+                                } elseif (isset($wo_order) && $wo_order > 0) {
+                                  $view_type = 'work_orders';
                                 }
+
+                                $attachments = $this->warehouse_model->get_inventory_shop_drawing_attachments(
+                                  'goods_receipt_shop_d',
+                                  $receipt_value['id'],
+                                  $view_type
+                                );
+
+                                if (!empty($attachments)) {
+                                  $file_html = '<a href="javascript:void(0)" onclick="view_purchase_tracker_attachments(' . $receipt_value['id'] . ', \'' . $view_type . '\'); return false;" class="btn btn-info btn-icon">View Files</a>';
+                                }
+
+                                echo $file_html;
 
 
                                 ?>
                               </td>
                               <td>
-                                <input type="date" id="shop_submission" name="shop_submission" class="form-control" value="<?php echo $shop_submission; ?>" data-id="<?php echo $receipt_value['id']; ?>" data-tracker='<?php echo isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false'; ?>'>
+                                <input type="date" id="shop_submission" name="shop_submission" class="form-control" value="<?php echo $shop_submission; ?>" data-id="<?php echo $receipt_value['id']; ?>" data-tracker='<?php echo isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false'; ?>' data-purOrder=<?php echo (isset($pur_order) ? 'true' : 'false') ?>>
                               </td>
                               <td>
-                                <input type="date" id="shop_approval" name="shop_approval" class="form-control" value="<?php echo $shop_approval; ?>" data-id="<?php echo $receipt_value['id']; ?>" data-tracker='<?php echo isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false'; ?>'>
+                                <input type="date" id="shop_approval" name="shop_approval" class="form-control" value="<?php echo $shop_approval; ?>" data-id="<?php echo $receipt_value['id']; ?>" data-tracker='<?php echo isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false'; ?>' data-purOrder=<?php echo (isset($pur_order) ? 'true' : 'false') ?>>
                               </td>
                               <td>
-                                <textarea style="width: 154px;height: 50px;" class="form-control" name="actual_remarks" data-id="<?php echo $receipt_value['id']; ?>" data-tracker='<?php echo isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false'; ?>'><?php echo $actual_remarks; ?></textarea>
+                                <textarea style="width: 154px;height: 50px;" class="form-control" name="actual_remarks" data-id="<?php echo $receipt_value['id']; ?>" data-tracker='<?php echo isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false'; ?>' data-purOrder=<?php echo (isset($pur_order) ? 'true' : 'false') ?>><?php echo $actual_remarks; ?></textarea>
                               </td>
                             </tr>
                           <?php  } ?>
@@ -672,7 +706,7 @@
   </div>
 </div>
 <div id="purchase_tracker_file_data"></div>
-<?php require 'modules/warehouse/assets/js/view_purchase_js.php'; ?>
+<!-- <?php require 'modules/warehouse/assets/js/view_purchase_js.php'; ?> -->
 </body>
 
 </html>

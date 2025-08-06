@@ -272,6 +272,12 @@ function init_po_tracker(id) {
     load_small_table_item_proposal(id, '#purchase_sm_view', 'purchase_id', 'purchase/view_po_tracker', '.purchase_sm');
 }
 
+init_wo_tracker();
+function init_wo_tracker(id) {
+    "use strict";
+    load_small_table_item_proposal(id, '#purchase_sm_view', 'purchase_id', 'purchase/view_wo_tracker', '.purchase_sm');
+}
+ 
 function load_small_table_item_proposal(pr_id, selector, input_name, url, table) {
     "use strict";
 
@@ -330,10 +336,11 @@ function toggle_small_view_proposal(table, main_data) {
 
 }
 
-function view_purchase_tracker_attachments(rel_id) {
+function view_purchase_tracker_attachments(rel_id,view_type) {
     "use strict";
     $.post(admin_url + 'purchase/view_purchase_tracker_attachments', {
-        rel_id: rel_id
+        rel_id: rel_id,
+        view_type: view_type
     }).done(function (response) { 
         response = JSON.parse(response);
         if (response.result) {
@@ -348,13 +355,14 @@ function view_purchase_tracker_attachments(rel_id) {
 function preview_purchase_tracker_btn(invoker) {
     "use strict";
     var id = $(invoker).attr('id');
-    view_purchase_tracker_file(id);
+    var view_type = $(invoker).attr('view_type');;
+    view_purchase_tracker_file(id,view_type);
 }
 
-function view_purchase_tracker_file(id) {
+function view_purchase_tracker_file(id,view_type) {
     "use strict";
     $('#purchase_tracker_file_data').empty();
-    $("#purchase_tracker_file_data").load(admin_url + 'purchase/view_purchase_tracker_file/' + id, function (response, status, xhr) {
+    $("#purchase_tracker_file_data").load(admin_url + 'purchase/view_purchase_tracker_file/' + id + '/' + view_type, function (response, status, xhr) {
         if (status == "error") {
             alert_float('danger', xhr.statusText);
         }

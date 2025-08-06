@@ -20426,12 +20426,16 @@ class Warehouse_model extends App_Model
 		return $arr_inventory_number;
 	}
 
-	function change_production_status($status, $id, $purchase_tracker)
+	function change_production_status($status, $id, $purchase_tracker, $purOrder)
 	{
 
 		$this->db->where('id', $id);
 		if ($purchase_tracker == "false") {
-			$this->db->update(db_prefix() . 'pur_order_detail', ['production_status' => $status]);
+			if ($purOrder == "true") {
+				$this->db->update(db_prefix() . 'pur_order_detail', ['production_status' => $status]);
+			} elseif ($purOrder == "false") {
+				$this->db->update(db_prefix() . 'wo_order_detail', ['production_status' => $status]);
+			}
 		} else {
 			$this->db->update(db_prefix() . 'goods_receipt_detail', ['production_status' => $status]);
 		}
@@ -21280,22 +21284,30 @@ class Warehouse_model extends App_Model
 		return $url;
 	}
 
-	function change_imp_local_status($status, $id, $purchase_tracker)
+	function change_imp_local_status($status, $id, $purchase_tracker, $purOrder)
 	{
 		$this->db->where('id', $id);
 		if ($purchase_tracker == "false") {
-			$this->db->update(db_prefix() . 'pur_order_detail', ['imp_local_status' => $status]);
+			if ($purOrder == "true") {
+				$this->db->update(db_prefix() . 'pur_order_detail', ['imp_local_status' => $status]);
+			} elseif ($purOrder == "false") {
+				$this->db->update(db_prefix() . 'wo_order_detail', ['imp_local_status' => $status]);
+			}
 		} else {
 			$this->db->update(db_prefix() . 'goods_receipt_detail', ['imp_local_status' => $status]);
 		}
 		return true;
 	}
 
-	function change_tracker_status($status, $id, $purchase_tracker)
+	function change_tracker_status($status, $id, $purchase_tracker, $purOrder)
 	{
 		$this->db->where('id', $id);
 		if ($purchase_tracker == "false") {
-			$this->db->update(db_prefix() . 'pur_order_detail', ['tracker_status' => $status]);
+			if ($purOrder == "true") {
+				$this->db->update(db_prefix() . 'pur_order_detail', ['tracker_status' => $status]);
+			} elseif ($purOrder == "false") {
+				$this->db->update(db_prefix() . 'wo_order_detail', ['tracker_status' => $status]);
+			}
 		} else {
 			$this->db->update(db_prefix() . 'goods_receipt_detail', ['tracker_status' => $status]);
 		}
@@ -21428,31 +21440,37 @@ class Warehouse_model extends App_Model
 		return $attachments;
 	}
 
-	public function get_inventory_shop_drawing_attachments($related, $id, $pur_tracker)
+	public function get_inventory_shop_drawing_attachments($related, $id, $view_type = null)
 	{
-		if ($pur_tracker == 'true') {
-			// First try to get attachments directly with the original ID
-			$this->db->where('rel_id', $id);
-			$this->db->where('rel_type', $related);
-			$this->db->order_by('dateadded', 'desc');
-			$attachments = $this->db->get(db_prefix() . 'invetory_files')->result_array();
+		$this->db->where('rel_id', $id);
+		$this->db->where('rel_type', $related);
 
-			if (count($attachments) > 0) {
-				return $attachments;
-			}
+		// Handle view_type filtering
+		if ($view_type !== null) {
+			$this->db->where('view_type', $view_type);
+		} else {
+			// When view_type is null/empty, get records where view_type is empty
+			$this->db->group_start()
+				->where('view_type', null)
+				->or_where('view_type', '')
+				->group_end();
+		}
 
-			// If no attachments found, try to find related records through goods receipt and purchase order
+		$this->db->order_by('dateadded', 'desc');
+		$attachments = $this->db->get(db_prefix() . 'invetory_files')->result_array();
+
+		// If no attachments found with direct ID and we have a view_type, try to find related records
+		if (empty($attachments) && $view_type !== null) {
 			$this->db->select('goods_receipt_id, commodity_code, description');
 			$this->db->where('id', $id);
 			$goods_receipt_detail = $this->db->get(db_prefix() . 'goods_receipt_detail')->row();
 
 			if ($goods_receipt_detail && $goods_receipt_detail->goods_receipt_id) {
-				// Get pr_order_id from goods receipt
-				$this->db->select('pr_order_id');
+				$this->db->select('pr_order_id, wo_order_id');
 				$this->db->where('id', $goods_receipt_detail->goods_receipt_id);
 				$goods_receipt = $this->db->get(db_prefix() . 'goods_receipt')->row();
 
-				if ($goods_receipt && $goods_receipt->pr_order_id) {
+				if ($goods_receipt) {
 					$rawDesc = $goods_receipt_detail->description ?? '';
 					$cleanDesc = strip_tags(
 						str_replace(
@@ -21462,58 +21480,56 @@ class Warehouse_model extends App_Model
 						)
 					);
 
-					// 2) start building your query
-					$this->db
-						->select('id')
-						->from(db_prefix() . 'pur_order_detail')
-						->where('pur_order', $goods_receipt->pr_order_id);
+					// Check purchase orders first if view_type is purchase_orders
+					if ($view_type === 'purchase_orders' && $goods_receipt->pr_order_id) {
+						$this->db
+							->select('id')
+							->from(db_prefix() . 'pur_order_detail')
+							->where('pur_order', $goods_receipt->pr_order_id);
 
-					if (! empty($goods_receipt_detail->commodity_code)) {
-						$this->db->where('item_code', $goods_receipt_detail->commodity_code);
-					}
-
-					if ($cleanDesc !== '') {
-						// apply the same strip‑break logic to the DB column
-						$expr  = "REPLACE(";
-						$expr .= "REPLACE(";
-						$expr .= "REPLACE(";
-						$expr .= "REPLACE(`description`, '\r', ''),";
-						$expr .= " '\n', ''),";
-						$expr .= " '<br />', ''),";
-						$expr .= " '<br/>', '')";
-
-						// CI will generate: ... WHERE REPLACE(...)= 'yourCleanDesc'
-						$this->db->where("$expr =", $cleanDesc);
-					}
-
-					$pur_order_detail = $this->db->get()->row();
-
-					if ($pur_order_detail) {
-						// Try to get attachments with the new rel_id
-						$this->db->where('rel_id', $pur_order_detail->id);
-						$this->db->where('rel_type', $related);
-						$attachments = $this->db->get(db_prefix() . 'invetory_files')->result_array();
-
-						if (count($attachments) > 0) {
-							return $attachments;
+						if (!empty($goods_receipt_detail->commodity_code)) {
+							$this->db->where('item_code', $goods_receipt_detail->commodity_code);
 						}
+
+						if ($cleanDesc !== '') {
+							$expr = "REPLACE(REPLACE(REPLACE(REPLACE(`description`, '\r', ''), '\n', ''), '<br />', ''), '<br/>', '')";
+							$this->db->where("$expr =", $cleanDesc);
+						}
+
+						$order_detail = $this->db->get()->row();
+					}
+					// Check work orders if view_type is work_orders
+					elseif ($view_type === 'work_orders' && $goods_receipt->wo_order_id) {
+						$this->db
+							->select('id')
+							->from(db_prefix() . 'wo_order_detail')
+							->where('wo_order', $goods_receipt->wo_order_id);
+
+						if (!empty($goods_receipt_detail->commodity_code)) {
+							$this->db->where('item_code', $goods_receipt_detail->commodity_code);
+						}
+
+						if ($cleanDesc !== '') {
+							$expr = "REPLACE(REPLACE(REPLACE(REPLACE(`description`, '\r', ''), '\n', ''), '<br />', ''), '<br/>', '')";
+							$this->db->where("$expr =", $cleanDesc);
+						}
+
+						$order_detail = $this->db->get()->row();
+					}
+
+					if (isset($order_detail) && $order_detail) {
+						$this->db->where('rel_id', $order_detail->id);
+						$this->db->where('rel_type', $related);
+						$this->db->where('view_type', $view_type);
+						$attachments = $this->db->get(db_prefix() . 'invetory_files')->result_array();
 					}
 				}
 			}
-
-			return []; // Return empty array if no attachments found at all
-
-		} elseif ($pur_tracker == 'false') {
-			// Original logic for false case
-			$this->db->where('rel_id', $id);
-			$this->db->where('rel_type', $related);
-			$this->db->order_by('dateadded', 'desc');
-			$attachments = $this->db->get(db_prefix() . 'invetory_files')->result_array();
-			return $attachments;
 		}
 
-		return []; // Default return if neither condition is met
+		return $attachments;
 	}
+	
 	public function get_inventory_shop_drawing_attachments_new($related, $id)
 	{
 		$this->db->where('rel_id', $id);

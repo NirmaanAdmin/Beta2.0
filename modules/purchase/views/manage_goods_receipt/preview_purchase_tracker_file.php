@@ -9,8 +9,12 @@
             <div class="row">
                <div class="col-md-12 border-right project_file_area">
                   <?php
-
-                     $path ='modules/warehouse/uploads/purchase_tracker/goods_receipt_shop_drawings/'.$file->rel_id.'/'.$file->file_name;
+                     if($view_type != ''){
+                        $path ='modules/warehouse/uploads/purchase_tracker/goods_receipt_shop_drawings/'.$view_type.'/'.$file->rel_id.'/'.$file->file_name;
+                     }else{
+                        $path ='modules/warehouse/uploads/purchase_tracker/goods_receipt_shop_drawings/'.$file->rel_id.'/'.$file->file_name;
+                     }
+                     
                      if(is_image($path)){ ?>
                   <img src="<?php echo base_url($path); ?>" class="img img-responsive img_style">
                   <?php } else if(strpos($file->file_name,'.pdf') !== false){ ?>

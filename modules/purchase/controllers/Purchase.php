@@ -12080,7 +12080,6 @@ class purchase extends AdminController
             }
         }
         $data['goods_receipt_detail'] = $pur_order_details;
-
         $this->load->view('manage_goods_receipt/view_purchase', $data);
     }
 
@@ -15285,12 +15284,13 @@ class purchase extends AdminController
         die();
     }
 
-    public function view_purchase_tracker_file($id)
+    public function view_purchase_tracker_file($id,$view_type)
     {
         $data['discussion_user_profile_image_url'] = staff_profile_image_url(get_staff_user_id());
         $data['current_user_is_admin']             = is_admin();
         $this->load->model('warehouse/warehouse_model');
         $data['file'] = $this->warehouse_model->get_goods_receipt_file($id);
+        $data['view_type'] = $view_type;
         if (!$data['file']) {
             header('HTTP/1.0 404 Not Found');
             die;
@@ -16153,5 +16153,48 @@ class purchase extends AdminController
         $result = $this->purchase_model->get_vpt_dashboard($data);
         echo json_encode($result);
         die;
+    }
+
+    public function view_wo_tracker($id)
+    {
+        //approval
+        $this->load->model('warehouse/warehouse_model');
+        $data['get_staff_sign'] = array();
+        $data['check_approve_status'] = false;
+        $data['list_approve_status'] = array();
+        $data['payslip_log'] = array();
+        $data['commodity_code_name'] = $this->warehouse_model->get_commodity_code_name();
+        $data['units_code_name'] = $this->warehouse_model->get_units_code_name();
+        $data['units_warehouse_name'] = $this->warehouse_model->get_warehouse_code_name();
+        $data['tax_data'] = $this->warehouse_model->get_html_tax_receip($id);
+        $data['title'] = _l('stock_received_info');
+        $check_appr = $this->warehouse_model->get_approve_setting('1');
+        $data['check_appr'] = $check_appr;
+        $this->load->model('currencies_model');
+        $base_currency = $this->currencies_model->get_base_currency();
+        $data['base_currency'] = $base_currency;
+        $wo_order = $this->purchase_model->get_wo_order($id);
+        $data['wo_order'] = $wo_order;
+        $wo_order_details = $this->purchase_model->get_wo_order_detail($id);
+        $goods_receipt = array();
+        $goods_receipt['id'] = 0;
+        $goods_receipt['approval'] = '';
+        $goods_receipt['supplier_code'] = $wo_order->vendor;
+        $goods_receipt['deliver_name'] = '';
+        $goods_receipt['buyer_id'] = $wo_order->buyer;
+        $goods_receipt['goods_receipt_code'] = '';
+        $goods_receipt['description'] = '';
+        $goods_receipt['kind'] = $wo_order->kind;
+        $goods_receipt['wo_order_id'] = $wo_order->id;
+        $data['goods_receipt'] = (object) $goods_receipt;
+        if (!empty($wo_order_details)) {
+            foreach ($wo_order_details as $key => $detail) {
+                $wo_order_details[$key]['commodity_code'] = $detail['item_code'];
+                $wo_order_details[$key]['po_quantities'] = (float) $detail['quantity'];
+                $wo_order_details[$key]['quantities'] = 0;
+            }
+        }
+        $data['goods_receipt_detail'] = $wo_order_details;
+        $this->load->view('manage_goods_receipt/view_purchase', $data);
     }
 }

@@ -21520,16 +21520,22 @@ LEFT JOIN (
     {
         $file_html = '';
         $rel_id = $input['rel_id'];
+        $view_type = $input['view_type'];
         $this->load->model('warehouse/warehouse_model');
         $attachments = $this->warehouse_model->get_inventory_shop_drawing_attachments_new('goods_receipt_shop_d', $rel_id);
 
         if (count($attachments) > 0) {
             $file_html .= '<p class="bold text-muted">' . _l('customer_attachments') . '</p>';
             foreach ($attachments as $f) {
-                $href_url = site_url('modules/warehouse/uploads/purchase_tracker/goods_receipt_shop_drawings/' . $f['rel_id'] . '/' . $f['file_name']) . '" download';
+                if($view_type != ''){
+                     $href_url = site_url('modules/warehouse/uploads/purchase_tracker/goods_receipt_shop_drawings/'.$view_type . '/' . $f['rel_id'] . '/' . $f['file_name']) . '" download';
+                }else{
+                    $href_url = site_url('modules/warehouse/uploads/purchase_tracker/goods_receipt_shop_drawings/' . $f['rel_id'] . '/' . $f['file_name']) . '" download';
+                }
+                
                 $file_html .= '<div class="mbot15 row inline-block full-width" data-attachment-id="' . $f['id'] . '">
               <div class="col-md-8">
-                 <a name="preview-purinv-btn" onclick="preview_purchase_tracker_btn(this); return false;" id = "' . $f['id'] . '" href="Javascript:void(0);" class="mbot10 mright5 btn btn-success pull-left" data-toggle="tooltip" title data-original-title="' . _l('preview_file') . '"><i class="fa fa-eye"></i></a>
+                 <a name="preview-purinv-btn" onclick="preview_purchase_tracker_btn(this); return false;" view_type="' . $view_type . '" id = "' . $f['id'] . '" href="Javascript:void(0);" class="mbot10 mright5 btn btn-success pull-left" data-toggle="tooltip" title data-original-title="' . _l('preview_file') . '"><i class="fa fa-eye"></i></a>
                  <div class="pull-left"><i class="' . get_mime_class($f['filetype']) . '"></i></div>
                  <a href=" ' . $href_url . '" target="_blank" download>' . $f['file_name'] . '</a>
                  <br />

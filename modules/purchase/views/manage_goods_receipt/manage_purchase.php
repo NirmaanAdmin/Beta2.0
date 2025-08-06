@@ -250,7 +250,7 @@
                                             <?php
                                             $columns = [
                                                 _l('Docket code'),
-                                                _l('reference_purchase_order'),
+                                                _l('Choose From Order'),
                                                 _l('commodity_code'),
                                                 _l('description'),
                                                 _l('area'),
@@ -287,7 +287,7 @@
                                     </div>
                                     <?php render_datatable(array(
                                         _l('Docket code'),
-                                        _l('reference_purchase_order'),
+                                        _l('Choose From Order'),
                                         _l('commodity_code'),
                                         _l('description'),
                                         _l('area'),

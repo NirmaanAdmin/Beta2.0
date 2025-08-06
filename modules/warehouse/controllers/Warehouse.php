@@ -700,7 +700,7 @@ class warehouse extends AdminController
 			$data = $this->input->post();
 			if (!$this->input->post('id')) {
 
-				$mess = $this->warehouse_model->add_goods_receipt($data); 
+				$mess = $this->warehouse_model->add_goods_receipt($data);
 
 
 				if ($mess) {
@@ -9048,7 +9048,7 @@ class warehouse extends AdminController
 	// 	]);
 	// }
 
-	public function change_production_status($status, $id, $purchase_tracker = true)
+	public function change_production_status($status, $id, $purchase_tracker = true, $purOrder)
 	{
 
 		// Define an array of statuses with their corresponding labels and texts
@@ -9059,7 +9059,7 @@ class warehouse extends AdminController
 			4 => ['label' => 'warning', 'table' => 'delivered', 'text' => _l('Delivered')],
 
 		];
-		$success = $this->warehouse_model->change_production_status($status, $id, $purchase_tracker);
+		$success = $this->warehouse_model->change_production_status($status, $id, $purchase_tracker, $purOrder);
 		$message = $success ? _l('change_production_status_successfully') : _l('change_production_status_fail');
 
 		$html = '';
@@ -9078,7 +9078,7 @@ class warehouse extends AdminController
 		foreach ($production_labels as $key => $label) {
 			if ($key != $status) {
 				$html .= '<li>
-                    <a href="#" onclick="change_production_status(' . $key . ', ' . $id . '); return false;">
+                    <a href="#" onclick="change_production_status(' . $key . ', ' . $id . ', ' . $purchase_tracker . ',' . $purOrder . '); return false;">
                         ' . $label['text'] . '
                     </a>
                 </li>';
@@ -9103,6 +9103,7 @@ class warehouse extends AdminController
 		$id = $this->input->post('id');
 		$payment_date = $this->input->post('payment_date');
 		$purchase_tracker = $this->input->post('purchase_tracker');
+		$purOrder = $this->input->post('purOrder');
 
 		if (!$id  || !$payment_date) {
 			echo json_encode(['success' => false, 'message' => _l('invalid_request')]);
@@ -9111,7 +9112,11 @@ class warehouse extends AdminController
 		// Perform the update
 		$this->db->where('id', $id);
 		if ($purchase_tracker == "false") {
-			$success = $this->db->update('tblpur_order_detail', ['payment_date' => $payment_date]);
+			if ($purOrder == "true") {
+				$success = $this->db->update('tblpur_order_detail', ['payment_date' => $payment_date]);
+			} elseif ($purOrder == "false") {
+				$success = $this->db->update('tblwo_order_detail', ['payment_date' => $payment_date]);
+			}
 		} else {
 			$success = $this->db->update('tblgoods_receipt_detail', ['payment_date' => $payment_date]);
 		}
@@ -9127,6 +9132,7 @@ class warehouse extends AdminController
 		$id = $this->input->post('id');
 		$est_delivery_date_date = $this->input->post('est_delivery_date');
 		$purchase_tracker = $this->input->post('purchase_tracker');
+		$purOrder = $this->input->post('purOrder');
 
 		if (!$id  || !$est_delivery_date_date) {
 			echo json_encode(['success' => false, 'message' => _l('invalid_request')]);
@@ -9135,7 +9141,11 @@ class warehouse extends AdminController
 		// Perform the update
 		$this->db->where('id', $id);
 		if ($purchase_tracker == "false") {
-			$success = $this->db->update('tblpur_order_detail', ['est_delivery_date' => $est_delivery_date_date]);
+			if ($purOrder == "true") {
+				$success = $this->db->update('tblpur_order_detail', ['est_delivery_date' => $est_delivery_date_date]);
+			} elseif ($purOrder == "false") {
+				$success = $this->db->update('tblwo_order_detail', ['est_delivery_date' => $est_delivery_date_date]);
+			}
 		} else {
 			$success = $this->db->update('tblgoods_receipt_detail', ['est_delivery_date' => $est_delivery_date_date]);
 		}
@@ -9151,6 +9161,7 @@ class warehouse extends AdminController
 		$id = $this->input->post('id');
 		$remarks = $this->input->post('remarks');
 		$purchase_tracker = $this->input->post('purchase_tracker');
+		$purOrder = $this->input->post('purOrder');
 
 		if (!$id  || !$remarks) {
 			echo json_encode(['success' => false, 'message' => _l('invalid_request')]);
@@ -9159,7 +9170,11 @@ class warehouse extends AdminController
 		// Perform the update
 		$this->db->where('id', $id);
 		if ($purchase_tracker == "false") {
-			$success = $this->db->update('tblpur_order_detail', ['remarks' => $remarks]);
+			if ($purOrder == "true") {
+				$success = $this->db->update('tblpur_order_detail', ['remarks' => $remarks]);
+			} elseif ($purOrder == "false") {
+				$success = $this->db->update('tblwo_order_detail', ['remarks' => $remarks]);
+			}
 		} else {
 			$success = $this->db->update('tblgoods_receipt_detail', ['remarks' => $remarks]);
 		}
@@ -9176,6 +9191,7 @@ class warehouse extends AdminController
 		$id = $this->input->post('id');
 		$delivery_date = $this->input->post('delivery_date');
 		$purchase_tracker = $this->input->post('purchase_tracker');
+		$purOrder = $this->input->post('purOrder');
 
 		if (!$id  || !$delivery_date) {
 			echo json_encode(['success' => false, 'message' => _l('invalid_request')]);
@@ -9184,7 +9200,11 @@ class warehouse extends AdminController
 		// Perform the update
 		$this->db->where('id', $id);
 		if ($purchase_tracker == "false") {
-			$success = $this->db->update('tblpur_order_detail', ['delivery_date' => $delivery_date]);
+			if ($purOrder == "true") {
+				$success = $this->db->update('tblpur_order_detail', ['delivery_date' => $delivery_date]);
+			} elseif ($purOrder == "false") {
+				$success = $this->db->update('tblwo_order_detail', ['delivery_date' => $delivery_date]);
+			}
 		} else {
 			$success = $this->db->update('tblgoods_receipt_detail', ['delivery_date' => $delivery_date]);
 		}
@@ -9392,7 +9412,7 @@ class warehouse extends AdminController
 		$this->load->view('warehouse_dashboard/warehouse_dashboard', $data);
 	}
 
-	public function change_imp_local_status($status, $id, $purchase_tracker = true)
+	public function change_imp_local_status($status, $id, $purchase_tracker = true, $purOrder)
 	{
 		// Define an array of statuses with their corresponding labels and texts
 		$imp_local_labels = [
@@ -9400,7 +9420,7 @@ class warehouse extends AdminController
 			2 => ['label' => 'success', 'table' => 'imported', 'text' => _l('imported')],
 			3 => ['label' => 'info', 'table' => 'local', 'text' => _l('local')],
 		];
-		$success = $this->warehouse_model->change_imp_local_status($status, $id, $purchase_tracker);
+		$success = $this->warehouse_model->change_imp_local_status($status, $id, $purchase_tracker, $purOrder);
 		$message = $success ? _l('change_status_successfully') : _l('change_status_fail');
 		$html = '';
 		$status_str = $imp_local_labels[$status]['text'] ?? '';
@@ -9414,7 +9434,7 @@ class warehouse extends AdminController
 		foreach ($imp_local_labels as $key => $label) {
 			if ($key != $status) {
 				$html .= '<li>
-                    <a href="#" onclick="change_imp_local_status(' . $key . ', ' . $id . '); return false;">
+                    <a href="#" onclick="change_imp_local_status(' . $key . ', ' . $id . ', ' . $purchase_tracker . ',' . $purOrder . '); return false;">
                         ' . $label['text'] . '
                     </a>
                 </li>';
@@ -9431,7 +9451,7 @@ class warehouse extends AdminController
 		]);
 	}
 
-	public function change_tracker_status($status, $id, $purchase_tracker = true)
+	public function change_tracker_status($status, $id, $purchase_tracker = true, $purOrder)
 	{
 		// Define an array of statuses with their corresponding labels and texts
 		$tracker_status_labels = [
@@ -9442,7 +9462,7 @@ class warehouse extends AdminController
 			5 => ['label' => 'info', 'table' => 'POI', 'text' => 'POI'],
 			6 => ['label' => 'info', 'table' => 'PIR', 'text' => 'PIR'],
 		];
-		$success = $this->warehouse_model->change_tracker_status($status, $id, $purchase_tracker);
+		$success = $this->warehouse_model->change_tracker_status($status, $id, $purchase_tracker, $purOrder);
 		$message = $success ? _l('change_status_successfully') : _l('change_status_fail');
 		$html = '';
 		$status_str = $tracker_status_labels[$status]['text'] ?? '';
@@ -9456,7 +9476,7 @@ class warehouse extends AdminController
 		foreach ($tracker_status_labels as $key => $label) {
 			if ($key != $status) {
 				$html .= '<li>
-                    <a href="#" onclick="change_tracker_status(' . $key . ', ' . $id . '); return false;">
+                    <a href="#" onclick="change_tracker_status(' . $key . ', ' . $id . ', ' . $purchase_tracker . ',' . $purOrder . '); return false;">
                         ' . $label['text'] . '
                     </a>
                 </li>';
@@ -9478,7 +9498,7 @@ class warehouse extends AdminController
 		$id = $this->input->post('id');
 		$lead_time_days = $this->input->post('lead_time_days');
 		$purchase_tracker = $this->input->post('purchase_tracker');
-
+		$purOrder = $this->input->post('purOrder');
 		if (!$id  || !$lead_time_days) {
 			echo json_encode(['success' => false, 'message' => _l('invalid_request')]);
 			return;
@@ -9486,7 +9506,11 @@ class warehouse extends AdminController
 		// Perform the update
 		$this->db->where('id', $id);
 		if ($purchase_tracker == "false") {
-			$success = $this->db->update('tblpur_order_detail', ['lead_time_days' => $lead_time_days]);
+			if ($purOrder == "true") {
+				$success = $this->db->update('tblpur_order_detail', ['lead_time_days' => $lead_time_days]);
+			} elseif ($purOrder == "false") {
+				$success = $this->db->update('tblwo_order_detail', ['lead_time_days' => $lead_time_days]);
+			}
 		} else {
 			$success = $this->db->update('tblgoods_receipt_detail', ['lead_time_days' => $lead_time_days]);
 		}
@@ -9503,6 +9527,7 @@ class warehouse extends AdminController
 		$id = $this->input->post('id');
 		$advance_payment = $this->input->post('advance_payment');
 		$purchase_tracker = $this->input->post('purchase_tracker');
+		$purOrder = $this->input->post('purOrder');
 
 		if (!$id  || !$advance_payment) {
 			echo json_encode(['success' => false, 'message' => _l('invalid_request')]);
@@ -9511,7 +9536,11 @@ class warehouse extends AdminController
 		// Perform the update
 		$this->db->where('id', $id);
 		if ($purchase_tracker == "false") {
-			$success = $this->db->update('tblpur_order_detail', ['advance_payment' => $advance_payment]);
+			if ($purOrder == "true") {
+				$success = $this->db->update('tblpur_order_detail', ['advance_payment' => $advance_payment]);
+			} elseif ($purOrder == "false") {
+				$success = $this->db->update('tblwo_order_detail', ['advance_payment' => $advance_payment]);
+			}
 		} else {
 			$success = $this->db->update('tblgoods_receipt_detail', ['advance_payment' => $advance_payment]);
 		}
@@ -9528,6 +9557,7 @@ class warehouse extends AdminController
 		$id = $this->input->post('id');
 		$shop_submission = $this->input->post('shop_submission');
 		$purchase_tracker = $this->input->post('purchase_tracker');
+		$purOrder = $this->input->post('purOrder');
 
 		if (!$id  || !$shop_submission) {
 			echo json_encode(['success' => false, 'message' => _l('invalid_request')]);
@@ -9536,7 +9566,12 @@ class warehouse extends AdminController
 		// Perform the update
 		$this->db->where('id', $id);
 		if ($purchase_tracker == "false") {
-			$success = $this->db->update('tblpur_order_detail', ['shop_submission' => $shop_submission]);
+			if ($purOrder == "true") {
+				$success = $this->db->update('tblpur_order_detail', ['shop_submission' => $shop_submission]);
+			}elseif ($purOrder == "false") {
+				$success = $this->db->update('tblwo_order_detail', ['shop_submission' => $shop_submission]);
+			}
+			
 		} else {
 			$success = $this->db->update('tblgoods_receipt_detail', ['shop_submission' => $shop_submission]);
 		}
@@ -9549,37 +9584,55 @@ class warehouse extends AdminController
 	}
 
 	public function upload_purchase_tracker_attachments()
-	{
-		$input = $this->input->post();
-		$related_to = '';
-
-		$related_to = 'goods_receipt_shop_drawings';
-
-		// $uploaded_files = $this->purchase_model->upload_order_tracker_attachments($input);
-		$uploadedFiles = handle_purchase_tracker_attachments_array($related_to, $input['id']);
-		if ($uploadedFiles && is_array($uploadedFiles)) {
-			foreach ($uploadedFiles as $file) {
-				$data = array();
-				$data['dateadded'] = date('Y-m-d H:i:s');
-				$data['rel_type'] = $related_to;
-				$data['rel_id'] = $input['id'];
-				$data['staffid'] = get_staff_user_id();
-				$data['attachment_key'] = app_generate_hash();
-				$data['file_name'] = $file['file_name'];
-				$data['filetype']  = $file['filetype'];
-				$this->db->insert(db_prefix() . 'invetory_files', $data);
-			}
-		}
-
-		echo json_encode(['status' => !empty($uploadedFiles)]);
-		die();
+{
+    $input = $this->input->post();
+    $related_to = 'goods_receipt_shop_drawings';
+    
+    // Determine the subfolder based on which order type is true
+    $subfolder = '';
+    if ($input['purOrder'] === 'true') {
+        $subfolder = 'purchase_orders';
+    } elseif ($input['workOrder'] === 'true') {
+        $subfolder = 'work_orders';
+    } else{
+		$subfolder = '';
 	}
+    
+    // Set view_type for database (same as subfolder)
+    $view_type = $subfolder;
+	if($view_type == ''){
+		$path = WAREHOUSE_MODULE_UPLOAD_FOLDER . '/purchase_tracker/' . $related_to . '/' . $input['id'] . '/';
+	}else{
+		$path = WAREHOUSE_MODULE_UPLOAD_FOLDER . '/purchase_tracker/' . $related_to . '/' . $subfolder . '/' . $input['id'] . '/';
+	}
+    
+
+    $uploadedFiles = handle_purchase_tracker_attachments_array($path);
+    if ($uploadedFiles && is_array($uploadedFiles)) {
+        foreach ($uploadedFiles as $file) {
+            $data = array();
+            $data['dateadded'] = date('Y-m-d H:i:s');
+            $data['rel_type'] = $related_to;
+            $data['rel_id'] = $input['id'];
+            $data['staffid'] = get_staff_user_id();
+            $data['attachment_key'] = app_generate_hash();
+            $data['file_name'] = $file['file_name'];
+            $data['filetype'] = $file['filetype'];
+            $data['view_type'] = $view_type; // Set the view type (purchase_orders or work_orders)
+            $this->db->insert(db_prefix() . 'invetory_files', $data);
+        }
+    }
+
+    echo json_encode(['status' => !empty($uploadedFiles)]);
+    die();
+}
 
 	public function update_shop_approval()
 	{
 		$id = $this->input->post('id');
 		$shop_approval = $this->input->post('shop_approval');
 		$purchase_tracker = $this->input->post('purchase_tracker');
+		$purOrder = $this->input->post('purOrder');
 
 		if (!$id  || !$shop_approval) {
 			echo json_encode(['success' => false, 'message' => _l('invalid_request')]);
@@ -9588,7 +9641,11 @@ class warehouse extends AdminController
 		// Perform the update
 		$this->db->where('id', $id);
 		if ($purchase_tracker == "false") {
-			$success = $this->db->update('tblpur_order_detail', ['shop_approval' => $shop_approval]);
+			if ($purOrder == "true") {
+				$success = $this->db->update('tblpur_order_detail', ['shop_approval' => $shop_approval]);
+			} elseif ($purOrder == "false") {
+				$success = $this->db->update('tblwo_order_detail', ['shop_approval' => $shop_approval]);
+			}
 		} else {
 			$success = $this->db->update('tblgoods_receipt_detail', ['shop_approval' => $shop_approval]);
 		}
@@ -9605,6 +9662,7 @@ class warehouse extends AdminController
 		$id = $this->input->post('id');
 		$actual_remarks = $this->input->post('actual_remarks');
 		$purchase_tracker = $this->input->post('purchase_tracker');
+		$purOrder = $this->input->post('purOrder');
 
 		if (!$id  || !$actual_remarks) {
 			echo json_encode(['success' => false, 'message' => _l('invalid_request')]);
@@ -9613,7 +9671,11 @@ class warehouse extends AdminController
 		// Perform the update
 		$this->db->where('id', $id);
 		if ($purchase_tracker == "false") {
-			$success = $this->db->update('tblpur_order_detail', ['actual_remarks' => $actual_remarks]);
+			if ($purOrder == "true") {
+				$success = $this->db->update('tblpur_order_detail', ['actual_remarks' => $actual_remarks]);
+			}elseif ($purOrder == "false") {
+				$success = $this->db->update('tblwo_order_detail', ['actual_remarks' => $actual_remarks]);
+			}
 		} else {
 			$success = $this->db->update('tblgoods_receipt_detail', ['actual_remarks' => $actual_remarks]);
 		}
@@ -9911,7 +9973,7 @@ class warehouse extends AdminController
 	{
 
 		$pur_request_detail = $this->warehouse_model->reconciliation_delivery_get_pur_order($pur_order);
- 
+
 		echo json_encode([
 			'result' => $pur_request_detail['result'] ? $pur_request_detail['result'] : '',
 			'additional_discount' => $pur_request_detail['additional_discount'] ? $pur_request_detail['additional_discount'] : '',
