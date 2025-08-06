@@ -1213,104 +1213,142 @@ function data_tables_actual_purchase_tracker_init($aColumns, $join = [], $where 
     }
 
     $sTable = "( 
-        WITH aggregated AS (
-            SELECT 
-                goods_receipt_id, 
-                SUM(po_quantities) AS total_po_quantities, 
-                SUM(quantities) AS total_quantities
-            FROM tblgoods_receipt_detail
-            GROUP BY goods_receipt_id
-        )
+    WITH aggregated AS (
         SELECT 
-            combined_orders.*,
-            CASE 
-                WHEN combined_orders.type = 1 THEN
-                    CASE 
-                        WHEN COALESCE(agg.total_po_quantities, 0) = COALESCE(agg.total_quantities, 0) THEN '2'
-                        WHEN COALESCE(agg.total_quantities, 0) = 0 THEN '0'
-                        WHEN COALESCE(agg.total_quantities, 0) > 0 THEN '1'
-                        ELSE '0'
-                    END
-                ELSE '0'
-            END AS delivery_status
-        FROM (
-            SELECT 
-                gr.id AS id,
-                gr.goods_receipt_code,
-                gr.supplier_code AS supplier_name,
-                gr.buyer_id,
-                gr.kind,
-                gr.pr_order_id,
-                gr.date_add,
-                gr.approval,
-                1 AS type,
-                gr.project,
-                grd.id as item_detail_id,
-                grd.commodity_code,
-                grd.description,
-                grd.area,
-                grd.po_quantities,
-                grd.quantities,
-                (grd.po_quantities - grd.quantities) AS remaining_quantities,
-                grd.unit_id,
-                grd.imp_local_status,
-                grd.tracker_status,
-                grd.production_status,
-                grd.payment_date,
-                grd.est_delivery_date,
-                grd.delivery_date,
-                grd.remarks,
-                grd.lead_time_days,
-                grd.advance_payment,
-                grd.shop_submission,
-                grd.shop_approval,
-                grd.actual_remarks,
-                po.group_pur
-            FROM tblgoods_receipt_detail grd
-            LEFT JOIN tblgoods_receipt gr ON gr.id = grd.goods_receipt_id
-            LEFT JOIN tblpur_orders po ON po.id = gr.pr_order_id
+            goods_receipt_id, 
+            SUM(po_quantities) AS total_po_quantities, 
+            SUM(quantities) AS total_quantities
+        FROM tblgoods_receipt_detail
+        GROUP BY goods_receipt_id
+    )
+    SELECT 
+        combined_orders.*,
+        CASE 
+            WHEN combined_orders.type = 1 THEN
+                CASE 
+                    WHEN COALESCE(agg.total_po_quantities, 0) = COALESCE(agg.total_quantities, 0) THEN '2'
+                    WHEN COALESCE(agg.total_quantities, 0) = 0 THEN '0'
+                    WHEN COALESCE(agg.total_quantities, 0) > 0 THEN '1'
+                    ELSE '0'
+                END
+            ELSE '0'
+        END AS delivery_status
+    FROM (
+        SELECT 
+            gr.id AS id,
+            gr.goods_receipt_code,
+            gr.supplier_code AS supplier_name,
+            gr.buyer_id,
+            gr.kind,
+            gr.pr_order_id,
+            gr.date_add,
+            gr.approval,
+            1 AS type,
+            gr.project,
+            grd.id as item_detail_id,
+            grd.commodity_code,
+            grd.description,
+            grd.area,
+            grd.po_quantities,
+            grd.quantities,
+            (grd.po_quantities - grd.quantities) AS remaining_quantities,
+            grd.unit_id,
+            grd.imp_local_status,
+            grd.tracker_status,
+            grd.production_status,
+            grd.payment_date,
+            grd.est_delivery_date,
+            grd.delivery_date,
+            grd.remarks,
+            grd.lead_time_days,
+            grd.advance_payment,
+            grd.shop_submission,
+            grd.shop_approval,
+            grd.actual_remarks,
+            po.group_pur
+        FROM tblgoods_receipt_detail grd
+        LEFT JOIN tblgoods_receipt gr ON gr.id = grd.goods_receipt_id
+        LEFT JOIN tblpur_orders po ON po.id = gr.pr_order_id
 
-            UNION ALL
+        UNION ALL
 
-            SELECT 
-                po.id AS id,
-                '' AS goods_receipt_code,
-                po.vendor AS supplier_name,
-                po.id AS buyer_id,
-                po.kind,
-                po.id AS pr_order_id,
-                po.datecreated AS date_add,
-                po.approve_status AS approval,
-                2 AS type,
-                po.project,
-                pod.id as item_detail_id,
-                pod.item_code AS commodity_code,
-                pod.description,
-                pod.area,
-                pod.quantity AS po_quantities,
-                0 AS quantities,
-                pod.quantity AS remaining_quantities,
-                pod.unit_id,
-                pod.imp_local_status,
-                pod.tracker_status,
-                pod.production_status,
-                pod.payment_date,
-                pod.est_delivery_date,
-                pod.delivery_date,
-                pod.remarks,
-                pod.lead_time_days,
-                pod.advance_payment,
-                pod.shop_submission,
-                pod.shop_approval,
-                pod.actual_remarks,
-                po.group_pur
-            FROM tblpur_order_detail pod
-            LEFT JOIN tblpur_orders po ON po.id = pod.pur_order
-            WHERE po.goods_id = 0
-        ) AS combined_orders
-        LEFT JOIN aggregated agg ON combined_orders.id = agg.goods_receipt_id
-        WHERE combined_orders.project = '1'
-    ) AS final_result";
+        SELECT 
+            po.id AS id,
+            '' AS goods_receipt_code,
+            po.vendor AS supplier_name,
+            po.id AS buyer_id,
+            po.kind,
+            po.id AS pr_order_id,
+            po.datecreated AS date_add,
+            po.approve_status AS approval,
+            2 AS type,
+            po.project,
+            pod.id as item_detail_id,
+            pod.item_code AS commodity_code,
+            pod.description,
+            pod.area,
+            pod.quantity AS po_quantities,
+            0 AS quantities,
+            pod.quantity AS remaining_quantities,
+            pod.unit_id,
+            pod.imp_local_status,
+            pod.tracker_status,
+            pod.production_status,
+            pod.payment_date,
+            pod.est_delivery_date,
+            pod.delivery_date,
+            pod.remarks,
+            pod.lead_time_days,
+            pod.advance_payment,
+            pod.shop_submission,
+            pod.shop_approval,
+            pod.actual_remarks,
+            po.group_pur
+        FROM tblpur_order_detail pod
+        LEFT JOIN tblpur_orders po ON po.id = pod.pur_order
+        WHERE po.goods_id = 0
+
+        UNION ALL
+
+        SELECT 
+            wo.id AS id,
+            '' AS goods_receipt_code,
+            wo.vendor AS supplier_name,
+            wo.id AS buyer_id,
+            wo.kind,
+            wo.id AS pr_order_id,
+            wo.datecreated AS date_add,
+            wo.approve_status AS approval,
+            3 AS type, 
+            wo.project,
+            wod.id as item_detail_id,
+            wod.item_code AS commodity_code,
+            wod.description,
+            wod.area,
+            wod.quantity AS po_quantities,
+            0 AS quantities,
+            wod.quantity AS remaining_quantities,
+            wod.unit_id,
+            wod.imp_local_status,
+            wod.tracker_status,
+            wod.production_status,
+            wod.payment_date,
+            wod.est_delivery_date,
+            wod.delivery_date,
+            wod.remarks,
+            wod.lead_time_days,
+            wod.advance_payment,
+            wod.shop_submission,
+            wod.shop_approval,
+            wod.actual_remarks,
+            wo.group_pur
+        FROM tblwo_order_detail wod
+        LEFT JOIN tblwo_orders wo ON wo.id = wod.wo_order
+        WHERE wo.status_goods = 0
+    ) AS combined_orders
+    LEFT JOIN aggregated agg ON combined_orders.id = agg.goods_receipt_id
+    WHERE combined_orders.project = '1'
+) AS final_result";
 
     $allColumns = [];
     foreach ($aColumns as $column) {
