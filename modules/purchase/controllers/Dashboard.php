@@ -29,7 +29,24 @@ class Dashboard extends AdminController
         $result = $this->dashboard_model->get_purchase_order_dashboard($data);
         echo json_encode($result);
         die;
-    } 
+    }
+
+    public function billing_dashboard()
+    {
+        $this->load->model('projects_model');
+        $data['vendors'] = $this->purchase_model->get_vendor();
+        $data['projects'] = $this->projects_model->get();
+        $data['order_tagged_detail'] = $this->purchase_model->get_order_tagged_detail();
+        $this->load->view('dashboard/billing_dashboard', $data);
+    }
+
+    public function get_billing_dashboard()
+    {
+        $data = $this->input->post();
+        $result = $this->dashboard_model->get_billing_dashboard($data);
+        echo json_encode($result);
+        die;
+    }
 }
 
 ?>
