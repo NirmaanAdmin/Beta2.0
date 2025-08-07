@@ -785,4 +785,157 @@ class Dashboard_model extends App_Model
 
 		return $response;
 	}
+
+	public function get_billing_dashboard($data)
+	{
+		$this->load->model('currencies_model');
+		$base_currency = $this->currencies_model->get_base_currency();
+		$vendors = isset($data['vendors']) ? $data['vendors'] : '';
+		$projects = isset($data['projects']) ? $data['projects'] : get_default_project();
+		$order_tagged_detail = isset($data['order_tagged_detail']) ? $data['order_tagged_detail'] : array();
+
+		$response = array();
+		$sql = "SELECT 
+			pi.id, 
+			pi.vendor_submitted_amount_without_tax, 
+			pi.invoice_date,
+			SUM(
+                CASE 
+                    WHEN ril.id IS NOT NULL THEN (itm.qty * itm.rate)
+                    ELSE 0
+                END
+            ) AS ril_certified_amount
+	    FROM tblpur_invoices pi
+	    LEFT JOIN tblitemable itm ON itm.vbt_id = pi.id AND itm.rel_type = 'invoice'
+        LEFT JOIN (SELECT id FROM tblinvoices WHERE status IN (2, 3)) ril ON ril.id = itm.rel_id
+	    ";
+
+		$module_name = 'billing_dashboard';
+		$vendor_filter_name = 'vendor';
+		$project_filter_name = 'project';
+		$order_tagged_detail_filter_name = 'order_tagged_detail';
+		$conditions = [];
+		update_module_filter($module_name, $vendor_filter_name, NULL);
+		update_module_filter($module_name, $project_filter_name, NULL);
+		update_module_filter($module_name, $order_tagged_detail_filter_name, NULL);
+		if (!empty($vendors)) {
+			update_module_filter($module_name, $vendor_filter_name, $vendors);
+		}
+		if (!empty($projects)) {
+			update_module_filter($module_name, $project_filter_name, $projects);
+		}
+		if (!empty($order_tagged_detail)) {
+			update_module_filter($module_name, $order_tagged_detail_filter_name, implode(',', $order_tagged_detail));
+		}
+		if (!empty($vendors)) {
+			$conditions[] = "pi.vendor = '" . $vendors . "'";
+		}
+		if (!empty($projects)) {
+			$conditions[] = "pi.project_id = '" . $projects . "'";
+		}
+		if (!empty($order_tagged_detail)) {
+		    $or_conditions = [];
+		    foreach ($order_tagged_detail as $t) {
+		        if (!empty($t)) {
+		            if (strpos($t, 'po_') === 0) {
+		                $id = str_replace('po_', '', $t);
+		                $or_conditions[] = "pi.pur_order = '$id'";
+		            } elseif (strpos($t, 'wo_') === 0) {
+		                $id = str_replace('wo_', '', $t);
+		                $or_conditions[] = "pi.wo_order = '$id'";
+		            } elseif (strpos($t, 'ot_') === 0) {
+		                $id = str_replace('ot_', '', $t);
+		                $or_conditions[] = "pi.order_tracker_id = '$id'";
+		            }
+		        }
+		    }
+		    if (!empty($or_conditions)) {
+		        $conditions[] = '(' . implode(' OR ', $or_conditions) . ')';
+		    }
+		}
+		$custom_date_select = $this->purchase_model->get_where_report_period('pi.invoice_date');
+		if (!empty($custom_date_select)) {
+		    $custom_date_select = preg_replace('/^\s*AND\s*/i', '', $custom_date_select);
+		    $conditions[] = $custom_date_select;
+		}
+		if (!empty($conditions)) {
+			$sql .= " WHERE " . implode(" AND ", $conditions);
+		}
+		$sql .= " GROUP BY pi.id";
+		$sql .= " ORDER BY pi.invoice_date ASC";
+		$query = $this->db->query($sql);
+		$result = $query->result_array();
+
+		$response['total_bil_count'] = 0;
+		$total_bil_amount = 0;
+		$response['total_ril_count'] = 0;
+		$total_ril_amount = 0;
+		if(!empty($result)) {
+			$response['total_bil_count'] = count($result);
+			$total_bil_amount = array_reduce($result, function ($carry, $item) {
+                return $carry + (float)$item['vendor_submitted_amount_without_tax'];
+            }, 0);
+            $response['total_ril_count'] = count(array_filter($result, fn($item) =>
+			    $item['ril_certified_amount'] == 0 || is_null($item['ril_certified_amount'])
+			));
+            $total_ril_amount = array_reduce($result, function ($carry, $item) {
+                return $carry + (float)$item['ril_certified_amount'];
+            }, 0);
+		}
+		$response['total_bil_amount'] = app_format_money($total_bil_amount, $base_currency);
+		$response['total_ril_amount'] = app_format_money($total_ril_amount, $base_currency);
+
+		$response['line_bil_order_date'] = $response['line_bil_order_total'] = array();
+		$response['line_ril_order_date'] = $response['line_ril_order_total'] = array();
+		$line_bil_order_total = array();
+		$line_ril_order_total = array();
+        foreach ($result as $key => $value) {
+            if (!empty($value['invoice_date'])) {
+                $timestamp = strtotime($value['invoice_date']);
+                if ($timestamp !== false && $timestamp > 0) {
+                    $month = date('Y-m', $timestamp);
+                } elseif ($timestamp === false || $timestamp <= 0) {
+                    $month = date('Y') . '-01';
+                }
+            } else {
+                $month = date('Y') . '-01';
+            }
+            if (!isset($line_bil_order_total[$month])) {
+                $line_bil_order_total[$month] = 0;
+            }
+            $line_bil_order_total[$month] += $value['vendor_submitted_amount_without_tax'];
+            if (!isset($line_ril_order_total[$month])) {
+                $line_ril_order_total[$month] = 0;
+            }
+            $line_ril_order_total[$month] += $value['ril_certified_amount'];
+        }
+
+        if (!empty($line_bil_order_total)) {
+            ksort($line_bil_order_total);
+            $cumulative = 0;
+            foreach ($line_bil_order_total as $month => $value) {
+                $cumulative += $value;
+                $line_bil_order_total[$month] = $cumulative;
+            }
+            $response['line_bil_order_date'] = array_map(function ($month) {
+                return date('M-y', strtotime($month . '-01'));
+            }, array_keys($line_bil_order_total));
+            $response['line_bil_order_total'] = array_values($line_bil_order_total);
+        }
+
+        if (!empty($line_ril_order_total)) {
+            ksort($line_ril_order_total);
+            $cumulative = 0;
+            foreach ($line_ril_order_total as $month => $value) {
+                $cumulative += $value;
+                $line_ril_order_total[$month] = $cumulative;
+            }
+            $response['line_ril_order_date'] = array_map(function ($month) {
+                return date('M-y', strtotime($month . '-01'));
+            }, array_keys($line_ril_order_total));
+            $response['line_ril_order_total'] = array_values($line_ril_order_total);
+        }
+
+		return $response;
+	}
 }

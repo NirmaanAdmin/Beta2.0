@@ -60,7 +60,8 @@
       get_billing_dashboard();
     });
 
-    var budgetedVsActualCategory;
+    var lineChartBilOverTime;
+    var lineChartRilOverTime;
 
     function get_billing_dashboard() {
       "use strict";
@@ -78,6 +79,115 @@
       $.post(admin_url + 'purchase/dashboard/get_billing_dashboard', data).done(function(response) {
         response = JSON.parse(response);
 
+        // Update value summaries
+        $('.total_bil_count').text(response.total_bil_count);
+        $('.total_bil_amount').text(response.total_bil_amount);
+        $('.total_ril_count').text(response.total_ril_count);
+        $('.total_ril_amount').text(response.total_ril_amount);
+
+        // LINE CHART - Total Certified Amount Over Period of Time
+        var lineBilCtx = document.getElementById('lineChartBilOverTime').getContext('2d');
+        if (lineChartBilOverTime) {
+          lineChartBilOverTime.data.labels = response.line_bil_order_date;
+          lineChartBilOverTime.data.datasets[0].data = response.line_bil_order_total;
+          lineChartBilOverTime.update();
+        } else {
+          lineChartBilOverTime = new Chart(lineBilCtx, {
+            type: 'line',
+            data: {
+              labels: response.line_bil_order_date,
+              datasets: [{
+                label: 'Total Certified Amount',
+                data: response.line_bil_order_total,
+                fill: false,
+                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                tension: 0.3
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  display: true,
+                  position: 'bottom'
+                },
+                tooltip: {
+                  mode: 'index',
+                  intersect: false
+                }
+              },
+              scales: {
+                x: {
+                  title: {
+                    display: true,
+                    text: 'Month'
+                  }
+                },
+                y: {
+                  beginAtZero: true,
+                  title: {
+                    display: true,
+                    text: 'Total Certified Amount'
+                  }
+                }
+              }
+            }
+          });
+        }
+
+        // LINE CHART - Total Certified Amount Over Period of Time
+        var lineRilCtx = document.getElementById('lineChartRilOverTime').getContext('2d');
+        if (lineChartRilOverTime) {
+          lineChartRilOverTime.data.labels = response.line_ril_order_date;
+          lineChartRilOverTime.data.datasets[0].data = response.line_ril_order_total;
+          lineChartRilOverTime.update();
+        } else {
+          lineChartRilOverTime = new Chart(lineRilCtx, {
+            type: 'line',
+            data: {
+              labels: response.line_ril_order_date,
+              datasets: [{
+                label: 'Total Certified Amount',
+                data: response.line_ril_order_total,
+                fill: false,
+                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                tension: 0.3
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  display: true,
+                  position: 'bottom'
+                },
+                tooltip: {
+                  mode: 'index',
+                  intersect: false
+                }
+              },
+              scales: {
+                x: {
+                  title: {
+                    display: true,
+                    text: 'Month'
+                  }
+                },
+                y: {
+                  beginAtZero: true,
+                  title: {
+                    display: true,
+                    text: 'Total Certified Amount'
+                  }
+                }
+              }
+            }
+          });
+        }
 
       });
     }
