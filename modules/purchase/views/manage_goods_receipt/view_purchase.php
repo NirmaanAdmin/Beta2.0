@@ -595,7 +595,7 @@
                                 );
 
                                 if (!empty($attachments)) {
-                                  $file_html = '<a href="javascript:void(0)" onclick="view_purchase_tracker_attachments(' . $receipt_value['id'] . ', \'' . $view_type . '\'); return false;" class="btn btn-info btn-icon">View Files</a>';
+                                  $file_html = '<a href="javascript:void(0)" onclick="view_purchase_tracker_attachments(' . $attachments[0]['rel_id'] . ', \'' . $attachments[0]['view_type'] . '\'); return false;" class="btn btn-info btn-icon">View Files</a>';
                                 }
 
                                 echo $file_html;

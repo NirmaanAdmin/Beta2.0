@@ -95,18 +95,42 @@ if (
 ) {
     $where[] = 'AND production_status IN (' . implode(',', $this->ci->input->post('production_status')) . ')';
 }
+$wo_po_orders = $this->ci->input->post('wo_po_order') ? $this->ci->input->post('wo_po_order') : [];
+if (!empty($wo_po_orders)) {
+    $where_conditions = [];
+    foreach ($wo_po_orders as $order_value) {
+        $parts = explode('-', $order_value);
+        if (count($parts) === 3) {
+            $order_type = (int)$parts[1];
+            $order_id = (int)$parts[0];
+            $goods_id = (int)$parts[2];
 
+            if ($order_type === 2 && $goods_id === 0) { // Purchase Order
+                $where_conditions[] = '(pr_order_id = ' . $order_id . ' AND type = 2 )';
+            } elseif ($order_type === 3 && $goods_id === 0) { // Work Order
+                $where_conditions[] = '(wo_order_id = ' . $order_id . ' AND type = 3 )';
+            } elseif ($order_type === 2 && $goods_id === 1) {
+                $where_conditions[] = '(pr_order_id = ' . $order_id . ' AND type = 1 )';
+            } elseif ($order_type === 3 && $goods_id === 1) {
+                $where_conditions[] = '(wo_order_id = ' . $order_id . ' AND type = 1 )';
+            }
+        }
+    }
+    if (!empty($where_conditions)) {
+        $where[] = 'AND (' . implode(' OR ', $where_conditions) . ')';
+    }
+}
 if (get_default_project()) {
     $where[] = 'AND project = "' . get_default_project() . '"';
 }
-
 $this->ci->load->model('warehouse/warehouse_model');
 
 $result = data_tables_actual_purchase_tracker_init($aColumns, $join, $where, [
     'id',
     'unit_id',
     'item_detail_id',
-    'type'
+    'type',
+    'wo_order_id'
 ]);
 
 $output  = $result['output'];
@@ -114,6 +138,8 @@ $rResult = $result['rResult'];
 
 foreach ($rResult as $aRow) {
     $row = [];
+    $pur_order = ($aRow['type'] == 2);
+    $wo_order = ($aRow['type'] == 3);
     for ($i = 0; $i < count($aColumns); $i++) {
         $_data = $aRow[$aColumns[$i]];
         if ($aColumns[$i] == 'goods_receipt_code') {
@@ -125,10 +151,9 @@ foreach ($rResult as $aRow) {
             } else {
                 if ($aRow['type'] == 2) {
                     $name .= '<a href="' . admin_url('purchase/view_po_tracker/' . $aRow['id']) . '" onclick="init_po_tracker(' . $aRow['id'] . '); small_table_full_view(); return false;">' . _l('Update') . '</a>';
-                }elseif ($aRow['type'] == 3){
+                } elseif ($aRow['type'] == 3) {
                     $name .= '<a href="' . admin_url('purchase/view_wo_tracker/' . $aRow['id']) . '" onclick="init_wo_tracker(' . $aRow['id'] . '); small_table_full_view(); return false;">' . _l('Update') . '</a>';
                 }
-                
             }
             $_data = $name;
         } elseif ($aColumns[$i] == 'pr_order_id') {
@@ -144,8 +169,8 @@ foreach ($rResult as $aRow) {
             } else {
                 if (($aRow['pr_order_id'] != '') && ($aRow['pr_order_id'] != 0)) {
                     $name = '<a href="' . admin_url('purchase/purchase_order/' . $aRow['pr_order_id']) . '" style="max-width: 400px; word-wrap: break-word; white-space: pre-wrap; display: inline-block;">' . get_pur_order_name($aRow['pr_order_id']) . '</a>';
-                }elseif (($aRow['wo_order_id'] != '') && ($aRow['wo_order_id'] != 0)) {
-                    $name = '<a href="' . admin_url('purchase/work_order/' . $aRow['wo_order_id']) . '" style="max-width: 400px; word-wrap: break-word; white-space: pre-wrap; display: inline-block;">' . get_work_order_name($aRow['pr_order_id']) . '</a>';
+                } elseif (($aRow['wo_order_id'] != '') && ($aRow['wo_order_id'] != 0)) {
+                    $name = '<a href="' . admin_url('purchase/work_order/' . $aRow['wo_order_id']) . '" style="max-width: 400px; word-wrap: break-word; white-space: pre-wrap; display: inline-block;">' . get_work_order_name($aRow['wo_order_id']) . '</a>';
                 }
             }
             $_data = $name;
@@ -195,10 +220,11 @@ foreach ($rResult as $aRow) {
                 $imp_local_status .= '<span data-toggle="tooltip" title="' . _l('ticket_single_change_status') . '"><i class="fa fa-caret-down" aria-hidden="true"></i></span>';
                 $imp_local_status .= '</a>';
                 $imp_local_status .= '<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="tableImpLocalStatus-' . $aRow['item_detail_id'] . '">';
+                $purOrder = ($aRow['type'] == 2 ? 'true' : 'false');
                 foreach ($imp_local_labels as $key => $status) {
                     if ($key != $aRow['imp_local_status']) {
                         $imp_local_status .= '<li>
-                    <a href="#" onclick="change_imp_local_status(' . $key . ', ' . $aRow['item_detail_id'] . ', ' . ($aRow['type'] == 1 ? 'true' : 'false') . '); return false;">
+                    <a href="#" onclick="change_imp_local_status(' . $key . ', ' . $aRow['item_detail_id'] . ', ' . ($aRow['type'] == 1 ? 'true' : 'false') . ', ' . $purOrder . '); return false;">
                             ' . $status['text'] . '
                         </a>
                     </li>';
@@ -228,10 +254,11 @@ foreach ($rResult as $aRow) {
                 $tracker_status .= '<span data-toggle="tooltip" title="' . _l('ticket_single_change_status') . '"><i class="fa fa-caret-down" aria-hidden="true"></i></span>';
                 $tracker_status .= '</a>';
                 $tracker_status .= '<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="tableTrackerStatus-' . $aRow['item_detail_id'] . '">';
+                $purOrder = ($aRow['type'] == 2 ? 'true' : 'false');
                 foreach ($tracker_status_labels as $key => $status) {
                     if ($key != $aRow['tracker_status']) {
                         $tracker_status .= '<li>
-                      <a href="#" onclick="change_tracker_status(' . $key . ', ' . $aRow['item_detail_id'] . ', ' . ($aRow['type'] == 1 ? 'true' : 'false') . '); return false;"> 
+                      <a href="#" onclick="change_tracker_status(' . $key . ', ' . $aRow['item_detail_id'] . ', ' . ($aRow['type'] == 1 ? 'true' : 'false') . ', ' . $purOrder . '); return false;"> 
                           ' . $status['text'] . '
                       </a>
                   </li>';
@@ -258,10 +285,12 @@ foreach ($rResult as $aRow) {
                 $production_status .= '<span data-toggle="tooltip" title="' . _l('ticket_single_change_status') . '"><i class="fa fa-caret-down" aria-hidden="true"></i></span>';
                 $production_status .= '</a>';
                 $production_status .= '<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="tablePurOderStatus-' . $aRow['item_detail_id'] . '">';
+
+                $purOrder = ($aRow['type'] == 2 ? 'true' : 'false');
                 foreach ($production_labels as $key => $status) {
                     if ($key != $aRow['production_status']) {
                         $production_status .= '<li>
-                      <a href="#" onclick="change_production_status(' . $key . ', ' . $aRow['item_detail_id'] . ', ' . ($aRow['type'] == 1 ? 'true' : 'false') . '); return false;"> 
+                      <a href="#" onclick="change_production_status(' . $key . ', ' . $aRow['item_detail_id'] . ', ' . ($aRow['type'] == 1 ? 'true' : 'false') . ', ' . $purOrder . '); return false;"> 
                           ' . $status['text'] . '
                       </a>
                   </li>';
@@ -276,23 +305,27 @@ foreach ($rResult as $aRow) {
             $_data = '<input type="date" class="form-control payment-date-input"
               value="' . htmlspecialchars($aRow['payment_date']) . '"
               data-id="' . $aRow['item_detail_id'] . '"
-              data-tracker="' . ($aRow['type'] == 1 ? 'true' : 'false') . '">';
+              data-tracker="' . ($aRow['type'] == 1 ? 'true' : 'false') . '"
+              data-purorder="' . ($aRow['type'] == 2 ? 'true' : 'false') . '">';
         } elseif ($aColumns[$i] == 'est_delivery_date') {
             $_data = '<input type="date" class="form-control est-delivery-date-input"
               value="' . htmlspecialchars($aRow['est_delivery_date']) . '"
               data-id="' . $aRow['item_detail_id'] . '"
-              data-tracker="' . ($aRow['type'] == 1 ? 'true' : 'false') . '">';
+              data-tracker="' . ($aRow['type'] == 1 ? 'true' : 'false') . '"
+              data-purorder="' . ($aRow['type'] == 2 ? 'true' : 'false') . '">';
         } elseif ($aColumns[$i] == 'delivery_date') {
             $_data = '<input type="date" class="form-control delivery-date-input"
               value="' . htmlspecialchars($aRow['delivery_date']) . '"
               data-id="' . $aRow['item_detail_id'] . '"
-              data-tracker="' . ($aRow['type'] == 1 ? 'true' : 'false') . '">';
+              data-tracker="' . ($aRow['type'] == 1 ? 'true' : 'false') . '"
+              data-purorder="' . ($aRow['type'] == 2 ? 'true' : 'false') . '">';
         } elseif ($aColumns[$i] == 'remarks') {
             $remarks = $aRow['remarks'];
             $_data = '<textarea style="width: 154px;height: 50px;" 
                 class="form-control remarks-input"
                 data-id="' . $aRow['item_detail_id'] . '" 
-                data-tracker="' . ($aRow['type'] == 1 ? 'true' : 'false') . '">' .
+                data-tracker="' . ($aRow['type'] == 1 ? 'true' : 'false') . '"
+                data-purorder="' . ($aRow['type'] == 2 ? 'true' : 'false') . '">' .
                 htmlspecialchars($remarks) .
                 '</textarea>';
         } elseif ($aColumns[$i] == 'lead_time_days') {
@@ -300,16 +333,19 @@ foreach ($rResult as $aRow) {
                 <input type="number" id="lead_time_days" name="lead_time_days" class="form-control" min="0" max="100" 
                        value="' . $aRow['lead_time_days'] . '" 
                        data-id="' . $aRow['item_detail_id'] . '" 
-                       data-tracker="' . ($aRow['type'] == 1 ? 'true' : 'false') . '">
+                       data-tracker="' . ($aRow['type'] == 1 ? 'true' : 'false') . '"
+                       data-purOrder="' . ($aRow['type'] == 2 ? 'true' : 'false') . '">
             </div>';
         } elseif ($aColumns[$i] == 'advance_payment') {
             $_data = '<div class="form-group">
                 <input type="number" id="advance_payment" name="advance_payment" class="form-control" min="0" max="100" 
                        value="' . $aRow['advance_payment'] . '" 
                        data-id="' . $aRow['item_detail_id'] . '" 
-                       data-tracker="' . ($aRow['type'] == 1 ? 'true' : 'false') . '">
+                       data-tracker="' . ($aRow['type'] == 1 ? 'true' : 'false') . '"
+                       data-purOrder="' . ($aRow['type'] == 2 ? 'true' : 'false') . '">
             </div>';
         } elseif ($aColumns[$i] == 1) {
+
             $_data = '<div class="input-group" style="width: 100%;">
                 <input type="file"
                     name="attachments[]"
@@ -321,16 +357,29 @@ foreach ($rResult as $aRow) {
                     <button type="button"
                         class="btn btn-success upload_shop_drawings_attachments"
                         data-id="' . $aRow['item_detail_id'] . '"
+                        data-purOrder="' . ($aRow['type'] == 2 ? 'true' : 'false') . '"
+                        data-workOrder="' . ($aRow['type'] == 3 ? 'true' : 'false') . '"
                         title="Upload Attachments">
                         <i class="fa fa-upload"></i>
                     </button>
                 </span>
             </div>';
         } elseif ($aColumns[$i] == 2) {
-            $true =  ($aRow['type'] == 1 ? 'true' : 'false');
-            $attachments = $this->ci->warehouse_model->get_inventory_shop_drawing_attachments('goods_receipt_shop_d', $aRow['item_detail_id'], $true);
+            $view_type = null;
+            if (($aRow['type'] == 2 ? 'true' : 'false') == 'true') {
+                $view_type = 'purchase_orders';
+            } elseif (($aRow['type'] == 2 ? 'true' : 'false') == 'true') {
+                $view_type = 'work_orders';
+            }
+
+            $attachments = $this->ci->warehouse_model->get_inventory_shop_drawing_attachments(
+                'goods_receipt_shop_d',
+                $aRow['item_detail_id'],
+                $view_type
+            );
+
             if (!empty($attachments)) {
-                $_data = '<a href="javascript:void(0)" onclick="view_purchase_tracker_attachments(' . $aRow['item_detail_id'] . '); return false;" class="btn btn-info btn-icon">View Files</a>';
+                $_data = '<a href="javascript:void(0)" onclick="view_purchase_tracker_attachments(' . $attachments[0]['rel_id'] . ', \'' . $attachments[0]['view_type'] . '\'); return false;" class="btn btn-info btn-icon">View Files</a>';
             } else {
                 $_data = '';
             }
@@ -338,18 +387,21 @@ foreach ($rResult as $aRow) {
             $_data = '<input type="date" id="shop_submission" name="shop_submission" class="form-control"
                value="' . htmlspecialchars($aRow['shop_submission']) . '"
                data-id="' . $aRow['item_detail_id'] . '"
-               data-tracker="' . ($aRow['type'] == 1 ? 'true' : 'false') . '">';
+               data-tracker="' . ($aRow['type'] == 1 ? 'true' : 'false') . '"
+               data-purOrder="' . ($aRow['type'] == 2 ? 'true' : 'false') . '">';
         } elseif ($aColumns[$i] == 'shop_approval') {
             $_data = '<input type="date" id="shop_approval" name="shop_approval" class="form-control"
                value="' . htmlspecialchars($aRow['shop_approval']) . '"
                data-id="' . $aRow['item_detail_id'] . '"
-               data-tracker="' . ($aRow['type'] == 1 ? 'true' : 'false') . '">';
+               data-tracker="' . ($aRow['type'] == 1 ? 'true' : 'false') . '"
+               data-purOrder="' . ($aRow['type'] == 2 ? 'true' : 'false') . '">';
         } elseif ($aColumns[$i] == 'actual_remarks') {
             $_data = '<textarea style="width: 154px;height: 50px;" 
                 class="form-control" 
                 name="actual_remarks"
                 data-id="' . $aRow['item_detail_id'] . '" 
-                data-tracker="' . ($aRow['type'] == 1 ? 'true' : 'false') . '">' .
+                data-tracker="' . ($aRow['type'] == 1 ? 'true' : 'false') . '"
+                data-purOrder="' . ($aRow['type'] == 2 ? 'true' : 'false') . '">' .
                 htmlspecialchars($aRow['actual_remarks']) .
                 '</textarea>';
         }

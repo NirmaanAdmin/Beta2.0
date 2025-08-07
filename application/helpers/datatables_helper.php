@@ -1037,7 +1037,7 @@ function data_tables_purchase_tracker_init($aColumns, $join = [], $where = [], $
             3 AS type, 
             project 
         FROM tblwo_orders 
-        WHERE status_goods = 0 
+        WHERE goods_id = 0 
     ) AS combined_orders 
 ) AS final_result";
 
@@ -1226,6 +1226,7 @@ function data_tables_actual_purchase_tracker_init($aColumns, $join = [], $where 
             gr.buyer_id,
             gr.kind,
             gr.pr_order_id,
+            gr.wo_order_id,
             gr.date_add,
             gr.approval,
             1 AS type,
@@ -1254,6 +1255,7 @@ function data_tables_actual_purchase_tracker_init($aColumns, $join = [], $where 
         FROM tblgoods_receipt_detail grd
         LEFT JOIN tblgoods_receipt gr ON gr.id = grd.goods_receipt_id
         LEFT JOIN tblpur_orders po ON po.id = gr.pr_order_id
+        LEFT JOIN tblwo_orders wo ON wo.id = gr.wo_order_id        
 
         UNION ALL
 
@@ -1264,6 +1266,7 @@ function data_tables_actual_purchase_tracker_init($aColumns, $join = [], $where 
             po.id AS buyer_id,
             po.kind,
             po.id AS pr_order_id,
+            NULL AS wo_order_id, 
             po.datecreated AS date_add,
             po.approve_status AS approval,
             2 AS type,
@@ -1301,7 +1304,8 @@ function data_tables_actual_purchase_tracker_init($aColumns, $join = [], $where 
             wo.vendor AS supplier_name,
             wo.id AS buyer_id,
             wo.kind,
-            wo.id AS pr_order_id,
+            NULL AS pr_order_id, 
+            wo.id AS wo_order_id,
             wo.datecreated AS date_add,
             wo.approve_status AS approval,
             3 AS type, 
@@ -1329,7 +1333,7 @@ function data_tables_actual_purchase_tracker_init($aColumns, $join = [], $where 
             wo.group_pur
         FROM tblwo_order_detail wod
         LEFT JOIN tblwo_orders wo ON wo.id = wod.wo_order
-        WHERE wo.status_goods = 0
+        WHERE wo.goods_id = 0
     ) AS combined_orders
     LEFT JOIN aggregated agg ON combined_orders.id = agg.goods_receipt_id
     WHERE combined_orders.project = '1'

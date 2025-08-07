@@ -1279,8 +1279,14 @@ class Warehouse_model extends App_Model
 		$this->save_invetory_files('goods_receipt', $insert_id);
 		/*insert detail*/
 		if ($insert_id) {
-			$this->db->where('id', $data['pr_order_id']);
-			$this->db->update(db_prefix() . 'pur_orders', ['goods_id' => 1]);
+			if($data['pr_order_id'] != '' && $data['pr_order_id'] != 0) {
+				$this->db->where('id', $data['pr_order_id']);
+				$this->db->update(db_prefix() . 'pur_orders', ['goods_id' => 1]);
+			}else if($data['wo_order_id'] != '' && $data['wo_order_id'] != 0) {
+				$this->db->where('id', $data['wo_order_id']);
+				$this->db->update(db_prefix() . 'wo_orders', ['goods_id' => 1]);
+			}
+			
 			foreach ($inventory_receipts as $inventory_receipt) {
 				$inventory_receipt['goods_receipt_id'] = $insert_id;
 
@@ -21525,11 +21531,75 @@ class Warehouse_model extends App_Model
 					}
 				}
 			}
+		} elseif (empty($attachments) && ($view_type === null || $view_type === '')) {
+			$this->db->select('goods_receipt_id, commodity_code, description');
+			$this->db->where('id', $id);
+			$goods_receipt_detail = $this->db->get(db_prefix() . 'goods_receipt_detail')->row();
+
+			if ($goods_receipt_detail && $goods_receipt_detail->goods_receipt_id) {
+				$this->db->select('pr_order_id, wo_order_id');
+				$this->db->where('id', $goods_receipt_detail->goods_receipt_id);
+				$goods_receipt = $this->db->get(db_prefix() . 'goods_receipt')->row();
+
+				if ($goods_receipt) {
+					$rawDesc = $goods_receipt_detail->description ?? '';
+					$cleanDesc = strip_tags(
+						str_replace(
+							["\r", "\n", "<br />", "<br/>"],
+							'',
+							$rawDesc
+						)
+					);
+
+					// Check purchase orders first if view_type is purchase_orders
+					if ($goods_receipt->pr_order_id) {
+						$this->db
+							->select('id')
+							->from(db_prefix() . 'pur_order_detail')
+							->where('pur_order', $goods_receipt->pr_order_id);
+
+						if (!empty($goods_receipt_detail->commodity_code)) {
+							$this->db->where('item_code', $goods_receipt_detail->commodity_code);
+						}
+
+						if ($cleanDesc !== '') {
+							$expr = "REPLACE(REPLACE(REPLACE(REPLACE(`description`, '\r', ''), '\n', ''), '<br />', ''), '<br/>', '')";
+							$this->db->where("$expr =", $cleanDesc);
+						}
+
+						$order_detail = $this->db->get()->row();
+					}
+					// Check work orders if view_type is work_orders
+					elseif ($goods_receipt->wo_order_id) {
+						$this->db
+							->select('id')
+							->from(db_prefix() . 'wo_order_detail')
+							->where('wo_order', $goods_receipt->wo_order_id);
+
+						if (!empty($goods_receipt_detail->commodity_code)) {
+							$this->db->where('item_code', $goods_receipt_detail->commodity_code);
+						}
+
+						if ($cleanDesc !== '') {
+							$expr = "REPLACE(REPLACE(REPLACE(REPLACE(`description`, '\r', ''), '\n', ''), '<br />', ''), '<br/>', '')";
+							$this->db->where("$expr =", $cleanDesc);
+						}
+
+						$order_detail = $this->db->get()->row();
+					}
+
+					if (isset($order_detail) && $order_detail) {
+						$this->db->where('rel_id', $order_detail->id);
+						$this->db->where('rel_type', $related);
+						$attachments = $this->db->get(db_prefix() . 'invetory_files')->result_array();
+					}
+				}
+			}
 		}
 
 		return $attachments;
 	}
-	
+
 	public function get_inventory_shop_drawing_attachments_new($related, $id)
 	{
 		$this->db->where('rel_id', $id);

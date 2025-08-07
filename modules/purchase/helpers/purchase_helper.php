@@ -4748,3 +4748,23 @@ function get_invoice_amount($type)
 
     return $amount;
 }
+function get_purchase_work_order()
+{
+    $CI = &get_instance();
+
+    // Initialize empty array for combined orders
+    $combined_orders = array();
+
+    // Get records from purchase orders table (type = 2)
+    $CI->db->select('CONCAT(pur_order_number, "-", pur_order_name) as name, id, 2 as type, goods_id');
+    $purchase_orders = $CI->db->get('tblpur_orders')->result_array();
+
+    // Get records from work orders table (type = 3)
+    $CI->db->select('CONCAT(wo_order_number, "-", wo_order_name) as name, id, 3 as type, goods_id');
+    $work_orders = $CI->db->get('tblwo_orders')->result_array();
+
+    // Combine both results
+    $combined_orders = array_merge($purchase_orders, $work_orders);
+
+    return $combined_orders;
+}

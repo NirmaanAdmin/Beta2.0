@@ -9,6 +9,7 @@ var GoodsreceiptParams = {
     "group_pur": "[name='group_pur[]']",
     "tracker_status": "[name='tracker_status[]']",
     "production_status": "[name='production_status[]']",
+    "wo_po_order" : "[name='wo_po_order[]']",
     "toggle-filter": "input[name='toggle-filter']"
 };
 
@@ -93,6 +94,17 @@ $('select[name="production_status[]"]').on('change', function () {
         table_manage_actual_goods_receipt.DataTable().ajax.reload();
     }
 });
+
+$('select[name="wo_po_order[]"]').on('change', function () {
+    $('select[name="wo_po_order[]"]').selectpicker('refresh');
+    var activeTabId = $('.tracker-pane.active').attr('id');
+    if (activeTabId === 'tracker_1') {
+        table_manage_actual_goods_receipt.DataTable().ajax.reload();
+    }else{
+        table_manage_goods_receipt.DataTable().ajax.reload();
+    }
+});
+
 
 $(document).on('change', 'select[name="kind"], select[name="delivery"], select[name="vendors[]"], select[name="group_pur[]"], select[name="tracker_status[]"], select[name="production_status[]"], input[name="date_add"]', function() {
     get_purchase_tracker_dashboard();

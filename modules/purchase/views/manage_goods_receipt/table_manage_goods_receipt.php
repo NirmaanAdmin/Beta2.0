@@ -23,7 +23,7 @@ $day_vouchers = $ci->input->post('day_vouchers') ? to_sql_date($ci->input->post(
 $kind = $ci->input->post('kind');
 $delivery = $ci->input->post('delivery');
 $vendors = $ci->input->post('vendors');
-
+$wo_po_orders = $ci->input->post('wo_po_order') ? $ci->input->post('wo_po_order') : [];
 if ($ci->input->post('toggle-filter')) {
     $where[] = 'AND type IN (2, 3)';
 }
@@ -64,6 +64,26 @@ if ($project_id) {
     $where[] = 'AND project = "' . $project_id . '"';
 }
 
+if (!empty($wo_po_orders)) {
+    $where_conditions = [];
+    foreach ($wo_po_orders as $order_value) {
+        // Split the value into type and id (format: "type-id")
+        $parts = explode('-', $order_value);
+        if (count($parts) === 3) {
+            $order_type = (int)$parts[1];
+            $order_id = (int)$parts[0];
+            
+            if ($order_type === 2) { // Purchase Order
+                $where_conditions[] = '(pr_order_id = ' . $order_id . ' AND type = 2)';
+            } elseif ($order_type === 3) { // Work Order
+                $where_conditions[] = '(wo_order_id = ' . $order_id . ' AND type = 3)';
+            }
+        }
+    }
+    if (!empty($where_conditions)) {
+        $where[] = 'AND (' . implode(' OR ', $where_conditions) . ')';
+    }
+}
 $result = data_tables_purchase_tracker_init($aColumns, $join, $where, ['type']);
 $output = $result['output'];
 $rResult = $result['rResult'];
