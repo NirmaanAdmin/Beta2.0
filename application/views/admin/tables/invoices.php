@@ -13,7 +13,7 @@ return App_table::find('invoices')
             '1',
             'number',
             'title',
-            'total',
+            'subtotal',
             // 'YEAR(date) as year',
             'total_left_to_pay',
             'date',
@@ -129,7 +129,7 @@ return App_table::find('invoices')
 
             $row[] = $aRow['title'];
 
-            $row[] = e(app_format_money($aRow['total'], $aRow['currency_name']));
+            $row[] = e(app_format_money($aRow['subtotal'], $aRow['currency_name']));
 
             $row[] = e(app_format_money($aRow['total_left_to_pay'], $aRow['currency_name']));
 
@@ -160,7 +160,7 @@ return App_table::find('invoices')
 
             $row = hooks()->apply_filters('invoices_table_row_data', $row, $aRow);
 
-            $footer_data['total_invoice_amount'] += $aRow['total'];
+            $footer_data['total_invoice_amount'] += $aRow['subtotal'];
             $footer_data['total_invoice_amount_due'] += $total_left_to_pay;
             $output['aaData'][] = $row;
         }
