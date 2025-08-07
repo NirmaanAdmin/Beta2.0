@@ -799,15 +799,37 @@ class Dashboard_model extends App_Model
 			pi.id, 
 			pi.vendor_submitted_amount_without_tax, 
 			pi.invoice_date,
-			SUM(
+			pi.payment_status,
+			ril.id AS ril_invoice_id,
+			ril.status AS ril_status,
+			CASE 
+		        WHEN ril.id IS NOT NULL THEN DATE(ril.datecreated)
+		        ELSE NULL
+		    END AS rli_invoice_date,
+		    SUM(
                 CASE 
                     WHEN ril.id IS NOT NULL THEN (itm.qty * itm.rate)
                     ELSE 0
                 END
-            ) AS ril_certified_amount
+            ) AS ril_certified_amount,
+            SUM(
+                CASE 
+                    WHEN ril.total > 0 THEN (ip.amount * pi.vendor_submitted_amount_without_tax) / ril.total
+                    ELSE 0
+                END
+            ) AS ril_payment,
+            CASE 
+		        WHEN ip.payment_date IS NOT NULL THEN DATE(ip.payment_date)
+		        ELSE NULL
+		    END AS rli_payment_date
 	    FROM tblpur_invoices pi
 	    LEFT JOIN tblitemable itm ON itm.vbt_id = pi.id AND itm.rel_type = 'invoice'
-        LEFT JOIN (SELECT id FROM tblinvoices WHERE status IN (2, 3)) ril ON ril.id = itm.rel_id
+        LEFT JOIN tblinvoices ril ON ril.id = itm.rel_id
+        LEFT JOIN (
+            SELECT invoiceid, SUM(amount) AS amount, MAX(daterecorded) as payment_date
+            FROM tblinvoicepaymentrecords
+            GROUP BY invoiceid
+        ) ip ON ip.invoiceid = ril.id
 	    ";
 
 		$module_name = 'billing_dashboard';
@@ -870,25 +892,59 @@ class Dashboard_model extends App_Model
 		$total_bil_amount = 0;
 		$response['total_ril_count'] = 0;
 		$total_ril_amount = 0;
+		$response['total_paid_count'] = 0;
+		$total_paid_amount = 0;
+		$response['total_unpaid_count'] = 0;
+		$total_unpaid_amount = 0;
+		$response['bill_pending_by_bil'] = 0;
+		$response['bill_pending_by_ril'] = 0;
 		if(!empty($result)) {
 			$response['total_bil_count'] = count($result);
 			$total_bil_amount = array_reduce($result, function ($carry, $item) {
                 return $carry + (float)$item['vendor_submitted_amount_without_tax'];
             }, 0);
             $response['total_ril_count'] = count(array_filter($result, fn($item) =>
-			    $item['ril_certified_amount'] == 0 || is_null($item['ril_certified_amount'])
+			    isset($item['ril_invoice_id']) && $item['ril_invoice_id'] !== NULL
 			));
             $total_ril_amount = array_reduce($result, function ($carry, $item) {
-                return $carry + (float)$item['ril_certified_amount'];
+			    if (in_array($item['ril_status'], [2, 3])) {
+			        return $carry + (float)$item['ril_certified_amount'];
+			    }
+			    return $carry;
+			}, 0);
+            $response['total_paid_count'] = count(array_filter($result, fn($item) =>
+			    (float)$item['ril_payment'] > 0
+			));
+			$total_paid_amount = array_reduce($result, function ($carry, $item) {
+                return $carry + (float)$item['ril_payment'];
             }, 0);
+            $response['total_unpaid_count'] = count(array_filter($result, function($item) {
+			    return $item['payment_status'] == 0;
+			}));
+			$total_unpaid_amount = array_reduce($result, function ($carry, $item) {
+			    if ($item['payment_status'] == 0) {
+			        return $carry + (float)($item['vendor_submitted_amount_without_tax']);
+			    }
+			    return $carry;
+			}, 0);
+			$response['bill_pending_by_bil'] = count(array_filter($result, fn($item) =>
+			    is_null($item['ril_invoice_id'])
+			));
+			$response['bill_pending_by_ril'] = count(array_filter($result, fn($item) =>
+			    !in_array($item['ril_status'], [2, 3])
+			));
 		}
 		$response['total_bil_amount'] = app_format_money($total_bil_amount, $base_currency);
 		$response['total_ril_amount'] = app_format_money($total_ril_amount, $base_currency);
+		$response['total_paid_amount'] = app_format_money($total_paid_amount, $base_currency);
+		$response['total_unpaid_amount'] = app_format_money($total_unpaid_amount, $base_currency);
 
 		$response['line_bil_order_date'] = $response['line_bil_order_total'] = array();
 		$response['line_ril_order_date'] = $response['line_ril_order_total'] = array();
+		$response['line_paid_order_date'] = $response['line_paid_order_total'] = array();
+		$response['line_unpaid_order_date'] = $response['line_unpaid_order_total'] = array();
+
 		$line_bil_order_total = array();
-		$line_ril_order_total = array();
         foreach ($result as $key => $value) {
             if (!empty($value['invoice_date'])) {
                 $timestamp = strtotime($value['invoice_date']);
@@ -904,12 +960,7 @@ class Dashboard_model extends App_Model
                 $line_bil_order_total[$month] = 0;
             }
             $line_bil_order_total[$month] += $value['vendor_submitted_amount_without_tax'];
-            if (!isset($line_ril_order_total[$month])) {
-                $line_ril_order_total[$month] = 0;
-            }
-            $line_ril_order_total[$month] += $value['ril_certified_amount'];
         }
-
         if (!empty($line_bil_order_total)) {
             ksort($line_bil_order_total);
             $cumulative = 0;
@@ -923,6 +974,28 @@ class Dashboard_model extends App_Model
             $response['line_bil_order_total'] = array_values($line_bil_order_total);
         }
 
+        $rli_invoice_result = array_values(array_filter($result, fn($item) =>
+		    in_array($item['ril_status'], [2, 3])
+		));
+		$line_ril_order_total = array();
+		if(!empty($rli_invoice_result)) {
+			foreach ($rli_invoice_result as $key => $value) {
+	            if (!empty($value['rli_invoice_date'])) {
+	                $timestamp = strtotime($value['rli_invoice_date']);
+	                if ($timestamp !== false && $timestamp > 0) {
+	                    $month = date('Y-m', $timestamp);
+	                } elseif ($timestamp === false || $timestamp <= 0) {
+	                    $month = date('Y') . '-01';
+	                }
+	            } else {
+	                $month = date('Y') . '-01';
+	            }
+	            if (!isset($line_ril_order_total[$month])) {
+	                $line_ril_order_total[$month] = 0;
+	            }
+	            $line_ril_order_total[$month] += $value['ril_certified_amount'];
+	        }
+		}
         if (!empty($line_ril_order_total)) {
             ksort($line_ril_order_total);
             $cumulative = 0;
@@ -934,6 +1007,76 @@ class Dashboard_model extends App_Model
                 return date('M-y', strtotime($month . '-01'));
             }, array_keys($line_ril_order_total));
             $response['line_ril_order_total'] = array_values($line_ril_order_total);
+        }
+
+        $rli_paid_result = array_values(array_filter($result, fn($item) =>
+		    !empty($item['rli_payment_date'])
+		));
+		$line_paid_order_total = array();
+		if(!empty($rli_paid_result)) {
+			foreach ($rli_paid_result as $key => $value) {
+	            if (!empty($value['rli_payment_date'])) {
+	                $timestamp = strtotime($value['rli_payment_date']);
+	                if ($timestamp !== false && $timestamp > 0) {
+	                    $month = date('Y-m', $timestamp);
+	                } elseif ($timestamp === false || $timestamp <= 0) {
+	                    $month = date('Y') . '-01';
+	                }
+	            } else {
+	                $month = date('Y') . '-01';
+	            }
+	            if (!isset($line_paid_order_total[$month])) {
+	                $line_paid_order_total[$month] = 0;
+	            }
+	            $line_paid_order_total[$month] += $value['ril_payment'];
+	        }
+		}
+        if (!empty($line_paid_order_total)) {
+            ksort($line_paid_order_total);
+            $cumulative = 0;
+            foreach ($line_paid_order_total as $month => $value) {
+                $cumulative += $value;
+                $line_paid_order_total[$month] = $cumulative;
+            }
+            $response['line_paid_order_date'] = array_map(function ($month) {
+                return date('M-y', strtotime($month . '-01'));
+            }, array_keys($line_paid_order_total));
+            $response['line_paid_order_total'] = array_values($line_paid_order_total);
+        }
+
+        $rli_unpaid_result = array_values(array_filter($result, fn($item) =>
+		    $item['payment_status'] == 0
+		));
+        $line_unpaid_order_total = array();
+		if(!empty($rli_unpaid_result)) {
+			foreach ($rli_unpaid_result as $key => $value) {
+	            if (!empty($value['invoice_date'])) {
+	                $timestamp = strtotime($value['invoice_date']);
+	                if ($timestamp !== false && $timestamp > 0) {
+	                    $month = date('Y-m', $timestamp);
+	                } elseif ($timestamp === false || $timestamp <= 0) {
+	                    $month = date('Y') . '-01';
+	                }
+	            } else {
+	                $month = date('Y') . '-01';
+	            }
+	            if (!isset($line_unpaid_order_total[$month])) {
+	                $line_unpaid_order_total[$month] = 0;
+	            }
+	            $line_unpaid_order_total[$month] += $value['vendor_submitted_amount_without_tax'];
+	        }
+		}
+		if (!empty($line_unpaid_order_total)) {
+            ksort($line_unpaid_order_total);
+            $cumulative = 0;
+            foreach ($line_unpaid_order_total as $month => $value) {
+                $cumulative += $value;
+                $line_unpaid_order_total[$month] = $cumulative;
+            }
+            $response['line_unpaid_order_date'] = array_map(function ($month) {
+                return date('M-y', strtotime($month . '-01'));
+            }, array_keys($line_unpaid_order_total));
+            $response['line_unpaid_order_total'] = array_values($line_unpaid_order_total);
         }
 
 		return $response;

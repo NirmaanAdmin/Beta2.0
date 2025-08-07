@@ -326,6 +326,14 @@ function purchase_module_init_menu_items()
         'position' => 10,
     ]);
 
+    $CI->app_menu->add_sidebar_children_item('purchase', [
+        'slug' => 'billing-dashboard',
+        'name' => _l('dashboard'),
+        'icon'     => '',
+        'href' => admin_url('purchase/dashboard/billing_dashboard'),
+        'position' => 9,
+    ]);
+
     if (has_permission('purchase_invoices', '', 'view') || has_permission('purchase_invoices', '', 'view_own')) {
         $CI->app_menu->add_sidebar_children_item('purchase', [
             'slug' => 'purchase-invoices',

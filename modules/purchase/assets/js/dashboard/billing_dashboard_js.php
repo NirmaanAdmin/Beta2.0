@@ -62,6 +62,8 @@
 
     var lineChartBilOverTime;
     var lineChartRilOverTime;
+    var lineChartPaidOverTime;
+    var lineChartUnpaidOverTime;
 
     function get_billing_dashboard() {
       "use strict";
@@ -84,6 +86,12 @@
         $('.total_bil_amount').text(response.total_bil_amount);
         $('.total_ril_count').text(response.total_ril_count);
         $('.total_ril_amount').text(response.total_ril_amount);
+        $('.total_paid_count').text(response.total_paid_count);
+        $('.total_paid_amount').text(response.total_paid_amount);
+        $('.total_unpaid_count').text(response.total_unpaid_count);
+        $('.total_unpaid_amount').text(response.total_unpaid_amount);
+        $('.bill_pending_by_bil').text(response.bill_pending_by_bil);
+        $('.bill_pending_by_ril').text(response.bill_pending_by_ril);
 
         // LINE CHART - Total Certified Amount Over Period of Time
         var lineBilCtx = document.getElementById('lineChartBilOverTime').getContext('2d');
@@ -151,6 +159,110 @@
               datasets: [{
                 label: 'Total Certified Amount',
                 data: response.line_ril_order_total,
+                fill: false,
+                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                tension: 0.3
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  display: true,
+                  position: 'bottom'
+                },
+                tooltip: {
+                  mode: 'index',
+                  intersect: false
+                }
+              },
+              scales: {
+                x: {
+                  title: {
+                    display: true,
+                    text: 'Month'
+                  }
+                },
+                y: {
+                  beginAtZero: true,
+                  title: {
+                    display: true,
+                    text: 'Total Certified Amount'
+                  }
+                }
+              }
+            }
+          });
+        }
+
+        // LINE CHART - Total Certified Amount Over Period of Time
+        var linePaidCtx = document.getElementById('lineChartPaidOverTime').getContext('2d');
+        if (lineChartPaidOverTime) {
+          lineChartPaidOverTime.data.labels = response.line_paid_order_date;
+          lineChartPaidOverTime.data.datasets[0].data = response.line_paid_order_total;
+          lineChartPaidOverTime.update();
+        } else {
+          lineChartPaidOverTime = new Chart(linePaidCtx, {
+            type: 'line',
+            data: {
+              labels: response.line_paid_order_date,
+              datasets: [{
+                label: 'Total Certified Amount',
+                data: response.line_paid_order_total,
+                fill: false,
+                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                tension: 0.3
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  display: true,
+                  position: 'bottom'
+                },
+                tooltip: {
+                  mode: 'index',
+                  intersect: false
+                }
+              },
+              scales: {
+                x: {
+                  title: {
+                    display: true,
+                    text: 'Month'
+                  }
+                },
+                y: {
+                  beginAtZero: true,
+                  title: {
+                    display: true,
+                    text: 'Total Certified Amount'
+                  }
+                }
+              }
+            }
+          });
+        }
+
+        // LINE CHART - Total Certified Amount Over Period of Time
+        var lineUnpaidCtx = document.getElementById('lineChartUnpaidOverTime').getContext('2d');
+        if (lineChartUnpaidOverTime) {
+          lineChartUnpaidOverTime.data.labels = response.line_unpaid_order_date;
+          lineChartUnpaidOverTime.data.datasets[0].data = response.line_unpaid_order_total;
+          lineChartUnpaidOverTime.update();
+        } else {
+          lineChartUnpaidOverTime = new Chart(lineUnpaidCtx, {
+            type: 'line',
+            data: {
+              labels: response.line_unpaid_order_date,
+              datasets: [{
+                label: 'Total Certified Amount',
+                data: response.line_unpaid_order_total,
                 fill: false,
                 borderColor: 'rgba(54, 162, 235, 1)',
                 backgroundColor: 'rgba(54, 162, 235, 0.2)',

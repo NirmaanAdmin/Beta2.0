@@ -221,6 +221,163 @@
       </div>
     </div>
 
+    <div class="panel_s">
+      <div class="panel-body dashboard-budget-summary">
+        <div class="col-md-12">
+          <p class="no-margin main_head_title">Paid Data</p>
+          <hr class="mtop10">
+        </div>
+        <div class="col-md-5">
+          <div class="row">
+            <div class="quick-stats-invoices col-md-8 tw-mb-2 sm:tw-mb-0">
+              <div class="top_stats_wrapper">
+                <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                  <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                    <span class="tw-truncate dashboard_stat_title">Total Paid Count</span>
+                  </div>
+                  <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                </div>
+                <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                  <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                    <span class="tw-truncate dashboard_stat_value total_paid_count"></span>
+                  </div>
+                  <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <br>
+          <div class="row">
+            <div class="quick-stats-invoices col-md-8 tw-mb-2 sm:tw-mb-0">
+              <div class="top_stats_wrapper">
+                <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                  <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                    <span class="tw-truncate dashboard_stat_title">Total Paid Amount</span>
+                  </div>
+                  <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                </div>
+                <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                  <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                    <span class="tw-truncate dashboard_stat_value total_paid_amount"></span>
+                  </div>
+                  <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-7">
+          <div class="row">
+            <p class="mbot15 dashboard_stat_title">Total Amount Over Period of Time</p>
+            <div style="width: 100%; height: 400px;">
+               <canvas id="lineChartPaidOverTime"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel_s">
+      <div class="panel-body dashboard-budget-summary">
+        <div class="col-md-12">
+          <p class="no-margin main_head_title">Unpaid Data</p>
+          <hr class="mtop10">
+        </div>
+        <div class="col-md-5">
+          <div class="row">
+            <div class="quick-stats-invoices col-md-8 tw-mb-2 sm:tw-mb-0">
+              <div class="top_stats_wrapper">
+                <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                  <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                    <span class="tw-truncate dashboard_stat_title">Total Unpaid Count</span>
+                  </div>
+                  <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                </div>
+                <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                  <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                    <span class="tw-truncate dashboard_stat_value total_unpaid_count"></span>
+                  </div>
+                  <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <br>
+          <div class="row">
+            <div class="quick-stats-invoices col-md-8 tw-mb-2 sm:tw-mb-0">
+              <div class="top_stats_wrapper">
+                <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                  <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                    <span class="tw-truncate dashboard_stat_title">Total Unpaid Amount</span>
+                  </div>
+                  <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                </div>
+                <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                  <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                    <span class="tw-truncate dashboard_stat_value total_unpaid_amount"></span>
+                  </div>
+                  <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-7">
+          <div class="row">
+            <p class="mbot15 dashboard_stat_title">Total Amount Over Period of Time</p>
+            <div style="width: 100%; height: 400px;">
+               <canvas id="lineChartUnpaidOverTime"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel_s">
+      <div class="panel-body dashboard-budget-summary">
+        <div class="col-md-12">
+          <p class="no-margin main_head_title">Bill Pending</p>
+          <hr class="mtop10">
+        </div>
+        <div class="col-md-12">
+          <div class="row">
+            <div class="quick-stats-invoices col-md-4 tw-mb-2 sm:tw-mb-0">
+              <div class="top_stats_wrapper">
+                <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                  <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                    <span class="tw-truncate dashboard_stat_title">Bill Pending By BIL</span>
+                  </div>
+                  <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                </div>
+                <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                  <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                    <span class="tw-truncate dashboard_stat_value bill_pending_by_bil"></span>
+                  </div>
+                  <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                </div>
+              </div>
+            </div>
+            <div class="quick-stats-invoices col-md-4 tw-mb-2 sm:tw-mb-0">
+              <div class="top_stats_wrapper">
+                <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                  <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                    <span class="tw-truncate dashboard_stat_title">Bill Pending By RIL</span>
+                  </div>
+                  <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                </div>
+                <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                  <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                    <span class="tw-truncate dashboard_stat_value bill_pending_by_ril"></span>
+                  </div>
+                  <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 <?php init_tail(); ?>
