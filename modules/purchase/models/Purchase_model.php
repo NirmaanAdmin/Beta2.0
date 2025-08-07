@@ -21511,12 +21511,12 @@ class Purchase_model extends App_Model
         if (count($attachments) > 0) {
             $file_html .= '<p class="bold text-muted">' . _l('customer_attachments') . '</p>';
             foreach ($attachments as $f) {
-                if($view_type != ''){
-                     $href_url = site_url('modules/warehouse/uploads/purchase_tracker/goods_receipt_shop_drawings/'.$view_type . '/' . $f['rel_id'] . '/' . $f['file_name']) . '" download';
-                }else{
+                if ($view_type != '') {
+                    $href_url = site_url('modules/warehouse/uploads/purchase_tracker/goods_receipt_shop_drawings/' . $view_type . '/' . $f['rel_id'] . '/' . $f['file_name']) . '" download';
+                } else {
                     $href_url = site_url('modules/warehouse/uploads/purchase_tracker/goods_receipt_shop_drawings/' . $f['rel_id'] . '/' . $f['file_name']) . '" download';
                 }
-                
+
                 $file_html .= '<div class="mbot15 row inline-block full-width" data-attachment-id="' . $f['id'] . '">
               <div class="col-md-8">
                  <a name="preview-purinv-btn" onclick="preview_purchase_tracker_btn(this); return false;" view_type="' . $view_type . '" id = "' . $f['id'] . '" href="Javascript:void(0);" class="mbot10 mright5 btn btn-success pull-left" data-toggle="tooltip" title data-original-title="' . _l('preview_file') . '"><i class="fa fa-eye"></i></a>
@@ -22814,6 +22814,7 @@ class Purchase_model extends App_Model
         $tracker_status = isset($data['tracker_status']) ? $data['tracker_status'] : '';
         $production_status = isset($data['production_status']) ? $data['production_status'] : '';
         $date_add = isset($data['date_add']) ? $data['date_add'] : '';
+        $wo_po_orders =  isset($data['wo_po_order']) ? $data['wo_po_order'] : [];
 
         $response['total_po'] = $response['average_lead_time'] = $response['percentage_delivered'] = $response['average_advance_payments'] = $response['shop_drawings_approval'] = 0;
         $response['bar_status_name'] = $response['bar_status_value'] = array();
@@ -22884,6 +22885,30 @@ class Purchase_model extends App_Model
             $where[] = 'AND production_status IN (' . implode(',', $production_status) . ')';
         }
 
+        if (!empty($wo_po_orders)) {
+            $where_conditions = [];
+            foreach ($wo_po_orders as $order_value) {
+                $parts = explode('-', $order_value);
+                if (count($parts) === 3) {
+                    $order_type = (int)$parts[1];
+                    $order_id = (int)$parts[0];
+                    $goods_id = (int)$parts[2];
+
+                    if ($order_type === 2 && $goods_id === 0) { // Purchase Order
+                        $where_conditions[] = '(pr_order_id = ' . $order_id . ' AND type = 2 )';
+                    } elseif ($order_type === 3 && $goods_id === 0) { // Work Order
+                        $where_conditions[] = '(wo_order_id = ' . $order_id . ' AND type = 3 )';
+                    } elseif ($order_type === 2 && $goods_id === 1) {
+                        $where_conditions[] = '(pr_order_id = ' . $order_id . ' AND type = 1 )';
+                    } elseif ($order_type === 3 && $goods_id === 1) {
+                        $where_conditions[] = '(wo_order_id = ' . $order_id . ' AND type = 1 )';
+                    }
+                }
+            }
+            if (!empty($where_conditions)) {
+                $where[] = 'AND (' . implode(' OR ', $where_conditions) . ')';
+            }
+        }
         if (get_default_project()) {
             $where[] = 'AND project = "' . get_default_project() . '"';
         }

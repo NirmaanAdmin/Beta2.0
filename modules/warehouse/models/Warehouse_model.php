@@ -1360,24 +1360,48 @@ class Warehouse_model extends App_Model
 				unset($inventory_receipt['tax_select']);
 				$inventory_receipt['area'] = !empty($inventory_receipt['area']) ? implode(',', $inventory_receipt['area']) : NULL;
 				if (isset($inventory_receipt['id'])) {
-					$pur_order_detail_id = $inventory_receipt['id'];
-					$this->db->where('id', $pur_order_detail_id);
-					$pur_order_detail = $this->db->get(db_prefix() . 'pur_order_detail')->row();
-					if (!empty($pur_order_detail)) {
-						$inventory_receipt['delivery_date'] = $pur_order_detail->delivery_date;
-						$inventory_receipt['payment_date'] = $pur_order_detail->payment_date;
-						$inventory_receipt['est_delivery_date'] = $pur_order_detail->est_delivery_date;
-						$inventory_receipt['production_status'] = $pur_order_detail->production_status;
-						$inventory_receipt['remarks'] = $pur_order_detail->remarks;
-						$inventory_receipt['imp_local_status'] = $pur_order_detail->imp_local_status;
-						$inventory_receipt['tracker_status'] = $pur_order_detail->tracker_status;
-						$inventory_receipt['lead_time_days'] = $pur_order_detail->lead_time_days;
-						$inventory_receipt['advance_payment'] = $pur_order_detail->advance_payment;
-						$inventory_receipt['shop_submission'] = $pur_order_detail->shop_submission;
-						$inventory_receipt['shop_approval'] = $pur_order_detail->shop_approval;
-						$inventory_receipt['actual_remarks'] = $pur_order_detail->actual_remarks;
+					if($data['pr_order_id'] != '' && $data['pr_order_id'] != 0) {
+
+						$pur_order_detail_id = $inventory_receipt['id'];
+						$this->db->where('id', $pur_order_detail_id);
+						$pur_order_detail = $this->db->get(db_prefix() . 'pur_order_detail')->row();
+						if (!empty($pur_order_detail)) {
+							$inventory_receipt['delivery_date'] = $pur_order_detail->delivery_date;
+							$inventory_receipt['payment_date'] = $pur_order_detail->payment_date;
+							$inventory_receipt['est_delivery_date'] = $pur_order_detail->est_delivery_date;
+							$inventory_receipt['production_status'] = $pur_order_detail->production_status;
+							$inventory_receipt['remarks'] = $pur_order_detail->remarks;
+							$inventory_receipt['imp_local_status'] = $pur_order_detail->imp_local_status;
+							$inventory_receipt['tracker_status'] = $pur_order_detail->tracker_status;
+							$inventory_receipt['lead_time_days'] = $pur_order_detail->lead_time_days;
+							$inventory_receipt['advance_payment'] = $pur_order_detail->advance_payment;
+							$inventory_receipt['shop_submission'] = $pur_order_detail->shop_submission;
+							$inventory_receipt['shop_approval'] = $pur_order_detail->shop_approval;
+							$inventory_receipt['actual_remarks'] = $pur_order_detail->actual_remarks;
+						}
+						unset($inventory_receipt['id']);
+					}elseif ($data['wo_order_id'] != '' && $data['wo_order_id'] != 0) {
+						
+						$wo_order_detail_id = $inventory_receipt['id'];
+						$this->db->where('id', $wo_order_detail_id);
+						$wo_order_detail = $this->db->get(db_prefix() . 'wo_order_detail')->row();
+						if (!empty($wo_order_detail)) {
+							$inventory_receipt['delivery_date'] = $wo_order_detail->delivery_date;
+							$inventory_receipt['payment_date'] = $wo_order_detail->payment_date;
+							$inventory_receipt['est_delivery_date'] = $wo_order_detail->est_delivery_date;
+							$inventory_receipt['production_status'] = $wo_order_detail->production_status;
+							$inventory_receipt['remarks'] = $wo_order_detail->remarks;
+							$inventory_receipt['imp_local_status'] = $wo_order_detail->imp_local_status;
+							$inventory_receipt['tracker_status'] = $wo_order_detail->tracker_status;
+							$inventory_receipt['lead_time_days'] = $wo_order_detail->lead_time_days;
+							$inventory_receipt['advance_payment'] = $wo_order_detail->advance_payment;
+							$inventory_receipt['shop_submission'] = $wo_order_detail->shop_submission;
+							$inventory_receipt['shop_approval'] = $wo_order_detail->shop_approval;
+							$inventory_receipt['actual_remarks'] = $wo_order_detail->actual_remarks;
+						}
+						unset($inventory_receipt['id']);
 					}
-					unset($inventory_receipt['id']);
+					
 				}
 
 				$this->db->insert(db_prefix() . 'goods_receipt_detail', $inventory_receipt);

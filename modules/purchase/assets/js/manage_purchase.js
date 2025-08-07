@@ -106,7 +106,7 @@ $('select[name="wo_po_order[]"]').on('change', function () {
 });
 
 
-$(document).on('change', 'select[name="kind"], select[name="delivery"], select[name="vendors[]"], select[name="group_pur[]"], select[name="tracker_status[]"], select[name="production_status[]"], input[name="date_add"]', function() {
+$(document).on('change', 'select[name="kind"], select[name="delivery"], select[name="vendors[]"], select[name="group_pur[]"], select[name="tracker_status[]"], select[name="production_status[]"], input[name="date_add"], select[name="wo_po_order[]"]' , function() {
     get_purchase_tracker_dashboard();
 });
 
@@ -123,6 +123,7 @@ function get_purchase_tracker_dashboard() {
     tracker_status: $('select[name="tracker_status[]"]').val(),
     production_status: $('select[name="production_status[]"]').val(),
     date_add: $('input[name="date_add"]').val(),
+    wo_po_order: $('select[name="wo_po_order[]"]').val()
   }
 
   $.post(admin_url + 'purchase/get_purchase_tracker_charts', data).done(function(response){
