@@ -162,54 +162,76 @@ var croppedCtx;
       change_request_approval_status(id,-1);
   }
 
-  function change_request_approval_status(id, status, sign_code){
-    "use strict";
+  // function change_request_approval_status(id, status, sign_code){
+  //   "use strict";
    
-      var data = {};
-      data.rel_id = id;
-      data.rel_type = '2';
+  //     var data = {};
+  //     data.rel_id = id;
+  //     data.rel_type = '2';
      
-      data.approve = status;
+  //     data.approve = status;
 
-      if(status == 1){
-        $.post(admin_url + 'warehouse/check_approval_sign', data).done(function(response){
-          response = JSON.parse(response); 
-            if (response.success === true || response.success == 'true') {
+  //     if(status == 1){
+  //       $.post(admin_url + 'warehouse/check_approval_sign', data).done(function(response){
+  //         response = JSON.parse(response); 
+  //           if (response.success === true || response.success == 'true') {
 
-                      if(sign_code == true){
-                data.signature = $('input[name="signature"]').val();
-              }else{
-                data.note = $('textarea[name="reason"]').val();
-              }
-              $.post(admin_url + 'warehouse/approve_request/' + id, data).done(function(response){
-                  response = JSON.parse(response); 
-                  if (response.success === true || response.success == 'true') {
-                      alert_float('success', response.message);
-                      window.location.reload();
-                  }
-              });
-            }else{
-              //check approval false
-              alert_float('success', response.message);
-            }
+  //                     if(sign_code == true){
+  //               data.signature = $('input[name="signature"]').val();
+  //             }else{
+  //               data.note = $('textarea[name="reason"]').val();
+  //             }
+  //             $.post(admin_url + 'warehouse/approve_request/' + id, data).done(function(response){
+  //                 response = JSON.parse(response); 
+  //                 if (response.success === true || response.success == 'true') {
+  //                     alert_float('success', response.message);
+  //                     window.location.reload();
+  //                 }
+  //             });
+  //           }else{
+  //             //check approval false
+  //             alert_float('success', response.message);
+  //           }
 
-        });
+  //       });
 
-      }else{
-        if(sign_code == true){
-          data.signature = $('input[name="signature"]').val();
-        }else{
-          data.note = $('textarea[name="reason"]').val();
-        }
-        $.post(admin_url + 'warehouse/approve_request/' + id, data).done(function(response){
-            response = JSON.parse(response); 
-            if (response.success === true || response.success == 'true') {
-                alert_float('success', response.message);
-                window.location.reload();
-            }
-        });
-      }
+  //     }else{
+  //       if(sign_code == true){
+  //         data.signature = $('input[name="signature"]').val();
+  //       }else{
+  //         data.note = $('textarea[name="reason"]').val();
+  //       }
+  //       $.post(admin_url + 'warehouse/approve_request/' + id, data).done(function(response){
+  //           response = JSON.parse(response); 
+  //           if (response.success === true || response.success == 'true') {
+  //               alert_float('success', response.message);
+  //               window.location.reload();
+  //           }
+  //       });
+  //     }
       
+  // }
+
+  function change_request_approval_status(id, status, sign_code) {
+    "use strict";
+
+    var data = {};
+    data.rel_id = id;
+    data.rel_type = '2';
+
+    data.approve = status;
+    if (sign_code == true) {
+      data.signature = $('input[name="signature"]').val();
+    } else {
+      data.note = $('textarea[name="reason"]').val();
+    }
+    $.post(admin_url + 'warehouse/approve_request/' + id, data).done(function(response) {
+      response = JSON.parse(response);
+      if (response.success === true || response.success == 'true') {
+        alert_float('success', response.message);
+        window.location.reload();
+      }
+    });
   }
 
   function send_request_approve(id){
