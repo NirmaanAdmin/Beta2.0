@@ -509,52 +509,45 @@ function get_order_tracker_dashboard() {
 
     // LINE CHART - Total Certified Amount Over Period of Time
     var lineCertifiedCtx = document.getElementById('lineChartCertifiedOverTime').getContext('2d');
-
     if (lineChartCertifiedOverTime) {
       lineChartCertifiedOverTime.data.labels = response.line_certified_date;
       lineChartCertifiedOverTime.data.datasets[0].data = response.line_certified_total;
+      lineChartCertifiedOverTime.data.datasets[1].data = response.line_certified_paid;
       lineChartCertifiedOverTime.update();
     } else {
       lineChartCertifiedOverTime = new Chart(lineCertifiedCtx, {
         type: 'line',
         data: {
           labels: response.line_certified_date,
-          datasets: [{
-            label: 'Total Certified Amount',
-            data: response.line_certified_total,
-            fill: false,
-            borderColor: 'rgba(54, 162, 235, 1)',
-            backgroundColor: 'rgba(54, 162, 235, 0.2)',
-            tension: 0.3
-          }]
+          datasets: [
+            {
+              label: 'Total Certified Amount',
+              data: response.line_certified_total,
+              fill: false,
+              borderColor: '#00008B',
+              backgroundColor: '#00008B',
+              tension: 0.3
+            },
+            {
+              label: 'Paid Amount',
+              data: response.line_certified_paid,
+              fill: false,
+              borderColor: '#1E90FF',
+              backgroundColor: '#1E90FF',
+              tension: 0.3
+            }
+          ]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: {
-              display: true,
-              position: 'bottom'
-            },
-            tooltip: {
-              mode: 'index',
-              intersect: false
-            }
+            legend: { display: true, position: 'bottom' },
+            tooltip: { mode: 'index', intersect: false }
           },
           scales: {
-            x: {
-              title: {
-                display: true,
-                text: 'Month'
-              }
-            },
-            y: {
-              beginAtZero: true,
-              title: {
-                display: true,
-                text: 'Total Certified Amount'
-              }
-            }
+            x: { title: { display: true, text: 'Month' } },
+            y: { beginAtZero: true, title: { display: true, text: 'Amount' } }
           }
         }
       });

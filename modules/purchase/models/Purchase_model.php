@@ -23131,7 +23131,7 @@ class Purchase_model extends App_Model
         $response['line_order_date'] = $response['line_order_total'] = array();
         $response['co_tracker_data'] = $response['contractor_tracker'] = array();
         $response['scurve_order_date'] = $response['line_actual_cost_total'] = $response['line_planned_cost_total'] = array();
-        $response['line_certified_date'] = $response['line_certified_total'] = array();
+        $response['line_certified_date'] = $response['line_certified_total'] = $response['line_certified_paid'] = array();
 
         $aColumns = [
             'aw_unw_order_status',
@@ -23147,6 +23147,7 @@ class Purchase_model extends App_Model
             'cost_to_complete',
             'vendor_submitted_amount_without_tax',
             'ril_certified_amount',
+            'ril_payment',
             'project',
             'rli_filter',
             'kind',
@@ -23393,6 +23394,7 @@ class Purchase_model extends App_Model
 
             $line_order_total = array();
             $line_certified_total = array();
+            $line_certified_paid = array();
             foreach ($result as $key => $value) {
                 if (!empty($value['order_date'])) {
                     $timestamp = strtotime($value['order_date']);
@@ -23413,6 +23415,11 @@ class Purchase_model extends App_Model
                     $line_certified_total[$month] = 0;
                 }
                 $line_certified_total[$month] += $value['vendor_submitted_amount_without_tax'];
+
+                if (!isset($line_certified_paid[$month])) {
+                    $line_certified_paid[$month] = 0;
+                }
+                $line_certified_paid[$month] += $value['ril_payment'];
             }
 
             if (!empty($line_order_total)) {
@@ -23439,6 +23446,19 @@ class Purchase_model extends App_Model
                     return date('M-y', strtotime($month . '-01'));
                 }, array_keys($line_certified_total));
                 $response['line_certified_total'] = array_values($line_certified_total);
+            }
+
+            if (!empty($line_certified_paid)) {
+                ksort($line_certified_paid);
+                $cumulative = 0;
+                foreach ($line_certified_paid as $month => $value) {
+                    $cumulative += $value;
+                    $line_certified_paid[$month] = $cumulative;
+                }
+                $response['line_certified_date'] = array_map(function ($month) {
+                    return date('M-y', strtotime($month . '-01'));
+                }, array_keys($line_certified_paid));
+                $response['line_certified_paid'] = array_values($line_certified_paid);
             }
 
             $monthly_total_rev = array();

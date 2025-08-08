@@ -275,7 +275,7 @@
                   </div>
                   <div class="row mtop20">
                      <div class="col-md-12">
-                        <p class="mbot15 dashboard_stat_title">Total Certified Amount Over Period of Time</p>
+                        <p class="mbot15 dashboard_stat_title">Total Certified Amount vs Paid Amount Over Period of Time</p>
                         <div style="width: 100%; height: 400px;">
                            <canvas id="lineChartCertifiedOverTime"></canvas>
                         </div>
