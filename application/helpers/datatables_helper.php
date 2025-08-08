@@ -345,6 +345,27 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         COALESCE(inv_po_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
         COALESCE(inv_po_sum.ril_certified_amount, 0) AS ril_certified_amount,
         COALESCE(inv_po_sum.ril_payment, 0) AS ril_payment,
+        CASE 
+            WHEN IFNULL(inv_po_sum.vendor_submitted_amount_without_tax, 0) = 0 
+                 AND IFNULL(inv_po_sum.ril_certified_amount, 0) = 0 
+                THEN 1
+            WHEN IFNULL((IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                 > IFNULL(inv_po_sum.vendor_submitted_amount_without_tax, 0)
+                 AND IFNULL((IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                 > IFNULL(inv_po_sum.ril_certified_amount, 0)
+                THEN 2
+            WHEN IFNULL((IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                 < IFNULL(inv_po_sum.vendor_submitted_amount_without_tax, 0)
+                 OR IFNULL((IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                 < IFNULL(inv_po_sum.ril_certified_amount, 0)
+                THEN 3
+            WHEN IFNULL((IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                 = IFNULL(inv_po_sum.vendor_submitted_amount_without_tax, 0)
+                 OR IFNULL((IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                 = IFNULL(inv_po_sum.ril_certified_amount, 0)
+                THEN 4
+            ELSE 0
+        END AS yield,
         po.group_pur,
         po.kind, 
         po.remarks AS remarks,
@@ -411,6 +432,27 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         COALESCE(inv_wo_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
         COALESCE(inv_wo_sum.ril_certified_amount, 0) AS ril_certified_amount,
         COALESCE(inv_wo_sum.ril_payment, 0) AS ril_payment,
+        CASE 
+            WHEN IFNULL(inv_wo_sum.vendor_submitted_amount_without_tax, 0) = 0
+                 AND IFNULL(inv_wo_sum.ril_certified_amount, 0) = 0 
+                THEN 1
+            WHEN IFNULL((IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                 > IFNULL(inv_wo_sum.vendor_submitted_amount_without_tax, 0)
+                 AND IFNULL((IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                 > IFNULL(inv_wo_sum.ril_certified_amount, 0)
+                THEN 2
+            WHEN IFNULL((IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                 < IFNULL(inv_wo_sum.vendor_submitted_amount_without_tax, 0)
+                 OR IFNULL((IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                 < IFNULL(inv_wo_sum.ril_certified_amount, 0)
+                THEN 3
+            WHEN IFNULL((IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                 = IFNULL(inv_wo_sum.vendor_submitted_amount_without_tax, 0)
+                 OR IFNULL((IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                 = IFNULL(inv_wo_sum.ril_certified_amount, 0)
+                THEN 4
+            ELSE 0
+        END AS yield,
         wo.group_pur,
         wo.kind,
         wo.remarks AS remarks,
@@ -477,6 +519,27 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         COALESCE(inv_ot_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
         COALESCE(inv_ot_sum.ril_certified_amount, 0) AS ril_certified_amount,
         COALESCE(inv_ot_sum.ril_payment, 0) AS ril_payment,
+        CASE 
+            WHEN IFNULL(inv_ot_sum.vendor_submitted_amount_without_tax, 0) = 0
+                 AND IFNULL(inv_ot_sum.ril_certified_amount, 0) = 0
+                THEN 1
+            WHEN IFNULL((IFNULL(t.anticipate_variation, 0) + (t.total + IFNULL(t.co_total, 0))), 0)
+                 > IFNULL(inv_ot_sum.vendor_submitted_amount_without_tax, 0)
+                 AND IFNULL((IFNULL(t.anticipate_variation, 0) + (t.total + IFNULL(t.co_total, 0))), 0)
+                 > IFNULL(inv_ot_sum.ril_certified_amount, 0)
+                THEN 2
+            WHEN IFNULL((IFNULL(t.anticipate_variation, 0) + (t.total + IFNULL(t.co_total, 0))), 0)
+                 < IFNULL(inv_ot_sum.vendor_submitted_amount_without_tax, 0)
+                 OR IFNULL((IFNULL(t.anticipate_variation, 0) + (t.total + IFNULL(t.co_total, 0))), 0)
+                 < IFNULL(inv_ot_sum.ril_certified_amount, 0)
+                THEN 3
+            WHEN IFNULL((IFNULL(t.anticipate_variation, 0) + (t.total + IFNULL(t.co_total, 0))), 0)
+                 = IFNULL(inv_ot_sum.vendor_submitted_amount_without_tax, 0)
+                 OR IFNULL((IFNULL(t.anticipate_variation, 0) + (t.total + IFNULL(t.co_total, 0))), 0)
+                 = IFNULL(inv_ot_sum.ril_certified_amount, 0)
+                THEN 4
+            ELSE 0
+        END AS yield,
         t.group_pur,
         t.kind,
         t.remarks AS remarks,

@@ -285,7 +285,7 @@
 
                <div class="row all_ot_filters">
                   <hr>
-                  <div class="col-md-2 form-group">
+                  <div class="col-md-3 form-group">
                      <?php
                      // Fetch saved filter; ensure we end up with an array
                      $order_tracker_type_filter = get_module_filter($module_name, 'order_tracker_type');
@@ -324,14 +324,14 @@
                         <?php } ?>
                      </select>
                   </div>
-                  <div class="col-md-2">
+                  <div class="col-md-3">
                      <?php
                      $vendors_filter = get_module_filter($module_name, 'vendors');
                      $vendors_filter_val = !empty($vendors_filter) ? explode(",", $vendors_filter->filter_value) : '';
                      echo render_select('vendors[]', $vendors, array('userid', 'company'), '', $vendors_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('contractor'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
                      ?>
                   </div>
-                  <div class="col-md-2 form-group">
+                  <div class="col-md-3 form-group">
                      <?php
                      $order_tracker_kind_filter = get_module_filter($module_name, 'order_tracker_kind');
                      $order_tracker_kind_filter_val = !empty($order_tracker_kind_filter) ? $order_tracker_kind_filter->filter_value : '';
@@ -342,7 +342,7 @@
                         <option value="Bought out items" <?php echo ($order_tracker_kind_filter_val == "Bought out items") ? 'selected' : ''; ?>><?php echo _l('bought_out_items'); ?></option>
                      </select>
                   </div>
-                  <div class="col-md-2 form-group">
+                  <div class="col-md-3 form-group">
                      <?php
                      $budget_head_filter = get_module_filter($module_name, 'budget_head');
                      $budget_head_filter_val = !empty($budget_head_filter) ? $budget_head_filter->filter_value : '';
@@ -355,7 +355,7 @@
                         <?php } ?>
                      </select>
                   </div>
-                  <div class="col-md-2 form-group">
+                  <div class="col-md-3 form-group">
                      <?php
                      $order_type_filter_filter = get_module_filter($module_name, 'order_type_filter');
                      $order_type_filter_val = !empty($order_type_filter_filter) ? $order_type_filter_filter->filter_value : '';
@@ -368,7 +368,7 @@
 
                      </select>
                   </div>
-                  <div class="col-md-2">
+                  <div class="col-md-3">
                      <?php
                      $projects_filter = get_module_filter($module_name, 'projects');
                      if (!empty($projects_filter) && $projects_filter->filter_value != '') {
@@ -380,7 +380,7 @@
                      echo render_select('projects[]', $projects, array('id', 'name'), '', $projects_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('project'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
                      ?>
                   </div>
-                  <div class="col-md-2 form-group">
+                  <div class="col-md-3 form-group">
 
                      <?php
                      $aw_unw_order_status_type_filter = get_module_filter($module_name, 'aw_unw_order_status');
@@ -392,6 +392,18 @@
                      ];
 
                      echo render_select('aw_unw_order_status[]', $order_status, array('id', 'name'), '', $aw_unw_order_status_type_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('Order Status'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false); ?>
+                  </div>
+                  <div class="col-md-3 form-group">
+                     <?php
+                     $yield_filter = get_module_filter($module_name, 'yield');
+                     $yield_filter_val = !empty($yield_filter) ? explode(",", $yield_filter->filter_value) : [];
+                     $yield = [
+                        0 => ['id' => '1', 'name' => 'None'],
+                        1 => ['id' => '2', 'name' => 'Profit'],
+                        2 => ['id' => '3', 'name' => 'Loss'],
+                        3 => ['id' => '4', 'name' => 'Neutral'],
+                     ];
+                     echo render_select('yield[]', $yield, array('id', 'name'), '', $yield_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('Yield'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false); ?>
                   </div>
                   <div class="col-md-1 form-group">
                      <a href="javascript:void(0)" class="btn btn-info btn-icon reset_all_ot_filters">
@@ -427,15 +439,14 @@
                               _l('order_date'),
                               _l('completion_date'),
                               _l('budget_ro_projection'),
-                              // _l('order_value'),
                               _l('committed_contract_amount'),
                               _l('change_order_amount'),
                               _l('total_rev_contract_value'),
                               _l('anticipate_variation'),
                               _l('cost_to_complete'),
                               'Total Certified Amount By BIL',
-                              'Yield',
                               'RIL Certified Amount',
+                              'Yield',
                               _l('attachment_upload'),
                               _l('attachment_download'),
                               _l('project'),
@@ -478,15 +489,14 @@
                                  <th><?php echo _l('order_date'); ?></th>
                                  <th><?php echo _l('completion_date'); ?></th>
                                  <th><?php echo _l('budget_ro_projection'); ?></th>
-                                 <!-- <th><?php echo _l('order_value'); ?></th> -->
                                  <th><?php echo _l('committed_contract_amount'); ?></th>
                                  <th><?php echo _l('change_order_amount'); ?></th>
                                  <th><?php echo _l('total_rev_contract_value'); ?></th>
                                  <th><?php echo _l('anticipate_variation'); ?></th>
                                  <th><?php echo _l('cost_to_complete'); ?></th>
                                  <th>Total Certified Amount By BIL</th>
-                                 <th>Yield</th>
                                  <th>RIL Certified Amount</th>
+                                 <th>Yield</th>
                                  <th><?php echo _l('attachment_upload'); ?></th>
                                  <th><?php echo _l('attachment_download'); ?></th>
                                  <th><?php echo _l('project'); ?></th>
@@ -505,15 +515,17 @@
                               <td></td>
                               <td></td>
                               <td class="total_budget_ro_projection"></td>
-                              <!-- <td class="total_order_value"></td> -->
                               <td class="total_committed_contract_amount"></td>
                               <td class="total_change_order_amount"></td>
                               <td class="total_rev_contract_value"></td>
                               <td class="total_anticipate_variation"></td>
                               <td class="total_cost_to_complete"></td>
                               <td class="total_final_certified_amount"></td>
-                              <td></td>
                               <td class="total_ril_certified_amount"></td>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                              <td></td>
                               <td></td>
                               <td></td>
                               <td></td>

@@ -11,6 +11,7 @@ $budget_head_filter_name = 'budget_head';
 $order_type_filter_name = 'order_type_filter';
 $project_filter_name = 'projects';
 $aw_unw_order_status_filter_name = 'aw_unw_order_status';
+$yield_filter_name = 'yield';
 
 // Define common columns for both tables
 $aColumns = [
@@ -27,8 +28,8 @@ $aColumns = [
    'anticipate_variation',
    'cost_to_complete',
    'vendor_submitted_amount_without_tax',
-   3,
    'ril_certified_amount',
+   'yield',
    1,
    2,
    'project',
@@ -224,6 +225,24 @@ if (isset($aw_unw_order_status)) {
    }
 }
 
+$yield = $this->ci->input->post('yield');
+if (isset($yield)) {
+   $where_yield = '';
+   foreach ($yield as $t) {
+      if ($t != '') {
+         if ($where_yield == '') {
+            $where_yield .= ' AND (yield = "' . $t . '"';
+         } else {
+            $where_yield .= ' or yield = "' . $t . '"';
+         }
+      }
+   }
+   if ($where_yield != '') {
+      $where_yield .= ')';
+      array_push($where, $where_yield);
+   }
+}
+
 $having = '';
 
 $type_filter_value = !empty($this->ci->input->post('type')) ? implode(',', $this->ci->input->post('type')) : NULL;
@@ -249,6 +268,9 @@ update_module_filter($module_name, $project_filter_name, $projects_filter_value)
 
 $aw_unw_order_status_filter_value = !empty($this->ci->input->post('aw_unw_order_status')) ? implode(',', $this->ci->input->post('aw_unw_order_status')) : NULL;
 update_module_filter($module_name, $aw_unw_order_status_filter_name, $aw_unw_order_status_filter_value);
+
+$yield_filter_value = !empty($this->ci->input->post('yield')) ? implode(',', $this->ci->input->post('yield')) : NULL;
+update_module_filter($module_name, $yield_filter_name, $yield_filter_value);
 
 // Query and process data
 $result = data_tables_init_union($aColumns, $sIndexColumn, $sTable, $join, $where, [
@@ -519,20 +541,18 @@ foreach ($rResult as $aRow) {
             // Render as an editable input if no value exists
             $_data = '<span style="font-style: italic;font-size: 12px;">Values will be fetched directly from the vendor billing tracker</span>';
          }
-      } elseif ($column == 3) {
-         $ctc = $aRow['cost_to_complete'];
-         $bil = $aRow['vendor_submitted_amount_without_tax'];
-         $ril = $aRow['ril_certified_amount'];
-
-         $_data = ($bil == 0 && $ril == 0)
-            ? '<span class="label label-default">None</span>'
-            : ($ctc > $bil && $ctc > $ril
-               ? '<span class="label label-success">Profit</span>'
-               : ($ctc < $bil || $ctc < $ril
-                  ? '<span class="label label-danger">Loss</span>'
-                  : ($ctc == $bil || $ctc == $ril ? '<span class="label label-warning">Neutral</span>' : '')
-               )
-            );
+      } elseif ($column == 'yield') {
+         if($aRow['yield'] == 1) {
+            $_data = '<span class="label label-default">None</span>';
+         } else if($aRow['yield'] == 2) {
+            $_data = '<span class="label label-success">Profit</span>';
+         } else if($aRow['yield'] == 3) {
+            $_data = '<span class="label label-danger">Loss</span>';
+         } else if($aRow['yield'] == 4) {
+            $_data = '<span class="label label-warning">Neutral</span>';
+         } else {
+            $_data = '';
+         }
       } elseif ($column == 'ril_certified_amount') {
          $_data = '<span class=  data-id="' . $aRow['id'] . '" data-type="' . $aRow['source_table'] . '">' . app_format_money($aRow['ril_certified_amount'], '₹') . '</span>';
       } elseif ($column == 1) {

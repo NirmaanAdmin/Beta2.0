@@ -13,7 +13,8 @@ var expenseDropzone;
         "budget_head": "[name='budget_head']",
         "order_type_filter": "[name='order_type_filter']",
         "projects": "[name='projects[]']",
-        "aw_unw_order_status": "[name='aw_unw_order_status[]']"
+        "aw_unw_order_status": "[name='aw_unw_order_status[]']",
+        "yield": "[name='yield[]']"
     };
 
     initDataTable('.table-table_order_tracker', admin_url + 'purchase/table_order_tracker', [], [], Params, [3, 'desc']);
@@ -53,6 +54,10 @@ var expenseDropzone;
 
     $(document).on('change', 'select[name="order_type_filter"]', function () {
         $('select[name="order_type_filter"]').selectpicker('refresh');
+    });
+
+    $(document).on('change', 'select[name="yield[]"]', function () {
+        $('select[name="yield[]"]').selectpicker('refresh');
     });
 
     $(document).on('click', '.reset_all_ot_filters', function () {
