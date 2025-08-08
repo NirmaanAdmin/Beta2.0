@@ -803,7 +803,7 @@ class Dashboard_model extends App_Model
 			ril.id AS ril_invoice_id,
 			ril.status AS ril_status,
 			CASE 
-		        WHEN ril.id IS NOT NULL THEN DATE(ril.datecreated)
+		        WHEN ril.id IS NOT NULL THEN DATE(ril.date)
 		        ELSE NULL
 		    END AS rli_invoice_date,
 		    SUM(
@@ -826,7 +826,7 @@ class Dashboard_model extends App_Model
 	    LEFT JOIN tblitemable itm ON itm.vbt_id = pi.id AND itm.rel_type = 'invoice'
         LEFT JOIN tblinvoices ril ON ril.id = itm.rel_id
         LEFT JOIN (
-            SELECT invoiceid, SUM(amount) AS amount, MAX(daterecorded) as payment_date
+            SELECT invoiceid, SUM(amount) AS amount, MAX(date) as payment_date
             FROM tblinvoicepaymentrecords
             GROUP BY invoiceid
         ) ip ON ip.invoiceid = ril.id
@@ -918,21 +918,33 @@ class Dashboard_model extends App_Model
 			$total_paid_amount = array_reduce($result, function ($carry, $item) {
                 return $carry + (float)$item['ril_payment'];
             }, 0);
-            $response['total_unpaid_count'] = count(array_filter($result, function($item) {
-			    return $item['payment_status'] == 0;
-			}));
+			$response['total_unpaid_count'] = count(
+			    array_filter($result, fn($item) =>
+			        isset($item['ril_invoice_id']) &&
+			        $item['ril_invoice_id'] !== NULL &&
+			        !in_array($item['ril_status'], [2, 3])
+			    )
+			);
 			$total_unpaid_amount = array_reduce($result, function ($carry, $item) {
-			    if ($item['payment_status'] == 0) {
-			        return $carry + (float)($item['vendor_submitted_amount_without_tax']);
+			    if (
+			        isset($item['ril_invoice_id']) &&
+			        $item['ril_invoice_id'] !== NULL &&
+			        !in_array($item['ril_status'], [2, 3])
+			    ) {
+			        $carry += (float) $item['vendor_submitted_amount_without_tax'];
 			    }
 			    return $carry;
 			}, 0);
 			$response['bill_pending_by_bil'] = count(array_filter($result, fn($item) =>
 			    is_null($item['ril_invoice_id'])
 			));
-			$response['bill_pending_by_ril'] = count(array_filter($result, fn($item) =>
-			    !in_array($item['ril_status'], [2, 3])
-			));
+			$response['bill_pending_by_ril'] = count(
+			    array_filter($result, fn($item) =>
+			        isset($item['ril_invoice_id']) &&
+			        $item['ril_invoice_id'] !== NULL &&
+			        !in_array($item['ril_status'], [2, 3])
+			    )
+			);
 		}
 		$response['total_bil_amount'] = app_format_money($total_bil_amount, $base_currency);
 		$response['total_ril_amount'] = app_format_money($total_ril_amount, $base_currency);
@@ -1044,9 +1056,13 @@ class Dashboard_model extends App_Model
             $response['line_paid_order_total'] = array_values($line_paid_order_total);
         }
 
-        $rli_unpaid_result = array_values(array_filter($result, fn($item) =>
-		    $item['payment_status'] == 0
-		));
+        $rli_unpaid_result = array_values(
+		    array_filter($result, fn($item) =>
+		        isset($item['ril_invoice_id']) &&
+		        $item['ril_invoice_id'] !== NULL &&
+		        !in_array($item['ril_status'], [2, 3])
+		    )
+		);
         $line_unpaid_order_total = array();
 		if(!empty($rli_unpaid_result)) {
 			foreach ($rli_unpaid_result as $key => $value) {
