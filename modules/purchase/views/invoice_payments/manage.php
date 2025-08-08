@@ -177,7 +177,7 @@
                   <div class="row mtop20">
                         <div class="vbt_all_filters">
 
-                           <div class="col-md-2">
+                           <div class="col-md-3">
                               <?php
                               $from_date_filter = get_module_filter($module_name, 'from_date');
                               $from_date_filter_val = !empty($from_date_filter) ? $from_date_filter->filter_value : '';
@@ -185,7 +185,7 @@
                               ?>
                            </div>
 
-                           <div class="col-md-2">
+                           <div class="col-md-3">
                               <?php
                               $to_date_filter = get_module_filter($module_name, 'to_date');
                               $to_date_filter_val = !empty($to_date_filter) ? $to_date_filter->filter_value : '';
@@ -243,6 +243,14 @@
                               </select>
                            </div>
 
+                           <div class="col-md-3">
+                              <?php
+                              $order_tagged_detail_filter = get_module_filter($module_name, 'order_tagged_detail');
+                              $order_tagged_detail_filter_val = !empty($order_tagged_detail_filter) ? explode(",", $order_tagged_detail_filter->filter_value) : '';
+                              echo render_select('order_tagged_detail[]', $order_tagged_detail, array('id', 'name'), '', $order_tagged_detail_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('Order Detail'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
+                              ?>
+                           </div>
+
                            <div class="col-md-1 form-group">
                               <a href="javascript:void(0)" class="btn btn-info btn-icon reset_vbt_all_filters">
                                  <?php echo _l('reset_filter'); ?>
@@ -292,6 +300,7 @@
                            'amount_without_tax',
                            'vendor_submitted_tax_amount',
                            'certified_amount',
+                           'vbt_order_name',
                            'bil_payment_date',
                            'bil_payment_made',
                            'bil_tds',
@@ -325,6 +334,7 @@
                               <th><?php echo _l('amount_without_tax'); ?></th>
                               <th><?php echo _l('vendor_submitted_tax_amount'); ?></th>
                               <th><?php echo _l('final_certified_amount'); ?></th>
+                              <th><?php echo _l('vbt_order_name'); ?></th>
                               <th><?php echo _l('bil_payment_date'); ?></th>
                               <th><?php echo _l('bil_payment_made'); ?></th>
                               <th><?php echo _l('bil_tds'); ?></th>
@@ -350,6 +360,7 @@
                               <td class="total_vendor_submitted_amount_without_tax"></td>
                               <td class="total_vendor_submitted_tax_amount"></td>
                               <td class="total_final_certified_amount"></td>
+                              <td></td>
                               <td></td>
                               <td class="total_payment_made"></td>
                               <td class="total_bil_tds"></td>

@@ -9,6 +9,7 @@ $vendors_filter_name = 'vendors';
 $budget_head_filter_name = 'budget_head';
 $billing_invoices_filter_name = 'billing_invoices';
 $bil_payment_status_filter_name = 'bil_payment_status';
+$order_tagged_detail_filter_name = 'order_tagged_detail';
 
 $aColumns = [
     1,
@@ -20,6 +21,7 @@ $aColumns = [
     'vendor_submitted_amount_without_tax',
     'vendor_submitted_tax_amount',
     'final_certified_amount',
+    6,
     2,
     3,
     4,
@@ -125,6 +127,29 @@ if (isset($budget_head)) {
     }
 }
 
+$order_tagged_detail = $this->ci->input->post('order_tagged_detail');
+if (isset($order_tagged_detail) && is_array($order_tagged_detail) && !empty($order_tagged_detail)) {
+    $or_conditions = [];
+    foreach ($order_tagged_detail as $t) {
+        if (!empty($t)) {
+            if (strpos($t, 'po_') === 0) {
+                $id = str_replace('po_', '', $t);
+                $or_conditions[] = db_prefix() . "pur_invoices.pur_order = '$id'";
+            } elseif (strpos($t, 'wo_') === 0) {
+                $id = str_replace('wo_', '', $t);
+                $or_conditions[] = db_prefix() . "pur_invoices.wo_order = '$id'";
+            } elseif (strpos($t, 'ot_') === 0) {
+                $id = str_replace('ot_', '', $t);
+                $or_conditions[] = db_prefix() . "pur_invoices.order_tracker_id = '$id'";
+            }
+        }
+    }
+    if (!empty($or_conditions)) {
+        $where_order_tagged_detail = ' AND (' . implode(' OR ', $or_conditions) . ')';
+        array_push($where, $where_order_tagged_detail);
+    }
+}
+
 if(get_default_project()) {
     array_push($where, 'AND ' . db_prefix() . 'pur_invoices.project_id = '.get_default_project().'');
 }
@@ -147,6 +172,9 @@ update_module_filter($module_name, $billing_invoices_filter_name, $billing_invoi
 $bil_payment_status_filter_name_value = !empty($this->ci->input->post('bil_payment_status')) ? $this->ci->input->post('bil_payment_status') : NULL;
 update_module_filter($module_name, $bil_payment_status_filter_name, $bil_payment_status_filter_name_value);
 
+$order_tagged_detail_filter_name_value = !empty($this->ci->input->post('order_tagged_detail')) ? implode(',', $this->ci->input->post('order_tagged_detail')) : NULL;
+update_module_filter($module_name, $order_tagged_detail_filter_name, $order_tagged_detail_filter_name_value);
+
 $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [
     db_prefix() . 'pur_invoices.id as id',
     '(SELECT GROUP_CONCAT(name SEPARATOR ",") FROM ' . db_prefix() . 'taggables JOIN ' . db_prefix() . 'tags ON ' . db_prefix() . 'taggables.tag_id = ' . db_prefix() . 'tags.id WHERE rel_id = ' . db_prefix() . 'pur_invoices.id and rel_type="pur_invoice" ORDER by tag_order ASC) as tags',
@@ -155,6 +183,8 @@ $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [
     db_prefix() . 'pur_invoices.currency',
     'expense_convert',
     db_prefix() . 'pur_invoices.wo_order',
+    db_prefix() . 'pur_invoices.pur_order',
+    db_prefix() . 'pur_invoices.order_tracker_id',
     db_prefix() . 'items_groups.name',
     db_prefix() . 'pur_invoices.description_services',
     'ril.id as ril_invoice_id',
@@ -336,6 +366,21 @@ foreach ($rResult as $aRow) {
             } else {
                 $_data = '';
             }
+        } elseif ($aColumns[$i] == 6) {
+            $order_data = '';
+            if (!empty($aRow['order_tracker_id'])) {
+                $order_tracker_detail = get_order_tracker_main_detail($aRow['order_tracker_id']);
+                $order_data = $order_tracker_detail->pur_order_name;
+            } else if (!empty($aRow['pur_order'])) {
+                $pur_order_detail = get_pur_order_main_detail($aRow['pur_order']);
+                $order_data =  '<span><a href="' . admin_url('purchase/pur_order/' . $pur_order_detail->id) . '" target="_blank">' . $pur_order_detail->pur_order_number . ' - ' . $pur_order_detail->pur_order_name . '</a></span>';
+            } else if (!empty($aRow['wo_order'])) {
+                $wo_order_detail = get_wo_order_main_detail($aRow['wo_order']);
+                $order_data = '<span><a href="' . admin_url('purchase/wo_order/' . $wo_order_detail->id) . '" target="_blank">' . $wo_order_detail->wo_order_number . ' - ' . $wo_order_detail->wo_order_name . '</a><span>';
+            } else {
+                $order_data = '';
+            }
+            $_data = '<div style="width: 200px;">' . $order_data . '</div>';
         } elseif ($aColumns[$i] == 'payment_remarks') {
             $order_name = '<textarea class="form-control payment-remarks-input"  data-id="' . $aRow['id'] . '" rows="3" style="width: 150px">' . $aRow['payment_remarks'] . '</textarea>';
             $_data = $order_name;

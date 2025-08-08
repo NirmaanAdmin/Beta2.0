@@ -12483,6 +12483,7 @@ class purchase extends AdminController
         $data['billing_invoices'] = $this->purchase_model->get_billing_invoices();
         $data['budget_head'] = get_budget_head_project_wise();
         $data['invoices'] = get_all_applied_invoices();
+        $data['order_tagged_detail'] = $this->purchase_model->get_order_tagged_detail();
         $this->load->view('invoice_payments/manage', $data);
     }
 

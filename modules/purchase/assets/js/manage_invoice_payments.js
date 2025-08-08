@@ -8,6 +8,7 @@
     "budget_head": "[name='budget_head']",
     "billing_invoices": "[name='billing_invoices']",
     "bil_payment_status": "[name='bil_payment_status']",
+    "order_tagged_detail": "[name='order_tagged_detail[]']",
   };
 
   initDataTable(table_invoice, admin_url + 'purchase/table_pur_invoice_payments', [], [], Params, [5, 'desc']);
@@ -35,6 +36,9 @@
   });
   $(document).on('change', 'select[name="bil_payment_status"]', function () {
     $('select[name="bil_payment_status"]').selectpicker('refresh');
+  });
+  $(document).on('change', 'select[name="order_tagged_detail[]"]', function () {
+    $('select[name="order_tagged_detail[]"]').selectpicker('refresh');
   });
 
   $(document).on('click', '.reset_vbt_all_filters', function () {
