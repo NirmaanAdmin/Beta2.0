@@ -30,6 +30,7 @@ $aColumns = [
    'vendor_submitted_amount_without_tax',
    'ril_certified_amount',
    'yield',
+   'yield_delta',
    1,
    2,
    'project',
@@ -553,6 +554,8 @@ foreach ($rResult as $aRow) {
          } else {
             $_data = '';
          }
+      } elseif ($column == 'yield_delta') {
+         $_data = app_format_money($aRow['yield_delta'], $base_currency->symbol);
       } elseif ($column == 'ril_certified_amount') {
          $_data = '<span class=  data-id="' . $aRow['id'] . '" data-type="' . $aRow['source_table'] . '">' . app_format_money($aRow['ril_certified_amount'], '₹') . '</span>';
       } elseif ($column == 1) {
