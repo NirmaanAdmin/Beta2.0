@@ -436,6 +436,7 @@ class MinutesController extends AdminController
 
         $data['other_participants'] = $this->Meeting_model->get_participants($agenda_id);
         $data['minutes_data'] = $this->Meeting_model->get_minutes_detials($agenda_id);
+        $data['activity'] = $this->Meeting_model->get_activity_log($agenda_id, 'mom_agenda');
         // Load the view
         $this->load->view('meeting_management/view_meeting', $data);
     }

@@ -118,7 +118,7 @@ class Meeting_model extends App_Model
         return 0;
     }
 
-     public function check_action_by($id)
+    public function check_action_by($id)
     {
         $this->db->where('minute_id', $id);
         $mom_details = $this->db->get(db_prefix() . 'minutes_details')->result_array();
@@ -315,6 +315,15 @@ class Meeting_model extends App_Model
                 }
             }
         }
+
+        $data_log = [];
+        $data_log['rel_id'] = $agenda_id;
+        $data_log['rel_type'] = 'mom_agenda';
+        $data_log['staffid'] = get_staff_user_id();
+        $data_log['date'] = date('Y-m-d H:i:s');
+        $data_log['note'] = "mom_agenda_note";
+
+        $this->add_activity_log($data_log);
 
         return $agenda_id;
     }
@@ -788,6 +797,16 @@ class Meeting_model extends App_Model
                 }
             }
         }
+        
+        $data_log = [];
+        $data_log['rel_id'] = $agenda_id;
+        $data_log['rel_type'] = 'mom_agenda';
+        $data_log['staffid'] = get_staff_user_id();
+        $data_log['date'] = date('Y-m-d H:i:s');
+        $data_log['note'] = "update_mom_agenda_note";
+
+        $this->add_activity_log($data_log);
+        
     }
 
     // Save participants for a given agenda
@@ -1349,7 +1368,19 @@ class Meeting_model extends App_Model
         }
     }
 
-    public function get_critical_tracker_pdf_content(){
-        
-    }
+    public function get_critical_tracker_pdf_content() {}
+
+    public function add_activity_log($data)
+	{
+		$this->db->insert(db_prefix() . 'mom_activity_log', $data);
+		return true;
+	}
+
+    public function get_activity_log($rel_id, $rel_type)
+	{
+
+		$this->db->where('rel_id', $rel_id);
+		$this->db->where('rel_type', $rel_type);
+		return $this->db->get(db_prefix() . 'mom_activity_log')->result_array();
+	}
 }

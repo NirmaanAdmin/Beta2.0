@@ -91,6 +91,7 @@
             $.each(data, function(index, agenda) {
                const row = `
                     <tr>
+                        <td>${index + 1}</td>
                         <td>${agenda.meeting_title}</td>
                         <td>${agenda.project_name || 'N/A'}</td>
                         <td>${formatDate(agenda.meeting_date)}</td>

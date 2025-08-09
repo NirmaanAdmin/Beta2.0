@@ -31,7 +31,7 @@ class AgendaController extends AdminController
         }
         $data['projects'] = $this->projects_model->get_items();
         $data['title'] = _l('meeting_agenda');
-        $this->load->view('meeting_management/agendas_list', $data);
+        $this->load->view('meeting_management/agendas_list', $data); 
     }
 
     public function filter_minutes()
@@ -167,6 +167,7 @@ class AgendaController extends AdminController
         $data['other_participants'] = $this->Meeting_model->get_participants($agenda_id);
         $data['minutes_data'] = $this->Meeting_model->get_minutes_detials($agenda_id);
         $data['agenda_data'] = $this->Meeting_model->get_mom_detials($agenda_id);
+        $data['activity'] = $this->Meeting_model->get_activity_log($agenda_id, 'mom_agenda');
         $this->load->view('meeting_management/view_meeting', $data);
     }
 

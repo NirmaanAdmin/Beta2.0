@@ -147,3 +147,5 @@ $lang['select_staff'] = 'Select Staff';
 $lang['staff_updated'] = 'Staff Updated Successfully';
 $lang['vendor_updated'] = 'Vendor Updated Successfully';
 $lang['target_date_updated'] = 'Target Date Updated Successfully';
+$lang['mom_agenda_note'] = 'Create Meeting';
+$lang['update_mom_agenda_note'] = 'Update Meeting';
