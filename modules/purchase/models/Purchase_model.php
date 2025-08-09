@@ -19727,9 +19727,8 @@ class Purchase_model extends App_Model
         $html .=  '<table class="table purorder-item" style="width: 100%">
         <thead>
           <tr>
-            <th class="thead-dark" align="left" style="width: 3%" >' . _l('#') . '</th>
             <th class="thead-dark" align="left" style="width: 4%">' . _l('order_status') . '</th>
-            <th class="thead-dark" align="left" style="width: 10.2%">' . _l('order_scope') . '</th>
+            <th class="thead-dark" align="left" style="width: 5.1%">' . _l('order_scope') . '</th>
             <th class="thead-dark" align="left" style="width: 5.6%">' . _l('contractor') . '</th>
             <th class="thead-dark" align="left" style="width: 4.6%">' . _l('order_date') . '</th>
             <th class="thead-dark" align="left" style="width: 4.6%">' . _l('completion_date') . '</th>
@@ -19739,12 +19738,15 @@ class Purchase_model extends App_Model
             <th class="thead-dark" align="left" style="width: 5.6%">' . _l('total_rev_contract_value') . '</th>
             <th class="thead-dark" align="left" style="width: 5.6%">' . _l('anticipate_variation') . '</th>
             <th class="thead-dark" align="left" style="width: 5.6%">' . _l('cost_to_complete') . '</th>
-            <th class="thead-dark" align="left" style="width: 5.6%">' . _l('final_certified_amount') . '</th>
+            <th class="thead-dark" align="left" style="width: 5.6%">' . _l('Total Certified Amount By BIL') . '</th>
+            <th class="thead-dark" align="left" style="width: 3%">' . _l('RIL Certified Amount') . '</th>
+            <th class="thead-dark" align="left" style="width: 5.1%">' . _l('Yield') . '</th>
+            <th class="thead-dark" align="left" style="width: 5.1%">' . _l('Yield Delta') . '</th>
             <th class="thead-dark" align="left" style="width: 4.6%">' . _l('project') . '</th>
             <th class="thead-dark" align="left" style="width: 5.6%">' . _l('rli_filter') . '</th>
             <th class="thead-dark" align="left" style="width: 3.6%">' . _l('category') . '</th>
             <th class="thead-dark" align="left" style="width: 5.6%">' . _l('group_pur') . '</th>
-            <th class="thead-dark" align="left" style="width: 10.2%">' . _l('remarks') . '</th>
+            <th class="thead-dark" align="left" style="width: 5.1%">' . _l('remarks') . '</th>
             
           </tr>
           </thead>
@@ -19785,13 +19787,24 @@ class Purchase_model extends App_Model
                 9 => ['label' => 'green', 'table' => 'common_services_in_ril_scope', 'text' => _l('common_services_in_ril_scope')],
                 10 => ['label' => 'default', 'table' => 'due_to_site_specfic_constraint', 'text' => _l('due_to_site_specfic_constraint')],
             ];
+            $yield = '';
+            if($row['yield'] == 1) {
+                $yield = 'None';
+            } else if($row['yield'] == 2) {
+                $yield = 'Profit';
+            } else if($row['yield'] == 3) {
+                $yield = 'Loss';
+            } else if($row['yield'] == 4) {
+                $yield = 'Neutral';
+            } else {
+                $yield = '';
+            }
             $html .= '<tr>
-                <td style="width: 3%">' . $serial_no . '</td>
                 <td style="width: 4%">' . $aw_unw_order_status . '</td>';
             if ($row['source_table'] == "order_tracker") {
-                $html .= '<td style="width: 10.2%">' . $row['order_name'] . '</td>';
+                $html .= '<td style="width: 5.1%">' . $row['order_name'] . '</td>';
             } else {
-                $html .= '<td style="width: 10.2%">' . $row['order_number'] . '-' . $row['order_name'] . '</td>';
+                $html .= '<td style="width: 5.1%">' . $row['order_number'] . '-' . $row['order_name'] . '</td>';
             }
 
             $html .= '<td style="width: 5.6%">' . $row['vendor'] . '</td>
@@ -19807,12 +19820,15 @@ class Purchase_model extends App_Model
                 <td style="width: 5.6%">' . app_format_money($row['total_rev_contract_value'], '₹') . '</td>
                 <td style="width: 5.6%">' . app_format_money($row['anticipate_variation'], '₹') . '</td>
                 <td style="width: 5.6%">' . app_format_money($row['cost_to_complete'], '₹') . '</td>
-                <td style="width: 5.6%">' . app_format_money($row['final_certified_amount'], '₹') . '</td>
+                <td style="width: 5.6%">' . app_format_money($row['vendor_submitted_amount_without_tax'], '₹') . '</td>
+                <td style="width: 3%">' . app_format_money($row['ril_certified_amount'], '₹') . '</td>
+                <td style="width: 5.1%">' . $yield . '</td>
+                <td style="width: 5.1%">' . app_format_money($row['yield_delta'], '₹') . '</td>
                 <td style="width: 4.6%">' . $row['project'] . '</td>
                 <td style="width: 5.6%">' . $status_labels[$row['rli_filter']]['text'] . '</td>
                 <td style="width: 3.6%">' . $row['kind'] . '</td>
                 <td style="width: 5.6%">' . get_group_name_by_id($row['group_pur']) . '</td>
-                <td style="width: 10.2%">' . $row['remarks'] . '</td>
+                <td style="width: 5.1%">' . $row['remarks'] . '</td>
             </tr>';
             $serial_no++;
         }
@@ -19968,39 +19984,83 @@ class Purchase_model extends App_Model
     {
         // 1) Build the base UNION ALL query
         $baseSql = "
-        SELECT
-            po.id,
-            po.aw_unw_order_status AS aw_unw_order_status,
-            po.pur_order_number AS order_number,
-            po.pur_order_name AS order_name,
-            po.rli_filter,
-            po.group_pur AS group_pur,
-            pv.company AS vendor,
-            pv.userid AS vendor_id,
-            po.order_date,
-            po.completion_date,
-            po.budget,
-            po.order_value,
-            po.total AS total,
-            IFNULL(co.co_total, 0) AS co_total,
-            (po.subtotal + IFNULL(co.co_total, 0)) AS total_rev_contract_value, 
-            po.anticipate_variation,
-            (IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co.co_total, 0))) AS cost_to_complete,
-            COALESCE(inv_po_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
-            COALESCE(inv_po_sum.ril_certified_amount, 0) AS ril_certified_amount,
-            po.kind,
-            po.remarks AS remarks,
-            po.subtotal AS subtotal,
-            pr.name AS project,
-            pr.id AS project_id,
-            'pur_orders' AS source_table
+        SELECT DISTINCT
+        po.id,
+        po.aw_unw_order_status as aw_unw_order_status,
+        po.pur_order_number AS order_number,
+        po.pur_order_name AS order_name,
+        po.rli_filter,
+        pv.company AS vendor,
+        pv.userid AS vendor_id,
+        po.order_date,
+        po.completion_date,
+        po.budget,
+        po.order_value,
+        po.total AS total,
+        IFNULL(co_sum.co_total, 0) AS co_total,
+        (po.subtotal + IFNULL(co_sum.co_total, 0)) AS total_rev_contract_value, 
+        po.anticipate_variation,
+        (IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0))) AS cost_to_complete,
+        COALESCE(inv_po_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
+        COALESCE(inv_po_sum.ril_certified_amount, 0) AS ril_certified_amount,
+        COALESCE(inv_po_sum.ril_payment, 0) AS ril_payment,
+        CASE 
+            WHEN IFNULL(inv_po_sum.vendor_submitted_amount_without_tax, 0) = 0 
+                 AND IFNULL(inv_po_sum.ril_certified_amount, 0) = 0 
+                THEN 1
+            WHEN IFNULL((IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                 > IFNULL(inv_po_sum.vendor_submitted_amount_without_tax, 0)
+                 AND IFNULL((IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                 > IFNULL(inv_po_sum.ril_certified_amount, 0)
+                THEN 2
+            WHEN IFNULL((IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                 < IFNULL(inv_po_sum.vendor_submitted_amount_without_tax, 0)
+                 OR IFNULL((IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                 < IFNULL(inv_po_sum.ril_certified_amount, 0)
+                THEN 3
+            WHEN IFNULL((IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                 = IFNULL(inv_po_sum.vendor_submitted_amount_without_tax, 0)
+                 OR IFNULL((IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                 = IFNULL(inv_po_sum.ril_certified_amount, 0)
+                THEN 4
+            ELSE 0
+        END AS yield,
+        CASE 
+            WHEN IFNULL(inv_po_sum.vendor_submitted_amount_without_tax, 0) = 0 
+            THEN 0
+            WHEN 
+                (
+                    IFNULL((IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                    > IFNULL(inv_po_sum.vendor_submitted_amount_without_tax, 0)
+                    AND IFNULL((IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                    > IFNULL(inv_po_sum.ril_certified_amount, 0)
+                )
+                OR
+                (
+                    IFNULL((IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                    < IFNULL(inv_po_sum.vendor_submitted_amount_without_tax, 0)
+                    OR IFNULL((IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                    < IFNULL(inv_po_sum.ril_certified_amount, 0)
+                )
+                THEN (IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0))) 
+                     - COALESCE(inv_po_sum.vendor_submitted_amount_without_tax, 0)
+            ELSE 0
+        END AS yield_delta,
+        po.group_pur,
+        po.kind, 
+        po.remarks AS remarks,
+        po.subtotal as subtotal,
+        pr.name as project,
+        pr.id as project_id,
+        'pur_orders' AS source_table
         FROM tblpur_orders po
         LEFT JOIN tblpur_vendor pv ON pv.userid = po.vendor
         LEFT JOIN (
             SELECT po_order_id, SUM(co_value) AS co_total
             FROM tblco_orders
+            WHERE po_order_id IS NOT NULL
             GROUP BY po_order_id
-        ) co ON co.po_order_id = po.id
+        ) AS co_sum ON co_sum.po_order_id = po.id
         LEFT JOIN tblprojects pr ON pr.id = po.project
         LEFT JOIN (
             SELECT
@@ -20011,23 +20071,33 @@ class Purchase_model extends App_Model
                         WHEN ril.id IS NOT NULL THEN (itm.qty * itm.rate)
                         ELSE 0
                     END
-                ) AS ril_certified_amount
+                ) AS ril_certified_amount,
+                SUM(
+                    CASE 
+                        WHEN ril.total > 0 THEN (ip.amount * pi.vendor_submitted_amount_without_tax) / ril.total
+                        ELSE 0
+                    END
+                ) AS ril_payment
             FROM tblpur_invoices pi
             LEFT JOIN tblitemable itm ON itm.vbt_id = pi.id AND itm.rel_type = 'invoice'
-            LEFT JOIN (SELECT id FROM tblinvoices WHERE status IN (2, 3)) ril ON ril.id = itm.rel_id
+            LEFT JOIN (SELECT id, total FROM tblinvoices WHERE status IN (2, 3)) ril ON ril.id = itm.rel_id
+            LEFT JOIN (
+                SELECT invoiceid, SUM(amount) AS amount, MAX(date) as payment_date
+                FROM tblinvoicepaymentrecords
+                GROUP BY invoiceid
+            ) ip ON ip.invoiceid = ril.id
             GROUP BY pi.pur_order
         ) AS inv_po_sum ON inv_po_sum.pur_order = po.id
         WHERE po.approve_status = 2
 
         UNION ALL
 
-        SELECT
+        SELECT DISTINCT
             wo.id,
-            wo.aw_unw_order_status AS aw_unw_order_status,
+            wo.aw_unw_order_status as aw_unw_order_status,
             wo.wo_order_number AS order_number,
             wo.wo_order_name AS order_name,
             wo.rli_filter,
-            wo.group_pur AS group_pur,
             pv.company AS vendor,
             pv.userid AS vendor_id,
             wo.order_date,
@@ -20035,25 +20105,70 @@ class Purchase_model extends App_Model
             wo.budget,
             wo.order_value,
             wo.total AS total,
-            IFNULL(co.co_total, 0) AS co_total,
-            (wo.subtotal + IFNULL(co.co_total, 0)) AS total_rev_contract_value,
+            IFNULL(co_sum.co_total, 0) AS co_total,
+            (wo.subtotal + IFNULL(co_sum.co_total, 0)) AS total_rev_contract_value,
             wo.anticipate_variation,
-            (IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co.co_total, 0))) AS cost_to_complete,
+            (IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0))) AS cost_to_complete,
             COALESCE(inv_wo_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
             COALESCE(inv_wo_sum.ril_certified_amount, 0) AS ril_certified_amount,
+            COALESCE(inv_wo_sum.ril_payment, 0) AS ril_payment,
+            CASE 
+                WHEN IFNULL(inv_wo_sum.vendor_submitted_amount_without_tax, 0) = 0
+                     AND IFNULL(inv_wo_sum.ril_certified_amount, 0) = 0 
+                    THEN 1
+                WHEN IFNULL((IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                     > IFNULL(inv_wo_sum.vendor_submitted_amount_without_tax, 0)
+                     AND IFNULL((IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                     > IFNULL(inv_wo_sum.ril_certified_amount, 0)
+                    THEN 2
+                WHEN IFNULL((IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                     < IFNULL(inv_wo_sum.vendor_submitted_amount_without_tax, 0)
+                     OR IFNULL((IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                     < IFNULL(inv_wo_sum.ril_certified_amount, 0)
+                    THEN 3
+                WHEN IFNULL((IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                     = IFNULL(inv_wo_sum.vendor_submitted_amount_without_tax, 0)
+                     OR IFNULL((IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                     = IFNULL(inv_wo_sum.ril_certified_amount, 0)
+                    THEN 4
+                ELSE 0
+            END AS yield,
+            CASE 
+                WHEN IFNULL(inv_wo_sum.vendor_submitted_amount_without_tax, 0) = 0 
+                THEN 0
+                WHEN 
+                    (
+                        IFNULL((IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                        > IFNULL(inv_wo_sum.vendor_submitted_amount_without_tax, 0)
+                        AND IFNULL((IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                        > IFNULL(inv_wo_sum.ril_certified_amount, 0)
+                    )
+                    OR
+                    (
+                        IFNULL((IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                        < IFNULL(inv_wo_sum.vendor_submitted_amount_without_tax, 0)
+                        OR IFNULL((IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                        < IFNULL(inv_wo_sum.ril_certified_amount, 0)
+                    )
+                    THEN (IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0))) 
+                         - COALESCE(inv_wo_sum.vendor_submitted_amount_without_tax, 0)
+                ELSE 0
+            END AS yield_delta,
+            wo.group_pur,
             wo.kind,
             wo.remarks AS remarks,
-            wo.subtotal AS subtotal,
-            pr.name AS project,
-            pr.id AS project_id,
+            wo.subtotal as subtotal,
+            pr.name as project,
+            pr.id as project_id,
             'wo_orders' AS source_table
         FROM tblwo_orders wo
         LEFT JOIN tblpur_vendor pv ON pv.userid = wo.vendor
         LEFT JOIN (
             SELECT wo_order_id, SUM(co_value) AS co_total
             FROM tblco_orders
+            WHERE wo_order_id IS NOT NULL
             GROUP BY wo_order_id
-        ) co ON co.wo_order_id = wo.id
+        ) AS co_sum ON co_sum.wo_order_id = wo.id
         LEFT JOIN tblprojects pr ON pr.id = wo.project
         LEFT JOIN (
             SELECT
@@ -20064,23 +20179,33 @@ class Purchase_model extends App_Model
                         WHEN ril.id IS NOT NULL THEN (itm.qty * itm.rate)
                         ELSE 0
                     END
-                ) AS ril_certified_amount
+                ) AS ril_certified_amount,
+                SUM(
+                    CASE 
+                        WHEN ril.total > 0 THEN (ip.amount * pi.vendor_submitted_amount_without_tax) / ril.total
+                        ELSE 0
+                    END
+                ) AS ril_payment
             FROM tblpur_invoices pi
             LEFT JOIN tblitemable itm ON itm.vbt_id = pi.id AND itm.rel_type = 'invoice'
-            LEFT JOIN (SELECT id FROM tblinvoices WHERE status IN (2, 3)) ril ON ril.id = itm.rel_id
+            LEFT JOIN (SELECT id, total FROM tblinvoices WHERE status IN (2, 3)) ril ON ril.id = itm.rel_id
+            LEFT JOIN (
+                SELECT invoiceid, SUM(amount) AS amount, MAX(date) as payment_date
+                FROM tblinvoicepaymentrecords
+                GROUP BY invoiceid
+            ) ip ON ip.invoiceid = ril.id
             GROUP BY pi.wo_order
         ) AS inv_wo_sum ON inv_wo_sum.wo_order = wo.id
         WHERE wo.approve_status = 2
 
         UNION ALL
 
-        SELECT
+        SELECT DISTINCT
             t.id,
-            t.aw_unw_order_status AS aw_unw_order_status,
+            t.aw_unw_order_status as aw_unw_order_status,
             t.pur_order_number AS order_number,
             t.pur_order_name AS order_name,
             t.rli_filter,
-            t.group_pur AS group_pur,
             pv.company AS vendor,
             pv.userid AS vendor_id,
             t.order_date,
@@ -20094,11 +20219,55 @@ class Purchase_model extends App_Model
             (IFNULL(t.anticipate_variation, 0) + (t.total + IFNULL(t.co_total, 0))) AS cost_to_complete,
             COALESCE(inv_ot_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
             COALESCE(inv_ot_sum.ril_certified_amount, 0) AS ril_certified_amount,
+            COALESCE(inv_ot_sum.ril_payment, 0) AS ril_payment,
+            CASE 
+                WHEN IFNULL(inv_ot_sum.vendor_submitted_amount_without_tax, 0) = 0
+                     AND IFNULL(inv_ot_sum.ril_certified_amount, 0) = 0
+                    THEN 1
+                WHEN IFNULL((IFNULL(t.anticipate_variation, 0) + (t.total + IFNULL(t.co_total, 0))), 0)
+                     > IFNULL(inv_ot_sum.vendor_submitted_amount_without_tax, 0)
+                     AND IFNULL((IFNULL(t.anticipate_variation, 0) + (t.total + IFNULL(t.co_total, 0))), 0)
+                     > IFNULL(inv_ot_sum.ril_certified_amount, 0)
+                    THEN 2
+                WHEN IFNULL((IFNULL(t.anticipate_variation, 0) + (t.total + IFNULL(t.co_total, 0))), 0)
+                     < IFNULL(inv_ot_sum.vendor_submitted_amount_without_tax, 0)
+                     OR IFNULL((IFNULL(t.anticipate_variation, 0) + (t.total + IFNULL(t.co_total, 0))), 0)
+                     < IFNULL(inv_ot_sum.ril_certified_amount, 0)
+                    THEN 3
+                WHEN IFNULL((IFNULL(t.anticipate_variation, 0) + (t.total + IFNULL(t.co_total, 0))), 0)
+                     = IFNULL(inv_ot_sum.vendor_submitted_amount_without_tax, 0)
+                     OR IFNULL((IFNULL(t.anticipate_variation, 0) + (t.total + IFNULL(t.co_total, 0))), 0)
+                     = IFNULL(inv_ot_sum.ril_certified_amount, 0)
+                    THEN 4
+                ELSE 0
+            END AS yield,
+            CASE
+                WHEN IFNULL(inv_ot_sum.vendor_submitted_amount_without_tax, 0) = 0 
+                THEN 0 
+                WHEN 
+                    (
+                        IFNULL((IFNULL(t.anticipate_variation, 0) + (t.total + IFNULL(t.co_total, 0))), 0) 
+                        > IFNULL(inv_ot_sum.vendor_submitted_amount_without_tax, 0)
+                        AND IFNULL((IFNULL(t.anticipate_variation, 0) + (t.total + IFNULL(t.co_total, 0))), 0) 
+                        > IFNULL(inv_ot_sum.ril_certified_amount, 0)
+                    )
+                    OR
+                    (
+                        IFNULL((IFNULL(t.anticipate_variation, 0) + (t.total + IFNULL(t.co_total, 0))), 0) 
+                        < IFNULL(inv_ot_sum.vendor_submitted_amount_without_tax, 0)
+                        OR IFNULL((IFNULL(t.anticipate_variation, 0) + (t.total + IFNULL(t.co_total, 0))), 0) 
+                        < IFNULL(inv_ot_sum.ril_certified_amount, 0)
+                    )
+                    THEN (IFNULL(t.anticipate_variation, 0) + (t.total + IFNULL(t.co_total, 0))) 
+                         - COALESCE(inv_ot_sum.vendor_submitted_amount_without_tax, 0)
+                ELSE 0
+            END AS yield_delta,
+            t.group_pur,
             t.kind,
             t.remarks AS remarks,
-            t.subtotal AS subtotal,
-            pr.name AS project,
-            pr.id AS project_id,
+            t.subtotal as subtotal,
+            pr.name as project,
+            pr.id as project_id,
             'order_tracker' AS source_table
         FROM tblpur_order_tracker t
         LEFT JOIN tblpur_vendor pv ON pv.userid = t.vendor
@@ -20112,10 +20281,21 @@ class Purchase_model extends App_Model
                         WHEN ril.id IS NOT NULL THEN (itm.qty * itm.rate)
                         ELSE 0
                     END
-                ) AS ril_certified_amount
+                ) AS ril_certified_amount,
+                SUM(
+                    CASE 
+                        WHEN ril.total > 0 THEN (ip.amount * pi.vendor_submitted_amount_without_tax) / ril.total
+                        ELSE 0
+                    END
+                ) AS ril_payment
             FROM tblpur_invoices pi
             LEFT JOIN tblitemable itm ON itm.vbt_id = pi.id AND itm.rel_type = 'invoice'
-            LEFT JOIN (SELECT id FROM tblinvoices WHERE status IN (2, 3)) ril ON ril.id = itm.rel_id
+            LEFT JOIN (SELECT id, total FROM tblinvoices WHERE status IN (2, 3)) ril ON ril.id = itm.rel_id
+            LEFT JOIN (
+                SELECT invoiceid, SUM(amount) AS amount, MAX(date) as payment_date
+                FROM tblinvoicepaymentrecords
+                GROUP BY invoiceid
+            ) ip ON ip.invoiceid = ril.id
             GROUP BY pi.order_tracker_id
         ) AS inv_ot_sum ON inv_ot_sum.order_tracker_id = t.id
         ";

@@ -13747,6 +13747,8 @@ class purchase extends AdminController
             'Cost to Complete',
             'Total Certified Amount By BIL',
             'RIL Certified Amount',
+            'Yield',
+            'Yield Delta',
             'Project',
             'RLI Filter',
             'Category',
@@ -13800,6 +13802,19 @@ class purchase extends AdminController
                 $contract_amount = app_format_money($row['subtotal'] ?? 0, '');
                 $order_name = $row['order_number'] . '-' . $row['order_name'] ?? '';
             }
+
+            $yield = '';
+            if($row['yield'] == 1) {
+                $yield = 'None';
+            } else if($row['yield'] == 2) {
+                $yield = 'Profit';
+            } else if($row['yield'] == 3) {
+                $yield = 'Loss';
+            } else if($row['yield'] == 4) {
+                $yield = 'Neutral';
+            } else {
+                $yield = '';
+            }
             // Write row data
             fputcsv($output, [
                 $aw_unw_order_status,
@@ -13815,6 +13830,8 @@ class purchase extends AdminController
                 app_format_money($row['cost_to_complete'] ?? 0, ''),
                 app_format_money($row['vendor_submitted_amount_without_tax'] ?? 0, ''),
                 app_format_money($row['ril_certified_amount'] ?? 0, ''),
+                $yield,
+                app_format_money($row['yield_delta'] ?? 0, ''),
                 $row['project'] ?? '',
                 $status_labels[$row['rli_filter']]['text'] ?? '',
                 $row['kind'] ?? '',
