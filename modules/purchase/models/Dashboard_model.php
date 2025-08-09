@@ -935,14 +935,17 @@ class Dashboard_model extends App_Model
 			    }
 			    return $carry;
 			}, 0);
-			$response['bill_pending_by_bil'] = count(array_filter($result, fn($item) =>
-			    is_null($item['ril_invoice_id'])
-			));
+			$response['bill_pending_by_bil'] = count(
+			    array_filter($result, fn($item) =>
+			        isset($item['payment_status']) &&
+			        in_array($item['payment_status'], ['0', '2', '3', '4'], true)
+			    )
+			);
 			$response['bill_pending_by_ril'] = count(
 			    array_filter($result, fn($item) =>
 			        isset($item['ril_invoice_id']) &&
-			        $item['ril_invoice_id'] !== NULL &&
-			        !in_array($item['ril_status'], [2, 3])
+			        $item['ril_invoice_id'] !== null &&
+			        (float)$item['ril_payment'] == 0
 			    )
 			);
 		}
