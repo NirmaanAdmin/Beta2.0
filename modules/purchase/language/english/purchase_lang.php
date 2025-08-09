@@ -962,3 +962,4 @@ $lang['delivery_performance_report'] = 'Delivery Performance Report';
 $lang['ot_payment_certificate'] = 'Order tracker payment certificate';
 $lang['new_payment_certificate'] = 'New';
 $lang['not_started'] = 'Not Started';
+$lang['last_action_by'] = 'Last Action By';

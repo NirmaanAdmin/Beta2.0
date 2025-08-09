@@ -18197,6 +18197,7 @@ class Purchase_model extends App_Model
         $cron_email['options'] = json_encode($cron_email_options, true);
         $this->db->insert(db_prefix() . 'cron_email', $cron_email);
         $this->save_payment_certificate_files($insert_id);
+        update_payment_certificate_last_action($insert_id);
         return true;
     }
 
@@ -18212,6 +18213,7 @@ class Purchase_model extends App_Model
         $this->db->update(db_prefix() . 'payment_certificate', $data);
         $this->log_pay_cer_activity($id, 'pay_cert_activity_updated');
         $this->save_payment_certificate_files($id);
+        update_payment_certificate_last_action($id);
         return true;
     }
 
@@ -23821,6 +23823,7 @@ class Purchase_model extends App_Model
         $cron_email['options'] = json_encode($cron_email_options, true);
         $this->db->insert(db_prefix() . 'cron_email', $cron_email);
         $this->save_payment_certificate_files($insert_id);
+        update_payment_certificate_last_action($insert_id);
         return true;
     }
 
@@ -23851,6 +23854,7 @@ class Purchase_model extends App_Model
         $this->db->update(db_prefix() . 'payment_certificate', $data);
         $this->log_pay_cer_activity($id, 'pay_cert_activity_updated');
         $this->save_payment_certificate_files($id);
+        update_payment_certificate_last_action($id);
         return true;
     }
 

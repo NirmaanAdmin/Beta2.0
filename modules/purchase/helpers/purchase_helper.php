@@ -4768,3 +4768,27 @@ function get_purchase_work_order()
 
     return $combined_orders;
 }
+
+function update_payment_certificate_last_action($id)
+{
+    $CI = &get_instance();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $CI->db->update(db_prefix() . 'payment_certificate', [
+            'last_action' => get_staff_user_id()
+        ]);
+    }
+    return true;
+}
+
+function get_last_action_full_name($userid = '')
+{
+    $CI = &get_instance();
+    if(!empty($userid)) {
+        $CI->db->where('staffid', $userid);
+        $staff = $CI->db->select('firstname,lastname')->from(db_prefix() . 'staff')->get()->row();
+        return $staff ? $staff->firstname . ' ' . $staff->lastname : '';
+    } else {
+        return '';
+    }
+}

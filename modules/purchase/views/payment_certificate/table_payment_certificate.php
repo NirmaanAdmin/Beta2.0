@@ -22,6 +22,7 @@ $aColumns = [
     db_prefix() . 'payment_certificate' . '.approve_status as approve_status',
     db_prefix() . 'payment_certificate' . '.pur_invoice_id as applied_to_vendor_bill',
     1,
+    db_prefix() . 'payment_certificate' . '.last_action as last_action',
 ];
 
 $sIndexColumn = 'id';
@@ -214,6 +215,8 @@ foreach ($rResult as $aRow) {
             $pdf .= '</ul>';
             $pdf .= '</div>';
             $_data = $pdf;
+        } elseif ($aColumns[$i] == 'last_action') {
+            $_data = get_last_action_full_name($aRow['last_action']);
         } else {
             if (strpos($aColumns[$i], 'date_picker_') !== false) {
                 $_data = (strpos($_data, ' ') !== false ? _dt($_data) : _d($_data));
