@@ -454,7 +454,8 @@
                               _l('rli_filter'),
                               _l('category'),
                               _l('group_pur'),
-                              _l('remarks')
+                              _l('remarks'),
+                              _l('last_action_by')
                            ];
                            ?>
                            <div>
@@ -506,6 +507,7 @@
                                  <th><?php echo _l('category'); ?></th>
                                  <th><?php echo _l('group_pur'); ?></th>
                                  <th><?php echo _l('remarks'); ?></th>
+                                 <th><?php echo _l('last_action_by'); ?></th>
                               </tr>
                            </thead>
                            <tbody>
@@ -524,6 +526,7 @@
                               <td class="total_cost_to_complete"></td>
                               <td class="total_final_certified_amount"></td>
                               <td class="total_ril_certified_amount"></td>
+                              <td></td>
                               <td></td>
                               <td></td>
                               <td></td>

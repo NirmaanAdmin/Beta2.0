@@ -8190,6 +8190,13 @@ class Purchase_model extends App_Model
         }
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . $tableName, ['rli_filter' => $status]);
+        if ($table_name === 'pur_orders') {
+            update_pur_orders_last_action($id);
+        } elseif ($table_name === 'wo_orders') {
+            update_wo_orders_last_action($id);
+        } elseif ($table_name === 'order_tracker') {
+            update_order_tracker_last_action($id);
+        }
         return true;
     }
     public function change_aw_unw_order_status($status, $id, $table_name)
@@ -8203,6 +8210,13 @@ class Purchase_model extends App_Model
         }
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . $tableName, ['aw_unw_order_status' => $status]);
+        if ($table_name === 'pur_orders') {
+            update_pur_orders_last_action($id);
+        } elseif ($table_name === 'wo_orders') {
+            update_wo_orders_last_action($id);
+        } elseif ($table_name === 'order_tracker') {
+            update_order_tracker_last_action($id);
+        }
         return true;
     }
     public function update_budget_head($status, $id, $table_name)
@@ -8216,6 +8230,13 @@ class Purchase_model extends App_Model
         }
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . $tableName, ['group_pur' => $status]);
+        if ($table_name === 'pur_orders') {
+            update_pur_orders_last_action($id);
+        } elseif ($table_name === 'wo_orders') {
+            update_wo_orders_last_action($id);
+        } elseif ($table_name === 'order_tracker') {
+            update_order_tracker_last_action($id);
+        }
         return true;
     }
 
@@ -17793,6 +17814,7 @@ class Purchase_model extends App_Model
                 $dt_data['remarks'] = $rqd['remarks'];
                 $dt_data['order_value'] = $rqd['order_value'];
                 $dt_data['project'] = $rqd['project'];
+                $dt_data['last_action'] = get_staff_user_id();
 
                 $this->db->insert(db_prefix() . 'pur_order_tracker', $dt_data);
                 $last_insert_id[] = $this->db->insert_id();
@@ -20672,6 +20694,7 @@ class Purchase_model extends App_Model
                 ]
             );
         }
+        update_pur_invoices_last_action($data['pur_invoice']);
 
         return true;
     }

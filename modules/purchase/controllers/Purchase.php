@@ -11016,6 +11016,13 @@ class purchase extends AdminController
         // Perform the update
         $this->db->where('id', $id);
         $success = $this->db->update($tableName, ['completion_date' => $completion_date]);
+        if ($table === 'pur_orders') {
+            update_pur_orders_last_action($id);
+        } elseif ($table === 'wo_orders') {
+            update_wo_orders_last_action($id);
+        } elseif ($table === 'order_tracker') {
+            update_order_tracker_last_action($id);
+        }
 
         if ($success) {
             echo json_encode(['success' => true, 'message' => _l('completion_date_updated')]);
@@ -11047,6 +11054,13 @@ class purchase extends AdminController
         // Perform the update
         $this->db->where('id', $id);
         $success = $this->db->update($tableName, ['order_date' => $order_date]);
+        if ($table === 'pur_orders') {
+            update_pur_orders_last_action($id);
+        } elseif ($table === 'wo_orders') {
+            update_wo_orders_last_action($id);
+        } elseif ($table === 'order_tracker') {
+            update_order_tracker_last_action($id);
+        }
 
         if ($success) {
             echo json_encode(['success' => true, 'message' => _l('order_date_updated')]);
@@ -11078,6 +11092,13 @@ class purchase extends AdminController
         // Perform the update
         $this->db->where('id', $id);
         $success = $this->db->update($tableName, ['budget' => $budget]);
+        if ($table === 'pur_orders') {
+            update_pur_orders_last_action($id);
+        } elseif ($table === 'wo_orders') {
+            update_wo_orders_last_action($id);
+        } elseif ($table === 'order_tracker') {
+            update_order_tracker_last_action($id);
+        }
 
         if ($success) {
             echo json_encode(['success' => true, 'message' => _l('amount_updated')]);
@@ -11104,6 +11125,7 @@ class purchase extends AdminController
         // Perform the update
         $this->db->where('id', $id);
         $success = $this->db->update($tableName, ['total' => $total]);
+        update_order_tracker_last_action($id);
 
         if ($success) {
             echo json_encode(['success' => true, 'message' => _l('amount_updated')]);
@@ -11135,6 +11157,13 @@ class purchase extends AdminController
 
         $this->db->where('id', $id);
         $success = $this->db->update($tableName, ['anticipate_variation' => $anticipate_variation]);
+        if ($table === 'pur_orders') {
+            update_pur_orders_last_action($id);
+        } elseif ($table === 'wo_orders') {
+            update_wo_orders_last_action($id);
+        } elseif ($table === 'order_tracker') {
+            update_order_tracker_last_action($id);
+        }
 
         if ($success) {
             echo json_encode(['success' => true, 'message' => _l('anticipate_variation_updated')]);
@@ -11229,6 +11258,13 @@ class purchase extends AdminController
 
         $this->db->where('id', $id);
         $success = $this->db->update($tableName, ['remarks' => $remarks]);
+        if ($table === 'pur_orders') {
+            update_pur_orders_last_action($id);
+        } elseif ($table === 'wo_orders') {
+            update_wo_orders_last_action($id);
+        } elseif ($table === 'order_tracker') {
+            update_order_tracker_last_action($id);
+        }
 
         if ($success) {
             echo json_encode(['success' => true, 'message' => _l('remarks_updated')]);

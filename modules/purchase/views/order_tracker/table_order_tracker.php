@@ -38,6 +38,7 @@ $aColumns = [
    'kind',
    'group_name',
    'remarks',
+   'last_action',
 ];
 
 $sIndexColumn = 'id';
@@ -596,6 +597,8 @@ foreach ($rResult as $aRow) {
          if (empty($aRow['remarks'])) {
             $_data = '<textarea class="form-control remarks-input" placeholder="Enter remarks" data-id="' . $aRow['id'] . '" data-type="' . $aRow['source_table'] . '"></textarea>';
          }
+      }  elseif ($column == 'last_action') {
+         $_data = get_last_action_full_name($aRow['last_action']);
       }
       //  elseif ($column == 'order_value') {
       //    $_data = '<span class="order-value-display" data-id="' . $aRow['id'] . '" data-type="' . $aRow['source_table'] . '">' . app_format_money($aRow['order_value'], $base_currency->symbol) . '</span>';

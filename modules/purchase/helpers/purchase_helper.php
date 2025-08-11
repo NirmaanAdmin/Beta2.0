@@ -4828,3 +4828,39 @@ function update_client_payments_last_action($id)
     }
     return true;
 }
+
+function update_order_tracker_last_action($id)
+{
+    $CI = &get_instance();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $CI->db->update(db_prefix() . 'pur_order_tracker', [
+            'last_action' => get_staff_user_id()
+        ]);
+    }
+    return true;
+}
+
+function update_pur_orders_last_action($id)
+{
+    $CI = &get_instance();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $CI->db->update(db_prefix() . 'pur_orders', [
+            'last_action' => get_staff_user_id()
+        ]);
+    }
+    return true;
+}
+
+function update_wo_orders_last_action($id)
+{
+    $CI = &get_instance();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $CI->db->update(db_prefix() . 'wo_orders', [
+            'last_action' => get_staff_user_id()
+        ]);
+    }
+    return true;
+}

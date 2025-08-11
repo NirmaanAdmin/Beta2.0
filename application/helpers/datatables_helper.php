@@ -393,6 +393,7 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         po.subtotal as subtotal,
         pr.name as project,
         pr.id as project_id,
+        po.last_action as last_action,
         'pur_orders' AS source_table
     FROM tblpur_orders po
     LEFT JOIN tblpur_vendor pv ON pv.userid = po.vendor
@@ -501,6 +502,7 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         wo.subtotal as subtotal,
         pr.name as project,
         pr.id as project_id,
+        wo.last_action as last_action,
         'wo_orders' AS source_table
     FROM tblwo_orders wo
     LEFT JOIN tblpur_vendor pv ON pv.userid = wo.vendor
@@ -609,6 +611,7 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         t.subtotal as subtotal,
         pr.name as project,
         pr.id as project_id,
+        t.last_action as last_action,
         'order_tracker' AS source_table
     FROM tblpur_order_tracker t
     LEFT JOIN tblpur_vendor pv ON pv.userid = t.vendor
