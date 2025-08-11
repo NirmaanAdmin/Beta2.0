@@ -4804,3 +4804,27 @@ function update_pur_invoices_last_action($id)
     }
     return true;
 }
+
+function update_client_invoices_last_action($id)
+{
+    $CI = &get_instance();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $CI->db->update(db_prefix() . 'invoices', [
+            'last_action' => get_staff_user_id()
+        ]);
+    }
+    return true;
+}
+
+function update_client_payments_last_action($id)
+{
+    $CI = &get_instance();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $CI->db->update(db_prefix() . 'invoicepaymentrecords', [
+            'last_action' => get_staff_user_id()
+        ]);
+    }
+    return true;
+}

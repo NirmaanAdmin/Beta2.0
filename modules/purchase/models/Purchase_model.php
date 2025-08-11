@@ -21914,6 +21914,7 @@ class Purchase_model extends App_Model
             $this->db->update(db_prefix() . 'pur_invoices', $dt_data);
 
             if ($this->db->affected_rows() > 0) {
+                update_pur_invoices_last_action($data['vbt_id']);
                 return true;
             } else {
                 return false;

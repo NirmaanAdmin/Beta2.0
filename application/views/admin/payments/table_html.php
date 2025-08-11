@@ -9,6 +9,7 @@
                 <th><?php echo _l('payments_table_client_heading'); ?></th>
                 <th><?php echo _l('payments_table_amount_heading'); ?></th>
                 <th><?php echo _l('payments_table_date_heading'); ?></th>
+                <th><?php echo _l('last_action_by'); ?></th>
             </tr>
         </thead>
         <tbody>
@@ -20,6 +21,7 @@
           <td></td>
           <td></td>
           <td class="total_payments_amount"></td>
+          <td></td>
           <td></td>
         </tfoot>
     </table>

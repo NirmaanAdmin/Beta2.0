@@ -22,6 +22,7 @@ return App_table::find('invoices')
             '(SELECT GROUP_CONCAT(name SEPARATOR ",") FROM ' . db_prefix() . 'taggables JOIN ' . db_prefix() . 'tags ON ' . db_prefix() . 'taggables.tag_id = ' . db_prefix() . 'tags.id WHERE rel_id = ' . db_prefix() . 'invoices.id and rel_type="invoice" ORDER by tag_order ASC) as tags',
             'duedate',
             db_prefix() . 'invoices.status',
+            db_prefix() . 'invoices.last_action',
         ];
 
         $sIndexColumn = 'id';
@@ -150,6 +151,8 @@ return App_table::find('invoices')
             $row[] = e(_d($aRow['duedate']));
 
             $row[] = format_invoice_status($aRow[db_prefix() . 'invoices.status']);
+
+            $row[] = get_last_action_full_name($aRow[db_prefix() . 'invoices.last_action']);
 
             // Custom fields add values
             foreach ($customFieldsColumns as $customFieldColumn) {

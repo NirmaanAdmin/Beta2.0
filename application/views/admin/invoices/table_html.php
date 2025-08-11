@@ -13,6 +13,7 @@
         <th><?php echo _l('tags'); ?></th>
         <th><?php echo _l('invoice_dt_table_heading_duedate'); ?></th>
         <th><?php echo _l('invoice_dt_table_heading_status'); ?></th>
+        <th><?php echo _l('last_action_by'); ?></th>
       </tr>
     </thead>
     <tbody>
@@ -23,6 +24,7 @@
       <td></td>
       <td class="total_invoice_amount"></td>
       <td class="total_invoice_amount_due"></td>
+      <td></td>
       <td></td>
       <td></td>
       <td></td>

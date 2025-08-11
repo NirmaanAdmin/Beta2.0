@@ -4256,3 +4256,4 @@ $lang['monthly_progress_report'] = 'Monthly Progress Report';
 $lang['additional_notes'] = 'Additional Notes';
 $lang['save_report'] = 'Save Report';
 $lang['daily_labor_report'] = 'Daily Labor Report';
+$lang['last_action_by'] = 'Last Action By';

@@ -372,6 +372,8 @@ class Payments_model extends App_Model
             }
 
             pusher_trigger_notification($notifiedUsers);
+            update_client_payments_last_action($insert_id);
+            update_client_invoices_last_action($data['invoiceid']);
 
             hooks()->do_action('after_payment_added', $insert_id);
 

@@ -902,6 +902,7 @@ class Invoices_model extends App_Model
                     ])
                 );
             }
+            update_client_invoices_last_action($id);
         }
 
         if ($this->save_invoice_items($inv_items, $id)) {

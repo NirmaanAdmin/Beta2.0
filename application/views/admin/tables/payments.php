@@ -12,6 +12,7 @@ $aColumns = [
     get_sql_select_client_company(),
     'amount',
     db_prefix() . 'invoicepaymentrecords.date as date',
+    db_prefix() . 'invoicepaymentrecords.last_action as last_action',
     ];
 
 $join = [
@@ -108,6 +109,8 @@ foreach ($rResult as $aRow) {
     $row[] = e(app_format_money($aRow['amount'], $aRow['currency_name']));
 
     $row[] = e(_d($aRow['date']));
+
+    $row[] = get_last_action_full_name($aRow['last_action']);
 
     $row['DT_RowClass'] = 'has-row-options';
 

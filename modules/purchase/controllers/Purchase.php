@@ -3529,6 +3529,10 @@ class purchase extends AdminController
                         ]);
                     }
                 }
+                update_client_invoices_last_action($invoiceid);
+                if (isset($data['vbt_id'])) {
+                    update_pur_invoices_last_action($data['vbt_id']);
+                }
 
                 // set_alert('success', _l('converted', _l('expense')));
                 // echo json_encode([
@@ -12809,6 +12813,7 @@ class purchase extends AdminController
                             if ($select_invoice == "create_invoice") {
                                 $this->purchase_model->mark_converted_pur_invoice($pur_invoice, $id);
                                 $invoiceid = $this->expenses_model->convert_to_invoice($id);
+                                update_client_invoices_last_action($invoiceid);
                                 set_alert('success', _l('vendor_bills_converted_to_ril_invoices'));
                             } elseif ($select_invoice == "applied_invoice") {
                                 $this->purchase_model->mark_converted_pur_invoice($pur_invoice, $id);
@@ -12816,8 +12821,12 @@ class purchase extends AdminController
                                 $applied['invoice_id'] = $applied_to_invoice;
                                 $applied['expense_id'] = $id;
                                 $invoiceid = $this->expenses_model->applied_to_invoice($applied);
+                                update_client_invoices_last_action($invoiceid);
                                 set_alert('success', _l('vendor_bills_converted_to_ril_invoices'));
                             }
+                        }
+                        if (isset($data['vbt_id'])) {
+                            update_pur_invoices_last_action($data['vbt_id']);
                         }
                     }
                 }
