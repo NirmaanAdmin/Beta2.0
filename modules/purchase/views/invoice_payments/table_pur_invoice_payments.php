@@ -32,6 +32,7 @@ $aColumns = [
     'ip.date as ril_date',
     'ril_amount',
     'payment_remarks',
+    db_prefix() . 'pur_invoices.last_action',
 ];
 
 $sIndexColumn = 'id';
@@ -189,6 +190,7 @@ $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [
     db_prefix() . 'pur_invoices.description_services',
     'ril.id as ril_invoice_id',
     'ril.title as ril_invoice_title',
+    db_prefix() . 'pur_invoices.last_action',
     'IF(ril.total > 0, (ip.amount * vendor_submitted_amount_without_tax) / ril.total, 0) AS ril_this_bill',
     '(ril_previous + IF(ril.total > 0, (ip.amount * vendor_submitted_amount_without_tax) / ril.total, 0)) AS ril_amount',
 ]);
@@ -384,6 +386,8 @@ foreach ($rResult as $aRow) {
         } elseif ($aColumns[$i] == 'payment_remarks') {
             $order_name = '<textarea class="form-control payment-remarks-input"  data-id="' . $aRow['id'] . '" rows="3" style="width: 150px">' . $aRow['payment_remarks'] . '</textarea>';
             $_data = $order_name;
+        } elseif ($aColumns[$i] == db_prefix() . 'pur_invoices.last_action') {
+            $_data = get_last_action_full_name($aRow['last_action']);
         } else {
             if (strpos($aColumns[$i], 'date_picker_') !== false) {
                 $_data = (strpos($_data, ' ') !== false ? _dt($_data) : _d($_data));

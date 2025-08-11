@@ -369,6 +369,7 @@
                            'tag',
                            'attachment',
                            'adminnote',
+                           'last_action_by',
                         ];
                         ?>
                         <div>
@@ -405,6 +406,7 @@
                               <th><?php echo _l('tag'); ?></th>
                               <th><?php echo _l('attachment'); ?></th>
                               <th><?php echo _l('adminnote'); ?></th>
+                              <th><?php echo _l('last_action_by'); ?></th>
                            </tr>
                         </thead>
                         <tbody>
@@ -423,6 +425,7 @@
                               <td class="total_vendor_submitted_amount_without_tax"></td>
                               <td class="total_vendor_submitted_tax_amount"></td>
                               <td class="total_final_certified_amount"></td>
+                              <td></td>
                               <td></td>
                               <td></td>
                               <td></td>

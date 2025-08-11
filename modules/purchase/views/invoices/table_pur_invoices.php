@@ -35,6 +35,7 @@ $aColumns = [
     'vendor_note',
     db_prefix() . 'pur_invoices.id as inv_id',
     db_prefix() . 'pur_invoices.adminnote',
+    db_prefix() . 'pur_invoices.last_action',
 ];
 
 $sIndexColumn = 'id';
@@ -292,6 +293,7 @@ $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [
     db_prefix() . 'pur_invoices.vendor as vendor_id',
     db_prefix() . 'pur_invoices.pur_order',
     db_prefix() . 'pur_invoices.order_tracker_id',
+    db_prefix() . 'pur_invoices.last_action',
 ], '', [], '', 'vendor_billing_tracker');
 
 $output  = $result['output'];
@@ -593,6 +595,8 @@ foreach ($rResult as $aRow) {
         } elseif ($aColumns[$i] == 'billing_remarks') {
             $order_name = '<textarea class="form-control billing-remarks-input"  data-id="' . $aRow['id'] . '" rows="3" style="width: 150px">' . $aRow['billing_remarks'] . '</textarea>';
             $_data = $order_name;
+        } elseif ($aColumns[$i] == db_prefix() . 'pur_invoices.last_action') {
+            $_data = get_last_action_full_name($aRow['last_action']);
         } else {
             if (strpos($aColumns[$i], 'date_picker_') !== false) {
                 $_data = (strpos($_data, ' ') !== false ? _dt($_data) : _d($_data));

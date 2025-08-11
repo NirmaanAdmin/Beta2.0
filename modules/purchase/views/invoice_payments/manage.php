@@ -311,6 +311,7 @@
                            'ril_date',
                            'ril_amount',
                            'remarks',
+                           'last_action_by',
                         ];
                         ?>
                         <div>
@@ -345,6 +346,7 @@
                               <th><?php echo _l('ril_date'); ?></th>
                               <th><?php echo _l('ril_amount'); ?></th>
                               <th><?php echo _l('remarks'); ?></th>
+                              <th><?php echo _l('last_action_by'); ?></th>
                            </tr>
                         </thead>
                         <tbody>
@@ -370,6 +372,7 @@
                               <td class="total_ril_this_bill"></td>
                               <td></td>
                               <td class="total_ril_amount"></td>
+                              <td></td>
                               <td></td>
                            </tr>
                         </tfoot>

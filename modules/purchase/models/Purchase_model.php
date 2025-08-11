@@ -7113,6 +7113,7 @@ class Purchase_model extends App_Model
 
             $this->db->where('id', $insert_id);
             $this->db->update(db_prefix() . 'pur_invoices', $total);
+            update_pur_invoices_last_action($insert_id);
 
             hooks()->do_action('after_pur_invoice_added', $insert_id);
 
@@ -7352,6 +7353,7 @@ class Purchase_model extends App_Model
 
         $this->update_pur_invoice_status($id);
         $this->update_vbt_expense_ril_data($id);
+        update_pur_invoices_last_action($id);
 
         hooks()->do_action('after_pur_invoice_updated', $id);
         if ($this->db->affected_rows() > 0) {
@@ -8222,6 +8224,7 @@ class Purchase_model extends App_Model
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'pur_invoices', ['payment_status' => $status]);
         if ($this->db->affected_rows() > 0) {
+            update_pur_invoices_last_action($id);
             return true;
         }
         return false;
@@ -17498,6 +17501,7 @@ class Purchase_model extends App_Model
                 $input['daterecorded'] = date('Y-m-d H:i:s');
                 $this->db->insert('tblinvoicepaymentrecords', $input);
             }
+            update_pur_invoices_last_action($id);
         }
         return true;
     }
@@ -17542,6 +17546,7 @@ class Purchase_model extends App_Model
             $pur_invoice_payment_id = $this->db->insert_id();
         }
         $this->update_pur_invoice_payment_status($pur_invoice);
+        update_pur_invoices_last_action($pur_invoice);
         return $pur_invoice_payment_id;
     }
 
@@ -17571,6 +17576,7 @@ class Purchase_model extends App_Model
             $pur_invoice_payment_id = $this->db->insert_id();
         }
         $this->update_pur_invoice_payment_status($pur_invoice);
+        update_pur_invoices_last_action($pur_invoice);
         return $pur_invoice_payment_id;
     }
 
@@ -17600,6 +17606,7 @@ class Purchase_model extends App_Model
             $pur_invoice_payment_id = $this->db->insert_id();
         }
         $this->update_pur_invoice_payment_status($pur_invoice);
+        update_pur_invoices_last_action($pur_invoice);
         return $pur_invoice_payment_id;
     }
 
@@ -17881,6 +17888,7 @@ class Purchase_model extends App_Model
                 $this->invoices_model->update_basic_invoice_details($itemable->rel_id);
             }
         }
+        update_pur_invoices_last_action($id);
 
         return true;
     }

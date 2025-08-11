@@ -4792,3 +4792,15 @@ function get_last_action_full_name($userid = '')
         return '';
     }
 }
+
+function update_pur_invoices_last_action($id)
+{
+    $CI = &get_instance();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $CI->db->update(db_prefix() . 'pur_invoices', [
+            'last_action' => get_staff_user_id()
+        ]);
+    }
+    return true;
+}

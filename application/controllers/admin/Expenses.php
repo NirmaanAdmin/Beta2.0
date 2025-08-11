@@ -576,6 +576,7 @@ class Expenses extends AdminController
         if ($insert_id) {
             $this->db->where('option_name', 'next_inv_number');
             $this->db->update(db_prefix() . 'purchase_option', ['option_val' =>  $next_number + 1]);
+            update_pur_invoices_last_action($insert_id);
         }
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'expenses', ['vbt_id' => $insert_id]);

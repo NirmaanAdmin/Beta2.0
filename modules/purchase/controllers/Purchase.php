@@ -11871,6 +11871,7 @@ class purchase extends AdminController
         // Perform the update
         $this->db->where('id', $id);
         $success = $this->db->update('tblpur_invoices', ['invoice_date' => $invoice_date]);
+        update_pur_invoices_last_action($id);
 
         if ($success) {
             echo json_encode(['success' => true, 'message' => 'Invoice date is updated']);
@@ -11893,6 +11894,7 @@ class purchase extends AdminController
         // Perform the update
         $this->db->where('id', $id);
         $success = $this->db->update('tblpur_invoices', ['adminnote' => $admin_note]);
+        update_pur_invoices_last_action($id);
 
         if ($success) {
             echo json_encode(['success' => true, 'message' => 'Admin Note is updated']);
@@ -12701,6 +12703,7 @@ class purchase extends AdminController
         // Perform the update
         $this->db->where('id', $id);
         $success = $this->db->update('tblpur_invoices', ['payment_remarks' => $payment_remarks]);
+        update_pur_invoices_last_action($id);
 
         if ($success) {
             echo json_encode(['success' => true, 'message' => 'Remarks is updated']);
@@ -13000,6 +13003,7 @@ class purchase extends AdminController
         if ($insert_id) {
             $this->db->where('option_name', 'next_inv_number');
             $this->db->update(db_prefix() . 'purchase_option', ['option_val' =>  $next_number + 1]);
+            update_pur_invoices_last_action($insert_id);
         }
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'payment_certificate', ['pur_invoice_id' => $insert_id]);
