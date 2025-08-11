@@ -245,7 +245,7 @@ class drawing_management extends AdminController
 				}
 				$data['custom_field'] = $custom_field;
 				$data['related_file'] = $related_file;
-				$res = $this->drawing_management_model->update_item($data); 
+				$res = $this->drawing_management_model->update_item($data);  
 				if ($res) {
 					set_alert('success', _l('dmg_updated_successfully'));
 				} else {

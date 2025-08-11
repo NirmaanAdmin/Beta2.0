@@ -265,7 +265,7 @@
 									<?php
 									if (isset($item)) {
 										if (isset($item) && $item->filetype == 'folder') {
-											$child_items = $this->document_management_model->get_item('', 'parent_id = ' . $parent_id, 'name, id, dateadded, filetype');
+											$child_items = $this->document_management_model->get_item('', 'parent_id = ' . $parent_id, 'name, id, dateadded, filetype, last_action');
 											if (count($child_items)) {
 												$this->load->view('file_managements/includes/item_list.php', ['child_items' => $child_items]);
 											} else { ?>

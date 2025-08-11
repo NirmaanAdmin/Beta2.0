@@ -395,8 +395,8 @@
 											<?php
 											if (isset($item)) {
 												if (isset($item) && $item->filetype == 'folder') {
-													$child_items = $this->drawing_management_model->get_item('', 'parent_id = ' . $parent_id, 'name, id, dateadded, filetype,parent_id');
-													if (count($child_items)) {
+													$child_items = $this->drawing_management_model->get_item('', 'parent_id = ' . $parent_id, 'name, id, dateadded, filetype,parent_id,last_action');
+													if (count($child_items)) { 
 														$this->load->view('file_managements/includes/item_list.php', ['child_items' => $child_items]);
 													} else { ?>
 														<div class="row mbot20">

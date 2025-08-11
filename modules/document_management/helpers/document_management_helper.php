@@ -15,7 +15,7 @@ if (!function_exists('add_document_management_email_templates')) {
 		$CI->load->view('document_management/email_templates', $data);
 	}
 }
-
+ 
 function init_fist_item($type = 'staff'){
 	$CI = & get_instance();
 	$user_id = 0;
@@ -384,4 +384,48 @@ function doc_get_client_ip() {
 		$ip = $_SERVER['REMOTE_ADDR'];
 	}
 	return $ip;
+}
+function update_document_last_action($id)
+{
+	$CI = &get_instance();
+	if (!empty($id)) {
+		// First update the current item
+		$CI->db->where('id', $id);
+		$CI->db->update(db_prefix() . 'dmg_items', [
+			'last_action' => get_staff_user_id()
+		]);
+
+		// Check if this item has any parents that need updating
+		$current_id = $id;
+		$max_depth = 10; // Prevent infinite loops in case of circular references
+		$processed_ids = [$id]; // Track processed IDs to avoid duplicates
+
+		while ($max_depth-- > 0) {
+			// Get parent of current item
+			$CI->db->select('parent_id');
+			$CI->db->where('id', $current_id);
+			$parent = $CI->db->get(db_prefix() . 'dmg_items')->row();
+
+			// If no parent or parent_id is 0, we're done
+			if (empty($parent) || $parent->parent_id <= 0) {
+				break;
+			}
+
+			// Avoid processing the same ID twice
+			if (in_array($parent->parent_id, $processed_ids)) {
+				break;
+			}
+
+			// Update the parent's last_action
+			$CI->db->where('id', $parent->parent_id);
+			$CI->db->update(db_prefix() . 'dmg_items', [
+				'last_action' => get_staff_user_id()
+			]);
+
+			// Add to processed IDs and move up the tree
+			$processed_ids[] = $parent->parent_id;
+			$current_id = $parent->parent_id;
+		}
+	}
+	return true;
 }

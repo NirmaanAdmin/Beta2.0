@@ -204,6 +204,7 @@ class drawing_management_model extends app_model
 			$this->db->update(db_prefix() . 'dms_items', $data);
 
 			if ($this->db->affected_rows() > 0) {
+				update_drawing_last_action($id);
 				// Rename file if name has been changed
 				if (isset($data['name']) && ($data_item->name != $data['name'])) {
 					$this->change_file_name($id, $data['name']);

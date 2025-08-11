@@ -27,11 +27,12 @@
 			<th scope="col"><input type="checkbox" id="mass_select_all" data-to-table="checkout_managements"></th>
 			<th scope="col"><?php echo _l('dmg_name'); ?></th>
 			<th scope="col"><?php echo _l('dms_date'); ?></th>
+			<th scope="col"><?php echo _l('Last Updated By'); ?></th>
 			<th scope="col"><?php echo _l('dmg_option'); ?></th>
 		</tr>
 	</thead>
 	<tbody id="sortable-tbody">
-		<?php foreach ($child_items as $key => $value) {
+		<?php foreach ($child_items as $key => $value) { 
 			$item_icon = ($value['filetype'] == 'folder')
 				? '<i class="fa fa-folder text-yellow fs-19"></i>'
 				: '<i class="fa fa-file text-primary fs-14"></i>';
@@ -49,6 +50,9 @@
 				</td>
 				<td>
 					<?php echo drawing_htmldecode($a1 . _dt($value['dateadded']) . $a2); ?>
+				</td>
+				<td>
+					<?php echo get_last_action_full_name($value['last_action']); ?>
 				</td>
 				<td>
 					<div class="dropdown pull-right">

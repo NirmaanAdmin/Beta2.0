@@ -190,6 +190,7 @@ class document_management_model extends app_model
 			}
 		}
 		if ($affectedRows > 0) {
+			update_document_last_action($id);
 			$this->add_audit_log($id, _l('dmg_updated_file'));
 			return true;
 		}

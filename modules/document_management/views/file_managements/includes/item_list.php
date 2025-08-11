@@ -24,6 +24,7 @@
 			position: relative;
 			padding-right: 20px;
 		}
+
 		.column_sortable .sort-arrow {
 			position: absolute;
 			right: 5px;
@@ -40,6 +41,7 @@
 				<th scope="col"><input type="checkbox" id="mass_select_all" data-to-table="checkout_managements"></th>
 				<th scope="col" class="column_sortable" data-sort="name"><?php echo _l('dmg_name'); ?></th>
 				<th scope="col"><?php echo _l('dmg_date'); ?></th>
+				<th scope="col"><?php echo _l('Last Updated By'); ?></th>
 				<th scope="col" align="right"><?php echo _l('dmg_option'); ?></th>
 			</tr>
 		</thead>
@@ -65,6 +67,9 @@
 					</td>
 					<td>
 						<?php echo htmldecode($a1 . _dt($value['dateadded']) . $a2); ?>
+					</td>
+					<td>
+						<?php echo get_last_action_full_name($value['last_action']); ?>
 					</td>
 					<td>
 						<div class="dropdown pull-right">
@@ -150,7 +155,7 @@
 					$.ajax({
 						url: admin_url + 'document_management/update_order',
 						type: 'POST',
-						data: { 
+						data: {
 							order: newOrder
 						},
 						success: function(response) {
@@ -168,7 +173,7 @@
 			const headers = document.querySelectorAll('th.column_sortable');
 
 			headers.forEach(th => {
-				th.addEventListener('click', function () {
+				th.addEventListener('click', function() {
 					const sortKey = th.dataset.sort;
 					const isAsc = !sortState[sortKey];
 					sortState[sortKey] = isAsc;
@@ -188,7 +193,8 @@
 					const rows = Array.from(tbody.querySelectorAll('tr'));
 
 					rows.sort((a, b) => {
-						let valA = '', valB = '';
+						let valA = '',
+							valB = '';
 
 						if (sortKey === 'name') {
 							valA = a.querySelector('td:nth-child(3)').textContent.trim().toLowerCase();
