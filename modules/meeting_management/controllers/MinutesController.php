@@ -534,7 +534,7 @@ class MinutesController extends AdminController
     }
 
     public function critical_agenda()
-    {
+    { 
 
         $data['critical_agenda'] = $this->Meeting_model->get_critical_agenda();
         $data['department'] = $this->Departments_model->get();
@@ -653,7 +653,7 @@ class MinutesController extends AdminController
         // 2. Update in database
         $success = $this->Meeting_model->update_agenda_department($agenda_id, $department_id);
         $message = $success
-            ? _l('department_changed_successfully')
+            ? _l('department_changed_successfully') 
             : _l('department_change_failed');
 
         // 3. Prepare response payload
@@ -714,6 +714,7 @@ class MinutesController extends AdminController
         $success = $this->db->update(db_prefix() . 'critical_mom', ['date_closed' => $closedDate]);
 
         if ($success) {
+            update_critical_tracker_last_action($id);
             echo json_encode(['success' => true, 'message' => _l('closed_date_updated')]);
         } else {
             echo json_encode(['success' => false, 'message' => _l('update_failed')]);
@@ -735,6 +736,7 @@ class MinutesController extends AdminController
         $success = $this->db->update(db_prefix() . 'critical_mom', ['target_date' => $targetDate]);
 
         if ($success) {
+            update_critical_tracker_last_action($id);
             echo json_encode(['success' => true, 'message' => _l('Target Date Updated Successfully')]);
         } else {
             echo json_encode(['success' => false, 'message' => _l('update_failed')]);
@@ -811,6 +813,7 @@ class MinutesController extends AdminController
         $success = $this->db->update(db_prefix() . 'critical_mom', ['area' => $area]);
 
         if ($success) {
+            update_critical_tracker_last_action($id);
             echo json_encode(['success' => true, 'message' => _l('area_updated')]);
         } else {
             echo json_encode(['success' => false, 'message' => _l('update_failed')]);
@@ -831,6 +834,7 @@ class MinutesController extends AdminController
         $success = $this->db->update(db_prefix() . 'critical_mom', ['description' => $description]);
 
         if ($success) {
+            update_critical_tracker_last_action($id);
             echo json_encode(['success' => true, 'message' => _l('description_updated')]);
         } else {
             echo json_encode(['success' => false, 'message' => _l('update_failed')]);
@@ -851,6 +855,7 @@ class MinutesController extends AdminController
         $success = $this->db->update(db_prefix() . 'critical_mom', ['decision' => $decision]);
 
         if ($success) {
+            update_critical_tracker_last_action($id);
             echo json_encode(['success' => true, 'message' => _l('decision_updated')]);
         } else {
             echo json_encode(['success' => false, 'message' => _l('update_failed')]);
@@ -878,6 +883,7 @@ class MinutesController extends AdminController
         $success = $this->db->update(db_prefix() . 'critical_mom', ['action' => $action]);
 
         if ($success) {
+            update_critical_tracker_last_action($id);
             echo json_encode(['success' => true, 'message' => _l('action_updated')]);
         } else {
             echo json_encode(['success' => false, 'message' => _l('update_failed')]);
@@ -906,6 +912,7 @@ class MinutesController extends AdminController
         $success = $this->db->update(db_prefix() . 'critical_mom', ['vendor' => $vendor]);
 
         if ($success) {
+            update_critical_tracker_last_action($id);
             echo json_encode(['success' => true, 'message' => _l('vendor_updated')]);
         } else {
             echo json_encode(['success' => false, 'message' => _l('update_failed')]);

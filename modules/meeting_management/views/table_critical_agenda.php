@@ -24,6 +24,7 @@ $aColumns      = [
     'status',
     'priority',
     'minute_id',
+    'last_action'
 ];
 $sIndexColumn  = 'id';
 $sTable        = db_prefix() . 'critical_mom';
@@ -375,6 +376,9 @@ foreach ($rResult as $aRow) {
 
 
     $row[] = get_meeting_name_by_id($aRow['minute_id']);
+
+    $row[] = get_last_action_full_name($aRow['last_action']);
+
 
     $output['aaData'][] = $row;
 }

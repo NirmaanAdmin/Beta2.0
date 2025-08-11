@@ -159,6 +159,7 @@ $module_name = 'critical_mom'; ?>
                                     _l('Status'),
                                     _l('Priority'),
                                     _l('Fetched From'),
+                                    _l('Last Action By'),
                                 ];
                                 ?>
                                 <div>
@@ -200,6 +201,7 @@ $module_name = 'critical_mom'; ?>
                                     <th>Status</th>
                                     <th>Priority</th>
                                     <th>Fetched From</th>
+                                    <th>Last Action By</th>
                                 </tr>
                             </thead>
                             <tbody>

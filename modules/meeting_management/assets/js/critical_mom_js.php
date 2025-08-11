@@ -422,7 +422,7 @@
         previewArea.find('textarea').val('');
         previewArea.find('select').val('').selectpicker('refresh');
     }
-
+    var table_order_tracker = $('.table-table_critical_tracker').DataTable();
     $('body').on('click', '.area-display', function(e) {
         e.preventDefault();
 

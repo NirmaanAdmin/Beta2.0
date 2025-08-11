@@ -227,3 +227,15 @@ function get_critical_tracker_pdf()
     // 5) Execute and return
     return $CI->db->query($sql)->result_array();
 }
+function update_critical_tracker_last_action($id)
+{
+    $CI = &get_instance();
+    if (!empty($id)) {
+        $CI->db->where('id', $id);
+        $CI->db->update(db_prefix() . 'critical_mom', [
+            'last_action' => get_staff_user_id()
+        ]);
+    }
+    return true;
+}
+

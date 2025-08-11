@@ -1091,6 +1091,7 @@ class Meeting_model extends App_Model
     {
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'critical_mom', ['status' => $status]);
+        update_critical_tracker_last_action($id);
         return true;
     }
 
@@ -1105,6 +1106,7 @@ class Meeting_model extends App_Model
     {
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'critical_mom', ['priority' => $status]);
+        update_critical_tracker_last_action($id);
         return true;
     }
 
@@ -1119,6 +1121,7 @@ class Meeting_model extends App_Model
     {
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'critical_mom', ['department' => $department_id]);
+        update_critical_tracker_last_action($id);
         return true;
     }
 
@@ -1296,6 +1299,8 @@ class Meeting_model extends App_Model
 
                 $this->db->insert(db_prefix() . 'critical_mom', $dt_data);
                 $last_insert_id[] = $this->db->insert_id();
+                $last_id = $this->db->insert_id();
+                update_critical_tracker_last_action($last_id);
             }
             return $last_insert_id;
         }
