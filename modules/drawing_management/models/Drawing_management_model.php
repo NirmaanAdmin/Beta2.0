@@ -225,53 +225,47 @@ class drawing_management_model extends app_model
 
 			// Only generate document number if it's empty
 			if (empty($data['document_number'])) {
-				// Get first 3 letters of each component (uppercase)
-				$project_code = strtoupper(substr($project_name, 0, 3));
-				$discipline_code = strtoupper(substr($discipline_name, 0, 3));
+				// Build codes
+				$project_code      = strtoupper(substr($project_name, 0, 3));
+				$discipline_code   = strtoupper(substr($discipline_name, 0, 3));
 				$design_stage_code = strtoupper(substr($design_stage_name, 0, 3));
 
-				// Special handling for purpose - first letter of each word
-				$purpose_words = explode(' ', $purpose_name);
+				// Purpose = first letters of words, max 3 chars
 				$purpose_code = '';
-				foreach ($purpose_words as $word) {
-					if (!empty($word)) {
-						$purpose_code .= strtoupper(substr($word, 0, 1));
-					}
+				foreach (explode(' ', $purpose_name) as $w) {
+					$w = trim($w);
+					if ($w !== '') $purpose_code .= strtoupper($w[0]);
 				}
-				// Ensure we have exactly 3 characters for purpose code
-				$purpose_code = strtoupper(substr($purpose_code, 0, 3));
+				$purpose_code = substr($purpose_code, 0, 3);
 
 				$status_code = strtoupper(substr($status_name, 0, 3));
 
-				// Find the highest existing number for this combination
-				
-				$this->db->order_by('document_number', 'DESC');
-				$this->db->limit(1);
-				$last_doc = $this->db->get(db_prefix() . 'dms_items')->row();
+				// Find the highest trailing number across ALL document_number values that match the full pattern
+				$regex = "^[A-Z0-9]{3}-[A-Z0-9]{3}-[A-Z0-9]{3}-[A-Z0-9]{3}-[A-Z0-9]{3}-[0-9]{3}$";
 
-				$number = 1;
-				if ($last_doc && !empty($last_doc->document_number)) {
-					// Extract the number from the end of the document number
-					$parts = explode('-', $last_doc->document_number);
-					$last_number = end($parts);
-					if (is_numeric($last_number)) {
-						$number = (int)$last_number + 1;
-					}
-				}
+				$this->db->select('MAX(CAST(SUBSTRING_INDEX(document_number, "-", -1) AS UNSIGNED)) AS max_num', false)
+					->from(db_prefix() . 'dms_items')
+					// pass raw condition so CI doesn't escape it
+					->where("document_number REGEXP '{$regex}'", null, false);
 
-				// Create the new document number
+				$row = $this->db->get()->row();
+				$next_num = isset($row->max_num) && is_numeric($row->max_num)
+					? ((int)$row->max_num + 1)
+					: 1;
+
+				// Build new document number with YOUR current prefix + next global number
 				$document_number = implode('-', [
 					$project_code,
 					$discipline_code,
 					$design_stage_code,
 					$purpose_code,
 					$status_code,
-					str_pad($number, 3, '0', STR_PAD_LEFT) // 3-digit number with leading zeros
+					str_pad($next_num, 3, '0', STR_PAD_LEFT)
 				]);
 
-				// Add the document number to the data array
 				$data['document_number'] = $document_number;
 			}
+
 
 			$this->db->where('id', $id);
 			$this->db->update(db_prefix() . 'dms_items', $data);
