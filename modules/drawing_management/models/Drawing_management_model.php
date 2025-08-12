@@ -244,10 +244,12 @@ class drawing_management_model extends app_model
 				$status_code = strtoupper(substr($status_name, 0, 3));
 
 				// Find the highest existing number for this combination
-				$this->db->like('document_number', $project_code . '-' . $discipline_code . '-' . $design_stage_code . '-' . $purpose_code . '-' . $status_code, 'after');
-				$this->db->order_by('document_number', 'DESC');
+				$this->db->select('document_number');
+				$this->db->from(db_prefix() . 'dms_items');
+				$this->db->where('document_number REGEXP', '^[A-Z0-9]{3}-[A-Z0-9]{3}-[A-Z0-9]{3}-[A-Z0-9]{3}-[A-Z0-9]{3}-[0-9]{3}$');
+				$this->db->order_by('CAST(SUBSTRING_INDEX(document_number, "-", -1) AS UNSIGNED)', 'DESC');
 				$this->db->limit(1);
-				$last_doc = $this->db->get(db_prefix() . 'dms_items')->row();
+				$last_doc = $this->db->get()->row();
 
 				$number = 1;
 				if ($last_doc && !empty($last_doc->document_number)) {
