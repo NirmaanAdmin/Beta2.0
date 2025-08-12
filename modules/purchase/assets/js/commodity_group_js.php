@@ -35,4 +35,23 @@ $('select[name="select_project"]').on('change', function () {
   commodity_group_table.DataTable().ajax.reload();
 });
 
+$(document).on('click', '.delete_commodity_group_type', function(e) {
+   e.preventDefault();
+   var url = $(this).attr('href');
+   Swal.fire({
+      title: 'Are you sure?',
+      text: 'Are you sure you want to remove this budget head?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, remove it!',
+      cancelButtonText: 'Cancel'
+   }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = url;
+      }
+   });
+});
+
 </script>

@@ -24050,4 +24050,10 @@ class Purchase_model extends App_Model
 
         return $response;
     }
+
+    public function get_pur_invoice_budget_head($group_pur)
+    {
+        $this->db->where('group_pur', $group_pur);
+        return $this->db->get(db_prefix() . 'pur_invoices')->result_array();
+    }
 }

@@ -45,7 +45,7 @@ foreach ($rResult as $key => $aRow) {
     }
 
     if (has_permission('purchase_settings', '', 'edit') || is_admin()) {
-        $options .= ' <a href="' . admin_url('purchase/delete_commodity_group_type/' . $id) . '" class="btn btn-danger btn-icon _delete"><i class="fa fa-remove"></i></a>';
+        $options .= ' <a href="' . admin_url('purchase/delete_commodity_group_type/' . $id) . '" class="btn btn-danger btn-icon delete_commodity_group_type"><i class="fa fa-remove"></i></a>';
     }
 
     $row[] = $options;

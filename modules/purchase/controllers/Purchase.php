@@ -4292,6 +4292,11 @@ class purchase extends AdminController
         if (!$id) {
             redirect(admin_url('purchase/setting?group=commodity_group'));
         }
+        $budget_head = $this->purchase_model->get_pur_invoice_budget_head($id);
+        if(!empty($budget_head)) {
+            set_alert('warning', 'This budget head is already linked to a vendor billing tracker.');
+            redirect(admin_url('purchase/setting?group=commodity_group'));
+        }
         $response = $this->purchase_model->delete_commodity_group_type($id);
         if (is_array($response) && isset($response['referenced'])) {
             set_alert('warning', _l('is_referenced', _l('commodity_group_type')));
