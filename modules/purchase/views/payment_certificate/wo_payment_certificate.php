@@ -173,15 +173,14 @@
                     </div>
                   </div>
 
-                  <?php if ($is_view == 1 && get_staff_user_id() == 2) { ?>
+                  <?php if (isset($payment_certificate_id) && is_admin()) { ?>
                     <div class="row">
                       <div class="col-md-12 form-group">
-                        <select name="status" id="status" class="selectpicker pull-right mright10" onchange="change_status_pay_cert(this,<?php echo ($payment_certificate_id); ?>); return false;" data-live-search="true" data-width="35%" data-none-selected-text="<?php echo _l('pur_change_status_to'); ?>">
+                        <select name="status" id="status" class="selectpicker pull-right mright10" onchange="change_status_pay_cert(this,<?php echo ($payment_certificate_id); ?>); return false;" data-live-search="true" data-width="25%" data-none-selected-text="<?php echo _l('pur_change_status_to'); ?>">
                           <option value=""></option>
                           <option value="1"><?php echo _l('purchase_draft'); ?></option>
                           <option value="2"><?php echo _l('purchase_approved'); ?></option>
                           <option value="3"><?php echo _l('pur_rejected'); ?></option>
-                          <option value="4"><?php echo _l('pur_canceled'); ?></option>
                         </select>
                       </div>
                     </div>

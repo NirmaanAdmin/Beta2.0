@@ -18235,6 +18235,9 @@ class Purchase_model extends App_Model
     {
         unset($data['isedit']);
         unset($data['payment_certificate_id']);
+        if(isset($data['status'])) {
+            unset($data['status']);
+        }
         $data['bill_received_on'] = to_sql_date($data['bill_received_on']);
         if (!empty($data['bill_period_upto'])) {
             $data['bill_period_upto'] = to_sql_date($data['bill_period_upto']);
@@ -23863,6 +23866,9 @@ class Purchase_model extends App_Model
     {
         unset($data['isedit']);
         unset($data['payment_certificate_id']);
+        if(isset($data['status'])) {
+            unset($data['status']);
+        }
         $data['bill_received_on'] = to_sql_date($data['bill_received_on']);
         if (!empty($data['bill_period_upto'])) {
             $data['bill_period_upto'] = to_sql_date($data['bill_period_upto']);
