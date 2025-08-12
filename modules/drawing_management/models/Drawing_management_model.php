@@ -200,6 +200,79 @@ class drawing_management_model extends app_model
 					// set_alert('danger', _l('only_dwg_xref_files_allowed'));
 				}
 			}
+			$this->load->model('projects_model');
+			$get_project_id = get_default_project();
+			$project_name = $this->projects_model->get($get_project_id);
+			$project_name = $project_name->name;
+			$discipline_arr = $this->get_discipline($data['discipline']);
+			$discipline_name = $discipline_arr[0]['name'];
+
+			$design_stages = [
+				1 => 'Documents Under Review',
+				2 => 'Briefs',
+				3 => 'Concept',
+				4 => 'Schematic',
+				5 => 'Design Development',
+				6 => 'Tender Documents',
+				7 => 'Construction Documents',
+				8 => 'Shop Drawings',
+				9 => 'As-Built'
+			];
+
+			$design_stage_name = $design_stages[$data['design_stage']];
+			$purpose_name = $data['purpose'];
+			$status_name = $data['status'];
+
+			// Only generate document number if it's empty
+			if (empty($data['document_number'])) {
+				// Get first 3 letters of each component (uppercase)
+				$project_code = strtoupper(substr($project_name, 0, 3));
+				$discipline_code = strtoupper(substr($discipline_name, 0, 3));
+				$design_stage_code = strtoupper(substr($design_stage_name, 0, 3));
+
+				// Special handling for purpose - first letter of each word
+				$purpose_words = explode(' ', $purpose_name);
+				$purpose_code = '';
+				foreach ($purpose_words as $word) {
+					if (!empty($word)) {
+						$purpose_code .= strtoupper(substr($word, 0, 1));
+					}
+				}
+				// Ensure we have exactly 3 characters for purpose code
+				$purpose_code = strtoupper(substr($purpose_code, 0, 3));
+
+				$status_code = strtoupper(substr($status_name, 0, 3));
+
+				// Find the highest existing number for this combination
+				$this->db->like('document_number', $project_code . '-' . $discipline_code . '-' . $design_stage_code . '-' . $purpose_code . '-' . $status_code, 'after');
+				$this->db->order_by('document_number', 'DESC');
+				$this->db->limit(1);
+				$last_doc = $this->db->get(db_prefix() . 'dms_items')->row();
+
+				$number = 1;
+				if ($last_doc && !empty($last_doc->document_number)) {
+					// Extract the number from the end of the document number
+					$parts = explode('-', $last_doc->document_number);
+					$last_number = end($parts);
+					if (is_numeric($last_number)) {
+						$number = (int)$last_number + 1;
+					}
+				}
+
+				// Create the new document number
+				$document_number = implode('-', [
+					$project_code,
+					$discipline_code,
+					$design_stage_code,
+					$purpose_code,
+					$status_code,
+					str_pad($number, 3, '0', STR_PAD_LEFT) // 3-digit number with leading zeros
+				]);
+
+				// Add the document number to the data array
+				$data['document_number'] = $document_number;
+			}
+
 			$this->db->where('id', $id);
 			$this->db->update(db_prefix() . 'dms_items', $data);
 
@@ -284,7 +357,6 @@ class drawing_management_model extends app_model
 	{
 
 		$file = $this->db->where('id', $id)->get(db_prefix() . 'dms_items')->row();
-
 		if (!$file) {
 			return "Document type not found.";
 		}
@@ -2568,9 +2640,9 @@ class drawing_management_model extends app_model
 		$this->db->from(db_prefix() . 'dms_items');
 		$this->db->like(db_prefix() . 'dms_items.name', $query);
 		$this->db->join(
-		    db_prefix() . 'dms_items AS parent',
-		    'parent.id = ' . db_prefix() . 'dms_items.master_id',
-		    'left'
+			db_prefix() . 'dms_items AS parent',
+			'parent.id = ' . db_prefix() . 'dms_items.master_id',
+			'left'
 		);
 		$this->db->group_by(db_prefix() . 'dms_items.id');
 		$this->db->having("(master_project_id = $default_project OR master_project_id = 0)");

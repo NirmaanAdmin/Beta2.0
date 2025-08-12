@@ -172,7 +172,7 @@ class drawing_management extends AdminController
 		$result =  $this->drawing_management_model->upload_file($id, 'files');
 
 		if ($result) {
-			$this->drawing_management_model->get_document_number($result);
+			// $this->drawing_management_model->get_document_number($result);sssss
 			set_alert('success', _l('dmg_uploaded_successfully'));
 		} else {
 			set_alert('danger', _l('dmg_upload_failed'));
@@ -238,7 +238,7 @@ class drawing_management extends AdminController
 					$redirect_type = $data['redirect_type'];
 					unset($data['redirect_type']);
 				}
-				$custom_field = '';
+				$custom_field = ''; 
 				$related_file = '';
 				if (isset($data['related_file'])) {
 					$related_file = implode(',', $data['related_file']);
