@@ -340,7 +340,12 @@
 
 
   })(jQuery);
-
+  var table_order_tracker_new;
+    if ($('.table-table_manage_actual_goods_receipt').length) {
+      table_order_tracker_new = $('.table-table_manage_actual_goods_receipt').DataTable();
+    } else if ($('.table-items-preview').length) {
+      table_order_tracker_new = $('.table-items-preview').DataTable();
+    }
 
   function signaturePadChanged() {
     "use strict";
@@ -547,6 +552,7 @@
 
               // Display success message
               alert_float('success', response.mess);
+              table_order_tracker_new.ajax.reload(null, false);
             } else {
               // Display warning message if the operation fails
               alert_float('warning', response.mess);

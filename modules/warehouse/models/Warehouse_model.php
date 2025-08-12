@@ -21320,13 +21320,16 @@ class Warehouse_model extends App_Model
 		if ($purchase_tracker == "false") {
 			if ($purOrder == "true") {
 				$this->db->update(db_prefix() . 'pur_order_detail', ['imp_local_status' => $status]);
+				update_pur_orders_tracker_details_last_action($id);
 			} elseif ($purOrder == "false") {
 				$this->db->update(db_prefix() . 'wo_order_detail', ['imp_local_status' => $status]);
+				update_wo_orders_tracker_details_last_action($id);
 			}
 		} else {
 			$this->db->update(db_prefix() . 'goods_receipt_detail', ['imp_local_status' => $status]);
+			update_goods_orders_tracker_details_last_action($id);
 		}
-		return true;
+		return true; 
 	}
 
 	function change_tracker_status($status, $id, $purchase_tracker, $purOrder)
@@ -21335,11 +21338,14 @@ class Warehouse_model extends App_Model
 		if ($purchase_tracker == "false") {
 			if ($purOrder == "true") {
 				$this->db->update(db_prefix() . 'pur_order_detail', ['tracker_status' => $status]);
+				update_pur_orders_tracker_details_last_action($id);
 			} elseif ($purOrder == "false") {
 				$this->db->update(db_prefix() . 'wo_order_detail', ['tracker_status' => $status]);
+				update_wo_orders_tracker_details_last_action($id);
 			}
 		} else {
 			$this->db->update(db_prefix() . 'goods_receipt_detail', ['tracker_status' => $status]);
+			update_goods_orders_tracker_details_last_action($id);
 		}
 		return true;
 	}

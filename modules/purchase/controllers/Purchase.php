@@ -12062,7 +12062,7 @@ class purchase extends AdminController
         $data['units_warehouse_name'] = $this->warehouse_model->get_warehouse_code_name();
 
         $data['goods_receipt_detail'] = $this->warehouse_model->get_goods_receipt_detail($id);
-
+ 
         $data['goods_receipt'] = $this->warehouse_model->get_goods_receipt($id);
 
         $data['tax_data'] = $this->warehouse_model->get_html_tax_receip($id);

@@ -1165,7 +1165,8 @@ function data_tables_purchase_tracker_init($aColumns, $join = [], $where = [], $
             approval, 
             id AS pdf_id, 
             1 AS type, 
-            project 
+            project ,
+            last_action
         FROM tblgoods_receipt 
         
         UNION ALL 
@@ -1182,7 +1183,8 @@ function data_tables_purchase_tracker_init($aColumns, $join = [], $where = [], $
             approve_status AS approval, 
             id AS pdf_id, 
             2 AS type, 
-            project 
+            project,
+            last_action
         FROM tblpur_orders 
         WHERE goods_id = 0 
         
@@ -1200,7 +1202,8 @@ function data_tables_purchase_tracker_init($aColumns, $join = [], $where = [], $
             approve_status AS approval, 
             id AS pdf_id, 
             3 AS type, 
-            project 
+            project,
+            last_action
         FROM tblwo_orders 
         WHERE goods_id = 0 
     ) AS combined_orders 
@@ -1416,7 +1419,8 @@ function data_tables_actual_purchase_tracker_init($aColumns, $join = [], $where 
             grd.shop_submission,
             grd.shop_approval,
             grd.actual_remarks,
-            po.group_pur
+            po.group_pur,
+            grd.last_action
         FROM tblgoods_receipt_detail grd
         LEFT JOIN tblgoods_receipt gr ON gr.id = grd.goods_receipt_id
         LEFT JOIN tblpur_orders po ON po.id = gr.pr_order_id
@@ -1456,7 +1460,8 @@ function data_tables_actual_purchase_tracker_init($aColumns, $join = [], $where 
             pod.shop_submission,
             pod.shop_approval,
             pod.actual_remarks,
-            po.group_pur
+            po.group_pur,
+            pod.last_action
         FROM tblpur_order_detail pod
         LEFT JOIN tblpur_orders po ON po.id = pod.pur_order
         WHERE po.goods_id = 0
@@ -1495,13 +1500,13 @@ function data_tables_actual_purchase_tracker_init($aColumns, $join = [], $where 
             wod.shop_submission,
             wod.shop_approval,
             wod.actual_remarks,
-            wo.group_pur
+            wo.group_pur,
+            wod.last_action
         FROM tblwo_order_detail wod
         LEFT JOIN tblwo_orders wo ON wo.id = wod.wo_order
         WHERE wo.goods_id = 0
     ) AS combined_orders
     LEFT JOIN aggregated agg ON combined_orders.id = agg.goods_receipt_id
-    WHERE combined_orders.project = '1'
 ) AS final_result";
 
     $allColumns = [];

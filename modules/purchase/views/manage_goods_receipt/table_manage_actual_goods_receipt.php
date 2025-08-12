@@ -14,6 +14,7 @@ $aColumns = [
     'supplier_name',
     'kind',
     'date_add',
+    'last_action',
     'imp_local_status',
     'tracker_status',
     'production_status',
@@ -130,7 +131,8 @@ $result = data_tables_actual_purchase_tracker_init($aColumns, $join, $where, [
     'unit_id',
     'item_detail_id',
     'type',
-    'wo_order_id'
+    'wo_order_id',
+    'last_action'
 ]);
 
 $output  = $result['output'];
@@ -204,6 +206,8 @@ foreach ($rResult as $aRow) {
             $_data = $aRow['kind'];
         } elseif ($aColumns[$i] == 'date_add') {
             $_data = date('d M, Y', strtotime($aRow['date_add']));
+        } elseif($aColumns[$i] == 'last_action'){
+            $_data = get_last_action_full_name($aRow['last_action']);
         } elseif ($aColumns[$i] == 'imp_local_status') {
             $imp_local_status = '';
             $imp_local_labels = [

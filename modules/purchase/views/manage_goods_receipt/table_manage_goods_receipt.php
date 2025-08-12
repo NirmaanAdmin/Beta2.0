@@ -11,6 +11,7 @@ $aColumns = [
     'date_add',
     'buyer_id',
     'delivery_status',
+    'last_action',
     'type',
     'wo_order_id', // Needed for WO links
 ];
@@ -144,6 +145,9 @@ foreach ($rResult as $aRow) {
                 } else {
                     $_data = '<span class="inline-block label label-success" task-status-table="completely_delivered">' . _l('completely_delivered') . '</span>';
                 }
+                break;
+            case 'last_action':
+                $_data = get_last_action_full_name($aRow['last_action']);
                 break;
         }
 

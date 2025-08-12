@@ -9114,11 +9114,14 @@ class warehouse extends AdminController
 		if ($purchase_tracker == "false") {
 			if ($purOrder == "true") {
 				$success = $this->db->update('tblpur_order_detail', ['payment_date' => $payment_date]);
+				update_pur_orders_tracker_details_last_action($id);
 			} elseif ($purOrder == "false") {
 				$success = $this->db->update('tblwo_order_detail', ['payment_date' => $payment_date]);
+				update_wo_orders_tracker_details_last_action($id);
 			}
 		} else {
 			$success = $this->db->update('tblgoods_receipt_detail', ['payment_date' => $payment_date]);
+			update_goods_orders_tracker_details_last_action($id);
 		}
 
 		if ($success) {
@@ -9143,11 +9146,14 @@ class warehouse extends AdminController
 		if ($purchase_tracker == "false") {
 			if ($purOrder == "true") {
 				$success = $this->db->update('tblpur_order_detail', ['est_delivery_date' => $est_delivery_date_date]);
+				update_pur_orders_tracker_details_last_action($id);
 			} elseif ($purOrder == "false") {
 				$success = $this->db->update('tblwo_order_detail', ['est_delivery_date' => $est_delivery_date_date]);
+				update_wo_orders_tracker_details_last_action($id);
 			}
 		} else {
 			$success = $this->db->update('tblgoods_receipt_detail', ['est_delivery_date' => $est_delivery_date_date]);
+			update_goods_orders_tracker_details_last_action($id);
 		}
 
 		if ($success) {
@@ -9172,11 +9178,14 @@ class warehouse extends AdminController
 		if ($purchase_tracker == "false") {
 			if ($purOrder == "true") {
 				$success = $this->db->update('tblpur_order_detail', ['remarks' => $remarks]);
+				update_pur_orders_tracker_details_last_action($id);
 			} elseif ($purOrder == "false") {
 				$success = $this->db->update('tblwo_order_detail', ['remarks' => $remarks]);
+				update_wo_orders_tracker_details_last_action($id);
 			}
 		} else {
 			$success = $this->db->update('tblgoods_receipt_detail', ['remarks' => $remarks]);
+			update_goods_orders_tracker_details_last_action($id);
 		}
 
 		if ($success) {
@@ -9202,11 +9211,14 @@ class warehouse extends AdminController
 		if ($purchase_tracker == "false") {
 			if ($purOrder == "true") {
 				$success = $this->db->update('tblpur_order_detail', ['delivery_date' => $delivery_date]);
+				update_pur_orders_tracker_details_last_action($id);
 			} elseif ($purOrder == "false") {
 				$success = $this->db->update('tblwo_order_detail', ['delivery_date' => $delivery_date]);
+				update_wo_orders_tracker_details_last_action($id);
 			}
 		} else {
 			$success = $this->db->update('tblgoods_receipt_detail', ['delivery_date' => $delivery_date]);
+			update_goods_orders_tracker_details_last_action($id);
 		}
 
 		if ($success) {
@@ -9508,11 +9520,14 @@ class warehouse extends AdminController
 		if ($purchase_tracker == "false") {
 			if ($purOrder == "true") {
 				$success = $this->db->update('tblpur_order_detail', ['lead_time_days' => $lead_time_days]);
+				update_pur_orders_tracker_details_last_action($id);
 			} elseif ($purOrder == "false") {
 				$success = $this->db->update('tblwo_order_detail', ['lead_time_days' => $lead_time_days]);
+				update_wo_orders_tracker_details_last_action($id);
 			}
 		} else {
 			$success = $this->db->update('tblgoods_receipt_detail', ['lead_time_days' => $lead_time_days]);
+			update_goods_orders_tracker_details_last_action($id);
 		}
 
 		if ($success) {
@@ -9538,11 +9553,14 @@ class warehouse extends AdminController
 		if ($purchase_tracker == "false") {
 			if ($purOrder == "true") {
 				$success = $this->db->update('tblpur_order_detail', ['advance_payment' => $advance_payment]);
+				update_pur_orders_tracker_details_last_action($id);
 			} elseif ($purOrder == "false") {
 				$success = $this->db->update('tblwo_order_detail', ['advance_payment' => $advance_payment]);
+				update_wo_orders_tracker_details_last_action($id);
 			}
 		} else {
 			$success = $this->db->update('tblgoods_receipt_detail', ['advance_payment' => $advance_payment]);
+			update_goods_orders_tracker_details_last_action($id);
 		}
 
 		if ($success) {
@@ -9568,12 +9586,14 @@ class warehouse extends AdminController
 		if ($purchase_tracker == "false") {
 			if ($purOrder == "true") {
 				$success = $this->db->update('tblpur_order_detail', ['shop_submission' => $shop_submission]);
-			}elseif ($purOrder == "false") {
+				update_pur_orders_tracker_details_last_action($id);
+			} elseif ($purOrder == "false") {
 				$success = $this->db->update('tblwo_order_detail', ['shop_submission' => $shop_submission]);
+				update_wo_orders_tracker_details_last_action($id);
 			}
-			
 		} else {
 			$success = $this->db->update('tblgoods_receipt_detail', ['shop_submission' => $shop_submission]);
+			update_goods_orders_tracker_details_last_action($id);
 		}
 
 		if ($success) {
@@ -9584,48 +9604,55 @@ class warehouse extends AdminController
 	}
 
 	public function upload_purchase_tracker_attachments()
-{
-    $input = $this->input->post();
-    $related_to = 'goods_receipt_shop_drawings';
-    
-    // Determine the subfolder based on which order type is true
-    $subfolder = '';
-    if ($input['purOrder'] === 'true') {
-        $subfolder = 'purchase_orders';
-    } elseif ($input['workOrder'] === 'true') {
-        $subfolder = 'work_orders';
-    } else{
+	{
+		$input = $this->input->post();
+		$related_to = 'goods_receipt_shop_drawings';
+
+		// Determine the subfolder based on which order type is true
 		$subfolder = '';
-	}
-    
-    // Set view_type for database (same as subfolder)
-    $view_type = $subfolder;
-	if($view_type == ''){
-		$path = WAREHOUSE_MODULE_UPLOAD_FOLDER . '/purchase_tracker/' . $related_to . '/' . $input['id'] . '/';
-	}else{
-		$path = WAREHOUSE_MODULE_UPLOAD_FOLDER . '/purchase_tracker/' . $related_to . '/' . $subfolder . '/' . $input['id'] . '/';
-	}
-    
+		if ($input['purOrder'] === 'true') {
+			$subfolder = 'purchase_orders';
+		} elseif ($input['workOrder'] === 'true') {
+			$subfolder = 'work_orders';
+		} else {
+			$subfolder = '';
+		}
 
-    $uploadedFiles = handle_purchase_tracker_attachments_array($path);
-    if ($uploadedFiles && is_array($uploadedFiles)) {
-        foreach ($uploadedFiles as $file) {
-            $data = array();
-            $data['dateadded'] = date('Y-m-d H:i:s');
-            $data['rel_type'] = $related_to;
-            $data['rel_id'] = $input['id'];
-            $data['staffid'] = get_staff_user_id();
-            $data['attachment_key'] = app_generate_hash();
-            $data['file_name'] = $file['file_name'];
-            $data['filetype'] = $file['filetype'];
-            $data['view_type'] = $view_type; // Set the view type (purchase_orders or work_orders)
-            $this->db->insert(db_prefix() . 'invetory_files', $data);
-        }
-    }
+		// Set view_type for database (same as subfolder)
+		$view_type = $subfolder;
+		if ($view_type == '') {
+			$path = WAREHOUSE_MODULE_UPLOAD_FOLDER . '/purchase_tracker/' . $related_to . '/' . $input['id'] . '/';
+		} else {
+			$path = WAREHOUSE_MODULE_UPLOAD_FOLDER . '/purchase_tracker/' . $related_to . '/' . $subfolder . '/' . $input['id'] . '/';
+		}
 
-    echo json_encode(['status' => !empty($uploadedFiles)]);
-    die();
-}
+
+		$uploadedFiles = handle_purchase_tracker_attachments_array($path);
+		if ($uploadedFiles && is_array($uploadedFiles)) {
+			foreach ($uploadedFiles as $file) {
+				$data = array();
+				$data['dateadded'] = date('Y-m-d H:i:s');
+				$data['rel_type'] = $related_to;
+				$data['rel_id'] = $input['id'];
+				$data['staffid'] = get_staff_user_id();
+				$data['attachment_key'] = app_generate_hash();
+				$data['file_name'] = $file['file_name'];
+				$data['filetype'] = $file['filetype'];
+				$data['view_type'] = $view_type; // Set the view type (purchase_orders or work_orders)
+				$this->db->insert(db_prefix() . 'invetory_files', $data);
+			}
+			if($view_type == 'purchase_orders'){
+				update_pur_orders_tracker_details_last_action($input['id']);
+			}elseif ($view_type == 'work_orders') {
+				update_wo_orders_tracker_details_last_action($input['id']);
+			}else{
+				update_goods_orders_tracker_details_last_action($input['id']);
+			}
+		}
+
+		echo json_encode(['status' => !empty($uploadedFiles)]);
+		die();
+	}
 
 	public function update_shop_approval()
 	{
@@ -9643,11 +9670,14 @@ class warehouse extends AdminController
 		if ($purchase_tracker == "false") {
 			if ($purOrder == "true") {
 				$success = $this->db->update('tblpur_order_detail', ['shop_approval' => $shop_approval]);
+				update_pur_orders_tracker_details_last_action($id);
 			} elseif ($purOrder == "false") {
 				$success = $this->db->update('tblwo_order_detail', ['shop_approval' => $shop_approval]);
+				update_wo_orders_tracker_details_last_action($id);
 			}
 		} else {
 			$success = $this->db->update('tblgoods_receipt_detail', ['shop_approval' => $shop_approval]);
+			update_goods_orders_tracker_details_last_action($id);
 		}
 
 		if ($success) {
@@ -9673,11 +9703,14 @@ class warehouse extends AdminController
 		if ($purchase_tracker == "false") {
 			if ($purOrder == "true") {
 				$success = $this->db->update('tblpur_order_detail', ['actual_remarks' => $actual_remarks]);
-			}elseif ($purOrder == "false") {
+				update_pur_orders_tracker_details_last_action($id);
+			} elseif ($purOrder == "false") {
 				$success = $this->db->update('tblwo_order_detail', ['actual_remarks' => $actual_remarks]);
+				update_wo_orders_tracker_details_last_action($id);
 			}
 		} else {
 			$success = $this->db->update('tblgoods_receipt_detail', ['actual_remarks' => $actual_remarks]);
+			update_goods_orders_tracker_details_last_action($id);
 		}
 
 		if ($success) {

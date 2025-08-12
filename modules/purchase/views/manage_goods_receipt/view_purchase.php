@@ -209,6 +209,7 @@
                         <label><input type="checkbox" class="column-toggle" data-column="10" checked=""> <?php echo _l('est_delivery_date') ?></label>
                         <label><input type="checkbox" class="column-toggle" data-column="11" checked=""><?php echo _l('delivery_date') ?></label>
                         <label><input type="checkbox" class="column-toggle" data-column="12" checked=""><?php echo _l('remarks') ?></label>
+                        <label><input type="checkbox" class="column-toggle" data-column="12" checked=""><?php echo _l('Last Updated By') ?></label>
                       </div>
                     </span>
                   </div>
@@ -230,6 +231,7 @@
                             <th><?php echo _l('est_delivery_date') ?></th>
                             <th><?php echo _l('delivery_date') ?></th>
                             <th><?php echo _l('remarks') ?></th>
+                            <th>Last Updated By</th>
                           </tr>
                         </thead>
                         <tbody class="ui-sortable purchase-body">
@@ -415,6 +417,7 @@
                                 ?>
                               </td>
                               <td><?php echo '<textarea style="width: 154px;height: 50px;" class="form-control  remarks-input" data-id="' . $receipt_value['id'] . '" data-tracker=\'' . (isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false') . '\' data-purorder="' . (isset($pur_order) ? 'true' : 'false') . '">' . $remarks . '</textarea>' ?></td>
+                              <td><?php echo get_last_action_full_name($receipt_value['last_action']); ?></td>
                             </tr>
                           <?php  } ?>
                         </tbody>
@@ -523,6 +526,7 @@
                             <th><?php echo _l('shop_drawings_submission') ?></th>
                             <th><?php echo _l('shop_drawings_approval') ?></th>
                             <th><?php echo _l('remarks') ?></th>
+                            <th>Last Updated By</th>
                           </tr>
                         </thead>
                         <tbody class="ui-sortable purchase-body">
@@ -612,6 +616,7 @@
                               <td>
                                 <textarea style="width: 154px;height: 50px;" class="form-control" name="actual_remarks" data-id="<?php echo $receipt_value['id']; ?>" data-tracker='<?php echo isset($purchase_tracker) ? json_encode($purchase_tracker) : 'false'; ?>' data-purOrder=<?php echo (isset($pur_order) ? 'true' : 'false') ?>><?php echo $actual_remarks; ?></textarea>
                               </td>
+                              <td><?php echo get_last_action_full_name($receipt_value['last_action']); ?></td>
                             </tr>
                           <?php  } ?>
                         </tbody>

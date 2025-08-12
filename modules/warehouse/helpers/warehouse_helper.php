@@ -2525,3 +2525,81 @@ function get_inventory_reconcilliation_area_list($name_area, $area)
     }
     return render_select($name_area, $get_area, array('id', 'area_name'), '', $selected, ['multiple' => true, 'disabled' => true], ['id' => 'project_area'], '', '', false);
 }
+
+function update_pur_orders_tracker_details_last_action($id)
+{
+    $CI = &get_instance();
+    if (!empty($id)) {
+        // Update last_action in pur_order_detail table
+        $CI->db->where('id', $id);
+        $CI->db->update(db_prefix() . 'pur_order_detail', [
+            'last_action' => get_staff_user_id()
+        ]);
+
+        // Get the pur_order ID from the detail record
+        $CI->db->select('pur_order');
+        $CI->db->where('id', $id);
+        $detail = $CI->db->get(db_prefix() . 'pur_order_detail')->row();
+
+        if ($detail && !empty($detail->pur_order)) {
+            // Update last_action in the master orders table
+            $CI->db->where('id', $detail->pur_order);
+            $CI->db->update(db_prefix() . 'pur_orders', [
+                'last_action' => get_staff_user_id()
+            ]);
+        }
+    }
+    return true;
+}
+
+function update_wo_orders_tracker_details_last_action($id)
+{
+    $CI = &get_instance();
+    if (!empty($id)) {
+        // Update last_action in wo_order_detail table
+        $CI->db->where('id', $id);
+        $CI->db->update(db_prefix() . 'wo_order_detail', [
+            'last_action' => get_staff_user_id()
+        ]);
+        
+        // Get the wo_order ID from the detail record
+        $CI->db->select('wo_order');
+        $CI->db->where('id', $id);
+        $detail = $CI->db->get(db_prefix() . 'wo_order_detail')->row();
+        
+        if ($detail && !empty($detail->wo_order)) {
+            // Update last_action in the master orders table
+            $CI->db->where('id', $detail->wo_order);
+            $CI->db->update(db_prefix() . 'wo_orders', [
+                'last_action' => get_staff_user_id()
+            ]);
+        }
+    }
+    return true;
+}
+
+function update_goods_orders_tracker_details_last_action($id)
+{
+    $CI = &get_instance();
+    if (!empty($id)) {
+        // Update last_action in goods_receipt_detail table
+        $CI->db->where('id', $id);
+        $CI->db->update(db_prefix() . 'goods_receipt_detail', [
+            'last_action' => get_staff_user_id()
+        ]);
+        
+        // Get the goods_receipt_id from the detail record
+        $CI->db->select('goods_receipt_id');
+        $CI->db->where('id', $id);
+        $detail = $CI->db->get(db_prefix() . 'goods_receipt_detail')->row();
+        
+        if ($detail && !empty($detail->goods_receipt_id)) {
+            // Update last_action in the master goods receipt table
+            $CI->db->where('id', $detail->goods_receipt_id);
+            $CI->db->update(db_prefix() . 'goods_receipt', [
+                'last_action' => get_staff_user_id()
+            ]);
+        }
+    }
+    return true;
+}
