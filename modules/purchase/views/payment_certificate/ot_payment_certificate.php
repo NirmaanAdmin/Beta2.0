@@ -164,7 +164,7 @@
                     </div>
                   </div>
 
-                  <?php if (isset($payment_certificate_id) && is_admin()) { ?>
+                  <?php if (!empty($payment_certificate_id) && is_admin()) { ?>
                     <div class="row">
                       <div class="col-md-12 form-group">
                         <select name="status" id="status" class="selectpicker pull-right mright10" onchange="change_status_pay_cert(this,<?php echo ($payment_certificate_id); ?>); return false;" data-live-search="true" data-width="25%" data-none-selected-text="<?php echo _l('pur_change_status_to'); ?>">
