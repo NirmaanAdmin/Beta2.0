@@ -80,6 +80,11 @@
                         <?php echo _l('pur_information'); ?>
                       </a>
                     </li>
+                    <li role="presentation">
+                      <a href="#tab_documentation" aria-controls="tab_documentation" role="tab" data-toggle="tab">
+                        Documentation
+                      </a>
+                    </li>
                     <?php
                     if (isset($payment_certificate)) { ?>
                       <li role="presentation">
@@ -182,55 +187,6 @@
                     </div>
                   <?php } ?>
                 </div>
-
-                <div class="panel-body mtop15">
-                  <?php if ($is_view == 0) { ?>
-                    <label for="attachment"><?php echo _l('attachment'); ?></label>
-                    <div class="attachments">
-                      <div class="attachment">
-                        <div class="col-md-5 form-group" style="padding-left: 0px;">
-                          <div class="input-group">
-                            <input type="file" extension="<?php echo str_replace(['.', ' '], '', get_option('ticket_attachments_file_extensions')); ?>" filesize="<?php echo file_upload_max_size(); ?>" class="form-control" name="attachments[0]" accept="<?php echo get_ticket_form_accepted_mimes(); ?>">
-                            <span class="input-group-btn">
-                              <button class="btn btn-success add_more_attachments p8" type="button"><i class="fa fa-plus"></i></button>
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  <?php } ?>
-                  <div class="clearfix"></div>
-
-                  <?php
-                  if (isset($attachments) && count($attachments) > 0) {
-                    foreach ($attachments as $value) {
-                      echo '<div class="col-md-3">';
-                      $path = get_upload_path_by_type('purchase') . 'payment_certificate/' . $value['rel_id'] . '/' . $value['file_name'];
-                      $is_image = is_image($path);
-                      if ($is_image) {
-                        echo '<div class="preview_image">';
-                      }
-                  ?>
-                      <a href="<?php echo site_url('download/file/payment_certificate/' . $value['id']); ?>" class="display-block mbot5" <?php if ($is_image) { ?> data-lightbox="attachment-payment_certificate-<?php echo $value['rel_id']; ?>" <?php } ?>>
-                        <a name="preview-payment-cert-btn" onclick="preview_paymentcert_btn(this); return false;" rel_id="<?php echo $value['rel_id']; ?>" id="<?php echo $value['id']; ?>" href="Javascript:void(0);" class="mbot10 mright5 btn btn-success pull-left" data-toggle="tooltip" title data-original-title="<?php echo _l('preview_file'); ?>"><i class="fa fa-eye"></i></a>
-                        <?php echo $value['file_name']; ?>
-                        <?php if ($is_image) { ?>
-                          <img class="mtop5 hide" src="<?php echo site_url('download/preview_image?path=' . protected_file_url_by_path($path) . '&type=' . $value['filetype']); ?>" style="height: 165px;">
-                        <?php } ?>
-                        <br />
-                      </a>
-                      <?php
-                      echo '<a href="' . admin_url('purchase/delete_payment_certificate_files/' . $value['id']) . '" class="text-danger _delete">' . _l('delete') . '</a>';
-                      ?>
-                      <?php if ($is_image) {
-                        echo '</div>';
-                      } ?>
-                  <?php echo '</div>';
-                    }
-                  } ?>
-                </div>
-
-                <div id="paymentcert_file_data"></div>
 
                 <div class="panel-body mtop15">
                   <div class="col-md-10 pull-right" style="z-index: 99999;display: flex;justify-content: end;">
@@ -704,6 +660,56 @@
                 </div>
               <?php } ?>
 
+              <div role="tabpanel" class="tab-pane ptop10" id="tab_documentation">
+                <div class="panel-body mtop15">
+                  <?php if ($is_view == 0) { ?>
+                    <label for="attachment"><?php echo _l('attachment'); ?></label>
+                    <div class="attachments">
+                      <div class="attachment">
+                        <div class="col-md-5 form-group" style="padding-left: 0px;">
+                          <div class="input-group">
+                            <input type="file" extension="<?php echo str_replace(['.', ' '], '', get_option('ticket_attachments_file_extensions')); ?>" filesize="<?php echo file_upload_max_size(); ?>" class="form-control" name="attachments[0]" accept="<?php echo get_ticket_form_accepted_mimes(); ?>">
+                            <span class="input-group-btn">
+                              <button class="btn btn-success add_more_attachments p8" type="button"><i class="fa fa-plus"></i></button>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  <?php } ?>
+                  <div class="clearfix"></div>
+
+                  <?php
+                  if (isset($attachments) && count($attachments) > 0) {
+                    foreach ($attachments as $value) {
+                      echo '<div class="col-md-3">';
+                      $path = get_upload_path_by_type('purchase') . 'payment_certificate/' . $value['rel_id'] . '/' . $value['file_name'];
+                      $is_image = is_image($path);
+                      if ($is_image) {
+                        echo '<div class="preview_image">';
+                      }
+                  ?>
+                      <a href="<?php echo site_url('download/file/payment_certificate/' . $value['id']); ?>" class="display-block mbot5" <?php if ($is_image) { ?> data-lightbox="attachment-payment_certificate-<?php echo $value['rel_id']; ?>" <?php } ?>>
+                        <a name="preview-payment-cert-btn" onclick="preview_paymentcert_btn(this); return false;" rel_id="<?php echo $value['rel_id']; ?>" id="<?php echo $value['id']; ?>" href="Javascript:void(0);" class="mbot10 mright5 btn btn-success pull-left" data-toggle="tooltip" title data-original-title="<?php echo _l('preview_file'); ?>"><i class="fa fa-eye"></i></a>
+                        <?php echo $value['file_name']; ?>
+                        <?php if ($is_image) { ?>
+                          <img class="mtop5 hide" src="<?php echo site_url('download/preview_image?path=' . protected_file_url_by_path($path) . '&type=' . $value['filetype']); ?>" style="height: 165px;">
+                        <?php } ?>
+                        <br />
+                      </a>
+                      <?php
+                      echo '<a href="' . admin_url('purchase/delete_payment_certificate_files/' . $value['id']) . '" class="text-danger _delete">' . _l('delete') . '</a>';
+                      ?>
+                      <?php if ($is_image) {
+                        echo '</div>';
+                      } ?>
+                  <?php echo '</div>';
+                    }
+                  } ?>
+                </div>
+                <div id="paymentcert_file_data"></div>
+              </div>
+
               <div role="tabpanel" class="tab-pane ptop10" id="tab_activity">
                 <div class="row">
                   <div class="col-md-12">
@@ -777,102 +783,100 @@
       </div>
 
       <?php if (count($list_approve_status) > 0) { ?>
-        <div class="row">
-          <div class="col-md-12">
-            <div class="panel_s">
-              <div class="panel-body">
-                <div class="project-overview-right">
-                  <div class="row">
-                    <div class="col-md-12 project-overview-expenses-finance">
-                      <?php
-                      $this->load->model('staff_model');
-                      $enter_charge_code = 0;
-                      foreach ($list_approve_status as $value) {
-                        $value['staffid'] = explode(', ', $value['staffid'] ?? '');
+        <div class="col-md-12">
+          <div class="panel_s">
+            <div class="panel-body">
+              <div class="project-overview-right">
+                <div class="row">
+                  <div class="col-md-12 project-overview-expenses-finance">
+                    <?php
+                    $this->load->model('staff_model');
+                    $enter_charge_code = 0;
+                    foreach ($list_approve_status as $value) {
+                      $value['staffid'] = explode(', ', $value['staffid'] ?? '');
 
-                        if ($value['action'] == 'sign') { ?>
-                          <div class="col-md-4 apr_div">
-                            <p class="text-uppercase text-muted no-mtop bold">
-                              <?php
-                              $staff_name = '';
-                              $st = _l('status_0');
-                              $color = 'warning';
-                              foreach ($value['staffid'] as $key => $val) {
-                                if ($staff_name != '') {
-                                  $staff_name .= ' or ';
-                                }
-                                $staff_name .= $this->staff_model->get($val)->firstname;
-                              }
-                              echo pur_html_entity_decode($staff_name);
-                              ?>
-                            </p>
-                            <?php if ($value['approve'] == 2) {
-                            ?>
-                              <img src="<?php echo site_url(PURCHASE_PATH . 'pur_order/signature/' . $estimate->id . '/signature_' . $value['id'] . '.png'); ?>" class="img_style">
-                              <br><br>
-                              <p class="bold text-center text-success"><?php echo _l('signed') . ' ' . _dt($value['date']); ?></p>
-                            <?php } ?>
-                          </div>
-                        <?php } else { ?>
-                          <div class="col-md-4 apr_div">
-                            <p class="text-uppercase text-muted no-mtop bold">
-                              <?php
-                              $staff_name = '';
-                              foreach ($value['staffid'] as $key => $val) {
-                                if ($staff_name != '') {
-                                  $staff_name .= ' or ';
-                                }
-                                $staff_name .= $this->staff_model->get($val)->firstname;
-                              }
-                              echo pur_html_entity_decode($staff_name);
-                              ?>
-                            </p>
-
-                            <?php if ($value['approve'] == 2) {
-                            ?>
-                              <?php if ($value['approve_by_admin'] == 1) { ?>
-                                <img src="<?php echo site_url(PURCHASE_PATH . 'approval/approved_by_admin.png'); ?>" class="img_style">
-                              <?php } else { ?>
-                                <img src="<?php echo site_url(PURCHASE_PATH . 'approval/approved.png'); ?>" class="img_style">
-                              <?php } ?>
-                            <?php } elseif ($value['approve'] == 3) { ?>
-                              <img src="<?php echo site_url(PURCHASE_PATH . 'approval/rejected.png'); ?>" class="img_style">
-                            <?php } ?>
-                            <br><br>
-                            <p><?php echo pur_html_entity_decode($value['note']) ?></p>
-                            <p class="bold text-center text-<?php if ($value['approve'] == 2) {
-                                                              echo 'success';
-                                                            } elseif ($value['approve'] == 3) {
-                                                              echo 'danger';
-                                                            } ?>"><?php echo _dt($value['date']); ?>
-                            </p>
-
+                      if ($value['action'] == 'sign') { ?>
+                        <div class="col-md-4 apr_div">
+                          <p class="text-uppercase text-muted no-mtop bold">
                             <?php
-                            if (isset($check_approve_status['staffid'])) {
-                              if (in_array(get_staff_user_id(), $check_approve_status['staffid']) && !in_array(get_staff_user_id(), $get_staff_sign) && $value['staffid'] == $check_approve_status['staffid']) { ?>
-                                <div class="btn-group">
-                                  <a href="#" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><?php echo _l('approve'); ?><span class="caret"></span></a>
+                            $staff_name = '';
+                            $st = _l('status_0');
+                            $color = 'warning';
+                            foreach ($value['staffid'] as $key => $val) {
+                              if ($staff_name != '') {
+                                $staff_name .= ' or ';
+                              }
+                              $staff_name .= $this->staff_model->get($val)->firstname;
+                            }
+                            echo pur_html_entity_decode($staff_name);
+                            ?>
+                          </p>
+                          <?php if ($value['approve'] == 2) {
+                          ?>
+                            <img src="<?php echo site_url(PURCHASE_PATH . 'pur_order/signature/' . $estimate->id . '/signature_' . $value['id'] . '.png'); ?>" class="img_style">
+                            <br><br>
+                            <p class="bold text-center text-success"><?php echo _l('signed') . ' ' . _dt($value['date']); ?></p>
+                          <?php } ?>
+                        </div>
+                      <?php } else { ?>
+                        <div class="col-md-4 apr_div">
+                          <p class="text-uppercase text-muted no-mtop bold">
+                            <?php
+                            $staff_name = '';
+                            foreach ($value['staffid'] as $key => $val) {
+                              if ($staff_name != '') {
+                                $staff_name .= ' or ';
+                              }
+                              $staff_name .= $this->staff_model->get($val)->firstname;
+                            }
+                            echo pur_html_entity_decode($staff_name);
+                            ?>
+                          </p>
 
-                                  <ul class="dropdown-menu dropdown-menu-right ul_style" style="width: max-content;">
-                                    <li>
-                                      <div class="col-md-12">
-                                        <?php echo render_textarea('reason', 'reason'); ?>
-                                      </div>
-                                    </li>
-                                    <li>
-                                      <div class="row text-right col-md-12">
-                                        <a href="#" data-loading-text="<?php echo _l('wait_text'); ?>" onclick="approve_payment_certificate_request(<?php echo pur_html_entity_decode($payment_certificate_id); ?>); return false;" class="btn btn-success mright15"><?php echo _l('approve'); ?></a>
-                                        <a href="#" data-loading-text="<?php echo _l('wait_text'); ?>" onclick="deny_payment_certificate_request(<?php echo pur_html_entity_decode($payment_certificate_id); ?>); return false;" class="btn btn-warning"><?php echo _l('deny'); ?></a>
-                                      </div>
-                                    </li>
-                                  </ul>
-                                </div>
-                            <?php }
-                            } ?>
-                          </div>
-                      <?php }
-                      } ?>
-                    </div>
+                          <?php if ($value['approve'] == 2) {
+                          ?>
+                            <?php if ($value['approve_by_admin'] == 1) { ?>
+                              <img src="<?php echo site_url(PURCHASE_PATH . 'approval/approved_by_admin.png'); ?>" class="img_style">
+                            <?php } else { ?>
+                              <img src="<?php echo site_url(PURCHASE_PATH . 'approval/approved.png'); ?>" class="img_style">
+                            <?php } ?>
+                          <?php } elseif ($value['approve'] == 3) { ?>
+                            <img src="<?php echo site_url(PURCHASE_PATH . 'approval/rejected.png'); ?>" class="img_style">
+                          <?php } ?>
+                          <br><br>
+                          <p><?php echo pur_html_entity_decode($value['note']) ?></p>
+                          <p class="bold text-center text-<?php if ($value['approve'] == 2) {
+                                                            echo 'success';
+                                                          } elseif ($value['approve'] == 3) {
+                                                            echo 'danger';
+                                                          } ?>"><?php echo _dt($value['date']); ?>
+                          </p>
+
+                          <?php
+                          if (isset($check_approve_status['staffid'])) {
+                            if (in_array(get_staff_user_id(), $check_approve_status['staffid']) && !in_array(get_staff_user_id(), $get_staff_sign) && $value['staffid'] == $check_approve_status['staffid']) { ?>
+                              <div class="btn-group">
+                                <a href="#" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><?php echo _l('approve'); ?><span class="caret"></span></a>
+
+                                <ul class="dropdown-menu dropdown-menu-right ul_style" style="width: max-content;">
+                                  <li>
+                                    <div class="col-md-12">
+                                      <?php echo render_textarea('reason', 'reason'); ?>
+                                    </div>
+                                  </li>
+                                  <li>
+                                    <div class="row text-right col-md-12">
+                                      <a href="#" data-loading-text="<?php echo _l('wait_text'); ?>" onclick="approve_payment_certificate_request(<?php echo pur_html_entity_decode($payment_certificate_id); ?>); return false;" class="btn btn-success mright15"><?php echo _l('approve'); ?></a>
+                                      <a href="#" data-loading-text="<?php echo _l('wait_text'); ?>" onclick="deny_payment_certificate_request(<?php echo pur_html_entity_decode($payment_certificate_id); ?>); return false;" class="btn btn-warning"><?php echo _l('deny'); ?></a>
+                                    </div>
+                                  </li>
+                                </ul>
+                              </div>
+                          <?php }
+                          } ?>
+                        </div>
+                    <?php }
+                    } ?>
                   </div>
                 </div>
               </div>

@@ -80,6 +80,11 @@
                         <?php echo _l('pur_information'); ?>
                       </a>
                     </li>
+                    <li role="presentation">
+                      <a href="#tab_documentation" aria-controls="tab_documentation" role="tab" data-toggle="tab">
+                        Documentation
+                      </a>
+                    </li>
                     <?php
                     if (isset($payment_certificate)) { ?>
                       <li role="presentation">
@@ -183,54 +188,6 @@
                   <?php } ?>
                 </div>
 
-                <div class="panel-body mtop15">
-                  <?php if ($is_view == 0) { ?>
-                    <label for="attachment"><?php echo _l('attachment'); ?></label>
-                    <div class="attachments">
-                      <div class="attachment">
-                        <div class="col-md-5 form-group" style="padding-left: 0px;">
-                          <div class="input-group">
-                            <input type="file" extension="<?php echo str_replace(['.', ' '], '', get_option('ticket_attachments_file_extensions')); ?>" filesize="<?php echo file_upload_max_size(); ?>" class="form-control" name="attachments[0]" accept="<?php echo get_ticket_form_accepted_mimes(); ?>">
-                            <span class="input-group-btn">
-                              <button class="btn btn-success add_more_attachments p8" type="button"><i class="fa fa-plus"></i></button>
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  <?php } ?>
-                  <div class="clearfix"></div>
-
-                  <?php
-                  if (isset($attachments) && count($attachments) > 0) {
-                    foreach ($attachments as $value) {
-                      echo '<div class="col-md-3">';
-                      $path = get_upload_path_by_type('purchase') . 'payment_certificate/' . $value['rel_id'] . '/' . $value['file_name'];
-                      $is_image = is_image($path);
-                      if ($is_image) {
-                        echo '<div class="preview_image">';
-                      }
-                  ?>
-                      <a href="<?php echo site_url('download/file/payment_certificate/' . $value['id']); ?>" class="display-block mbot5" <?php if ($is_image) { ?> data-lightbox="attachment-payment_certificate-<?php echo $value['rel_id']; ?>" <?php } ?>>
-                        <a name="preview-payment-cert-btn" onclick="preview_paymentcert_btn(this); return false;" rel_id="<?php echo $value['rel_id']; ?>" id="<?php echo $value['id']; ?>" href="Javascript:void(0);" class="mbot10 mright5 btn btn-success pull-left" data-toggle="tooltip" title data-original-title="<?php echo _l('preview_file'); ?>"><i class="fa fa-eye"></i></a>
-                        <?php echo $value['file_name']; ?>
-                        <?php if ($is_image) { ?>
-                          <img class="mtop5 hide" src="<?php echo site_url('download/preview_image?path=' . protected_file_url_by_path($path) . '&type=' . $value['filetype']); ?>" style="height: 165px;">
-                        <?php } ?>
-                        <br />
-                      </a>
-                      <?php
-                      echo '<a href="' . admin_url('purchase/delete_payment_certificate_files/' . $value['id']) . '" class="text-danger _delete">' . _l('delete') . '</a>';
-                      ?>
-                      <?php if ($is_image) {
-                        echo '</div>';
-                      } ?>
-                  <?php echo '</div>';
-                    }
-                  } ?>
-                </div>
-
-                <div id="paymentcert_file_data"></div>
                 <div class="col-md-10 pull-right" style="z-index: 999;display: flex;justify-content: end;">
 
                   <span style="margin-right: 10px;">
@@ -703,6 +660,56 @@
                   <?php init_relation_tasks_table(array('data-new-rel-id' => $payment_certificate->id, 'data-new-rel-type' => 'payment_certificate')); ?>
                 </div>
               <?php } ?>
+
+              <div role="tabpanel" class="tab-pane ptop10" id="tab_documentation">
+                <div class="panel-body mtop15">
+                  <?php if ($is_view == 0) { ?>
+                    <label for="attachment"><?php echo _l('attachment'); ?></label>
+                    <div class="attachments">
+                      <div class="attachment">
+                        <div class="col-md-5 form-group" style="padding-left: 0px;">
+                          <div class="input-group">
+                            <input type="file" extension="<?php echo str_replace(['.', ' '], '', get_option('ticket_attachments_file_extensions')); ?>" filesize="<?php echo file_upload_max_size(); ?>" class="form-control" name="attachments[0]" accept="<?php echo get_ticket_form_accepted_mimes(); ?>">
+                            <span class="input-group-btn">
+                              <button class="btn btn-success add_more_attachments p8" type="button"><i class="fa fa-plus"></i></button>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  <?php } ?>
+                  <div class="clearfix"></div>
+
+                  <?php
+                  if (isset($attachments) && count($attachments) > 0) {
+                    foreach ($attachments as $value) {
+                      echo '<div class="col-md-3">';
+                      $path = get_upload_path_by_type('purchase') . 'payment_certificate/' . $value['rel_id'] . '/' . $value['file_name'];
+                      $is_image = is_image($path);
+                      if ($is_image) {
+                        echo '<div class="preview_image">';
+                      }
+                  ?>
+                      <a href="<?php echo site_url('download/file/payment_certificate/' . $value['id']); ?>" class="display-block mbot5" <?php if ($is_image) { ?> data-lightbox="attachment-payment_certificate-<?php echo $value['rel_id']; ?>" <?php } ?>>
+                        <a name="preview-payment-cert-btn" onclick="preview_paymentcert_btn(this); return false;" rel_id="<?php echo $value['rel_id']; ?>" id="<?php echo $value['id']; ?>" href="Javascript:void(0);" class="mbot10 mright5 btn btn-success pull-left" data-toggle="tooltip" title data-original-title="<?php echo _l('preview_file'); ?>"><i class="fa fa-eye"></i></a>
+                        <?php echo $value['file_name']; ?>
+                        <?php if ($is_image) { ?>
+                          <img class="mtop5 hide" src="<?php echo site_url('download/preview_image?path=' . protected_file_url_by_path($path) . '&type=' . $value['filetype']); ?>" style="height: 165px;">
+                        <?php } ?>
+                        <br />
+                      </a>
+                      <?php
+                      echo '<a href="' . admin_url('purchase/delete_payment_certificate_files/' . $value['id']) . '" class="text-danger _delete">' . _l('delete') . '</a>';
+                      ?>
+                      <?php if ($is_image) {
+                        echo '</div>';
+                      } ?>
+                  <?php echo '</div>';
+                    }
+                  } ?>
+                </div>
+                <div id="paymentcert_file_data"></div>
+              </div>
 
               <div role="tabpanel" class="tab-pane ptop10" id="tab_activity">
                 <div class="row">
