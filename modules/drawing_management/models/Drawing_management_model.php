@@ -244,7 +244,7 @@ class drawing_management_model extends app_model
 				$status_code = strtoupper(substr($status_name, 0, 3));
 
 				// Find the highest existing number for this combination
-				$this->db->like('document_number', $project_code . '-' . $discipline_code . '-' . $design_stage_code . '-' . $purpose_code . '-' . $status_code, 'after');
+				
 				$this->db->order_by('document_number', 'DESC');
 				$this->db->limit(1);
 				$last_doc = $this->db->get(db_prefix() . 'dms_items')->row();
