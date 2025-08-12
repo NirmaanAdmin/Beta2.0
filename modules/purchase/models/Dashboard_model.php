@@ -888,6 +888,45 @@ class Dashboard_model extends App_Model
 		$query = $this->db->query($sql);
 		$result = $query->result_array();
 
+		$default_project = get_default_project();
+		$pc_conditions = [];
+		$pc_sql = "
+		SELECT 
+		    pc.id AS id
+		FROM 
+		    tblpayment_certificate pc
+		LEFT JOIN tblpur_orders po 
+		    ON pc.po_id IS NOT NULL 
+		    AND po.id = pc.po_id
+		LEFT JOIN tblwo_orders wo 
+		    ON pc.wo_id IS NOT NULL 
+		    AND wo.id = pc.wo_id
+		LEFT JOIN tblpur_order_tracker ot 
+		    ON pc.ot_id IS NOT NULL 
+		    AND ot.id = pc.ot_id
+		WHERE 
+		    pc.approve_status IN (2)
+		    AND pc.pur_invoice_id IS NULL
+		    AND (
+		        (pc.po_id IS NOT NULL AND po.project IN ($default_project)) 
+		        OR (pc.wo_id IS NOT NULL AND wo.project IN ($default_project)) 
+		        OR (pc.ot_id IS NOT NULL AND ot.project IN ($default_project))
+		    )
+		";
+		if (!empty($vendors)) {
+		    $pc_conditions[] = "pc.vendor = " . $this->db->escape($vendors);
+		}
+		$pc_custom_date_select = $this->purchase_model->get_where_report_period('pc.order_date');
+		if (!empty($pc_custom_date_select)) {
+		    $pc_custom_date_select = preg_replace('/^\s*AND\s*/i', '', $pc_custom_date_select);
+		    $pc_conditions[] = $pc_custom_date_select;
+		}
+		if (!empty($pc_conditions)) {
+		    $pc_sql .= " AND " . implode(" AND ", $pc_conditions);
+		}
+		$pc_sql .= " GROUP BY pc.id";
+		$pc_result = $this->db->query($pc_sql)->result_array();
+
 		$response['total_bil_count'] = 0;
 		$total_bil_amount = 0;
 		$response['total_ril_count'] = 0;
@@ -896,7 +935,7 @@ class Dashboard_model extends App_Model
 		$total_paid_amount = 0;
 		$response['total_unpaid_count'] = 0;
 		$total_unpaid_amount = 0;
-		$response['bill_pending_by_bil'] = 0;
+		$response['bill_pending_by_bil'] = count($pc_result);
 		$response['bill_pending_by_ril'] = 0;
 		if(!empty($result)) {
 			$response['total_bil_count'] = count($result);
@@ -907,8 +946,8 @@ class Dashboard_model extends App_Model
 			    isset($item['ril_invoice_id']) && $item['ril_invoice_id'] !== NULL
 			));
             $total_ril_amount = array_reduce($result, function ($carry, $item) {
-			    if (in_array($item['ril_status'], [2, 3])) {
-			        return $carry + (float)$item['ril_certified_amount'];
+			    if (!empty($item['ril_invoice_id'])) {
+			        $carry += (float) $item['vendor_submitted_amount_without_tax'];
 			    }
 			    return $carry;
 			}, 0);
@@ -935,18 +974,8 @@ class Dashboard_model extends App_Model
 			    }
 			    return $carry;
 			}, 0);
-			$response['bill_pending_by_bil'] = count(
-			    array_filter($result, fn($item) =>
-			        isset($item['payment_status']) &&
-			        in_array($item['payment_status'], ['0', '2', '3', '4'], true)
-			    )
-			);
 			$response['bill_pending_by_ril'] = count(
-			    array_filter($result, fn($item) =>
-			        isset($item['ril_invoice_id']) &&
-			        $item['ril_invoice_id'] !== null &&
-			        (float)$item['ril_payment'] == 0
-			    )
+			    array_filter($result, fn($item) => empty($item['ril_invoice_id']))
 			);
 		}
 		$response['total_bil_amount'] = app_format_money($total_bil_amount, $base_currency);
@@ -989,9 +1018,9 @@ class Dashboard_model extends App_Model
             $response['line_bil_order_total'] = array_values($line_bil_order_total);
         }
 
-        $rli_invoice_result = array_values(array_filter($result, fn($item) =>
-		    in_array($item['ril_status'], [2, 3])
-		));
+        $rli_invoice_result = array_values(array_filter($result, function ($item) {
+		    return !empty($item['ril_invoice_id']);
+		}));
 		$line_ril_order_total = array();
 		if(!empty($rli_invoice_result)) {
 			foreach ($rli_invoice_result as $key => $value) {
