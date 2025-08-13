@@ -65,5 +65,13 @@
 	      table_material_issue_report.DataTable().ajax.reload();
 	    });
 
+	    $('.table-table_material_issue_report').on('draw.dt', function() {
+	      var materialIssueTable = $(this).DataTable();
+	      var sums = materialIssueTable.ajax.json().sums;
+	      $(this).find('tfoot').addClass('bold');
+	      $(this).find('tfoot td').eq(0).html("<?php echo _l('invoice_total'); ?> (<?php echo _l('per_page'); ?>)");
+	      $(this).find('tfoot td.total_quantity').html(sums.total_quantity);
+	    });
+
 })(jQuery);
 </script>

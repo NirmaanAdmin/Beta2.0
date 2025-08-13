@@ -59,25 +59,42 @@
 </div>
 
 <div class="row">
-	<div class="col-md-12">
-		<?php 
-		$table_data = array(
-			_l('PO Id'),
-			_l('Issue Id'),
-			_l('Item'),
-			_l('Descriptions'),
-			_l('Vendor'),
-			_l('Qty'),
-			_l('Issued On'),
-			_l('Return able'),
-			_l('Returned?'),
-			_l('Return Date'),
-		);
-		render_datatable($table_data,'table_material_issue_report',
-			array('customizable-table')
-		); ?>
-	</div>
+   <div class="col-md-12">
+      <table class="dt-table-loading table table-table_material_issue_report customizable-table">
+         <thead>
+            <tr>
+              <th><?php echo _l('PO Id'); ?></th>
+              <th><?php echo _l('Issue Id'); ?></th>
+              <th><?php echo _l('Item'); ?></th>
+              <th><?php echo _l('Descriptions'); ?></th>
+              <th><?php echo _l('Vendor'); ?></th>
+              <th><?php echo _l('Qty'); ?></th>
+              <th><?php echo _l('Issued On'); ?></th>
+              <th><?php echo _l('Return able'); ?></th>
+              <th><?php echo _l('Returned?'); ?></th>
+              <th><?php echo _l('Return Date'); ?></th>
+            </tr>
+         </thead>
+         <tbody>
+         </tbody>
+         <tfoot>
+         	<tr>
+         		<td></td>
+            	<td></td>
+            	<td></td>
+            	<td></td>
+            	<td></td>
+            	<td class="total_quantity"></td>
+            	<td></td>
+            	<td></td>
+            	<td></td>
+            	<td></td>
+         	</tr>
+         </tfoot>
+      </table>
+   </div>
 </div>
+
 <?php init_tail(); ?>
 <?php require 'modules/warehouse/assets/js/material_issue_report_js.php'; ?>
 </body>
