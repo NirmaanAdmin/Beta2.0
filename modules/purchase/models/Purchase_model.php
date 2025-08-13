@@ -18461,7 +18461,7 @@ class Purchase_model extends App_Model
         </table>
         <br>';
 
-        $html .= '<table class="table" style="width: 100%" border="1" style="font-size:13px">
+        $html .= '<table class="table" style="width: 100%" border="1" style="font-size:12px">
             <tbody>
                 <tr class="pay_cert_title">
                   <td style="width:5%">' . _l('serial_no') . '</td>
