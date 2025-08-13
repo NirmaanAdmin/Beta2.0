@@ -59,23 +59,38 @@
 </div>
 
 <div class="row">
-	<div class="col-md-12">
-		<?php 
-		$table_data = array(
-			_l('PO Id'),
-			_l('Item'),
-			_l('Descriptions'),
-			_l('Opening Qty'),
-			_l('Inward'),
-			_l('Outward'),
-			_l('Site Transfers'),
-			_l('Closing Qty'),
-		);
-		render_datatable($table_data,'table_stock_movement_ledger',
-			array('customizable-table')
-		); ?>
-	</div>
+   <div class="col-md-12">
+      <table class="dt-table-loading table table-table_stock_movement_ledger customizable-table">
+         <thead>
+            <tr>
+              <th><?php echo _l('PO Id'); ?></th>
+              <th><?php echo _l('Item'); ?></th>
+              <th><?php echo _l('Descriptions'); ?></th>
+              <th><?php echo _l('Opening Qty'); ?></th>
+              <th><?php echo _l('Inward'); ?></th>
+              <th><?php echo _l('Outward'); ?></th>
+              <th><?php echo _l('Site Transfers'); ?></th>
+              <th><?php echo _l('Closing Qty'); ?></th>
+            </tr>
+         </thead>
+         <tbody>
+         </tbody>
+         <tfoot>
+         	<tr>
+         		<td></td>
+            	<td></td>
+            	<td></td>
+            	<td class="total_opening_quantity"></td>
+            	<td class="total_inward"></td>
+            	<td class="total_outward"></td>
+            	<td class="total_site_transfers"></td>
+            	<td class="total_closing_quantity"></td>
+         	</tr>
+         </tfoot>
+      </table>
+   </div>
 </div>
+
 <?php init_tail(); ?>
 <?php require 'modules/warehouse/assets/js/stock_movement_ledger_js.php'; ?>
 </body>

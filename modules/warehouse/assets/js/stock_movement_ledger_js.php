@@ -64,6 +64,18 @@
 	      }
 	      table_stock_movement_ledger.DataTable().ajax.reload();
 	    });
+
+	    $('.table-table_stock_movement_ledger').on('draw.dt', function() {
+	      var stockMovementTable = $(this).DataTable();
+	      var sums = stockMovementTable.ajax.json().sums;
+	      $(this).find('tfoot').addClass('bold');
+	      $(this).find('tfoot td').eq(0).html("<?php echo _l('invoice_total'); ?> (<?php echo _l('per_page'); ?>)");
+	      $(this).find('tfoot td.total_opening_quantity').html(sums.total_opening_quantity);
+	      $(this).find('tfoot td.total_inward').html(sums.total_inward);
+	      $(this).find('tfoot td.total_outward').html(sums.total_outward);
+	      $(this).find('tfoot td.total_site_transfers').html(sums.total_site_transfers);
+	      $(this).find('tfoot td.total_closing_quantity').html(sums.total_closing_quantity);
+	    });
 	    
 })(jQuery);
 </script>

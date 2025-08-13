@@ -86,6 +86,13 @@ $result  = data_tables_init($select, $sIndexColumn, $sTable, $join, $where, $add
 $output  = $result['output'];
 $rResult = $result['rResult'];
 
+$footer_data = [
+    'total_opening_quantity' => 0,
+    'total_inward' => 0,
+    'total_outward' => 0,
+    'total_site_transfers' => 0,
+    'total_closing_quantity' => 0,
+];
 foreach ($rResult as $aRow) {
     $row = [];
 
@@ -102,7 +109,19 @@ foreach ($rResult as $aRow) {
     $row[] = 0;
     $row[] = number_format($aRow['closing_qty'], 2, '.', '');
 
+    $footer_data['total_opening_quantity'] += $aRow['opening_qty'];
+    $footer_data['total_inward'] += $aRow['inward'];
+    $footer_data['total_outward'] += $aRow['outward'];
+    $footer_data['total_site_transfers'] += 0;
+    $footer_data['total_closing_quantity'] += $aRow['closing_qty'];
+
     $output['aaData'][] = $row;
 }
+
+foreach ($footer_data as $key => $total) {
+    $footer_data[$key] = number_format($total, 2, '.', '');
+}
+
+$output['sums'] = $footer_data;
 
 ?>
