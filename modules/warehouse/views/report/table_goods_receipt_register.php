@@ -87,6 +87,9 @@ $result  = data_tables_init($select, $sIndexColumn, $sTable, $join, $where, $add
 $output  = $result['output'];
 $rResult = $result['rResult'];
 
+$footer_data = [
+    'total_quantity' => 0,
+];
 foreach ($rResult as $aRow) {
     $row = [];
 
@@ -117,7 +120,15 @@ foreach ($rResult as $aRow) {
     }
     $row[] = $approval;
 
+    $footer_data['total_quantity'] += $aRow['quantities'];
+
     $output['aaData'][] = $row;
 }
+
+foreach ($footer_data as $key => $total) {
+    $footer_data[$key] = number_format($total, 2, '.', '');
+}
+
+$output['sums'] = $footer_data;
 
 ?>

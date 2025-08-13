@@ -69,27 +69,46 @@
 </div>
 
 <div class="row">
-	<div class="col-md-12">
-		<?php 
-		$table_data = array(
-			_l('Order Id'),
-			_l('Receipt Id'),
-			_l('Item'),
-			_l('Descriptions'),
-			_l('Vendor'),
-			_l('Qty'),
-			_l('Received On'),
-			_l('Stock Import'),
-			_l('Tech sign'),
-			_l('Transport Doc'),
-			_l('Production Certificate'),
-			_l('Status'),
-		);
-		render_datatable($table_data,'table_goods_receipt_register',
-			array('customizable-table')
-		); ?>
-	</div>
+   <div class="col-md-12">
+      <table class="dt-table-loading table table-table_goods_receipt_register customizable-table">
+         <thead>
+            <tr>
+              <th><?php echo _l('Order Id'); ?></th>
+              <th><?php echo _l('Receipt Id'); ?></th>
+              <th><?php echo _l('Item'); ?></th>
+              <th><?php echo _l('Descriptions'); ?></th>
+              <th><?php echo _l('Vendor'); ?></th>
+              <th><?php echo _l('Qty'); ?></th>
+              <th><?php echo _l('Received On'); ?></th>
+              <th><?php echo _l('Stock Import'); ?></th>
+              <th><?php echo _l('Tech sign'); ?></th>
+              <th><?php echo _l('Transport Doc'); ?></th>
+              <th><?php echo _l('Production Certificate'); ?></th>
+              <th><?php echo _l('Status'); ?></th>
+            </tr>
+         </thead>
+         <tbody>
+         </tbody>
+         <tfoot>
+         	<tr>
+         		<td></td>
+            	<td></td>
+            	<td></td>
+            	<td></td>
+            	<td></td>
+            	<td class="total_quantity"></td>
+            	<td></td>
+            	<td></td>
+            	<td></td>
+            	<td></td>
+            	<td></td>
+            	<td></td>
+         	</tr>
+         </tfoot>
+      </table>
+   </div>
 </div>
+
 <?php init_tail(); ?>
 <?php require 'modules/warehouse/assets/js/goods_receipt_register_js.php'; ?>
 </body>

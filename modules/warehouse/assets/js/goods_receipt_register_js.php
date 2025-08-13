@@ -66,5 +66,13 @@
 	      table_goods_receipt_register.DataTable().ajax.reload();
 	    });
 
+	    $('.table-table_goods_receipt_register').on('draw.dt', function() {
+	      var goodsReceiptRegisterTable = $(this).DataTable();
+	      var sums = goodsReceiptRegisterTable.ajax.json().sums;
+	      $(this).find('tfoot').addClass('bold');
+	      $(this).find('tfoot td').eq(0).html("<?php echo _l('invoice_total'); ?> (<?php echo _l('per_page'); ?>)");
+	      $(this).find('tfoot td.total_quantity').html(sums.total_quantity);
+	    });
+
 })(jQuery);
 </script>
