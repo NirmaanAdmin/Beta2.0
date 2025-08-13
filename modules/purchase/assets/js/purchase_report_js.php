@@ -87,8 +87,11 @@
 
     $('select[name="wo_department[]"]').on('change', function() {
       gen_reports();
-    })
+    });
 
+    $('select[name="vendors[]"]').on('change', function() {
+      gen_reports();
+    });
 
     report_from.on('change', function() {
       var val = $(this).val();
@@ -145,6 +148,16 @@
       $(this).find('tfoot td.total').html(sums.total);
       $(this).find('tfoot td.total_tax').html(sums.total_tax);
       $(this).find('tfoot td.total_value').html(sums.total_value);
+    });
+
+    $('.table-payment-certificate-summary-report').on('draw.dt', function() {
+      var pcReportsTable = $(this).DataTable();
+      var sums = pcReportsTable.ajax.json().sums;
+      $(this).find('tfoot').addClass('bold');
+      $(this).find('tfoot td').eq(0).html("<?php echo _l('invoice_total'); ?> (<?php echo _l('per_page'); ?>)");
+      $(this).find('tfoot td.total_po_value').html(sums.total_po_value);
+      $(this).find('tfoot td.total_paid_value').html(sums.total_paid_value);
+      $(this).find('tfoot td.total_balance_value').html(sums.total_balance_value);
     });
 
     $('.table-item-tracker-report').on('draw.dt', function() {

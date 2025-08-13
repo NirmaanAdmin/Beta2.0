@@ -32,5 +32,15 @@
          </tr>
       </thead>
       <tbody></tbody>
+      <tfoot>
+         <tr>
+            <td></td>
+            <td></td>
+            <td class="total_po_value"></td>
+            <td class="total_paid_value"></td>
+            <td class="total_balance_value"></td>
+            <td></td>
+         </tr>
+      </tfoot>
    </table>
 </div>

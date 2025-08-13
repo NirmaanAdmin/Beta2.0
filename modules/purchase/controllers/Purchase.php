@@ -15960,6 +15960,11 @@ class purchase extends AdminController
             $output  = $result['output'];
             $rResult = $result['rResult'];
 
+            $footer_data = [
+                'total_po_value' => 0,
+                'total_paid_value' => 0,
+                'total_balance_value' => 0,
+            ];
             foreach ($rResult as $aRow) {
                 $row = [];
 
@@ -15976,9 +15981,18 @@ class purchase extends AdminController
                 $row[] = app_format_money($balance, '₹');
                 $row[] = $paid_percentage . '%';
 
+                $footer_data['total_po_value'] += $po_total;
+                $footer_data['total_paid_value'] += $pc_total;
+                $footer_data['total_balance_value'] += $balance;
+
                 $output['aaData'][] = $row;
             }
 
+            foreach ($footer_data as $key => $total) {
+                $footer_data[$key] = app_format_money($total, '₹');
+            }
+
+            $output['sums'] = $footer_data;
             echo json_encode($output);
             die();
         }
