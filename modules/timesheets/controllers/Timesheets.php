@@ -7961,4 +7961,30 @@ class timesheets extends AdminController
 		}
 		return $result;
 	}
+
+	public function send_missed_punch()
+	{
+		$data = $this->input->post();
+		$success = false;
+		if (isset($data['additional_day'])) {
+			$staff_id = '';
+				if (isset($data['staff_id'])) {
+					$staff_id = $data['staff_id'];
+				}
+
+			$success = $this->timesheets_model->add_missed_punch($data, '', $staff_id);
+		}
+		if ($success) {
+			set_alert('success', _l('added_successfully', _l('Missed Punch')));
+		} else {
+			set_alert('warning', _l('fail'));
+		}
+		redirect(admin_url('timesheets/requisition_manage?tab=missed_punch'));
+	}
+
+
+	public function table_missed_punch()
+	{
+		$this->app->get_table_data(module_views_path('timesheets', 'timekeeping/table_missed_punch'));
+	}
 }

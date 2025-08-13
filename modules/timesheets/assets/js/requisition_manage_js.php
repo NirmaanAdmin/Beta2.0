@@ -2,6 +2,7 @@
   var addnewkpi;
   var table_registration_leave = $('table.table-table_registration_leave');
   var table_additional_timesheets = $('table.table-table_additional_timesheets');
+  var table_missed_punch = $('table.table-table_missed_punch');
   var rest_time = 0;
   var time = 0;
   var hour_working;
@@ -57,6 +58,12 @@
       "department_ats": "[name='department_ats[]']",
     };
 
+    var missedpunchServerParams = {
+      "status_filter_mp": "[name='status_filter_mp[]']",
+      "chose_mp": "[name='chose_mp']",
+      "department_mp": "[name='department_mp[]']",
+    };
+
     initDataTable(table_additional_timesheets, admin_url + 'timesheets/table_additional_timesheets', [0], [0], addtimesheetServerParams, [3, 'desc']);
     $.each(addtimesheetServerParams, function() {
       $('#status_filter_ats').on('change', function() {
@@ -79,6 +86,27 @@
 
       $('#department_ats').on('change', function() {
         table_additional_timesheets.DataTable().ajax.reload()
+          .columns.adjust()
+          .responsive.recalc();
+      });
+    });
+
+    initDataTable(table_missed_punch, admin_url + 'timesheets/table_missed_punch', [0], [0], missedpunchServerParams, [2, 'desc']);
+    $.each(addtimesheetServerParams, function() {
+      $('#status_filter_mp').on('change', function() {
+        table_missed_punch.DataTable().ajax.reload()
+          .columns.adjust()
+          .responsive.recalc();
+      });
+
+      $('#chose_mp').on('change', function() {
+        table_missed_punch.DataTable().ajax.reload()
+          .columns.adjust()
+          .responsive.recalc();
+      });
+
+      $('#department_mp').on('change', function() {
+        table_missed_punch.DataTable().ajax.reload()
           .columns.adjust()
           .responsive.recalc();
       });
@@ -469,6 +497,17 @@
       additional_day: 'required'
     });
 
+    $("#edit_missed_punch-form").submit(function(e) {
+      "use strict";
+      if ($("#edit_missed_punch-form").valid()) {
+        $('.btn-missed-punch').text('Processing ...');
+        $('.btn-missed-punch').attr('disabled', true);
+      }
+    });
+    appValidateForm($('#edit_missed_punch-form'), {
+      additional_day: 'required'
+    });
+
     $('input[name="start_time_s"]').change(function() {
       start_time_check('input[name="start_time_s"]', 'input[name="end_time_s"]');
     });
@@ -542,6 +581,10 @@
   function btn_additional_timesheets() {
     "use strict";
     $('#additional_timesheets_modalss').modal();
+  }
+  function btn_missed_punch() {
+    "use strict";
+    $('#missed_punch_modalss').modal();
   }
 
   function new_requisition() {

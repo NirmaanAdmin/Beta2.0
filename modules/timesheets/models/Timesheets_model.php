@@ -9040,4 +9040,49 @@ class timesheets_model extends app_model
 
 		return $this->db->get()->result_array();
 	}
+
+	public function add_missed_punch($data, $staffid = '', $created_id = '')
+	{
+		if ($staffid == '') {
+			$staff_id = get_staff_user_id();
+		} else {
+			$staff_id = $staffid;
+		}
+		
+		if (is_numeric($created_id)) {
+			$data['creator'] = $created_id;
+		} else {
+			$data['creator'] = $staff_id;
+		}
+
+		$data['staff_id'] = get_staff_user_id();
+		$data['additional_day'] = to_sql_date($data['additional_day']);
+		$data['status'] = '0';
+		$this->db->insert(db_prefix() . 'timesheets_missed_punch', $data);
+
+		$insert_id = $this->db->insert_id();
+
+		// if ($insert_id) {
+		// 	$check_proccess = $this->timesheets_model->get_approve_setting('missed_punch');
+		// 	if ($check_proccess) {
+		// 		$checks = $this->timesheets_model->check_choose_when_approving('missed_punch');
+		// 		if ($checks == 0) {
+		// 			// Has approve setting but not choose when approve
+		// 			$data_new = [];
+		// 			$data_new['rel_id'] = $insert_id;
+		// 			$data_new['rel_type'] = 'missed_punch';
+		// 			$data_new['addedfrom'] = $data['creator'];
+		// 			$success = $this->send_request_approve($data_new, $staffid);
+		// 			if ($success) {
+		// 				if ($staffid == '') {
+		// 					$this->send_mail($data_new);
+		// 				}
+		// 			}
+		// 		}
+		// 	}
+		// 	return $insert_id;
+		// }
+		return $insert_id;
+		return false;
+	}
 }
