@@ -133,6 +133,50 @@
       }
       gen_reports();
     });
+
+    $('.table-summary-report').on('draw.dt', function() {
+      var summaryReportsTable = $(this).DataTable();
+      var sums = summaryReportsTable.ajax.json().sums;
+      $(this).find('tfoot').addClass('bold');
+      $(this).find('tfoot td').eq(0).html("<?php echo _l('invoice_total'); ?> (<?php echo _l('per_page'); ?>)");
+      $(this).find('tfoot td.total_billed').html(sums.total_billed);
+      $(this).find('tfoot td.total_paid').html(sums.total_paid);
+      $(this).find('tfoot td.total_balance').html(sums.total_balance);
+    });
+
+    $('.table-aging-report').on('draw.dt', function() {
+      var agingReportsTable = $(this).DataTable();
+      var sums = agingReportsTable.ajax.json().sums;
+      $(this).find('tfoot').addClass('bold');
+      $(this).find('tfoot td').eq(0).html("<?php echo _l('invoice_total'); ?> (<?php echo _l('per_page'); ?>)");
+      $(this).find('tfoot td.total_amount').html(sums.total_amount);
+    });
+
+    $('.table-mapping-report').on('draw.dt', function() {
+      var mappingReportsTable = $(this).DataTable();
+      var sums = mappingReportsTable.ajax.json().sums;
+      $(this).find('tfoot').addClass('bold');
+      $(this).find('tfoot td').eq(0).html("<?php echo _l('invoice_total'); ?> (<?php echo _l('per_page'); ?>)");
+      $(this).find('tfoot td.total_vendor_amount').html(sums.total_vendor_amount);
+    });
+
+    $('.table-invoicing-report').on('draw.dt', function() {
+      var invoicingReportsTable = $(this).DataTable();
+      var sums = invoicingReportsTable.ajax.json().sums;
+      $(this).find('tfoot').addClass('bold');
+      $(this).find('tfoot td').eq(0).html("<?php echo _l('invoice_total'); ?> (<?php echo _l('per_page'); ?>)");
+      $(this).find('tfoot td.total_amount').html(sums.total_amount);
+      $(this).find('tfoot td.total_paid').html(sums.total_paid);
+    });
+
+    $('.table-client-aging-report').on('draw.dt', function() {
+      var clientAgingReportsTable = $(this).DataTable();
+      var sums = clientAgingReportsTable.ajax.json().sums;
+      $(this).find('tfoot').addClass('bold');
+      $(this).find('tfoot td').eq(0).html("<?php echo _l('invoice_total'); ?> (<?php echo _l('per_page'); ?>)");
+      $(this).find('tfoot td.total_amount_due').html(sums.total_amount_due);
+    });
+
   })(jQuery);
 
 

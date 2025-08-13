@@ -54,6 +54,9 @@ $result  = data_tables_init($select, $sIndexColumn, $sTable, $join, $where, $add
 $output  = $result['output'];
 $rResult = $result['rResult'];
 
+$footer_data = [
+    'total_amount' => 0,
+];
 foreach ($rResult as $aRow) {
     $row = [];
 
@@ -82,7 +85,15 @@ foreach ($rResult as $aRow) {
 
     $row[] = $payment_status;
 
+    $footer_data['total_amount'] += $aRow['invoice_amount'];
+
     $output['aaData'][] = $row;
 }
+
+foreach ($footer_data as $key => $total) {
+    $footer_data[$key] = app_format_money($total, '₹');
+}
+
+$output['sums'] = $footer_data;
 
 ?>

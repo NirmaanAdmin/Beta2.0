@@ -31,5 +31,13 @@
          </tr>
       </thead>
       <tbody></tbody>
+      <tfoot>
+         <tr>
+            <td></td>
+            <td class="total_amount"></td>
+            <td class="total_paid"></td>
+            <td></td>
+         </tr>
+      </tfoot>
    </table>
 </div>

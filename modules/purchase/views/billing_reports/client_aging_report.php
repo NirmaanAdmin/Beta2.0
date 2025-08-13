@@ -36,5 +36,15 @@
          </tr>
       </thead>
       <tbody></tbody>
+      <tfoot>
+         <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="total_amount_due"></td>
+            <td></td>
+            <td></td>
+         </tr>
+      </tfoot>
    </table>
 </div>

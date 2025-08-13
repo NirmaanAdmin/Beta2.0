@@ -55,6 +55,11 @@ $output  = $result['output'];
 $rResult = $result['rResult'];
 $base_currency = get_base_currency_pur();
 
+$footer_data = [
+    'total_billed' => 0,
+    'total_paid' => 0,
+    'total_balance' => 0,
+];
 foreach ($rResult as $aRow) {
     $row = [];
 
@@ -64,7 +69,17 @@ foreach ($rResult as $aRow) {
     $row[] = app_format_money($aRow['total_balance'], $base_currency->symbol);
     $row[] = round($aRow['paid_percentage']).'%';
 
+    $footer_data['total_billed'] += $aRow['total_billed'];
+    $footer_data['total_paid'] += $aRow['total_paid'];
+    $footer_data['total_balance'] += $aRow['total_balance'];
+
     $output['aaData'][] = $row;
 }
+
+foreach ($footer_data as $key => $total) {
+    $footer_data[$key] = app_format_money($total, '₹');
+}
+
+$output['sums'] = $footer_data;
 
 ?>

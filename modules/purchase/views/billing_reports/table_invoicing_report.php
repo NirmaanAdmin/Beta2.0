@@ -36,6 +36,10 @@ $output  = $result['output'];
 $rResult = $result['rResult'];
 $base_currency = get_base_currency_pur();
 
+$footer_data = [
+    'total_amount' => 0,
+    'total_paid' => 0,
+];
 foreach ($rResult as $aRow) {
     $row = [];
 
@@ -62,7 +66,16 @@ foreach ($rResult as $aRow) {
 
     $row[] = $payment_status;
 
+    $footer_data['total_amount'] += $aRow['total_billed'];
+    $footer_data['total_paid'] += $aRow['total_paid'];
+
     $output['aaData'][] = $row;
 }
+
+foreach ($footer_data as $key => $total) {
+    $footer_data[$key] = app_format_money($total, '₹');
+}
+
+$output['sums'] = $footer_data;
 
 ?>

@@ -53,6 +53,9 @@ $result  = data_tables_init($select, $sIndexColumn, $sTable, $join, $where, $add
 $output  = $result['output'];
 $rResult = $result['rResult'];
 
+$footer_data = [
+    'total_amount_due' => 0,
+];
 foreach ($rResult as $aRow) {
     $row = [];
 
@@ -63,7 +66,15 @@ foreach ($rResult as $aRow) {
     $row[] = $aRow['days_outstanding'];
     $row[] = format_invoice_status($aRow['status']);
 
+    $footer_data['total_amount_due'] += $aRow['total_left_to_pay'];
+
     $output['aaData'][] = $row;
 }
+
+foreach ($footer_data as $key => $total) {
+    $footer_data[$key] = app_format_money($total, '₹');
+}
+
+$output['sums'] = $footer_data;
 
 ?>

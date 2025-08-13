@@ -42,5 +42,14 @@
          </tr>
       </thead>
       <tbody></tbody>
+      <tfoot>
+         <tr>
+            <td></td>
+            <td class="total_billed"></td>
+            <td class="total_paid"></td>
+            <td class="total_balance"></td>
+            <td></td>
+         </tr>
+      </tfoot>
    </table>
 </div>
