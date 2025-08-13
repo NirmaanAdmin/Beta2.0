@@ -19,7 +19,7 @@ $valid_cur_date = $this->timesheets_model->get_next_shift_date(get_staff_user_id
               <div class="scroller arrow-right"><i class="fa fa-angle-right"></i></div>
               <div class="horizontal-tabs">
                 <ul class="nav nav-tabs nav-tabs-horizontal mbot15" role="tablist">
-                  <li role="presentation" class="<?php if (!isset($tab) && $tab == 'registration_on_leave') {
+                  <li role="presentation" class="<?php if (!isset($tab) || (isset($tab) && $tab == 'registration_on_leave')) {
                                                     echo 'active';
                                                   } ?>">
                     <a href="#registration_on_leave" aria-controls="registration_on_leave" role="tab" data-toggle="tab">
@@ -33,7 +33,7 @@ $valid_cur_date = $this->timesheets_model->get_next_shift_date(get_staff_user_id
                       <span class="glyphicon glyphicon-time"></span>&nbsp;<?php echo _l('Miss Punch'); ?>
                     </a>
                   </li>
-                  <li role="presentation" class="<?php if (isset($tab)  && $tab == 'additional_timesheets') {
+                  <li role="presentation" class="<?php if (isset($tab) && $tab == 'additional_timesheets') {
                                                     echo 'active';
                                                   } ?>">
                     <a href="#additional_timesheets" aria-controls="additional_timesheets" role="tab" data-toggle="tab">
@@ -46,9 +46,9 @@ $valid_cur_date = $this->timesheets_model->get_next_shift_date(get_staff_user_id
             <input type="hidden" name="userid" value="<?php echo html_entity_decode($userid); ?>">
 
             <div class="tab-content active">
-              <div role="tabpanel" class="tab-pane <?php if (!isset($tab) && $tab == 'registration_on_leave') {
-                                                      echo 'active';
-                                                    } ?>" id="registration_on_leave">
+              <div role="tabpanel" class="tab-pane <?php if (!isset($tab) || (isset($tab) && $tab == 'registration_on_leave')) {
+                                                    echo 'active';
+                                                  } ?>" id="registration_on_leave">
                 <div class="row">
                   <div class="col-md-12 mtop15">
                     <a href="#" onclick="new_requisition(); return false;" class="btn mright5 btn-info pull-left display-block" data-toggle="sidebar-right" data-target=".requisition_m">
