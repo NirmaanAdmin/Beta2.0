@@ -9141,4 +9141,18 @@ class timesheets_model extends app_model
 		$this->db->order_by('id', 'desc');
 		return $this->db->get(db_prefix() . 'timesheets_missed_punch')->result_array();
 	}
+
+	public function delete_missed_punch($id)
+	{
+
+		$this->db->where('id', $id);
+		$this->db->delete(db_prefix() . 'timesheets_missed_punch');
+		if ($this->db->affected_rows() > 0) {
+			$this->db->where('relate_id', $id);
+			$this->db->where('relate_type', 'missed_punch');
+			$this->db->delete(db_prefix() . 'timesheets_timesheet');
+			return true;
+		}
+		return false;
+	}
 }

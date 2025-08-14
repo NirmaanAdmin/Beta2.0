@@ -192,7 +192,7 @@ foreach ($rResult as $aRow) {
 
 
   if($aRow['status'] == 0 || is_admin()){
-      $options .= '<a id="delete-insurance" href="'. admin_url('timesheets/delete_additional_timesheets/'.$aRow['id']).'" class="btn btn-danger btn-icon _delete mleft5"><i class="fa fa-remove"></i></a>';
+      $options .= '<a id="delete-insurance" href="'. admin_url('timesheets/delete_missed_punch/'.$aRow['id']).'" class="btn btn-danger btn-icon _delete mleft5"><i class="fa fa-remove"></i></a>';
   }
   $row[]   = $options;
 

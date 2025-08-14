@@ -8168,4 +8168,18 @@ class timesheets extends AdminController
 		]);
 		die();
 	}
+
+	
+	public function delete_missed_punch($id)
+	{
+		$response = $this->timesheets_model->delete_missed_punch($id);
+		if (is_array($response) && isset($response['referenced'])) {
+			set_alert('warning', _l('is_referenced'));
+		} elseif ($response == true) {
+			set_alert('success', _l('deleted'));
+		} else {
+			set_alert('warning', _l('problem_deleting'));
+		}
+		redirect(admin_url('timesheets/requisition_manage?tab=missed_punch'));
+	}
 }
