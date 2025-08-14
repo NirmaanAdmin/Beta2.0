@@ -16367,4 +16367,21 @@ class purchase extends AdminController
         $data['goods_receipt_detail'] = $wo_order_details;
         $this->load->view('manage_goods_receipt/view_purchase', $data);
     }
+
+    public function update_payment_certificate_file_order()
+    {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+        }
+        $order = $this->input->post('order');
+        if (!is_array($order)) {
+            echo json_encode(['success' => false, 'message' => 'Invalid order']);
+            return;
+        }
+        foreach ($order as $position => $id) {
+            $this->db->where('id', $id);
+            $this->db->update(db_prefix() . 'payment_certificate_files', ['position' => $position + 1]);
+        }
+        echo json_encode(['success' => true]);
+    }
 }

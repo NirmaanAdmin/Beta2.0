@@ -4864,3 +4864,17 @@ function update_wo_orders_last_action($id)
     }
     return true;
 }
+
+function get_next_payment_certificate_file_order($id)
+{
+    $CI = &get_instance();
+    $CI->db->select('position');
+    $CI->db->from('payment_certificate_files');
+    $CI->db->where('rel_id', $id);
+    $CI->db->order_by('position', 'DESC');
+    $CI->db->limit(1);
+    $query = $CI->db->get();
+    $file_order = $query->row();
+    return !empty($file_order) ? ($file_order->position + 1) : 1;
+}
+

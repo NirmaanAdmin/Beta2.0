@@ -19640,6 +19640,7 @@ class Purchase_model extends App_Model
     public function save_payment_certificate_files($id)
     {
         $uploadedFiles = handle_payment_certificate_attachments_array($id);
+        $position = get_next_payment_certificate_file_order($id);
         if ($uploadedFiles && is_array($uploadedFiles)) {
             foreach ($uploadedFiles as $file) {
                 $data = array();
@@ -19649,6 +19650,7 @@ class Purchase_model extends App_Model
                 $data['attachment_key'] = app_generate_hash();
                 $data['file_name'] = $file['file_name'];
                 $data['filetype']  = $file['filetype'];
+                $data['position']  = $position;
                 $this->db->insert(db_prefix() . 'payment_certificate_files', $data);
             }
         }
@@ -19667,7 +19669,7 @@ class Purchase_model extends App_Model
     public function get_payment_certificate_attachments($id)
     {
         $this->db->where('rel_id', $id);
-        $this->db->order_by('dateadded', 'desc');
+        $this->db->order_by('position', 'asc');
         $attachments = $this->db->get(db_prefix() . 'payment_certificate_files')->result_array();
         return $attachments;
     }
