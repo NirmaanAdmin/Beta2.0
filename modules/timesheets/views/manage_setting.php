@@ -71,7 +71,7 @@
         <div class="col-md-9">
           <div class="panel_s">
             <div class="panel-body">
-              <?php $this->load->view($tabs['view']); ?>
+              <?php  $this->load->view($tabs['view']); ?>
             </div>
           </div>
         </div>

@@ -24,6 +24,7 @@
         // ]; 
         $related = [ 
           ['id' => 'additional_timesheets', 'name' => _l('additional_timesheets')],
+          ['id' => 'missed_punch', 'name' => _l('Missed Punch')],
           ['id' => 'private_work_without_pay', 'name' => _l('Leave Without Pay (lWP)')],
           ['id' => 'sick_leave', 'name' => _l('sick_leave')],
           ['id' => 'late', 'name' => _l('late')],

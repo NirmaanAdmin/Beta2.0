@@ -13,5 +13,5 @@
   render_datatable($table_data,'table_missed_punch');
   ?>
 
-<!-- <div class="modal fade additional-timesheets-sidebar" id="additional_timesheets_modal" >
-</div> -->
+<div class="modal fade additional-timesheets-sidebar" id="missed_punch_modal" >
+</div>

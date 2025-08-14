@@ -968,4 +968,18 @@
     $('#update_end_time').val(end_time);
     $('#update_leave_id').val(leave_id);
   }
+
+
+  function view_missed_punch(id) {
+    "use strict";
+    $.post(admin_url + 'timesheets/get_data_missed_punch/' + id).done(function(response) {
+      response = JSON.parse(response);
+      $('#missed_punch_modal').html('');
+
+      $('#missed_punch_modal').append(response.html);
+
+      $('#missed_punch_modal').modal('show');
+      $('select[name="approver_c"]').selectpicker('refresh');
+    });
+  }
 </script>

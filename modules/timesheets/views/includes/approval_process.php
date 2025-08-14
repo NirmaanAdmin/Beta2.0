@@ -27,6 +27,9 @@
            case 'additional_timesheets':
            $related = _l('additional_timesheets');
            break;
+           case 'missed_punch':
+           $related = _l('missed_punch');
+           break;
            case 'Leave':
            $related = _l('annual_leave');
            break;

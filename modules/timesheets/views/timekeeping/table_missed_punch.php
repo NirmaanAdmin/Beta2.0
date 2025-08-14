@@ -188,7 +188,7 @@ foreach ($rResult as $aRow) {
 
   $row[] = '<span class="label label-'. $status_class.'  mr-1 mb-1 mt-1">'. _l($status_text).'</span>';
 
-  $options = '<a href="Javascript:void(0);" onclick="view_additional_timesheets('.$aRow['id'].'); return false" class="btn btn-default btn-icon" data-toggle="sidebar-right" data-target=".additional-timesheets-sidebar"><i class="fa fa-eye"></i></a>';
+  $options = '<a href="Javascript:void(0);" onclick="view_missed_punch('.$aRow['id'].'); return false" class="btn btn-default btn-icon" data-toggle="sidebar-right" data-target=".additional-timesheets-sidebar"><i class="fa fa-eye"></i></a>';
 
 
   if($aRow['status'] == 0 || is_admin()){

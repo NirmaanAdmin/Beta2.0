@@ -249,10 +249,10 @@ class timesheets extends AdminController
 				$result = $this->timesheets_model->get_attendance_manual($staffs, $month, $month_year);
 				$data['staff_row_tk'] = $result['staff_row_tk'];
 				// Remove the first element (Admin N360)
-				unset($data['staff_row_tk'][2]); 
+				unset($data['staff_row_tk'][2]);
 				// Optional: Reset array keys (if needed)
 				$data['staff_row_tk'] = array_values($data['staff_row_tk']);
-				unset($data['staff_row_tk'][30]); 
+				unset($data['staff_row_tk'][30]);
 				// Optional: Reset array keys (if needed)
 				$data['staff_row_tk'] = array_values($data['staff_row_tk']);
 
@@ -1813,15 +1813,15 @@ class timesheets extends AdminController
 		$additional_timesheets = $this->timesheets_model->get_additional_timesheets($id);
 
 		$html = '
-	<div class="modal-dialog">
-	<div class="modal-content">
-	<div class="modal-header">
-	<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-	<h4 class="modal-title">
-	<span>' . _l('additional_timesheets') . '</span>
-	</h4>
-	</div>
-	<div class="modal-body">';
+		<div class="modal-dialog">
+		<div class="modal-content">
+		<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		<h4 class="modal-title">
+		<span>' . _l('additional_timesheets') . '</span>
+		</h4>
+		</div>
+		<div class="modal-body">';
 
 		$html .= '<div class="col-md-12">';
 		if ($additional_timesheets) {
@@ -1842,52 +1842,52 @@ class timesheets extends AdminController
 				]) . '</a> <a href="' . admin_url('staff/profile/' . $additional_timesheets->creator) . '">' . get_staff_full_name($additional_timesheets->creator) . '</a>';
 			}
 			$html .= '<table class="table border table-striped margin-top-0">
-		<tbody>
-		<tr class="project-overview">
-		<td class="bold" width="30%">' . _l('creator') . '</td>
-		<td><a href="' . admin_url('staff/profile/' . $additional_timesheets->creator) . '">' . staff_profile_image($additional_timesheets->creator, [
+			<tbody>
+			<tr class="project-overview">
+			<td class="bold" width="30%">' . _l('creator') . '</td>
+			<td><a href="' . admin_url('staff/profile/' . $additional_timesheets->creator) . '">' . staff_profile_image($additional_timesheets->creator, [
 				'staff-profile-image-small',
 			]) . '</a> <a href="' . admin_url('staff/profile/' . $additional_timesheets->creator) . '">' . get_staff_full_name($additional_timesheets->creator) . '</a>
-		</td>
-		</tr>
-		<tr class="project-overview">
-		<td class="bold" width="30%">' . _l('status') . '</td>
-		<td><span class="label label-' . $status_class . ' mr-1 mb-1 mt-1">' . _l($status_text) . '</span></td>
-		</tr>
-		<tr class="project-overview">
-		<td class="bold">' . _l('additional_day') . '</td>
-		<td>' . _d($additional_timesheets->additional_day) . '</td>
-		</tr>
-		<tr class="project-overview">
-		<td class="bold">' . _l('time_in') . '</td>
-		<td>' . $additional_timesheets->time_in . '</td>
-		</tr>
-		<tr class="project-overview">
-		<td class="bold">' . _l('time_out') . '</td>
-		<td>' . $additional_timesheets->time_out . '</td>
-		</tr>
-		';
+			</td>
+			</tr>
+			<tr class="project-overview">
+			<td class="bold" width="30%">' . _l('status') . '</td>
+			<td><span class="label label-' . $status_class . ' mr-1 mb-1 mt-1">' . _l($status_text) . '</span></td>
+			</tr>
+			<tr class="project-overview">
+			<td class="bold">' . _l('additional_day') . '</td>
+			<td>' . _d($additional_timesheets->additional_day) . '</td>
+			</tr>
+			<tr class="project-overview">
+			<td class="bold">' . _l('time_in') . '</td>
+			<td>' . $additional_timesheets->time_in . '</td>
+			</tr>
+			<tr class="project-overview">
+			<td class="bold">' . _l('time_out') . '</td>
+			<td>' . $additional_timesheets->time_out . '</td>
+			</tr>
+			';
 
 			$html .= '  <tr class="project-overview">
-		<td class="bold" width="30%">' . _l('timekeeping_value') . '</td>
-		<td>' . $additional_timesheets->timekeeping_value . '</td>
-		</tr>
-		<tr class="project-overview">
-		<td class="bold" width="30%">' . _l('reason_') . '</td>
-		<td>' . $additional_timesheets->reason . '</td>
-		</tr>
-		</tbody>
-		</table>';
+			<td class="bold" width="30%">' . _l('timekeeping_value') . '</td>
+			<td>' . $additional_timesheets->timekeeping_value . '</td>
+			</tr>
+			<tr class="project-overview">
+			<td class="bold" width="30%">' . _l('reason_') . '</td>
+			<td>' . $additional_timesheets->reason . '</td>
+			</tr>
+			</tbody>
+			</table>';
 		}
 		$html .= '
-	<p class="bold margin-top-15">' . _l('approval_infor') . '</p>
-	<hr class="border-0-5" /><div>
+			<p class="bold margin-top-15">' . _l('approval_infor') . '</p>
+			<hr class="border-0-5" /><div>
 
-	<div class="project-overview-right">';
+			<div class="project-overview-right">';
 		if (count($list_approve_status) > 0) {
 
 			$html .= '<div class="row">
-		<div class="col-md-12 project-overview-expenses-finance">';
+				<div class="col-md-12 project-overview-expenses-finance">';
 
 			$this->load->model('staff_model');
 			$enter_charge_code = 0;
@@ -1895,7 +1895,7 @@ class timesheets extends AdminController
 				$value['staffid'] = explode(', ', $value['staffid']);
 
 				$html .= '<div class="col-md-6" class="font-15">
-			<p class="text-uppercase text-muted no-mtop bold">';
+					<p class="text-uppercase text-muted no-mtop bold">';
 				$staff_name = '';
 				foreach ($value['staffid'] as $key => $val) {
 					if ($staff_name != '') {
@@ -1911,13 +1911,13 @@ class timesheets extends AdminController
 				if ($value['approve'] == 1) {
 					$html .= '<img src="' . site_url(TIMESHEETS_PATH . 'approval/approved.png') . '" class="wh-150-80">';
 					$html .= '<br><br>
-				<p class="bold text-center text-success">' . _dt($value['date']) . '</p>
-				';
+						<p class="bold text-center text-success">' . _dt($value['date']) . '</p>
+						';
 				} elseif ($value['approve'] == 2) {
 					$html .= '<img src="' . site_url(TIMESHEETS_PATH . 'approval/rejected.png') . '" class="wh-150-80">';
 					$html .= '<br><br>
-				<p class="bold text-center text-danger">' . _dt($value['date']) . '</p>
-				';
+						<p class="bold text-center text-danger">' . _dt($value['date']) . '</p>
+						';
 				}
 				$html .= '</div>';
 			}
@@ -1925,8 +1925,8 @@ class timesheets extends AdminController
 		}
 
 		$html .= '</div>
-	<div class="clearfix"></div></br>
-	<div class="modal-footer">';
+				<div class="clearfix"></div></br>
+				<div class="modal-footer">';
 
 		$check_proccess = $this->timesheets_model->get_approve_setting('additional_timesheets', false);
 		$check = '';
@@ -1956,41 +1956,41 @@ class timesheets extends AdminController
 					}
 				}
 				$html .= '</select></div>';
-				$html .= '<div class="col-md-5"><a href="#" class="btn btn-default pull-right mleft15" data-toggle="modal" data-target=".additional-timesheets-sidebar">' . _l('close') . '</a>';
+				$html .= '<div class="col-md-5"><a href="#" class="btn btn-default pull-right mleft15" data-dismiss="modal" aria-label="Close" data-toggle="modal">' . _l('close') . '</a>';
 				$html .= '<a href="#" onclick="choose_approver(' . $additional_timesheets->id . ',' . $additional_timesheets->creator . ');" class="btn btn-success lead-top-btn lead-view pull-right" data-loading-text="' . _l('wait_text') . '">' . _l('choose') . '</a></div></div></div>';
 			}
 		}
 		if (isset($check_approve_status['staffid'])) {
 			if (in_array(get_staff_user_id(), $check_approve_status['staffid'])) {
 				$html .= '<div class="btn-group pull-left" >
-			<a href="#" class="btn btn-success dropdown-toggle " data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' . _l('approve') . '<span class="caret"></span></a>
-			<ul class="dropdown-menu dropdown-menu-left wh-500-190">
-			<li>
-			<div class="col-md-12">
-			' . render_textarea('reason', 'reason') . '
-			</div>
-			</li>
-			<li>
-			<div class="row text-right col-md-12">
-			<a href="#" data-loading-text="' . _l('wait_text') . '" onclick="approve_request(' . $additional_timesheets->id . ',\'additional_timesheets\'); return false;" class="btn btn-success margin-left-right-15">' . _l('approve') . '</a>
-			<a href="#" data-loading-text="' . _l('wait_text') . '" onclick="deny_request(' . $additional_timesheets->id . ',\'additional_timesheets\'); return false;" class="btn btn-warning">' . _l('deny') . '</a>
-			</div>
-			</li>
-			</ul>
-			</div>';
+						<a href="#" class="btn btn-success dropdown-toggle " data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' . _l('approve') . '<span class="caret"></span></a>
+						<ul class="dropdown-menu dropdown-menu-left wh-500-190">
+						<li>
+						<div class="col-md-12">
+						' . render_textarea('reason', 'reason') . '
+						</div>
+						</li>
+						<li>
+						<div class="row text-right col-md-12">
+						<a href="#" data-loading-text="' . _l('wait_text') . '" onclick="approve_request(' . $additional_timesheets->id . ',\'additional_timesheets\'); return false;" class="btn btn-success margin-left-right-15">' . _l('approve') . '</a>
+						<a href="#" data-loading-text="' . _l('wait_text') . '" onclick="deny_request(' . $additional_timesheets->id . ',\'additional_timesheets\'); return false;" class="btn btn-warning">' . _l('deny') . '</a>
+						</div>
+						</li>
+						</ul>
+						</div>';
 			}
 		}
 		if ($check != 'choose') {
-			$html .= '<a href="#" class="btn btn-default pull-right" data-toggle="modal" data-target=".additional-timesheets-sidebar">' . _l('close') . '</a>';
+			$html .= '<a href="#" class="btn btn-default pull-right close" data-dismiss="modal" aria-label="Close" data-toggle="modal">' . _l('close') . '</a>';
 		}
 
 		$html .= '</div></div>
-	</div>
+				</div>
 
 
-	<div class="clearfix"></div>
-	</div>
-	</div>';
+				<div class="clearfix"></div>
+				</div>
+				</div>';
 		echo json_encode([
 			'html' => $html,
 		]);
@@ -7968,9 +7968,9 @@ class timesheets extends AdminController
 		$success = false;
 		if (isset($data['additional_day'])) {
 			$staff_id = '';
-				if (isset($data['staff_id'])) {
-					$staff_id = $data['staff_id'];
-				}
+			if (isset($data['staff_id'])) {
+				$staff_id = $data['staff_id'];
+			}
 
 			$success = $this->timesheets_model->add_missed_punch($data, '', $staff_id);
 		}
@@ -7986,5 +7986,186 @@ class timesheets extends AdminController
 	public function table_missed_punch()
 	{
 		$this->app->get_table_data(module_views_path('timesheets', 'timekeeping/table_missed_punch'));
+	}
+
+	public function get_data_missed_punch($id)
+	{
+		$check_approve_status = $this->timesheets_model->check_approval_details($id, 'missed_punch');
+		$list_approve_status = $this->timesheets_model->get_list_approval_details($id, 'missed_punch');
+
+		$missed_punch = $this->timesheets_model->get_missed_punch($id);
+
+		$html = '
+		<div class="modal-dialog">
+		<div class="modal-content">
+		<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		<h4 class="modal-title">
+		<span>' . _l('additional_timesheets') . '</span>
+		</h4>
+		</div>
+		<div class="modal-body">';
+
+		$html .= '<div class="col-md-12">';
+		if ($missed_punch) {
+			$status_class = 'info';
+			$status_text = 'status_0';
+			if ($missed_punch->status == 1) {
+				$status_class = 'success';
+				$status_text = 'status_1';
+			} elseif ($missed_punch->status == 2) {
+				$status_class = 'danger';
+				$status_text = 'status_-1';
+			}
+
+			$creator = '';
+			if (isset($missed_punch->creator)) {
+				$creator = '<a href="' . admin_url('staff/profile/' . $missed_punch->creator) . '">' . staff_profile_image($missed_punch->creator, [
+					'staff-profile-image-small',
+				]) . '</a> <a href="' . admin_url('staff/profile/' . $missed_punch->creator) . '">' . get_staff_full_name($missed_punch->creator) . '</a>';
+			}
+			$html .= '<table class="table border table-striped margin-top-0">
+			<tbody>
+			<tr class="project-overview">
+			<td class="bold" width="30%">' . _l('creator') . '</td>
+			<td><a href="' . admin_url('staff/profile/' . $missed_punch->creator) . '">' . staff_profile_image($missed_punch->creator, [
+				'staff-profile-image-small',
+			]) . '</a> <a href="' . admin_url('staff/profile/' . $missed_punch->creator) . '">' . get_staff_full_name($missed_punch->creator) . '</a>
+			</td>
+			</tr>
+			<tr class="project-overview">
+			<td class="bold" width="30%">' . _l('status') . '</td>
+			<td><span class="label label-' . $status_class . ' mr-1 mb-1 mt-1">' . _l($status_text) . '</span></td>
+			</tr>
+			<tr class="project-overview">
+			<td class="bold">' . _l('additional_day') . '</td>
+			<td>' . _d($missed_punch->additional_day) . '</td>
+			</tr>
+			';
+
+			$html .= ' 
+			<tr class="project-overview">
+			<td class="bold" width="30%">' . _l('reason_') . '</td>
+			<td>' . $missed_punch->reason . '</td>
+			</tr>
+			</tbody>
+			</table>';
+		}
+		$html .= '
+			<p class="bold margin-top-15">' . _l('approval_infor') . '</p>
+			<hr class="border-0-5" /><div>
+
+			<div class="project-overview-right">';
+		if (count($list_approve_status) > 0) {
+
+			$html .= '<div class="row">
+				<div class="col-md-12 project-overview-expenses-finance">';
+
+			$this->load->model('staff_model');
+			$enter_charge_code = 0;
+			foreach ($list_approve_status as $value) {
+				$value['staffid'] = explode(', ', $value['staffid']);
+
+				$html .= '<div class="col-md-6" class="font-15">
+					<p class="text-uppercase text-muted no-mtop bold">';
+				$staff_name = '';
+				foreach ($value['staffid'] as $key => $val) {
+					if ($staff_name != '') {
+						$staff_name .= ' or ';
+					}
+					$get_staff = $this->staff_model->get($val);
+					if ($get_staff) {
+						$staff_name .= $get_staff->firstname . ' ' . $get_staff->lastname;
+					}
+				}
+				$html .= $staff_name . '</p>';
+
+				if ($value['approve'] == 1) {
+					$html .= '<img src="' . site_url(TIMESHEETS_PATH . 'approval/approved.png') . '" class="wh-150-80">';
+					$html .= '<br><br>
+						<p class="bold text-center text-success">' . _dt($value['date']) . '</p>
+						';
+				} elseif ($value['approve'] == 2) {
+					$html .= '<img src="' . site_url(TIMESHEETS_PATH . 'approval/rejected.png') . '" class="wh-150-80">';
+					$html .= '<br><br>
+						<p class="bold text-center text-danger">' . _dt($value['date']) . '</p>
+						';
+				}
+				$html .= '</div>';
+			}
+			$html .= '</div></div>';
+		}
+
+		$html .= '</div>
+				<div class="clearfix"></div></br>
+				<div class="modal-footer">';
+
+		$check_proccess = $this->timesheets_model->get_approve_setting('missed_punch', false);
+		$check = '';
+		if ($check_proccess) {
+			if ($check_proccess->choose_when_approving == 0) {
+				$check = 'not_choose';
+			} else {
+				$check = 'choose';
+			}
+		} else {
+			$check = 'no_proccess';
+		}
+
+		if ($missed_punch->status == 0 && ($check_approve_status == false || $check_approve_status == 'reject')) {
+			if ($check != 'choose') {
+				$html .= '<a data-toggle="tooltip" data-loading-text="' . _l('wait_text') . '" class="btn btn-success lead-top-btn lead-view" data-placement="top" href="#" onclick="send_request_approve(' . $missed_punch->id . ',' . $missed_punch->creator . '); return false;">' . _l('send_request_approve') . '</a>';
+			}
+
+			if ($check == 'choose') {
+				$this->load->model('staff_model');
+				$list_staff = $this->staff_model->get();
+				$html .= '<div class="row"><div class="row"><div class="col-md-7"><select name="approver_c" class="selectpicker" data-live-search="true" id="approver_c" data-width="100%" data-none-selected-text="' . _l('please_choose_approver') . '" required>';
+				$current_user = get_staff_user_id();
+				foreach ($list_staff as $staff) {
+					if ($staff['staffid'] != $current_user || is_admin()) {
+						$html .= '<option value="' . $staff['staffid'] . '">' . $staff['staff_identifi'] . ' - ' . $staff['firstname'] . ' ' . $staff['lastname'] . '</option>';
+					}
+				}
+				$html .= '</select></div>';
+				$html .= '<div class="col-md-5"><a href="#" class="btn btn-default pull-right mleft15" data-dismiss="modal" aria-label="Close" data-toggle="modal">' . _l('close') . '</a>';
+				$html .= '<a href="#" onclick="choose_approver(' . $missed_punch->id . ',' . $missed_punch->creator . ');" class="btn btn-success lead-top-btn lead-view pull-right" data-loading-text="' . _l('wait_text') . '">' . _l('choose') . '</a></div></div></div>';
+			}
+		}
+		if (isset($check_approve_status['staffid'])) {
+			if (in_array(get_staff_user_id(), $check_approve_status['staffid'])) {
+				$html .= '<div class="btn-group pull-left" >
+						<a href="#" class="btn btn-success dropdown-toggle " data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' . _l('approve') . '<span class="caret"></span></a>
+						<ul class="dropdown-menu dropdown-menu-left wh-500-190">
+						<li>
+						<div class="col-md-12">
+						' . render_textarea('reason', 'reason') . '
+						</div>
+						</li>
+						<li>
+						<div class="row text-right col-md-12">
+						<a href="#" data-loading-text="' . _l('wait_text') . '" onclick="approve_request(' . $missed_punch->id . ',\'missed_punch\'); return false;" class="btn btn-success margin-left-right-15">' . _l('approve') . '</a>
+						<a href="#" data-loading-text="' . _l('wait_text') . '" onclick="deny_request(' . $missed_punch->id . ',\'missed_punch\'); return false;" class="btn btn-warning">' . _l('deny') . '</a>
+						</div>
+						</li>
+						</ul>
+						</div>';
+			}
+		}
+		if ($check != 'choose') {
+			$html .= '<a href="#" class="btn btn-default pull-right" data-dismiss="modal" aria-label="Close" data-toggle="modal">' . _l('close') . '</a>';
+		}
+
+		$html .= '</div></div>
+				</div>
+
+
+				<div class="clearfix"></div>
+				</div>
+				</div>';
+		echo json_encode([
+			'html' => $html,
+		]);
+		die();
 	}
 }

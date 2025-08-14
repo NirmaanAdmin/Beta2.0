@@ -1876,6 +1876,47 @@ class timesheets_model extends app_model
 
 				return true;
 				break;
+			case 'missed_punch':
+				$data_update['status'] = $status;
+				$this->db->where('id', $rel_id);
+				$this->db->update(db_prefix() . 'timesheets_missed_punch', $data_update);
+				if ($status == 1) {
+					$this->db->where('id', $rel_id);
+					$missed_punch = $this->db->get(db_prefix() . 'timesheets_missed_punch')->row();
+
+
+					$staffid = '';
+					$data_addts = $this->get_missed_punch($rel_id);
+					if ($data_addts) {
+						$this->db->where('date_work', $data_addts->additional_day);
+						$this->db->where('staff_id', $data_addts->creator);
+						$existing_record = $this->db->get(db_prefix() . 'timesheets_timesheet')->row();
+
+						if ($existing_record) {
+							// Update existing record
+							$this->db->where('id', $existing_record->id);
+							$this->db->update(db_prefix() . 'timesheets_timesheet', [
+								'add_from' => $data_addts->creator,
+								'relate_id' => $rel_id,
+								'relate_type' => 'missed_punch',
+								'type' => 'P',
+							]);
+						} else {
+							// Insert new record
+							$this->db->insert(db_prefix() . 'timesheets_timesheet', [
+								'staff_id' => $data_addts->creator,
+								'date_work' => $data_addts->additional_day,
+								'add_from' => $data_addts->creator,
+								'relate_id' => $rel_id,
+								'relate_type' => 'missed_punch',
+								'type' => 'P',
+							]);
+						}
+					}
+				}
+
+				return true;
+				break;
 			default:
 				$this->update_requisition_after_approve($rel_id, $status, $rel_type);
 				break;
@@ -4974,7 +5015,7 @@ class timesheets_model extends app_model
 	 */
 	public function add_update_timesheet($data, $is_timesheets = false)
 	{
-		$type_valid = ['AL', 'W', 'U', 'HO', 'E', 'L', 'B', 'SI', 'M', 'ME', 'NS', 'P', 'OFF', 'H/F', 'W/H', 'N/A','OW', 'C/OFF'];
+		$type_valid = ['AL', 'W', 'U', 'HO', 'E', 'L', 'B', 'SI', 'M', 'ME', 'NS', 'P', 'OFF', 'H/F', 'W/H', 'N/A', 'OW', 'C/OFF'];
 		$data_type_of_leave = $this->get_type_of_leave();
 		foreach ($data_type_of_leave as $key => $value) {
 			$type_valid[] = $value['symbol'];
@@ -5325,7 +5366,7 @@ class timesheets_model extends app_model
 		if ($string != '') {
 			$array = explode(';', $string);
 			$list_type = [];
-			$special_cases = ['H/F', 'W/H', 'N/A','OW','C/OFF']; // Add any other special cases here
+			$special_cases = ['H/F', 'W/H', 'N/A', 'OW', 'C/OFF']; // Add any other special cases here
 
 			// First check if this is a special case that shouldn't be processed
 			if (count($array) == 1) {
@@ -6881,7 +6922,7 @@ class timesheets_model extends app_model
 	 */
 	public function get_attendance_manual($staffs_list, $month = '', $year = '', $from_date = '', $to_date = '')
 	{
-		$type_valid = ['AL', 'W', 'U', 'HO', 'E', 'L', 'B', 'SI', 'M', 'ME', 'NS', 'P', 'OFF', 'H/F', 'W/H', 'N/A','OW','C/OFF'];;
+		$type_valid = ['AL', 'W', 'U', 'HO', 'E', 'L', 'B', 'SI', 'M', 'ME', 'NS', 'P', 'OFF', 'H/F', 'W/H', 'N/A', 'OW', 'C/OFF'];;
 		$data_type_of_leave = $this->get_type_of_leave();
 		foreach ($data_type_of_leave as $key => $value) {
 			$type_valid[] = $value['symbol'];
@@ -9048,7 +9089,7 @@ class timesheets_model extends app_model
 		} else {
 			$staff_id = $staffid;
 		}
-		
+
 		if (is_numeric($created_id)) {
 			$data['creator'] = $created_id;
 		} else {
@@ -9062,27 +9103,42 @@ class timesheets_model extends app_model
 
 		$insert_id = $this->db->insert_id();
 
-		// if ($insert_id) {
-		// 	$check_proccess = $this->timesheets_model->get_approve_setting('missed_punch');
-		// 	if ($check_proccess) {
-		// 		$checks = $this->timesheets_model->check_choose_when_approving('missed_punch');
-		// 		if ($checks == 0) {
-		// 			// Has approve setting but not choose when approve
-		// 			$data_new = [];
-		// 			$data_new['rel_id'] = $insert_id;
-		// 			$data_new['rel_type'] = 'missed_punch';
-		// 			$data_new['addedfrom'] = $data['creator'];
-		// 			$success = $this->send_request_approve($data_new, $staffid);
-		// 			if ($success) {
-		// 				if ($staffid == '') {
-		// 					$this->send_mail($data_new);
-		// 				}
-		// 			}
-		// 		}
-		// 	}
-		// 	return $insert_id;
-		// }
-		return $insert_id;
+		if ($insert_id) {
+			$check_proccess = $this->timesheets_model->get_approve_setting('missed_punch');
+			if ($check_proccess) {
+				$checks = $this->timesheets_model->check_choose_when_approving('missed_punch');
+				if ($checks == 0) {
+					// Has approve setting but not choose when approve
+					$data_new = [];
+					$data_new['rel_id'] = $insert_id;
+					$data_new['rel_type'] = 'missed_punch';
+					$data_new['addedfrom'] = $data['creator'];
+					$success = $this->send_request_approve($data_new, $staffid);
+					if ($success) {
+						if ($staffid == '') {
+							$this->send_mail($data_new);
+						}
+					}
+				}
+			}
+			return $insert_id;
+		}
 		return false;
+	}
+
+
+	public function get_missed_punch($id = '')
+	{
+		if (is_numeric($id)) {
+			$this->db->select('*');
+			$this->db->where('id', $id);
+			return $this->db->get(db_prefix() . 'timesheets_missed_punch')->row();
+		}
+
+		// if (!is_admin() && !has_permission('additional_timesheets_management', '', 'view')) {
+		$this->db->where(' ' . get_staff_user_id() . ' in (select staffid from ' . db_prefix() . 'timesheets_approval_details where rel_type = "missed_punch" and rel_id = ' . db_prefix() . 'timesheets_missed_punch.id)');
+		// }
+		$this->db->order_by('id', 'desc');
+		return $this->db->get(db_prefix() . 'timesheets_missed_punch')->result_array();
 	}
 }

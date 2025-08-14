@@ -47,8 +47,8 @@ $valid_cur_date = $this->timesheets_model->get_next_shift_date(get_staff_user_id
 
             <div class="tab-content active">
               <div role="tabpanel" class="tab-pane <?php if (!isset($tab) || (isset($tab) && $tab == 'registration_on_leave')) {
-                                                    echo 'active';
-                                                  } ?>" id="registration_on_leave">
+                                                      echo 'active';
+                                                    } ?>" id="registration_on_leave">
                 <div class="row">
                   <div class="col-md-12 mtop15">
                     <a href="#" onclick="new_requisition(); return false;" class="btn mright5 btn-info pull-left display-block" data-toggle="sidebar-right" data-target=".requisition_m">
@@ -158,13 +158,9 @@ $valid_cur_date = $this->timesheets_model->get_next_shift_date(get_staff_user_id
                                                     } ?>" id="missed_punch">
                 <div class="row mtop15">
                   <div class="col-md-12">
-                    <?php
-                    if (has_permission('additional_timesheets_management', '', 'view') || is_admin()) {
-                    ?>
-                      <a href="#" onclick="btn_missed_punch(); return false;" class="btn mright5 btn-info pull-left display-block">
-                        <?php echo _l('add'); ?>
-                      </a>
-                    <?php } ?>
+                    <a href="#" onclick="btn_missed_punch(); return false;" class="btn mright5 btn-info pull-left display-block">
+                      <?php echo _l('add'); ?>
+                    </a>
                   </div>
                   <div class="clearfix"></div>
                   <br>
@@ -204,13 +200,9 @@ $valid_cur_date = $this->timesheets_model->get_next_shift_date(get_staff_user_id
 
                 <div class="row mtop15">
                   <div class="col-md-12">
-                    <?php
-                    if (has_permission('additional_timesheets_management', '', 'view') || has_permission('additional_timesheets_management', '', 'view_own') || is_admin()) {
-                    ?>
-                      <a href="#" onclick="btn_additional_timesheets(); return false;" class="btn mright5 btn-info pull-left display-block">
-                        <?php echo _l('add'); ?>
-                      </a>
-                    <?php } ?>
+                    <a href="#" onclick="btn_additional_timesheets(); return false;" class="btn mright5 btn-info pull-left display-block">
+                      <?php echo _l('add'); ?>
+                    </a>
                   </div>
                   <div class="clearfix"></div>
                   <br>

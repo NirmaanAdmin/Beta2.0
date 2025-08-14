@@ -890,3 +890,4 @@ $lang['ts_specific_employees'] = 'Specific Employee';
 $lang['ts_specific_employees_tooltip'] = 'If you want to add Additional Work Hours for a specific employee, select here, otherwise you are adding additional Working Hours yourself.';
 $lang['ts_additional_work_hours_for_specific_employee'] = 'Timesheet - Additional Work Hours for Specific Employee';
 $lang['permission_timesheet_settings'] = 'Timesheet - Settings';
+$lang['missed_punch'] = 'Missed Punch';
