@@ -742,6 +742,13 @@
                   </div>
                 <?php } ?>
                 <div id="paymentcert_file_data"></div>
+                <?php if ($is_view == 0) { ?>
+                  <div class="btn-bottom-toolbar text-right">
+                    <button type="button" class="btn-tr btn btn-info mleft10 pay-cert-submit">
+                      <?php echo _l('submit'); ?>
+                    </button>
+                  </div>
+                <?php } ?>
               </div>
 
               <div role="tabpanel" class="tab-pane ptop10" id="tab_activity">

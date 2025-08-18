@@ -12917,13 +12917,13 @@ class purchase extends AdminController
             if ($payment_certificate_id == '') {
                 $this->purchase_model->add_payment_certificate($pur_cert_data);
                 set_alert('success', _l('added_successfully', _l('payment_certificate')));
-                redirect(admin_url('purchase/purchase_order/' . $po_id));
+                redirect(admin_url('purchase/list_payment_certificate'));
             } else {
                 $success = $this->purchase_model->update_payment_certificate($pur_cert_data, $payment_certificate_id);
                 if ($success) {
                     set_alert('success', _l('updated_successfully', _l('payment_certificate')));
                 }
-                redirect(admin_url('purchase/purchase_order/' . $po_id));
+                redirect(admin_url('purchase/list_payment_certificate'));
             }
         }
 
@@ -13225,13 +13225,13 @@ class purchase extends AdminController
             if ($payment_certificate_id == '') {
                 $this->purchase_model->add_payment_certificate($pur_cert_data);
                 set_alert('success', _l('added_successfully', _l('payment_certificate')));
-                redirect(admin_url('purchase/work_order/' . $wo_id));
+                redirect(admin_url('purchase/list_payment_certificate'));
             } else {
                 $success = $this->purchase_model->update_payment_certificate($pur_cert_data, $payment_certificate_id);
                 if ($success) {
                     set_alert('success', _l('updated_successfully', _l('payment_certificate')));
                 }
-                redirect(admin_url('purchase/work_order/' . $wo_id));
+                redirect(admin_url('purchase/list_payment_certificate'));
             }
         }
 
