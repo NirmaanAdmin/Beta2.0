@@ -18668,6 +18668,7 @@ class Purchase_model extends App_Model
             $approved_image = '<div style="text-align: center;"><img src="' . site_url(PURCHASE_PATH . 'approval/approved.png') . '" class="img_style" width="90px" height="50px"></div>';
             $rejected_image = '<div style="text-align: center;"><img src="' . site_url(PURCHASE_PATH . 'approval/rejected.png') . '" class="img_style" width="90px" height="50px"></div>';
 
+            $html .= '<div style="page-break-before: always;"></div>';
             $html .= '<table class="table" style="width: 100%" style="font-size:13px">
                 <tbody>';
             $html .= '<tr class="footer_cert_title">';
