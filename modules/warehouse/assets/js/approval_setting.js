@@ -40,30 +40,12 @@
     $('input[name="account_template"]').val(account_template.getData());
   });
 
-  $("body").on('change', '#project_id', function() {
-    var project_id = $(this).val();
-    if(project_id) {
-        $('#approver').empty().selectpicker('refresh');
-        $.post(admin_url+'warehouse/find_project_members',{'project_id':project_id}).done(function(response){
-            response = JSON.parse(response);
-            if(response.length > 0) {
-                $.each(response, function(idx, member) {
-                    var approver = $('#approver');
-                    approver.prepend('<option value="'+member.id+'">'+member.full_name+'</option>');
-                });
-                $('#approver').selectpicker('refresh');
-            }
-        });
-    }
-  });
-
-  $(document).on('change', '#project_id, #related', function() {
+  $(document).on('change', '#related', function() {
     var data = {};
     data.approval_setting_id = $('input[name="approval_setting_id"]').val();
-    data.project_id = $('select[id="project_id"]').val();
     data.related = $('select[name="related"]').val();
     $('.submit_approval_setting').prop('disabled', false);
-    if(data.project_id && data.related) {
+    if(data.related) {
         $.post(admin_url+'warehouse/find_approval_setting',data).done(function(response){
             response = JSON.parse(response);
             if(response.success == true) {
@@ -80,16 +62,14 @@
 
 function edit_approval_setting(invoker,id){
   "use strict";
-  appValidateForm($('#approval-setting-form'),{name:'required', related:'required', project_id:'required', "approver[]": "required"});
+  appValidateForm($('#approval-setting-form'),{name:'required', related:'required', "approver[]": "required"});
 
   var name = $(invoker).data('name');
   var related = $(invoker).data('related');
-  var project_id = $(invoker).data('project');
   
   $('input[name="approval_setting_id"]').val(id);
   $('#approval_setting_modal input[name="name"]').val(name);
   $('select[name="related"]').val(related).selectpicker('refresh');
-  $('select[id="project_id"]').val(project_id).selectpicker('refresh');
 
   var approver = $(invoker).data('approver');
   var approver_array = [];
@@ -98,7 +78,7 @@ function edit_approval_setting(invoker,id){
   }
 
   $('#approver').empty().selectpicker('refresh');
-  $.post(admin_url+'warehouse/find_project_members',{'project_id':project_id}).done(function(response){
+  $.post(admin_url+'warehouse/find_project_members').done(function(response){
     response = JSON.parse(response);
     if(response.length > 0) {
         $.each(response, function(idx, member) {
@@ -129,11 +109,10 @@ function edit_approval_setting(invoker,id){
 
 function new_approval_setting(){
   "use strict";
-  appValidateForm($('#approval-setting-form'),{name:'required', related:'required', project_id:'required', "approver[]": "required"});
+  appValidateForm($('#approval-setting-form'),{name:'required', related:'required', "approver[]": "required"});
 
   $('#approval_setting_modal input[name="name"]').val('');
   $('select[name="related"]').val('').selectpicker('refresh');
-  $('select[id="project_id"]').val('').selectpicker('refresh');
   $('#approver').empty().selectpicker('refresh');
   
   // $.post(admin_url + 'warehouse/get_html_approval_setting').done(function(response) {
