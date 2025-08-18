@@ -15280,7 +15280,8 @@ class Purchase_model extends App_Model
 
     public function find_approval_setting($data)
     {
-        $this->db->where('project_id', $data['project_id']);
+        $default_project = get_default_project();
+        $this->db->where('project_id', $default_project);
         $this->db->where('related', $data['related']);
         if (!empty($data['approval_setting_id'])) {
             $this->db->where('id !=', $data['approval_setting_id']);
