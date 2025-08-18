@@ -18652,11 +18652,21 @@ class Purchase_model extends App_Model
         </table>
         <br>';
 
-        $list_approve_status = $this->get_list_pay_cert_approval_details($id, 'payment_certificate');
+        $payment_certificate_type = '';
+        if (!empty($payment_certificate->po_id)) {
+            $payment_certificate_type = 'po_payment_certificate';
+        } else if(!empty($payment_certificate->wo_id)) {
+            $payment_certificate_type = 'wo_payment_certificate';
+        } else if(!empty($payment_certificate->ot_id)) {
+            $payment_certificate_type = 'ot_payment_certificate';
+        } else {
+            $payment_certificate_type = '';
+        }
+        $list_approve_status = $this->get_list_pay_cert_approval_details($id, $payment_certificate_type);
         if (!empty($list_approve_status)) {
-            $approved_by_admin_image = '<div style="text-align: center;"><img src="' . site_url(PURCHASE_PATH . 'approval/approved_by_admin.png') . '" class="img_style" width="160px" height="90px"></div>';
-            $approved_image = '<div style="text-align: center;"><img src="' . site_url(PURCHASE_PATH . 'approval/approved.png') . '" class="img_style" width="160px" height="90px"></div>';
-            $rejected_image = '<div style="text-align: center;"><img src="' . site_url(PURCHASE_PATH . 'approval/rejected.png') . '" class="img_style" width="160px" height="90px"></div>';
+            $approved_by_admin_image = '<div style="text-align: center;"><img src="' . site_url(PURCHASE_PATH . 'approval/approved_by_admin.png') . '" class="img_style" width="90px" height="50px"></div>';
+            $approved_image = '<div style="text-align: center;"><img src="' . site_url(PURCHASE_PATH . 'approval/approved.png') . '" class="img_style" width="90px" height="50px"></div>';
+            $rejected_image = '<div style="text-align: center;"><img src="' . site_url(PURCHASE_PATH . 'approval/rejected.png') . '" class="img_style" width="90px" height="50px"></div>';
 
             $html .= '<table class="table" style="width: 100%" style="font-size:13px">
                 <tbody>';
@@ -18691,7 +18701,7 @@ class Purchase_model extends App_Model
 
             $html .= '</tr>';
 
-            $html .= '</tbody></table><br><br>';
+            $html .= '</tbody></table>';
         }
 
         $html .= '<link href="' . module_dir_url(PURCHASE_MODULE_NAME, 'assets/css/payment_certificate_style.css') . '"  rel="stylesheet" type="text/css" />';
