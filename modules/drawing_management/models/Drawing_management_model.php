@@ -245,7 +245,6 @@ class drawing_management_model extends app_model
 
 				$this->db->select('MAX(CAST(SUBSTRING_INDEX(document_number, "-", -1) AS UNSIGNED)) AS max_num', false)
 					->from(db_prefix() . 'dms_items')
-					// pass raw condition so CI doesn't escape it
 					->where("document_number REGEXP '{$regex}'", null, false);
 
 				$row = $this->db->get()->row();
@@ -648,6 +647,183 @@ class drawing_management_model extends app_model
 		$this->db->insert(db_prefix() . 'dms_items', $data);
 		$insert_id = $this->db->insert_id();
 		if ($insert_id) {
+
+			// Only proceed for valid old item id
+			if (is_numeric($old_item_id) && (int)$old_item_id > 0) {
+				// 1) Resolve parent id correctly (get_parent_id returns a row)
+				$parentRow = $this->get_parent_id($insert_id);
+				$new_parent_id = $parentRow && isset($parentRow->parent_id) ? (int)$parentRow->parent_id : null;
+				if (!$new_parent_id) {
+					// nothing to do without a valid parent
+					return;
+				}
+
+				// 2) Fetch the design stage node (expects a row with name,parent_id)
+				$design_stage_obj = $this->get_design_discipline_stage($new_parent_id);
+				if (empty($design_stage_obj) || empty($design_stage_obj->name)) {
+					return;
+				}
+
+				// Static map of stage ids to names (if you need ids later)
+				$design_stages = [
+					1 => 'Documents Under Review',
+					2 => 'Briefs',
+					3 => 'Concept',
+					4 => 'Schematic',
+					5 => 'Design Development',
+					6 => 'Tender Documents',
+					7 => 'Construction Documents',
+					8 => 'Shop Drawings',
+					9 => 'As-Built',
+				];
+
+				$design_stage_name = trim($design_stage_obj->name);
+				$stage_key = array_search($design_stage_name, $design_stages, true); // strict search
+
+				// 3) Project info (guard for nulls)
+				$get_project_id = get_default_project();
+				$project_obj = $this->projects_model->get($get_project_id);
+				$project_name = $project_obj && isset($project_obj->name) ? $project_obj->name : 'GEN';
+
+				// 4) Discipline name: attempt to resolve via parent->name against your discipline list
+				$discipline_name = 'General';
+				if (!empty($design_stage_obj->parent_id)) {
+					$parent_obj = $this->get_design_discipline_stage((int)$design_stage_obj->parent_id);
+					if (!empty($parent_obj) && !empty($parent_obj->name)) {
+						$all_disciplines = [
+							1 => 'Acoustic',
+							2 => 'Architecture',
+							3 => 'Audiovisual',
+							4 => 'Building Management & Automation Systems',
+							5 => 'Civil & Structure',
+							6 => 'Electrical',
+							7 => 'Engineering (multi-discipline)',
+							8 => 'Facilities',
+							9 => 'Façade Engineering',
+							10 => 'Fire Alarm & Public Address',
+							11 => 'Fire Fighting',
+							12 => 'Fire & Life Safety (Passive)',
+							13 => 'Field Survey',
+							14 => 'HVAC',
+							15 => 'Information & Communication Systems',
+							16 => 'Interior Design',
+							17 => 'Landscaping',
+							18 => 'Lighting',
+							19 => 'Traffic',
+							20 => 'Master Antenna TV',
+							21 => 'Mechanical',
+							22 => 'MEP Coordination (multi-discipline)',
+							23 => 'Operations',
+							24 => 'Owner Plumbing',
+							25 => 'Project Management',
+						];
+						$stage_key2 = array_search($parent_obj->name, $all_disciplines, true);
+						$discipline_name = $parent_obj->name;
+					}
+				}
+
+				// 5) Status name buckets
+				$under_review_stages = ['Documents Under Review', 'Briefs', 'Concept', 'Schematic', 'Design Development'];
+				$released_stages     = ['Tender Documents', 'Construction Documents', 'Shop Drawings', 'As-Built'];
+
+				$status_name = '';
+				if (in_array($design_stage_name, $under_review_stages, true)) {
+					$status_name = 'under_review';
+				} elseif (in_array($design_stage_name, $released_stages, true)) {
+					$status_name = 'released';
+				}
+
+				// 6) Purpose by stage
+				$purpose_name = '';
+				switch ($design_stage_name) {
+					case 'Documents Under Review':
+					case 'Briefs':
+					case 'Concept':
+					case 'Schematic':
+						$purpose_name = 'Issued for review';
+						break;
+					case 'Tender Documents':
+						$purpose_name = 'Issued for tender';
+						break;
+					case 'Design Development':
+						$purpose_name = 'Issued for approval';
+						break;
+					case 'Construction Documents':
+					case 'Shop Drawings':
+					case 'As-Built':
+						$purpose_name = 'Issued for construction';
+						break;
+					default:
+						$purpose_name = 'Issued'; // safe fallback
+						break;
+				}
+
+				// 7) Build codes (safe fallbacks + trimming)
+				$project_code      = strtoupper(substr(preg_replace('/\s+/', '', (string)$project_name), 0, 3)) ?: '';
+				$discipline_code   = strtoupper(substr(preg_replace('/\s+/', '', (string)$discipline_name), 0, 3)) ?: '';
+				$design_stage_code = strtoupper(substr(preg_replace('/\s+/', '', (string)$design_stage_name), 0, 3)) ?: '';
+
+				// Purpose code: initials, max 3 chars
+				$purpose_code = '';
+				foreach (preg_split('/\s+/', $purpose_name, -1, PREG_SPLIT_NO_EMPTY) as $w) {
+					$purpose_code .= strtoupper(substr($w, 0, 1));
+				}
+				$purpose_code = substr($purpose_code, 0, 3) ?: 'PUR';
+
+				// Status code: first 3 chars, or Fallback
+				$status_code = strtoupper(substr($status_name, 0, 3)) ?: 'STA';
+
+				// 8) Sequence per base prefix (not global)
+				// Base prefix is the first 5 parts: PRJ-DIS-STG-PUR-STA
+				$base_prefix = implode('-', [$project_code, $discipline_code, $design_stage_code, $purpose_code, $status_code]);
+
+				// MySQL REGEXP for full doc pattern
+				$regex = "^[A-Z0-9]{3}-[A-Z0-9]{3}-[A-Z0-9]{3}-[A-Z0-9]{3}-[A-Z0-9]{3}-[0-9]{3}$";
+
+				$this->db->select('MAX(CAST(SUBSTRING_INDEX(document_number, "-", -1) AS UNSIGNED)) AS max_num', false)
+					->from(db_prefix() . 'dms_items')
+					->where("document_number REGEXP '{$regex}'", null, false);
+
+				$row = $this->db->get()->row();
+				$next_num = isset($row->max_num) && is_numeric($row->max_num)
+					? ((int)$row->max_num + 1)
+					: 1;
+				// Ensure uniqueness in a rare race; bump until free (bounded loop)
+				$maxAttempts = 5;
+				$attempts = 0;
+				do {
+					$seq = str_pad($next_num, 3, '0', STR_PAD_LEFT);
+					$document_number = $base_prefix . '-' . $seq;
+
+					$this->db->select('id')
+						->from(db_prefix() . 'dms_items')
+						->where('document_number', $document_number)
+						->limit(1);
+					$exists = $this->db->get()->row();
+
+					if (!$exists) {
+						break;
+					}
+					$next_num++;
+					$attempts++;
+				} while ($attempts < $maxAttempts);
+
+				// 9) Prepare update payload (do not write nulls)
+				$update_data = [
+					'document_number' => $document_number,
+					'design_stage'    => ($stage_key !== false) ? $stage_key : null, // numeric id if you need it
+					'discipline'      => $stage_key2,
+					'status'          => $status_name ?: null,
+					'purpose'         => $purpose_name ?: null,
+				];
+				$update_data = array_filter($update_data, static fn($v) => $v !== null);
+
+				if (!empty($update_data)) {
+					$this->db->where('id', (int)$insert_id)->update(db_prefix() . 'dms_items', $update_data);
+				}
+			}
+
+
 			if ($log_text == '') {
 				$this->add_audit_log($insert_id, _l('dmg_added_file'));
 			} else {
@@ -662,8 +838,25 @@ class drawing_management_model extends app_model
 				$this->change_sign_approve_item_id($old_item_id, $insert_id);
 			}
 		}
+		update_drawing_last_action($insert_id);
 		return $insert_id;
 	}
+	public function get_parent_id($id)
+	{
+		return $this->db->select('parent_id')
+			->where('id', (int)$id)
+			->get(db_prefix() . 'dms_items')
+			->row();
+	}
+
+	public function get_design_discipline_stage($id)
+	{
+		return $this->db->select('name,parent_id')
+			->where('id', (int)$id)
+			->get(db_prefix() . 'dms_items')
+			->row();
+	}
+
 
 	/**
 	 * get log version
