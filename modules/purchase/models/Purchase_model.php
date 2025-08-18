@@ -18874,13 +18874,49 @@ class Purchase_model extends App_Model
 
     public function change_status_pay_cert($status, $id)
     {
-        $original_po = $this->get_payment_certificate($id);
+        $payment_certificate = $this->get_payment_certificate($id);
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'payment_certificate', ['approve_status' => $status]);
-        if ($this->db->affected_rows() > 0) {
-            return true;
+        if (!empty($payment_certificate->po_id)) {
+            $payment_certificate_type = 'po_payment_certificate';
+        } elseif (!empty($payment_certificate->wo_id)) {
+            $payment_certificate_type = 'wo_payment_certificate';
+        } elseif (!empty($payment_certificate->ot_id)) {
+            $payment_certificate_type = 'ot_payment_certificate';
+        } else {
+            $payment_certificate_type = '';
         }
-        return false;
+        $this->db->where('rel_id', $id);
+        $this->db->where('rel_type', $payment_certificate_type);
+        $this->db->where('staffid', get_staff_user_id());
+        $this->db->order_by('id', 'asc');
+        $this->db->limit(1);
+        $pur_approval = $this->db->get(db_prefix() . 'payment_certificate_details')->row();
+        if ($pur_approval) {
+            $payment_certificate_details = [
+                'approve'       => $status,
+                'note'          => null,
+                'date'          => date('Y-m-d H:i:s'),
+                'staff_approve' => get_staff_user_id(),
+            ];
+            $this->db->where('id', $pur_approval->id);
+            $this->db->update(db_prefix() . 'payment_certificate_details', $payment_certificate_details);
+        } else {
+            $row = [
+                'approve'       => $status,
+                'action'        => ($status == 2 ? 'approve' : 'pending'),
+                'staffid'       => get_staff_user_id(),
+                'date'          => date('Y-m-d H:i:s'),
+                'date_send'     => date('Y-m-d H:i:s'),
+                'rel_id'        => $id,
+                'rel_type'      => $payment_certificate_type,
+            ];
+            if ($status == 2) {
+                $row['approve_by_admin'] = 1;
+            }
+            $this->db->insert(db_prefix() . 'payment_certificate_details', $row);
+        }
+        return true;
     }
 
     public function get_all_wo_payment_certificate($id)
