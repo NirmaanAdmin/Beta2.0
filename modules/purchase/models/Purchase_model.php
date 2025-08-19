@@ -24243,4 +24243,46 @@ class Purchase_model extends App_Model
         return false;
     }
 
+    public function copy_pc_files_to_vbt($payment_certificate_id, $pur_invoice_id)
+    {
+        $source = FCPATH . 'uploads/purchase/payment_certificate/' . $payment_certificate_id;
+        $destination = FCPATH . 'modules/purchase/uploads/pur_invoice/' . $pur_invoice_id;
+        if (!is_dir($source)) {
+            return false; // nothing to copy
+        }
+        $files = array_diff(scandir($source), ['.', '..']);
+        if (empty($files)) {
+            return false;
+        }
+        if (!is_dir($destination)) {
+            mkdir($destination, 0777, true);
+        }
+        $copied = 0;
+        foreach ($files as $file) {
+            $srcFile = $source . DIRECTORY_SEPARATOR . $file;
+            $destFile = $destination . DIRECTORY_SEPARATOR . $file;
+            if (is_file($srcFile)) {
+                if (copy($srcFile, $destFile)) {
+                    $copied++;
+                }
+            }
+        }
+        $this->db->where('rel_id', $payment_certificate_id);
+        $this->db->order_by('id', 'ASC');
+        $payment_certificate_files = $this->db->get(db_prefix() . 'payment_certificate_files')->result_array();
+        if(!empty($payment_certificate_files) && !empty($files)) {
+            foreach ($payment_certificate_files as $key => $value) {
+                $row = array();
+                $row['rel_id'] = $pur_invoice_id;
+                $row['rel_type'] = 'pur_invoice';
+                $row['file_name'] = $value['file_name'];
+                $row['filetype'] = $value['filetype'];
+                $row['attachment_key'] = $value['attachment_key'];
+                $row['staffid'] = get_staff_user_id();
+                $row['dateadded'] = date('Y-m-d H:i:s');
+                $this->db->insert(db_prefix() . 'files', $row);
+            }
+        }
+        return $copied > 0;
+    }
 }

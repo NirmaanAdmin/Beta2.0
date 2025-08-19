@@ -13140,6 +13140,7 @@ class purchase extends AdminController
         }
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'payment_certificate', ['pur_invoice_id' => $insert_id]);
+        $this->purchase_model->copy_pc_files_to_vbt($id, $insert_id);
         set_alert('success', _l('purchase_invoice') . ' ' . _l('added_successfully'));
         redirect(admin_url('purchase/pur_invoice/' . $insert_id));
     }
