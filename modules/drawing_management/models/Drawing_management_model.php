@@ -464,6 +464,7 @@ class drawing_management_model extends app_model
 						// Regular file upload
 						_maybe_create_upload_path($path);
 						$filename = $this->check_duplicate_file_name($id, $_FILES['file']['name'][$i]);
+						$orginal_filename = $this->check_duplicate_file_name($id, $_FILES['file']['name'][$i]);
 						$newFilePath = $path . $filename;
 
 						if (move_uploaded_file($tmpFilePath, $newFilePath)) {
@@ -479,7 +480,8 @@ class drawing_management_model extends app_model
 								'',
 								'',
 								'',
-								$creator_type
+								$creator_type,
+								$orginal_filename,
 							);
 							$totalUploaded++;
 						}
@@ -610,7 +612,7 @@ class drawing_management_model extends app_model
 	 * @param [type] $version   
 	 * @param [type] $filetype  
 	 */
-	public function add_attachment_file_to_database($name, $parent_id, $version, $filetype, $log_text = '', $old_item_id = '', $creator_id = '', $creator_type = 'staff')
+	public function add_attachment_file_to_database($name, $parent_id, $version, $filetype, $log_text = '', $old_item_id = '', $creator_id = '', $creator_type = 'staff', $orginal_filename = '')
 	{
 		if (is_numeric($old_item_id) && $old_item_id > 0) {
 			$data_item = $this->get_item($old_item_id);
@@ -643,185 +645,239 @@ class drawing_management_model extends app_model
 			$data['filetype'] = $filetype;
 			$data['hash'] = app_generate_hash();
 			$data['master_id'] = $this->get_master_id($parent_id);
+			$data['orginal_filename'] = $orginal_filename;
 		}
 		$this->db->insert(db_prefix() . 'dms_items', $data);
 		$insert_id = $this->db->insert_id();
 		if ($insert_id) {
 
-			// Only proceed for valid old item id
-			if (is_numeric($old_item_id) && (int)$old_item_id > 0) {
-				// 1) Resolve parent id correctly (get_parent_id returns a row)
-				$parentRow = $this->get_parent_id($insert_id);
-				$new_parent_id = $parentRow && isset($parentRow->parent_id) ? (int)$parentRow->parent_id : null;
-				if (!$new_parent_id) {
-					// nothing to do without a valid parent
-					return;
-				}
+			$parentRow = $this->get_parent_id($insert_id);
+			$new_parent_id = $parentRow && isset($parentRow->parent_id) ? (int)$parentRow->parent_id : null;
+			if (!$new_parent_id) {
+				// nothing to do without a valid parent
+				return;
+			}
 
-				// 2) Fetch the design stage node (expects a row with name,parent_id)
-				$design_stage_obj = $this->get_design_discipline_stage($new_parent_id);
-				if (empty($design_stage_obj) || empty($design_stage_obj->name)) {
-					return;
-				}
+			// 2) Fetch the design stage node (expects a row with name,parent_id)
+			$design_stage_obj = $this->get_design_discipline_stage($new_parent_id);
+			if (empty($design_stage_obj) || empty($design_stage_obj->name)) {
+				return;
+			}
 
-				// Static map of stage ids to names (if you need ids later)
-				$design_stages = [
-					1 => 'Documents Under Review',
-					2 => 'Briefs',
-					3 => 'Concept',
-					4 => 'Schematic',
-					5 => 'Design Development',
-					6 => 'Tender Documents',
-					7 => 'Construction Documents',
-					8 => 'Shop Drawings',
-					9 => 'As-Built',
-				];
+			// Static map of stage ids to names (if you need ids later)
+			$design_stages = [
+				1 => 'Documents Under Review',
+				2 => 'Briefs',
+				3 => 'Concept',
+				4 => 'Schematic',
+				5 => 'Design Development',
+				6 => 'Tender Documents',
+				7 => 'Construction Documents',
+				8 => 'Shop Drawings',
+				9 => 'As-Built',
+			];
 
-				$design_stage_name = trim($design_stage_obj->name);
-				$stage_key = array_search($design_stage_name, $design_stages, true); // strict search
+			$design_stage_name = trim($design_stage_obj->name);
+			$stage_key = array_search($design_stage_name, $design_stages, true); // strict search
 
-				// 3) Project info (guard for nulls)
-				$get_project_id = get_default_project();
-				$project_obj = $this->projects_model->get($get_project_id);
-				$project_name = $project_obj && isset($project_obj->name) ? $project_obj->name : 'GEN';
+			// 3) Project info (guard for nulls)
+			$get_project_id = get_default_project();
+			$project_obj = $this->projects_model->get($get_project_id);
+			$project_name = $project_obj && isset($project_obj->name) ? $project_obj->name : '';
 
-				// 4) Discipline name: attempt to resolve via parent->name against your discipline list
-				$discipline_name = 'General';
-				if (!empty($design_stage_obj->parent_id)) {
-					$parent_obj = $this->get_design_discipline_stage((int)$design_stage_obj->parent_id);
-					if (!empty($parent_obj) && !empty($parent_obj->name)) {
-						$all_disciplines = [
-							1 => 'Acoustic',
-							2 => 'Architecture',
-							3 => 'Audiovisual',
-							4 => 'Building Management & Automation Systems',
-							5 => 'Civil & Structure',
-							6 => 'Electrical',
-							7 => 'Engineering (multi-discipline)',
-							8 => 'Facilities',
-							9 => 'Façade Engineering',
-							10 => 'Fire Alarm & Public Address',
-							11 => 'Fire Fighting',
-							12 => 'Fire & Life Safety (Passive)',
-							13 => 'Field Survey',
-							14 => 'HVAC',
-							15 => 'Information & Communication Systems',
-							16 => 'Interior Design',
-							17 => 'Landscaping',
-							18 => 'Lighting',
-							19 => 'Traffic',
-							20 => 'Master Antenna TV',
-							21 => 'Mechanical',
-							22 => 'MEP Coordination (multi-discipline)',
-							23 => 'Operations',
-							24 => 'Owner Plumbing',
-							25 => 'Project Management',
-						];
-						$stage_key2 = array_search($parent_obj->name, $all_disciplines, true);
-						$discipline_name = $parent_obj->name;
-					}
-				}
-
-				// 5) Status name buckets
-				$under_review_stages = ['Documents Under Review', 'Briefs', 'Concept', 'Schematic', 'Design Development'];
-				$released_stages     = ['Tender Documents', 'Construction Documents', 'Shop Drawings', 'As-Built'];
-
-				$status_name = '';
-				if (in_array($design_stage_name, $under_review_stages, true)) {
-					$status_name = 'under_review';
-				} elseif (in_array($design_stage_name, $released_stages, true)) {
-					$status_name = 'released';
-				}
-
-				// 6) Purpose by stage
-				$purpose_name = '';
-				switch ($design_stage_name) {
-					case 'Documents Under Review':
-					case 'Briefs':
-					case 'Concept':
-					case 'Schematic':
-						$purpose_name = 'Issued for review';
-						break;
-					case 'Tender Documents':
-						$purpose_name = 'Issued for tender';
-						break;
-					case 'Design Development':
-						$purpose_name = 'Issued for approval';
-						break;
-					case 'Construction Documents':
-					case 'Shop Drawings':
-					case 'As-Built':
-						$purpose_name = 'Issued for construction';
-						break;
-					default:
-						$purpose_name = 'Issued'; // safe fallback
-						break;
-				}
-
-				// 7) Build codes (safe fallbacks + trimming)
-				$project_code      = strtoupper(substr(preg_replace('/\s+/', '', (string)$project_name), 0, 3)) ?: '';
-				$discipline_code   = strtoupper(substr(preg_replace('/\s+/', '', (string)$discipline_name), 0, 3)) ?: '';
-				$design_stage_code = strtoupper(substr(preg_replace('/\s+/', '', (string)$design_stage_name), 0, 3)) ?: '';
-
-				// Purpose code: initials, max 3 chars
-				$purpose_code = '';
-				foreach (preg_split('/\s+/', $purpose_name, -1, PREG_SPLIT_NO_EMPTY) as $w) {
-					$purpose_code .= strtoupper(substr($w, 0, 1));
-				}
-				$purpose_code = substr($purpose_code, 0, 3) ?: 'PUR';
-
-				// Status code: first 3 chars, or Fallback
-				$status_code = strtoupper(substr($status_name, 0, 3)) ?: 'STA';
-
-				// 8) Sequence per base prefix (not global)
-				// Base prefix is the first 5 parts: PRJ-DIS-STG-PUR-STA
-				$base_prefix = implode('-', [$project_code, $discipline_code, $design_stage_code, $purpose_code, $status_code]);
-
-				// MySQL REGEXP for full doc pattern
-				$regex = "^[A-Z0-9]{3}-[A-Z0-9]{3}-[A-Z0-9]{3}-[A-Z0-9]{3}-[A-Z0-9]{3}-[0-9]{3}$";
-
-				$this->db->select('MAX(CAST(SUBSTRING_INDEX(document_number, "-", -1) AS UNSIGNED)) AS max_num', false)
-					->from(db_prefix() . 'dms_items')
-					->where("document_number REGEXP '{$regex}'", null, false);
-
-				$row = $this->db->get()->row();
-				$next_num = isset($row->max_num) && is_numeric($row->max_num)
-					? ((int)$row->max_num + 1)
-					: 1;
-				// Ensure uniqueness in a rare race; bump until free (bounded loop)
-				$maxAttempts = 5;
-				$attempts = 0;
-				do {
-					$seq = str_pad($next_num, 3, '0', STR_PAD_LEFT);
-					$document_number = $base_prefix . '-' . $seq;
-
-					$this->db->select('id')
-						->from(db_prefix() . 'dms_items')
-						->where('document_number', $document_number)
-						->limit(1);
-					$exists = $this->db->get()->row();
-
-					if (!$exists) {
-						break;
-					}
-					$next_num++;
-					$attempts++;
-				} while ($attempts < $maxAttempts);
-
-				// 9) Prepare update payload (do not write nulls)
-				$update_data = [
-					'document_number' => $document_number,
-					'design_stage'    => ($stage_key !== false) ? $stage_key : null, // numeric id if you need it
-					'discipline'      => $stage_key2,
-					'status'          => $status_name ?: null,
-					'purpose'         => $purpose_name ?: null,
-				];
-				$update_data = array_filter($update_data, static fn($v) => $v !== null);
-
-				if (!empty($update_data)) {
-					$this->db->where('id', (int)$insert_id)->update(db_prefix() . 'dms_items', $update_data);
+			// 4) Discipline name: attempt to resolve via parent->name against your discipline list
+			$discipline_name = '';
+			$stage_key2 = null;
+			if (!empty($design_stage_obj->parent_id)) {
+				$parent_obj = $this->get_design_discipline_stage((int)$design_stage_obj->parent_id);
+				if (!empty($parent_obj) && !empty($parent_obj->name)) {
+					$all_disciplines = [
+						1 => 'Acoustic',
+						2 => 'Architecture',
+						3 => 'Audiovisual',
+						4 => 'Building Management & Automation Systems',
+						5 => 'Civil & Structure',
+						6 => 'Electrical',
+						7 => 'Engineering (multi-discipline)',
+						8 => 'Facilities',
+						9 => 'Façade Engineering',
+						10 => 'Fire Alarm & Public Address',
+						11 => 'Fire Fighting',
+						12 => 'Fire & Life Safety (Passive)',
+						13 => 'Field Survey',
+						14 => 'HVAC',
+						15 => 'Information & Communication Systems',
+						16 => 'Interior Design',
+						17 => 'Landscaping',
+						18 => 'Lighting',
+						19 => 'Traffic',
+						20 => 'Master Antenna TV',
+						21 => 'Mechanical',
+						22 => 'MEP Coordination (multi-discipline)',
+						23 => 'Operations',
+						24 => 'Owner Plumbing',
+						25 => 'Project Management',
+					];
+					$discipline_name = trim($parent_obj->name);
+					$stage_key2 = array_search($discipline_name, $all_disciplines, true);
 				}
 			}
+
+			// 5) Status name buckets
+			$under_review_stages = ['Documents Under Review', 'Briefs', 'Concept', 'Schematic', 'Design Development'];
+			$released_stages     = ['Tender Documents', 'Construction Documents', 'Shop Drawings', 'As-Built'];
+
+			$status_name = '';
+			if (in_array($design_stage_name, $under_review_stages, true)) {
+				$status_name = 'under_review';
+			} elseif (in_array($design_stage_name, $released_stages, true)) {
+				$status_name = 'released';
+			}
+
+			// 6) Purpose by stage
+			$purpose_name = '';
+			switch ($design_stage_name) {
+				case 'Documents Under Review':
+				case 'Briefs':
+				case 'Concept':
+				case 'Schematic':
+					$purpose_name = 'Issued for review';
+					break;
+				case 'Tender Documents':
+					$purpose_name = 'Issued for tender';
+					break;
+				case 'Design Development':
+					$purpose_name = 'Issued for approval';
+					break;
+				case 'Construction Documents':
+				case 'Shop Drawings':
+				case 'As-Built':
+					$purpose_name = 'Issued for construction';
+					break;
+			}
+
+
+			// 7) Build codes (safe, trimmed)
+			$project_code      = strtoupper(substr(preg_replace('/\s+/', '', (string)$project_name), 0, 3));
+			$discipline_code   = strtoupper(substr(preg_replace('/\s+/', '', (string)$discipline_name), 0, 3));
+			$design_stage_code = strtoupper(substr(preg_replace('/\s+/', '', (string)$design_stage_name), 0, 3));
+
+			// Purpose code: initials, max 3 chars
+			$purpose_code = '';
+			foreach (preg_split('/\s+/', (string)$purpose_name, -1, PREG_SPLIT_NO_EMPTY) as $w) {
+				$purpose_code .= strtoupper(substr($w, 0, 1));
+			}
+			$purpose_code = substr($purpose_code, 0, 3);
+
+			$status_code = strtoupper(substr((string)$status_name, 0, 3));
+
+			// 8) Build base_prefix with only non-empty components (require at least one)
+			$prefix_components = array_values(array_filter([
+				$project_code ?: null,
+				$discipline_code ?: null,
+				$design_stage_code ?: null,
+				$purpose_code ?: null,
+				$status_code ?: null,
+			], static fn($v) => $v !== null && $v !== ''));
+
+			if (empty($prefix_components)) {
+				// No meaningful parts to build a document number; bail out.
+				return;
+			}
+
+			$base_prefix = implode('-', $prefix_components);
+
+			// Ensure we only look at this prefix and that the last token is a 3-digit number
+			$this->db->select('MAX(CAST(SUBSTRING_INDEX(document_number, "-", -1) AS UNSIGNED)) AS max_num', false)
+				->from(db_prefix() . 'dms_items')
+				->where("document_number REGEXP '[0-9]{3}$'", null, false);             // enforce -NNN at the end
+
+			$row = $this->db->get()->row();
+			$next_num = (isset($row->max_num) && is_numeric($row->max_num)) ? ((int)$row->max_num + 1) : 1;
+
+			// Build candidate and ensure uniqueness (bounded attempts)
+			$maxAttempts = 5;
+			$attempts = 0;
+			do {
+				$seq = str_pad((string)$next_num, 3, '0', STR_PAD_LEFT);
+				$document_number = $base_prefix . '-' . $seq;
+
+				$exists = $this->db->select('id')
+					->from(db_prefix() . 'dms_items')
+					->where('document_number', $document_number)
+					->limit(1)
+					->get()->row();
+
+				if (!$exists) {
+					break;
+				}
+				$next_num++;
+				$attempts++;
+			} while ($attempts < $maxAttempts);
+
+			// 9) Prepare update payload
+			$update_data = [
+				'document_number' => $document_number ?? null,
+				'design_stage'    => ($stage_key !== false) ? $stage_key : null,
+				'discipline'      => $stage_key2 ?? null,
+				'status'          => $status_name ?: null,
+				'purpose'         => $purpose_name ?: null,
+			];
+
+			// drop nulls
+			$update_data = array_filter($update_data, static fn($v) => $v !== null);
+
+			// Try to rename the physical file to include the document number
+			if (is_numeric($old_item_id) && $old_item_id > 0) {
+				$file_record = $this->db->select('name,orginal_filename')->where('id', (int)$insert_id)->get(db_prefix() . 'dms_items')->row();
+				if ($file_record && !empty($file_record->orginal_filename)) {
+					$upload_dir = rtrim(DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER, '/')
+						. '/files/' . (int)$new_parent_id . '/';
+
+					$old_filename = $file_record->name;
+					$old_filename_original_name = $file_record->orginal_filename;
+					$file_parts   = pathinfo($old_filename_original_name);
+					$basename     = $file_parts['filename'] ?? '';
+					$ext          = isset($file_parts['extension']) ? ('.' . $file_parts['extension']) : '';
+
+					if ($basename !== '' && strpos($basename, $document_number) === false) {
+						$new_filename = $basename . '-' . $document_number . $ext;
+						$old_path = $upload_dir . $old_filename;
+						$new_path = $upload_dir . $new_filename;
+
+						if (is_file($old_path) && @rename($old_path, $new_path)) {
+							$update_data['name'] = $new_filename;
+						}
+					}
+				}
+			} else {
+				$file_record = $this->db->select('name')->where('id', (int)$insert_id)->get(db_prefix() . 'dms_items')->row();
+				if ($file_record && !empty($file_record->name)) {
+					$upload_dir = rtrim(DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER, '/')
+						. '/files/' . (int)$new_parent_id . '/';
+
+					$old_filename = $file_record->name;
+					$file_parts   = pathinfo($old_filename);
+					$basename     = $file_parts['filename'] ?? '';
+					$ext          = isset($file_parts['extension']) ? ('.' . $file_parts['extension']) : '';
+
+					if ($basename !== '' && strpos($basename, $document_number) === false) {
+						$new_filename = $basename . '-' . $document_number . $ext;
+						$old_path = $upload_dir . $old_filename;
+						$new_path = $upload_dir . $new_filename;
+
+						if (is_file($old_path) && @rename($old_path, $new_path)) {
+							$update_data['name'] = $new_filename;
+						}
+					}
+				}
+			}
+
+			// Final update
+			if (!empty($update_data)) {
+				$this->db->where('id', (int)$insert_id)->update(db_prefix() . 'dms_items', $update_data);
+			}
+
 
 
 			if ($log_text == '') {
