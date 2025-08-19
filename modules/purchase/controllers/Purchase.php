@@ -12938,6 +12938,7 @@ class purchase extends AdminController
         }
 
         $this->load->model('currencies_model');
+        $this->load->model('warehouse/warehouse_model');
         $data['base_currency'] = $this->currencies_model->get_base_currency();
         $data['po_id'] = $po_id;
         $data['payment_certificate_id'] = $payment_certificate_id;
@@ -12948,6 +12949,8 @@ class purchase extends AdminController
         $data['list_approve_status'] = $this->purchase_model->get_list_pay_cert_approval_details($payment_certificate_id, 'po_payment_certificate');
         $data['check_approve_status'] = $this->purchase_model->check_pay_cert_approval_details($payment_certificate_id, 'po_payment_certificate');
         $data['get_staff_sign'] = $this->purchase_model->get_pay_cert_staff_sign($payment_certificate_id, 'po_payment_certificate');
+        $data['goods_receipt'] = $this->warehouse_model->get_po_goods_receipt($po_id);
+        $data['goods_delivery'] = $this->warehouse_model->get_po_goods_delivery($po_id);
 
         $data['activity'] = $this->purchase_model->get_pay_cert_activity($payment_certificate_id);
         $this->load->view('payment_certificate/payment_certificate', $data);
@@ -13246,6 +13249,7 @@ class purchase extends AdminController
         }
 
         $this->load->model('currencies_model');
+        $this->load->model('warehouse/warehouse_model');
         $data['base_currency'] = $this->currencies_model->get_base_currency();
         $data['wo_id'] = $wo_id;
         $data['payment_certificate_id'] = $payment_certificate_id;
@@ -13257,6 +13261,8 @@ class purchase extends AdminController
         $data['check_approve_status'] = $this->purchase_model->check_pay_cert_approval_details($payment_certificate_id, 'wo_payment_certificate');
         $data['get_staff_sign'] = $this->purchase_model->get_pay_cert_staff_sign($payment_certificate_id, 'wo_payment_certificate');
         $data['activity'] = $this->purchase_model->get_pay_cert_activity($payment_certificate_id);
+        $data['goods_receipt'] = $this->warehouse_model->get_wo_goods_receipt($wo_id);
+        $data['goods_delivery'] = $this->warehouse_model->get_wo_goods_delivery($wo_id);
         $this->load->view('payment_certificate/wo_payment_certificate', $data);
     }
 
@@ -16296,6 +16302,8 @@ class purchase extends AdminController
         $data['list_approve_status'] = $this->purchase_model->get_list_pay_cert_approval_details($payment_certificate_id, 'ot_payment_certificate');
         $data['check_approve_status'] = $this->purchase_model->check_pay_cert_approval_details($payment_certificate_id, 'ot_payment_certificate');
         $data['get_staff_sign'] = $this->purchase_model->get_pay_cert_staff_sign($payment_certificate_id, 'ot_payment_certificate');
+        $data['goods_receipt'] = array();
+        $data['goods_delivery'] = array();
 
         $data['activity'] = $this->purchase_model->get_pay_cert_activity($payment_certificate_id);
         $this->load->view('payment_certificate/ot_payment_certificate', $data);

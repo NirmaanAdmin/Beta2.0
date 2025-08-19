@@ -23924,4 +23924,32 @@ class Warehouse_model extends App_Model
 	{
 		return app_pdf('delivery', module_dir_path(WAREHOUSE_MODULE_NAME, 'libraries/pdf/Delivery_reconcile_pdf.php'), $delivery);
 	}
+
+	public function get_po_goods_receipt($pr_order_id)
+	{
+		$this->db->select('id, pr_order_id, wo_order_id');
+		$this->db->where('pr_order_id', $pr_order_id);
+		return $this->db->get(db_prefix() . 'goods_receipt')->result_array();
+	}
+
+	public function get_wo_goods_receipt($wo_order_id)
+	{
+		$this->db->select('id, pr_order_id, wo_order_id');
+		$this->db->where('wo_order_id', $wo_order_id);
+		return $this->db->get(db_prefix() . 'goods_receipt')->result_array();
+	}
+
+	public function get_po_goods_delivery($pr_order_id)
+	{
+		$this->db->select('id, pr_order_id, wo_order_id');
+		$this->db->where('pr_order_id', $pr_order_id);
+		return $this->db->get(db_prefix() . 'goods_delivery')->result_array();
+	}
+
+	public function get_wo_goods_delivery($wo_order_id)
+	{
+		$this->db->select('id, pr_order_id, wo_order_id');
+		$this->db->where('wo_order_id', $wo_order_id);
+		return $this->db->get(db_prefix() . 'goods_delivery')->result_array();
+	}
 }

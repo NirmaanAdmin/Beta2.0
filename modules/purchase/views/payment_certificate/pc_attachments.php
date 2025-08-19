@@ -57,6 +57,62 @@
           </tr>
         <?php } ?>
       </tbody>
+      <tfoot>
+        <?php if (isset($goods_receipt) && count($goods_receipt) > 0) { 
+          foreach ($goods_receipt as $value) { ?>
+          <tr>
+            <td>
+            </td>
+            <td>
+              <?php if(!empty($value['pr_order_id'])) { ?>
+                <a href="<?php echo admin_url('purchase/purchase_order/' . $value['pr_order_id']) ?>"><?php echo get_pur_order_name($value['pr_order_id']).' ('._l('goods_receipt').')' ?></a>
+              <?php } elseif (!empty($value['wo_order_id'])) { ?>
+                <a href="<?php echo admin_url('purchase/work_order/' . $value['wo_order_id']) ?>"><?php echo get_wo_order_name($value['wo_order_id']).' ('._l('goods_receipt').')' ?></a>
+              <?php } else {
+
+              } ?>
+            </td>
+            <td>
+              <a href="<?php echo admin_url('warehouse/stock_import_pdf/' . $value['id'] . '/?output_type=I') ?>" 
+                 target="_blank"
+                 class="btn btn-success btn-sm mright5" 
+                 data-toggle="tooltip" 
+                 title="<?php echo _l('preview_file'); ?>">
+                 <i class="fa fa-eye"></i>
+              </a>
+            </td>
+            <td>
+            </td>
+          </tr>
+        <?php } } ?>
+        <?php if (isset($goods_delivery) && count($goods_delivery) > 0) { 
+          foreach ($goods_delivery as $value) { ?>
+          <tr>
+            <td>
+            </td>
+            <td>
+              <?php if(!empty($value['pr_order_id'])) { ?>
+                <a href="<?php echo admin_url('purchase/purchase_order/' . $value['pr_order_id']) ?>"><?php echo get_pur_order_name($value['pr_order_id']).' ('._l('goods_delivery').')' ?></a>
+              <?php } elseif (!empty($value['wo_order_id'])) { ?>
+                <a href="<?php echo admin_url('purchase/work_order/' . $value['wo_order_id']) ?>"><?php echo get_wo_order_name($value['wo_order_id']).' ('._l('goods_delivery').')' ?></a>
+              <?php } else {
+
+              } ?>
+            </td>
+            <td>
+              <a href="<?php echo admin_url('warehouse/stock_export_pdf/' . $value['id'] . '/?output_type=I') ?>" 
+                 target="_blank"
+                 class="btn btn-success btn-sm mright5" 
+                 data-toggle="tooltip" 
+                 title="<?php echo _l('preview_file'); ?>">
+                 <i class="fa fa-eye"></i>
+              </a>
+            </td>
+            <td>
+            </td>
+          </tr>
+        <?php } } ?>
+      </tfoot>
     </table>
   </div>
 <?php } ?>

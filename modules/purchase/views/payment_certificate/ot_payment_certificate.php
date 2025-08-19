@@ -694,6 +694,8 @@
                 <?php $this->load->view('pc_attachments', [
                   'is_view'     => $is_view,
                   'attachments' => isset($attachments) ? $attachments : [],
+                  'goods_receipt' => $goods_receipt,
+                  'goods_delivery' => $goods_delivery,
                 ]); ?>
               </div>
 
