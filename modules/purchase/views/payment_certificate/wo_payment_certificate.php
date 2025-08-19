@@ -212,20 +212,18 @@
                       <?php $bill_received_on = (isset($payment_certificate) ? _d($payment_certificate->bill_received_on) : _d(date('Y-m-d')));
                       echo render_date_input('bill_received_on', 'bill_received_on', $bill_received_on); ?>
                     </div>
-                  </div>
-
-                  <?php if (!empty($payment_certificate_id) && is_admin()) { ?>
-                    <div class="row">
-                      <div class="col-md-12 form-group">
-                        <select name="status" id="status" class="selectpicker pull-right mright10" onchange="change_status_pay_cert(this,<?php echo ($payment_certificate_id); ?>); return false;" data-live-search="true" data-width="25%" data-none-selected-text="<?php echo _l('pur_change_status_to'); ?>">
+                    <?php if (!empty($payment_certificate_id) && is_admin()) { ?>
+                      <div class="col-md-3 form-group">
+                        <label for="pur_change_status_to"><?php echo _l('pur_change_status_to'); ?></label>
+                        <select name="status" id="status" class="selectpicker" onchange="change_status_pay_cert(this,<?php echo ($payment_certificate_id); ?>); return false;" data-width="100%" data-live-search="true" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
                           <option value=""></option>
                           <option value="1"><?php echo _l('purchase_draft'); ?></option>
                           <option value="2"><?php echo _l('purchase_approved'); ?></option>
                           <option value="3"><?php echo _l('pur_rejected'); ?></option>
                         </select>
                       </div>
-                    </div>
-                  <?php } ?>
+                    <?php } ?>
+                  </div>
                 </div>
 
                 <div class="col-md-10 pull-right" style="z-index: 999;display: flex;justify-content: end;">
