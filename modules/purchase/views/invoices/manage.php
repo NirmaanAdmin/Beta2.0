@@ -80,12 +80,7 @@
                   </div>
                   <div class="row">
                      <div class="_buttons col-md-12">
-                        <?php if (has_permission('purchase_invoices', '', 'create') || is_admin()) { ?>
-                           <a href="<?php echo admin_url('purchase/pur_invoice'); ?>" class="btn btn-info pull-left mright10 display-block">
-                              <?php echo _l('new'); ?>
-                           </a>
-                        <?php } ?>
-                        <button class="btn btn-info pull-left mleft10 display-block" type="button" data-toggle="collapse" data-target="#vbt-charts-section" aria-expanded="true"aria-controls="vbt-charts-section">
+                        <button class="btn btn-info pull-left display-block" type="button" data-toggle="collapse" data-target="#vbt-charts-section" aria-expanded="true"aria-controls="vbt-charts-section">
                          <?php echo _l('Vendor Billing Tracker Charts'); ?> <i class="fa fa-chevron-down toggle-icon"></i>
                         </button>
                      </div>
