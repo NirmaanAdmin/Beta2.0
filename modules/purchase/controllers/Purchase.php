@@ -16380,4 +16380,95 @@ class purchase extends AdminController
         }
         echo json_encode(['success' => true]);
     }
+
+    public function get_pc_notes($id, $rel_type)
+    {
+        $data['notes'] = $this->purchase_model->get_pc_notes($id, $rel_type);
+        $this->load->view('payment_certificate/notes_template', $data);
+    }
+
+    public function add_pc_note($rel_id, $rel_type)
+    {
+        if ($this->input->post()) {
+            $this->purchase_model->add_pc_note($this->input->post(), $rel_id, $rel_type);
+            set_alert('success', 'Your note has been recorded.');
+            redirect($_SERVER['HTTP_REFERER']);
+        }
+    }
+
+    public function delete_pc_note($id)
+    {
+        $success = $this->purchase_model->delete_pc_note($id);
+        if (!$this->input->is_ajax_request()) {
+            if ($success) {
+                set_alert('success', 'Your note has been deleted.');
+            }
+            redirect(previous_url() ?: $_SERVER['HTTP_REFERER']);
+        } else {
+            echo json_encode(['success' => $success]);
+        }
+    }
+
+    public function edit_pc_note($id)
+    {
+        if ($this->input->post()) {
+            $data = $this->input->post();
+            $success = $this->purchase_model->edit_pc_note($data, $id);
+            echo json_encode([
+                'description'=> process_text_content_for_display(nl2br($data['description'])),
+                'success' => $success,
+                'message' => _l('note_updated_successfully'),
+            ]);
+        }
+    }
+
+    public function add_pc_comment()
+    {
+        if ($this->input->post()) {
+            echo json_encode([
+                'success' => $this->purchase_model->add_pc_comment($this->input->post()),
+                'message' => 'Your comment has been recorded.',
+            ]);
+        }
+    }
+
+    public function get_pc_comments($id, $type)
+    {
+        $data['comments'] = $this->purchase_model->get_pc_comments($id, $type);
+        $this->load->view('payment_certificate/comments_template', $data);
+    }
+
+    public function edit_pc_comment($id)
+    {
+        if ($this->input->post()) {
+            echo json_encode([
+                'success' => $this->purchase_model->edit_pc_comment($this->input->post(), $id),
+                'message' => 'Your comment has been updated.',
+            ]);
+        }
+    }
+
+    public function remove_pc_comment($id)
+    {
+        $this->db->where('id', $id);
+        $comment = $this->db->get(db_prefix() . 'payment_certificate_comments')->row();
+        if ($comment) {
+            if ($comment->staffid != get_staff_user_id() && !is_admin()) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Something went wrong',
+                ]);
+                die;
+            }
+            echo json_encode([
+                'success' => $this->purchase_model->remove_pc_comment($id),
+                'message' => 'Your comment has been deleted.',
+            ]);
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Something went wrong',
+            ]);
+        }
+    }
 }

@@ -1,7 +1,9 @@
 <script>
+	var pc_id = '<?php echo isset($payment_certificate) ? pur_html_entity_decode($payment_certificate->id) : NULL; ?>';
 	$(function() {});
 
 	calculate_payment_certificate();
+	get_contract_comments();
 
 	function calculate_payment_certificate() {
 		"use strict";
@@ -484,4 +486,77 @@
 		var form = that.parents('form._payment_transaction_form');
 		form.submit();
 	});
+
+	function add_contract_comment() {
+	  "use strict";
+	    var comment = $('#comment').val();
+	    if (comment == '') {
+	       return;
+	    }
+	    var data = {};
+	    data.content = comment;
+	    data.rel_id = pc_id;
+	    data.rel_type = 'po_payment_certificate';
+	    $('body').append('<div class="dt-loader"></div>');
+	    $.post(admin_url + 'purchase/add_pc_comment', data).done(function (response) {
+	       response = JSON.parse(response);
+	       $('body').find('.dt-loader').remove();
+	       if (response.success == true) {
+	       	  alert_float('success', response.message);
+	          location.reload(); 
+	       }
+	    });
+	}
+
+	function get_contract_comments() {
+	    "use strict";
+	    if (typeof (pc_id) == 'undefined') {
+	       return;
+	    }
+	    requestGet('purchase/get_pc_comments/' + pc_id+'/po_payment_certificate').done(function (response) {
+	       $('#contract-comments').html(response);
+	       var totalComments = $('[data-commentid]').length;
+	       var commentsIndicator = $('.comments-indicator');
+	       if(totalComments == 0) {
+	            commentsIndicator.addClass('hide');
+	       } else {
+	         commentsIndicator.removeClass('hide');
+	         commentsIndicator.text(totalComments);
+	       }
+	    });
+    }
+
+    function toggle_contract_comment_edit(id) {
+      "use strict";
+       $('body').find('[data-contract-comment="' + id + '"]').toggleClass('hide');
+       $('body').find('[data-contract-comment-edit-textarea="' + id + '"]').toggleClass('hide');
+   	}
+
+   	function edit_contract_comment(id) {
+	    "use strict";
+	    var content = $('body').find('[data-contract-comment-edit-textarea="' + id + '"] textarea').val();
+	    if (content != '') {
+	       $.post(admin_url + 'purchase/edit_pc_comment/' + id, {
+	          content: content
+	       }).done(function (response) {
+	          response = JSON.parse(response);
+	          if (response.success == true) {
+	            alert_float('success', response.message);
+	            location.reload();
+	          }
+	       });
+	    }
+   	}
+
+   	function remove_contract_comment(commentid) {
+    	"use strict";
+    	if (confirm_delete()) {
+	       requestGetJSON('purchase/remove_pc_comment/' + commentid).done(function (response) {
+	          if (response.success == true) {
+	            alert_float('success', response.message);
+	          	location.reload(); 
+	          }
+	       });
+    	}
+   	}
 </script>

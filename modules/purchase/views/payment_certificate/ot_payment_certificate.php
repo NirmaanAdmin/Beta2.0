@@ -116,6 +116,29 @@
                         <?php echo _l('invoice_view_activity_tooltip'); ?>
                       </a>
                     </li>
+                    <?php
+                    if (isset($payment_certificate)) { ?>
+                      <li role="presentation">
+                         <a href="#tab_notes" onclick="get_pc_notes(<?php echo pur_html_entity_decode($payment_certificate->id); ?>,'ot_payment_certificate'); return false" aria-controls="tab_notes" role="tab" data-toggle="tab">
+                            <?php echo _l('estimate_notes'); ?>
+                            <span class="notes-total">
+                               <?php $totalNotes = total_rows(db_prefix() . 'notes', ['rel_id' => $estimate->id, 'rel_type' => 'purchase_order']);
+                               if ($totalNotes > 0) { ?>
+                                  <span class="badge"><?php echo ($totalNotes); ?></span>
+                               <?php } ?>
+                            </span>
+                         </a>
+                      </li>
+                      <li role="presentation">
+                       <?php
+                       $totalComments = total_rows(db_prefix() . 'payment_certificate_comments', ['rel_id' => $payment_certificate->id, 'rel_type' => 'ot_payment_certificate']);
+                       ?>
+                       <a href="#discuss" aria-controls="discuss" role="tab" data-toggle="tab">
+                          <?php echo _l('pur_discuss'); ?>
+                          <span class="badge comments-indicator<?php echo $totalComments == 0 ? ' hide' : ''; ?>"><?php echo $totalComments; ?></span>
+                       </a>
+                      </li>
+                    <?php } ?>
                   </ul>
                 </div>
               </div>
@@ -804,13 +827,37 @@
                   </div>
                 </div>
               </div>
+              <?php echo form_close(); ?>
+
+              <?php
+              if (isset($payment_certificate)) { ?>
+                <div role="tabpanel" class="tab-pane ptop10" id="tab_notes">
+                 <?php echo form_open(admin_url('purchase/add_pc_note/' . $payment_certificate->id.'/ot_payment_certificate'), array('id' => 'pc-notes', 'class' => 'pc-notes-form')); ?>
+                 <?php echo render_textarea('description'); ?>
+                 <div class="text-right">
+                    <button type="submit" class="btn btn-info mtop15 mbot15"><?php echo _l('estimate_add_note'); ?></button>
+                 </div>
+                 <?php echo form_close(); ?>
+                 <hr />
+                 <div class="panel_s mtop20 no-shadow" id="pc_notes_area">
+                 </div>
+                </div>
+
+                <div role="tabpanel" class="tab-pane ptop10" id="discuss">
+                 <div class="row contract-comments mtop15">
+                    <div class="col-md-12">
+                       <div id="contract-comments"></div>
+                       <div class="clearfix"></div>
+                       <textarea name="content" id="comment" rows="4" class="form-control mtop15 contract-comment"></textarea>
+                       <button type="button" class="btn btn-info mtop10 pull-right" onclick="add_contract_comment();"><?php echo _l('proposal_add_comment'); ?></button>
+                    </div>
+                 </div>
+                </div>
+              <?php } ?>
             </div>
           </div>
-
-
         </div>
       </div>
-      <?php echo form_close(); ?>
     </div>
 
     <?php if (count($list_approve_status) > 0) { ?>

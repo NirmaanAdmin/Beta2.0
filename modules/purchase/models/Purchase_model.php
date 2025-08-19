@@ -18209,6 +18209,10 @@ class Purchase_model extends App_Model
         $data['group_pur'] = $pur_order->group_pur;
         $data['po_number'] = $po_number;
         $data['wo_number'] = $wo_number;
+        unset($data['description']);
+        unset($data['content']);
+        unset($data['related_tasks_length']);
+        unset($data['comment-content']);
 
         $this->db->insert(db_prefix() . 'payment_certificate', $data);
         $insert_id = $this->db->insert_id();
@@ -18243,6 +18247,10 @@ class Purchase_model extends App_Model
         if (!empty($data['bill_period_upto'])) {
             $data['bill_period_upto'] = to_sql_date($data['bill_period_upto']);
         }
+        unset($data['description']);
+        unset($data['content']);
+        unset($data['related_tasks_length']);
+        unset($data['comment-content']);
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'payment_certificate', $data);
         $this->log_pay_cer_activity($id, 'pay_cert_activity_updated');
@@ -23889,6 +23897,10 @@ class Purchase_model extends App_Model
             $data['po_this_bill'] = $data['ot_this_bill'];
             unset($data['ot_this_bill']);
         }
+        unset($data['description']);
+        unset($data['content']);
+        unset($data['related_tasks_length']);
+        unset($data['comment-content']);
 
         $this->db->insert(db_prefix() . 'payment_certificate', $data);
         $insert_id = $this->db->insert_id();
@@ -23937,6 +23949,10 @@ class Purchase_model extends App_Model
             $data['po_this_bill'] = $data['ot_this_bill'];
             unset($data['ot_this_bill']);
         }
+        unset($data['description']);
+        unset($data['content']);
+        unset($data['related_tasks_length']);
+        unset($data['comment-content']);
         $data['vendor'] = !empty($data['vendor']) ? $data['vendor'] : NULL;
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'payment_certificate', $data);
@@ -24112,4 +24128,119 @@ class Purchase_model extends App_Model
         $this->db->where('group_pur', $group_pur);
         return $this->db->get(db_prefix() . 'pur_invoices')->result_array();
     }
+
+    public function get_pc_notes($rel_id, $rel_type)
+    {
+        $this->db->join(db_prefix() . 'staff', db_prefix() . 'staff.staffid=' . db_prefix() . 'payment_certificate_notes.addedfrom');
+        $this->db->where('rel_id', $rel_id);
+        $this->db->where('rel_type', $rel_type);
+        $this->db->order_by('dateadded', 'desc');
+        $pc_notes = $this->db->get(db_prefix() . 'payment_certificate_notes')->result_array();
+        return $pc_notes;
+    }
+
+    public function add_pc_note($data, $rel_id, $rel_type)
+    {
+        $data['dateadded']   = date('Y-m-d H:i:s');
+        $data['addedfrom']   = get_staff_user_id();
+        $data['rel_type']    = $rel_type;
+        $data['rel_id']      = $rel_id;
+        $data['description'] = nl2br($data['description']);
+        $data = hooks()->apply_filters('create_note_data', $data, $rel_type, $rel_id);
+        $this->db->insert(db_prefix() . 'payment_certificate_notes', $data);
+        $insert_id = $this->db->insert_id();
+        if ($insert_id) {
+            hooks()->do_action('note_created', $insert_id, $data);
+            return $insert_id;
+        }
+        return false;
+    }
+
+    public function delete_pc_note($note_id)
+    {
+        hooks()->do_action('before_delete_note', $note_id);
+        $this->db->where('id', $note_id);
+        $note = $this->db->get(db_prefix() . 'payment_certificate_notes')->row();
+        if ($note->addedfrom != get_staff_user_id() && !is_admin()) {
+            return false;
+        }
+        $this->db->where('id', $note_id);
+        $this->db->delete(db_prefix() . 'payment_certificate_notes');
+        if ($this->db->affected_rows() > 0) {
+            hooks()->do_action('note_deleted', $note_id, $note);
+            return true;
+        }
+        return false;
+    }
+
+    public function edit_pc_note($data, $id)
+    {
+        hooks()->do_action('before_update_note', [
+            'data' => $data,
+            'id'   => $id,
+        ]);
+        $this->db->where('id', $id);
+        $this->db->update(db_prefix() . 'payment_certificate_notes', $data = [
+            'description' => nl2br($data['description']),
+        ]);
+        if ($this->db->affected_rows() > 0) {
+            hooks()->do_action('note_updated', $id, $data);
+            return true;
+        }
+        return false;
+    }
+
+    public function add_pc_comment($data, $vendor = false)
+    {
+        if (is_staff_logged_in()) {
+            $vendor = false;
+        }
+        if (isset($data['action'])) {
+            unset($data['action']);
+        }
+        $data['dateadded'] = date('Y-m-d H:i:s');
+        if ($vendor == false) {
+            $data['staffid'] = get_staff_user_id();
+        } else {
+            $data['staffid'] = 0;
+        }
+        $data['content'] = nl2br($data['content']);
+        $this->db->insert(db_prefix() . 'payment_certificate_comments', $data);
+        $insert_id = $this->db->insert_id();
+        if ($insert_id) {
+            return true;
+        }
+        return false;
+    }
+
+    public function get_pc_comments($id, $type)
+    {
+        $this->db->where('rel_id', $id);
+        $this->db->where('rel_type', $type);
+        $this->db->order_by('dateadded', 'ASC');
+        return $this->db->get(db_prefix() . 'payment_certificate_comments')->result_array();
+    }
+
+    public function edit_pc_comment($data, $id)
+    {
+        $this->db->where('id', $id);
+        $this->db->update(db_prefix() . 'payment_certificate_comments', [
+            'content' => nl2br($data['content']),
+        ]);
+        if ($this->db->affected_rows() > 0) {
+            return true;
+        }
+        return false;
+    }
+
+    public function remove_pc_comment($id)
+    {
+        $this->db->where('id', $id);
+        $this->db->delete(db_prefix() . 'payment_certificate_comments');
+        if ($this->db->affected_rows() > 0) {
+            return true;
+        }
+        return false;
+    }
+
 }
