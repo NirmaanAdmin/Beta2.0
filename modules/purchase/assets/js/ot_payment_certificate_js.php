@@ -613,6 +613,7 @@
 			    ot_id: ot_id,
 			    options: options,
 			    vendor: vendor,
+			    pc_id: pc_id,
 			}).done(function (response) {
    				response = JSON.parse(response);
    				$('input[name="pc_number"]').val(response.ot_pc_format);

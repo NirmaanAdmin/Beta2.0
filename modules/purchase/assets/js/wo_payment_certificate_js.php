@@ -571,6 +571,7 @@
    			$.post(admin_url + "purchase/get_wo_pc_format", {
 			    wo_id: wo_id,
 			    options: options,
+			    pc_id: pc_id,
 			}).done(function (response) {
    				response = JSON.parse(response);
    				$('input[name="pc_number"]').val(response.wo_pc_format);
