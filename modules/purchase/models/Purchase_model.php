@@ -23902,6 +23902,10 @@ class Purchase_model extends App_Model
         unset($data['content']);
         unset($data['related_tasks_length']);
         unset($data['comment-content']);
+        if (isset($data['save_and_send'])) {
+            $save_and_send = $data['save_and_send'];
+            unset($data['save_and_send']);
+        }
 
         $this->db->insert(db_prefix() . 'payment_certificate', $data);
         $insert_id = $this->db->insert_id();
@@ -23922,6 +23926,9 @@ class Purchase_model extends App_Model
         $this->db->insert(db_prefix() . 'cron_email', $cron_email);
         $this->save_payment_certificate_files($insert_id);
         update_payment_certificate_last_action($insert_id);
+        if(isset($save_and_send)) {
+            $this->send_payment_certificate_approve(['rel_id' => $insert_id, 'rel_type' => 'ot_payment_certificate']);
+        }
         return true;
     }
 
@@ -23954,12 +23961,19 @@ class Purchase_model extends App_Model
         unset($data['content']);
         unset($data['related_tasks_length']);
         unset($data['comment-content']);
+        if (isset($data['save_and_send'])) {
+            $save_and_send = $data['save_and_send'];
+            unset($data['save_and_send']);
+        }
         $data['vendor'] = !empty($data['vendor']) ? $data['vendor'] : NULL;
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'payment_certificate', $data);
         $this->log_pay_cer_activity($id, 'pay_cert_activity_updated');
         $this->save_payment_certificate_files($id);
         update_payment_certificate_last_action($id);
+        if(isset($save_and_send)) {
+            $this->send_payment_certificate_approve(['rel_id' => $id, 'rel_type' => 'ot_payment_certificate']);
+        }
         return true;
     }
 

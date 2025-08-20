@@ -7,9 +7,6 @@
 		get_contract_comments();
 	}
 	get_ot_pc_format();
-	appValidateForm($('#payment_certificate_form'), {
-	    ot_id: 'required',
-  	});
 
 	function calculate_payment_certificate() {
 		"use strict";
