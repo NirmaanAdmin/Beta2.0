@@ -1,11 +1,15 @@
 <script>
 	var pc_id = '<?php echo isset($payment_certificate) ? pur_html_entity_decode($payment_certificate->id) : NULL; ?>';
+	var order_tracker_id = '<?php echo isset($payment_certificate) ? pur_html_entity_decode($payment_certificate->ot_id) : NULL; ?>';
 	$(function() {});
 
 	if(pc_id) {
 		get_contract_comments();
 	}
 	get_ot_pc_format();
+	appValidateForm($('#payment_certificate_form'), {
+	    ot_id: 'required',
+  	});
 
 	function calculate_payment_certificate() {
 		"use strict";
@@ -504,7 +508,6 @@
 			calculate_payment_certificate();
 			$.post(admin_url + 'purchase/get_order_tracker_detail/' + ot_id).done(function (response) {
             response = JSON.parse(response);
-            	$('select[name="vendor"]').val(response.vendor).change();
             	$('select[name="project"]').val(response.project).change();
             	if (response.order_date !== '0000-00-00') {
 				  var parts = response.order_date.split('-');
@@ -520,7 +523,6 @@
 				}
             });
         } else {
-        	$('select[name="vendor"]').val('').change();
         	var today = new Date();
 		    var day = String(today.getDate()).padStart(2, '0');
 		    var month = String(today.getMonth() + 1).padStart(2, '0');
@@ -529,6 +531,30 @@
 		    $('input[name="order_date"]').val(todayFormatted).change();
         }
     }
+
+    $("body").on('change', 'select[name="vendor"]', function () {
+	    var vendor = $(this).selectpicker('val');
+	    var ot_view = $('select[name="ot_id"]');
+	    ot_view.empty().append('<option value=""></option>').selectpicker('refresh');
+	    if (vendor) {
+	        $.post(admin_url + 'purchase/get_all_vendor_created_order_tracker/' + vendor).done(function (response) {
+	            response = JSON.parse(response);
+	            if (response.length > 0) {
+	                $.each(response, function (id, value) {
+	                    if (order_tracker_id == value.id) {
+	                        ot_view.append('<option value="' + value.id + '" selected>' + value.pur_order_name + '</option>');
+	                    } else {
+	                        ot_view.append('<option value="' + value.id + '">' + value.pur_order_name + '</option>');
+	                    }
+	                });
+	                ot_view.selectpicker('refresh').trigger('change');
+	            } else {
+	                ot_view.empty().append('<option value=""></option>').selectpicker('refresh').trigger('change');
+	            }
+	        });
+	    }
+	});
+	$('select[name="vendor"]').trigger('change');
 
     function add_contract_comment() {
 	  "use strict";
