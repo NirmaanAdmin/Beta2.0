@@ -272,7 +272,7 @@
                     <th width="11%" align="left"><?php echo _l('Reconciliation Date'); ?></th>
                     <th width="8%" align="left"><?php echo _l('Return Quantity'); ?></th>
                     <th width="8%" align="left"><?php echo _l('Used Quantity'); ?></th>
-                    <th width="8%" align="left"><?php echo _l('Location'); ?></th>
+                    <th width="8%" align="left"><?php echo _l('Remarks'); ?></th>
                     <!-- <th align="center" width='1%'><i class="fa fa-cog"></i></th> -->
                   </tr>
                 </thead>

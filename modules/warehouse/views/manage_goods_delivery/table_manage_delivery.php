@@ -46,6 +46,37 @@ if ($this->ci->input->post('delivery_status')) {
         $where[] = 'AND ' . $sTable . '.delivery_status = "'.$delivery_status.'"';
     }
 }
+// Add vendor filter
+if ($this->ci->input->post('vendor')) {
+    $vendor = $this->ci->input->post('vendor');
+    if ($vendor) {
+        // Use subqueries to check vendor in related tables without causing duplicates
+        $where[] = 'AND (' . $sTable . '.pr_order_id IN (SELECT id FROM ' . db_prefix() . 'pur_orders WHERE vendor IN(' . implode(',', $vendor) . ')) 
+                     OR ' . $sTable . '.wo_order_id IN (SELECT id FROM ' . db_prefix() . 'wo_orders WHERE vendor IN(' . implode(',', $vendor) . ')))';
+    }
+}
+$wo_po_orders = $this->ci->input->post('wo_po_order') ? $this->ci->input->post('wo_po_order') : [];
+
+if (!empty($wo_po_orders)) {
+    $where_conditions = [];
+    foreach ($wo_po_orders as $order_value) {
+        // Split the value into type and id (format: "type-id")
+        $parts = explode('-', $order_value);
+        if (count($parts) === 3) {
+            $order_type = (int)$parts[1];
+            $order_id = (int)$parts[0];
+            
+            if ($order_type === 2) { // Purchase Order
+                $where_conditions[] = '(pr_order_id = ' . $order_id . ')';
+            } elseif ($order_type === 3) { // Work Order
+                $where_conditions[] = '(wo_order_id = ' . $order_id . ')';
+            }
+        }
+    }
+    if (!empty($where_conditions)) {
+        $where[] = 'AND (' . implode(' OR ', $where_conditions) . ')';
+    }
+}
 
 if(get_default_project()) {
     $where[] = 'AND ' . db_prefix() . 'goods_delivery.project = '.get_default_project().'';
@@ -108,9 +139,9 @@ foreach ($rResult as $aRow) {
                 break;
 
             case 'goods_delivery_code':
-                $name = '<a href="' . admin_url('warehouse/view_delivery/' . $aRow['id']) . '" onclick="init_goods_delivery(' . $aRow['id'] . '); small_table_full_view(); return false;">' . $aRow['goods_delivery_code'] . '</a>';
+                $name = '<a href="' . admin_url('warehouse/view_delivery/' . $aRow['id']) . '" onclick="init_goods_delivery(' . $aRow['id'] . ');  return false;">' . $aRow['goods_delivery_code'] . '</a>';
                 $name .= '<div class="row-options">';
-                $name .= '<a href="' . admin_url('warehouse/view_delivery/' . $aRow['id']) . '" onclick="init_goods_delivery(' . $aRow['id'] . '); small_table_full_view(); return false;">' . _l('view') . '</a>';
+                $name .= '<a href="' . admin_url('warehouse/view_delivery/' . $aRow['id']) . '" onclick="init_goods_delivery(' . $aRow['id'] . ');  return false;">' . _l('view') . '</a>';
                 if ((has_permission('warehouse', '', 'edit') || is_admin()) && ($aRow['approval'] == 0)) {
                     $name .= ' | <a href="' . admin_url('warehouse/goods_delivery/' . $aRow['id']) . '">' . _l('edit') . '</a>';
                 }

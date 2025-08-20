@@ -131,10 +131,11 @@
                     <tr class="project-overview">
                       <td class="bold"><?php echo _l('reference_order'); ?></td>
                       <td>
-                        <?php 
-                        if(!empty($goods_delivery->pr_order_id)) { ?>
+                        <?php
+                        if (!empty($goods_delivery->pr_order_id)) { ?>
                           <a href="<?php echo admin_url('purchase/purchase_order/' . $goods_delivery->pr_order_id) ?>"><?php echo get_pur_order_name($goods_delivery->pr_order_id) ?></a>
-                        <?php } if(!empty($goods_delivery->wo_order_id)) { ?>
+                        <?php }
+                        if (!empty($goods_delivery->wo_order_id)) { ?>
                           <a href="<?php echo admin_url('purchase/work_order/' . $goods_delivery->wo_order_id) ?>"><?php echo get_wo_order_name($goods_delivery->wo_order_id) ?></a>
                         <?php } ?>
 
@@ -161,6 +162,26 @@
                         </ul>
                       </div>
 
+                    </td>
+                  </tr>
+                  <tr class="project-overview">
+                    <td class="bold">Stock Received ID's</td>
+                    <td>
+                      <?php
+                      if (!empty($goods_delivery->pr_order_id)) {
+                        $stock_received_records = get_stock_received_ids($goods_delivery->pr_order_id);
+                        echo implode(', ', array_map(function ($record) {
+                          return '<a target="_blank" href="' . admin_url('warehouse/manage_purchase/' . $record['id']) . '">' . $record['goods_receipt_code'] . '</a>';
+                        }, $stock_received_records));
+                      ?>
+                      <?php }
+                      if (!empty($goods_delivery->wo_order_id)) {
+                        $stock_received_records = get_stock_received_wo_ids($goods_delivery->wo_order_id);
+                        echo implode(', ', array_map(function ($record) {
+                          return '<a target="_blank" href="' . admin_url('warehouse/manage_purchase/' . $record['id']) . '">' . $record['goods_receipt_code'] . '</a>';
+                        }, $stock_received_records));
+                      ?>
+                      <?php } ?>
                     </td>
                   </tr>
 
@@ -312,7 +333,7 @@
                         if (!empty($delivery_value['returnable_date'])) {
                           $returnable_date = json_decode($delivery_value['returnable_date'], true);
                           foreach ($returnable_date as $key => $value) {
-                            $returnable_date_all .= get_vendor_name($key) . ": " . date('d M, Y',strtotime($value)) . ",</br> ";
+                            $returnable_date_all .= get_vendor_name($key) . ": " . date('d M, Y', strtotime($value)) . ",</br> ";
                           }
                           $returnable_date_all = rtrim($returnable_date_all, ',</br>');
                         }
@@ -325,7 +346,7 @@
                           $all_lot_number = rtrim($all_lot_number, ', ');
                         }
 
-                        ?>
+                      ?>
 
                         <tr>
                           <td><?php echo html_entity_decode($delivery) ?></td>
@@ -698,3 +719,7 @@
 </body>
 
 </html>
+
+<script>
+  small_table_full_view();
+</script>

@@ -2561,12 +2561,12 @@ function update_wo_orders_tracker_details_last_action($id)
         $CI->db->update(db_prefix() . 'wo_order_detail', [
             'last_action' => get_staff_user_id()
         ]);
-        
+
         // Get the wo_order ID from the detail record
         $CI->db->select('wo_order');
         $CI->db->where('id', $id);
         $detail = $CI->db->get(db_prefix() . 'wo_order_detail')->row();
-        
+
         if ($detail && !empty($detail->wo_order)) {
             // Update last_action in the master orders table
             $CI->db->where('id', $detail->wo_order);
@@ -2587,12 +2587,12 @@ function update_goods_orders_tracker_details_last_action($id)
         $CI->db->update(db_prefix() . 'goods_receipt_detail', [
             'last_action' => get_staff_user_id()
         ]);
-        
+
         // Get the goods_receipt_id from the detail record
         $CI->db->select('goods_receipt_id');
         $CI->db->where('id', $id);
         $detail = $CI->db->get(db_prefix() . 'goods_receipt_detail')->row();
-        
+
         if ($detail && !empty($detail->goods_receipt_id)) {
             // Update last_action in the master goods receipt table
             $CI->db->where('id', $detail->goods_receipt_id);
@@ -2602,4 +2602,56 @@ function update_goods_orders_tracker_details_last_action($id)
         }
     }
     return true;
+}
+
+function get_stock_issued_ids($id)
+{
+    $CI = &get_instance();
+
+    $CI->db->reset_query();
+    $CI->db->select('id, goods_delivery_code');
+    $CI->db->where('pr_order_id', $id);
+
+    $result = $CI->db->get(db_prefix() . 'goods_delivery')->result_array();
+
+    return $result;
+}
+
+function get_stock_issued_wo_ids($id)
+{
+    $CI = &get_instance();
+
+    $CI->db->reset_query();
+    $CI->db->select('id, goods_delivery_code');
+    $CI->db->where('wo_order_id', $id);
+
+    $result = $CI->db->get(db_prefix() . 'goods_delivery')->result_array();
+
+    return $result;
+}
+
+function get_stock_received_ids($id)
+{
+    $CI = &get_instance();
+
+    $CI->db->reset_query();
+    $CI->db->select('id, goods_receipt_code');
+    $CI->db->where('pr_order_id', $id);
+
+    $result = $CI->db->get(db_prefix() . 'goods_receipt')->result_array();
+
+    return $result;
+}
+
+function get_stock_received_wo_ids($id)
+{
+    $CI = &get_instance();
+
+    $CI->db->reset_query();
+    $CI->db->select('id, goods_receipt_code');
+    $CI->db->where('wo_order_id', $id);
+
+    $result = $CI->db->get(db_prefix() . 'goods_receipt')->result_array();
+
+    return $result;
 }

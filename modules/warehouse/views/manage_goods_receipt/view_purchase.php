@@ -110,10 +110,11 @@
                     <tr class="project-overview">
                       <td class="bold"><?php echo _l('reference_order'); ?></td>
                       <td>
-                        <?php 
-                        if(!empty($goods_receipt->pr_order_id)) { ?>
+                        <?php
+                        if (!empty($goods_receipt->pr_order_id)) { ?>
                           <a href="<?php echo admin_url('purchase/purchase_order/' . $goods_receipt->pr_order_id) ?>"><?php echo get_pur_order_name($goods_receipt->pr_order_id) ?></a>
-                        <?php } if(!empty($goods_receipt->wo_order_id)) { ?>
+                        <?php }
+                        if (!empty($goods_receipt->wo_order_id)) { ?>
                           <a href="<?php echo admin_url('purchase/work_order/' . $goods_receipt->wo_order_id) ?>"><?php echo get_wo_order_name($goods_receipt->wo_order_id) ?></a>
                         <?php } ?>
 
@@ -161,6 +162,26 @@
 
                       </div>
 
+                    </td>
+                  </tr>
+                  <tr class="project-overview">
+                    <td class="bold">Stock Issued ID's</td>
+                    <td>
+                      <?php
+                      if (!empty($goods_receipt->pr_order_id)) {
+                        $stock_issued_records = get_stock_issued_ids($goods_receipt->pr_order_id);
+                        echo implode(', ', array_map(function ($record) {
+                          return '<a target="_blank" href="' . admin_url('warehouse/manage_delivery/' . $record['id']) . '">' . $record['goods_delivery_code'] . '</a>';
+                        }, $stock_issued_records));
+                      ?>
+                      <?php }
+                      if (!empty($goods_receipt->wo_order_id)) {
+                        $stock_issued_records = get_stock_issued_wo_ids($goods_receipt->wo_order_id);
+                        echo implode(', ', array_map(function ($record) {
+                          return '<a target="_blank" href="' . admin_url('warehouse/manage_delivery/' . $record['id']) . '">' . $record['goods_delivery_code'] . '</a>';
+                        }, $stock_issued_records));
+                      ?>
+                      <?php } ?>
                     </td>
                   </tr>
                   </tr>
@@ -510,7 +531,7 @@
                         <?php if ($is_attachemnt == 1) : ?>
                           <a href="javascript:void(0)" onclick="view_goods_receipt_attachments('<?= $file_id ?>','<?= $rel_id ?>','goods_receipt_checkl'); return false;" class="btn btn-info btn-icon">View Files</a>
                         <?php endif; ?>
-                       
+
                       </td>
 
                     </tr>
@@ -848,4 +869,8 @@
       addMoreAttachmentsInputKey++; // Increment for the next attachment
     });
   }
+</script>
+
+<script>
+  small_table_full_view();
 </script>

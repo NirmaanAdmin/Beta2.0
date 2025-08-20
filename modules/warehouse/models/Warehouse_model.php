@@ -20644,7 +20644,7 @@ class Warehouse_model extends App_Model
 		$item_value = isset($data['item_value']) ? $data['item_value'] : 0;
 		$location_html = '';
 		$location_html .= '<div class="vendor-' . $vendor . '" style="margin-bottom: 10px;">';
-		$location_html .= render_input('' . $item_name . '[location][' . $vendor . ']', '', $item_value, 'text', ['placeholder' => wh_get_vendor_company_name($vendor), ''], [], 'no-margin');
+		$location_html .= render_input('' . $item_name . '[location][' . $vendor . ']', '', $item_value, 'text', ['placeholder' => 'Remarks', ''], [], 'no-margin');
 		$location_html .= '</div>';
 		return $location_html;
 	}
@@ -23720,7 +23720,7 @@ class Warehouse_model extends App_Model
                 <th class="thead-dark">' . _l('Reconciliation Date') . '</th>
                 <th class="thead-dark">' . _l('Return Quantity') . '</th>
                 <th class="thead-dark">' . _l('Used Quantity') . '</th>
-                <th class="thead-dark">' . _l('Location') . '</th>
+                <th class="thead-dark">' . _l('Remarks') . '</th>
             </tr>
         </thead>
         <tbody>';

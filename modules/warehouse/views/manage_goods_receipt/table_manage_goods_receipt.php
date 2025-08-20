@@ -98,12 +98,12 @@ foreach ($rResult as $aRow) {
         } elseif ($aColumns[$i] == 'total_tax_money') {
             // $_data = app_format_money((float)$aRow['total_tax_money'],'');
         } elseif ($aColumns[$i] == 'goods_receipt_code') {
-            $name = '<a href="' . admin_url('warehouse/view_purchase/' . $aRow['id']) . '" onclick="init_goods_receipt(' . $aRow['id'] . ');small_table_full_view(); return false;">' . $aRow['goods_receipt_code'] . '</a>';
+            $name = '<a href="' . admin_url('warehouse/view_purchase/' . $aRow['id']) . '" onclick="init_goods_receipt(' . $aRow['id'] . '); return false;">' . $aRow['goods_receipt_code'] . '</a>';
 
             $name .= '<div class="row-options">';
 
             // $name .= '<a href="' . admin_url('warehouse/edit_purchase/' . $aRow['id']) . '" >' . _l('view') . '</a>';
-            $name .= '<a href="' . admin_url('warehouse/view_purchase/' . $aRow['id']) . '" onclick="init_goods_receipt(' . $aRow['id'] . ');small_table_full_view(); return false;">' . _l('view'). '</a>';
+            $name .= '<a href="' . admin_url('warehouse/view_purchase/' . $aRow['id']) . '" onclick="init_goods_receipt(' . $aRow['id'] . ');    return false;">' . _l('view'). '</a>';
 
             if ((has_permission('warehouse', '', 'edit') || is_admin()) && ($aRow['approval'] == 0)) {
                 $name .= ' | <a href="' . admin_url('warehouse/manage_goods_receipt/' . $aRow['id']) . '" >' . _l('edit') . '</a>';

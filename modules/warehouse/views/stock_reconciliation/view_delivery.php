@@ -185,7 +185,7 @@
                         <th colspan="1" c><?php echo _l('Reconciliation Date') ?></th>
                         <th colspan="1"><?php echo _l('Return Quantity') ?></th>
                         <th colspan="1"><?php echo _l('Used Quantity') ?></th>
-                        <th colspan="1"><?php echo _l('Location') ?></th>
+                        <th colspan="1"><?php echo _l('Remarks') ?></th>
                       </tr>
                     </thead>
                     <tbody class="ui-sortable">
