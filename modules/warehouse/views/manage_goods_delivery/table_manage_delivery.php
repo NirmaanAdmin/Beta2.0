@@ -110,7 +110,7 @@ foreach ($rResult as $aRow) {
             case 'goods_delivery_code':
                 $name = '<a href="' . admin_url('warehouse/view_delivery/' . $aRow['id']) . '" onclick="init_goods_delivery(' . $aRow['id'] . '); small_table_full_view(); return false;">' . $aRow['goods_delivery_code'] . '</a>';
                 $name .= '<div class="row-options">';
-                $name .= '<a href="' . admin_url('warehouse/edit_delivery/' . $aRow['id']) . '">' . _l('view') . '</a>';
+                $name .= '<a href="' . admin_url('warehouse/view_delivery/' . $aRow['id']) . '" onclick="init_goods_delivery(' . $aRow['id'] . '); small_table_full_view(); return false;">' . _l('view') . '</a>';
                 if ((has_permission('warehouse', '', 'edit') || is_admin()) && ($aRow['approval'] == 0)) {
                     $name .= ' | <a href="' . admin_url('warehouse/goods_delivery/' . $aRow['id']) . '">' . _l('edit') . '</a>';
                 }
