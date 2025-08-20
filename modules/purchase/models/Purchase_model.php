@@ -18279,6 +18279,21 @@ class Purchase_model extends App_Model
 
     public function delete_payment_certificate($id)
     {
+        $this->db->where('rel_id', $id);
+        $this->db->delete('tblpayment_certificate_activity');
+
+        $this->db->where('rel_id', $id);
+        $this->db->delete('tblpayment_certificate_comments');
+
+        $this->db->where('rel_id', $id);
+        $this->db->delete('tblpayment_certificate_notes');
+
+        $this->db->where('rel_id', $id);
+        $this->db->delete('tblpayment_certificate_files');
+
+        $this->db->where('rel_id', $id);
+        $this->db->delete('tblpayment_certificate_details');
+
         $this->db->where('id', $id);
         return $this->db->delete('tblpayment_certificate');
     }

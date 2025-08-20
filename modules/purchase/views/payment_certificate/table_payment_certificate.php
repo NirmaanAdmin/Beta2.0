@@ -144,16 +144,18 @@ foreach ($rResult as $aRow) {
         }
 
         if ($aColumns[$i] == 'id') {
-            $_data = '';
+            $numberOutput = '';
             if (!empty($aRow['po_id'])) {
-                $_data = '<a href="' . admin_url('purchase/payment_certificate/' . $aRow['po_id'] . '/' . $aRow['id']) . '" target="_blank">' . _l('view') . '</a>';
+                $numberOutput .= '<a href="' . admin_url('purchase/payment_certificate/' . $aRow['po_id'] . '/' . $aRow['id']) . '" target="_blank">' . _l('view') . '</a>';
             }
             if (!empty($aRow['wo_id'])) {
-                $_data = '<a href="' . admin_url('purchase/wo_payment_certificate/' . $aRow['wo_id'] . '/' . $aRow['id']) . '" target="_blank">' . _l('view') . '</a>';
+                $numberOutput .= '<a href="' . admin_url('purchase/wo_payment_certificate/' . $aRow['wo_id'] . '/' . $aRow['id']) . '" target="_blank">' . _l('view') . '</a>';
             }
             if (!empty($aRow['ot_id'])) {
-                $_data = '<a href="' . admin_url('purchase/ot_payment_certificate/' . $aRow['ot_id'] . '/' . $aRow['id']) . '" target="_blank">' . _l('view') . '</a>';
+                $numberOutput .= '<a href="' . admin_url('purchase/ot_payment_certificate/' . $aRow['ot_id'] . '/' . $aRow['id']) . '" target="_blank">' . _l('view') . '</a>';
             }
+            $numberOutput .= ' | <a href="' . admin_url('purchase/delete_payment_certificate/' . $aRow['id']) . '" class="text-danger delete_payment_cert">' . _l('delete') . '</a>';
+            $_data = $numberOutput;
         } elseif ($aColumns[$i] == 'po_id') {
             $_data = '';
             if (!empty($aRow['po_id'])) {

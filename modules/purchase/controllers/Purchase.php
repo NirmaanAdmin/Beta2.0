@@ -12962,10 +12962,11 @@ class purchase extends AdminController
         echo json_encode($po_contract_data);
     }
 
-    public function delete_payment_certificate($po_id, $id)
+    public function delete_payment_certificate($id)
     {
         $response = $this->purchase_model->delete_payment_certificate($id);
-        redirect(admin_url('purchase/purchase_order/' . $po_id));
+        set_alert('success', 'The payment certificate has been deleted successfully.');
+        redirect($_SERVER['HTTP_REFERER']);
     }
 
     public function payment_certificate_pdf($id)
