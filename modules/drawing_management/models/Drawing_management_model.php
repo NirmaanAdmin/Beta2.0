@@ -841,7 +841,7 @@ class drawing_management_model extends app_model
 					$ext          = isset($file_parts['extension']) ? ('.' . $file_parts['extension']) : '';
 
 					if ($basename !== '' && strpos($basename, $document_number) === false) {
-						$new_filename = $basename . '-' . $document_number . $ext;
+						$new_filename = $document_number .'-'. $basename . $ext;
 						$old_path = $upload_dir . $old_filename;
 						$new_path = $upload_dir . $new_filename;
 
@@ -862,7 +862,7 @@ class drawing_management_model extends app_model
 					$ext          = isset($file_parts['extension']) ? ('.' . $file_parts['extension']) : '';
 
 					if ($basename !== '' && strpos($basename, $document_number) === false) {
-						$new_filename = $basename . '-' . $document_number . $ext;
+						$new_filename = $document_number .'-'. $basename . $ext;
 						$old_path = $upload_dir . $old_filename;
 						$new_path = $upload_dir . $new_filename;
 
