@@ -18209,6 +18209,7 @@ class Purchase_model extends App_Model
         $data['group_pur'] = $pur_order->group_pur;
         $data['po_number'] = $po_number;
         $data['wo_number'] = $wo_number;
+        $data['dateadded'] = date('Y-m-d H:i:s');
         unset($data['description']);
         unset($data['content']);
         unset($data['related_tasks_length']);
@@ -23933,6 +23934,7 @@ class Purchase_model extends App_Model
             $data['po_this_bill'] = $data['ot_this_bill'];
             unset($data['ot_this_bill']);
         }
+        $data['dateadded'] = date('Y-m-d H:i:s');
         unset($data['description']);
         unset($data['content']);
         unset($data['related_tasks_length']);

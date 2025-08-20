@@ -17,7 +17,7 @@ $aColumns = [
      END) as project',
     'po_id',
     db_prefix() . 'pur_vendor' . '.company as company',
-    db_prefix() . 'payment_certificate' . '.order_date as order_date',
+    db_prefix() . 'payment_certificate' . '.dateadded as dateadded',
     db_prefix() . 'assets_group' . '.group_name as group_name',
     db_prefix() . 'payment_certificate' . '.approve_status as approve_status',
     db_prefix() . 'payment_certificate' . '.pur_invoice_id as applied_to_vendor_bill',
@@ -169,8 +169,8 @@ foreach ($rResult as $aRow) {
             }
         } elseif ($aColumns[$i] == 'company') {
             $_data = '<a href="' . admin_url('purchase/vendor/' . $aRow['vendor']) . '" >' . $aRow['company'] . '</a>';
-        } elseif ($aColumns[$i] == 'order_date') {
-            $_data = _d($aRow['order_date']);
+        } elseif ($aColumns[$i] == 'dateadded') {
+            $_data = date('d-m-Y', strtotime($aRow['dateadded']));
         } elseif ($aColumns[$i] == 'group_name') {
             $_data = $aRow['group_name'];
         } elseif ($aColumns[$i] == 'approve_status') {
