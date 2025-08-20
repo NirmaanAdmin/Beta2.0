@@ -4286,7 +4286,7 @@ class Warehouse_model extends App_Model
 		if (!empty($goods_delivery->wo_order_id)) {
 			$get_all_order_details = get_all_wo_details_in_warehouse($goods_delivery->wo_order_id);
 		}
-		$budget_head = get_group_name_item($get_all_po_details->group_pur);
+		$budget_head = get_group_name_item($get_all_order_details->group_pur);
 
 		$this->load->model('staff_model');
 		$staff_name = $this->staff_model->get($goods_delivery->addedfrom);
