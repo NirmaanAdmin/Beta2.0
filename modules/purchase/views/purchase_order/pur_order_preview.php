@@ -986,7 +986,7 @@ if ($estimate->currency != 0) {
                               <?php } ?>
                            </td>
                            <td>
-                              <a href="<?php echo admin_url('purchase/payment_certificate/' . $estimate->id . '/' . $pay['id'] . '/1'); ?>" class="btn btn-default btn-icon" data-toggle="tooltip" data-placement="top" title="<?php echo _l('view'); ?>"><i class="fa fa-eye "></i></a>
+                              <a href="<?php echo admin_url('purchase/payment_certificate/' . $estimate->id . '/' . $pay['id']); ?>" target="_blank" class="btn btn-default btn-icon" data-toggle="tooltip" data-placement="top" title="<?php echo _l('view'); ?>"><i class="fa fa-eye "></i></a>
                               <?php if ($pay['approve_status'] == 1) { ?>
                                  <a href="<?php echo admin_url('purchase/payment_certificate/' . $estimate->id . '/' . $pay['id']); ?>" class="btn btn-default btn-icon" data-toggle="tooltip" data-placement="top" title="<?php echo _l('edit'); ?>"><i class="fa fa-pencil-square "></i></a>
                               <?php } ?>
