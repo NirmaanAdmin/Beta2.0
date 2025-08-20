@@ -683,6 +683,9 @@
 
                 <?php if ($is_view == 0) { ?>
                   <div class="btn-bottom-toolbar text-right">
+                    <?php if (count($list_approve_status) == 0) { ?>
+                      <input type="submit" name="save_and_send" class="btn-tr btn btn-info mleft10 pay-cert-submit" value="Save & Send" />
+                    <?php } ?>
                     <button type="button" class="btn-tr btn btn-info mleft10 pay-cert-submit">
                       <?php echo _l('submit'); ?>
                     </button>
