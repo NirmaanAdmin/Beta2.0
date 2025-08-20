@@ -102,7 +102,8 @@ foreach ($rResult as $aRow) {
 
             $name .= '<div class="row-options">';
 
-            $name .= '<a href="' . admin_url('warehouse/edit_purchase/' . $aRow['id']) . '" >' . _l('view') . '</a>';
+            // $name .= '<a href="' . admin_url('warehouse/edit_purchase/' . $aRow['id']) . '" >' . _l('view') . '</a>';
+            $name .= '<a href="' . admin_url('warehouse/view_purchase/' . $aRow['id']) . '" onclick="init_goods_receipt(' . $aRow['id'] . ');small_table_full_view(); return false;">' . _l('view'). '</a>';
 
             if ((has_permission('warehouse', '', 'edit') || is_admin()) && ($aRow['approval'] == 0)) {
                 $name .= ' | <a href="' . admin_url('warehouse/manage_goods_receipt/' . $aRow['id']) . '" >' . _l('edit') . '</a>';
