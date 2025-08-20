@@ -653,7 +653,11 @@ class Meeting_model extends App_Model
             $remove_order = $minutes_data['removed_items'];
             unset($minutes_data['removed_items']);
         }
-
+        $remove_section_break = [];
+        if (isset($minutes_data['removed_section_break'])) {
+            $remove_section_break = $minutes_data['removed_section_break'];
+            unset($minutes_data['removed_section_break']);
+        }
 
         $this->save_agends_files('agenda_meeting', $agenda_id);
 
@@ -797,6 +801,18 @@ class Meeting_model extends App_Model
                 }
             }
         }
+
+        
+
+        if (count($remove_section_break) > 0) {
+            foreach ($remove_section_break as $remove_id) {
+                $this->db->where('id', $remove_id);
+                if ($this->db->update(db_prefix() . 'minutes_details', ['section_break' => ''])) {
+                    $affectedRows++;
+                }
+            }
+        }
+        
         
         $data_log = [];
         $data_log['rel_id'] = $agenda_id;
@@ -990,7 +1006,7 @@ class Meeting_model extends App_Model
         // Add section break row first if it exists
         if ($section_break && $name != '') {
             $name_section_break = $name . '[section_break]';
-            $row .= '<tr class="section-break-row"><td colspan="11" style="text-align:center;"><input type="text" class="form-control" name="' . $name_section_break . '" value="' . $section_break . '" placeholder="Section Break" style="text-align:center;width:100%;" /></td></tr>';
+            $row .= '<tr class="section-break-row"><td colspan="11" style="text-align:center;"><div style="display:flex;justify-content: space-between;"><input type="text" class="form-control" name="' . $name_section_break . '" value="' . $section_break . '" placeholder="Section Break" style="text-align:center;width:97%;" /><a href="#" class="pull-right" onclick="section_delete_item(this,' . $item_key . ',\'.mom-items\'); return false;" style="font-size: 22px;color: gray;">×</a></div></td></tr>';
         }
 
         if ($name == '') {

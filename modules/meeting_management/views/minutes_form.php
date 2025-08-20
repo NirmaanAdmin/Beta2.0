@@ -203,6 +203,7 @@
                      <?php echo render_textarea('additional_note', 'Additional Note', $additional_note, array(), array(), 'mtop15', 'tinymce'); ?>
                   </div>
                   <div id="removed-items"></div>
+                  <div id="removed-section-break"></div>
                   <!-- Participants Selection -->
                   <div class="form-group">
                      <label for="participants"><?php echo _l('select_participants'); ?></label>
@@ -709,14 +710,28 @@
       }
    }
 
+   function section_delete_item(row, itemid, parent) {
+      "use strict";
+
+      $(row).parents('tr').addClass('animated fadeOut', function() {
+         setTimeout(function() {
+            $(row).parents('tr').remove();
+            pur_calculate_total();
+         }, 50);
+      });
+      if (itemid && $('input[name="isedit"]').length > 0) {
+         $(parent + ' #removed-section-break').append(hidden_input('removed_section_break[]', itemid));
+      }
+   }
+
    function add_section_break(anchor, name) {
       // Find the closest <tr> relative to the clicked link.
       var $tr = $(anchor).closest('tr');
 
       // Optional: Prevent multiple section break rows from being added.
-      if ($tr.next().hasClass('section-break-row')) {
-         return;
-      }
+      // if ($tr.next().hasClass('section-break-row')) {
+      //    return;
+      // }
 
       // Determine how many columns exist in the current row
       var colCount = $tr.children('td').length;
@@ -724,9 +739,10 @@
       // Create a new row with a single cell spanning all columns.
       // The cell will contain an input field with text centered.
       var sectionBreakRow = '<tr class="section-break-row">' +
-         '<td colspan="' + colCount + '" style="text-align:center;">' +
-         '<input type="text" class="form-control" name="' + name + '" placeholder="Section Break" style="text-align:center;width:100%;" />' +
-         '</td>' +
+         '<td colspan="' + colCount + '" style="text-align:center;"> <div style="display:flex; justify-content: space-between;">' +
+         '<input type="text" class="form-control" name="' + name + '" placeholder="Section Break" style="text-align:center;width:97%;" />' +
+         '<a href="#" class="pull-right" onclick="section_delete_item(this,1,\'.section-break-row\'); return false;" style="font-size: 22px;color: gray;">×</a>' +
+         '</div></td>' +
          '</tr>';
 
       // Insert the new row right after the current row.
