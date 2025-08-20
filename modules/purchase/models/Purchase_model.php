@@ -24285,4 +24285,73 @@ class Purchase_model extends App_Model
         }
         return $copied > 0;
     }
+
+    public function get_po_pc_format($data)
+    {
+        $po_pc_format = '';
+        $po_id = $data['po_id'];
+        $pur_order = $this->get_pur_order($po_id);
+        $this->db->where('po_id', $po_id);
+        $all_po_pc = $this->db->get(db_prefix() . 'payment_certificate')->result_array();
+        $next_po_pc = count($all_po_pc) > 0 ? count($all_po_pc) + 1 : 1;
+        $vendor_name = get_vendor_company_name($pur_order->vendor);
+        $options = !empty($data['options']) ? '-'.strtoupper(str_replace(['-', '_', ' '], '', $data['options'])) : '';
+        
+        $default_project = get_default_project();
+        $project_name = get_project_name_by_id($default_project);
+        $po_pc_format .= strtoupper(substr($project_name, 0, 3));
+        $po_pc_format .= '-'.date('Y');
+        $po_pc_format .= '-PO'.str_pad($pur_order->number, 5, '0', STR_PAD_LEFT);
+        $po_pc_format .= '-'.str_pad($next_po_pc, 2, '0', STR_PAD_LEFT);
+        $po_pc_format .= '-'.$vendor_name;
+        $po_pc_format .= $options;
+
+        return $po_pc_format;
+    }
+
+    public function get_wo_pc_format($data)
+    {
+        $wo_pc_format = '';
+        $wo_id = $data['wo_id'];
+        $wo_order = $this->get_wo_order($wo_id);
+        $this->db->where('wo_id', $wo_id);
+        $all_wo_pc = $this->db->get(db_prefix() . 'payment_certificate')->result_array();
+        $next_wo_pc = count($all_wo_pc) > 0 ? count($all_wo_pc) + 1 : 1;
+        $vendor_name = get_vendor_company_name($wo_order->vendor);
+        $options = !empty($data['options']) ? '-'.strtoupper(str_replace(['-', '_', ' '], '', $data['options'])) : '';
+        
+        $default_project = get_default_project();
+        $project_name = get_project_name_by_id($default_project);
+        $wo_pc_format .= strtoupper(substr($project_name, 0, 3));
+        $wo_pc_format .= '-'.date('Y');
+        $wo_pc_format .= '-WO'.str_pad($wo_order->number, 5, '0', STR_PAD_LEFT);
+        $wo_pc_format .= '-'.str_pad($next_wo_pc, 2, '0', STR_PAD_LEFT);
+        $wo_pc_format .= '-'.$vendor_name;
+        $wo_pc_format .= $options;
+
+        return $wo_pc_format;
+    }
+
+    public function get_ot_pc_format($data)
+    {
+        $ot_pc_format = '';
+        $ot_id = $data['ot_id'];
+        $order_tracker = $this->get_order_tracker($ot_id);
+        $this->db->where('ot_id', $ot_id);
+        $all_ot_pc = $this->db->get(db_prefix() . 'payment_certificate')->result_array();
+        $next_ot_pc = count($all_ot_pc) > 0 ? count($all_ot_pc) + 1 : 1;
+        $vendor_name = !empty($data['vendor']) ? get_vendor_company_name($data['vendor']) : '';
+        $options = !empty($data['options']) ? '-'.strtoupper(str_replace(['-', '_', ' '], '', $data['options'])) : '';
+        
+        $default_project = get_default_project();
+        $project_name = get_project_name_by_id($default_project);
+        $ot_pc_format .= strtoupper(substr($project_name, 0, 3));
+        $ot_pc_format .= '-'.date('Y');
+        $ot_pc_format .= '-OT'.str_pad($order_tracker->id, 5, '0', STR_PAD_LEFT);
+        $ot_pc_format .= '-'.str_pad($next_ot_pc, 2, '0', STR_PAD_LEFT);
+        $ot_pc_format .= '-'.$vendor_name;
+        $ot_pc_format .= $options;
+
+        return $ot_pc_format;
+    }
 }

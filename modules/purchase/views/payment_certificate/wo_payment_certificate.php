@@ -150,8 +150,12 @@
                     <?php echo form_hidden('wo_id', $wo_id); ?>
                     <?php echo form_hidden('payment_certificate_id', $payment_certificate_id); ?>
                     <div class="col-md-3">
-                      <?php $serial_no = (isset($payment_certificate) ? $payment_certificate->serial_no : get_payment_certificate_serial_no($wo_id, 'wo'));
-                      echo render_input('serial_no', 'payment_certificate_no', $serial_no); ?>
+                      <?php $serial_no = (isset($payment_certificate) ? $payment_certificate->serial_no : get_payment_certificate_serial_no());
+                      echo render_input('serial_no', 'payment_certificate_no', $serial_no, 'text', ['readonly' => true]); ?>
+                    </div>
+                    <div class="col-md-3">
+                      <?php $pc_number = (isset($payment_certificate) ? $payment_certificate->pc_number : '');
+                      echo render_input('pc_number', 'Payment certificate number', $pc_number, 'text', ['readonly' => true]); ?>
                     </div>
                     <div class="col-md-3">
                       <div class="form-group">
@@ -178,9 +182,6 @@
                       <?php $po_no = $wo_order->wo_order_number;
                       echo render_input('po_no', 'wo_no', $po_no, 'text', ['disabled' => 'disabled']); ?>
                     </div>
-                  </div>
-
-                  <div class="row">
                     <div class="col-md-3">
                       <?php $po_date = _d($wo_order->order_date);
                       echo render_date_input('po_date', 'wo_date', $po_date, ['disabled' => 'disabled']); ?>
@@ -197,9 +198,6 @@
                       <?php $location = (isset($payment_certificate) ? $payment_certificate->location : '');
                       echo render_input('location', 'Location', $location); ?>
                     </div>
-                  </div>
-
-                  <div class="row">
                     <div class="col-md-3">
                       <?php $invoice_ref = (isset($payment_certificate) ? $payment_certificate->invoice_ref : '');
                       echo render_input('invoice_ref', 'invoice_ref', $invoice_ref); ?>
@@ -1082,39 +1080,22 @@
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const tbody = document.querySelector('#sortable-tbody');
-
-    // Restore order if available
-    const savedOrder = JSON.parse(localStorage.getItem('fileOrder')) || [];
-    if (savedOrder.length) {
-      const rows = Array.from(tbody.querySelectorAll('tr'));
-      const rowMap = new Map();
-      rows.forEach(row => {
-        const id = row.dataset.id;
-        if (id) {
-          rowMap.set(id, row);
-        }
-      });
-      const sortedRows = savedOrder.map(id => rowMap.get(id)).filter(Boolean);
-      tbody.append(...sortedRows);
+    if (!tbody) {
+      return;
     }
-
-    // Enable row sorting
     new Sortable(tbody, {
       handle: '.draggerer',
       animation: 150,
       ghostClass: 'sortable-ghost',
-      onUpdate: function (evt) {
+      onUpdate: function () {
         const newOrder = Array.from(tbody.querySelectorAll('tr'))
           .map(row => row.dataset.id)
           .filter(Boolean);
-        localStorage.setItem('fileOrder', JSON.stringify(newOrder));
-        // Send AJAX to save order in DB
+
         $.ajax({
           url: admin_url + 'purchase/update_payment_certificate_file_order',
           type: 'POST',
-          data: {
-            order: newOrder
-          },
+          data: { order: newOrder },
           success: function(response) {
             alert_float('success', 'The order has been saved successfully.');
           },

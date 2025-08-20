@@ -149,6 +149,14 @@
                   <div class="row">
                     <?php echo form_hidden('payment_certificate_id', $payment_certificate_id); ?>
                     <div class="col-md-3">
+                      <?php $serial_no = (isset($payment_certificate) ? $payment_certificate->serial_no : get_payment_certificate_serial_no());
+                      echo render_input('serial_no', 'payment_certificate_no', $serial_no, 'text', ['readonly' => true]); ?>
+                    </div>
+                    <div class="col-md-3">
+                      <?php $pc_number = (isset($payment_certificate) ? $payment_certificate->pc_number : '');
+                      echo render_input('pc_number', 'Payment certificate number', $pc_number, 'text', ['readonly' => true]); ?>
+                    </div>
+                    <div class="col-md-3">
                       <div class="form-group">
                         <label for="type"><?php echo _l('type'); ?></label>
                         <select name="pay_cert_options" id="pay_cert_options" class="selectpicker" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
@@ -1088,39 +1096,22 @@
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const tbody = document.querySelector('#sortable-tbody');
-
-    // Restore order if available
-    const savedOrder = JSON.parse(localStorage.getItem('fileOrder')) || [];
-    if (savedOrder.length) {
-      const rows = Array.from(tbody.querySelectorAll('tr'));
-      const rowMap = new Map();
-      rows.forEach(row => {
-        const id = row.dataset.id;
-        if (id) {
-          rowMap.set(id, row);
-        }
-      });
-      const sortedRows = savedOrder.map(id => rowMap.get(id)).filter(Boolean);
-      tbody.append(...sortedRows);
+    if (!tbody) {
+      return;
     }
-
-    // Enable row sorting
     new Sortable(tbody, {
       handle: '.draggerer',
       animation: 150,
       ghostClass: 'sortable-ghost',
-      onUpdate: function (evt) {
+      onUpdate: function () {
         const newOrder = Array.from(tbody.querySelectorAll('tr'))
           .map(row => row.dataset.id)
           .filter(Boolean);
-        localStorage.setItem('fileOrder', JSON.stringify(newOrder));
-        // Send AJAX to save order in DB
+
         $.ajax({
           url: admin_url + 'purchase/update_payment_certificate_file_order',
           type: 'POST',
-          data: {
-            order: newOrder
-          },
+          data: { order: newOrder },
           success: function(response) {
             alert_float('success', 'The order has been saved successfully.');
           },

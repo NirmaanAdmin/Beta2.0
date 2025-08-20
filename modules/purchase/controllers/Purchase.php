@@ -16480,4 +16480,34 @@ class purchase extends AdminController
             ]);
         }
     }
+
+    public function get_po_pc_format()
+    {
+        $result = array();
+        $data = $this->input->post();
+        if(!empty($data)) {
+            $result['po_pc_format'] = $this->purchase_model->get_po_pc_format($data);
+        }
+        echo json_encode($result);
+    }
+
+    public function get_wo_pc_format()
+    {
+        $result = array();
+        $data = $this->input->post();
+        if(!empty($data)) {
+            $result['wo_pc_format'] = $this->purchase_model->get_wo_pc_format($data);
+        }
+        echo json_encode($result);
+    }
+
+    public function get_ot_pc_format()
+    {
+        $result = array();
+        $data = $this->input->post();
+        if(!empty($data)) {
+            $result['ot_pc_format'] = $this->purchase_model->get_ot_pc_format($data);
+        }
+        echo json_encode($result);
+    }
 }

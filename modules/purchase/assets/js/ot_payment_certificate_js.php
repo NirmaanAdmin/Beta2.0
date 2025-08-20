@@ -2,6 +2,11 @@
 	var pc_id = '<?php echo isset($payment_certificate) ? pur_html_entity_decode($payment_certificate->id) : NULL; ?>';
 	$(function() {});
 
+	if(pc_id) {
+		get_contract_comments();
+	}
+	get_ot_pc_format();
+
 	function calculate_payment_certificate() {
 		"use strict";
 		var ot_id = $('select[name="ot_id"]').val();
@@ -597,4 +602,24 @@
 	       });
     	}
    	}
+
+   	function get_ot_pc_format() {
+   		"use strict";
+   		var ot_id = $('select[name="ot_id"]').val();
+   		var options = $('select[name="pay_cert_options"]').val();
+   		var vendor = $('select[name="vendor"]').val();
+   		if (ot_id != '') {
+   			$.post(admin_url + "purchase/get_ot_pc_format", {
+			    ot_id: ot_id,
+			    options: options,
+			    vendor: vendor,
+			}).done(function (response) {
+   				response = JSON.parse(response);
+   				$('input[name="pc_number"]').val(response.ot_pc_format);
+   			});
+   		}
+   	}
+   	$("body").on('change', 'select[name="ot_id"], select[name="pay_cert_options"], select[name="vendor"]', function() {
+	    get_ot_pc_format();
+	});
 </script>

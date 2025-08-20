@@ -4074,28 +4074,17 @@ function get_ril_invoice_item($id)
     return $ril_invoice_item;
 }
 
-function get_payment_certificate_serial_no($po_id, $type)
+function get_payment_certificate_serial_no()
 {
-    if (!empty($po_id)) {
-        $CI = &get_instance();
-        if ($type == 'wo') {
-            $payment_certificate = $CI->db->select('*')
-                ->where('wo_id', $po_id)
-                ->from(db_prefix() . 'payment_certificate')
-                ->get()
-                ->result_array();
-        } else {
-            $payment_certificate = $CI->db->select('*')
-                ->where('po_id', $po_id)
-                ->from(db_prefix() . 'payment_certificate')
-                ->get()
-                ->result_array();
-        }
-        if (!empty($payment_certificate)) {
-            return count($payment_certificate) + 1;
-        }
+    $CI = &get_instance();
+    $CI->db->select_max('serial_no');
+    $CI->db->from(db_prefix() . 'payment_certificate');
+    $payment_certificate = $CI->db->get()->row();
+    if (!empty($payment_certificate) && $payment_certificate->serial_no !== null) {
+        return $payment_certificate->serial_no + 1;
+    } else {
+        return 1;
     }
-    return 1;
 }
 
 function get_list_approval_details($rel_id, $rel_type)

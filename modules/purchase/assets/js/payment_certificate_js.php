@@ -3,7 +3,10 @@
 	$(function() {});
 
 	calculate_payment_certificate();
-	get_contract_comments();
+	if(pc_id) {
+		get_contract_comments();
+	}
+	get_po_pc_format();
 
 	function calculate_payment_certificate() {
 		"use strict";
@@ -559,4 +562,22 @@
 	       });
     	}
    	}
+
+   	function get_po_pc_format() {
+   		"use strict";
+   		var po_id = $('input[name="po_id"]').val();
+   		var options = $('select[name="pay_cert_options"]').val();
+   		if (po_id != '') {
+   			$.post(admin_url + "purchase/get_po_pc_format", {
+			    po_id: po_id,
+			    options: options,
+			}).done(function (response) {
+   				response = JSON.parse(response);
+   				$('input[name="pc_number"]').val(response.po_pc_format);
+   			});
+   		}
+   	}
+   	$("body").on('change', 'select[name="pay_cert_options"]', function() {
+		get_po_pc_format();
+	});
 </script>
