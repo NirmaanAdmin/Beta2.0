@@ -181,8 +181,8 @@
                     </div>
                     <div class="col-md-3">
                       <?php
-                      $ot_id = (isset($payment_certificate) ? $payment_certificate->ot_id : ''); 
-                      echo render_select('ot_id', $all_created_order_tracker, array('id', 'pur_order_name'), 'Order Tracker', $ot_id);
+                      $ot_id = ''; 
+                      echo render_select('ot_id', array(), array('id', 'pur_order_name'), 'Order Tracker', $ot_id);
                       ?>
                     </div>
                     <div class="col-md-3">
@@ -955,16 +955,23 @@
   $(document).ready(function() {
     "use strict";
     var is_view = <?php echo $is_view; ?>;
+    var pc_id = '<?php echo isset($payment_certificate) ? pur_html_entity_decode($payment_certificate->id) : NULL; ?>';
     if (is_view == 1) {
       $('input, select').not('select[name="status"]').prop('disabled', true);
       $('.selectpicker').selectpicker('refresh');
     } else {
       $('.selectpicker').selectpicker('refresh');
     }
-    $('select[name="vendor"]').parent('.bootstrap-select').css({
-      'pointer-events': 'none',
-      'background-color': '#e9ecef'
-    }).find('button').attr('tabindex', '-1');
+    if(pc_id) {
+      $('select[name="vendor"]').parent('.bootstrap-select').css({
+        'pointer-events': 'none',
+        'background-color': '#e9ecef'
+      }).find('button').attr('tabindex', '-1');
+      $('select[name="ot_id"]').parent('.bootstrap-select').css({
+        'pointer-events': 'none',
+        'background-color': '#e9ecef'
+      }).find('button').attr('tabindex', '-1');
+    }
     $('input[name="order_date"]').prop('readonly', true).css({
       'background-color': '#e9ecef',
       'pointer-events': 'none'

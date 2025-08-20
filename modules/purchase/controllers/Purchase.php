@@ -16294,7 +16294,6 @@ class purchase extends AdminController
         $data['ot_id'] = $ot_id;
         $data['payment_certificate_id'] = $payment_certificate_id;
         $data['order_tracker'] = $this->purchase_model->get_order_tracker($ot_id);
-        $data['all_created_order_tracker'] = $this->purchase_model->get_all_created_order_tracker();
         $data['title'] = $title;
         $data['is_edit'] = $is_edit;
         $data['is_view'] = $view;
@@ -16509,5 +16508,11 @@ class purchase extends AdminController
             $result['ot_pc_format'] = $this->purchase_model->get_ot_pc_format($data);
         }
         echo json_encode($result);
+    }
+
+    public function get_all_vendor_created_order_tracker($vendor)
+    {
+        $order_tracker_detail = $this->purchase_model->get_all_vendor_created_order_tracker($vendor);
+        echo json_encode($order_tracker_detail);
     }
 }

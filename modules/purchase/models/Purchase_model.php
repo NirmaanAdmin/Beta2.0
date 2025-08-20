@@ -23841,8 +23841,9 @@ class Purchase_model extends App_Model
         return $response;
     }
 
-    public function get_all_created_order_tracker()
+    public function get_all_vendor_created_order_tracker($vendor)
     {
+        $this->db->where('vendor', $vendor);
         $this->db->order_by('id', 'desc');
         return $this->db->get(db_prefix() . 'pur_order_tracker')->result_array();
     }
