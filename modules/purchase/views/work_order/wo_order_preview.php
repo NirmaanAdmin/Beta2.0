@@ -987,7 +987,10 @@ if ($estimate->currency != 0) {
                               <?php if ($pay['approve_status'] == 1) { ?>
                                  <a href="<?php echo admin_url('purchase/wo_payment_certificate/' . $estimate->id . '/' . $pay['id']); ?>" class="btn btn-default btn-icon" data-toggle="tooltip" data-placement="top" title="<?php echo _l('edit'); ?>"><i class="fa fa-pencil-square "></i></a>
                               <?php } ?>
-                              <a href="<?php echo admin_url('purchase/delete_payment_certificate/' . $estimate->id . '/' . $pay['id']); ?>" class="btn btn-danger btn-icon _delete"><i class="fa fa-remove"></i></a>
+                              <a href="<?php echo admin_url('purchase/delete_payment_certificate/' . $pay['id']); ?>" 
+                                 class="btn btn-danger btn-icon delete_payment_cert">
+                                 <i class="fa fa-remove"></i>
+                              </a>
                               <div class="btn-group">
                                  <a href="javascript:void(0)" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-file-pdf"></i><span class="caret"></span></a>
                                  <ul class="dropdown-menu dropdown-menu-right">
@@ -1251,6 +1254,28 @@ if ($estimate->currency != 0) {
          console.error('CSV export failed:', error);
          alert('Could not export CSV. Please check console for details.');
       }
+   });
+</script>
+<script>
+   $(document).ready(function() {
+      $(document).on('click', '.delete_payment_cert', function(e) {
+         e.preventDefault();
+         var url = $(this).attr('href');
+         Swal.fire({
+            title: 'Are you sure?',
+            text: 'Are you sure you want to remove this payment certificate?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, remove it!',
+            cancelButtonText: 'Cancel'
+         }).then((result) => {
+            if (result.isConfirmed) {
+              window.location.href = url;
+            }
+         });
+      });
    });
 </script>
 <script>

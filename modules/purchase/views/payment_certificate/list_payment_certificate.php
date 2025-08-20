@@ -325,6 +325,25 @@ $module_name = 'payment_certificate'; ?>
          });
       });
 
+      $(document).on('click', '.delete_payment_cert', function(e) {
+         e.preventDefault();
+         var url = $(this).attr('href');
+         Swal.fire({
+            title: 'Are you sure?',
+            text: 'Are you sure you want to remove this payment certificate?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, remove it!',
+            cancelButtonText: 'Cancel'
+         }).then((result) => {
+            if (result.isConfirmed) {
+              window.location.href = url;
+            }
+         });
+      });
+
    });
 </script>
 <script>
