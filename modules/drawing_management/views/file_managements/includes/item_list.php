@@ -46,7 +46,13 @@
 					<input type="checkbox" class="individual" data-id="<?php echo drawing_htmldecode($value['id']); ?>" onchange="checked_add(this); return false;" />
 				</td>
 				<td>
-					<?php echo drawing_htmldecode('<div class="display-flex">' . $item_icon . $a1 . '<strong class="fs-14 mleft10">' . $value['name'] . '</strong>' . $a2 . '</div>'); ?>
+					<?php 
+					if($value['document_number'] > 0){
+						$document_number = $value['document_number'] . '-' . $value['name'];
+					}else{
+						$document_number = $value['name'];
+					}
+					echo drawing_htmldecode('<div class="display-flex">' . $item_icon . $a1 . '<strong class="fs-14 mleft10">' . $document_number . '</strong>' . $a2 . '</div>'); ?>
 				</td>
 				<td>
 					<?php echo drawing_htmldecode($a1 . _dt($value['dateadded']) . $a2); ?>

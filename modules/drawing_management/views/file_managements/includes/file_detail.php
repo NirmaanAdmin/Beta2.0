@@ -15,9 +15,21 @@
 				<div class="alert alert-warning">
 					<?php echo _l('dmg_the_file_is_locked_by') . ' ' . get_staff_full_name($item->lock_user) . ' ' . _l('dmg_for_editing'); ?>
 				</div>
-			<?php } ?>
+			<?php }
+			if ($item->filetype === 'folder') { ?>
+				<h4><?php echo drawing_htmldecode($item->name); ?></h4>
+			<?php } else { 
+				if($item->document_number > 0){
+					$document_number = $item->document_number . '-' . $item->name;
+				}else{
+					$document_number = $item->name;
+				}
+				?>
+				<h4><?php echo drawing_htmldecode($document_number); ?></h4>
+			<?php }
+			?>
 
-			<h4><?php echo drawing_htmldecode($item->name); ?></h4>
+
 			<table class="table">
 				<tr>
 					<?php /* <td class="text-nowrap"><?php echo _l('dmg_tags'); ?></td>
