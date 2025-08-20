@@ -1873,6 +1873,10 @@ class timesheets extends AdminController
 			<td>' . $additional_timesheets->timekeeping_value . '</td>
 			</tr>
 			<tr class="project-overview">
+			<td class="bold" width="30%">' . _l('Comoff value') . '</td>
+			<td>' . $additional_timesheets->comoff_value . '</td>
+			</tr>
+			<tr class="project-overview">
 			<td class="bold" width="30%">' . _l('reason_') . '</td>
 			<td>' . $additional_timesheets->reason . '</td>
 			</tr>
@@ -8169,7 +8173,7 @@ class timesheets extends AdminController
 		die();
 	}
 
-	
+
 	public function delete_missed_punch($id)
 	{
 		$response = $this->timesheets_model->delete_missed_punch($id);
