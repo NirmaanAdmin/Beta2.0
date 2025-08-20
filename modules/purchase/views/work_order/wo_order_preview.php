@@ -34,11 +34,11 @@ if ($estimate->currency != 0) {
                         <?php echo _l('attachment'); ?>
                      </a>
                   </li>
-                  <li role="presentation">
+                  <!-- <li role="presentation">
                      <a href="#payment_record" aria-controls="payment_record" role="tab" data-toggle="tab">
                         <?php echo _l('payment_record'); ?>
                      </a>
-                  </li>
+                  </li> -->
                   <li role="presentation">
                      <a href="#payment_certificate" aria-controls="payment_certificate" role="tab" data-toggle="tab">
                         <?php echo _l('payment_certificate'); ?>
