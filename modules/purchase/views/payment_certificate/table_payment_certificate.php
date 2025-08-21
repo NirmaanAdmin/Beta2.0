@@ -11,6 +11,7 @@ $order_tagged_detail_filter_name = 'order_tagged_detail';
 
 $aColumns = [
     db_prefix() . 'payment_certificate' . '.id as id',
+    db_prefix() . 'payment_certificate' . '.pc_number as pc_number',
     'po_id',
     db_prefix() . 'pur_vendor' . '.company as company',
     db_prefix() . 'payment_certificate' . '.order_date as order_date',
@@ -212,6 +213,16 @@ foreach ($rResult as $aRow) {
             }
             $numberOutput .= ' | <a href="' . admin_url('purchase/delete_payment_certificate/' . $aRow['id']) . '" class="text-danger delete_payment_cert">' . _l('delete') . '</a>';
             $_data = $numberOutput;
+        } elseif ($aColumns[$i] == 'pc_number') {
+            if (!empty($aRow['po_id'])) {
+                $_data = '<a href="' . admin_url('purchase/payment_certificate/' . $aRow['po_id'] . '/' . $aRow['id']) . '" target="_blank">' . $aRow['pc_number'] . '</a>';
+            }
+            if (!empty($aRow['wo_id'])) {
+                $_data = '<a href="' . admin_url('purchase/wo_payment_certificate/' . $aRow['wo_id'] . '/' . $aRow['id']) . '" target="_blank">' . $aRow['pc_number'] . '</a>';
+            }
+            if (!empty($aRow['ot_id'])) {
+                $_data = '<a href="' . admin_url('purchase/ot_payment_certificate/' . $aRow['ot_id'] . '/' . $aRow['id']) . '" target="_blank">' . $aRow['pc_number'] . '</a>';
+            }
         } elseif ($aColumns[$i] == 'po_id') {
             $_data = '';
             if (!empty($aRow['po_id'])) {

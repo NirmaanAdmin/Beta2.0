@@ -24365,7 +24365,7 @@ class Purchase_model extends App_Model
         $default_project = get_default_project();
         $project_name = get_project_name_by_id($default_project);
         $po_pc_format .= strtoupper(substr($project_name, 0, 3));
-        $po_pc_format .= !empty($payment_certificate) ? '-'.date('Y', strtotime($payment_certificate->order_date)) : '-'.date('Y');
+        $po_pc_format .= !empty($payment_certificate) ? '-'.date('Y', strtotime($payment_certificate->dateadded)) : '-'.date('Y');
         $po_pc_format .= '-PO'.str_pad($pur_order->number, 5, '0', STR_PAD_LEFT);
         $po_pc_format .= '-'.str_pad($next_po_pc, 2, '0', STR_PAD_LEFT);
         $po_pc_format .= '-'.$vendor_name;
@@ -24393,7 +24393,7 @@ class Purchase_model extends App_Model
         $default_project = get_default_project();
         $project_name = get_project_name_by_id($default_project);
         $wo_pc_format .= strtoupper(substr($project_name, 0, 3));
-        $wo_pc_format .= !empty($payment_certificate) ? '-'.date('Y', strtotime($payment_certificate->order_date)) : '-'.date('Y');
+        $wo_pc_format .= !empty($payment_certificate) ? '-'.date('Y', strtotime($payment_certificate->dateadded)) : '-'.date('Y');
         $wo_pc_format .= '-WO'.str_pad($wo_order->number, 5, '0', STR_PAD_LEFT);
         $wo_pc_format .= '-'.str_pad($next_wo_pc, 2, '0', STR_PAD_LEFT);
         $wo_pc_format .= '-'.$vendor_name;
@@ -24421,7 +24421,7 @@ class Purchase_model extends App_Model
         $default_project = get_default_project();
         $project_name = get_project_name_by_id($default_project);
         $ot_pc_format .= strtoupper(substr($project_name, 0, 3));
-        $ot_pc_format .= !empty($payment_certificate) ? '-'.date('Y', strtotime($payment_certificate->order_date)) : '-'.date('Y');
+        $ot_pc_format .= !empty($payment_certificate) ? '-'.date('Y', strtotime($payment_certificate->dateadded)) : '-'.date('Y');
         $ot_pc_format .= '-OT'.str_pad($order_tracker->id, 5, '0', STR_PAD_LEFT);
         $ot_pc_format .= '-'.str_pad($next_ot_pc, 2, '0', STR_PAD_LEFT);
         $ot_pc_format .= '-'.$vendor_name;

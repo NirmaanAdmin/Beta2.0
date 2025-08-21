@@ -218,6 +218,7 @@ $module_name = 'payment_certificate'; ?>
                            <?php
                            $columns = [
                               'Payment cert',
+                              'payment_certificate_number',
                               'order_name',
                               'vendor',
                               'order_date',
@@ -244,6 +245,7 @@ $module_name = 'payment_certificate'; ?>
 
                      <?php $table_data = array(
                         _l('Payment cert'),
+                        _l('payment_certificate_number'),
                         _l('order_name'),
                         _l('vendor'),
                         _l('order_date'),
