@@ -138,6 +138,17 @@
                         </td>
                       </tr>
 
+                  <?php   }elseif (($goods_delivery->wo_order_id != '') && ($goods_delivery->wo_order_id != 0)) {
+                    ?>
+
+                      <tr class="project-overview">
+                        <td class="bold"><?php echo _l('reference_work_order'); ?></td>
+                        <td>
+                          <a href="<?php echo admin_url('purchase/work_order/' . $goods_delivery->wo_order_id) ?>"><?php echo get_wo_order_name($goods_delivery->wo_order_id) ?></a>
+
+                        </td>
+                      </tr>
+
                   <?php   }
                   }
                   ?>

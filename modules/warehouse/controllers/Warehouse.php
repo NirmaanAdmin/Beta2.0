@@ -9637,11 +9637,11 @@ class warehouse extends AdminController
 				$data['view_type'] = $view_type; // Set the view type (purchase_orders or work_orders)
 				$this->db->insert(db_prefix() . 'invetory_files', $data);
 			}
-			if($view_type == 'purchase_orders'){
+			if ($view_type == 'purchase_orders') {
 				update_pur_orders_tracker_details_last_action($input['id']);
-			}elseif ($view_type == 'work_orders') {
+			} elseif ($view_type == 'work_orders') {
 				update_wo_orders_tracker_details_last_action($input['id']);
-			}else{
+			} else {
 				update_goods_orders_tracker_details_last_action($input['id']);
 			}
 		}
@@ -9871,6 +9871,9 @@ class warehouse extends AdminController
 				$data['pr_orders'] = $this->warehouse_model->get_pr_order_delivered();
 				$data['pr_orders_status'] = true;
 
+				$data['wo_orders'] = $this->warehouse_model->get_wo_order_delivered();
+				$data['wo_orders_status'] = true;
+
 				$data['vendors'] = $this->purchase_model->get_vendor();
 
 				$data['projects'] = $this->projects_model->get();
@@ -9879,10 +9882,14 @@ class warehouse extends AdminController
 			} else {
 				$data['pr_orders'] = [];
 				$data['pr_orders_status'] = false;
+				$data['wo_orders'] = [];
+				$data['wo_orders_status'] = false;
 			}
 		} else {
 			$data['pr_orders'] = [];
 			$data['pr_orders_status'] = false;
+			$data['wo_orders'] = [];
+			$data['wo_orders_status'] = false;
 		}
 
 
@@ -10193,4 +10200,16 @@ class warehouse extends AdminController
 	{
 		$this->app->get_table_data(module_views_path('warehouse', 'report/table_returnable_material_alert'));
 	}
+
+	public function reconciliation_delivery_copy_wo_order($wo_order = '')
+	{
+
+		$wo_request_detail = $this->warehouse_model->reconciliation_delivery_get_wo_order($wo_order);
+
+		echo json_encode([
+			'result' => $wo_request_detail['result'] ? $wo_request_detail['result'] : '',
+			'additional_discount' => $wo_request_detail['additional_discount'] ? $wo_request_detail['additional_discount'] : '',
+		]);
+	}
+
 }

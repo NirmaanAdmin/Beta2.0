@@ -63,7 +63,7 @@
                     <?php render_datatable(array(
                         _l('id'),
                         _l('Reconciliation Voucher Code'),
-                        _l('reference_purchase_order'),
+                        _l('Choose From Order'),
                         _l('Reconciliation Date'),
                         // _l('invoices'),
                         // _l('staff_id'),

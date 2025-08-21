@@ -92,7 +92,21 @@
                       </select>
                     </div>
                   </div>
-
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="wo_order_id"><?php echo _l('reference_work_order'); ?></label>
+                      <select onchange="wo_order_change(this); return false;" name="wo_order_id" id="wo_order_id" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>"
+                        <?php echo ($edit_approval == 'true') ? 'disabled' : ''; ?>>
+                        <option value=""></option>
+                        <?php foreach ($wo_orders as $wo_order) { ?>
+                          <option value="<?php echo html_entity_decode($wo_order['id']); ?>" <?php if (isset($goods_delivery) && ($goods_delivery->wo_order_id == $wo_order['id'])) {
+                                                                                                echo 'selected';
+                                                                                              } ?>><?php echo html_entity_decode($wo_order['wo_order_number'] . ' - ' . $wo_order['wo_order_name'] . ' - ' . get_vendor_name($wo_order['vendor'])); ?>
+                          </option>
+                        <?php } ?>
+                      </select>
+                    </div>
+                  </div>
                   <?php if (ACTIVE_PROPOSAL == true) { ?>
 
 
@@ -268,7 +282,7 @@
                     <th width="9%" align="left"><?php echo _l('area'); ?></th>
                     <th width="10%" align="left"><?php echo _l('warehouse_name'); ?></th>
                     <th width="9%" align="left" class="available_quantity"><?php echo _l('Issued Quantity'); ?></th>
-                    <th width="9%" align="left"><?php echo _l('Return Date'); ?></th>
+                    <th width="9%" align="left"><?php echo _l('Expected Return Date'); ?></th>
                     <th width="11%" align="left"><?php echo _l('Reconciliation Date'); ?></th>
                     <th width="8%" align="left"><?php echo _l('Return Quantity'); ?></th>
                     <th width="8%" align="left"><?php echo _l('Used Quantity'); ?></th>
@@ -428,8 +442,6 @@
     var usedVal = issuedVal - returnVal;
     $('input[name="' + usedName + '"]').val(usedVal.toFixed(2));
   });
-
-  
 </script>
 
 </html>
