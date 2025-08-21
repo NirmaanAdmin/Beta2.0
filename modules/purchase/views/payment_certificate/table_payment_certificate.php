@@ -10,16 +10,17 @@ $projects_filter_name = 'projects';
 
 $aColumns = [
     db_prefix() . 'payment_certificate' . '.id as id',
-    '(CASE 
-        WHEN ' . db_prefix() . 'payment_certificate.po_id IS NOT NULL THEN ' . db_prefix() . 'pur_orders.project 
-        WHEN ' . db_prefix() . 'payment_certificate.wo_id IS NOT NULL THEN ' . db_prefix() . 'wo_orders.project
-        WHEN ' . db_prefix() . 'payment_certificate.ot_id IS NOT NULL THEN ' . db_prefix() . 'pur_order_tracker.project 
-        ELSE NULL 
-     END) as project',
     'po_id',
     db_prefix() . 'pur_vendor' . '.company as company',
-    db_prefix() . 'payment_certificate' . '.dateadded as dateadded',
+    db_prefix() . 'payment_certificate' . '.order_date as order_date',
     db_prefix() . 'assets_group' . '.group_name as group_name',
+    '(' . db_prefix() . 'payment_certificate.po_this_bill 
+      + ' . db_prefix() . 'payment_certificate.cgst_this_bill 
+      + ' . db_prefix() . 'payment_certificate.sgst_this_bill 
+      + ' . db_prefix() . 'payment_certificate.igst_this_bill 
+      + ' . db_prefix() . 'payment_certificate.labour_cess_3
+    ) as this_bill',
+    db_prefix() . 'payment_certificate' . '.dateadded as submission_date',
     db_prefix() . 'payment_certificate' . '.approve_status as approve_status',
     '(CASE 
         WHEN ' . db_prefix() . 'payment_certificate.pur_invoice_id IS NOT NULL THEN 2 
@@ -132,6 +133,12 @@ $result = data_tables_init(
         db_prefix() . 'pur_order_tracker.pur_order_name as ot_number',
         db_prefix() . 'payment_certificate.vendor',
         db_prefix() . 'payment_certificate.group_pur',
+        '(CASE 
+            WHEN ' . db_prefix() . 'payment_certificate.po_id IS NOT NULL THEN ' . db_prefix() . 'pur_orders.project 
+            WHEN ' . db_prefix() . 'payment_certificate.wo_id IS NOT NULL THEN ' . db_prefix() . 'wo_orders.project
+            WHEN ' . db_prefix() . 'payment_certificate.ot_id IS NOT NULL THEN ' . db_prefix() . 'pur_order_tracker.project 
+            ELSE NULL 
+         END) as project',
     ],
     '',
     [],
@@ -188,10 +195,14 @@ foreach ($rResult as $aRow) {
             }
         } elseif ($aColumns[$i] == 'company') {
             $_data = '<a href="' . admin_url('purchase/vendor/' . $aRow['vendor']) . '" >' . $aRow['company'] . '</a>';
-        } elseif ($aColumns[$i] == 'dateadded') {
-            $_data = date('d-m-Y', strtotime($aRow['dateadded']));
+        } elseif ($aColumns[$i] == 'order_date') {
+            $_data = _d($aRow['order_date']);
         } elseif ($aColumns[$i] == 'group_name') {
             $_data = $aRow['group_name'];
+        } elseif ($aColumns[$i] == 'this_bill') {
+            $_data = app_format_money($aRow['this_bill'], $base_currency->symbol);
+        } elseif ($aColumns[$i] == 'submission_date') {
+            $_data = date('d-m-Y', strtotime($aRow['submission_date']));
         } elseif ($aColumns[$i] == 'approve_status') {
             $_data = '';
             $list_approval_details = get_list_approval_details($aRow['id'], ['po_payment_certificate', 'wo_payment_certificate', 'ot_payment_certificate']);
@@ -226,8 +237,6 @@ foreach ($rResult as $aRow) {
             } else {
                 $_data = '';
             }
-        } elseif ($aColumns[$i] == 'project') {
-            $_data = get_project_name_by_id($aRow['project']);
         } elseif ($aColumns[$i] == 1) {
             $pdf = '';
             $pdf = '<div class="btn-group display-flex">';

@@ -211,11 +211,12 @@ $module_name = 'payment_certificate'; ?>
                            <?php
                            $columns = [
                               'Payment cert',
-                              'project',
                               'order_name',
                               'vendor',
-                              'Date',
+                              'order_date',
                               'group_pur',
+                              'this_bill',
+                              'submission_date',
                               'approval_status',
                               'applied_to_vendor_bill',
                               _l('options'),
@@ -235,11 +236,12 @@ $module_name = 'payment_certificate'; ?>
 
                      <?php $table_data = array(
                         _l('Payment cert'),
-                        _l('project'),
                         _l('order_name'),
                         _l('vendor'),
-                        _l('Date'),
+                        _l('order_date'),
                         _l('group_pur'),
+                        _l('this_bill'),
+                        _l('submission_date'),
                         _l('approval_status'),
                         _l('applied_to_vendor_bill'),
                         _l('options'),
@@ -271,7 +273,7 @@ $module_name = 'payment_certificate'; ?>
          "projects": "[name='projects[]']",
          "applied_to_vendor_bill": "[name='applied_to_vendor_bill[]']",
       };
-      initDataTable(table_payment_certificate, admin_url + 'purchase/table_payment_certificate', [], [], Params, [4, 'desc']);
+      initDataTable(table_payment_certificate, admin_url + 'purchase/table_payment_certificate', [], [], Params, [6, 'desc']);
       $.each(Params, function(i, obj) {
          $('select' + obj).on('change', function() {
             table_payment_certificate.DataTable().ajax.reload();
