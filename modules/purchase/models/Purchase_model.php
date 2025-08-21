@@ -23837,9 +23837,16 @@ class Purchase_model extends App_Model
     {
         $response = [];
         $this->db->select("GROUP_CONCAT(DISTINCT CONCAT('po_', " . db_prefix() . "pur_orders.id) SEPARATOR '_') as id", false);
-        $this->db->select(db_prefix() . "pur_orders.pur_order_number as name");
+        $this->db->select("
+            CONCAT(
+                " . db_prefix() . "pur_orders.pur_order_number, ' - ',
+                " . db_prefix() . "pur_orders.pur_order_name, ' - ',
+                " . db_prefix() . "pur_vendor.company
+            ) as name
+        ", false);
         $this->db->from(db_prefix() . 'pur_invoices');
         $this->db->join(db_prefix() . 'pur_orders', db_prefix() . 'pur_orders.id = ' . db_prefix() . 'pur_invoices.pur_order', 'left');
+        $this->db->join(db_prefix() . 'pur_vendor', db_prefix() . 'pur_vendor.userid = ' . db_prefix() . 'pur_orders.vendor', 'left');
         $this->db->where(db_prefix() . 'pur_invoices.pur_order !=', 0);
         $this->db->where(db_prefix() . 'pur_invoices.pur_order IS NOT NULL', null, false);
         $this->db->group_by(db_prefix() . 'pur_orders.id');
@@ -23848,9 +23855,16 @@ class Purchase_model extends App_Model
             $response = array_merge($response, $pur_orders);
         }
         $this->db->select("GROUP_CONCAT(DISTINCT CONCAT('wo_', " . db_prefix() . "wo_orders.id) SEPARATOR '_') as id", false);
-        $this->db->select(db_prefix() . "wo_orders.wo_order_number as name");
+        $this->db->select("
+            CONCAT(
+                " . db_prefix() . "wo_orders.wo_order_number, ' - ',
+                " . db_prefix() . "wo_orders.wo_order_name, ' - ',
+                " . db_prefix() . "pur_vendor.company
+            ) as name
+        ", false);
         $this->db->from(db_prefix() . 'pur_invoices');
         $this->db->join(db_prefix() . 'wo_orders', db_prefix() . 'wo_orders.id = ' . db_prefix() . 'pur_invoices.wo_order', 'left');
+        $this->db->join(db_prefix() . 'pur_vendor', db_prefix() . 'pur_vendor.userid = ' . db_prefix() . 'wo_orders.vendor', 'left');
         $this->db->where(db_prefix() . 'pur_invoices.wo_order !=', 0);
         $this->db->where(db_prefix() . 'pur_invoices.wo_order IS NOT NULL', null, false);
         $this->db->group_by(db_prefix() . 'wo_orders.id');
