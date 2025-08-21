@@ -2655,3 +2655,59 @@ function get_stock_received_wo_ids($id)
 
     return $result;
 }
+
+function get_stock_received_quantity($po_id = null, $description = null, $wo_id = null, $commodity_code = null)
+{
+    $CI = &get_instance();
+
+    // Exactly one of PO or WO must be provided
+    $has_po = !empty($po_id);
+    $has_wo = !empty($wo_id);
+    if ($has_po === $has_wo) {
+        return 0.0;
+    }
+
+    // Normalize the incoming description
+    $normalized_desc = null;
+    if ($description !== null) {
+        $normalized_desc = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $description));
+    }
+
+    $CI->db->reset_query();
+
+    $CI->db->select('grd.quantities');
+    $CI->db->select("
+        REPLACE(
+            REPLACE(
+                REPLACE(
+                    REPLACE(grd.description, '\\r', ''),
+                '\\n', ''),
+            '<br />', ''),
+        '<br/>', '') AS non_break_description
+    ", false);
+
+    $CI->db->from(db_prefix() . 'goods_receipt gr');
+    $CI->db->join(db_prefix() . 'goods_receipt_detail grd', 'gr.id = grd.goods_receipt_id', 'inner');
+
+    // Filter by PO or WO
+    if ($has_po) {
+        $CI->db->where('gr.pr_order_id', (int)$po_id);
+    } else {
+        $CI->db->where('gr.wo_order_id', (int)$wo_id);
+    }
+
+    // Commodity code filter
+    if (is_array($commodity_code) && !empty($commodity_code)) {
+        $CI->db->where_in('grd.commodity_code', $commodity_code);
+    } elseif (is_string($commodity_code) && $commodity_code !== '') {
+        $CI->db->where('grd.commodity_code', $commodity_code);
+    }
+
+    // Description filter (use HAVING since it's on the alias)
+    if ($normalized_desc !== null && $normalized_desc !== '') {
+        $CI->db->having('non_break_description', $normalized_desc);
+    }
+
+    $row = $CI->db->get()->row();
+    return $row ? (float)$row->quantities : 0.0;
+}

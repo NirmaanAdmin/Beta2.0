@@ -281,7 +281,8 @@
                     <th width="13%" align="left"><?php echo _l('item_description'); ?></th>
                     <th width="9%" align="left"><?php echo _l('area'); ?></th>
                     <th width="10%" align="left"><?php echo _l('warehouse_name'); ?></th>
-                    <th width="9%" align="left" class="available_quantity"><?php echo _l('Issued Quantity'); ?></th>
+                    <th width="9%" align="left"><?php echo _l('Received  Quantity'); ?></th>
+                    <th width="5%" align="left" class="available_quantity"><?php echo _l('Issued Quantity'); ?></th>
                     <th width="9%" align="left"><?php echo _l('Expected Return Date'); ?></th>
                     <th width="11%" align="left"><?php echo _l('Reconciliation Date'); ?></th>
                     <th width="8%" align="left"><?php echo _l('Return Quantity'); ?></th>

@@ -191,6 +191,7 @@
                         <th colspan="1"><?php echo _l('item_description') ?></th>
                         <th colspan="1"><?php echo _l('area') ?></th>
                         <th colspan="1"><?php echo _l('warehouse_name') ?></th>
+                        <th colspan="1"><?php echo _l('received_quantity') ?></th>
                         <th colspan="1"><?php echo _l('Issued Quantity') ?></th>
                         <th colspan="1"><?php echo _l('Return Date') ?></th>
                         <th colspan="1" c><?php echo _l('Reconciliation Date') ?></th>
@@ -208,6 +209,7 @@
                       foreach ($goods_delivery_detail as $delivery => $delivery_value) {
                         $delivery++;
                         $available_quantity = (isset($delivery_value) ? $delivery_value['available_quantity'] : '');
+                        $received_quantity = (isset($delivery_value) ? $delivery_value['received_quantity'] : '');
                         $total_money = (isset($delivery_value) ? $delivery_value['total_money'] : '');
                         $discount = (isset($delivery_value) ? $delivery_value['discount'] : '');
                         $discount_money = (isset($delivery_value) ? $delivery_value['discount_money'] : '');
@@ -348,6 +350,7 @@
                           <td><?php echo html_entity_decode($delivery_value['description']) ?></td>
                           <td><?php echo get_area_name_by_id($delivery_value['area']); ?></td>
                           <td><?php echo html_entity_decode($warehouse_name) ?></td>
+                          <td><?php echo html_entity_decode($received_quantity) ?></td>
                           <td><?php echo html_entity_decode($all_issued_quantities) ?></td>
                           <td><?php echo html_entity_decode($all_returnable_date) ?></td>
                           <td><?php echo html_entity_decode($all_reconciliation_date) ?></td>
@@ -704,3 +707,6 @@
 </body>
 
 </html>
+<script>
+  small_table_full_view();
+</script>
