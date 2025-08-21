@@ -13293,6 +13293,7 @@ class purchase extends AdminController
         $data['vendors'] = $this->purchase_model->get_vendor();
         $data['item_group'] = get_budget_head_project_wise();
         $data['projects'] = $this->projects_model->get();
+        $data['order_tagged_detail'] = $this->purchase_model->get_order_tagged_detail();
         $this->load->view('payment_certificate/list_payment_certificate', $data);
     }
 
@@ -16515,5 +16516,14 @@ class purchase extends AdminController
     {
         $order_tracker_detail = $this->purchase_model->get_all_vendor_created_order_tracker($vendor);
         echo json_encode($order_tracker_detail);
+    }
+
+    public function update_responsible_person()
+    {
+        $id = $this->input->post('id');
+        $responsible_person = !empty($this->input->post('responsible_person')) ? $this->input->post('responsible_person') : NULL;
+        $this->db->where('id', $id);
+        $success = $this->db->update('tblpayment_certificate', ['responsible_person' => $responsible_person]);
+        echo json_encode(['success' => true, 'message' => 'The responsible person has been updated.']);
     }
 }

@@ -7,6 +7,7 @@ $group_pur_filter_name = 'group_pur';
 $approval_status_filter_name = 'approval_status';
 $applied_to_vendor_bill_filter_name = 'applied_to_vendor_bill';
 $projects_filter_name = 'projects';
+$order_tagged_detail_filter_name = 'order_tagged_detail';
 
 $aColumns = [
     db_prefix() . 'payment_certificate' . '.id as id',
@@ -28,6 +29,7 @@ $aColumns = [
         ELSE 3 
      END) as applied_to_vendor_bill',
     1,
+    db_prefix() . 'payment_certificate' . '.responsible_person as responsible_person',
     db_prefix() . 'payment_certificate' . '.last_action as last_action',
 ];
 
@@ -99,6 +101,29 @@ if ($this->ci->input->post('applied_to_vendor_bill') && count($this->ci->input->
     )';
 }
 
+$order_tagged_detail = $this->ci->input->post('order_tagged_detail');
+if (isset($order_tagged_detail) && is_array($order_tagged_detail) && !empty($order_tagged_detail)) {
+    $or_conditions = [];
+    foreach ($order_tagged_detail as $t) {
+        if (!empty($t)) {
+            if (strpos($t, 'po_') === 0) {
+                $id = str_replace('po_', '', $t);
+                $or_conditions[] = db_prefix() . "payment_certificate.po_id = '$id'";
+            } elseif (strpos($t, 'wo_') === 0) {
+                $id = str_replace('wo_', '', $t);
+                $or_conditions[] = db_prefix() . "payment_certificate.wo_id = '$id'";
+            } elseif (strpos($t, 'ot_') === 0) {
+                $id = str_replace('ot_', '', $t);
+                $or_conditions[] = db_prefix() . "payment_certificate.ot_id = '$id'";
+            }
+        }
+    }
+    if (!empty($or_conditions)) {
+        $where_order_tagged_detail = ' AND (' . implode(' OR ', $or_conditions) . ')';
+        array_push($where, $where_order_tagged_detail);
+    }
+}
+
 $vendors_filter_name_value = !empty($this->ci->input->post('vendors')) ? implode(',', $this->ci->input->post('vendors')) : NULL;
 update_module_filter($module_name, $vendors_filter_name, $vendors_filter_name_value);
 
@@ -113,6 +138,9 @@ update_module_filter($module_name, $projects_filter_name, $projects_filter_name_
 
 $applied_to_vendor_bill_filter_name_value = !empty($this->ci->input->post('applied_to_vendor_bill')) ? implode(',', $this->ci->input->post('applied_to_vendor_bill')) : NULL;
 update_module_filter($module_name, $applied_to_vendor_bill_filter_name, $applied_to_vendor_bill_filter_name_value);
+
+$order_tagged_detail_filter_name_value = !empty($this->ci->input->post('order_tagged_detail')) ? implode(',', $this->ci->input->post('order_tagged_detail')) : NULL;
+update_module_filter($module_name, $order_tagged_detail_filter_name, $order_tagged_detail_filter_name_value);
 
 $having = '';
 
@@ -157,7 +185,9 @@ $aColumns = array_map(function ($col) {
     return trim($col, '"` ');
 }, $aColumns);
 
-$this->ci->load->model('purchase/purchase_model');
+$this->ci->load->model('Staff_model');
+$staff_list   = $this->ci->Staff_model->get();
+
 foreach ($rResult as $aRow) {
     $row = [];
 
@@ -251,6 +281,18 @@ foreach ($rResult as $aRow) {
             $_data = $pdf;
         } elseif ($aColumns[$i] == 'last_action') {
             $_data = get_last_action_full_name($aRow['last_action']);
+        } elseif ($aColumns[$i] == 'responsible_person') {
+            $_data = '';
+            $staff_html = '<select class="form-control responsible_person selectpicker" data-live-search="true" data-width="100%" name="responsible_person" data-id="' . $aRow['id'] . '">';
+            $staff_html .= '<option value=""></option>';
+            foreach ($staff_list as $st) {
+                $selected = ($aRow['responsible_person'] == $st['staffid']) ? ' selected' : '';
+                $staff_html .= '<option value="' . $st['staffid'] . '"' . $selected . '>'
+                    . html_escape($st['firstname'] . ' ' . $st['lastname'])
+                    . '</option>';
+            }
+            $staff_html .= '</select>';
+            $_data = $staff_html;
         } else {
             if (strpos($aColumns[$i], 'date_picker_') !== false) {
                 $_data = (strpos($_data, ' ') !== false ? _dt($_data) : _d($_data));

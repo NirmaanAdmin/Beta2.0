@@ -135,21 +135,21 @@ $module_name = 'payment_certificate'; ?>
                      </div>
 
                      <div class="row all_ot_filters mtop20">
-                        <div class="col-md-2 form-group">
+                        <div class="col-md-3 form-group">
                            <?php
                            $vendors_type_filter = get_module_filter($module_name, 'vendors');
                            $vendors_type_filter_val = !empty($vendors_type_filter) ? explode(",", $vendors_type_filter->filter_value) : [];
                            echo render_select('vendors[]', $vendors, array('userid', 'company'), '', $vendors_type_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('pur_vendor'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
                            ?>
                         </div>
-                        <div class="col-md-2 form-group">
+                        <div class="col-md-3 form-group">
                            <?php
                            $group_pur_type_filter = get_module_filter($module_name, 'group_pur');
                            $group_pur_type_filter_val = !empty($group_pur_type_filter) ? explode(",", $group_pur_type_filter->filter_value) : [];
                            echo render_select('group_pur[]', $item_group, array('id', 'name'), '', $group_pur_type_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('group_pur'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
                            ?>
                         </div>
-                        <div class="col-md-2 form-group">
+                        <div class="col-md-3 form-group">
                            <?php
                            $approval_status_type_filter = get_module_filter($module_name, 'approval_status');
                            $approval_status_type_filter_val = !empty($approval_status_type_filter) ? explode(",", $approval_status_type_filter->filter_value) : [];
@@ -165,7 +165,7 @@ $module_name = 'payment_certificate'; ?>
                         $projects_type_filter = get_module_filter($module_name, 'projects');
                         $projects_type_filter_val = !empty($projects_type_filter) ? explode(",", $projects_type_filter->filter_value) : [];
                         ?>
-                        <div class="col-md-2 form-group">
+                        <div class="col-md-3 form-group">
                            <select name="projects[]" id="projects" class="selectpicker" multiple="true" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('leads_all'); ?>">
                               <?php foreach ($projects as $pj) { ?>
                                  <option value="<?php echo pur_html_entity_decode($pj['id']); ?>"
@@ -175,7 +175,7 @@ $module_name = 'payment_certificate'; ?>
                               <?php } ?>
                            </select>
                         </div>
-                        <div class="col-md-2 form-group">
+                        <div class="col-md-3 form-group">
                            <?php
                            $applied_to_vendor_bill_filter = get_module_filter($module_name, 'applied_to_vendor_bill');
                            $applied_to_vendor_bill_filter_val = !empty($applied_to_vendor_bill_filter) ? explode(",", $applied_to_vendor_bill_filter->filter_value) : [];
@@ -185,6 +185,13 @@ $module_name = 'payment_certificate'; ?>
                               ['id' => 3, 'name' => 'Pending'],
                            ];
                            echo render_select('applied_to_vendor_bill[]', $applied_to_vendor_bill, array('id', 'name'), '', $applied_to_vendor_bill_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('applied_to_vendor_bill'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
+                           ?>
+                        </div>
+                        <div class="col-md-3">
+                           <?php
+                           $order_tagged_detail_filter = get_module_filter($module_name, 'order_tagged_detail');
+                           $order_tagged_detail_filter_val = !empty($order_tagged_detail_filter) ? explode(",", $order_tagged_detail_filter->filter_value) : '';
+                           echo render_select('order_tagged_detail[]', $order_tagged_detail, array('id', 'name'), '', $order_tagged_detail_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('Order Detail'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
                            ?>
                         </div>
                         <div class="col-md-1 form-group ">
@@ -220,7 +227,8 @@ $module_name = 'payment_certificate'; ?>
                               'approval_status',
                               'applied_to_vendor_bill',
                               _l('options'),
-                              'last_action_by'
+                              'responsible_person',
+                              'last_action_by',
                            ];
                            ?>
                            <div>
@@ -245,6 +253,7 @@ $module_name = 'payment_certificate'; ?>
                         _l('approval_status'),
                         _l('applied_to_vendor_bill'),
                         _l('options'),
+                        _l('responsible_person'),
                         _l('last_action_by'),
                      );
 
@@ -272,6 +281,7 @@ $module_name = 'payment_certificate'; ?>
          "approval_status": "[name='approval_status[]']",
          "projects": "[name='projects[]']",
          "applied_to_vendor_bill": "[name='applied_to_vendor_bill[]']",
+         "order_tagged_detail": "[name='order_tagged_detail[]']",
       };
       initDataTable(table_payment_certificate, admin_url + 'purchase/table_payment_certificate', [], [], Params, [6, 'desc']);
       $.each(Params, function(i, obj) {
@@ -319,6 +329,26 @@ $module_name = 'payment_certificate'; ?>
       // Prevent dropdown from closing when clicking inside
       $('.dropdown-menu').on('click', function(e) {
          e.stopPropagation();
+      });
+
+      table_payment_certificate.on('draw.dt', function () {
+         $('.selectpicker').selectpicker('refresh');
+      });
+
+      $(document).on('change', 'select[name="responsible_person"]', function(e) {
+         e.preventDefault();
+         var responsible_person = $(this).val();
+         var id = $(this).data('id');
+         $.post(admin_url + 'purchase/update_responsible_person', {
+            id: id,
+            responsible_person: responsible_person, 
+         }).done(function (response) {
+            response = JSON.parse(response);
+            if (response.success == true) {
+               alert_float('success', response.message);
+               table_payment_certificate.DataTable().ajax.reload();
+            }
+         });
       });
 
       $(document).on('click', '.convert-pur-invoice', function(e) {

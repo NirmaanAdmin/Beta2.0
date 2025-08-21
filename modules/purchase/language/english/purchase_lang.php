@@ -964,3 +964,4 @@ $lang['new_payment_certificate'] = 'New';
 $lang['not_started'] = 'Not Started';
 $lang['last_action_by'] = 'Last Action By';
 $lang['submission_date'] = 'Submission Date';
+$lang['responsible_person'] = 'Responsible Person';
