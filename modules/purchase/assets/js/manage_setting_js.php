@@ -155,6 +155,25 @@
       $('#approval_setting_modal').modal('show');
       $('#approval_setting_modal .add-title').removeClass('hide');
       $('#approval_setting_modal .edit-title').addClass('hide');
+      update_project_members();
+    }
+
+    function update_project_members()
+    {
+      var project_id = $('#project_id').val();
+      if(project_id) {
+          $('#approver').empty().selectpicker('refresh');
+          $.post(admin_url+'purchase/find_project_members',{'project_id':project_id}).done(function(response){
+              response = JSON.parse(response);
+              if(response.length > 0) {
+                  $.each(response, function(idx, member) {
+                      var approver = $('#approver');
+                      approver.prepend('<option value="'+member.id+'">'+member.full_name+'</option>');
+                  });
+                  $('#approver').selectpicker('refresh');
+              }
+          });
+      }
     }
 
    function purchase_order_setting(invoker){
