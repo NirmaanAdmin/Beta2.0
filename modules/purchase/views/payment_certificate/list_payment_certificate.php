@@ -175,6 +175,18 @@ $module_name = 'payment_certificate'; ?>
                               <?php } ?>
                            </select>
                         </div>
+                        <div class="col-md-2 form-group">
+                           <?php
+                           $applied_to_vendor_bill_filter = get_module_filter($module_name, 'applied_to_vendor_bill');
+                           $applied_to_vendor_bill_filter_val = !empty($applied_to_vendor_bill_filter) ? explode(",", $applied_to_vendor_bill_filter->filter_value) : [];
+                           $applied_to_vendor_bill = [
+                              ['id' => 1, 'name' => _l('convert_to_vendor_bill')],
+                              ['id' => 2, 'name' => 'Converted'],
+                              ['id' => 3, 'name' => 'Pending'],
+                           ];
+                           echo render_select('applied_to_vendor_bill[]', $applied_to_vendor_bill, array('id', 'name'), '', $applied_to_vendor_bill_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('applied_to_vendor_bill'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
+                           ?>
+                        </div>
                         <div class="col-md-1 form-group ">
                            <a href="javascript:void(0)" class="btn btn-info btn-icon reset_all_ot_filters">
                               <?php echo _l('reset_filter'); ?>
@@ -257,6 +269,7 @@ $module_name = 'payment_certificate'; ?>
          "group_pur": "[name='group_pur[]']",
          "approval_status": "[name='approval_status[]']",
          "projects": "[name='projects[]']",
+         "applied_to_vendor_bill": "[name='applied_to_vendor_bill[]']",
       };
       initDataTable(table_payment_certificate, admin_url + 'purchase/table_payment_certificate', [], [], Params, [4, 'desc']);
       $.each(Params, function(i, obj) {

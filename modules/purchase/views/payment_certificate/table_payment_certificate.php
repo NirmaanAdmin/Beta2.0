@@ -5,6 +5,7 @@ $module_name = 'payment_certificate';
 $vendors_filter_name = 'vendors';
 $group_pur_filter_name = 'group_pur';
 $approval_status_filter_name = 'approval_status';
+$applied_to_vendor_bill_filter_name = 'applied_to_vendor_bill';
 $projects_filter_name = 'projects';
 
 $aColumns = [
@@ -20,7 +21,11 @@ $aColumns = [
     db_prefix() . 'payment_certificate' . '.dateadded as dateadded',
     db_prefix() . 'assets_group' . '.group_name as group_name',
     db_prefix() . 'payment_certificate' . '.approve_status as approve_status',
-    db_prefix() . 'payment_certificate' . '.pur_invoice_id as applied_to_vendor_bill',
+    '(CASE 
+        WHEN ' . db_prefix() . 'payment_certificate.pur_invoice_id IS NOT NULL THEN 2 
+        WHEN ' . db_prefix() . 'payment_certificate.approve_status = 2 AND ' . db_prefix() . 'payment_certificate.pur_invoice_id IS NULL THEN 1 
+        ELSE 3 
+     END) as applied_to_vendor_bill',
     1,
     db_prefix() . 'payment_certificate' . '.last_action as last_action',
 ];
@@ -82,6 +87,17 @@ if ($this->ci->input->post('projects') && count($this->ci->input->post('projects
     array_push($where, $where_projects);
 }
 
+if ($this->ci->input->post('applied_to_vendor_bill') && count($this->ci->input->post('applied_to_vendor_bill')) > 0) {
+    $applied_to_vendor_bill = implode(',', $this->ci->input->post('applied_to_vendor_bill'));
+    $where[] = 'AND (
+        ( ' . db_prefix() . 'payment_certificate.pur_invoice_id IS NOT NULL AND 2 IN (' . $applied_to_vendor_bill . '))
+        OR
+        ( ' . db_prefix() . 'payment_certificate.approve_status = 2 AND ' . db_prefix() . 'payment_certificate.pur_invoice_id IS NULL AND 1 IN (' . $applied_to_vendor_bill . '))
+        OR
+        ( ( ' . db_prefix() . 'payment_certificate.approve_status != 2 OR ' . db_prefix() . 'payment_certificate.approve_status IS NULL ) AND ' . db_prefix() . 'payment_certificate.pur_invoice_id IS NULL AND 3 IN (' . $applied_to_vendor_bill . '))
+    )';
+}
+
 $vendors_filter_name_value = !empty($this->ci->input->post('vendors')) ? implode(',', $this->ci->input->post('vendors')) : NULL;
 update_module_filter($module_name, $vendors_filter_name, $vendors_filter_name_value);
 
@@ -93,6 +109,9 @@ update_module_filter($module_name, $approval_status_filter_name, $approval_statu
 
 $projects_filter_name_value = !empty($this->ci->input->post('projects')) ? implode(',', $this->ci->input->post('projects')) : NULL;
 update_module_filter($module_name, $projects_filter_name, $projects_filter_name_value);
+
+$applied_to_vendor_bill_filter_name_value = !empty($this->ci->input->post('applied_to_vendor_bill')) ? implode(',', $this->ci->input->post('applied_to_vendor_bill')) : NULL;
+update_module_filter($module_name, $applied_to_vendor_bill_filter_name, $applied_to_vendor_bill_filter_name_value);
 
 $having = '';
 
@@ -197,11 +216,15 @@ foreach ($rResult as $aRow) {
             }
         } elseif ($aColumns[$i] == 'applied_to_vendor_bill') {
             $_data = '';
-            if ($aRow['approve_status'] == 2 && empty($aRow['applied_to_vendor_bill'])) {
+            if ($aRow['applied_to_vendor_bill'] == 1) {
                 $_data = '<a href="' . admin_url('purchase/convert_pur_invoice_from_po/' . $aRow['id']) . '" class="btn btn-info convert-pur-invoice" data-url="' . admin_url('purchase/convert_pur_invoice_from_po/' . $aRow['id']) . '">' . _l('convert_to_vendor_bill') . '
                 </a>';
-            } else if(!empty($aRow['applied_to_vendor_bill'])) {
+            } else if($aRow['applied_to_vendor_bill'] == 2) {
                 $_data = '<span class="btn btn-success">Converted</span>';
+            } else if($aRow['applied_to_vendor_bill'] == 3) {
+                $_data = '<span class="btn btn-warning">Pending</span>';
+            } else {
+                $_data = '';
             }
         } elseif ($aColumns[$i] == 'project') {
             $_data = get_project_name_by_id($aRow['project']);
