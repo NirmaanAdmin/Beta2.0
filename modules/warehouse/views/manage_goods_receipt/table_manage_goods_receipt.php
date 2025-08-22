@@ -1,7 +1,12 @@
 <?php
 
 defined('BASEPATH') or exit('No direct script access allowed');
-
+$module_name = 'warehouse_goods_receipt';
+$status_filter_name = 'status';
+$vendor_filter_name = 'vendor';
+$day_vouchers_name = 'day_vouchers';
+$kind_filter_name = 'kind';
+$report_months_filter_name = 'report_months';
 $aColumns = [
     'id',
     'goods_receipt_code',
@@ -51,6 +56,8 @@ if (isset($kind)) {
 if(!empty($vendor)){
     $where[] = 'AND tblgoods_receipt.supplier_code IN(' . implode(',', $vendor) . ')';
 }
+
+
 // $status = $this->ci->input->post('status');
 if (isset($status)) {
     if($status == 'approved'){
@@ -63,6 +70,22 @@ if (isset($status)) {
 if(get_default_project()) {
     $where[] = 'AND ' . db_prefix() . 'goods_receipt.project = '.get_default_project().'';
 }
+
+
+$status_filter_name_value = !empty($this->ci->input->post('status')) ? $this->ci->input->post('status') : '';
+update_module_filter($module_name, $status_filter_name, $status_filter_name_value);
+
+$vendor_filter_name_value = !empty($this->ci->input->post('vendor')) ? implode(',', $this->ci->input->post('vendor')) : NULL;
+update_module_filter($module_name, $vendor_filter_name, $vendor_filter_name_value);
+
+$day_vouchers_name_value = !empty($this->ci->input->post('day_vouchers')) ? to_sql_date($this->ci->input->post('day_vouchers')) : '';
+update_module_filter($module_name, $day_vouchers_name, $day_vouchers_name_value);
+
+$kind_filter_name_value = !empty($this->ci->input->post('kind')) ? $this->ci->input->post('kind') : '';
+update_module_filter($module_name, $kind_filter_name, $kind_filter_name_value);
+
+$report_months_name_value = !empty($this->ci->input->post('report_months')) ? $this->ci->input->post('report_months') : '';
+update_module_filter($module_name, $report_months_filter_name, $report_months_name_value);
 
 $this->ci->load->model('purchase/purchase_model');
 $custom_date_select = $this->ci->purchase_model->get_where_report_period(db_prefix() . 'goods_receipt.date_add');

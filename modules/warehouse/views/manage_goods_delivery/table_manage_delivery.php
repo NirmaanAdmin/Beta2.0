@@ -1,6 +1,11 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
-
+$module_name = 'warehouse_goods_delivery';
+$day_vouchers_name = 'day_vouchers';
+$approval_filter_name = 'approval';
+$delivery_status_filter_name = 'delivery_status';
+$vendor_filter_name = 'vendor';
+$wo_po_orders_filter_name = 'wo_po_order';
 $aColumns = [
     'id',
     'goods_delivery_code',
@@ -81,6 +86,25 @@ if (!empty($wo_po_orders)) {
 if(get_default_project()) {
     $where[] = 'AND ' . db_prefix() . 'goods_delivery.project = '.get_default_project().'';
 }
+
+$day_vouchers_name_value = !empty($this->ci->input->post('day_vouchers')) ? to_sql_date($this->ci->input->post('day_vouchers')) : '';
+update_module_filter($module_name, $day_vouchers_name, $day_vouchers_name_value);
+
+// Update approval filter
+$approval_filter_name_value = !empty($this->ci->input->post('approval')) ? $this->ci->input->post('approval') : '';
+update_module_filter($module_name, $approval_filter_name, $approval_filter_name_value);
+
+// Update delivery status filter
+$delivery_status_filter_name_value = !empty($this->ci->input->post('delivery_status')) ? $this->ci->input->post('delivery_status') : '';
+update_module_filter($module_name, $delivery_status_filter_name, $delivery_status_filter_name_value);
+
+// Update vendor filter
+$vendor_filter_name_value = !empty($this->ci->input->post('vendor')) ? implode(',', $this->ci->input->post('vendor')) : NULL;
+update_module_filter($module_name, $vendor_filter_name, $vendor_filter_name_value);
+
+// Update work order / purchase order filter
+$wo_po_orders_filter_name_value = !empty($this->ci->input->post('wo_po_order')) ? implode(',', $this->ci->input->post('wo_po_order')) : NULL;
+update_module_filter($module_name, $wo_po_orders_filter_name, $wo_po_orders_filter_name_value);
 
 // Add any extra fields you want to retrieve
 $additionalSelect = [

@@ -1,6 +1,9 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
-
+$module_name = 'warehouse_stock_reconciliation';
+$day_vouchers_name = 'day_vouchers';
+$approval_filter_name = 'approval';
+$delivery_status_filter_name = 'delivery_status';
 $aColumns = [
     'id',
     'goods_delivery_code',
@@ -50,6 +53,17 @@ if ($this->ci->input->post('delivery_status')) {
 if(get_default_project()) {
     $where[] = 'AND project = "' . get_default_project() . '"';
 }
+
+$day_vouchers_name_value = !empty($this->ci->input->post('day_vouchers')) ? to_sql_date($this->ci->input->post('day_vouchers')) : '';
+update_module_filter($module_name, $day_vouchers_name, $day_vouchers_name_value);
+
+// Update approval filter
+$approval_filter_name_value = !empty($this->ci->input->post('approval')) ? $this->ci->input->post('approval') : '';
+update_module_filter($module_name, $approval_filter_name, $approval_filter_name_value);
+
+// Update delivery status filter
+$delivery_status_filter_name_value = !empty($this->ci->input->post('delivery_status')) ? $this->ci->input->post('delivery_status') : '';
+update_module_filter($module_name, $delivery_status_filter_name, $delivery_status_filter_name_value);
 
 // Add any extra fields you want to retrieve
 $additionalSelect = [

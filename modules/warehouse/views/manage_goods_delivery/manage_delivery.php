@@ -1,5 +1,6 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
-<?php init_head(); ?>
+<?php init_head();
+$module_name = 'warehouse_goods_delivery'; ?>
 <style type="text/css">
   .n_width {
     width: 25% !important;
@@ -123,57 +124,83 @@
               </div>
             </div>
 
-            <div class="row mtop20">
+            <div class="row mtop20 all_ot_filters">
               <div class="col-md-3">
                 <?php
                 $input_attr_e = [];
                 $input_attr_e['placeholder'] = _l('day_vouchers');
+                $day_vouchers_filter = get_module_filter($module_name, 'day_vouchers');
+                $day_vouchers_filter_val = !empty($day_vouchers_filter) ?  $day_vouchers_filter->filter_value : '';
 
-                echo render_date_input('date_add', '', '', $input_attr_e); ?>
+                echo render_date_input('date_add', '', $day_vouchers_filter_val, $input_attr_e); ?>
               </div>
               <div class="col-md-3">
+                <?php
+                $approval_filter = get_module_filter($module_name, 'approval');
+                $approval_filter_val = !empty($approval_filter) ? $approval_filter->filter_value : '';
+                ?>
                 <select name="approval" id="approval" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('status_label'); ?>">
-                  <option value=""></option>
-                  <option value="0"><?php echo _l('not_yet_approve'); ?></option>
-                  <option value="1"><?php echo _l('approved'); ?></option>
-                  <option value="-1"><?php echo _l('reject'); ?></option>
+                  <option value="" <?php echo ($approval_filter_val === '') ? 'selected' : ''; ?>></option>
+                  <option value="0" <?php echo ($approval_filter_val === '0') ? 'selected' : ''; ?>><?php echo _l('not_yet_approve'); ?></option>
+                  <option value="1" <?php echo ($approval_filter_val === '1') ? 'selected' : ''; ?>><?php echo _l('approved'); ?></option>
+                  <option value="-1" <?php echo ($approval_filter_val === '-1') ? 'selected' : ''; ?>><?php echo _l('reject'); ?></option>
                 </select>
               </div>
               <div class="col-md-3">
+                <?php
+                $delivery_status_filter = get_module_filter($module_name, 'delivery_status');
+                $delivery_status_filter_val = !empty($delivery_status_filter) ? $delivery_status_filter->filter_value : '';
+                ?>
                 <select name="delivery_status" id="delivery_status" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('delivery_status_new'); ?>">
-                  <option value=""></option>
-                  <option value="ready_to_deliver"><?php echo _l('wh_ready_to_deliver_new'); ?></option>
-                  <option value="delivery_in_progress"><?php echo _l('wh_delivery_in_progress_new'); ?></option>
-                  <option value="delivered"><?php echo _l('wh_delivered_new'); ?></option>
-                  <option value="received"><?php echo _l('wh_received'); ?></option>
-                  <option value="returned"><?php echo _l('wh_returned'); ?></option>
-                  <option value="not_delivered"><?php echo _l('wh_not_delivered_new'); ?></option>
+                  <option value="" <?php echo ($delivery_status_filter_val === '') ? 'selected' : ''; ?>></option>
+                  <option value="ready_to_deliver" <?php echo ($delivery_status_filter_val === 'ready_to_deliver') ? 'selected' : ''; ?>><?php echo _l('wh_ready_to_deliver_new'); ?></option>
+                  <option value="delivery_in_progress" <?php echo ($delivery_status_filter_val === 'delivery_in_progress') ? 'selected' : ''; ?>><?php echo _l('wh_delivery_in_progress_new'); ?></option>
+                  <option value="delivered" <?php echo ($delivery_status_filter_val === 'delivered') ? 'selected' : ''; ?>><?php echo _l('wh_delivered_new'); ?></option>
+                  <option value="received" <?php echo ($delivery_status_filter_val === 'received') ? 'selected' : ''; ?>><?php echo _l('wh_received'); ?></option>
+                  <option value="returned" <?php echo ($delivery_status_filter_val === 'returned') ? 'selected' : ''; ?>><?php echo _l('wh_returned'); ?></option>
+                  <option value="not_delivered" <?php echo ($delivery_status_filter_val === 'not_delivered') ? 'selected' : ''; ?>><?php echo _l('wh_not_delivered_new'); ?></option>
                 </select>
               </div>
               <div class="col-md-3 form-group pull-right">
+                <?php
+                $vendor_type_filter = get_module_filter($module_name, 'vendor');
+                $vendor_type_filter_val = !empty($vendor_type_filter) ? explode(",", $vendor_type_filter->filter_value) : [];
+                ?>
                 <select name="vendor[]" id="vendor" class="selectpicker" multiple="true" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('vendor'); ?>">
-                  <option value=""></option>
                   <?php
                   $vendor = get_pur_vendor_list();
-                  foreach ($vendor as $vendors) { ?>
-                    <option value="<?php echo $vendors['userid']; ?>"><?php echo  $vendors['company']; ?></option>
+                  foreach ($vendor as $vendors) {
+                    $selected = in_array($vendors['userid'], $vendor_type_filter_val) ? 'selected' : '';
+                  ?>
+                    <option value="<?php echo $vendors['userid']; ?>" <?php echo $selected; ?>>
+                      <?php echo $vendors['company']; ?>
+                    </option>
                   <?php  } ?>
                 </select>
               </div>
               <div class="col-md-3 form-group" style="clear: both;">
+                <?php
+                $wo_po_orders_filter = get_module_filter($module_name, 'wo_po_order');
+                $wo_po_orders_filter_val = !empty($wo_po_orders_filter) ? explode(",", $wo_po_orders_filter->filter_value) : [];
+                ?>
                 <select name="wo_po_order[]" id="wo_po_order" multiple class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('Choose From Order'); ?>">
-                  <option value=""></option>
-
                   <?php
                   $po_wo_orders = get_purchase_work_order();
-
                   foreach ($po_wo_orders as $key => $value) {
-                    echo '<option value="' . $value['id'] . '-' . $value['type'] . '-' . $value['goods_id'] . '">' . $value['name'] . '</option>';
+                    $option_value = $value['id'] . '-' . $value['type'] . '-' . $value['goods_id'];
+                    $selected = in_array($option_value, $wo_po_orders_filter_val) ? 'selected' : '';
+                    echo '<option value="' . $option_value . '" ' . $selected . '>' . $value['name'] . '</option>';
                   }
                   ?>
                 </select>
               </div>
-
+              <div class="row">
+                <div class="col-md-1 form-group">
+                  <a href="javascript:void(0)" class="btn btn-info btn-icon reset_all_ot_filters">
+                    <?php echo _l('reset_filter'); ?>
+                  </a>
+                </div>
+              </div>
             </div>
 
             <br />
