@@ -18128,7 +18128,7 @@ class Purchase_model extends App_Model
         $result['po_this_bill'] = 0;
         $result['po_comulative'] = 0;
 
-        $result = [];
+        // $result = [];
 
         // 1) Fetch just the latest change order
         $recent_co = $this->db
@@ -18988,7 +18988,7 @@ class Purchase_model extends App_Model
         $result['po_this_bill'] = 0;
         $result['po_comulative'] = 0;
 
-        $result = [];
+        // $result = [];
 
         // Fetch subtotal from work order
         $this->db->select('*');
