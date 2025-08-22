@@ -1085,4 +1085,48 @@ class Expenses_model extends App_Model
         $this->db->where('vbt_id IS NOT NULL', null, false);
         return $this->db->get(db_prefix() . 'expenses')->row();
     }
+
+    public function copy_expense_files_to_vbt($expense_id, $pur_invoice_id)
+    {
+        $source = FCPATH . 'uploads/expenses/' . $expense_id;
+        $destination = FCPATH . 'modules/purchase/uploads/pur_invoice/' . $pur_invoice_id;
+        if (!is_dir($source)) {
+            return false; // nothing to copy
+        }
+        $files = array_diff(scandir($source), ['.', '..']);
+        if (empty($files)) {
+            return false;
+        }
+        if (!is_dir($destination)) {
+            mkdir($destination, 0777, true);
+        }
+        $copied = 0;
+        foreach ($files as $file) {
+            $srcFile = $source . DIRECTORY_SEPARATOR . $file;
+            $destFile = $destination . DIRECTORY_SEPARATOR . $file;
+            if (is_file($srcFile)) {
+                if (copy($srcFile, $destFile)) {
+                    $copied++;
+                }
+            }
+        }
+        $this->db->where('rel_id', $expense_id);
+        $this->db->where('rel_type', 'expense');
+        $this->db->order_by('id', 'ASC');
+        $expense_files = $this->db->get(db_prefix() . 'files')->result_array();
+        if(!empty($expense_files) && !empty($files)) {
+            foreach ($expense_files as $key => $value) {
+                $row = array();
+                $row['rel_id'] = $pur_invoice_id;
+                $row['rel_type'] = 'pur_invoice';
+                $row['file_name'] = $value['file_name'];
+                $row['filetype'] = $value['filetype'];
+                $row['attachment_key'] = $value['attachment_key'];
+                $row['staffid'] = get_staff_user_id();
+                $row['dateadded'] = date('Y-m-d H:i:s');
+                $this->db->insert(db_prefix() . 'files', $row);
+            }
+        }
+        return $copied > 0;
+    }
 }

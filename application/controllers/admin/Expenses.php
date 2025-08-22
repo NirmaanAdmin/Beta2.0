@@ -560,7 +560,7 @@ class Expenses extends AdminController
         $input['vendor'] = !empty($expense->vendor) ? $expense->vendor : 0;
         $input['group_pur'] = !empty($group_pur) ? $group_pur : 0;
         $input['description_services'] = !empty($expense->expense_name) ? $expense->expense_name : '';
-        $input['invoice_date'] = !empty($expense->date) ? $expense->date : date('Y-m-d');
+        $input['invoice_date'] = date('Y-m-d');
         $input['currency'] = 3;
         $input['to_currency'] = 3;
         $input['date_add'] = date('Y-m-d');
@@ -580,6 +580,7 @@ class Expenses extends AdminController
         }
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'expenses', ['vbt_id' => $insert_id]);
+        $this->expenses_model->copy_expense_files_to_vbt($id, $insert_id);
         set_alert('success', _l('purchase_invoice') . ' ' . _l('added_successfully'));
         redirect(admin_url('purchase/pur_invoice/' . $insert_id));
     }
