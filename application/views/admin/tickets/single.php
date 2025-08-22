@@ -538,6 +538,7 @@
                                                 if(!empty($area_selected)) {
                                                     $area_selected = explode(",", $area_selected);
                                                 }
+                                                $area = get_area_project_wise();
                                                 echo render_select('area[]', $area, array('id','area_name'), 'area', $area_selected, array('multiple' => true)); 
                                                 ?>
                                             </div>

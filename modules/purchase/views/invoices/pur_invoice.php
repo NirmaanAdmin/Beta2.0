@@ -535,15 +535,15 @@
 			} else {
 				$('select[name="wo_order"]').prop('disabled', false).selectpicker('refresh');
 				$('select[name="order_tracker_id"]').prop('disabled', false).selectpicker('refresh');
-				$('select[name="vendor"]').val('').trigger('change');
-				$('select[name="group_pur"]').val('').trigger('change');
-				$('select[name="project_id"]').val('').trigger('change');
-				if(empty(expense_id)) {
-					$('input[name="vendor_submitted_amount_without_tax"]').val('').trigger('change');
-					$('input[name="vendor_submitted_tax_amount"]').val('').trigger('change');
-				}
-				$('textarea[name="description_services"]').val('');
-				calculateSum();
+				// $('select[name="vendor"]').val('').trigger('change');
+				// $('select[name="group_pur"]').val('').trigger('change');
+				// $('select[name="project_id"]').val('').trigger('change');
+				// if(empty(expense_id)) {
+				// 	$('input[name="vendor_submitted_amount_without_tax"]').val('').trigger('change');
+				// 	$('input[name="vendor_submitted_tax_amount"]').val('').trigger('change');
+				// }
+				// $('textarea[name="description_services"]').val('');
+				// calculateSum();
 				init_selectpicker();
 			}
 		});
@@ -573,15 +573,15 @@
 			} else {
 				$('select[name="pur_order"]').prop('disabled', false).selectpicker('refresh');
 				$('select[name="order_tracker_id"]').prop('disabled', false).selectpicker('refresh');
-				$('select[name="vendor"]').val('').trigger('change');
-				$('select[name="group_pur"]').val('').trigger('change');
-				$('select[name="project_id"]').val('').trigger('change');
-				if(empty(expense_id)) {
-					$('input[name="vendor_submitted_amount_without_tax"]').val('').trigger('change');
-					$('input[name="vendor_submitted_tax_amount"]').val('').trigger('change');
-				}
-				$('textarea[name="description_services"]').val('');
-				calculateSum();
+				// $('select[name="vendor"]').val('').trigger('change');
+				// $('select[name="group_pur"]').val('').trigger('change');
+				// $('select[name="project_id"]').val('').trigger('change');
+				// if(empty(expense_id)) {
+				// 	$('input[name="vendor_submitted_amount_without_tax"]').val('').trigger('change');
+				// 	$('input[name="vendor_submitted_tax_amount"]').val('').trigger('change');
+				// }
+				// $('textarea[name="description_services"]').val('');
+				// calculateSum();
 				init_selectpicker();
 			}
 		});
@@ -608,15 +608,15 @@
 			} else {
 				$('select[name="pur_order"]').prop('disabled', false).selectpicker('refresh');
 				$('select[name="wo_order"]').prop('disabled', false).selectpicker('refresh');
-				$('select[name="vendor"]').val('').trigger('change');
-				$('select[name="group_pur"]').val('').trigger('change');
-				$('select[name="project_id"]').val('').trigger('change');
-				if(empty(expense_id)) {
-					$('input[name="vendor_submitted_amount_without_tax"]').val('').trigger('change');
-					$('input[name="vendor_submitted_tax_amount"]').val('').trigger('change');
-				}
-				$('textarea[name="description_services"]').val('');
-				calculateSum();
+				// $('select[name="vendor"]').val('').trigger('change');
+				// $('select[name="group_pur"]').val('').trigger('change');
+				// $('select[name="project_id"]').val('').trigger('change');
+				// if(empty(expense_id)) {
+				// 	$('input[name="vendor_submitted_amount_without_tax"]').val('').trigger('change');
+				// 	$('input[name="vendor_submitted_tax_amount"]').val('').trigger('change');
+				// }
+				// $('textarea[name="description_services"]').val('');
+				// calculateSum();
 				init_selectpicker();
 			}
 		});

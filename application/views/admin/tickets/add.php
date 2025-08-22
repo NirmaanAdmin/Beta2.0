@@ -120,7 +120,8 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <?php 
+                                        <?php
+                                        $area = get_area_project_wise(); 
                                         echo render_select('area[]', $area, array('id','area_name'), 'area', [], array('multiple' => true));
                                         ?>
                                     </div>
