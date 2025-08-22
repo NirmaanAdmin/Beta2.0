@@ -659,28 +659,51 @@
 
         <div role="tabpanel" class="tab-pane" id="attachment">
           <div class="col-md-12">
+            
             <?php
+            $file_html = '';
             if (isset($attachments) && count($attachments) > 0) {
+
               foreach ($attachments as $value) {
-                echo '<div class="col-md-6" style="padding-bottom: 10px">';
                 $path = get_upload_path_by_type('inventory') . 'goods_delivery/' . $value['rel_id'] . '/' . $value['file_name'];
                 $is_image = is_image($path);
-                if ($is_image) {
-                  echo '<div class="preview_image">';
-                } ?>
-                <a href="<?php echo site_url('download/file/inventory/' . $value['id']); ?>" class="display-block mbot5" <?php if ($is_image) { ?> data-lightbox="attachment-inventory-<?php echo $value['rel_id']; ?>" <?php } ?>>
-                  <i class="<?php echo get_mime_class($value['filetype']); ?>"></i> <?php echo $value['file_name']; ?>
-                  <?php if ($is_image) { ?>
-                    <img class="mtop5" src="<?php echo site_url('download/preview_image?path=' . protected_file_url_by_path($path) . '&type=' . $value['filetype']); ?>" style="height: 165px;">
-                  <?php } ?>
-                </a>
-                <?php if ($is_image) {
-                  echo '</div>';
-                } ?>
-            <?php echo '</div>';
+
+                $download_url = site_url('download/file/inventory/' . $value['id']);
+
+                $file_html .= '<div class="mbot15 row inline-block full-width" data-attachment-id="' . $value['id'] . '">
+                  <div class="col-md-8">';
+
+                // Preview button for images
+                $file_html .= '<a name="preview-purchase-btn" 
+                     onclick="preview_goods_delivery_attachment(this); return false;" 
+                     rel_id="' . $value['rel_id'] . '" 
+                     id="' . $value['id'] . '" 
+                     href="javascript:void(0);" 
+                     class="mbot10 mright5 btn btn-success pull-left" 
+                     data-toggle="tooltip" 
+                     title="' . _l('preview_file') . '">
+                     <i class="fa fa-eye"></i>
+                  </a>';
+
+                $file_html .= '<div class="pull-left"><i class="' . get_mime_class($value['filetype']) . '"></i></div>
+                  <a href="' . $download_url . '" target="_blank" download>
+                     ' . $value['file_name'] . '
+                  </a>
+                  <br />
+                  <small class="text-muted">' . $value['filetype'] . '</small>
+                  </div>
+                  <div class="col-md-4 text-right">';
+
+
+                $file_html .= '</div></div>';
               }
-            } ?>
+
+              $file_html .= '<hr />';
+              echo pur_html_entity_decode($file_html);
+            }
+            ?>
           </div>
+          <div id="goods_delivery_file_data"></div>
         </div>
 
       </div>
@@ -722,4 +745,28 @@
 
 <script>
   small_table_full_view();
+</script>
+
+<script>
+   function preview_goods_delivery_attachment(invoker) {
+      "use strict";
+      var id = $(invoker).attr('id');
+      var rel_id = $(invoker).attr('rel_id');
+      view_preview_goods_delivery_attachment(id, rel_id);
+   }
+
+   function view_preview_goods_delivery_attachment(id, rel_id) {
+      "use strict";
+      $('#goods_delivery_file_data').empty();
+      $("#goods_delivery_file_data").load(admin_url + 'warehouse/file_goods_delivery_preview/' + id + '/' + rel_id, function(response, status, xhr) {
+         if (status == "error") {
+            alert_float('danger', xhr.statusText);
+         }
+      });
+   }
+
+   function close_modal_preview() {
+      "use strict";
+      $('._project_file').modal('hide');
+   }
 </script>

@@ -240,7 +240,7 @@
               if (isset($attachments) && count($attachments) > 0) {
                 foreach ($attachments as $value) {
                   echo '<div class="col-md-3">';
-                  $path = get_upload_path_by_type('inventory') . 'goods_delivery/' . $value['rel_id'] . '/' . $value['file_name'];
+                  $path = get_upload_path_by_type('inventory') . 'stock_reconciliation/' . $value['rel_id'] . '/' . $value['file_name'];
                   $is_image = is_image($path);
                   if ($is_image) {
                     echo '<div class="preview_image">';

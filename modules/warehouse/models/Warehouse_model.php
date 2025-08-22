@@ -7958,7 +7958,7 @@ class Warehouse_model extends App_Model
 		if ($this->db->affected_rows() > 0) {
 			$results++;
 		}
-
+		$this->save_invetory_files('goods_delivery', $goods_delivery_id);
 		/*update googs delivery*/
 
 		foreach ($update_goods_deliveries as $goods_delivery) {
@@ -8264,9 +8264,11 @@ class Warehouse_model extends App_Model
 
 		$this->db->where('id', $goods_receipt_id);
 		$this->db->update(db_prefix() . 'goods_receipt', $data);
+		
 		if ($this->db->affected_rows() > 0) {
 			$results++;
 		}
+		$this->save_invetory_files('goods_receipt', $goods_receipt_id);
 		foreach ($production_approval as $value) {
 			unset($value['order']);
 
@@ -22393,7 +22395,7 @@ class Warehouse_model extends App_Model
 		if ($this->db->affected_rows() > 0) {
 			$results++;
 		}
-
+		$this->save_invetory_files('stock_reconciliation', $goods_delivery_id);
 		/*update googs delivery*/
 
 		foreach ($update_goods_deliveries as $goods_delivery) {
@@ -24020,4 +24022,27 @@ class Warehouse_model extends App_Model
 
 		return $arr_wo_order;
 	}
+
+	public function get_goods_receipt_attachments_with_id($id)
+    {
+        $this->db->where('id', $id);
+        $this->db->order_by('dateadded', 'desc');
+        $attachments = $this->db->get(db_prefix() . 'invetory_files')->row();
+        return $attachments;
+    }
+
+	public function get_goods_delivery_attachments_with_id($id)
+    {
+        $this->db->where('id', $id);
+        $this->db->order_by('dateadded', 'desc');
+        $attachments = $this->db->get(db_prefix() . 'invetory_files')->row();
+        return $attachments;
+    }
+	public function get_goods_reconciliation_attachments_with_id($id)
+    {
+        $this->db->where('id', $id);
+        $this->db->order_by('dateadded', 'desc');
+        $attachments = $this->db->get(db_prefix() . 'invetory_files')->row();
+        return $attachments;
+    }
 }

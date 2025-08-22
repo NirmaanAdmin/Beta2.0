@@ -9813,7 +9813,7 @@ class warehouse extends AdminController
 				if ($goods_delivery->approval == 0) {
 					$mess = $this->warehouse_model->update_stock_reconciliation($data);
 				} else {
-					$mess = $this->warehouse_model->update_goods_delivery_approval($data);
+					$mess = $this->warehouse_model->update_stock_reconciliation($data);
 				}
 
 				if ($data['save_and_send_request'] == 'true') {
@@ -9917,7 +9917,7 @@ class warehouse extends AdminController
 			if (isset($goods_delivery->pr_order_id) && (float)$goods_delivery->pr_order_id > 0) {
 				$is_purchase_order = true;
 			}
-			$data['attachments'] = $this->warehouse_model->get_inventory_attachments('goods_delivery', $id);
+			$data['attachments'] = $this->warehouse_model->get_inventory_attachments('stock_reconciliation', $id);
 
 			if (count($data['goods_delivery_detail']) > 0) {
 
@@ -10000,7 +10000,7 @@ class warehouse extends AdminController
 		$this->load->model('currencies_model');
 		$base_currency = $this->currencies_model->get_base_currency();
 		$data['base_currency'] = $base_currency;
-		$data['attachments'] = $this->warehouse_model->get_inventory_attachments('goods_delivery', $id);
+		$data['attachments'] = $this->warehouse_model->get_inventory_attachments('stock_reconciliation', $id);
 
 
 		$this->load->view('stock_reconciliation/view_delivery', $data);
@@ -10212,4 +10212,43 @@ class warehouse extends AdminController
 		]);
 	}
 
+	public function file_goods_receipt_preview($id, $rel_id)
+    {
+        $data['discussion_user_profile_image_url'] = staff_profile_image_url(get_staff_user_id());
+        $data['current_user_is_admin']             = is_admin();
+        $data['file'] = $this->warehouse_model->get_goods_receipt_attachments_with_id($id);
+
+        if (!$data['file']) {
+            header('HTTP/1.0 404 Not Found');
+            die;
+        }
+        $this->load->view('manage_goods_receipt/_file_new', $data);
+    }
+
+	public function file_goods_delivery_preview($id, $rel_id)
+    {
+        $data['discussion_user_profile_image_url'] = staff_profile_image_url(get_staff_user_id());
+        $data['current_user_is_admin']             = is_admin();
+        $data['file'] = $this->warehouse_model->get_goods_delivery_attachments_with_id($id);
+
+        if (!$data['file']) {
+            header('HTTP/1.0 404 Not Found');
+            die;
+        }
+        $this->load->view('manage_goods_delivery/_file_new', $data);
+    }
+
+	
+	public function file_goods_reconciliation_preview($id, $rel_id)
+    {
+        $data['discussion_user_profile_image_url'] = staff_profile_image_url(get_staff_user_id());
+        $data['current_user_is_admin']             = is_admin();
+        $data['file'] = $this->warehouse_model->get_goods_reconciliation_attachments_with_id($id);
+
+        if (!$data['file']) {
+            header('HTTP/1.0 404 Not Found');
+            die;
+        }
+        $this->load->view('stock_reconciliation/_file_new', $data);
+    }
 }
