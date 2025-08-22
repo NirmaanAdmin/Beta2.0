@@ -34,7 +34,7 @@ $aColumns = [
     4,
     'vendor_note',
     db_prefix() . 'pur_invoices.id as inv_id',
-    db_prefix() . 'pur_invoices.adminnote',
+    db_prefix() . 'pur_invoices.adminnote as adminnote',
     db_prefix() . 'pur_invoices.last_action',
 ];
 
@@ -309,6 +309,15 @@ $footer_data = [
 $invoice_ids = '';
 $base_currency = get_base_currency_pur();
 
+$aColumns = array_map(function ($col) {
+    $col = trim($col);
+    if (stripos($col, ' as ') !== false) {
+        $parts = preg_split('/\s+as\s+/i', $col);
+        return trim($parts[1], '"` ');
+    }
+    return trim($col, '"` ');
+}, $aColumns);
+
 $this->ci->load->model('purchase/purchase_model');
 $sr = 1 + $this->ci->input->post('start');
 foreach ($rResult as $aRow) {
@@ -368,7 +377,7 @@ foreach ($rResult as $aRow) {
             } else {
                 $_data = $aRow['invoice_number'];
             }
-        } elseif ($aColumns[$i] == db_prefix() . 'pur_invoices.id as inv_id') {
+        } elseif ($aColumns[$i] == 'inv_id') {
 
             $this->ci->load->model('purchase/purchase_model');
             $attachments = $this->ci->purchase_model->get_purchase_invoice_attachments($aRow['id']);
@@ -588,7 +597,7 @@ foreach ($rResult as $aRow) {
                 }
             }
             $_data = $expense_convert;
-        } elseif ($aColumns[$i] == db_prefix() . 'pur_invoices.adminnote') {
+        } elseif ($aColumns[$i] == 'adminnote') {
             // $_data = '<input type="date" class="form-control invoice-date-input" value="' . $aRow['invoice_date'] . '" data-id="' . $aRow['id'] . '">';
 
             $_data = '<textarea class="form-control adminnote-input"  data-id="' . $aRow['id'] . '">' . $aRow['adminnote'] . '</textarea>';
