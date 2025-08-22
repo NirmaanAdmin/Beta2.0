@@ -855,6 +855,10 @@ class Estimates_model extends App_Model
                 $affectedRows++;
             }
 
+            if (update_sales_item_post($item['itemid'], $item, 'area')) {
+                $affectedRows++;
+            }
+
             if (update_sales_item_post($item['itemid'], $item, 'unit')) {
                 $affectedRows++;
             }

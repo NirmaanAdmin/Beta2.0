@@ -778,12 +778,13 @@
                                 <thead>
                                     <tr>
                                         <th width="13%" align="left"><?php echo _l('estimate_table_item_heading'); ?></th>
-                                        <th width="18%" align="left"><?php echo _l('estimate_table_item_description'); ?></th>
+                                        <th width="16%" align="left"><?php echo _l('estimate_table_item_description'); ?></th>
                                         <th width="10%" class="qty" align="right"><?php echo _l('sub_head'); ?></th>
+                                        <th width="12%" class="area" align="right"><?php echo _l('area'); ?></th>
                                         <th width="10%" class="qty" align="right"><?php echo e(_l('estimate_table_quantity_heading')); ?></th>
-                                        <th width="16%" align="right"><?php echo _l('estimate_table_rate_heading'); ?></th>
-                                        <th width="16%" align="right"><?php echo _l('estimate_table_amount_heading'); ?></th>
-                                        <th width="17%" align="right"><?php echo _l('remarks'); ?></th>
+                                        <th width="13%" align="right"><?php echo _l('estimate_table_rate_heading'); ?></th>
+                                        <th width="13%" align="right"><?php echo _l('estimate_table_amount_heading'); ?></th>
+                                        <th width="13%" align="right"><?php echo _l('remarks'); ?></th>
                                     </tr>
                                     <tbody>
                                         <?php
@@ -798,6 +799,7 @@
                                                     $old_item_code = isset($root_estimate_data['estimate_items'][$ankey]['item_code']) ? $root_estimate_data['estimate_items'][$ankey]['item_code'] : '';
                                                     $old_long_description = isset($root_estimate_data['estimate_items'][$ankey]['long_description']) ? $root_estimate_data['estimate_items'][$ankey]['long_description'] : '';
                                                     $old_sub_head = isset($root_estimate_data['estimate_items'][$ankey]['sub_head']) ? $root_estimate_data['estimate_items'][$ankey]['sub_head'] : '';
+                                                    $old_area = isset($root_estimate_data['estimate_items'][$ankey]['area']) ? $root_estimate_data['estimate_items'][$ankey]['area'] : '';
                                                     $old_unit_id = isset($root_estimate_data['estimate_items'][$ankey]['unit_id']) ? $root_estimate_data['estimate_items'][$ankey]['unit_id'] : '';
                                                     $old_qty = isset($root_estimate_data['estimate_items'][$ankey]['qty']) ? $root_estimate_data['estimate_items'][$ankey]['qty'] : '';
                                                     $old_rate = isset($root_estimate_data['estimate_items'][$ankey]['rate']) ? $root_estimate_data['estimate_items'][$ankey]['rate'] : '';
@@ -812,6 +814,9 @@
                                                     </td>
                                                     <td align="right" <?php echo find_estimate_revision_bold($old_sub_head, $item['sub_head']); ?>>
                                                         <?php echo get_sub_head($item['sub_head']); ?>
+                                                    </td>
+                                                    <td align="right" <?php echo find_estimate_revision_bold($old_area, $item['area']); ?>>
+                                                        <?php echo get_area_name_by_id($item['area']); ?>
                                                     </td>
                                                     <td align="right">
                                                         <?php 

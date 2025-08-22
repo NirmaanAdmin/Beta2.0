@@ -3565,7 +3565,6 @@ function get_item_form_accepted_mimes()
 function get_area_list($name_area, $area)
 {
     $CI = &get_instance();
-    $CI->load->model('purchase_model');
     $get_area = get_area_project_wise();
     $selected = !empty($area) ? $area : array();
     if (!is_array($selected)) {

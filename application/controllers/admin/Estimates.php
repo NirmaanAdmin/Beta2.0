@@ -773,4 +773,11 @@ class Estimates extends AdminController
         $response = $this->estimates_model->cost_control_sheet($data);
         echo json_encode($response);
     }
+
+    public function get_area_dropdown()
+    {
+        $name    = $this->input->post('name');
+        $value = $this->input->post('value');
+        echo get_area_list($name, $value);
+    }
 }

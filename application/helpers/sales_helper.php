@@ -746,6 +746,7 @@ function add_new_sales_item_post($item, $rel_id, $rel_type)
                     'remarks'          => isset($item['remarks']) ? $item['remarks'] : NULL,
                     'item_code'        => isset($item['item_name']) ? $item['item_name'] : NULL,
                     'sub_head'         => isset($item['sub_head']) ? $item['sub_head'] : NULL,
+                    'area'             => isset($item['area']) ? implode(',', $item['area']) : NULL,
                 ]);
 
     $id = $CI->db->insert_id();
@@ -776,6 +777,8 @@ function update_sales_item_post($item_id, $data, $field = '')
             $update[$field] = $data['order'];
         } elseif ($field == 'detailed_costing_item_code') {
             $update['item_code'] = $data['item_name'];
+        } elseif ($field == 'area') {
+            $update['area'] = isset($data['area']) ? implode(',', $data['area']) : NULL;
         } else {
             $update[$field] = $data[$field];
         }
@@ -790,6 +793,7 @@ function update_sales_item_post($item_id, $data, $field = '')
             'unit_id'          => isset($data['unit_id']) ? $data['unit_id'] : NULL,
             'item_code'        => isset($data['item_name']) ? $data['item_name'] : NULL,
             'sub_head'         => isset($data['sub_head']) ? $data['sub_head'] : NULL,
+            'area'             => isset($data['area']) ? implode(',', $data['area']) : NULL,
         ];
     }
 

@@ -696,12 +696,13 @@
                                     <tr>
                                         <th width="1%"></th>
                                         <th width="13%" align="left"><i class="fa-solid fa-circle-exclamation tw-mr-1" aria-hidden="true" data-toggle="tooltip" data-title="<?php echo _l('item_description_new_lines_notice'); ?>"></i><?php echo _l('estimate_table_item_heading'); ?></th>
-                                        <th width="18%" align="left"><?php echo _l('estimate_table_item_description'); ?></th>
+                                        <th width="16%" align="left"><?php echo _l('estimate_table_item_description'); ?></th>
                                         <th width="10%" class="qty" align="right"><?php echo _l('sub_head'); ?></th>
+                                        <th width="12%" class="area" align="right"><?php echo _l('area'); ?></th>
                                         <th width="10%" class="qty" align="right"><?php echo e(_l('estimate_table_quantity_heading')); ?></th>
-                                        <th width="16%" align="right"><?php echo _l('estimate_table_rate_heading'); ?></th>
-                                        <th width="16%" align="right"><?php echo _l('estimate_table_amount_heading'); ?></th>
-                                        <th width="16%" align="right"><?php echo _l('remarks'); ?></th>
+                                        <th width="12%" align="right"><?php echo _l('estimate_table_rate_heading'); ?></th>
+                                        <th width="13%" align="right"><?php echo _l('estimate_table_amount_heading'); ?></th>
+                                        <th width="13%" align="right"><?php echo _l('remarks'); ?></th>
                                         <th align="center"><i class="fa fa-cog"></i></th>
                                     </tr>
                                 </thead>
@@ -725,6 +726,9 @@
                                             <?php
                                             echo render_select('sub_head', $sub_head, array('id', 'sub_group_name'));
                                             ?>
+                                        </td>
+                                        <td>
+                                            <?php echo get_area_list('area[]', ''); ?>
                                         </td>
                                         <td>
                                             <input type="number" name="quantity" min="0" value="1" class="form-control" placeholder="<?php echo _l('item_quantity_placeholder'); ?>">
@@ -807,6 +811,8 @@
 
                                                 $sub_head_name = $items_indicator . '[' . $i . '][sub_head]';
                                                 $table_row .= '<td>' . render_select($sub_head_name, $sub_head, array('id', 'sub_group_name'), '', $item['sub_head']) . '</td>';
+
+                                                $table_row .= '<td class="area">' . get_area_list($items_indicator . '[' . $i . '][area][]', $item['area']) . '</td>';
 
                                                 $table_row .= '<td class="quantity"><input type="number" min="0" onblur="calculate_estimate_total();" onchange="calculate_estimate_total();" data-quantity name="' . $items_indicator . '[' . $i . '][qty]" value="' . $item['qty'] . '" class="form-control">';
                                                 
