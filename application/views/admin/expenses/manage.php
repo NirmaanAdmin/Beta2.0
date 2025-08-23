@@ -428,9 +428,7 @@
 
     $.each(Params, function(i, obj) {
       $('select' + obj).on('change', function() {
-        table_rec_task.DataTable().ajax.reload()
-          .columns.adjust()
-          .responsive.recalc();
+        table_rec_task.DataTable().ajax.reload();
       });
     });
 
@@ -438,7 +436,7 @@
       var filterArea = $('.all_ot_filters');
       filterArea.find('input').val("");
       filterArea.find('select').selectpicker("val", "");
-      table_rec_task.DataTable().ajax.reload().columns.adjust().responsive.recalc();
+      table_rec_task.DataTable().ajax.reload();
     });
     $('.table-expenses').on('draw.dt', function() {
       var reportsTable = $(this).DataTable();
@@ -446,6 +444,18 @@
       $(this).find('tfoot').addClass('bold');
       $(this).find('tfoot td').eq(1).html("Total (Per Page)");
       $(this).find('tfoot td.total_expense_amount').html(sums.total_expense_amount);
+    });
+
+    $(document).on('change', 'select[name="expense_category[]"]', function () {
+      $('select[name="expense_category[]"]').selectpicker('refresh');
+    });
+
+    $(document).on('change', 'select[name="payment_mode[]"]', function () {
+      $('select[name="payment_mode[]"]').selectpicker('refresh');
+    });
+
+    $(document).on('change', 'select[name="vendor[]"]', function () {
+      $('select[name="vendor[]"]').selectpicker('refresh');
     });
   })(jQuery);
 </script>

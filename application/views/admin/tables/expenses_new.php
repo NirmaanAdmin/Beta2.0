@@ -72,7 +72,7 @@ if (get_default_project()) {
 }
 
 if ($this->ci->input->post('expense_category') && count($this->ci->input->post('expense_category')) > 0) {
-    array_push($where, 'AND category IN (' . implode(',', $this->ci->input->post('expense_category')) . ')');
+    array_push($where, 'AND ' . db_prefix() . 'expenses.category IN (' . implode(',', $this->ci->input->post('expense_category')) . ')');
 }
 
 if ($this->ci->input->post('payment_mode') && count($this->ci->input->post('payment_mode')) > 0) {

@@ -343,4 +343,16 @@ class Payment_modes_model extends App_Model
             hooks()->add_filter('app_payment_gateways', [$class, 'initMode']);
         }
     }
+
+    public function get_payment_modes($id = '')
+    {
+        if (is_numeric($id)) {
+            $this->db->where('id', $id);
+
+            return $this->db->get(db_prefix() . 'payment_modes')->row();
+        }
+        $this->db->order_by('name', 'asc');
+
+        return $this->db->get(db_prefix() . 'payment_modes')->result_array();
+    }
 }

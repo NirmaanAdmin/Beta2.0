@@ -28,7 +28,7 @@ class Expenses extends AdminController
         $this->load->model('payment_modes_model');
         $this->load->model('expenses_model');
         $this->load->model('purchase/purchase_model');
-        $data['payment_modes'] = $this->payment_modes_model->get('', [], true);
+        $data['payment_modes'] = $this->payment_modes_model->get_payment_modes();
         $data['expenseid']     = $id;
         $data['categories']    = $this->expenses_model->get_category();
         $data['years']         = $this->expenses_model->get_expenses_years();
