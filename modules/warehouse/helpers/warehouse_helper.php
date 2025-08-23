@@ -2708,6 +2708,6 @@ function get_stock_received_quantity($po_id = null, $description = null, $wo_id 
         $CI->db->having('non_break_description', $normalized_desc);
     }
 
-    $row = $CI->db->get()->row();
-    return $row ? (float)$row->quantities : 0.0;
+    $rows = $CI->db->get()->result_array();
+    return !empty($rows) ? array_sum(array_column($rows, 'quantities')) : 0.0;
 }
