@@ -194,6 +194,13 @@ $module_name = 'payment_certificate'; ?>
                            echo render_select('order_tagged_detail[]', $order_tagged_detail, array('id', 'name'), '', $order_tagged_detail_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('Order Detail'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
                            ?>
                         </div>
+                        <div class="col-md-3 form-group">
+                           <?php
+                           $res_person_filter = get_module_filter($module_name, 'res_person');
+                           $res_person_filter_val = !empty($res_person_filter) ? explode(",", $res_person_filter->filter_value) : [];
+                           echo render_select('res_person[]', $responsible_person, array('staffid', ['firstname','lastname']), '', $res_person_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('responsible_person'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
+                           ?>
+                        </div>
                         <div class="col-md-1 form-group ">
                            <a href="javascript:void(0)" class="btn btn-info btn-icon reset_all_ot_filters">
                               <?php echo _l('reset_filter'); ?>
@@ -284,6 +291,7 @@ $module_name = 'payment_certificate'; ?>
          "projects": "[name='projects[]']",
          "applied_to_vendor_bill": "[name='applied_to_vendor_bill[]']",
          "order_tagged_detail": "[name='order_tagged_detail[]']",
+         "res_person": "[name='res_person[]']",
       };
       initDataTable(table_payment_certificate, admin_url + 'purchase/table_payment_certificate', [], [], Params, [7, 'desc']);
       $.each(Params, function(i, obj) {
@@ -341,7 +349,7 @@ $module_name = 'payment_certificate'; ?>
          e.preventDefault();
          var responsible_person = $(this).val();
          var id = $(this).data('id');
-         $.post(admin_url + 'purchase/update_responsible_person', {
+         $.post(admin_url + 'purchase/update_pc_responsible_person', {
             id: id,
             responsible_person: responsible_person
          }).done(function (response) {

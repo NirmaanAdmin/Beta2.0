@@ -13294,6 +13294,7 @@ class purchase extends AdminController
         $data['item_group'] = get_budget_head_project_wise();
         $data['projects'] = $this->projects_model->get();
         $data['order_tagged_detail'] = $this->purchase_model->get_order_tagged_detail();
+        $data['responsible_person'] = $this->staff_model->get();
         $this->load->view('payment_certificate/list_payment_certificate', $data);
     }
 
@@ -16518,7 +16519,7 @@ class purchase extends AdminController
         echo json_encode($order_tracker_detail);
     }
 
-    public function update_responsible_person()
+    public function update_pc_responsible_person()
     {
         $id = $this->input->post('id');
         $responsible_persons = $this->input->post('responsible_person');

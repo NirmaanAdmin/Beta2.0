@@ -8,6 +8,7 @@ $approval_status_filter_name = 'approval_status';
 $applied_to_vendor_bill_filter_name = 'applied_to_vendor_bill';
 $projects_filter_name = 'projects';
 $order_tagged_detail_filter_name = 'order_tagged_detail';
+$res_person_filter_name = 'res_person';
 
 $aColumns = [
     db_prefix() . 'payment_certificate' . '.id as id',
@@ -125,6 +126,15 @@ if (isset($order_tagged_detail) && is_array($order_tagged_detail) && !empty($ord
     }
 }
 
+if ($this->ci->input->post('res_person') && count($this->ci->input->post('res_person')) > 0) {
+    $persons = $this->ci->input->post('res_person');
+    $conditions = [];
+    foreach ($persons as $p) {
+        $conditions[] = "FIND_IN_SET(" . (int)$p . ", " . db_prefix() . "payment_certificate.responsible_person)";
+    }
+    $where[] = "AND (" . implode(' OR ', $conditions) . ")";
+}
+
 $vendors_filter_name_value = !empty($this->ci->input->post('vendors')) ? implode(',', $this->ci->input->post('vendors')) : NULL;
 update_module_filter($module_name, $vendors_filter_name, $vendors_filter_name_value);
 
@@ -142,6 +152,9 @@ update_module_filter($module_name, $applied_to_vendor_bill_filter_name, $applied
 
 $order_tagged_detail_filter_name_value = !empty($this->ci->input->post('order_tagged_detail')) ? implode(',', $this->ci->input->post('order_tagged_detail')) : NULL;
 update_module_filter($module_name, $order_tagged_detail_filter_name, $order_tagged_detail_filter_name_value);
+
+$res_person_filter_name_value = !empty($this->ci->input->post('res_person')) ? implode(',', $this->ci->input->post('res_person')) : NULL;
+update_module_filter($module_name, $res_person_filter_name, $res_person_filter_name_value);
 
 $having = '';
 
