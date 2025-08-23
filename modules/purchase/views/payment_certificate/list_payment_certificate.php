@@ -337,20 +337,20 @@ $module_name = 'payment_certificate'; ?>
          $('.selectpicker').selectpicker('refresh');
       });
 
-      $(document).on('change', 'select[name="responsible_person"]', function(e) {
+      $(document).on('change', 'select[name="responsible_person[]"]', function(e) {
          e.preventDefault();
          var responsible_person = $(this).val();
          var id = $(this).data('id');
          $.post(admin_url + 'purchase/update_responsible_person', {
             id: id,
-            responsible_person: responsible_person, 
+            responsible_person: responsible_person
          }).done(function (response) {
             response = JSON.parse(response);
             if (response.success == true) {
                alert_float('success', response.message);
                table_payment_certificate.DataTable().ajax.reload();
             }
-         });
+          });
       });
 
       $(document).on('click', '.convert-pur-invoice', function(e) {

@@ -294,10 +294,10 @@ foreach ($rResult as $aRow) {
             $_data = get_last_action_full_name($aRow['last_action']);
         } elseif ($aColumns[$i] == 'responsible_person') {
             $_data = '';
-            $staff_html = '<select class="form-control responsible_person selectpicker" data-live-search="true" data-width="100%" name="responsible_person" data-id="' . $aRow['id'] . '">';
-            $staff_html .= '<option value=""></option>';
+            $staff_html = '<select class="form-control responsible_person selectpicker" multiple data-live-search="true" data-width="100%" name="responsible_person[]" data-id="' . $aRow['id'] . '">';
+            $saved_responsible = !empty($aRow['responsible_person']) ? explode(',', $aRow['responsible_person']) : [];
             foreach ($staff_list as $st) {
-                $selected = ($aRow['responsible_person'] == $st['staffid']) ? ' selected' : '';
+                $selected = (is_array($saved_responsible) && in_array($st['staffid'], $saved_responsible)) ? ' selected' : '';
                 $staff_html .= '<option value="' . $st['staffid'] . '"' . $selected . '>'
                     . html_escape($st['firstname'] . ' ' . $st['lastname'])
                     . '</option>';

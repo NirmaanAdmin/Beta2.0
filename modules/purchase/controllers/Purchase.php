@@ -16521,9 +16521,16 @@ class purchase extends AdminController
     public function update_responsible_person()
     {
         $id = $this->input->post('id');
-        $responsible_person = !empty($this->input->post('responsible_person')) ? $this->input->post('responsible_person') : NULL;
+        $responsible_persons = $this->input->post('responsible_person');
+        if (!empty($responsible_persons) && is_array($responsible_persons)) {
+            $responsible_persons = implode(',', $responsible_persons);
+        } else {
+            $responsible_persons = NULL;
+        }
         $this->db->where('id', $id);
-        $success = $this->db->update('tblpayment_certificate', ['responsible_person' => $responsible_person]);
-        echo json_encode(['success' => true, 'message' => 'The responsible person has been updated.']);
+        $success = $this->db->update('tblpayment_certificate', [
+            'responsible_person' => $responsible_persons
+        ]);
+        echo json_encode(['success' => true, 'message' => 'Responsible persons have been updated.']);
     }
 }
