@@ -180,7 +180,7 @@
                   </div>
 
                   <div class="row vbt_all_filters mtop20">
-                     <div class="col-md-2">
+                     <div class="col-md-3">
                         <?php
                         $from_date_filter = get_module_filter($module_name, 'from_date');
                         $from_date_filter_val = !empty($from_date_filter) ? $from_date_filter->filter_value : '';
@@ -188,7 +188,7 @@
                         ?>
                      </div>
 
-                     <div class="col-md-2">
+                     <div class="col-md-3">
                         <?php
                         $to_date_filter = get_module_filter($module_name, 'to_date');
                         $to_date_filter_val = !empty($to_date_filter) ? $to_date_filter->filter_value : '';
@@ -196,7 +196,7 @@
                         ?>
                      </div>
 
-                     <div class="col-md-3">
+                     <div class="col-md-3 form-group">
                         <?php
                         $vendors_filter = get_module_filter($module_name, 'vendors');
                         $vendors_filter_val = !empty($vendors_filter) ? explode(",", $vendors_filter->filter_value) : '';
@@ -254,7 +254,7 @@
                            <?php } ?>
                         </select>
                      </div>
-                     <div class="col-md-2 form-group">
+                     <div class="col-md-3 form-group">
                         <?php
                         $order_tagged_filter = get_module_filter($module_name, 'order_tagged');
                         $order_tagged_filter_val = !empty($order_tagged_filter) ? $order_tagged_filter->filter_value : '';
@@ -270,7 +270,7 @@
                            <?php } ?>
                         </select>
                      </div>
-                     <div class="col-md-3">
+                     <div class="col-md-3 form-group">
                         <?php
                         $order_tagged_detail_filter = get_module_filter($module_name, 'order_tagged_detail');
                         $order_tagged_detail_filter_val = !empty($order_tagged_detail_filter) ? explode(",", $order_tagged_detail_filter->filter_value) : '';
