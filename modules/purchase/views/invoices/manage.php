@@ -359,6 +359,7 @@
                            'vendor_submitted_tax_amount',
                            'certified_amount',
                            'billing_status',
+                           'responsible_person',
                            'vbt_order_name',
                            'Order Budget Head',
                            'tag',
@@ -395,6 +396,7 @@
                               <th><?php echo _l('vendor_submitted_tax_amount'); ?></th>
                               <th><?php echo _l('final_certified_amount'); ?></th>
                               <th><?php echo _l('billing_status'); ?></th>
+                              <th><?php echo _l('responsible_person'); ?></th>
                               <th><?php echo _l('vbt_order_name'); ?></th>
                               <th>Order Budget Head</th>
                               <!-- <th><?php echo _l('vbt_order_amount'); ?></th> -->
@@ -420,6 +422,7 @@
                               <td class="total_vendor_submitted_amount_without_tax"></td>
                               <td class="total_vendor_submitted_tax_amount"></td>
                               <td class="total_final_certified_amount"></td>
+                              <td></td>
                               <td></td>
                               <td></td>
                               <td></td>
@@ -681,6 +684,26 @@
 
       $('#vbt-charts-section').on('hidden.bs.collapse', function () {
          $('.toggle-icon').removeClass('fa-chevron-down').addClass('fa-chevron-up');
+      });
+
+      table.on('draw.dt', function () {
+         $('.selectpicker').selectpicker('refresh');
+      });
+
+      $(document).on('change', 'select[name="responsible_person[]"]', function(e) {
+         e.preventDefault();
+         var responsible_person = $(this).val();
+         var id = $(this).data('id');
+         $.post(admin_url + 'purchase/update_vbt_responsible_person', {
+            id: id,
+            responsible_person: responsible_person
+         }).done(function (response) {
+            response = JSON.parse(response);
+            if (response.success == true) {
+               alert_float('success', response.message);
+               table_payment_certificate.DataTable().ajax.reload();
+            }
+          });
       });
    });
 

@@ -16534,4 +16534,20 @@ class purchase extends AdminController
         ]);
         echo json_encode(['success' => true, 'message' => 'Responsible persons have been updated.']);
     }
+
+    public function update_vbt_responsible_person()
+    {
+        $id = $this->input->post('id');
+        $responsible_persons = $this->input->post('responsible_person');
+        if (!empty($responsible_persons) && is_array($responsible_persons)) {
+            $responsible_persons = implode(',', $responsible_persons);
+        } else {
+            $responsible_persons = NULL;
+        }
+        $this->db->where('id', $id);
+        $success = $this->db->update('tblpur_invoices', [
+            'responsible_person' => $responsible_persons
+        ]);
+        echo json_encode(['success' => true, 'message' => 'Responsible persons have been updated.']);
+    }
 }

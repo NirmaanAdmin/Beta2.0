@@ -30,6 +30,7 @@ $aColumns = [
     'vendor_submitted_tax_amount',
     'final_certified_amount',
     'payment_status',
+    db_prefix() . 'pur_invoices.responsible_person as responsible_person',
     3,
     4,
     'vendor_note',
@@ -317,6 +318,9 @@ $aColumns = array_map(function ($col) {
     }
     return trim($col, '"` ');
 }, $aColumns);
+
+$this->ci->load->model('Staff_model');
+$staff_list   = $this->ci->Staff_model->get();
 
 $this->ci->load->model('purchase/purchase_model');
 $sr = 1 + $this->ci->input->post('start');
@@ -606,6 +610,18 @@ foreach ($rResult as $aRow) {
             $_data = $order_name;
         } elseif ($aColumns[$i] == db_prefix() . 'pur_invoices.last_action') {
             $_data = get_last_action_full_name($aRow['last_action']);
+        } elseif ($aColumns[$i] == 'responsible_person') {
+            $_data = '';
+            $staff_html = '<select class="form-control responsible_person selectpicker" multiple data-live-search="true" data-width="100%" name="responsible_person[]" data-id="' . $aRow['id'] . '">';
+            $saved_responsible = !empty($aRow['responsible_person']) ? explode(',', $aRow['responsible_person']) : [];
+            foreach ($staff_list as $st) {
+                $selected = (is_array($saved_responsible) && in_array($st['staffid'], $saved_responsible)) ? ' selected' : '';
+                $staff_html .= '<option value="' . $st['staffid'] . '"' . $selected . '>'
+                    . html_escape($st['firstname'] . ' ' . $st['lastname'])
+                    . '</option>';
+            }
+            $staff_html .= '</select>';
+            $_data = $staff_html;
         } else {
             if (strpos($aColumns[$i], 'date_picker_') !== false) {
                 $_data = (strpos($_data, ' ') !== false ? _dt($_data) : _d($_data));
