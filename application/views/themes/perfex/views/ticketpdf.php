@@ -84,8 +84,8 @@ $tickethtml .= '
 </tr>';
 $tickethtml .= '
 <tr style="font-size:13px;">
-    <td align="center" width="30%;"><b>Reference drawings</b></td>
-    <td width="70%;">BGJ-AKD-IDE-DWG-ID-PL-312B</td>
+    <td align="center" width="30%;"><b>'._l('reference_drawings').'</b></td>
+    <td width="70%;">'.$ticket->ref_drawing.'</td>
 </tr>';
 $tickethtml .= '</tbody>';
 $tickethtml .= '</table>';

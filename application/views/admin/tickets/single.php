@@ -551,6 +551,15 @@
                                             </div>
                                         </div>
 
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <?php 
+                                                $ref_drawing = (isset($ticket) ? $ticket->ref_drawing : '');
+                                                echo render_input('ref_drawing', 'reference_drawings', $ref_drawing); 
+                                                ?>
+                                            </div>
+                                        </div>
+
                                     </div>
                                     <div class="col-md-12">
                                         <?php echo render_custom_fields('tickets', $ticket->ticketid); ?>
