@@ -15,6 +15,7 @@ var expenseDropzone;
     "billing_status": "[name='billing_status']",
     "order_tagged": "[name='order_tagged']",
     "order_tagged_detail": "[name='order_tagged_detail[]']",
+    "res_person": "[name='res_person[]']",
   };
 
   initDataTable(table_invoice, admin_url + 'purchase/table_pur_invoices', [], [0], Params, [5, 'desc']);
@@ -49,6 +50,9 @@ var expenseDropzone;
   });
   $(document).on('change', 'select[name="order_tagged_detail[]"]', function () {
     $('select[name="order_tagged_detail[]"]').selectpicker('refresh');
+  });
+  $(document).on('change', 'select[name="res_person[]"]', function () {
+    $('select[name="res_person[]"]').selectpicker('refresh');
   });
 
   $(document).on('click', '.reset_vbt_all_filters', function () {

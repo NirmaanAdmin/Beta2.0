@@ -5163,6 +5163,7 @@ class purchase extends AdminController
         $data['budget_head'] = get_budget_head_project_wise();
         $data['invoices'] = get_all_applied_invoices();
         $data['order_tagged_detail'] = $this->purchase_model->get_order_tagged_detail();
+        $data['responsible_person'] = $this->staff_model->get();
         $this->load->view('invoices/manage', $data);
     }
 

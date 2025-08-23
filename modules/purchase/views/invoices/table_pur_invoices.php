@@ -15,6 +15,7 @@ $budget_head_filter_name = 'budget_head';
 $billing_status_filter_name = 'billing_status';
 $order_tagged_filter_name = 'order_tagged';
 $order_tagged_detail_filter_name = 'order_tagged_detail';
+$res_person_filter_name = 'res_person';
 
 $aColumns = [
     0,
@@ -253,6 +254,15 @@ if (isset($order_tagged_detail) && is_array($order_tagged_detail) && !empty($ord
     }
 }
 
+if ($this->ci->input->post('res_person') && count($this->ci->input->post('res_person')) > 0) {
+    $persons = $this->ci->input->post('res_person');
+    $conditions = [];
+    foreach ($persons as $p) {
+        $conditions[] = "FIND_IN_SET(" . (int)$p . ", " . db_prefix() . "pur_invoices.responsible_person)";
+    }
+    $where[] = "AND (" . implode(' OR ', $conditions) . ")";
+}
+
 if(get_default_project()) {
     array_push($where, 'AND ' . db_prefix() . 'pur_invoices.project_id = '.get_default_project().'');
 }
@@ -280,6 +290,9 @@ update_module_filter($module_name, $order_tagged_filter_name, $order_tagged_filt
 
 $order_tagged_detail_filter_name_value = !empty($this->ci->input->post('order_tagged_detail')) ? implode(',', $this->ci->input->post('order_tagged_detail')) : NULL;
 update_module_filter($module_name, $order_tagged_detail_filter_name, $order_tagged_detail_filter_name_value);
+
+$res_person_filter_name_value = !empty($this->ci->input->post('res_person')) ? implode(',', $this->ci->input->post('res_person')) : NULL;
+update_module_filter($module_name, $res_person_filter_name, $res_person_filter_name_value);
 
 $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [
     db_prefix() . 'pur_invoices.id as id',

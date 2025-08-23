@@ -277,6 +277,13 @@
                         echo render_select('order_tagged_detail[]', $order_tagged_detail, array('id', 'name'), '', $order_tagged_detail_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('Order Detail'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
                         ?>
                      </div>
+                     <div class="col-md-3 form-group">
+                        <?php
+                        $res_person_filter = get_module_filter($module_name, 'res_person');
+                        $res_person_filter_val = !empty($res_person_filter) ? explode(",", $res_person_filter->filter_value) : [];
+                        echo render_select('res_person[]', $responsible_person, array('staffid', ['firstname','lastname']), '', $res_person_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('responsible_person'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
+                        ?>
+                     </div>
                      <div class="col-md-1 form-group">
                         <a href="javascript:void(0)" class="btn btn-info btn-icon reset_vbt_all_filters">
                            <?php echo _l('reset_filter'); ?>
