@@ -126,6 +126,10 @@ return App_table::find('tickets')
             array_push($where, 'AND project_id = ' . $this->ci->db->escape_str($project_id));
         }
 
+        if(get_default_project()) {
+            array_push($where, 'AND ' . db_prefix() . 'tickets.project_id = '.get_default_project().'');
+        }
+
         // If userid is set, the the view is in client profile, should be shown all tickets
         if (!is_admin()) {
             if (get_option('staff_access_only_assigned_departments') == 1) {
