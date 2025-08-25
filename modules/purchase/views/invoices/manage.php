@@ -564,7 +564,7 @@
 </div>
 
 <div class="modal fade" id="convert_ril_bill_modal" tabindex="-1" role="dialog">
-   <div class="modal-dialog modal-xl">
+   <div class="modal-dialog" role="document" style="width: 98%;">
       <div class="modal-content">
          <?php echo form_open(admin_url('purchase/add_bulk_convert_ril_bill'), array('id' => 'convert_ril_bill_form', 'class' => '')); ?>
          <div class="modal-header">

@@ -12816,6 +12816,7 @@ class purchase extends AdminController
             unset($input['convert_date']);
             unset($input['convert_select_invoice']);
             unset($input['convert_applied_to_invoice']);
+            unset($input['convert_responsible_person']);
             unset($input['bulk_pur_order']);
             unset($input['bulk_wo_order']);
             unset($input['bulk_order_tracker']);

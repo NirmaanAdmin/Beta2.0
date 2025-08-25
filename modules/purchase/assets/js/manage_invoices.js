@@ -242,6 +242,7 @@ var expenseDropzone;
     var convert_date = $('#convert_date').val();
     var convert_select_invoice = $('#convert_select_invoice').val();
     var convert_applied_to_invoice = $('#convert_applied_to_invoice').val();
+    var convert_responsible_person = $('#convert_responsible_person').val();
 
     if(convert_expense_name) {
       $('.all_expense_name textarea').val(convert_expense_name);
@@ -257,6 +258,9 @@ var expenseDropzone;
     } else {
       $('select#bulk_select_invoice').val(convert_select_invoice).trigger('change');
       $('select#bulk_applied_to_invoice').val(convert_applied_to_invoice).trigger('change');
+    }
+    if(convert_responsible_person) {
+      $('select#bulk_responsible_person').val(convert_responsible_person).trigger('change');
     }
   });
 

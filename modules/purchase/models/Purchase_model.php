@@ -17983,20 +17983,22 @@ class Purchase_model extends App_Model
                 $pur_orders = $this->get_pur_order_approved_for_inv();
                 $wo_orders = $this->get_wo_order_approved_for_inv();
                 $order_tracker_list = get_order_tracker_list();
+                $staff_list = $this->staff_model->get();
 
                 $html .= '<input type="hidden" name="bulk_active_tab" id="bulk_active_tab" value="bulk_action">';
 
                 $html .= '<div class="row">
-                        <div class="col-md-2 bulk-title"></div>
+                        <div class="col-md-1 bulk-title"></div>
                         <div class="col-md-2 bulk-title">' . _l('description_of_services') . '</div>
                         <div class="col-md-2 bulk-title">' . _l('group_pur') . '</div>
                         <div class="col-md-2 bulk-title">' . _l('invoice_date') . '</div>
                         <div class="col-md-2 bulk-title">' . _l('invoice') . '</div>
-                        <div class="col-md-2"></div>
+                        <div class="col-md-2 bulk-title">' . _l('responsible_person') . '</div>
+                        <div class="col-md-1"></div>
                     </div><br/>';
 
                 $html .= '<div class="row">';
-                $html .= '<div class="col-md-2"></div>';
+                $html .= '<div class="col-md-1"></div>';
                 $html .= '<div class="col-md-2">' . render_textarea('convert_expense_name', '', '', ['rows' => 3]) . '</div>';
                 $html .= '<div class="col-md-2">' . render_select('convert_category', $expense_categories, array('id', 'name')) . '</div>';
                 $html .= '<div class="col-md-2">' . render_date_input('convert_date') . '</div>';
@@ -18015,16 +18017,25 @@ class Purchase_model extends App_Model
                     $html .= '<option value="' . $i['id'] . '">' . format_invoice_number($i['id']) . " (" . $i['title'] . ')</option>';
                 }
                 $html .= '</select></div></div>';
-                $html .= '<div class="col-md-2"><button type="button" class="btn btn-info update_vbt_convert">' . _l('update') . '</button></div>';
+                $html .= '<div class="col-md-2">';
+                $html .= '<select class="selectpicker display-block" multiple data-width="100%" name="convert_responsible_person[]" id="convert_responsible_person" data-none-selected-text="' . _l('none') . '" data-live-search="true">';
+                foreach ($staff_list as $st) {
+                    $html .= '<option value="' . $st['staffid'] . '">'
+                    . html_escape($st['firstname'] . ' ' . $st['lastname'])
+                    . '</option>';
+                }
+                $html .= '</select></div>';
+                $html .= '<div class="col-md-1"><button type="button" class="btn btn-info update_vbt_convert">' . _l('update') . '</button></div>';
                 $html .= '</div><br/><hr>';
 
                 $html .= '<div class="row">
-                        <div class="col-md-2 bulk-title">' . _l('invoice_code') . '</div>
+                        <div class="col-md-1 bulk-title">' . _l('Invoice') . '</div>
                         <div class="col-md-2 bulk-title">' . _l('description_of_services') . '</div>
                         <div class="col-md-2 bulk-title">' . _l('group_pur') . '</div>
                         <div class="col-md-2 bulk-title">' . _l('invoice_date') . '</div>
-                        <div class="col-md-2 bulk-title">' . _l('expense_add_edit_amount') . '</div>
+                        <div class="col-md-1 bulk-title">' . _l('expense_add_edit_amount') . '</div>
                         <div class="col-md-2 bulk-title">' . _l('invoice') . '</div>
+                        <div class="col-md-2 bulk-title">' . _l('responsible_person') . '</div>
                     </div><br/>';
 
                 foreach ($pur_invoices as $pkey => $pvalue) {
@@ -18048,6 +18059,7 @@ class Purchase_model extends App_Model
                     $amount_name_attr = "newitems[$pkey][amount]";
                     $select_invoice_name_attr = "newitems[$pkey][select_invoice]";
                     $applied_to_invoice_name_attr = "newitems[$pkey][applied_to_invoice]";
+                    $responsible_person_name_attr = "newitems[$pkey][responsible_person][]";
 
                     $html .= '<div class="row">';
                     $html .= form_hidden($vendor_name_attr, $pvalue['vendor']);
@@ -18061,7 +18073,7 @@ class Purchase_model extends App_Model
                     $html .= form_hidden($paymentmode_name_attr, '');
                     $html .= form_hidden($pur_invoice_name_attr, $pvalue['id']);
 
-                    $html .= '<div class="col-md-2 bulk-title">' . $pvalue['invoice_number'] . '</div>';
+                    $html .= '<div class="col-md-1 bulk-title">' . $pvalue['invoice_number'] . '</div>';
 
                     $html .= '<div class="col-md-2 all_expense_name">' . render_textarea($expense_name_attr, '', $pvalue['description_services'], ['rows' => 3]) . '</div>';
 
@@ -18069,7 +18081,7 @@ class Purchase_model extends App_Model
 
                     $html .= '<div class="col-md-2 all_invoice_date">' . render_date_input($date_name_attr, '', _d($pvalue['invoice_date'])) . '</div>';
 
-                    $html .= '<div class="col-md-2">' . render_input($amount_name_attr, '', $pvalue['final_certified_amount'], 'number', ['readonly' => true]) . '</div>';
+                    $html .= '<div class="col-md-1">' . render_input($amount_name_attr, '', $pvalue['final_certified_amount'], 'number', ['readonly' => true]) . '</div>';
 
                     $html .= '<div class="col-md-2">
                         <select class="selectpicker display-block" data-width="100%" name="' . $select_invoice_name_attr . '" id="bulk_select_invoice" data-id="' . $pvalue['id'] . '" data-none-selected-text="' . _l('none') . '">
@@ -18085,6 +18097,16 @@ class Purchase_model extends App_Model
                     <option value=""></option>';
                     foreach ($invoices as $i) {
                         $html .= '<option value="' . $i['id'] . '">' . format_invoice_number($i['id']) . " (" . $i['title'] . ')</option>';
+                    }
+                    $html .= '</select></div>';
+                    $html .= '<div class="col-md-2">';
+                    $html .= '<select class="selectpicker display-block" multiple data-width="100%" name="' . $responsible_person_name_attr . '" id="bulk_responsible_person" data-none-selected-text="' . _l('none') . '" data-live-search="true">';
+                    $saved_responsible = !empty($pvalue['responsible_person']) ? explode(',', $pvalue['responsible_person']) : [];
+                    foreach ($staff_list as $st) {
+                        $selected = (is_array($saved_responsible) && in_array($st['staffid'], $saved_responsible)) ? ' selected' : '';
+                        $html .= '<option value="' . $st['staffid'] . '"' . $selected . '>'
+                            . html_escape($st['firstname'] . ' ' . $st['lastname'])
+                            . '</option>';
                     }
                     $html .= '</select></div>';
                     $html .= '</div><br/>';
@@ -22029,6 +22051,7 @@ class Purchase_model extends App_Model
             $dt_data = [
                 'invoice_date' => $invoice_date,
                 'description_services' => $data['expense_name'],
+                'responsible_person' => !empty($data['responsible_person']) ? implode(',', $data['responsible_person']) : NULL,
             ];
             $this->db->where('id', $data['vbt_id']);
             $this->db->update(db_prefix() . 'pur_invoices', $dt_data);
