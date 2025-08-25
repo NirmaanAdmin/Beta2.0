@@ -25,6 +25,7 @@ $aColumns = [
     ) as this_bill',
     db_prefix() . 'payment_certificate' . '.dateadded as submission_date',
     db_prefix() . 'payment_certificate' . '.approve_status as approve_status',
+    'pending_approval',
     '(CASE 
         WHEN ' . db_prefix() . 'payment_certificate.pur_invoice_id IS NOT NULL THEN 2 
         WHEN ' . db_prefix() . 'payment_certificate.approve_status = 2 AND ' . db_prefix() . 'payment_certificate.pur_invoice_id IS NULL THEN 1 
@@ -50,6 +51,12 @@ $join = [
     'LEFT JOIN ' . db_prefix() . 'pur_vendor 
     ON ' . db_prefix() . 'pur_vendor.userid = ' . db_prefix() . 'payment_certificate.vendor',
     'LEFT JOIN ' . db_prefix() . 'assets_group ON ' . db_prefix() . 'assets_group.group_id = ' . db_prefix() . 'payment_certificate.group_pur',
+    'LEFT JOIN (
+        SELECT rel_id, GROUP_CONCAT(staffid) AS pending_approval
+        FROM ' . db_prefix() . 'payment_certificate_details
+        WHERE approve IS NULL
+        GROUP BY rel_id
+    ) AS pcd ON pcd.rel_id = ' . db_prefix() . 'payment_certificate.id',
 ];
 
 $where = [];
@@ -317,6 +324,8 @@ foreach ($rResult as $aRow) {
             }
             $staff_html .= '</select>';
             $_data = $staff_html;
+        } elseif ($aColumns[$i] == 'pending_approval') {
+            $_data = get_multiple_staff_names($aRow['pending_approval']);
         } else {
             if (strpos($aColumns[$i], 'date_picker_') !== false) {
                 $_data = (strpos($_data, ' ') !== false ? _dt($_data) : _d($_data));

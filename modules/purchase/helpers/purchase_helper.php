@@ -4866,3 +4866,20 @@ function get_next_payment_certificate_file_order($id)
     return !empty($file_order) ? ($file_order->position + 1) : 1;
 }
 
+function get_multiple_staff_names($userids = '')
+{
+    $CI = &get_instance();
+    if (!empty($userids)) {
+        if (!is_array($userids)) {
+            $userids = explode(',', $userids);
+        }
+        $CI->db->select("GROUP_CONCAT(CONCAT(firstname, ' ', lastname) SEPARATOR ', ') AS full_names");
+        $CI->db->from(db_prefix() . 'staff');
+        $CI->db->where_in('staffid', $userids);
+        $row = $CI->db->get()->row();
+        return $row ? $row->full_names : '';
+    }
+    return '';
+}
+
+
