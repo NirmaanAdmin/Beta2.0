@@ -165,7 +165,16 @@ foreach ($rResult as $aRow) {
     $row[] = '<a href="' . admin_url('projects/view/' . $aRow['project_id']) . '">' . e($aRow['project_name']) . '</a>';
     $row[] = '<a href="' . admin_url('clients/client/' . $aRow['clientid']) . '">' . e($aRow['company']) . '</a>';
 
-    $row[] = $aRow['invoiceid'] ? '<a href="' . admin_url('invoices/list_invoices/' . $aRow['invoiceid']) . '" target="_blank">INV-' . $aRow['invoiceid'] . '</a>' : '';
+    if ($aRow['vbt_id']) {
+        $pur_invoices = get_pur_invoices($aRow['vbt_id']);
+        if(!empty($pur_invoices)) {
+            $row[] = '<a href="' . admin_url('purchase/pur_invoice/' . $aRow['vbt_id']) . '" target="_blank">' .$pur_invoices->invoice_number . '</a>';
+        } else {
+          $row[] = '';  
+        }
+    } else {
+        $row[] = '';
+    }
 
     $row[] = e($aRow['reference_no']);
 

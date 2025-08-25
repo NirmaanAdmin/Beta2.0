@@ -13134,7 +13134,7 @@ class purchase extends AdminController
         $input['vendor_submitted_amount'] = $value_certified_amount;
         $input['final_certified_amount'] = $value_certified_amount;
         $input['pc_id'] = $id;
-        $data['add_from'] = get_staff_user_id();
+        $input['add_from'] = get_staff_user_id();
         $this->db->insert(db_prefix() . 'pur_invoices', $input);
         $insert_id = $this->db->insert_id();
         if ($insert_id) {

@@ -76,4 +76,52 @@
             }, 200);
         }
     }
+
+    function bulk_convert_expense_to_vbt() {
+      "use strict";
+      var print_id = '';
+      var rows = $('.table-expenses').find('tbody tr');
+
+      $.each(rows, function () {
+        var checkbox = $($(this).find('td').eq(0)).find('input');
+        if (checkbox.prop('checked') === true) {
+          if (print_id !== '') {
+            print_id += ',';
+          }
+          print_id += checkbox.val();
+        }
+      });
+
+      if (print_id !== '') {
+        Swal.fire({
+          title: 'Are you sure?',
+          text: "Do you want to convert the selected expenses into vendor bills?",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Yes, convert them!',
+          cancelButtonText: 'Cancel'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            $.post(admin_url + 'expenses/bulk_convert_expense_to_vbt', {
+              ids: print_id,
+            }).done(function (response) {
+              response = JSON.parse(response);
+              if (response.success) {
+                alert_float('success', response.message);
+              } else {
+                alert_float('danger', response.message);
+              }
+              setTimeout(function () {
+                location.reload();
+              }, 1000);
+            });
+          }
+        });
+
+      } else {
+        alert_float('danger', 'Please select at least one item from the list');
+      }
+    }
 </script>

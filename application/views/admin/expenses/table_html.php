@@ -7,6 +7,7 @@ if ($withBulkActions === true && $hasPermission) { ?>
     <?php echo _l('bulk_actions'); ?>
   </a>
 <?php } ?>
+<a onclick="bulk_convert_expense_to_vbt(); return false;" data-table=".table-expenses" class="hide bulk-actions-btn table-btn">Bulk Convert</a>
 <div class="row all_ot_filters">
   <hr style="margin-top: 0px !important;">
   <?php

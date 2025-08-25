@@ -529,7 +529,7 @@ class Expenses extends AdminController
         die;
     }
 
-    public function convert_pur_invoice_from_expense($id)
+    public function convert_pur_invoice_from_expense($id, $rtype = 0)
     {
         if (!$id) {
             redirect(admin_url('expenses'));
@@ -571,7 +571,7 @@ class Expenses extends AdminController
         $input['vendor_submitted_amount'] = $vendor_submitted_amount;
         $input['final_certified_amount'] = $vendor_submitted_amount;
         $input['expense_id'] = $id;
-        $data['add_from'] = get_staff_user_id();
+        $input['add_from'] = get_staff_user_id();
         $this->db->insert(db_prefix() . 'pur_invoices', $input);
         $insert_id = $this->db->insert_id();
         if ($insert_id) {
@@ -582,7 +582,29 @@ class Expenses extends AdminController
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'expenses', ['vbt_id' => $insert_id]);
         $this->expenses_model->copy_expense_files_to_vbt($id, $insert_id);
-        set_alert('success', _l('purchase_invoice') . ' ' . _l('added_successfully'));
-        redirect(admin_url('purchase/pur_invoice/' . $insert_id));
+        if($rtype == 0) {
+            set_alert('success', _l('purchase_invoice') . ' ' . _l('added_successfully'));
+            redirect(admin_url('purchase/pur_invoice/' . $insert_id));
+        } else {
+            return true;
+        }
+    }
+
+    public function bulk_convert_expense_to_vbt()
+    {
+        $response = array();
+        $data = $this->input->post();
+        $expense_vbt = $this->expenses_model->check_convert_expenses_to_vbt($data['ids']);
+        if(empty($expense_vbt)) {
+            $response['success'] = false;
+            $response['message'] = 'All the selected expenses have already been converted into vendor bills.';
+        } else {
+            foreach ($expense_vbt as $key => $value) {
+                $this->convert_pur_invoice_from_expense($value['id'], 1);
+            }
+            $response['success'] = true;
+            $response['message'] = 'All the selected expenses are now converted into vendor bills.';
+        }
+        echo json_encode($response);
     }
 }

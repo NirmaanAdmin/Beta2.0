@@ -1129,4 +1129,14 @@ class Expenses_model extends App_Model
         }
         return $copied > 0;
     }
+
+    public function check_convert_expenses_to_vbt($ids)
+    {
+        if (!is_array($ids)) {
+            $ids = explode(',', $ids);
+        }
+        $this->db->where_in('id', $ids);
+        $this->db->where('vbt_id IS NULL', null, false);
+        return $this->db->get(db_prefix() . 'expenses')->result_array();
+    }
 }
