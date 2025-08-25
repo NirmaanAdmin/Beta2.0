@@ -571,6 +571,7 @@ class Expenses extends AdminController
         $input['vendor_submitted_amount'] = $vendor_submitted_amount;
         $input['final_certified_amount'] = $vendor_submitted_amount;
         $input['expense_id'] = $id;
+        $data['add_from'] = get_staff_user_id();
         $this->db->insert(db_prefix() . 'pur_invoices', $input);
         $insert_id = $this->db->insert_id();
         if ($insert_id) {

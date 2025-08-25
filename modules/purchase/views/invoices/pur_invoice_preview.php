@@ -284,7 +284,12 @@
 	         					<hr class="mtop5 mbot5">
 	         				</div>
 	         				<div class="col-md-6 pad_left_0 border-right">
-	         					<p><?php echo _l('add_from').':'; ?><span class="pull-right bold"><a href="<?php echo admin_url('staff/profile/'.$pur_invoice->add_from); ?>" ><?php echo get_staff_full_name($pur_invoice->add_from); ?></a></span></p>
+	         					<p><?php echo _l('add_from').':'; ?>
+	         						<?php if(!empty($pur_invoice->add_from)) { ?>
+			         					<span class="pull-right bold"><a href="<?php echo admin_url('staff/profile/'.$pur_invoice->add_from); ?>" ><?php echo get_staff_full_name($pur_invoice->add_from); ?></a>
+			         					</span>
+			         				<?php } ?>
+	         					</p>
 	         				</div>
 	         				<div class="col-md-6 pad_right_0">
 	         					<p><?php echo _l('date_add').':'; ?><span class="pull-right bold"><?php echo _d($pur_invoice->date_add); ?></span></p>
