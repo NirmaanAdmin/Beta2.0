@@ -241,7 +241,7 @@ $module_name = 'payment_certificate'; ?>
                            ?>
                            <div>
                               <?php foreach ($columns as $key => $label): ?>
-                                 <input type="checkbox" class="toggle-column" value="<?php echo $key; ?>" checked>
+                                 <input type="checkbox" class="toggle-column" data-id="<?php echo $label; ?>" value="<?php echo $key; ?>" checked>
                                  <?php echo _l($label); ?><br>
                               <?php endforeach; ?>
                            </div>
@@ -342,6 +342,7 @@ $module_name = 'payment_certificate'; ?>
       });
 
       table_payment_certificate.on('draw.dt', function () {
+         $('.toggle-column[data-id="group_pur"]').prop('checked', false).trigger('change');
          $('.selectpicker').selectpicker('refresh');
       });
 
