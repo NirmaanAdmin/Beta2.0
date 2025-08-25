@@ -19,6 +19,7 @@ class Payment_certificate_pdf extends App_pdf
         $this->payment_certificate = $payment_certificate;
         
         $this->SetTitle(_l('payment_certificate'));
+        $this->SetAutoPageBreak(false, 0);
         # Don't remove these lines - important for the PDF layout
         $this->payment_certificate = $this->fix_editor_html($this->payment_certificate);
     }
