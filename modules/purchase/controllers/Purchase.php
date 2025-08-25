@@ -3512,7 +3512,7 @@ class purchase extends AdminController
                     if ($invoiceid) {
                         set_alert('success', _l('expense_converted_to_invoice'));
                         echo json_encode([
-                            'url' => admin_url('invoices/invoice/' . $invoiceid),
+                            'url' => admin_url('purchase/invoices'),
                             'expenseid' => $id,
                         ]);
                     }
@@ -3524,7 +3524,7 @@ class purchase extends AdminController
                     if ($invoiceid) {
                         set_alert('success', _l('expense_applied_to_invoice'));
                         echo json_encode([
-                            'url' => admin_url('invoices/invoice/' . $invoiceid),
+                            'url' => admin_url('purchase/invoices'),
                             'expenseid' => $id,
                         ]);
                     }

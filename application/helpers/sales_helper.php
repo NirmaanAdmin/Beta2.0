@@ -1072,6 +1072,7 @@ function get_all_applied_invoices()
     $CI = &get_instance();
     $CI->db->select('id, title');
     $CI->db->from('tblinvoices');
+    $CI->db->order_by('id', 'desc');
     return $CI->db->get()->result_array();
 }
 
