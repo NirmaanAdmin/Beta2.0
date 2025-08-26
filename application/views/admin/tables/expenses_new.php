@@ -23,7 +23,7 @@ $aColumns = [
     'file_name',
     'date',
     db_prefix() . 'projects.name as project_name',
-    get_sql_select_client_company(),
+    '(CASE WHEN ' . db_prefix() . 'expenses.vbt_id IS NOT NULL THEN 2 ELSE 3 END) as converted',
     'invoiceid',
     'reference_no',
     'paymentmode',
@@ -164,7 +164,14 @@ foreach ($rResult as $aRow) {
     $row[] = !empty($aRow['file_name']) ? '<a href="' . site_url('download/file/expense/' . $aRow['id']) . '">' . e($aRow['file_name']) . '</a>' : '';
     $row[] = date('d M, Y', strtotime($aRow['date']));
     $row[] = '<a href="' . admin_url('projects/view/' . $aRow['project_id']) . '">' . e($aRow['project_name']) . '</a>';
-    $row[] = '<a href="' . admin_url('clients/client/' . $aRow['clientid']) . '">' . e($aRow['company']) . '</a>';
+
+    if($aRow['converted'] == 2) {
+        $row[] = '<span class="btn btn-success">Converted</span>';
+    } elseif($aRow['converted'] == 3) {
+        $row[] = '<span class="btn btn-warning">Pending</span>';
+    } else {
+        $row[] = '';
+    }
 
     if ($aRow['vbt_id']) {
         $pur_invoices = get_pur_invoices($aRow['vbt_id']);

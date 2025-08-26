@@ -13120,7 +13120,7 @@ class purchase extends AdminController
         $input['vendor'] = isset($pur_order->vendor) ? $pur_order->vendor : 0;
         $input['group_pur'] = isset($pur_order->group_pur) ? $pur_order->group_pur : 0;
         $input['description_services'] = $order_name;
-        $input['invoice_date'] = date('Y-m-d');
+        $input['invoice_date'] = !empty($payment_certificate->invoice_date) ? $payment_certificate->invoice_date : date('Y-m-d');
         $input['currency'] = 3;
         $input['to_currency'] = 3;
         $input['date_add'] = date('Y-m-d');

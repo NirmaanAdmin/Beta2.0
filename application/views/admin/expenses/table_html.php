@@ -87,7 +87,7 @@ if ($withBulkActions === true && $hasPermission) { ?>
         <th><?php echo _l('receipt'); ?></th>
         <th><?php echo _l('expense_dt_table_heading_date'); ?></th>
         <th><?php echo _l('project'); ?></th>
-        <th><?php echo _l('expense_dt_table_heading_customer'); ?></th>
+        <th>Converted?</th>
         <th><?php echo _l('invoice'); ?></th>
         <th><?php echo _l('expense_dt_table_heading_reference_no'); ?></th>
         <th><?php echo _l('expense_dt_table_heading_payment_mode'); ?></th>
