@@ -28,6 +28,7 @@ $aColumns = [
     'reference_no',
     'paymentmode',
     'vendor',
+    1,
 ];
 
 $custom_fields = get_table_custom_fields('expenses');
@@ -168,7 +169,7 @@ foreach ($rResult as $aRow) {
     if ($aRow['vbt_id']) {
         $pur_invoices = get_pur_invoices($aRow['vbt_id']);
         if(!empty($pur_invoices)) {
-            $row[] = '<a href="' . admin_url('purchase/pur_invoice/' . $aRow['vbt_id']) . '" target="_blank">' .$pur_invoices->invoice_number . '</a>';
+            $row[] = '<a href="' . admin_url('purchase/purchase_invoice/' . $aRow['vbt_id']) . '" target="_blank">' .$pur_invoices->invoice_number . '</a>';
         } else {
           $row[] = '';  
         }
@@ -188,6 +189,18 @@ foreach ($rResult as $aRow) {
     $row[] = $paymentModeOutput;
 
     $row[] = '<a href="' . admin_url('purchase/vendor/' . $aRow['vendor']) . '">' . e($aRow['vendor_name']) . '</a>';
+
+    $pdf = '';
+    $pdf = '<div class="btn-group display-flex">';
+    $pdf .= '<a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-file-pdf"></i><span class="caret"></span></a>';
+    $pdf .= '<ul class="dropdown-menu dropdown-menu-right">';
+    $pdf .= '<li class="hidden-xs"><a href="' . admin_url('expenses/pdf/' . $aRow['id'] . '?output_type=I') . '">' . _l('view_pdf') . '</a></li>';
+    $pdf .= '<li class="hidden-xs"><a href="' . admin_url('expenses/pdf/' . $aRow['id'] . '?output_type=I') . '" target="_blank">' . _l('view_pdf_in_new_window') . '</a></li>';
+    $pdf .= '<li><a href="' . admin_url('expenses/pdf/' . $aRow['id']) . '">' . _l('download') . '</a></li>';
+    $pdf .= '<li><a href="' . admin_url('expenses/pdf/' . $aRow['id'] . '?print=true') . '" target="_blank">' . _l('print') . '</a></li>';
+    $pdf .= '</ul>';
+    $pdf .= '</div>';
+    $row[] = $pdf;
 
     foreach ($customFieldsColumns as $customFieldColumn) {
         $row[] = strpos($customFieldColumn, 'date_picker_') !== false ? _d($aRow[$customFieldColumn]) : $aRow[$customFieldColumn];

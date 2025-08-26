@@ -92,6 +92,7 @@ if ($withBulkActions === true && $hasPermission) { ?>
         <th><?php echo _l('expense_dt_table_heading_reference_no'); ?></th>
         <th><?php echo _l('expense_dt_table_heading_payment_mode'); ?></th>
         <th>Vendor</th>
+        <th>Options</th>
       </tr>
     </thead>
     <tbody>
@@ -101,6 +102,7 @@ if ($withBulkActions === true && $hasPermission) { ?>
       <td></td>
       <td></td>
       <td class="total_expense_amount"></td>
+      <td></td>
       <td></td>
       <td></td>
       <td></td>

@@ -95,7 +95,7 @@
 	                     </span>
 	                     </a>
 	                  </li>
-	                  <li role="presentation" class="tab-separator">
+	                  <li role="presentation">
 	                    <?php
 	                              $totalComments = total_rows(db_prefix().'pur_comments',['rel_id' => $pur_invoice->id, 'rel_type' => 'pur_invoice']);
 	                              ?>
@@ -567,35 +567,46 @@
 		                <?php echo form_close(); ?>
 		               
 		               <div class="col-md-12" id="purinv_pv_file">
-		                                    <?php
-		                                        $file_html = '';
-		                                        if(count($pur_invoice_attachments) > 0){
-		                                            $file_html .= '<hr />
-		                                                    <p class="bold text-muted">'._l('customer_attachments').'</p>';
-		                                            foreach ($pur_invoice_attachments as $f) {
-		                                                $href_url = site_url(PURCHASE_PATH.'pur_invoice/'.$f['rel_id'].'/'.$f['file_name']).'" download';
-		                                                                if(!empty($f['external'])){
-		                                                                  $href_url = $f['external_link'];
-		                                                                }
-		                                               $file_html .= '<div class="mbot15 row inline-block full-width" data-attachment-id="'. $f['id'].'">
-		                                              <div class="col-md-8">
-		                                                 <a name="preview-purinv-btn" onclick="preview_purinv_btn(this); return false;" rel_id = "'. $f['rel_id']. '" id = "'.$f['id'].'" href="Javascript:void(0);" class="mbot10 mright5 btn btn-success pull-left" data-toggle="tooltip" title data-original-title="'. _l('preview_file').'"><i class="fa fa-eye"></i></a>
-		                                                 <div class="pull-left"><i class="'. get_mime_class($f['filetype']).'"></i></div>
-		                                                 <a href=" '. $href_url.'" target="_blank" download>'.$f['file_name'].'</a>
-		                                                 <br />
-		                                                 <small class="text-muted">'.$f['filetype'].'</small>
-		                                              </div>
-		                                              <div class="col-md-4 text-right">';
-		                                                if($f['staffid'] == get_staff_user_id() || is_admin()){
-		                                                $file_html .= '<a href="#" class="text-danger" onclick="delete_purinv_attachment('. $f['id'].'); return false;"><i class="fa fa-times"></i></a>';
-		                                                } 
-		                                               $file_html .= '</div></div>';
-		                                            }
-		                                            $file_html .= '<hr />';
-		                                            echo pur_html_entity_decode($file_html);
-		                                        }
-		                                     ?>
-		                                  </div>
+							<?php
+							$file_html = '';
+							if(count($pur_invoice_attachments) > 0){
+								$file_html .= '<hr />
+								<p class="bold text-muted">'._l('customer_attachments').'</p>';
+								foreach ($pur_invoice_attachments as $f) {
+									$href_url = site_url(PURCHASE_PATH.'pur_invoice/'.$f['rel_id'].'/'.$f['file_name']).'" download';
+									if(!empty($f['external'])){
+										$href_url = $f['external_link'];
+									}
+									$file_html .= '<div class="mbot15 row inline-block full-width" data-attachment-id="'. $f['id'].'">
+									<div class="col-md-8">
+									<a name="preview-purinv-btn" onclick="preview_purinv_btn(this); return false;" rel_id = "'. $f['rel_id']. '" id = "'.$f['id'].'" href="Javascript:void(0);" class="mbot10 mright5 btn btn-success pull-left" data-toggle="tooltip" title data-original-title="'. _l('preview_file').'"><i class="fa fa-eye"></i></a>
+									<div class="pull-left"><i class="'. get_mime_class($f['filetype']).'"></i></div>
+									<a href=" '. $href_url.'" target="_blank" download>'.$f['file_name'].'</a>
+									<br />
+									<small class="text-muted">'.$f['filetype'].'</small>
+									</div>
+									<div class="col-md-4 text-right">';
+									if($f['staffid'] == get_staff_user_id() || is_admin()){
+										$file_html .= '<a href="#" class="text-danger" onclick="delete_purinv_attachment('. $f['id'].'); return false;"><i class="fa fa-times"></i></a>';
+									} 
+									$file_html .= '</div></div>';
+								}
+								if(!empty($pur_invoice->expense_id)) {
+									$file_html .= '<div class="mbot15 row inline-block full-width">
+									<div class="col-md-8">
+									<a name="preview-purinv-btn" href=" '. admin_url('expenses/pdf/'.$pur_invoice->expense_id).'" target="_blank" class="mbot10 mright5 btn btn-success pull-left" data-toggle="tooltip" title data-original-title="'. _l('preview_file').'"><i class="fa fa-eye"></i></a>
+									<div class="pull-left"><i class="mime mime-pdf"></i></div>
+									<a href=" '. admin_url('expenses/pdf/'.$pur_invoice->expense_id).'" target="_blank">'._l('expense_receipt').'</a>
+									<br />
+									<small class="text-muted">application/pdf</small>
+									</div>
+									<div class="col-md-4 text-right"></div></div>';
+								}
+								$file_html .= '<hr />';
+								echo pur_html_entity_decode($file_html);
+							}
+							?>
+						</div>
 
 		               <div id="purinv_file_data"></div>
                   	</div>

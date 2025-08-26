@@ -324,7 +324,7 @@ $module_name = 'payment_certificate'; ?>
          "order_tagged_detail": "[name='order_tagged_detail[]']",
          "res_person": "[name='res_person[]']",
       };
-      initDataTable(table_payment_certificate, admin_url + 'purchase/table_payment_certificate', [], [], Params, [7, 'desc']);
+      initDataTable(table_payment_certificate, admin_url + 'purchase/table_payment_certificate', [], [], Params, [8, 'desc']);
       $.each(Params, function(i, obj) {
          $('select' + obj).on('change', function() {
             table_payment_certificate.DataTable().ajax.reload();

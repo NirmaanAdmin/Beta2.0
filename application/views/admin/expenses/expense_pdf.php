@@ -10,7 +10,7 @@ if (!empty($expense->expense_name)) {
     $html .= '<h3>' . $expense->expense_name . '</h3>';
 }
 
-$html .= '<p>' . _l('expense_amount') . ' <strong>' . app_format_money($expense->amount, $expense->currency_data) . '</strong>';
+$html .= '<p><strong>' . _l('expense_amount') . ':</strong> ' . app_format_money($expense->amount, $expense->currency_data);
 
 if ($expense->paymentmode != '0' && !empty($expense->paymentmode)) {
     $html .= '<br />' . _l('expense_paid_via', $expense->payment_mode_name);
@@ -62,8 +62,16 @@ if ($expense->project_id) {
     $html .= '<p><strong>' . _l('project') . ':</strong> ' . $expense->project_data->name . '</p>';
 }
 
+if ($expense->vendor) {
+    $html .= '<p><strong>' . _l('vendor') . ':</strong> ' . get_vendor_company_name($expense->vendor) . '</p>';
+}
+
 if (!empty($expense->note)) {
     $html .= '<p><strong>' . _l('expense_note') . '</strong> ' . $expense->note . '</p>';
+}
+
+if (!empty($expense->attachment)) {
+    $html .= '<p><strong>' . _l('expense_receipt') . ':</strong> ' . $expense->attachment . '</p>';
 }
 
 $custom_fields = get_custom_fields('expenses');
