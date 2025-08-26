@@ -265,9 +265,6 @@ class Tickets extends AdminController
 
     public function edit_message()
     {
-        if (!can_staff_edit_ticket_message()) {
-            access_denied();
-        }
 
         if ($this->input->post()) {
             $data         = $this->input->post();
