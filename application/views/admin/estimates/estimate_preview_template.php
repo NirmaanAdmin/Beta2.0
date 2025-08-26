@@ -22,7 +22,7 @@
                         </li>
                         <li role="presentation">
                             <a href="#tender_strategy" aria-controls="tender_strategy" role="tab" data-toggle="tab">
-                                Unawarded Tenders
+                                Tender Strategy
                             </a>
                         </li>
 
@@ -140,7 +140,7 @@
                                 <div class="mtop10"></div>
                             </div>
                             <div class="pull-right _buttons">
-                                <a href="#" class="btn btn-primary" onclick="assign_unawarded_capex(<?php echo $estimate->id; ?>); return false;"><i class="fa-regular fa-plus tw-mr-1"></i>Assign Unawarded Capex</a>
+                                <a href="#" class="btn btn-primary" onclick="assign_unawarded_capex(<?php echo $estimate->id; ?>); return false;"><i class="fa-regular fa-plus tw-mr-1"></i>Generate Tender Strategy</a>
                                 <a href="#" class="btn btn-primary" onclick="create_new_revision(<?php echo $estimate->id; ?>); return false;"><i class="fa-regular fa-plus tw-mr-1"></i><?php echo _l('create_new_revision'); ?></a>
                                 <?php if (staff_can('edit', 'estimates')) { ?>
                                 <?php
@@ -920,7 +920,7 @@
                 <div role="tabpanel" class="tab-pane" id="tender_strategy">
                     <div class="row">
                         <div class="col-md-12">
-                            <a href="#" class="btn btn-primary" onclick="view_package(<?php echo $estimate->id; ?>); return false;"><i class="fa-regular fa-plus tw-mr-1"></i>Add Package</a>
+                            <a href="#" class="btn btn-primary" onclick="view_package(<?php echo $estimate->id; ?>); return false;"><i class="fa-regular fa-plus tw-mr-1"></i>Add Tender</a>
                             <hr />
 
                             <div class="col-md-2 form-group" style="padding-left: 0px;">
@@ -1137,6 +1137,8 @@
             <button type="button" class="close" data-dismiss="modal">&times;</button>
             <div class="col-md-3 unawarded-budget-head" style="padding-left: 0px; padding-top: 5px;">
             </div>
+            <div class="col-md-3 unawarded-sub-head" style="padding-left: 0px; padding-top: 5px;">
+            </div>
          </div>
          <div class="modal-body">
             <div class="row">
@@ -1257,6 +1259,8 @@ function assign_unawarded_capex(id) {
     if (response.budgetsummaryhtml) {
       $('.unawarded-budget-head').html('');
       $('.unawarded-budget-head').html(response.budgetsummaryhtml);
+      $('.unawarded-sub-head').html('');
+      $('.unawarded-sub-head').html(response.subheadsummaryhtml);
       $('.unawarded-capex-body').html('');
       $('.unawarded-capex-body').html(response.itemhtml);
       $('.unawarded_capex_title').html('Assign Unawarded Capex');
@@ -1275,6 +1279,30 @@ $("body").on("change", "select[name='unawarded_budget_head']", function (e) {
     $.post(admin_url + "estimates/assign_unawarded_capex", {
       id: id,
       unawarded_budget: unawarded_budget,
+    }).done(function (res) {
+      var response = JSON.parse(res);
+      if (response.itemhtml) {
+        $('.unawarded-capex-body').html('');
+        $('.unawarded-capex-body').html(response.itemhtml);
+        $('#unawarded_capex_modal button[type="submit"]').show();
+        init_selectpicker();
+        calculate_unawarded_capex();
+      }
+    });
+  } else {
+    $('.unawarded-capex-body').html('');
+    init_selectpicker();
+  }
+});
+
+
+$("body").on("change", "select[name='unawarded_sub_head']", function (e) {
+  var id = $(this).find('option:selected').data('estimateid');
+  var unawarded_sub_head = $(this).val();
+  if(unawarded_sub_head != '') {
+    $.post(admin_url + "estimates/assign_unawarded_capex", {
+      id: id,
+      unawarded_sub_head: unawarded_sub_head,
     }).done(function (res) {
       var response = JSON.parse(res);
       if (response.itemhtml) {

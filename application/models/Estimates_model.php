@@ -2078,16 +2078,18 @@ class Estimates_model extends App_Model
 
     public function assign_unawarded_capex($data)
     {
-        $this->load->model('currencies_model');
+        $this->load->model('currencies_model'); 
         $response = array();
         $budgetsummary = '';
         $itemhtml = '';
         $estimate_id = $data['id'];
         $unawarded_budget = isset($data['unawarded_budget']) ? $data['unawarded_budget'] : '';
+        $unawarded_sub_head = isset($data['unawarded_sub_head']) ? $data['unawarded_sub_head'] : '';
         $base_currency = $this->currencies_model->get_base_currency();
         $this->db->where('id', $estimate_id);
         $estimates = $this->db->get(db_prefix() . 'estimates')->row();
         $unawarded_budget_head = $this->get_estimate_budget_listing($estimates->id);
+        $unawarded_subhead = $this->get_estimate_subhead_listing($estimates->id);
         if (!empty($unawarded_budget_head)) {
             if (empty($unawarded_budget)) {
                 $unawarded_budget = isset($unawarded_budget_head[0]) ? $unawarded_budget_head[0]['annexure'] : '';
@@ -2102,6 +2104,20 @@ class Estimates_model extends App_Model
                 $budgetsummaryhtml .= '</div>';
             }
 
+
+            if (!empty($unawarded_subhead)) {
+                // $unawarded_subhead = isset($unawarded_subhead[0]) ? $unawarded_subhead[0]['sub_head'] : '';
+                $subheadsummaryhtml = '<div class="form-group">';
+                $subheadsummaryhtml .= '<label for="unawarded_sub_head" class="control-label">' . _l('Sub Head') . '</label>';
+                $subheadsummaryhtml .= '<select name="unawarded_sub_head" class="selectpicker" data-width="100%" data-none-selected-text="' . _l('') . '" data-live-search="true">';
+                foreach ($unawarded_subhead as $item) {
+                    $selected = ($unawarded_sub_head == $item['sub_head']) ? 'selected' : '';
+                    $subheadsummaryhtml .= '<option value="' . $item['sub_head'] . '" data-estimateid="' . $estimates->id . '" ' . $selected . '>' . $item['sub_head_name'] . '</option>';
+                }
+                $subheadsummaryhtml .= '</select>';
+                $subheadsummaryhtml .= '</div>';
+            }
+
             $this->db->select(
                 db_prefix() . 'itemable.*,' .
                     db_prefix() . 'unawarded_budget_info.unawarded_qty,' .
@@ -2112,6 +2128,9 @@ class Estimates_model extends App_Model
             $this->db->where('rel_id', $estimates->id);
             $this->db->where('rel_type', 'estimate');
             $this->db->where('annexure', $unawarded_budget);
+            if (!empty($unawarded_sub_head)) {
+                $this->db->where('sub_head', $unawarded_sub_head);
+            }
             $this->db->group_by(db_prefix() . 'itemable.id');
             $unawarded_budget_itemable = $this->db->get()->result_array();
 
@@ -2122,15 +2141,16 @@ class Estimates_model extends App_Model
                     <tr>
                         <th align="left">' . _l('estimate_table_item_heading') . '</th>
                         <th align="left">' . _l('estimate_table_item_description') . '</th>
+                        <th align="left">' . _l('area') . '</th>
                         <th align="left">' . _l('sub_groups_pur') . '</th>
-                        <th align="left">' . _l('budgeted_qty') . '</th>
-                        <th align="left">Remaining Quantity In Budget</th>
-                        <th align="left">' . _l('budgeted_rate') . '</th>
-                        <th align="left">' . _l('budgeted_amount') . '</th>
-                        <th align="left">Unawarded Quantity</th>
-                        <th align="left">Unawarded Rate</th>
-                        <th align="left">Unawarded Capex</th>
-                        <th align="left">Remaining Capex</th>
+                        <th align="left" width="8%">' . _l('budgeted_qty') . '</th>
+                        <th align="left" width="8%">Remaining Quantity In Budget</th>
+                        <th align="left" width="8%">' . _l('budgeted_rate') . '</th>
+                        <th align="left" width="8%">' . _l('budgeted_amount') . '</th>
+                        <th align="left" width="8%">Unawarded Quantity</th>
+                        <th align="left" width="8%">Unawarded Rate</th>
+                        <th align="left" width="8%">Unawarded Capex</th>
+                        <th align="left" width="8%">Remaining Capex</th>
                     </tr>
                 </thead>';
                 $itemhtml .= '<tbody style="border: 1px solid #ddd;">';
@@ -2197,6 +2217,7 @@ class Estimates_model extends App_Model
                     $itemhtml .= '<tr>';
                     $itemhtml .= '<td align="left">' . get_purchase_items($item['item_code']) . '</td>';
                     $itemhtml .= '<td align="left">' . clear_textarea_breaks($item['long_description']) . '</td>';
+                     $itemhtml .= '<td align="left">' . get_area_name_by_id($item['area']) . '</td>';
                     $itemhtml .= '<td align="left">' . get_sub_head_name_by_id($item['sub_head']) . '</td>';
                     $itemhtml .= '<td class="all_budgeted_qty" style="text-align: left;">
                         <input type="number" 
@@ -2257,7 +2278,7 @@ class Estimates_model extends App_Model
             </table>
         </div>';
 
-        $response = ['budgetsummaryhtml' => $budgetsummaryhtml, 'itemhtml' => $itemhtml];
+        $response = ['budgetsummaryhtml' => $budgetsummaryhtml, 'itemhtml' => $itemhtml, 'subheadsummaryhtml' => $subheadsummaryhtml];
         return $response;
     }
 
@@ -3340,5 +3361,32 @@ class Estimates_model extends App_Model
 
         $response = ['budgetsummaryhtml' => $budgetsummaryhtml, 'itemhtml' => $itemhtml];
         return $response;
+    }
+
+     public function get_estimate_subhead_listing($estimate_id)
+    {
+        $subhead_listing = array();
+        $subhead_listing = $this->db->select(
+            db_prefix() . 'itemable.id as id, ' .
+                db_prefix() . 'itemable.sub_head as sub_head, ' .
+                db_prefix() . 'wh_sub_group.sub_group_name as sub_head_name'
+        )
+            ->from(db_prefix() . 'itemable')
+            ->join(
+                db_prefix() . 'wh_sub_group',
+                db_prefix() . 'wh_sub_group.id = ' . db_prefix() . 'itemable.sub_head',
+                'left'
+            )
+            ->where('rel_id', $estimate_id)
+            ->where('rel_type', 'estimate')
+            ->group_by(db_prefix() . 'itemable.sub_head')
+            ->get()
+            ->result_array();
+        if (!empty($subhead_listing)) {
+            usort($subhead_listing, function ($a, $b) {
+                return $a['sub_head'] <=> $b['sub_head'];
+            });
+        }
+        return $subhead_listing;
     }
 }
