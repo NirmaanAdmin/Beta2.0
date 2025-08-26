@@ -24452,4 +24452,84 @@ class Purchase_model extends App_Model
 
         return $ot_pc_format;
     }
+
+    public function bulk_convert_payment_certificate($data)
+    {
+        $html = '';
+        $final_ids = !empty($data['ids']) ? explode(",", rtrim($data['ids'], ",")) : '';
+
+        if (!empty($final_ids)) {
+            $this->db->where_in('id', $final_ids);
+            $payment_certificates = $this->db->get(db_prefix() . 'payment_certificate')->result_array();
+            $staff_list = $this->staff_model->get();
+
+            $html .= '<div class="row">
+                    <div class="col-md-4 bulk-title">' . _l('responsible_person') . '</div>
+                    <div class="col-md-8"></div>
+                </div><br/>';
+
+            $html .= '<div class="row">';
+            $html .= '<div class="col-md-4">';
+            $html .= '<select class="selectpicker display-block" multiple data-width="100%" name="convert_responsible_person[]" id="convert_responsible_person" data-none-selected-text="' . _l('none') . '" data-live-search="true">';
+            foreach ($staff_list as $st) {
+                $html .= '<option value="' . $st['staffid'] . '">'
+                . html_escape($st['firstname'] . ' ' . $st['lastname'])
+                . '</option>';
+            }
+            $html .= '</select></div>';
+            $html .= '<div class="col-md-4"><button type="button" class="btn btn-info update_pc_convert">' . _l('update') . '</button></div>';
+            $html .= '<div class="col-md-4"></div>';
+            $html .= '</div><br/><hr>';
+
+            $html .= '<div class="row">
+                    <div class="col-md-4 bulk-title">' . _l('payment_certificate_number') . '</div>
+                    <div class="col-md-4 bulk-title">' . _l('responsible_person') . '</div>
+                    <div class="col-md-4 bulk-title"></div>
+                </div><br/>';
+
+            foreach ($payment_certificates as $pkey => $pvalue) {
+                $payment_certificate_name_attr = "newitems[$pkey][id]";
+                $responsible_person_name_attr = "newitems[$pkey][responsible_person][]";
+                $html .= '<div class="row">';
+                $html .= form_hidden($payment_certificate_name_attr, $pvalue['id']);
+
+                $html .= '<div class="col-md-4 bulk-title">' . $pvalue['pc_number'] . '</div>';
+                $html .= '<div class="col-md-4">';
+                $html .= '<select class="selectpicker display-block" multiple data-width="100%" name="' . $responsible_person_name_attr . '" id="bulk_responsible_person" data-none-selected-text="' . _l('none') . '" data-live-search="true">';
+                $saved_responsible = !empty($pvalue['responsible_person']) ? explode(',', $pvalue['responsible_person']) : [];
+                foreach ($staff_list as $st) {
+                    $selected = (is_array($saved_responsible) && in_array($st['staffid'], $saved_responsible)) ? ' selected' : '';
+                    $html .= '<option value="' . $st['staffid'] . '"' . $selected . '>'
+                        . html_escape($st['firstname'] . ' ' . $st['lastname'])
+                        . '</option>';
+                }
+                $html .= '</select></div>';
+                $html .= '<div class="col-md-4 bulk-title"></div>';
+                $html .= '</div><br/>';
+            }
+        }
+
+        return $html;
+    }
+
+    public function update_bulk_payment_certificate($data)
+    {
+        if (empty($data)) {
+            return false;
+        } else {
+            $dt_data = [
+                'responsible_person' => !empty($data['responsible_person']) ? implode(',', $data['responsible_person']) : NULL,
+            ];
+            $this->db->where('id', $data['id']);
+            $this->db->update(db_prefix() . 'payment_certificate', $dt_data);
+
+            if ($this->db->affected_rows() > 0) {
+                update_payment_certificate_last_action($data['id']);
+                return true;
+            } else {
+                return false;
+            }
+        }
+        exit;
+    }
 }

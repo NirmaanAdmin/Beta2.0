@@ -5,7 +5,7 @@ $module_name = 'payment_certificate'; ?>
    .show_hide_columns {
       position: absolute;
       z-index: 5000;
-      left: 204px
+      left: 295px
    }
 
    .show_hide_columns1 {
@@ -22,6 +22,9 @@ $module_name = 'payment_certificate'; ?>
    }
    .dashboard_stat_value {
       font-size: 19px;
+   }
+   .bulk-title {
+      font-weight: bold;
    }
 </style>
 <div id="wrapper">
@@ -224,6 +227,7 @@ $module_name = 'payment_certificate'; ?>
                            <!-- Column Checkboxes -->
                            <?php
                            $columns = [
+                              'Checkbox',
                               'Payment cert',
                               'payment_certificate_number',
                               'order_name',
@@ -250,34 +254,59 @@ $module_name = 'payment_certificate'; ?>
                         </div>
                      </div>
 
+                     <div class="row">
+                        <a onclick="bulk_convert_payment_certificate(); return false;" data-toggle="modal" data-table=".table-table_payment_certificate" class=" hide bulk-actions-btn table-btn">Bulk Convert</a>
+                     </div>
 
-                     <?php $table_data = array(
-                        _l('Payment cert'),
-                        _l('payment_certificate_number'),
-                        _l('order_name'),
-                        _l('vendor'),
-                        _l('order_date'),
-                        _l('group_pur'),
-                        _l('this_bill'),
-                        _l('submission_date'),
-                        _l('approval_status'),
-                        _l('pending_approval'),
-                        _l('applied_to_vendor_bill'),
-                        _l('options'),
-                        _l('responsible_person'),
-                        _l('last_action_by'),
-                     );
-
-                     foreach ($custom_fields as $field) {
-                        array_push($table_data, $field['name']);
-                     }
-                     render_datatable($table_data, 'table_payment_certificate');
-                     ?>
+                     <table class="dt-table-loading table table-table_payment_certificate">
+                        <thead>
+                           <tr>
+                              <th style="width: 5px"><span class="hide"> - </span>
+                                 <div class="checkbox mass_select_all_wrap"><input type="checkbox" id="mass_select_all" data-to-table="table_payment_certificate"><label></label></div>
+                              </th>
+                              <th><?php echo _l('Payment cert'); ?></th>
+                              <th><?php echo _l('payment_certificate_number'); ?></th>
+                              <th><?php echo _l('order_name'); ?></th>
+                              <th><?php echo _l('vendor'); ?></th>
+                              <th><?php echo _l('order_date'); ?></th>
+                              <th><?php echo _l('group_pur'); ?></th>
+                              <th><?php echo _l('this_bill'); ?></th>
+                              <th><?php echo _l('submission_date'); ?></th>
+                              <th><?php echo _l('approval_status'); ?></th>
+                              <th><?php echo _l('pending_approval'); ?></th>
+                              <th><?php echo _l('applied_to_vendor_bill'); ?></th>
+                              <th><?php echo _l('options'); ?></th>
+                              <th><?php echo _l('responsible_person'); ?></th>
+                              <th><?php echo _l('last_action_by'); ?></th>
+                           </tr>
+                        </thead>
+                        <tbody></tbody>
+                        <tbody></tbody>
+                     </table>
 
                   </div>
                </div>
             </div>
          </div>
+      </div>
+   </div>
+</div>
+
+<div class="modal fade" id="convert_payment_certificate_modal" tabindex="-1" role="dialog">
+   <div class="modal-dialog modal-xl" role="document">
+      <div class="modal-content">
+         <?php echo form_open(admin_url('purchase/add_bulk_convert_payment_certificate'), array('id' => 'convert_payment_certificate_form', 'class' => '')); ?>
+         <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title"><div class="bulk_convert_title"></div></h4>
+         </div>
+         <div class="modal-body convert-bulk-actions-body">
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo _l('close'); ?></button>
+            <button type="submit" class="btn btn-info"><?php echo _l('submit'); ?></button>
+         </div>
+         <?php echo form_close(); ?>
       </div>
    </div>
 </div>
@@ -402,6 +431,13 @@ $module_name = 'payment_certificate'; ?>
          });
       });
 
+      $('body').on('click', '.update_pc_convert', function (e) {
+         e.preventDefault();
+         var convert_responsible_person = $('#convert_responsible_person').val();
+         if(convert_responsible_person) {
+            $('select#bulk_responsible_person').val(convert_responsible_person).trigger('change');
+         }
+      });
    });
 </script>
 <script>
@@ -422,6 +458,40 @@ $module_name = 'payment_certificate'; ?>
                window.location.reload();
            }
        });
+   }
+
+   function bulk_convert_payment_certificate() {
+     "use strict";
+     var print_id = '';
+     var rows = $('.table-table_payment_certificate').find('tbody tr');
+     $.each(rows, function() {
+       var checkbox = $($(this).find('td').eq(0)).find('input');
+       if (checkbox.prop('checked') === true) {
+           if (print_id !== '') {
+               print_id += ','; // Append a comma before adding the next value
+           }
+           print_id += checkbox.val();
+       }
+     });
+     if (print_id !== '') {
+       // Perform AJAX request to update the invoice date
+       $.post(admin_url + 'purchase/bulk_convert_payment_certificate', {
+         ids: print_id,
+       }).done(function (response) {
+         response = JSON.parse(response);
+         if (response.success) {
+           $('.convert-bulk-actions-body').html('');
+           $('.convert-bulk-actions-body').html(response.bulk_html);
+           $('.bulk_convert_title').html('Bulk Convert');
+           init_selectpicker();
+           $('#convert_payment_certificate_modal').modal('show');
+         } else {
+           alert_float('danger', response.message);
+         }
+       });
+     } else {
+       alert_float('danger', 'Please select at least one item from the list');
+     }
    }
 </script>
 <script src="<?php echo module_dir_url(PURCHASE_MODULE_NAME, 'assets/plugins/charts/chart.js'); ?>?v=<?php echo PURCHASE_REVISION; ?>"></script>

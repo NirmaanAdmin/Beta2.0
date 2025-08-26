@@ -16553,4 +16553,33 @@ class purchase extends AdminController
         ]);
         echo json_encode(['success' => true, 'message' => 'Responsible persons have been updated.']);
     }
+
+    public function bulk_convert_payment_certificate()
+    {
+        $response = array();
+        $data = $this->input->post();
+        $bulk_html = $this->purchase_model->bulk_convert_payment_certificate($data);
+        if (!empty($bulk_html)) {
+            $response['success'] = true;
+            $response['bulk_html'] = $bulk_html;
+        } else {
+            $response['success'] = false;
+            $response['message'] = _l('you_have_not_select_the_convert_button_rows');
+        }
+        echo json_encode($response);
+    }
+
+    public function add_bulk_convert_payment_certificate()
+    {
+        $input = $this->input->post();
+        if (!empty($input)) {
+            unset($input['convert_responsible_person']);
+            $input = $input['newitems'];
+            foreach ($input as $ikey => $data) {
+                $this->purchase_model->update_bulk_payment_certificate($data);
+                set_alert('success', 'Responsible persons have been updated.');
+            }
+        }
+        redirect(admin_url('purchase/list_payment_certificate'));
+    }
 }

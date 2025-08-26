@@ -11,6 +11,7 @@ $order_tagged_detail_filter_name = 'order_tagged_detail';
 $res_person_filter_name = 'res_person';
 
 $aColumns = [
+    0,
     db_prefix() . 'payment_certificate' . '.id as id',
     db_prefix() . 'payment_certificate' . '.pc_number as pc_number',
     'po_id',
@@ -220,7 +221,9 @@ foreach ($rResult as $aRow) {
             $base_currency = pur_get_currency_by_id($aRow['currency']);
         }
 
-        if ($aColumns[$i] == 'id') {
+        if ($aColumns[$i] == '0') {
+            $_data = '<div class="checkbox"><input type="checkbox" value="' . $aRow['id'] . '"><label></label></div>';
+        } elseif ($aColumns[$i] == 'id') {
             $numberOutput = '';
             if (!empty($aRow['po_id'])) {
                 $numberOutput .= '<a href="' . admin_url('purchase/payment_certificate/' . $aRow['po_id'] . '/' . $aRow['id']) . '" target="_blank">' . _l('view') . '</a>';
