@@ -2078,18 +2078,20 @@ class Estimates_model extends App_Model
 
     public function assign_unawarded_capex($data)
     {
-        $this->load->model('currencies_model'); 
+        $this->load->model('currencies_model');
         $response = array();
         $budgetsummary = '';
         $itemhtml = '';
         $estimate_id = $data['id'];
         $unawarded_budget = isset($data['unawarded_budget']) ? $data['unawarded_budget'] : '';
         $unawarded_sub_head = isset($data['unawarded_sub_head']) ? $data['unawarded_sub_head'] : '';
+        $unawarded_area_val = isset($data['unawarded_area']) ? $data['unawarded_area'] : '';
         $base_currency = $this->currencies_model->get_base_currency();
         $this->db->where('id', $estimate_id);
         $estimates = $this->db->get(db_prefix() . 'estimates')->row();
         $unawarded_budget_head = $this->get_estimate_budget_listing($estimates->id);
         $unawarded_subhead = $this->get_estimate_subhead_listing($estimates->id);
+        $unawarded_area = $this->get_estimate_area_listing($estimates->id);
         if (!empty($unawarded_budget_head)) {
             if (empty($unawarded_budget)) {
                 $unawarded_budget = isset($unawarded_budget_head[0]) ? $unawarded_budget_head[0]['annexure'] : '';
@@ -2104,6 +2106,17 @@ class Estimates_model extends App_Model
                 $budgetsummaryhtml .= '</div>';
             }
 
+            if (!empty($unawarded_area)) {
+                $areasummaryhtml = '<div class="form-group">';
+                $areasummaryhtml .= '<label for="unawarded_area" class="control-label">' . _l('Area') . '</label>';
+                $areasummaryhtml .= '<select name="unawarded_area" class="selectpicker" data-width="100%" data-none-selected-text="' . _l('') . '" data-live-search="true" multiple> <option value=""></option>';
+                foreach ($unawarded_area as $item) {
+                    $selected = ($unawarded_area_val == $item['area']) ? 'selected' : '';
+                    $areasummaryhtml .= '<option value="' . $item['area'] . '" data-estimateid="' . $estimates->id . '" ' . $selected . '>' . $item['area_name'] . '</option>';
+                }
+                $areasummaryhtml .= '</select>';
+                $areasummaryhtml .= '</div>';
+            }
 
             if (!empty($unawarded_subhead)) {
                 // $unawarded_subhead = isset($unawarded_subhead[0]) ? $unawarded_subhead[0]['sub_head'] : '';
@@ -2130,6 +2143,29 @@ class Estimates_model extends App_Model
             $this->db->where('annexure', $unawarded_budget);
             if (!empty($unawarded_sub_head)) {
                 $this->db->where('sub_head', $unawarded_sub_head);
+            }
+            if (!empty($unawarded_area_val)) {
+                // itemable.area is CSV; use FIND_IN_SET against REPLACE(area,' ','') to ignore spaces
+                $areaField = "REPLACE(" . db_prefix() . "itemable.area, ' ', '')";
+
+                if (is_array($unawarded_area_val)) {
+                    // Any match among provided areas
+                    $this->db->group_start();
+                    foreach ($unawarded_area_val as $areaId) {
+                        $areaId = trim((string)$areaId);
+                        if ($areaId === '') {
+                            continue;
+                        }
+                        // FIND_IN_SET returns position (>0) if found
+                        $this->db->or_where("FIND_IN_SET(" . $this->db->escape($areaId) . ", {$areaField}) >", 0, false);
+                    }
+                    $this->db->group_end();
+                } else {
+                    $areaId = trim((string)$unawarded_area_val);
+                    if ($areaId !== '') {
+                        $this->db->where("FIND_IN_SET(" . $this->db->escape($areaId) . ", {$areaField}) >", 0, false);
+                    }
+                }
             }
             $this->db->group_by(db_prefix() . 'itemable.id');
             $unawarded_budget_itemable = $this->db->get()->result_array();
@@ -2217,7 +2253,7 @@ class Estimates_model extends App_Model
                     $itemhtml .= '<tr>';
                     $itemhtml .= '<td align="left">' . get_purchase_items($item['item_code']) . '</td>';
                     $itemhtml .= '<td align="left">' . clear_textarea_breaks($item['long_description']) . '</td>';
-                     $itemhtml .= '<td align="left">' . get_area_name_by_id($item['area']) . '</td>';
+                    $itemhtml .= '<td align="left">' . get_area_name_by_id($item['area']) . '</td>';
                     $itemhtml .= '<td align="left">' . get_sub_head_name_by_id($item['sub_head']) . '</td>';
                     $itemhtml .= '<td class="all_budgeted_qty" style="text-align: left;">
                         <input type="number" 
@@ -2278,7 +2314,7 @@ class Estimates_model extends App_Model
             </table>
         </div>';
 
-        $response = ['budgetsummaryhtml' => $budgetsummaryhtml, 'itemhtml' => $itemhtml, 'subheadsummaryhtml' => $subheadsummaryhtml];
+        $response = ['budgetsummaryhtml' => $budgetsummaryhtml, 'itemhtml' => $itemhtml, 'subheadsummaryhtml' => $subheadsummaryhtml, 'areasummaryhtml' => $areasummaryhtml];
         return $response;
     }
 
@@ -3051,7 +3087,7 @@ class Estimates_model extends App_Model
                         'remarks' => $value['remarks'],
                         'description' => $desc,
                         'sub_head' => $sub,
-                        
+
                     ]);
                 }
             }
@@ -3363,7 +3399,7 @@ class Estimates_model extends App_Model
         return $response;
     }
 
-     public function get_estimate_subhead_listing($estimate_id)
+    public function get_estimate_subhead_listing($estimate_id)
     {
         $subhead_listing = array();
         $subhead_listing = $this->db->select(
@@ -3388,5 +3424,30 @@ class Estimates_model extends App_Model
             });
         }
         return $subhead_listing;
+    }
+
+    public function get_estimate_area_listing($estimate_id)
+    {
+        $tbl_item = db_prefix() . 'itemable';
+        $tbl_area = db_prefix() . 'area';
+
+        // Match each area.id against the CSV in itemable.area (spaces stripped for safety)
+        // Use INNER JOIN so we only get rows with valid area matches
+        $area_listing = $this->db
+            ->select("$tbl_area.id AS id, $tbl_area.id AS area, $tbl_area.area_name AS area_name", false)
+            ->from($tbl_item)
+            ->join(
+                $tbl_area,
+                "FIND_IN_SET($tbl_area.id, REPLACE($tbl_item.area, ' ', ''))",
+                'inner'
+            )
+            ->where("$tbl_item.rel_id", (int)$estimate_id)
+            ->where("$tbl_item.rel_type", 'estimate')
+            ->group_by("$tbl_area.id")          // de-duplicate areas across items
+            ->order_by("$tbl_area.id", 'ASC')   // numeric order: 481, 482, 483, ...
+            ->get()
+            ->result_array();
+
+        return $area_listing ?: [];
     }
 }

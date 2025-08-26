@@ -1139,6 +1139,8 @@
             </div>
             <div class="col-md-3 unawarded-sub-head" style="padding-left: 0px; padding-top: 5px;">
             </div>
+             <div class="col-md-3 unawarded-area" style="padding-left: 0px; padding-top: 5px;">
+            </div>
          </div>
          <div class="modal-body">
             <div class="row">
@@ -1260,7 +1262,9 @@ function assign_unawarded_capex(id) {
       $('.unawarded-budget-head').html('');
       $('.unawarded-budget-head').html(response.budgetsummaryhtml);
       $('.unawarded-sub-head').html('');
-      $('.unawarded-sub-head').html(response.subheadsummaryhtml);
+      $('.unawarded-sub-head').html(response.subheadsummaryhtml);      
+      $('.unawarded-area').html('');
+      $('.unawarded-area').html(response.areasummaryhtml);
       $('.unawarded-capex-body').html('');
       $('.unawarded-capex-body').html(response.itemhtml);
       $('.unawarded_capex_title').html('Assign Unawarded Capex');
@@ -1303,6 +1307,29 @@ $("body").on("change", "select[name='unawarded_sub_head']", function (e) {
     $.post(admin_url + "estimates/assign_unawarded_capex", {
       id: id,
       unawarded_sub_head: unawarded_sub_head,
+    }).done(function (res) {
+      var response = JSON.parse(res);
+      if (response.itemhtml) {
+        $('.unawarded-capex-body').html('');
+        $('.unawarded-capex-body').html(response.itemhtml);
+        $('#unawarded_capex_modal button[type="submit"]').show();
+        init_selectpicker();
+        calculate_unawarded_capex();
+      }
+    });
+  } else {
+    $('.unawarded-capex-body').html('');
+    init_selectpicker();
+  }
+});
+
+$("body").on("change", "select[name='unawarded_area']", function (e) {
+  var id = $(this).find('option:selected').data('estimateid');
+  var unawarded_area = $(this).val();
+  if(unawarded_area != '') {
+    $.post(admin_url + "estimates/assign_unawarded_capex", {
+      id: id,
+      unawarded_area: unawarded_area,
     }).done(function (res) {
       var response = JSON.parse(res);
       if (response.itemhtml) {
