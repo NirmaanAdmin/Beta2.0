@@ -52,7 +52,7 @@
                                                                             echo 'active';
                                                                         } ?>">
                                             <a href="#addreply" aria-controls="addreply" role="tab" data-toggle="tab">
-                                                <?php echo _l('ticket_single_add_reply'); ?>
+                                                <?php echo _l('Edit RFI'); ?>
                                             </a>
                                         </li>
                                         <li role="presentation" class="<?php if ($this->session->flashdata('active_tab_settings')) {

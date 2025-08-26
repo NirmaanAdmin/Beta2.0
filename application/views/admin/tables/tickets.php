@@ -191,10 +191,10 @@ return App_table::find('tickets')
                     }
 
                     $url   = admin_url('tickets/ticket/' . $aRow['ticketid']);
-                    $_data = '<a href="' . $url . '" class="valign">' . $_data . '</a>';
+                    $_data = '<a href="' . $url . '?tab=settings" class="valign">' . $_data . '</a>';
                     $_data .= '<div class="row-options">';
-                    $_data .= '<a href="' . $url . '">' . _l('view') . '</a>';
-                    $_data .= ' | <a href="' . $url . '?tab=settings">' . _l('edit') . '</a>';
+                    $_data .= '<a href="' . $url . '?tab=settings">' . _l('view') . '</a>';
+                    $_data .= ' | <a href="' . $url . '">' . _l('edit') . '</a>';
                     $_data .= ' | <a href="' . get_ticket_public_url($aRow) . '" target="_blank">' . _l('view_public_form') . '</a>';
                     if (can_staff_delete_ticket()) {
                         $_data .= ' | <a href="' . admin_url('tickets/delete/' . $aRow['ticketid']) . '" class="text-danger _delete">' . _l('delete') . '</a>';
