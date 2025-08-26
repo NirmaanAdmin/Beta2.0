@@ -18217,6 +18217,9 @@ class Purchase_model extends App_Model
         if (!empty($data['bill_period_upto'])) {
             $data['bill_period_upto'] = to_sql_date($data['bill_period_upto']);
         }
+        if (!empty($data['invoice_date'])) {
+            $data['invoice_date'] = to_sql_date($data['invoice_date']);
+        }
         $po_number = $wo_number = '';
         if (isset($data['wo_id'])) {
             $pur_order = $this->get_wo_order($data['wo_id']);
@@ -18279,6 +18282,9 @@ class Purchase_model extends App_Model
         $data['bill_received_on'] = to_sql_date($data['bill_received_on']);
         if (!empty($data['bill_period_upto'])) {
             $data['bill_period_upto'] = to_sql_date($data['bill_period_upto']);
+        }
+        if (!empty($data['invoice_date'])) {
+            $data['invoice_date'] = to_sql_date($data['invoice_date']);
         }
         unset($data['description']);
         unset($data['content']);
@@ -23950,6 +23956,9 @@ class Purchase_model extends App_Model
         if (!empty($data['order_date'])) {
             $data['order_date'] = to_sql_date($data['order_date']);
         }
+        if (!empty($data['invoice_date'])) {
+            $data['invoice_date'] = to_sql_date($data['invoice_date']);
+        }
         $ot_id = $data['ot_id'];
         $data['vendor'] = !empty($data['vendor']) ? $data['vendor'] : NULL;
         $order_tracker = $this->get_order_tracker($ot_id);
@@ -24013,6 +24022,9 @@ class Purchase_model extends App_Model
         }
         if (!empty($data['order_date'])) {
             $data['order_date'] = to_sql_date($data['order_date']);
+        }
+        if (!empty($data['invoice_date'])) {
+            $data['invoice_date'] = to_sql_date($data['invoice_date']);
         }
         if (isset($data['project'])) {
             unset($data['project']);

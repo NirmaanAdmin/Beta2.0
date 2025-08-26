@@ -211,6 +211,10 @@
                       <?php $bill_received_on = (isset($payment_certificate) ? _d($payment_certificate->bill_received_on) : _d(date('Y-m-d')));
                       echo render_date_input('bill_received_on', 'bill_received_on', $bill_received_on); ?>
                     </div>
+                    <div class="col-md-3">
+                      <?php $invoice_date = (isset($payment_certificate) ? _d($payment_certificate->invoice_date) : _d(date('Y-m-d')));
+                      echo render_date_input('invoice_date', 'invoice_date', $invoice_date); ?>
+                    </div>
                     <?php if (!empty($payment_certificate_id) && is_admin()) { ?>
                       <div class="col-md-3 form-group">
                         <label for="pur_change_status_to"><?php echo _l('pur_change_status_to'); ?></label>
