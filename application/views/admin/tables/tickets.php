@@ -59,12 +59,12 @@ return App_table::find('tickets')
     ->outputUsing(function ($params) use ($statuses) {
         extract($params);
 
-        $aColumns = [
+        // First define the actual database columns for the SQL query
+        $dbColumns = [
             '1', // bulk actions
-            'ticketid',
+            'ticketid', // We still need this internally but won't display it
             'subject',
             db_prefix() . 'departments.name as department_name',
-            // db_prefix() . 'services.name as service_name',
             'CONCAT(' . db_prefix() . 'contacts.firstname, \' \', ' . db_prefix() . 'contacts.lastname) as contact_full_name',
             'status',
             'priority',
@@ -74,8 +74,23 @@ return App_table::find('tickets')
             '2',
         ];
 
-        $contactColumn = 4;
-        $tagsColumns   = 9;
+        // Then define the display columns (includes sr_no instead of ticketid)
+        $displayColumns = [
+            '1', // bulk actions
+            'sr_no', // SR. No column (will be generated in PHP)
+            'subject',
+            'department_name',
+            'contact_full_name',
+            'status',
+            'priority',
+            'lastreply',
+            'date',
+            'tags',
+            '2',
+        ];
+
+        $contactColumn = 4; // Position in displayColumns array
+        $tagsColumns   = 9; // Position in displayColumns array
 
         $additionalSelect = [
             'adminread',
@@ -102,7 +117,8 @@ return App_table::find('tickets')
         foreach ($custom_fields as $key => $field) {
             $selectAs = (is_cf_date($field) ? 'date_picker_cvalue_' . $key : 'cvalue_' . $key);
             array_push($customFieldsColumns, $selectAs);
-            array_push($aColumns, 'ctable_' . $key . '.value as ' . $selectAs);
+            array_push($dbColumns, 'ctable_' . $key . '.value as ' . $selectAs);
+            array_push($displayColumns, $selectAs);
             array_push($join, 'LEFT JOIN ' . db_prefix() . 'customfieldsvalues as ctable_' . $key . ' ON ' . db_prefix() . 'tickets.ticketid = ctable_' . $key . '.relid AND ctable_' . $key . '.fieldto="' . $field['fieldto'] . '" AND ctable_' . $key . '.fieldid=' . $field['id']);
         }
 
@@ -130,25 +146,6 @@ return App_table::find('tickets')
             array_push($where, 'AND ' . db_prefix() . 'tickets.project_id = '.get_default_project().'');
         }
 
-        // If userid is set, the the view is in client profile, should be shown all tickets
-        // if (!is_admin()) {
-        //     if (get_option('staff_access_only_assigned_departments') == 1) {
-        //         $staff_deparments_ids = $this->ci->departments_model->get_staff_departments(get_staff_user_id(), true);
-        //         $departments_ids      = [];
-        //         if (count($staff_deparments_ids) == 0) {
-        //             $departments = $this->ci->departments_model->get();
-        //             foreach ($departments as $department) {
-        //                 array_push($departments_ids, $department['departmentid']);
-        //             }
-        //         } else {
-        //             $departments_ids = $staff_deparments_ids;
-        //         }
-        //         if (count($departments_ids) > 0) {
-        //             array_push($where, 'AND department IN (SELECT departmentid FROM ' . db_prefix() . 'staff_departments WHERE departmentid IN (' . implode(',', $departments_ids) . ') AND staffid="' . get_staff_user_id() . '")');
-        //         }
-        //     }
-        // }
-
         $sIndexColumn = 'ticketid';
         $sTable       = db_prefix() . 'tickets';
 
@@ -157,57 +154,55 @@ return App_table::find('tickets')
             @$this->ci->db->query('SET SQL_BIG_SELECTS=1');
         }
 
-        $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, $additionalSelect);
+        // Use the dbColumns for the SQL query
+        $result = data_tables_init($dbColumns, $sIndexColumn, $sTable, $join, $where, $additionalSelect);
 
         $output  = $result['output'];
         $rResult = $result['rResult'];
-
+        
+        // Counter for serial number
+        $i = 1;
         foreach ($rResult as $aRow) {
             $row = [];
-            for ($i = 0; $i < count($aColumns); $i++) {
-                if (strpos($aColumns[$i], 'as') !== false && !isset($aRow[$aColumns[$i]])) {
-                    $_data = $aRow[strafter($aColumns[$i], 'as ')];
-                } else {
-                    $_data = $aRow[$aColumns[$i]];
-                }
-
-                if ($aColumns[$i] == '1') {
+            
+            // Process each display column (not db column)
+            for ($j = 0; $j < count($displayColumns); $j++) {
+                $colName = $displayColumns[$j];
+                
+                // Handle special columns
+                if ($colName == '1') {
                     $_data = '<div class="checkbox"><input type="checkbox" value="' . $aRow['ticketid'] . '" data-name="' . $aRow['subject'] . '" data-status="' . $aRow['status'] . '"><label></label></div>';
-                } elseif ($aColumns[$i] == 'lastreply') {
-                    if ($aRow[$aColumns[$i]] == null) {
+                } elseif ($colName == 'sr_no') {
+                    $_data = $i; // Generate serial number
+                } elseif ($colName == 'lastreply') {
+                    if ($aRow[$colName] == null) {
                         $_data = _l('ticket_no_reply_yet');
                     } else {
-                        $_data = e(_dt($aRow[$aColumns[$i]]));
+                        $_data = e(_dt($aRow[$colName]));
                     }
-                } elseif ($aColumns[$i] == 'subject' || $aColumns[$i] == 'ticketid') {
+                } elseif ($colName == 'subject') {
                     // Ticket is assigned
                     if ($aRow['assigned'] != 0) {
-                        if ($aColumns[$i] != 'ticketid') {
-                            $_data .= '<a href="' . admin_url('profile/' . $aRow['assigned']) . '" data-toggle="tooltip" title="' . e(get_staff_full_name($aRow['assigned'])) . '" class="pull-left mright5">' . staff_profile_image($aRow['assigned'], [
-                                'staff-profile-image-xs',
-                            ]) . '</a>';
-                        } else {
-                            $_data = e($_data);
-                        }
+                        $_data = e($aRow['subject']) . '<a href="' . admin_url('profile/' . $aRow['assigned']) . '" data-toggle="tooltip" title="' . e(get_staff_full_name($aRow['assigned'])) . '" class="pull-left mright5">' . staff_profile_image($aRow['assigned'], [
+                            'staff-profile-image-xs',
+                        ]) . '</a>';
                     } else {
-                        $_data = e($_data);
+                        $_data = e($aRow['subject']);
                     }
 
                     $url   = admin_url('tickets/ticket/' . $aRow['ticketid']);
                     $_data = '<a href="' . $url . '" class="valign">' . $_data . '</a>';
-                    if ($aColumns[$i] == 'subject') {
-                        $_data .= '<div class="row-options">';
-                        $_data .= '<a href="' . $url . '">' . _l('view') . '</a>';
-                        $_data .= ' | <a href="' . $url . '?tab=settings">' . _l('edit') . '</a>';
-                        $_data .= ' | <a href="' . get_ticket_public_url($aRow) . '" target="_blank">' . _l('view_public_form') . '</a>';
-                        if (can_staff_delete_ticket()) {
-                            $_data .= ' | <a href="' . admin_url('tickets/delete/' . $aRow['ticketid']) . '" class="text-danger _delete">' . _l('delete') . '</a>';
-                        }
-                        $_data .= '</div>';
+                    $_data .= '<div class="row-options">';
+                    $_data .= '<a href="' . $url . '">' . _l('view') . '</a>';
+                    $_data .= ' | <a href="' . $url . '?tab=settings">' . _l('edit') . '</a>';
+                    $_data .= ' | <a href="' . get_ticket_public_url($aRow) . '" target="_blank">' . _l('view_public_form') . '</a>';
+                    if (can_staff_delete_ticket()) {
+                        $_data .= ' | <a href="' . admin_url('tickets/delete/' . $aRow['ticketid']) . '" class="text-danger _delete">' . _l('delete') . '</a>';
                     }
-                } elseif ($i == $tagsColumns) {
-                    $_data = render_tags($_data);
-                } elseif ($i == $contactColumn) {
+                    $_data .= '</div>';
+                } elseif ($j == $tagsColumns) {
+                    $_data = render_tags($aRow['tags']);
+                } elseif ($j == $contactColumn) {
                     if ($aRow['userid'] != 0) {
                         $_data = '<a href="' . admin_url('clients/client/' . $aRow['userid'] . '?group=contacts') . '">' . e($aRow['contact_full_name']);
                         if (!empty($aRow['company'])) {
@@ -217,15 +212,13 @@ return App_table::find('tickets')
                     } else {
                         $_data = e($aRow['ticket_opened_by_name']);
                     }
-                } elseif ($aColumns[$i] == 'status') {
+                } elseif ($colName == 'status') {
                     $_data = '<span class="label ticket-status-' . $aRow['status'] . '" style="border:1px solid ' . adjust_hex_brightness($aRow['statuscolor'], 0.4) . '; color:' . $aRow['statuscolor'] . ';background: ' . adjust_hex_brightness($aRow['statuscolor'], 0.04) . ';">' . e(ticket_status_translate($aRow['status'])) . '</span>';
-                } elseif ($aColumns[$i] == db_prefix() . 'tickets.date') {
-                    $_data = e(_dt($_data));
-                } elseif (strpos($aColumns[$i],'service_name') !== false) {
-                    $_data = e($_data);
-                } elseif ($aColumns[$i] == 'priority') {
+                } elseif ($colName == 'date') {
+                    $_data = e(_dt($aRow['date']));
+                } elseif ($colName == 'priority') {
                     $_data = e(ticket_priority_translate($aRow['priority']));
-                } elseif($aColumns[$i] == '2') {
+                } elseif ($colName == '2') {
                     $_data = '<div class="btn-group mright5">
                        <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ><i class="fa fa-file-pdf"></i><span class="caret"></span></a>
                        <ul class="dropdown-menu dropdown-menu-right">
@@ -235,8 +228,15 @@ return App_table::find('tickets')
                        </ul>
                        </div>';
                 } else {
-                    if (strpos($aColumns[$i], 'date_picker_') !== false) {
-                        $_data = (strpos($_data, ' ') !== false ? _dt($_data) : _d($_data));
+                    // Handle custom fields and other columns
+                    if (isset($aRow[$colName])) {
+                        if (strpos($colName, 'date_picker_') !== false) {
+                            $_data = (strpos($aRow[$colName], ' ') !== false ? _dt($aRow[$colName]) : _d($aRow[$colName]));
+                        } else {
+                            $_data = e($aRow[$colName]);
+                        }
+                    } else {
+                        $_data = '';
                     }
                 }
 
@@ -255,6 +255,7 @@ return App_table::find('tickets')
 
             $row = hooks()->apply_filters('admin_tickets_table_row_data', $row, $aRow);
             $output['aaData'][] = $row;
+            $i++; // Increment serial number counter
         }
 
         return $output;

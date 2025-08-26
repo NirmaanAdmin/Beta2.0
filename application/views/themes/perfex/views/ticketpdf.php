@@ -1,6 +1,10 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
-
+$project_name = get_project($ticket->project_id);
+$dept_name = department_pur_request_name($ticket->department);
+$project_prefix = strtoupper(substr($project_name->name, 0, 3));
+$dept_prefix = strtoupper(substr($dept_name, 0, 3));
+$formatted_ticket_id = str_pad($ticket->ticketid, 2, '0', STR_PAD_LEFT);
 $tickethtml = '';
 $tickethtml .= '<table width="100%" cellspacing="0" cellpadding="5" border="1">';
 $tickethtml .= '<tbody>';
@@ -8,7 +12,7 @@ $tickethtml .= '
 <tr>
     <td width="50%;" align="center">'.pdf_logo_url().'</td>
     <td width="25%;" align="center"><b><br><br><br>Project</b></td>
-    <td width="25%;" align="center"><b><br><br><br>BGJ-Jamnagar</b></td>
+    <td width="25%;" align="center"><b><br><br><br>'.$project_name->name.'</b></td>
 </tr>';
 $tickethtml .= '</tbody>';
 $tickethtml .= '</table>';
@@ -24,7 +28,7 @@ $tickethtml .= '
 $tickethtml .= '
 <tr style="font-size:13px; text-align: center">
     <td><b>RFI No.</b></td>
-    <td>BGJ-MEP-RFI-02</td>
+    <td>'.$project_prefix .'-'. $dept_prefix .'-'.'RIF' .'-'.  $formatted_ticket_id .'</td>
     <td><b>Subject</b></td>
     <td>'.$ticket->subject.'</td>
 </tr>';
