@@ -131,23 +131,23 @@ return App_table::find('tickets')
         }
 
         // If userid is set, the the view is in client profile, should be shown all tickets
-        if (!is_admin()) {
-            if (get_option('staff_access_only_assigned_departments') == 1) {
-                $staff_deparments_ids = $this->ci->departments_model->get_staff_departments(get_staff_user_id(), true);
-                $departments_ids      = [];
-                if (count($staff_deparments_ids) == 0) {
-                    $departments = $this->ci->departments_model->get();
-                    foreach ($departments as $department) {
-                        array_push($departments_ids, $department['departmentid']);
-                    }
-                } else {
-                    $departments_ids = $staff_deparments_ids;
-                }
-                if (count($departments_ids) > 0) {
-                    array_push($where, 'AND department IN (SELECT departmentid FROM ' . db_prefix() . 'staff_departments WHERE departmentid IN (' . implode(',', $departments_ids) . ') AND staffid="' . get_staff_user_id() . '")');
-                }
-            }
-        }
+        // if (!is_admin()) {
+        //     if (get_option('staff_access_only_assigned_departments') == 1) {
+        //         $staff_deparments_ids = $this->ci->departments_model->get_staff_departments(get_staff_user_id(), true);
+        //         $departments_ids      = [];
+        //         if (count($staff_deparments_ids) == 0) {
+        //             $departments = $this->ci->departments_model->get();
+        //             foreach ($departments as $department) {
+        //                 array_push($departments_ids, $department['departmentid']);
+        //             }
+        //         } else {
+        //             $departments_ids = $staff_deparments_ids;
+        //         }
+        //         if (count($departments_ids) > 0) {
+        //             array_push($where, 'AND department IN (SELECT departmentid FROM ' . db_prefix() . 'staff_departments WHERE departmentid IN (' . implode(',', $departments_ids) . ') AND staffid="' . get_staff_user_id() . '")');
+        //         }
+        //     }
+        // }
 
         $sIndexColumn = 'ticketid';
         $sTable       = db_prefix() . 'tickets';
