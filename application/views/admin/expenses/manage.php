@@ -417,7 +417,7 @@
       "vendor": "[name='vendor[]']"
     };
 
-    initDataTable('.table-expenses', admin_url + 'expenses/table_expenses', [], [], Params, [6, 'desc']);
+    initDataTable('.table-expenses', admin_url + 'expenses/table_expenses', [], [0], Params, [6, 'desc']);
 
     // initDataTable('.table-expenses', admin_url + 'expenses/table', [0], [0], {},
     //     <?php echo hooks()->apply_filters('expenses_table_default_order', json_encode([6, 'desc'])); ?>)
@@ -456,6 +456,15 @@
 
     $(document).on('change', 'select[name="vendor[]"]', function () {
       $('select[name="vendor[]"]').selectpicker('refresh');
+    });
+
+    $("body").on('change', '#mass_select_all', function() {
+      var rows, checked;
+      rows = $('.table-expenses').find('tbody tr');
+      checked = $(this).prop('checked');
+      $.each(rows, function() {
+          $($(this).find('td').eq(0)).find('input').prop('checked', checked);
+      });
     });
   })(jQuery);
 </script>
