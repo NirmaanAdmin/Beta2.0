@@ -276,21 +276,21 @@ class drawing_management_model extends app_model
 			$status_code = $status_codes[$data['status']] ?? ''; // Default to GEN if not found
 
 			// Only generate document number if it's empty
-			if (empty($data['document_number'])) {
-				// Build project code (first 3 letters of project name)
-				$project_code = strtoupper(substr($project_name, 0, 3));
+			// if (empty($data['document_number'])) {
+			// Build project code (first 3 letters of project name)
+			$project_code = strtoupper(substr($project_name, 0, 3));
 
-				// Build document number without numeric suffix
-				$document_number = implode('-', [
-					$project_code,
-					$discipline_code,
-					$design_stage_code,
-					$purpose_code,
-					$status_code
-				]);
+			// Build document number without numeric suffix
+			$document_number = implode('-', [
+				$project_code,
+				$discipline_code,
+				$design_stage_code,
+				$purpose_code,
+				$status_code
+			]);
 
-				$data['document_number'] = $document_number;
-			}
+			$data['document_number'] = $document_number;
+			// }
 
 			$this->db->where('id', $id);
 			$this->db->update(db_prefix() . 'dms_items', $data);
@@ -1353,7 +1353,7 @@ class drawing_management_model extends app_model
 				// Upload the file into the temp dir
 				if ($this->copy_file($oldFilePath, $newFilePath)) {
 					$log_text = _l('dmg_moved_file_from') . ' ' . drawing_dmg_get_file_name($data_item->parent_id) . ' ' . _l('dmg_to') . ' ' . drawing_dmg_get_file_name($folder_id);
-					$this->add_attachment_file_to_database($filename, $folder_id, $data_item->version, $data_item->filetype, $log_text, $item_id, $data_item->creator_id, $data_item->creator_type,'');
+					$this->add_attachment_file_to_database($filename, $folder_id, $data_item->version, $data_item->filetype, $log_text, $item_id, $data_item->creator_id, $data_item->creator_type, '');
 					$affectedRows++;
 				}
 			}
