@@ -140,7 +140,7 @@
                                 <div class="mtop10"></div>
                             </div>
                             <div class="pull-right _buttons">
-                                <a href="#" class="btn btn-primary" onclick="assign_unawarded_capex(<?php echo $estimate->id; ?>); return false;"><i class="fa-regular fa-plus tw-mr-1"></i>Generate Tender Strategy</a>
+                                <a href="#" class="btn btn-primary" onclick="assign_unawarded_capex(<?php echo $estimate->id; ?>); return false;">Tender Strategy</a>
                                 <a href="#" class="btn btn-primary" onclick="create_new_revision(<?php echo $estimate->id; ?>); return false;"><i class="fa-regular fa-plus tw-mr-1"></i><?php echo _l('create_new_revision'); ?></a>
                                 <?php if (staff_can('edit', 'estimates')) { ?>
                                 <?php
@@ -920,7 +920,7 @@
                 <div role="tabpanel" class="tab-pane" id="tender_strategy">
                     <div class="row">
                         <div class="col-md-12">
-                            <a href="#" class="btn btn-primary" onclick="view_package(<?php echo $estimate->id; ?>); return false;"><i class="fa-regular fa-plus tw-mr-1"></i>Add Tender</a>
+                            <a href="#" class="btn btn-primary" onclick="view_package(<?php echo $estimate->id; ?>); return false;"><i class="fa-regular fa-plus tw-mr-1"></i>Add Package</a>
                             <hr />
 
                             <div class="col-md-2 form-group" style="padding-left: 0px;">
@@ -1346,6 +1346,14 @@ $("body").on("change", "select[name='unawarded_area']", function (e) {
   }
 });
 
+$('#unawarded_capex_form').on('submit', function (e) {
+    e.preventDefault();
+    var $form = $(this);
+    var $submitBtn = $form.find('button[type="submit"]');
+    $submitBtn.prop('disabled', true).text('<?php echo _l('Processing'); ?>');
+    this.submit();
+});
+
 function calculate_unawarded_capex() {
   var total_budgeted_amount = 0,
   total_unawarded_amount = 0,
@@ -1410,7 +1418,8 @@ $(document).on('change', 'select[name="package_budget_head"]', function () {
 $('#unawarded_package_form').on('submit', function (e) {
     e.preventDefault();
     const form = this;
-    if ($(form).find('.pack_items').length > 0) {
+    const $form = $(form);
+    if ($form.find('.pack_items').length > 0) {
         $('#package_modal').modal('hide');
         $('#package_modal').one('hidden.bs.modal', function () {
             Swal.fire({
@@ -1422,11 +1431,15 @@ $('#unawarded_package_form').on('submit', function (e) {
                 cancelButtonText: 'Cancel'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    form.submit();
+                    const $submitBtn = $form.find('button[type="submit"]');
+                    $submitBtn.prop('disabled', true).text('<?php echo _l('processing'); ?>');
+                    form.submit(); // use native submit to avoid recursion
                 }
             });
         });
     } else {
+        const $submitBtn = $form.find('button[type="submit"]');
+        $submitBtn.prop('disabled', true).text('<?php echo _l('processing'); ?>');
         form.submit();
     }
 });
