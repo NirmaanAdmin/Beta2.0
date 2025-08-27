@@ -47,7 +47,7 @@
 				</td>
 				<td>
 					<?php 
-					if($value['document_number'] > 0){
+					if($value['document_number'] > 0 && $value['orginal_filename'] == ''){
 						$document_number = $value['document_number'] . '-' . $value['name'];
 					}else{
 						$document_number = $value['name'];

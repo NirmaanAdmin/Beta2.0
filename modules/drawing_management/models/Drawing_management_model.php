@@ -690,62 +690,72 @@ class drawing_management_model extends app_model
 				return;
 			}
 
-			// Static map of stage ids to names (if you need ids later)
+			// Static map of stage names to codes (from Excel)
 			$design_stages = [
-				1 => 'Documents Under Review',
-				2 => 'Briefs',
-				3 => 'Concept',
-				4 => 'Schematic',
-				5 => 'Design Development',
-				6 => 'Tender Documents',
-				7 => 'Construction Documents',
-				8 => 'Shop Drawings',
-				9 => 'As-Built',
+				'Documents Under Review' => 'DUR',
+				'Briefs' => 'BRFs',
+				'Concept' => 'CON',
+				'Schematic' => 'SD',
+				'Design Development' => 'DD',
+				'Tender Documents' => 'TD',
+				'Construction Documents' => 'CD',
+				'Shop Drawings' => 'SHD',
+				'As-Built' => 'AsB'
 			];
 
 			$design_stage_name = trim($design_stage_obj->name);
-			$stage_key = array_search($design_stage_name, $design_stages, true); // strict search
+			$design_stage_code = $design_stages[$design_stage_name] ?? '';
 
 			// 3) Project info (guard for nulls)
 			$get_project_id = get_default_project();
 			$project_obj = $this->projects_model->get($get_project_id);
 			$project_name = $project_obj && isset($project_obj->name) ? $project_obj->name : '';
+			$project_code = strtoupper(substr($project_name, 0, 3));
 
 			// 4) Discipline name: attempt to resolve via parent->name against your discipline list
 			$discipline_name = '';
-			$stage_key2 = null;
+			$discipline_code = '';
 			if (!empty($design_stage_obj->parent_id)) {
 				$parent_obj = $this->get_design_discipline_stage((int)$design_stage_obj->parent_id);
 				if (!empty($parent_obj) && !empty($parent_obj->name)) {
-					$all_disciplines = [
-						1 => 'Acoustic',
-						2 => 'Architecture',
-						3 => 'Audiovisual',
-						4 => 'Building Management & Automation Systems',
-						5 => 'Civil & Structure',
-						6 => 'Electrical',
-						7 => 'Engineering (multi-discipline)',
-						8 => 'Facilities',
-						9 => 'Façade Engineering',
-						10 => 'Fire Alarm & Public Address',
-						11 => 'Fire Fighting',
-						12 => 'Fire & Life Safety (Passive)',
-						13 => 'Field Survey',
-						14 => 'HVAC',
-						15 => 'Information & Communication Systems',
-						16 => 'Interior Design',
-						17 => 'Landscaping',
-						18 => 'Lighting',
-						19 => 'Traffic',
-						20 => 'Master Antenna TV',
-						21 => 'Mechanical',
-						22 => 'MEP Coordination (multi-discipline)',
-						23 => 'Operations',
-						24 => 'Owner Plumbing',
-						25 => 'Project Management',
+					// Discipline mapping from Excel
+					$discipline_mapping = [
+						'Acoustic' => 'ACO',
+						'Architecture' => 'ARC',
+						'Audiovisual' => 'AV',
+						'Building Management & Automation Systems' => 'BMS',
+						'Civil & Structure' => 'STR',
+						'Electrical' => 'EL',
+						'Engineering (multi-discipline)' => 'ENG',
+						'Facilities' => 'FAC',
+						'Façade Engineering' => 'FEG',
+						'Fire Alarm & Public Address' => 'FAPA',
+						'Fire Fighting' => 'FF',
+						'Fire & Life Safety (Passive)' => 'FLS',
+						'Field Survey' => 'FS',
+						'HVAC' => 'HVAC',
+						'Information & Communication Systems' => 'ICS',
+						'Interior Design' => 'ID',
+						'Landscaping' => 'LD',
+						'Lighting' => 'LGT',
+						'Traffic' => 'TRA',
+						'Master Antenna TV' => 'MAT',
+						'Mechanical' => 'MEC',
+						'MEP Coordination (multi-discipline)' => 'MEP',
+						'Operations' => 'OPS',
+						'Owner Plumbing' => 'OPL',
+						'Project Management' => 'PM',
+						'Quantity Survey' => 'QS',
+						'Signage' => 'SNG',
+						'Security & Loss Prevention' => 'SLP',
+						'Sustainability' => 'SDG',
+						'Vertical Transportation' => 'VT',
+						'General' => 'GD',
+						'Equipment' => 'EQP'
 					];
+
 					$discipline_name = trim($parent_obj->name);
-					$stage_key2 = array_search($discipline_name, $all_disciplines, true);
+					$discipline_code = $discipline_mapping[$discipline_name] ?? '';
 				}
 			}
 
@@ -754,100 +764,58 @@ class drawing_management_model extends app_model
 			$released_stages     = ['Tender Documents', 'Construction Documents', 'Shop Drawings', 'As-Built'];
 
 			$status_name = '';
+			$status_code = 'GEN';
 			if (in_array($design_stage_name, $under_review_stages, true)) {
 				$status_name = 'under_review';
+				$status_code = 'URV';
 			} elseif (in_array($design_stage_name, $released_stages, true)) {
 				$status_name = 'released';
+				$status_code = 'RLS';
 			}
 
-			// 6) Purpose by stage
+			// 6) Purpose by stage with standardized codes
 			$purpose_name = '';
+			$purpose_code = 'GEN';
 			switch ($design_stage_name) {
 				case 'Documents Under Review':
 				case 'Briefs':
 				case 'Concept':
 				case 'Schematic':
 					$purpose_name = 'Issued for review';
+					$purpose_code = 'IFR';
 					break;
 				case 'Tender Documents':
 					$purpose_name = 'Issued for tender';
+					$purpose_code = 'IFT';
 					break;
 				case 'Design Development':
 					$purpose_name = 'Issued for approval';
+					$purpose_code = 'IFA';
 					break;
 				case 'Construction Documents':
 				case 'Shop Drawings':
 				case 'As-Built':
 					$purpose_name = 'Issued for construction';
+					$purpose_code = 'IFC';
 					break;
 			}
 
+			// 7) Build document number without numeric suffix
+			$document_number = implode('-', [
+				$project_code,
+				$discipline_code,
+				$design_stage_code,
+				$purpose_code,
+				$status_code
+			]);
 
-			// 7) Build codes (safe, trimmed)
-			$project_code      = strtoupper(substr(preg_replace('/\s+/', '', (string)$project_name), 0, 3));
-			$discipline_code   = strtoupper(substr(preg_replace('/\s+/', '', (string)$discipline_name), 0, 3));
-			$design_stage_code = strtoupper(substr(preg_replace('/\s+/', '', (string)$design_stage_name), 0, 3));
-
-			// Purpose code: initials, max 3 chars
-			$purpose_code = '';
-			foreach (preg_split('/\s+/', (string)$purpose_name, -1, PREG_SPLIT_NO_EMPTY) as $w) {
-				$purpose_code .= strtoupper(substr($w, 0, 1));
-			}
-			$purpose_code = substr($purpose_code, 0, 3);
-
-			$status_code = strtoupper(substr((string)$status_name, 0, 3));
-
-			// 8) Build base_prefix with only non-empty components (require at least one)
-			$prefix_components = array_values(array_filter([
-				$project_code ?: null,
-				$discipline_code ?: null,
-				$design_stage_code ?: null,
-				$purpose_code ?: null,
-				$status_code ?: null,
-			], static fn($v) => $v !== null && $v !== ''));
-
-			if (empty($prefix_components)) {
-				// No meaningful parts to build a document number; bail out.
-				return;
-			}
-
-			$base_prefix = implode('-', $prefix_components);
-
-			// Ensure we only look at this prefix and that the last token is a 3-digit number
-			$this->db->select('MAX(CAST(SUBSTRING_INDEX(document_number, "-", -1) AS UNSIGNED)) AS max_num', false)
-				->from(db_prefix() . 'dms_items')
-				->where("document_number REGEXP '[0-9]{3}$'", null, false);             // enforce -NNN at the end
-
-			$row = $this->db->get()->row();
-			$next_num = (isset($row->max_num) && is_numeric($row->max_num)) ? ((int)$row->max_num + 1) : 1;
-
-			// Build candidate and ensure uniqueness (bounded attempts)
-			$maxAttempts = 5;
-			$attempts = 0;
-			do {
-				$seq = str_pad((string)$next_num, 3, '0', STR_PAD_LEFT);
-				$document_number = $base_prefix . '-' . $seq;
-
-				$exists = $this->db->select('id')
-					->from(db_prefix() . 'dms_items')
-					->where('document_number', $document_number)
-					->limit(1)
-					->get()->row();
-
-				if (!$exists) {
-					break;
-				}
-				$next_num++;
-				$attempts++;
-			} while ($attempts < $maxAttempts);
-
-			// 9) Prepare update payload
+			// 8) Prepare update payload
 			$update_data = [
-				'document_number' => $document_number ?? null,
-				'design_stage'    => ($stage_key !== false) ? $stage_key : null,
-				'discipline'      => $stage_key2 ?? null,
-				'status'          => $status_name ?: null,
-				'purpose'         => $purpose_name ?: null,
+				'document_number' => $document_number,
+				'design_stage'    => array_search($design_stage_name, array_flip($design_stages)) ?? null,
+				'discipline'      => $discipline_name,
+				'status'          => $status_name,
+				'purpose'         => $purpose_name,
 			];
 
 			// drop nulls
@@ -873,6 +841,24 @@ class drawing_management_model extends app_model
 
 						if (is_file($old_path) && @rename($old_path, $new_path)) {
 							$update_data['name'] = $new_filename;
+						}
+					} elseif ($file_record && !empty($file_record->name)) {
+						$upload_dir = rtrim(DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER, '/')
+							. '/files/' . (int)$new_parent_id . '/';
+
+						$old_filename = $file_record->name;
+						$file_parts   = pathinfo($old_filename);
+						$basename     = $file_parts['filename'] ?? '';
+						$ext          = isset($file_parts['extension']) ? ('.' . $file_parts['extension']) : '';
+
+						if ($basename !== '' && strpos($basename, $document_number) === false) {
+							$new_filename = $document_number . '-' . $basename . $ext;
+							$old_path = $upload_dir . $old_filename;
+							$new_path = $upload_dir . $new_filename;
+
+							if (is_file($old_path) && @rename($old_path, $new_path)) {
+								$update_data['name'] = $new_filename;
+							}
 						}
 					}
 				}
@@ -1361,14 +1347,13 @@ class drawing_management_model extends app_model
 				}
 				$affectedRows++;
 			} else {
-
 				$oldFilePath = DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/files/' . $data_item->parent_id . '/' . $data_item->name;
 				$filename = $this->check_duplicate_file_name($folder_id, $data_item->name);
 				$newFilePath = $path . $filename;
 				// Upload the file into the temp dir
 				if ($this->copy_file($oldFilePath, $newFilePath)) {
 					$log_text = _l('dmg_moved_file_from') . ' ' . drawing_dmg_get_file_name($data_item->parent_id) . ' ' . _l('dmg_to') . ' ' . drawing_dmg_get_file_name($folder_id);
-					$this->add_attachment_file_to_database($filename, $folder_id, $data_item->version, $data_item->filetype, $log_text, $item_id, $data_item->creator_id, $data_item->creator_type);
+					$this->add_attachment_file_to_database($filename, $folder_id, $data_item->version, $data_item->filetype, $log_text, $item_id, $data_item->creator_id, $data_item->creator_type,'');
 					$affectedRows++;
 				}
 			}

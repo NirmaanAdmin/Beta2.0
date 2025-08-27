@@ -19,7 +19,7 @@
 			if ($item->filetype === 'folder') { ?>
 				<h4><?php echo drawing_htmldecode($item->name); ?></h4>
 			<?php } else { 
-				if($item->document_number > 0){
+				if($item->document_number > 0 && $item->orginal_filename == ''){
 					$document_number = $item->document_number . '-' . $item->name;
 				}else{
 					$document_number = $item->name;
