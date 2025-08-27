@@ -750,13 +750,18 @@ class Estimates extends AdminController
         if (!$id) {
             redirect(admin_url('purchase/unawarded_tracker'));
         }
+        $used_package = $this->estimates_model->check_used_package($id);
+        if(!empty($used_package)) {
+            set_alert('warning', 'This package has already been used in the tender strategy.');
+            redirect($_SERVER['HTTP_REFERER']);
+        }
         $response = $this->estimates_model->delete_package($id);
         if ($response == true) {
             set_alert('success', 'Package is deleted successfully');
         } else {
             set_alert('warning', 'Something went wrong');
         }
-        redirect(admin_url('purchase/unawarded_tracker'));
+        redirect($_SERVER['HTTP_REFERER']);
     }
 
     public function update_lock_budget()
