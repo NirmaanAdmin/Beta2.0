@@ -1355,31 +1355,16 @@ $('#unawarded_capex_form').on('submit', function (e) {
 });
 
 function calculate_unawarded_capex() {
-  var total_budgeted_amount = 0,
-  total_unawarded_amount = 0,
-  total_remaining_capex = 0;
+  var total_budgeted_amount = 0;
   var rows = $(".unawarded-capex-body tbody tr");
   $.each(rows, function () {
     var row = $(this);
     var budgeted_qty = parseFloat(row.find(".all_budgeted_qty input").val()) || 0;
     var budgeted_rate = parseFloat(row.find(".all_budgeted_rate input").val()) || 0;
     var budgeted_amount = parseFloat(row.find(".all_budgeted_amount input").val()) || 0;
-    var unawarded_qty = parseFloat(row.find(".all_unawarded_qty input").val()) || 0;
-    var unawarded_rate = parseFloat(row.find(".all_unawarded_rate input").val()) || 0;
-    var unawarded_amount = unawarded_qty * unawarded_rate;
-    var remaining_capex = budgeted_amount - unawarded_amount;
-    if (Math.abs(remaining_capex) < 0.01) {
-      remaining_capex = 0;
-    }
-    row.find(".all_unawarded_amount input").val(unawarded_amount.toFixed(2));
-    row.find(".all_remaining_capex input").val(remaining_capex.toFixed(2));
     total_budgeted_amount += budgeted_amount;
-    total_unawarded_amount += unawarded_amount;
-    total_remaining_capex += remaining_capex;
   });
   $(".total_budgeted_amount").html(format_money(total_budgeted_amount));
-  $(".total_unawarded_amount").html(format_money(total_unawarded_amount));
-  $(".total_remaining_capex").html(format_money(total_remaining_capex));
   $(document).trigger("sales-total-calculated");
 }
 

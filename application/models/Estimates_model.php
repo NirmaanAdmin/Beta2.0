@@ -2092,6 +2092,8 @@ class Estimates_model extends App_Model
         $unawarded_budget_head = $this->get_estimate_budget_listing($estimates->id);
         $unawarded_subhead = $this->get_estimate_subhead_listing($estimates->id);
         $unawarded_area = $this->get_estimate_area_listing($estimates->id);
+        $this->db->order_by('id', 'desc');
+        $all_packages = $this->db->get(db_prefix() . 'estimate_package_info')->result_array();
         if (!empty($unawarded_budget_head)) {
             if (empty($unawarded_budget)) {
                 $unawarded_budget = isset($unawarded_budget_head[0]) ? $unawarded_budget_head[0]['annexure'] : '';
@@ -2133,8 +2135,9 @@ class Estimates_model extends App_Model
 
             $this->db->select(
                 db_prefix() . 'itemable.*,' .
-                    db_prefix() . 'unawarded_budget_info.unawarded_qty,' .
-                    db_prefix() . 'unawarded_budget_info.unawarded_rate'
+                db_prefix() . 'unawarded_budget_info.unawarded_qty,' .
+                db_prefix() . 'unawarded_budget_info.unawarded_rate,' .
+                db_prefix() . 'unawarded_budget_info.packages'
             );
             $this->db->from(db_prefix() . 'itemable');
             $this->db->join(db_prefix() . 'unawarded_budget_info', db_prefix() . 'unawarded_budget_info.item_id = ' . db_prefix() . 'itemable.id', 'left');
@@ -2183,10 +2186,7 @@ class Estimates_model extends App_Model
                         <th align="left" width="8%">Remaining Quantity In Budget</th>
                         <th align="left" width="8%">' . _l('budgeted_rate') . '</th>
                         <th align="left" width="8%">' . _l('budgeted_amount') . '</th>
-                        <th align="left" width="8%">Unawarded Quantity</th>
-                        <th align="left" width="8%">Unawarded Rate</th>
-                        <th align="left" width="8%">Unawarded Capex</th>
-                        <th align="left" width="8%">Remaining Capex</th>
+                        <th align="left" width="16%">Packages</th>
                     </tr>
                 </thead>';
                 $itemhtml .= '<tbody style="border: 1px solid #ddd;">';
@@ -2218,13 +2218,9 @@ class Estimates_model extends App_Model
                     $budgeted_qty = number_format($item['qty'], 2, '.', '');
                     $budgeted_rate = number_format($item['rate'], 2, '.', '');
                     $budgeted_amount = number_format($budgeted_qty * $budgeted_rate, 2, '.', '');
-                    $unawarded_qty = !empty($item['unawarded_qty']) ? $item['unawarded_qty'] : 0.00;
-                    $unawarded_qty = number_format($unawarded_qty, 2, '.', '');
-                    $unawarded_rate = !empty($item['unawarded_rate']) ? $item['unawarded_rate'] : 0.00;
-                    $unawarded_rate = number_format($unawarded_rate, 2, '.', '');
-                    $unawarded_amount = number_format($unawarded_qty * $unawarded_rate, 2, '.', '');
                     $remaining_qty_budget = $budgeted_qty;
-                    $remaining_capex = 0;
+                    $packages = !empty($item['packages']) ? explode(',', $item['packages']) : array();
+                    
                     if (!empty($pur_order_detail)) {
                         $pur_detail_quantity = 0;
                         $pur_detail_amount = 0;
@@ -2235,21 +2231,22 @@ class Estimates_model extends App_Model
                         $remaining_qty_budget = $budgeted_qty - $pur_detail_quantity;
                         $remaining_qty_budget = number_format($remaining_qty_budget, 2, '.', '');
                     }
-                    $remaining_capex = $budgeted_amount - $unawarded_amount;
-                    $remaining_capex = number_format($remaining_capex, 2, '.', '');
                     $item_id_name_attr = "newitems[$key][item_id]";
                     $budgeted_qty_name_attr = "newitems[$key][budgeted_qty]";
                     $remaining_qty_budget_name_attr = "newitems[$key][remaining_qty_budget]";
                     $budgeted_unit_name_attr = "newitems[$key][budgeted_unit]";
                     $budgeted_rate_name_attr = "newitems[$key][budgeted_rate]";
                     $budgeted_amount_name_attr = "newitems[$key][budgeted_amount]";
-                    $unawarded_qty_name_attr = "newitems[$key][unawarded_qty]";
-                    $unawarded_unit_name_attr = "newitems[$key][unawarded_unit]";
-                    $unawarded_rate_name_attr = "newitems[$key][unawarded_rate]";
-                    $unawarded_amount_name_attr = "newitems[$key][unawarded_amount]";
-                    $remaining_capex_name_attr = "newitems[$key][remaining_capex]";
+                    $old_packages_name_attr = "newitems[$key][old_packages]";
+                    $packages_name_attr = "newitems[$key][packages][]";
 
                     $itemhtml .= form_hidden($item_id_name_attr, $item['id']);
+                    $old_packages = !empty($item['packages']) ? explode(',', $item['packages']) : [];
+                    if (!empty($old_packages)) {
+                        foreach ($old_packages as $pkg) {
+                            $itemhtml .= form_hidden($old_packages_name_attr . '[]', $pkg);
+                        }
+                    }
                     $itemhtml .= '<tr>';
                     $itemhtml .= '<td align="left">' . get_purchase_items($item['item_code']) . '</td>';
                     $itemhtml .= '<td align="left">' . clear_textarea_breaks($item['long_description']) . '</td>';
@@ -2269,21 +2266,7 @@ class Estimates_model extends App_Model
                     $itemhtml .= '<td align="left" class="all_remaining_qty_budget">' . render_input($remaining_qty_budget_name_attr, '', $remaining_qty_budget, 'number', ['readonly' => true]) . '</td>';
                     $itemhtml .= '<td align="left" class="all_budgeted_rate">' . render_input($budgeted_rate_name_attr, '', $budgeted_rate, 'number', ['readonly' => true]) . '</td>';
                     $itemhtml .= '<td align="left" class="all_budgeted_amount">' . render_input($budgeted_amount_name_attr, '', $budgeted_amount, 'number', ['readonly' => true]) . '</td>';
-                    $itemhtml .= '<td align="left" class="all_unawarded_qty">
-                        <input type="number" 
-                           id="' . $unawarded_qty_name_attr . '" 
-                           name="' . $unawarded_qty_name_attr . '" 
-                           value="' . $unawarded_qty . '" 
-                           class="form-control" 
-                           onchange="calculate_unawarded_capex()" 
-                           step="any">
-                        <span style="text-align: left; display: block;">' .
-                        (!empty($item['unit_id']) ? pur_get_unit_name($item['unit_id']) : '') .
-                        '</span>
-                    </td>';
-                    $itemhtml .= '<td align="left" class="all_unawarded_rate">' . render_input($unawarded_rate_name_attr, '', $unawarded_rate, 'number', ['onchange' => 'calculate_unawarded_capex()', 'step' => 'any']) . '</td>';
-                    $itemhtml .= '<td align="left" class="all_unawarded_amount">' . render_input($unawarded_amount_name_attr, '', $unawarded_amount, 'number', ['readonly' => true]) . '</td>';
-                    $itemhtml .= '<td align="left" class="all_remaining_capex">' . render_input($remaining_capex_name_attr, '', $remaining_capex, 'number', ['readonly' => true]) . '</td>';
+                    $itemhtml .= '<td align="left" class="all_packages">' . render_select($packages_name_attr, $all_packages, array('id', 'package_name'), '', $packages, array('data-width' => '100%', 'data-none-selected-text' => _l('None'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false) . '</td>';
                     $itemhtml .= '</tr>';
                 }
                 $itemhtml .= '</tbody>';
@@ -2300,16 +2283,6 @@ class Estimates_model extends App_Model
                         </td>
                         <td class="total_budgeted_amount"></td>
                     </tr>
-                    <tr>
-                        <td><span class="bold tw-text-neutral-700">Total Unawarded Capex :</span>
-                        </td>
-                        <td class="total_unawarded_amount"></td>
-                    </tr>
-                    <tr>
-                        <td><span class="bold tw-text-neutral-700">Total Remaining Capex :</span>
-                        </td>
-                        <td class="total_remaining_capex"></td>
-                    </tr>
                 </tbody>
             </table>
         </div>';
@@ -2325,6 +2298,11 @@ class Estimates_model extends App_Model
         $budget_head = isset($data['unawarded_budget_head']) ? $data['unawarded_budget_head'] : NULL;
         if (!empty($newitems)) {
             foreach ($newitems as $key => $value) {
+                $old_packages = isset($value['old_packages']) ? $value['old_packages'] : array();
+                $new_packages = isset($value['packages']) ? $value['packages'] : array();
+                $added = array_values(array_diff($new_packages, $old_packages));
+                $removed = array_values(array_diff($old_packages, $new_packages));
+                $unchanged = array_values(array_intersect($old_packages, $new_packages));
                 $this->db->where('estimate_id', $estimate_id);
                 $this->db->where('budget_head', $budget_head);
                 $this->db->where('item_id', $value['item_id']);
@@ -2334,17 +2312,32 @@ class Estimates_model extends App_Model
                     $this->db->where('budget_head', $budget_head);
                     $this->db->where('item_id', $value['item_id']);
                     $this->db->update(db_prefix() . 'unawarded_budget_info', [
-                        'unawarded_qty' => $value['unawarded_qty'],
-                        'unawarded_rate' => $value['unawarded_rate'],
+                        'unawarded_qty' => 0.00,
+                        'unawarded_rate' => 0.00,
+                        'packages' => !empty($value['packages']) ? implode(',', $value['packages']) : NULL,
                     ]);
                 } else {
                     $this->db->insert(db_prefix() . 'unawarded_budget_info', [
                         'estimate_id' => $estimate_id,
                         'budget_head' => $budget_head,
                         'item_id' => $value['item_id'],
-                        'unawarded_qty' => $value['unawarded_qty'],
-                        'unawarded_rate' => $value['unawarded_rate'],
+                        'unawarded_qty' => 0.00,
+                        'unawarded_rate' => 0.00,
+                        'packages' => !empty($value['packages']) ? implode(',', $value['packages']) : NULL,
                     ]);
+                }
+                if(!empty($added)) {
+                    foreach ($added as $akey => $avalue) {
+                        $this->db->insert(db_prefix() . 'estimate_package_items_info', [
+                            'package_id' => $avalue,
+                            'item_id' => $value['item_id'],
+                        ]);
+                    }
+                }
+                if(!empty($removed)) {
+                    $this->db->where('item_id', $value['item_id']);
+                    $this->db->where_in('package_id', $removed);
+                    $this->db->delete(db_prefix() . 'estimate_package_items_info');
                 }
             }
         }
@@ -3449,5 +3442,11 @@ class Estimates_model extends App_Model
             ->result_array();
 
         return $area_listing ?: [];
+    }
+
+    public function check_used_package($id)
+    {
+        $this->db->where("FIND_IN_SET(" . $this->db->escape_str($id) . ", " . db_prefix() . "unawarded_budget_info.packages) !=", 0);
+        return $this->db->get(db_prefix() . 'unawarded_budget_info')->row();
     }
 }
