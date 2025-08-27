@@ -204,67 +204,93 @@ class drawing_management_model extends app_model
 			$get_project_id = get_default_project();
 			$project_name = $this->projects_model->get($get_project_id);
 			$project_name = $project_name->name;
-			$discipline_arr = $this->get_discipline($data['discipline']);
-			$discipline_name = $discipline_arr[0]['name'];
 
+			// Define mapping arrays from your Excel data
 			$design_stages = [
-				1 => 'Documents Under Review',
-				2 => 'Briefs',
-				3 => 'Concept',
-				4 => 'Schematic',
-				5 => 'Design Development',
-				6 => 'Tender Documents',
-				7 => 'Construction Documents',
-				8 => 'Shop Drawings',
-				9 => 'As-Built'
+				1 => 'DUR',   // Documents Under Review
+				2 => 'BRFs',  // Briefs
+				3 => 'CON',   // Concept
+				4 => 'SD',    // Schematic
+				5 => 'DD',    // Design Development
+				6 => 'TD',    // Tender Documents
+				7 => 'CD',    // Construction Documents
+				8 => 'SHD',   // Shop Drawings
+				9 => 'AsB'    // As-Built
 			];
 
-			$design_stage_name = $design_stages[$data['design_stage']];
-			$purpose_name = $data['purpose'];
-			$status_name = $data['status'];
+			$purpose_codes = [
+				'Issued for Information' => 'IFI',
+				'Issued for review' => 'IFR',
+				'Issued for approval' => 'IFA',
+				'Issued for tender' => 'IFT',
+				'Issued for construction' => 'IFC'
+			];
+
+			$status_codes = [
+				'under_review' => 'URV',
+				'released' => 'RLS',
+				'released_with_comments' => 'RWC',
+				'rejected' => 'RJC'
+			];
+
+			// Discipline mapping from Excel - column H to G
+			$discipline_codes = [
+				'1' => 'ACO',
+				'2' => 'ARC',
+				'3' => 'AV',
+				'4' => 'BMS',
+				'5' => 'STR',
+				'6' => 'EL',
+				'7' => 'ENG',
+				'8' => 'FAC',
+				'9' => 'FEG',
+				'10' => 'FAPA',
+				'11' => 'FF',
+				'12' => 'FLS',
+				'13' => 'FS',
+				'14' => 'HVAC',
+				'15' => 'ICS',
+				'16' => 'ID',
+				'17' => 'LD',
+				'18' => 'LGT',
+				'19' => 'TRA',
+				'20' => 'MAT',
+				'21' => 'MEC',
+				'22' => 'MEP',
+				'23' => 'OPS',
+				'24' => 'OPL',
+				'25' => 'PM',
+				'26' => 'QS',
+				'27' => 'SNG',
+				'28' => 'SLP',
+				'29' => 'SDG',
+				'30' => 'VT',
+				'31' => 'GD',
+				'32' => 'EQP'
+			];
+
+			// Get codes using the standardized abbreviations
+			$discipline_code = $discipline_codes[$data['discipline']] ?? ''; // Default to GEN if not found
+			$design_stage_code = $design_stages[$data['design_stage']] ?? ''; // Default to GEN if not found
+			$purpose_code = $purpose_codes[$data['purpose']] ?? ''; // Default to GEN if not found
+			$status_code = $status_codes[$data['status']] ?? ''; // Default to GEN if not found
 
 			// Only generate document number if it's empty
 			if (empty($data['document_number'])) {
-				// Build codes
-				$project_code      = strtoupper(substr($project_name, 0, 3));
-				$discipline_code   = strtoupper(substr($discipline_name, 0, 3));
-				$design_stage_code = strtoupper(substr($design_stage_name, 0, 3));
+				// Build project code (first 3 letters of project name)
+				$project_code = strtoupper(substr($project_name, 0, 3));
 
-				// Purpose = first letters of words, max 3 chars
-				$purpose_code = '';
-				foreach (explode(' ', $purpose_name) as $w) {
-					$w = trim($w);
-					if ($w !== '') $purpose_code .= strtoupper($w[0]);
-				}
-				$purpose_code = substr($purpose_code, 0, 3);
-
-				$status_code = strtoupper(substr($status_name, 0, 3));
-
-				// Find the highest trailing number across ALL document_number values that match the full pattern
-				$regex = "^[A-Z0-9]{3}-[A-Z0-9]{3}-[A-Z0-9]{3}-[A-Z0-9]{3}-[A-Z0-9]{3}-[0-9]{3}$";
-
-				$this->db->select('MAX(CAST(SUBSTRING_INDEX(document_number, "-", -1) AS UNSIGNED)) AS max_num', false)
-					->from(db_prefix() . 'dms_items')
-					->where("document_number REGEXP '{$regex}'", null, false);
-
-				$row = $this->db->get()->row();
-				$next_num = isset($row->max_num) && is_numeric($row->max_num)
-					? ((int)$row->max_num + 1)
-					: 1;
-
-				// Build new document number with YOUR current prefix + next global number
+				// Build document number without numeric suffix
 				$document_number = implode('-', [
 					$project_code,
 					$discipline_code,
 					$design_stage_code,
 					$purpose_code,
-					$status_code,
-					str_pad($next_num, 3, '0', STR_PAD_LEFT)
+					$status_code
 				]);
 
 				$data['document_number'] = $document_number;
 			}
-
 
 			$this->db->where('id', $id);
 			$this->db->update(db_prefix() . 'dms_items', $data);
@@ -841,7 +867,7 @@ class drawing_management_model extends app_model
 					$ext          = isset($file_parts['extension']) ? ('.' . $file_parts['extension']) : '';
 
 					if ($basename !== '' && strpos($basename, $document_number) === false) {
-						$new_filename = $document_number .'-'. $basename . $ext;
+						$new_filename = $document_number . '-' . $basename . $ext;
 						$old_path = $upload_dir . $old_filename;
 						$new_path = $upload_dir . $new_filename;
 
@@ -862,7 +888,7 @@ class drawing_management_model extends app_model
 					$ext          = isset($file_parts['extension']) ? ('.' . $file_parts['extension']) : '';
 
 					if ($basename !== '' && strpos($basename, $document_number) === false) {
-						$new_filename = $document_number .'-'. $basename . $ext;
+						$new_filename = $document_number . '-' . $basename . $ext;
 						$old_path = $upload_dir . $old_filename;
 						$new_path = $upload_dir . $new_filename;
 
