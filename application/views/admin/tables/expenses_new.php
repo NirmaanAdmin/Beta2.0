@@ -10,6 +10,7 @@ $vendor_name = 'vendor';
 $CI = &get_instance();
 $CI->load->model('expenses_model');
 $CI->load->model('payment_modes_model');
+$CI->load->model('purchase/purchase_model');
 
 $hasPermissionEdit = staff_can('edit', 'expenses');
 $hasPermissionDelete = staff_can('delete', 'expenses');
@@ -82,6 +83,15 @@ if ($this->ci->input->post('payment_mode') && count($this->ci->input->post('paym
 
 if ($this->ci->input->post('vendor') && count($this->ci->input->post('vendor')) > 0) {
     array_push($where, 'AND vendor IN (' . implode(',', $this->ci->input->post('vendor')) . ')');
+}
+
+$custom_date_select = $this->ci->purchase_model->get_where_report_period('date');
+if ($custom_date_select != '') {
+    $custom_date_select = trim($custom_date_select);
+    if (!startsWith($custom_date_select, 'AND')) {
+        $custom_date_select = 'AND ' . $custom_date_select;
+    }
+    array_push($where, $custom_date_select);
 }
 
 $expense_category_name_value = !empty($this->ci->input->post('expense_category')) ? implode(',', $this->ci->input->post('expense_category')) : NULL;

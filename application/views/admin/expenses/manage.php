@@ -443,13 +443,22 @@
 
 <script>
   var table_rec_task;
+  var report_from_choose;
+  var report_from = $('input[name="report-from"]');
+  var report_to = $('input[name="report-to"]');
+  var date_range = $('#date-range');
   (function($) {
     table_rec_task = $('.table-expenses');
+    report_from_choose = $('#report-time');
 
     var Params = {
       "expense_category": "[name='expense_category[]']",
       "payment_mode": "[name='payment_mode[]']",
-      "vendor": "[name='vendor[]']"
+      "vendor": "[name='vendor[]']",
+      "report_months": '[name="months-report"]',
+      "report_from": '[name="report-from"]',
+      "report_to": '[name="report-to"]',
+      "year_requisition": "[name='year_requisition']",
     };
 
     initDataTable('.table-expenses', admin_url + 'expenses/table_expenses', [], [0], Params, [6, 'desc']);
@@ -465,6 +474,52 @@
       $('select' + obj).on('change', function() {
         table_rec_task.DataTable().ajax.reload();
       });
+    });
+
+    $('select[name="months-report"]').on('change', function() {
+      if ($(this).val() != 'custom') {
+        table_rec_task.DataTable().ajax.reload();
+      }
+    });
+
+    $('select[name="year_requisition"]').on('change', function() {
+      table_rec_task.DataTable().ajax.reload();
+    });
+
+    report_from.on('change', function() {
+      var val = $(this).val();
+      var report_to_val = report_to.val();
+      if (val != '') {
+        report_to.attr('disabled', false);
+        if (report_to_val != '') {
+          table_rec_task.DataTable().ajax.reload();
+        }
+      } else {
+        report_to.attr('disabled', true);
+      }
+    });
+
+    report_to.on('change', function() {
+      var val = $(this).val();
+      if (val != '') {
+        table_rec_task.DataTable().ajax.reload();
+      }
+    });
+
+    $('select[name="months-report"]').on('change', function() {
+      var val = $(this).val();
+      report_to.attr('disabled', true);
+      report_to.val('');
+      report_from.val('');
+      if (val == 'custom') {
+        date_range.addClass('fadeIn').removeClass('hide');
+        return;
+      } else {
+        if (!date_range.hasClass('hide')) {
+          date_range.removeClass('fadeIn').addClass('hide');
+        }
+      }
+      table_rec_task.DataTable().ajax.reload();
     });
 
     $(document).on('click', '.reset_all_ot_filters', function() {
