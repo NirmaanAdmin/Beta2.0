@@ -1417,14 +1417,14 @@ $('#unawarded_package_form').on('submit', function (e) {
             }).then((result) => {
                 if (result.isConfirmed) {
                     const $submitBtn = $form.find('button[type="submit"]');
-                    $submitBtn.prop('disabled', true).text('<?php echo _l('processing'); ?>');
+                    $submitBtn.prop('disabled', true).text('<?php echo _l('Processing'); ?>');
                     form.submit(); // use native submit to avoid recursion
                 }
             });
         });
     } else {
         const $submitBtn = $form.find('button[type="submit"]');
-        $submitBtn.prop('disabled', true).text('<?php echo _l('processing'); ?>');
+        $submitBtn.prop('disabled', true).text('<?php echo _l('Processing'); ?>');
         form.submit();
     }
 });
