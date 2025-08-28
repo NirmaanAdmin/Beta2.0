@@ -44,20 +44,20 @@
 	}
 
 	function calculate_package() {
-	  var total_unawarded_amount = 0,
+	  var total_item_amount = 0,
 	  total_package_amount = 0;
 	  var rows = $(".package-body table.items tbody .items");
 	  $.each(rows, function () {
 	    var row = $(this);
-	    var unawarded_qty = parseFloat(row.find(".all_unawarded_qty input").val()) || 0;
-	    var unawarded_rate = parseFloat(row.find(".all_unawarded_rate input").val()) || 0;
+	    var item_qty = parseFloat(row.find(".all_item_qty input").val()) || 0;
+	    var item_rate = parseFloat(row.find(".all_item_rate input").val()) || 0;
 	    var package_qty = parseFloat(row.find(".all_package_qty input").val()) || 0;
 	    var package_rate = parseFloat(row.find(".all_package_rate input").val()) || 0;
-	    var unawarded_amount = unawarded_qty * unawarded_rate;
+	    var item_amount = item_qty * item_rate;
 	    var package_amount = package_qty * package_rate;
-	    row.find(".all_unawarded_amount input").val(unawarded_amount.toFixed(2));
+	    row.find(".all_item_amount input").val(item_amount.toFixed(2));
 	    row.find(".all_package_amount input").val(package_amount.toFixed(2));
-	    total_unawarded_amount += unawarded_amount;
+	    total_item_amount += item_amount;
 	    total_package_amount += package_amount;
 	  });
 	  var sdeposit_percent = parseFloat($("input[name='sdeposit_percent']").val()) || 0;
@@ -68,12 +68,12 @@
 	    sdeposit_value = total_package_amount - package_without_secured;
 	  }
 	  var percentage_of_capex_used = 0;
-	  if(total_unawarded_amount > 0) {
-	    percentage_of_capex_used = (total_package_amount / total_unawarded_amount) * 100;
+	  if(total_item_amount > 0) {
+	    percentage_of_capex_used = (total_package_amount / total_item_amount) * 100;
 	    percentage_of_capex_used = Math.round(percentage_of_capex_used);
 	  }
 	  $(".percentage_of_capex_used").html(percentage_of_capex_used+'%');
-	  $(".total_unawarded_amount").html(format_money(total_unawarded_amount));
+	  $(".total_item_amount").html(format_money(total_item_amount));
 	  $(".total_package").html(
 	    format_money(total_package_amount) +
 	    hidden_input("total_package", total_package_amount)
@@ -226,7 +226,7 @@
 	  table_row +=
 	    '<tr class="items pack_items">';
 
-	  var unawarded_amount = data.unawarded_qty * data.unawarded_rate;
+	  var item_amount = data.item_qty * data.item_rate;
 	  var package_amount = data.package_qty * data.package_rate;
 
 	  var item_name = "newpackageitems[" + item_key + "][item_name]";
@@ -252,24 +252,27 @@
 	      '<td></td>';
 
 	    table_row +=
-	      '<td class="all_unawarded_qty"><input type="number" name="newpackageitems[' +
+	      '<td></td>';
+
+	    table_row +=
+	      '<td class="all_item_qty"><input type="number" name="newpackageitems[' +
 	      item_key +
-	      '][unawarded_qty]" value="' +
-	      data.unawarded_qty +
+	      '][item_qty]" value="' +
+	      data.item_qty +
 	      '" class="form-control" readonly></td>';
 
 	    table_row +=
-	      '<td class="all_unawarded_rate"><input type="number" name="newpackageitems[' +
+	      '<td class="all_item_rate"><input type="number" name="newpackageitems[' +
 	      item_key +
-	      '][unawarded_rate]" value="' +
-	      data.unawarded_rate +
+	      '][item_rate]" value="' +
+	      data.item_rate +
 	      '" class="form-control" readonly></td>';
 
 	    table_row +=
-	      '<td class="all_unawarded_amount"><input type="number" name="newpackageitems[' +
+	      '<td class="all_item_amount"><input type="number" name="newpackageitems[' +
 	      item_key +
-	      '][unawarded_amount]" value="' +
-	      unawarded_amount +
+	      '][item_amount]" value="' +
+	      item_amount +
 	      '" class="form-control" readonly></td>';
 
 	    table_row +=
@@ -348,9 +351,9 @@
 	  var tab = $('.package-body table.items tbody');
 	  response.item_name = tab.find('select[name="item_name"]').val();
 	  response.long_description = tab.find('textarea[name="long_description"]').val();
-	  response.unawarded_qty = tab.find('input[name="unawarded_qty"]').val();
-	  response.unawarded_rate = tab.find('input[name="unawarded_rate"]').val();
-	  response.unawarded_amount = tab.find('input[name="unawarded_amount"]').val();
+	  response.item_qty = tab.find('input[name="item_qty"]').val();
+	  response.item_rate = tab.find('input[name="item_rate"]').val();
+	  response.item_amount = tab.find('input[name="item_amount"]').val();
 	  response.package_qty = tab.find('input[name="package_qty"]').val();
 	  response.package_rate = tab.find('input[name="package_rate"]').val();
 	  response.package_amount = tab.find('input[name="package_amount"]').val();

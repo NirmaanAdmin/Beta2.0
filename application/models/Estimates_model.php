@@ -2092,8 +2092,6 @@ class Estimates_model extends App_Model
         $unawarded_budget_head = $this->get_estimate_budget_listing($estimates->id);
         $unawarded_subhead = $this->get_estimate_subhead_listing($estimates->id);
         $unawarded_area = $this->get_estimate_area_listing($estimates->id);
-        $this->db->order_by('id', 'desc');
-        $all_packages = $this->db->get(db_prefix() . 'estimate_package_info')->result_array();
         if (!empty($unawarded_budget_head)) {
             if (empty($unawarded_budget)) {
                 $unawarded_budget = isset($unawarded_budget_head[0]) ? $unawarded_budget_head[0]['annexure'] : '';
@@ -2172,6 +2170,11 @@ class Estimates_model extends App_Model
             }
             $this->db->group_by(db_prefix() . 'itemable.id');
             $unawarded_budget_itemable = $this->db->get()->result_array();
+
+            $this->db->order_by('id', 'desc');
+            $this->db->where('estimate_id', $estimates->id);
+            $this->db->where('budget_head', $unawarded_budget);
+            $all_packages = $this->db->get(db_prefix() . 'estimate_package_info')->result_array();
 
             if (!empty($unawarded_budget_itemable)) {
                 $itemhtml .= '<div class="table-responsive s_table">';
@@ -2338,6 +2341,26 @@ class Estimates_model extends App_Model
                     $this->db->where('item_id', $value['item_id']);
                     $this->db->where_in('package_id', $removed);
                     $this->db->delete(db_prefix() . 'estimate_package_items_info');
+
+                    foreach ($removed as $rkey => $rvalue) {
+                        $this->db->where('id', $rvalue);
+                        $estimate_package_info = $this->db->get(db_prefix() . 'estimate_package_info')->row();
+                        $this->db->select('SUM(package_qty * package_rate) AS total_amount');
+                        $this->db->where_in('package_id', $removed);
+                        $estimate_package_items_info_query = $this->db->get(db_prefix() . 'estimate_package_items_info');
+                        $estimate_package_items_info_data = $estimate_package_items_info_query->row_array();
+                        $total_amount = $estimate_package_items_info_data['total_amount'] ?? 0.00;
+                        $total_package = !empty($estimate_package_info->sdeposit_percent)
+                        ? $total_amount + ($total_amount * ($estimate_package_info->sdeposit_percent / 100))
+                        : $total_amount;
+                        $sdeposit_value = $total_package - $total_amount;
+
+                        $this->db->where('id', $rvalue);
+                        $this->db->update(db_prefix() . 'estimate_package_info', [
+                            'sdeposit_value' => $sdeposit_value,
+                            'total_package' => $total_package,
+                        ]);
+                    }
                 }
             }
         }
@@ -2370,6 +2393,7 @@ class Estimates_model extends App_Model
                     $package_budget = $package_info->budget_head;
                 }
                 $budgetsummaryhtml .= '<div class="row">';
+                $budgetsummaryhtml .= form_hidden('estimate_id', $estimates->id);
                 $budgetsummaryhtml .= '<div class="col-md-12" style="padding-left:0px;">';
                 $budgetsummaryhtml .= '<div class="col-md-2 form-group">';
                 $budgetsummaryhtml .= '<label for="package_budget_head" class="control-label">' . _l('Budget Head') . '</label>';
@@ -2417,44 +2441,44 @@ class Estimates_model extends App_Model
                 $budgetsummaryhtml .= '</div>';
             }
 
-            $this->db->select(
-                db_prefix() . 'itemable.*,' .
-                    db_prefix() . 'unawarded_budget_info.unawarded_qty,' .
-                    db_prefix() . 'unawarded_budget_info.unawarded_rate'
-            );
-            $this->db->from(db_prefix() . 'itemable');
-            $this->db->join(db_prefix() . 'unawarded_budget_info', db_prefix() . 'unawarded_budget_info.item_id = ' . db_prefix() . 'itemable.id', 'left');
-            $this->db->where('rel_id', $estimates->id);
-            $this->db->where('rel_type', 'estimate');
-            $this->db->where('annexure', $package_budget);
-            $this->db->group_by(db_prefix() . 'itemable.id');
-            $unawarded_budget_itemable = $this->db->get()->result_array();
-            $total_budgeted_amount = 0;
-            if (!empty($unawarded_budget_itemable)) {
-                $total_budgeted_amount = array_reduce($unawarded_budget_itemable, function ($carry, $item) {
-                    return $carry + ($item['qty'] * $item['rate']);
-                }, 0);
+            $package_items = array();
+            if(!empty($package_id)) {
+                $this->db->select(
+                    db_prefix() . 'itemable.qty,' .
+                    db_prefix() . 'itemable.rate,' .
+                    db_prefix() . 'itemable.unit_id,' .
+                    db_prefix() . 'itemable.item_code,' .
+                    db_prefix() . 'itemable.long_description,' .
+                    db_prefix() . 'itemable.sub_head,' .
+                    db_prefix() . 'itemable.area,' .
+                    db_prefix() . 'estimate_package_items_info.*'
+                );
+                $this->db->from(db_prefix() . 'estimate_package_items_info');
+                $this->db->join(db_prefix() . 'itemable', db_prefix() . 'itemable.id = ' . db_prefix() . 'estimate_package_items_info.item_id', 'left');
+                $this->db->where('package_id', $package_id);
+                $this->db->group_by(db_prefix() . 'estimate_package_items_info.id');
+                $package_items = $this->db->get()->result_array();
             }
-            if (!empty($unawarded_budget_itemable)) {
+            if(!empty($package_id)) {
                 $itemhtml .= '<div class="table-responsive s_table">';
                 $itemhtml .= '<table class="table items">';
                 $itemhtml .= '<thead>
                     <tr>
                         <th width="11%" align="left">' . _l('estimate_table_item_heading') . '</th>
                         <th width="14%" align="left">' . _l('estimate_table_item_description') . '</th>
+                        <th width="9%" align="left">' . _l('area') . '</th>
                         <th width="9%" align="left">' . _l('sub_groups_pur') . '</th>
-                        <th width="9%" align="right">Unawarded Quantity</th>
-                        <th width="9%" align="right">Unawarded Rate</th>
-                        <th width="9%" align="right">Unawarded Amount</th>
-                        <th width="9%" align="right">Package Quantity</th>
-                        <th width="9%" align="right">Package Rate</th>
-                        <th width="9%" align="right">Package Amount</th>
+                        <th width="8%" align="right">' . _l('budgeted_qty') . '</th>
+                        <th width="8%" align="right">' . _l('budgeted_rate') . '</th>
+                        <th width="8%" align="right">' . _l('budgeted_amount') . '</th>
+                        <th width="8%" align="right">Package Quantity</th>
+                        <th width="8%" align="right">Package Rate</th>
+                        <th width="8%" align="right">Package Amount</th>
                         <th width="9%" align="right">Remarks</th>
                         <th align="center"><i class="fa fa-cog"></i></th>
                     </tr>
                 </thead>';
                 $itemhtml .= '<tbody style="border: 1px solid #ddd;">';
-                $itemhtml .= form_hidden('estimate_id', $estimates->id);
                 $itemhtml .= form_hidden('package_id', $package_id);
                 $itemhtml .= '<tr>';
                 $itemhtml .= '<td align="left">
@@ -2472,9 +2496,10 @@ class Estimates_model extends App_Model
                     </textarea>
                 </td>';
                 $itemhtml .= '<td align="left"></td>';
-                $itemhtml .= '<td align="right">' . render_input('unawarded_qty', '', 0.00, 'number', ['readonly' => true]) . '</td>';
-                $itemhtml .= '<td align="right">' . render_input('unawarded_rate', '', 0.00, 'number', ['readonly' => true]) . '</td>';
-                $itemhtml .= '<td align="right">' . render_input('unawarded_amount', '', 0.00, 'number', ['readonly' => true]) . '</td>';
+                $itemhtml .= '<td align="left"></td>';
+                $itemhtml .= '<td align="right">' . render_input('item_qty', '', 0.00, 'number', ['readonly' => true]) . '</td>';
+                $itemhtml .= '<td align="right">' . render_input('item_rate', '', 0.00, 'number', ['readonly' => true]) . '</td>';
+                $itemhtml .= '<td align="right">' . render_input('item_amount', '', 0.00, 'number', ['readonly' => true]) . '</td>';
                 $itemhtml .= '<td align="right">' . render_input('package_qty', '', 0.00, 'number') . '</td>';
                 $itemhtml .= '<td align="right">' . render_input('package_rate', '', 0.00, 'number') . '</td>';
                 $itemhtml .= '<td align="right">' . render_input('package_amount', '', 0.00, 'number', ['readonly' => true]) . '</td>';
@@ -2485,107 +2510,99 @@ class Estimates_model extends App_Model
                     </button>
                 </td>';
                 $itemhtml .= '</tr>';
-                foreach ($unawarded_budget_itemable as $key => $item) {
-                    $package_items_info = array();
-                    if (!empty($package_id)) {
-                        $this->db->where('package_id', $package_id);
-                        $this->db->where('item_id', $item['id']);
-                        $package_items_info = $this->db->get(db_prefix() . 'estimate_package_items_info')->row();
-                    }
-                    $unawarded_qty = !empty($item['unawarded_qty']) ? number_format($item['unawarded_qty'], 2, '.', '') : 0.00;
-                    $unawarded_rate = !empty($item['unawarded_rate']) ? number_format($item['unawarded_rate'], 2, '.', '') : 0.00;
-                    $unawarded_amount = number_format($unawarded_qty * $unawarded_rate, 2, '.', '');
-                    $item_id_name_attr = "items[$key][item_id]";
-                    $unawarded_qty_name_attr = "items[$key][unawarded_qty]";
-                    $unawarded_unit_name_attr = "items[$key][unawarded_unit]";
-                    $unawarded_rate_name_attr = "items[$key][unawarded_rate]";
-                    $unawarded_amount_name_attr = "items[$key][unawarded_amount]";
-                    $package_qty_name_attr = "items[$key][package_qty]";
-                    $package_unit_name_attr = "items[$key][package_unit]";
-                    $package_rate_name_attr = "items[$key][package_rate]";
-                    $package_amount_name_attr = "items[$key][package_amount]";
-                    $package_remarks_name_attr = "items[$key][remarks]";
+                if(!empty($package_items)) {
+                    foreach ($package_items as $key => $item) {
+                        $item_qty = !empty($item['qty']) ? number_format($item['qty'], 2, '.', '') : 0.00;
+                        $item_rate = !empty($item['rate']) ? number_format($item['rate'], 2, '.', '') : 0.00;
+                        $item_amount = number_format($item_qty * $item_rate, 2, '.', '');
+                        $item_id_name_attr = "items[$key][item_id]";
+                        $item_qty_name_attr = "items[$key][item_qty]";
+                        $item_unit_name_attr = "items[$key][item_unit]";
+                        $item_rate_name_attr = "items[$key][item_rate]";
+                        $item_amount_name_attr = "items[$key][item_amount]";
+                        $package_qty_name_attr = "items[$key][package_qty]";
+                        $package_unit_name_attr = "items[$key][package_unit]";
+                        $package_rate_name_attr = "items[$key][package_rate]";
+                        $package_amount_name_attr = "items[$key][package_amount]";
+                        $package_remarks_name_attr = "items[$key][remarks]";
 
-                    $itemhtml .= form_hidden($item_id_name_attr, $item['id']);
-                    $itemhtml .= '<tr class="items">';
-                    $itemhtml .= '<td align="left">' . get_purchase_items($item['item_code']) . '</td>';
-                    $itemhtml .= '<td align="left">' . clear_textarea_breaks($item['long_description']) . '</td>';
-                    $itemhtml .= '<td align="left">' . get_sub_head_name_by_id($item['sub_head']) . '</td>';
-                    $itemhtml .= '<td class="all_unawarded_qty" style="text-align: left;">
-                        <input type="number" 
-                           id="' . $unawarded_qty_name_attr . '" 
-                           name="' . $unawarded_qty_name_attr . '" 
-                           value="' . $unawarded_qty . '" 
-                           class="form-control" 
-                           readonly>
-                        <span style="text-align: left; display: block;">' .
-                        (!empty($item['unit_id']) ? pur_get_unit_name($item['unit_id']) : '') .
-                        '</span>
-                    </td>';
-                    $itemhtml .= '<td align="right" class="all_unawarded_rate">' . render_input($unawarded_rate_name_attr, '', $unawarded_rate, 'number', ['readonly' => true]) . '</td>';
-                    $itemhtml .= '<td align="right" class="all_unawarded_amount">' . render_input($unawarded_amount_name_attr, '', $unawarded_amount, 'number', ['readonly' => true]) . '</td>';
-                    $itemhtml .= '<td align="right" class="all_package_qty">
-                        <input type="number" id="' . $package_qty_name_attr . '" 
-                           name="' . $package_qty_name_attr . '" 
-                           value="' . (!empty($package_items_info) ? $package_items_info->package_qty : '0.00') . '" 
-                           class="form-control" 
-                           onchange="calculate_package()" 
-                           step="any">
-                        <span style="text-align: left; display: block;">' .
-                        (!empty($item['unit_id']) ? pur_get_unit_name($item['unit_id']) : '') .
-                        '</span>
-                    </td>';
-                    $itemhtml .= '<td align="right" class="all_package_rate">' . render_input($package_rate_name_attr, '', !empty($package_items_info) ? $package_items_info->package_rate : 0.00, 'number', ['onchange' => 'calculate_package()', 'step' => 'any']) . '</td>';
-                    $itemhtml .= '<td align="right" class="all_package_amount">' . render_input($package_amount_name_attr, '', 0.00, 'number', ['readonly' => true]) . '</td>';
-                    $itemhtml .= '<td align="right">' . render_textarea($package_remarks_name_attr, '', !empty($package_items_info) ? $package_items_info->remarks : '', ['rows' => 2]) . '</td>';
-                    $itemhtml .= '<td align="center"></td>';
-                    $itemhtml .= '</tr>';
+                        $itemhtml .= form_hidden($item_id_name_attr, $item['item_id']);
+                        $itemhtml .= '<tr class="items">';
+                        $itemhtml .= '<td align="left">' . get_purchase_items($item['item_code']) . '</td>';
+                        $itemhtml .= '<td align="left">' . clear_textarea_breaks($item['long_description']) . '</td>';
+                        $itemhtml .= '<td align="left">' . get_area_name_by_id($item['area']) . '</td>';
+                        $itemhtml .= '<td align="left">' . get_sub_head_name_by_id($item['sub_head']) . '</td>';
+                        $itemhtml .= '<td class="all_item_qty" style="text-align: left;">
+                            <input type="number" 
+                               id="' . $item_qty_name_attr . '" 
+                               name="' . $item_qty_name_attr . '" 
+                               value="' . $item_qty . '" 
+                               class="form-control" 
+                               readonly>
+                            <span style="text-align: left; display: block;">' .
+                            (!empty($item['unit_id']) ? pur_get_unit_name($item['unit_id']) : '') .
+                            '</span>
+                        </td>';
+                        $itemhtml .= '<td align="right" class="all_item_rate">' . render_input($item_rate_name_attr, '', $item_rate, 'number', ['readonly' => true]) . '</td>';
+                        $itemhtml .= '<td align="right" class="all_item_amount">' . render_input($item_amount_name_attr, '', $item_amount, 'number', ['readonly' => true]) . '</td>';
+                        $itemhtml .= '<td align="right" class="all_package_qty">
+                            <input type="number" id="' . $package_qty_name_attr . '" 
+                               name="' . $package_qty_name_attr . '" 
+                               value="' . (!empty($item['package_qty']) ? $item['package_qty'] : '0.00') . '" 
+                               class="form-control" 
+                               onchange="calculate_package()" 
+                               step="any">
+                            <span style="text-align: left; display: block;">' .
+                            (!empty($item['unit_id']) ? pur_get_unit_name($item['unit_id']) : '') .
+                            '</span>
+                        </td>';
+                        $itemhtml .= '<td align="right" class="all_package_rate">' . render_input($package_rate_name_attr, '', !empty($item['package_rate']) ? $item['package_rate'] : 0.00, 'number', ['onchange' => 'calculate_package()', 'step' => 'any']) . '</td>';
+                        $itemhtml .= '<td align="right" class="all_package_amount">' . render_input($package_amount_name_attr, '', 0.00, 'number', ['readonly' => true]) . '</td>';
+                        $itemhtml .= '<td align="right">' . render_textarea($package_remarks_name_attr, '', !empty($item['remarks']) ? $item['remarks'] : '', ['rows' => 2]) . '</td>';
+                        $itemhtml .= '<td align="center"></td>';
+                        $itemhtml .= '</tr>';
+                    }
                 }
                 $itemhtml .= '</tbody>';
                 $itemhtml .= '</table>';
                 $itemhtml .= '</div>';
+
+                $itemhtml .= '<div class="col-md-8 col-md-offset-4">
+                    <table class="table text-right">
+                        <tbody>
+                            <tr>
+                                <td width="75%"><span class="bold tw-text-neutral-700">Total Budgeted Amount :</span>
+                                </td>
+                                <td width="25%" class="total_item_amount"></td>
+                            </tr>
+                            <tr>
+                                <td width="75%"><span class="bold tw-text-neutral-700">Secured Deposit :</span>
+                                </td>
+                                <td width="25%">
+                                    <div class="input-group date">
+                                        <input type="number" id="sdeposit_percent" name="sdeposit_percent" class="form-control" value="' . (!empty($package_info) ? $package_info->sdeposit_percent : 0) . '" autocomplete="off" min="0" max="100" onchange="calculate_package()">
+                                        <div class="input-group-addon">
+                                            %
+                                        </div>
+                                    </div>
+                                    <div class="sdeposit_value"></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="75%"><span class="bold tw-text-neutral-700">Total Package Amount :</span>
+                                </td>
+                                <td width="25%" class="total_package"></td>
+                            </tr>
+                            <tr>
+                                <td width="75%"><span class="bold tw-text-neutral-700">Percentage of Capex Used :</span>
+                                </td>
+                                <td width="25%" class="percentage_of_capex_used"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>';
             }
         }
-
-        $itemhtml .= '<div class="col-md-8 col-md-offset-4">
-            <table class="table text-right">
-                <tbody>
-                    <tr>
-                        <td><span class="bold tw-text-neutral-700">Total Budgeted Amount :</span>
-                        </td>
-                        <td>' . app_format_money($total_budgeted_amount, $base_currency) . '</td>
-                    </tr>
-                    <tr>
-                        <td width="75%"><span class="bold tw-text-neutral-700">Total Unawarded Amount :</span>
-                        </td>
-                        <td width="25%" class="total_unawarded_amount"></td>
-                    </tr>
-                    <tr>
-                        <td width="75%"><span class="bold tw-text-neutral-700">Secured Deposit :</span>
-                        </td>
-                        <td width="25%">
-                            <div class="input-group date">
-                                <input type="number" id="sdeposit_percent" name="sdeposit_percent" class="form-control" value="' . (!empty($package_info) ? $package_info->sdeposit_percent : 0) . '" autocomplete="off" min="0" max="100" onchange="calculate_package()">
-                                <div class="input-group-addon">
-                                    %
-                                </div>
-                            </div>
-                            <div class="sdeposit_value"></div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td width="75%"><span class="bold tw-text-neutral-700">Total Package Amount :</span>
-                        </td>
-                        <td width="25%" class="total_package"></td>
-                    </tr>
-                    <tr>
-                        <td width="75%"><span class="bold tw-text-neutral-700">Percentage of Capex Used :</span>
-                        </td>
-                        <td width="25%" class="percentage_of_capex_used"></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>';
 
         $response = ['budgetsummaryhtml' => $budgetsummaryhtml, 'itemhtml' => $itemhtml];
         return $response;
@@ -2911,9 +2928,9 @@ class Estimates_model extends App_Model
         $budget_head = isset($data['package_budget_head']) ? $data['package_budget_head'] : NULL;
         $project_awarded_date = isset($data['project_awarded_date']) ? $data['project_awarded_date'] : NULL;
         $package_name = isset($data['package_name']) ? $data['package_name'] : NULL;
-        $sdeposit_percent = isset($data['sdeposit_percent']) ? $data['sdeposit_percent'] : NULL;
-        $sdeposit_value = isset($data['sdeposit_value']) ? $data['sdeposit_value'] : NULL;
-        $total_package = isset($data['total_package']) ? $data['total_package'] : NULL;
+        $sdeposit_percent = isset($data['sdeposit_percent']) ? $data['sdeposit_percent'] : 0.00;
+        $sdeposit_value = isset($data['sdeposit_value']) ? $data['sdeposit_value'] : 0.00;
+        $total_package = isset($data['total_package']) ? $data['total_package'] : 0.00;
         $newpackageitems = isset($data['newpackageitems']) ? $data['newpackageitems'] : array();
         $kind = isset($data['kind']) ? $data['kind'] : NULL;
         $rli_filter = isset($data['rli_filter']) ? $data['rli_filter'] : NULL;
@@ -3119,7 +3136,6 @@ class Estimates_model extends App_Model
                         'remarks' => $value['remarks'],
                         'description' => $value['long_description'],
                         'sub_head' => $value['sub_head'] ?? '', // Assuming sub_head is
-                        'hash' => app_generate_hash(),
                     ]);
                 }
             }
