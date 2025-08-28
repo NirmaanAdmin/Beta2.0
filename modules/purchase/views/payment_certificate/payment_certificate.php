@@ -300,14 +300,14 @@
                               <td>C1</td>
                               <td class="mobilization_advance_class">
                                 <?php echo _l('mobilization_advance'); ?>
-                                <select name="mobilization_advance" id="mobilization_advance" class="selectpicker" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>" onchange="calculate_payment_certificate()">
+                                <!-- <select name="mobilization_advance" id="mobilization_advance" class="selectpicker" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>" onchange="calculate_payment_certificate()">
                                   <option value="0%" <?php if (isset($payment_certificate) && $payment_certificate->mobilization_advance == '0%') {
                                                         echo 'selected';
                                                       } ?>>0%</option>
                                   <option value="2.5%" <?php if (isset($payment_certificate) && $payment_certificate->mobilization_advance == '2.5%') {
                                                           echo 'selected';
                                                         } ?>>2.5%</option>
-                                </select>
+                                </select> -->
                                 as per clause
                                 <?php
                                 $payment_clause = (isset($payment_certificate) ? $payment_certificate->payment_clause  : '14.2');
