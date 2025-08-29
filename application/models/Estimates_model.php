@@ -2186,17 +2186,21 @@ class Estimates_model extends App_Model
                         <th align="left">' . _l('area') . '</th>
                         <th align="left">' . _l('sub_groups_pur') . '</th>
                         <th align="left" width="8%">' . _l('budgeted_qty') . '</th>
-                        <th align="left" width="8%">Remaining Quantity In Budget</th>
                         <th align="left" width="8%">' . _l('budgeted_rate') . '</th>
                         <th align="left" width="8%">' . _l('budgeted_amount') . '</th>
                         <th align="left" width="16%">Packages</th>
+                        <th align="left" width="8%">Remaining Amount In Budget</th>
+                        <th align="left" width="8%">Amount Booked In Package</th>
+                        <th align="left" width="8%">Amount Booked In Order</th>
                     </tr>
                 </thead>';
                 $itemhtml .= '<tbody style="border: 1px solid #ddd;">';
                 $itemhtml .= form_hidden('estimate_id', $estimates->id);
                 foreach ($unawarded_budget_itemable as $key => $item) {
-                    $non_break_description = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $item['long_description']));
-                    $this->db->select(db_prefix() . 'pur_order_detail.id as id, ' . db_prefix() . 'pur_order_detail.quantity as quantity, ' . db_prefix() . 'pur_order_detail.total as total');
+                    $non_break_description = strip_tags(
+                        str_replace(["\r", "\n", "<br />", "<br/>"], '', $item['long_description'])
+                    );
+                    $this->db->select('SUM(' . db_prefix() . 'pur_order_detail.total) AS total', false);
                     $this->db->select("
                         REPLACE(
                             REPLACE(
@@ -2205,43 +2209,58 @@ class Estimates_model extends App_Model
                                 '\n', ''),
                             '<br />', ''),
                         '<br/>', '') AS non_break_description
-                    ");
+                    ", false);
                     $this->db->from(db_prefix() . 'pur_order_detail');
-                    $this->db->join(db_prefix() . 'pur_orders', db_prefix() . 'pur_orders.id = ' . db_prefix() . 'pur_order_detail.pur_order', 'left');
+                    $this->db->join(
+                        db_prefix() . 'pur_orders',
+                        db_prefix() . 'pur_orders.id = ' . db_prefix() . 'pur_order_detail.pur_order',
+                        'left'
+                    );
                     $this->db->where(db_prefix() . 'pur_order_detail.item_code', $item['item_code']);
                     $this->db->where(db_prefix() . 'pur_orders.estimate', $estimates->id);
                     $this->db->where(db_prefix() . 'pur_orders.group_pur', $unawarded_budget);
                     $this->db->where(db_prefix() . 'pur_orders.approve_status', 2);
-                    $this->db->where(db_prefix() . 'pur_order_detail.quantity' . ' >', 0, false);
-                    $this->db->where(db_prefix() . 'pur_order_detail.total' . ' >', 0, false);
-                    $this->db->group_by(db_prefix() . 'pur_order_detail.id');
+                    $this->db->where(db_prefix() . 'pur_order_detail.quantity >', 0);
+                    $this->db->where(db_prefix() . 'pur_order_detail.total >', 0);
+                    $this->db->group_by('non_break_description');  
                     $this->db->having('non_break_description', $non_break_description);
-                    $pur_order_detail = $this->db->get()->result_array();
+                    $query = $this->db->get();
+                    $pur_order_detail = $query->row_array();
+                    $booked_in_order = $pur_order_detail['total'] ?? 0;
+                    $booked_in_order = number_format($booked_in_order, 2, '.', '');
+
+                    $this->db->select('SUM(' . db_prefix() . 'estimate_package_items_info.package_qty * ' . db_prefix() . 'estimate_package_items_info.package_rate) AS total', false);
+                    $this->db->from(db_prefix() . 'estimate_package_items_info');
+                    $this->db->join(
+                        db_prefix() . 'estimate_package_info',
+                        db_prefix() . 'estimate_package_info.id = ' . db_prefix() . 'estimate_package_items_info.package_id',
+                        'left'
+                    );
+                    $this->db->where(db_prefix() . 'estimate_package_info.estimate_id', $estimates->id);
+                    $this->db->where(db_prefix() . 'estimate_package_info.budget_head', $unawarded_budget);
+                    $this->db->where(db_prefix() . 'estimate_package_items_info.item_id', $item['id']);
+                    $query = $this->db->get();
+                    $package_items_info = $query->row_array();
+                    $booked_in_package = $package_items_info['total'] ?? 0;
+                    $booked_in_package = number_format($booked_in_package, 2, '.', '');
 
                     $budgeted_qty = number_format($item['qty'], 2, '.', '');
                     $budgeted_rate = number_format($item['rate'], 2, '.', '');
                     $budgeted_amount = number_format($budgeted_qty * $budgeted_rate, 2, '.', '');
-                    $remaining_qty_budget = $budgeted_qty;
                     $packages = !empty($item['packages']) ? explode(',', $item['packages']) : array();
+                    $remaining_amount = $budgeted_amount - $booked_in_order;
+                    $remaining_amount = number_format($remaining_amount, 2, '.', '');
                     
-                    if (!empty($pur_order_detail)) {
-                        $pur_detail_quantity = 0;
-                        $pur_detail_amount = 0;
-                        foreach ($pur_order_detail as $srow) {
-                            $pur_detail_quantity += (float)$srow['quantity'];
-                            $pur_detail_amount += (float)$srow['total'];
-                        }
-                        $remaining_qty_budget = $budgeted_qty - $pur_detail_quantity;
-                        $remaining_qty_budget = number_format($remaining_qty_budget, 2, '.', '');
-                    }
                     $item_id_name_attr = "newitems[$key][item_id]";
                     $budgeted_qty_name_attr = "newitems[$key][budgeted_qty]";
-                    $remaining_qty_budget_name_attr = "newitems[$key][remaining_qty_budget]";
                     $budgeted_unit_name_attr = "newitems[$key][budgeted_unit]";
                     $budgeted_rate_name_attr = "newitems[$key][budgeted_rate]";
                     $budgeted_amount_name_attr = "newitems[$key][budgeted_amount]";
                     $old_packages_name_attr = "newitems[$key][old_packages]";
                     $packages_name_attr = "newitems[$key][packages][]";
+                    $remaining_amount_name_attr = "newitems[$key][remaining_amount]";
+                    $booked_in_package_name_attr = "newitems[$key][booked_in_package]";
+                    $booked_in_order_name_attr = "newitems[$key][booked_in_order]";
 
                     $itemhtml .= form_hidden($item_id_name_attr, $item['id']);
                     $old_packages = !empty($item['packages']) ? explode(',', $item['packages']) : [];
@@ -2266,10 +2285,12 @@ class Estimates_model extends App_Model
                         (!empty($item['unit_id']) ? pur_get_unit_name($item['unit_id']) : '') .
                         '</span>
                     </td>';
-                    $itemhtml .= '<td align="left" class="all_remaining_qty_budget">' . render_input($remaining_qty_budget_name_attr, '', $remaining_qty_budget, 'number', ['readonly' => true]) . '</td>';
                     $itemhtml .= '<td align="left" class="all_budgeted_rate">' . render_input($budgeted_rate_name_attr, '', $budgeted_rate, 'number', ['readonly' => true]) . '</td>';
                     $itemhtml .= '<td align="left" class="all_budgeted_amount">' . render_input($budgeted_amount_name_attr, '', $budgeted_amount, 'number', ['readonly' => true]) . '</td>';
                     $itemhtml .= '<td align="left" class="all_packages">' . render_select($packages_name_attr, $all_packages, array('id', 'package_name'), '', $packages, array('data-width' => '100%', 'data-none-selected-text' => _l('None'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false) . '</td>';
+                    $itemhtml .= '<td align="left" class="all_remaining_amount">' . render_input($remaining_amount_name_attr, '', $remaining_amount, 'number', ['readonly' => true]) . '</td>';
+                    $itemhtml .= '<td align="left" class="all_booked_in_package">' . render_input($booked_in_package_name_attr, '', $booked_in_package, 'number', ['readonly' => true]) . '</td>';
+                    $itemhtml .= '<td align="left" class="all_booked_in_order">' . render_input($booked_in_order_name_attr, '', $booked_in_order, 'number', ['readonly' => true]) . '</td>';
                     $itemhtml .= '</tr>';
                 }
                 $itemhtml .= '</tbody>';
