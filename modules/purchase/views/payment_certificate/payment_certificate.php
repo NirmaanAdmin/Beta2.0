@@ -61,6 +61,7 @@
     cursor: move;
     position: relative;
   }
+
   .draggerer::after {
     content: "☰";
     position: absolute;
@@ -69,6 +70,7 @@
     transform: translateY(-50%);
     opacity: 0.4;
   }
+
   .draggerer:hover::after {
     opacity: 0.8;
   }
@@ -119,24 +121,24 @@
                     <?php
                     if (isset($payment_certificate)) { ?>
                       <li role="presentation">
-                         <a href="#tab_notes" onclick="get_pc_notes(<?php echo pur_html_entity_decode($payment_certificate->id); ?>,'po_payment_certificate'); return false" aria-controls="tab_notes" role="tab" data-toggle="tab">
-                            <?php echo _l('estimate_notes'); ?>
-                            <span class="notes-total">
-                               <?php $totalNotes = total_rows(db_prefix() . 'notes', ['rel_id' => $estimate->id, 'rel_type' => 'purchase_order']);
-                               if ($totalNotes > 0) { ?>
-                                  <span class="badge"><?php echo ($totalNotes); ?></span>
-                               <?php } ?>
-                            </span>
-                         </a>
+                        <a href="#tab_notes" onclick="get_pc_notes(<?php echo pur_html_entity_decode($payment_certificate->id); ?>,'po_payment_certificate'); return false" aria-controls="tab_notes" role="tab" data-toggle="tab">
+                          <?php echo _l('estimate_notes'); ?>
+                          <span class="notes-total">
+                            <?php $totalNotes = total_rows(db_prefix() . 'notes', ['rel_id' => $estimate->id, 'rel_type' => 'purchase_order']);
+                            if ($totalNotes > 0) { ?>
+                              <span class="badge"><?php echo ($totalNotes); ?></span>
+                            <?php } ?>
+                          </span>
+                        </a>
                       </li>
                       <li role="presentation">
-                       <?php
-                       $totalComments = total_rows(db_prefix() . 'payment_certificate_comments', ['rel_id' => $payment_certificate->id, 'rel_type' => 'po_payment_certificate']);
-                       ?>
-                       <a href="#discuss" aria-controls="discuss" role="tab" data-toggle="tab">
+                        <?php
+                        $totalComments = total_rows(db_prefix() . 'payment_certificate_comments', ['rel_id' => $payment_certificate->id, 'rel_type' => 'po_payment_certificate']);
+                        ?>
+                        <a href="#discuss" aria-controls="discuss" role="tab" data-toggle="tab">
                           <?php echo _l('pur_discuss'); ?>
                           <span class="badge comments-indicator<?php echo $totalComments == 0 ? ' hide' : ''; ?>"><?php echo $totalComments; ?></span>
-                       </a>
+                        </a>
                       </li>
                     <?php } ?>
                   </ul>
@@ -240,6 +242,7 @@
                         <label><input type="checkbox" class="column-toggle" data-column="3" checked=""> <?php echo _l('previous'); ?></label><br>
                         <label><input type="checkbox" class="column-toggle" data-column="4" checked=""> <?php echo _l('this_bill'); ?></label><br>
                         <label><input type="checkbox" class="column-toggle" data-column="5" checked=""> <?php echo _l('comulative'); ?></label><br>
+                        <label><input type="checkbox" class="column-toggle" data-column="6" checked=""> <?php echo _l('remarks'); ?></label><br>
                       </div>
                     </span>
                     <span style="padding: 0px;">
@@ -254,11 +257,12 @@
                           <thead>
                             <tr>
                               <th width="5%"><?php echo _l('serial_no'); ?></th>
-                              <th width="43%"><?php echo _l('decription'); ?></th>
+                              <th width="30%"><?php echo _l('decription'); ?></th>
                               <th width="13%"><?php echo _l('contract_amount'); ?></th>
                               <th width="13%"><?php echo _l('previous'); ?></th>
                               <th width="13%"><?php echo _l('this_bill'); ?></th>
                               <th width="13%"><?php echo _l('comulative'); ?></th>
+                              <th width="20%"><?php echo _l('remarks'); ?></th>
                             </tr>
                           </thead>
                           <tbody class="payment_certificate_body">
@@ -279,6 +283,12 @@
                                 ?>
                               </td>
                               <td class="po_comulative" style="text-align:right"></td>
+                              <td>
+                                <?php
+                                $a1_remarks = (isset($payment_certificate) ? $payment_certificate->a1_remarks : '');
+                                echo render_textarea('a1_remarks', '', $a1_remarks, ['rows' => 1]);
+                                ?>
+                              </td>
                             </tr>
                             <tr class="table_head">
                               <td>A</td>
@@ -287,10 +297,17 @@
                               <td class="total_po_previous" style="text-align:right"></td>
                               <td class="total_po_this_bill" style="text-align:right"></td>
                               <td class="po_comulative" style="text-align:right"></td>
+                              <td>
+                                <?php
+                                $a_remarks = (isset($payment_certificate) ? $payment_certificate->a_remarks : '');
+                                echo render_textarea('a_remarks', '', $a_remarks, ['rows' => 1]);
+                                ?>
+                              </td>
                             </tr>
                             <tr class="table_head">
                               <td>B</td>
                               <td><?php echo _l('pay_cert_b_title'); ?></td>
+                              <td></td>
                               <td></td>
                               <td></td>
                               <td></td>
@@ -333,6 +350,12 @@
                                 ?>
                               </td>
                               <td class="pay_cert_c1_4" style="text-align: right;"></td>
+                              <td>
+                                <?php
+                                $c1_remarks = (isset($payment_certificate) ? $payment_certificate->c1_remarks : '');
+                                echo render_textarea('c1_remarks', '', $c1_remarks, ['rows' => 1]);
+                                ?>
+                              </td>
                             </tr>
                             <tr>
                               <td>C2</td>
@@ -356,6 +379,12 @@
                                 ?>
                               </td>
                               <td class="pay_cert_c2_4" style="text-align: right"></td>
+                              <td>
+                                <?php
+                                $c2_remarks = (isset($payment_certificate) ? $payment_certificate->c2_remarks : '');
+                                echo render_textarea('c2_remarks', '', $c2_remarks, ['rows' => 1]);
+                                ?>
+                              </td>
                             </tr>
                             <tr class="table_head">
                               <td>C</td>
@@ -364,6 +393,7 @@
                               <td class="net_advance_2" style="text-align: right"></td>
                               <td class="net_advance_3" style="text-align: right"></td>
                               <td class="net_advance_4" style="text-align: right"></td>
+                              <td></td>
                             </tr>
                             <tr class="table_head">
                               <td>D</td>
@@ -372,6 +402,12 @@
                               <td class="sub_total_ac_2" style="text-align: right"></td>
                               <td class="sub_total_ac_3" style="text-align: right"></td>
                               <td class="sub_total_ac_4" style="text-align: right"></td>
+                              <td>
+                                <?php
+                                $d_remarks = (isset($payment_certificate) ? $payment_certificate->d_remarks : '');
+                                echo render_textarea('d_remarks', '', $d_remarks, ['rows' => 1]);
+                                ?>
+                              </td>
                             </tr>
                             <tr>
                               <td>E1</td>
@@ -395,6 +431,12 @@
                                 ?>
                               </td>
                               <td class="ret_fund_4" style="text-align: right"></td>
+                              <td>
+                                <?php
+                                $e1_remarks = (isset($payment_certificate) ? $payment_certificate->e1_remarks : '');
+                                echo render_textarea('e1_remarks', '', $e1_remarks, ['rows' => 1]);
+                                ?>
+                              </td>
                             </tr>
                             <tr>
                               <td>E2</td>
@@ -431,6 +473,12 @@
                                 ?>
                               </td>
                               <td class="works_exe_a_4" style="text-align: right"></td>
+                              <td>
+                                <?php
+                                $e2_remarks = (isset($payment_certificate) ? $payment_certificate->e2_remarks : '');
+                                echo render_textarea('e2_remarks', '', $e2_remarks, ['rows' => 1]);
+                                ?>
+                              </td>
                             </tr>
                             <tr class="table_head">
                               <td>E</td>
@@ -439,6 +487,7 @@
                               <td class="less_ret_2" style="text-align: right"></td>
                               <td class="less_ret_3" style="text-align: right"></td>
                               <td class="less_ret_4" style="text-align: right"></td>
+                              <td></td>
                             </tr>
                             <tr class="table_head">
                               <td>F</td>
@@ -447,6 +496,12 @@
                               <td class="sub_t_de_2" style="text-align: right"></td>
                               <td class="sub_t_de_3" style="text-align: right"></td>
                               <td class="sub_t_de_4" style="text-align: right"></td>
+                              <td>
+                                <?php
+                                $f_remarks = (isset($payment_certificate) ? $payment_certificate->f_remarks : '');
+                                echo render_textarea('f_remarks', '', $f_remarks, ['rows' => 1]);
+                                ?>
+                              </td>
                             </tr>
                             <tr>
                               <td>G1</td>
@@ -470,6 +525,12 @@
                                 ?>
                               </td>
                               <td class="less_4" style="text-align: right"></td>
+                              <td>
+                                <?php
+                                $g1_remarks = (isset($payment_certificate) ? $payment_certificate->g1_remarks : '');
+                                echo render_textarea('g1_remarks', '', $g1_remarks, ['rows' => 1]);
+                                ?>
+                              </td>
                             </tr>
                             <tr>
                               <td>G2</td>
@@ -493,6 +554,12 @@
                                 ?>
                               </td>
                               <td class="less_ah_4" style="text-align: right"></td>
+                              <td>
+                                <?php
+                                $g2_remarks = (isset($payment_certificate) ? $payment_certificate->g2_remarks : '');
+                                echo render_textarea('g2_remarks', '', $g2_remarks, ['rows' => 1]);
+                                ?>
+                              </td>
                             </tr>
                             <tr>
                               <td>G3</td>
@@ -516,6 +583,12 @@
                                 ?>
                               </td>
                               <td class="less_aht_4" style="text-align: right"></td>
+                              <td>
+                                <?php
+                                $g3_remarks = (isset($payment_certificate) ? $payment_certificate->g3_remarks : '');
+                                echo render_textarea('g3_remarks', '', $g3_remarks, ['rows' => 1]);
+                                ?>
+                              </td>
                             </tr>
                             <tr class="table_head">
                               <td>G</td>
@@ -524,6 +597,7 @@
                               <td class="less_ded_2" style="text-align: right"></td>
                               <td class="less_ded_3" style="text-align: right"></td>
                               <td class="less_ded_4" style="text-align: right"></td>
+                              <td></td>
                             </tr>
                             <tr class="table_head">
                               <td>H</td>
@@ -532,6 +606,12 @@
                               <td class="sub_fg_2" style="text-align: right"></td>
                               <td class="sub_fg_3" style="text-align: right"></td>
                               <td class="sub_fg_4" style="text-align: right"></td>
+                              <td>
+                                <?php
+                                $h_remarks = (isset($payment_certificate) ? $payment_certificate->h_remarks : '');
+                                echo render_textarea('h_remarks', '', $h_remarks, ['rows' => 1]);
+                                ?>
+                              </td>
                             </tr>
                             <tr>
                               <td>I1</td>
@@ -564,6 +644,12 @@
                                 ?>
                               </td>
                               <td class="cgst_on_a4" style="text-align: right"></td>
+                              <td>
+                                <?php
+                                $i1_remarks = (isset($payment_certificate) ? $payment_certificate->i1_remarks : '');
+                                echo render_textarea('i1_remarks', '', $i1_remarks, ['rows' => 1]);
+                                ?>
+                              </td>
                             </tr>
                             <tr>
                               <td>I2</td>
@@ -596,6 +682,12 @@
                                 ?>
                               </td>
                               <td class="sgst_on_a4" style="text-align: right"></td>
+                              <td>
+                                <?php
+                                $i2_remarks = (isset($payment_certificate) ? $payment_certificate->i2_remarks : '');
+                                echo render_textarea('i2_remarks', '', $i2_remarks, ['rows' => 1]);
+                                ?>
+                              </td>
                             </tr>
                             <tr>
                               <td>I3</td>
@@ -628,6 +720,12 @@
                                 ?>
                               </td>
                               <td class="igst_on_a4" style="text-align: right"></td>
+                              <td>
+                                <?php
+                                $i3_remarks = (isset($payment_certificate) ? $payment_certificate->i3_remarks : '');
+                                echo render_textarea('i3_remarks', '', $i3_remarks, ['rows' => 1]);
+                                ?>
+                              </td>
                             </tr>
                             <tr>
                               <td>I4</td>
@@ -661,6 +759,12 @@
                                 ?>
                               </td>
                               <td class="labour_cess_4" style="text-align: right"></td>
+                              <td>
+                                <?php
+                                $i4_remarks = (isset($payment_certificate) ? $payment_certificate->i4_remarks : '');
+                                echo render_textarea('i4_remarks', '', $i4_remarks, ['rows' => 1]);
+                                ?>
+                              </td>
                             </tr>
                             <tr class="table_head">
                               <td>I</td>
@@ -669,6 +773,12 @@
                               <td class="tot_app_tax_2" style="text-align: right"></td>
                               <td class="tot_app_tax_3" style="text-align: right"></td>
                               <td class="tot_app_tax_4" style="text-align: right"></td>
+                              <td>
+                                <?php
+                                $i_remarks = (isset($payment_certificate) ? $payment_certificate->i_remarks : '');
+                                echo render_textarea('i_remarks', '', $i_remarks, ['rows' => 1]);
+                                ?>
+                              </td>
                             </tr>
                             <tr class="table_head">
                               <td>J</td>
@@ -677,6 +787,12 @@
                               <td class="amount_rec_2" style="text-align: right"></td>
                               <td class="amount_rec_3" style="text-align: right"></td>
                               <td class="amount_rec_4" style="text-align: right"></td>
+                              <td>
+                                <?php
+                                $j_remarks = (isset($payment_certificate) ? $payment_certificate->j_remarks : '');
+                                echo render_textarea('j_remarks', '', $j_remarks, ['rows' => 1]);
+                                ?>
+                              </td>
                             </tr>
                           </tbody>
                         </table>
@@ -779,26 +895,26 @@
               <?php
               if (isset($payment_certificate)) { ?>
                 <div role="tabpanel" class="tab-pane ptop10" id="tab_notes">
-                 <?php echo form_open(admin_url('purchase/add_pc_note/' . $payment_certificate->id.'/po_payment_certificate'), array('id' => 'pc-notes', 'class' => 'pc-notes-form')); ?>
-                 <?php echo render_textarea('description'); ?>
-                 <div class="text-right">
+                  <?php echo form_open(admin_url('purchase/add_pc_note/' . $payment_certificate->id . '/po_payment_certificate'), array('id' => 'pc-notes', 'class' => 'pc-notes-form')); ?>
+                  <?php echo render_textarea('description'); ?>
+                  <div class="text-right">
                     <button type="submit" class="btn btn-info mtop15 mbot15"><?php echo _l('estimate_add_note'); ?></button>
-                 </div>
-                 <?php echo form_close(); ?>
-                 <hr />
-                 <div class="panel_s mtop20 no-shadow" id="pc_notes_area">
-                 </div>
+                  </div>
+                  <?php echo form_close(); ?>
+                  <hr />
+                  <div class="panel_s mtop20 no-shadow" id="pc_notes_area">
+                  </div>
                 </div>
 
                 <div role="tabpanel" class="tab-pane ptop10" id="discuss">
-                 <div class="row contract-comments mtop15">
+                  <div class="row contract-comments mtop15">
                     <div class="col-md-12">
-                       <div id="contract-comments"></div>
-                       <div class="clearfix"></div>
-                       <textarea name="content" id="comment" rows="4" class="form-control mtop15 contract-comment"></textarea>
-                       <button type="button" class="btn btn-info mtop10 pull-right" onclick="add_contract_comment();"><?php echo _l('proposal_add_comment'); ?></button>
+                      <div id="contract-comments"></div>
+                      <div class="clearfix"></div>
+                      <textarea name="content" id="comment" rows="4" class="form-control mtop15 contract-comment"></textarea>
+                      <button type="button" class="btn btn-info mtop10 pull-right" onclick="add_contract_comment();"><?php echo _l('proposal_add_comment'); ?></button>
                     </div>
-                 </div>
+                  </div>
                 </div>
               <?php } ?>
             </div>
@@ -921,39 +1037,39 @@
 </script>
 <?php require 'modules/purchase/assets/js/payment_certificate_js.php'; ?>
 <script>
-    $('#cgst_tax').on('change', function() {
-        var prev_bill = $('#po_previous').val();
-        var cgst_tax_new = $('#cgst_tax').val();
-        var cgst_on_tax_new = prev_bill * (cgst_tax_new / 100);
-        $('#cgst_prev_bill').val(cgst_on_tax_new);
+  $('#cgst_tax').on('change', function() {
+    var prev_bill = $('#po_previous').val();
+    var cgst_tax_new = $('#cgst_tax').val();
+    var cgst_on_tax_new = prev_bill * (cgst_tax_new / 100);
+    $('#cgst_prev_bill').val(cgst_on_tax_new);
 
-        var this_bill = $('#po_this_bill').val();
-        var cgst_tax_new1 = $('#cgst_tax').val();
-        var cgst_on_this_tax_new = this_bill * (cgst_tax_new1 / 100);
-        $('#cgst_this_bill').val(cgst_on_this_tax_new);
-    });
-    $('#sgst_tax').on('change', function() {
-        var prev_bill = $('#po_previous').val();
-        var sgst_tax_new = $('#sgst_tax').val();
-        var sgst_on_tax_new = prev_bill * (sgst_tax_new / 100);
-        $('#sgst_prev_bill').val(sgst_on_tax_new);
+    var this_bill = $('#po_this_bill').val();
+    var cgst_tax_new1 = $('#cgst_tax').val();
+    var cgst_on_this_tax_new = this_bill * (cgst_tax_new1 / 100);
+    $('#cgst_this_bill').val(cgst_on_this_tax_new);
+  });
+  $('#sgst_tax').on('change', function() {
+    var prev_bill = $('#po_previous').val();
+    var sgst_tax_new = $('#sgst_tax').val();
+    var sgst_on_tax_new = prev_bill * (sgst_tax_new / 100);
+    $('#sgst_prev_bill').val(sgst_on_tax_new);
 
-        var this_bill = $('#po_this_bill').val();
-        var sgst_tax_new1 = $('#sgst_tax').val();
-        var sgst_on_this_tax_new = this_bill * (sgst_tax_new1 / 100);
-        $('#sgst_this_bill').val(sgst_on_this_tax_new);
-    });
-     $('#igst_tax').on('change', function() {
-        var prev_bill = $('#po_previous').val();
-        var igst_tax_new = $('#igst_tax').val();
-        var igst_on_tax_new = prev_bill * (igst_tax_new / 100);
-        $('#igst_prev_bill').val(igst_on_tax_new);
+    var this_bill = $('#po_this_bill').val();
+    var sgst_tax_new1 = $('#sgst_tax').val();
+    var sgst_on_this_tax_new = this_bill * (sgst_tax_new1 / 100);
+    $('#sgst_this_bill').val(sgst_on_this_tax_new);
+  });
+  $('#igst_tax').on('change', function() {
+    var prev_bill = $('#po_previous').val();
+    var igst_tax_new = $('#igst_tax').val();
+    var igst_on_tax_new = prev_bill * (igst_tax_new / 100);
+    $('#igst_prev_bill').val(igst_on_tax_new);
 
-        var this_bill = $('#po_this_bill').val();
-        var igst_tax_new1 = $('#igst_tax').val();
-        var igst_on_this_tax_new = this_bill * (igst_tax_new1 / 100);
-        $('#igst_this_bill').val(igst_on_this_tax_new);
-    });
+    var this_bill = $('#po_this_bill').val();
+    var igst_tax_new1 = $('#igst_tax').val();
+    var igst_on_this_tax_new = this_bill * (igst_tax_new1 / 100);
+    $('#igst_this_bill').val(igst_on_this_tax_new);
+  });
   $(document).ready(function() {
     "use strict";
     var is_view = <?php echo $is_view; ?>;
@@ -1060,7 +1176,7 @@
 </script>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener('DOMContentLoaded', function() {
     const tbody = document.querySelector('#sortable-tbody');
     if (!tbody) {
       return;
@@ -1069,7 +1185,7 @@
       handle: '.draggerer',
       animation: 150,
       ghostClass: 'sortable-ghost',
-      onUpdate: function () {
+      onUpdate: function() {
         const newOrder = Array.from(tbody.querySelectorAll('tr'))
           .map(row => row.dataset.id)
           .filter(Boolean);
@@ -1077,7 +1193,9 @@
         $.ajax({
           url: admin_url + 'purchase/update_payment_certificate_file_order',
           type: 'POST',
-          data: { order: newOrder },
+          data: {
+            order: newOrder
+          },
           success: function(response) {
             alert_float('success', 'The order has been saved successfully.');
           },

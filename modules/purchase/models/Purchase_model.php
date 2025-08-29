@@ -18538,11 +18538,12 @@ class Purchase_model extends App_Model
             <tbody>
                 <tr class="pay_cert_title">
                   <td style="width:5%">' . _l('serial_no') . '</td>
-                  <td style="width:35%">' . _l('decription') . '</td>
-                  <td style="width:15%">' . _l('contract_amount') . '</td>
-                  <td style="width:15%">' . _l('previous') . '</td>
-                  <td style="width:15%">' . _l('this_bill') . '</td>
-                  <td style="width:15%">' . _l('comulative') . '</td>
+                  <td style="width:33%">' . _l('decription') . '</td>
+                  <td style="width:12%">' . _l('contract_amount') . '</td>
+                  <td style="width:12%">' . _l('previous') . '</td>
+                  <td style="width:12%">' . _l('this_bill') . '</td>
+                  <td style="width:12%">' . _l('comulative') . '</td>
+                  <td style="width:14%">' . _l('Remarks') . '</td>
                 </tr>
                 <tr class="pay_cert_value">
                   <td>A1</td>
@@ -18551,6 +18552,7 @@ class Purchase_model extends App_Model
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->po_previous) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->po_this_bill) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->po_comulative) . '</td>
+                  <td>' . $pay_cert_data->a1_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_title">
                   <td>A</td>
@@ -18559,10 +18561,12 @@ class Purchase_model extends App_Model
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->po_previous) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->po_this_bill) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->po_comulative) . '</td>
+                  <td>' . $pay_cert_data->a_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_title">
                   <td>B</td>
                   <td>' . _l('pay_cert_b_title') . '</td>
+                  <td></td>
                   <td></td>
                   <td></td>
                   <td></td>
@@ -18575,6 +18579,7 @@ class Purchase_model extends App_Model
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->pay_cert_c1_2) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->pay_cert_c1_3) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->pay_cert_c1_4) . '</td>
+                  <td>' . $pay_cert_data->c1_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_value">
                   <td>C2</td>
@@ -18583,6 +18588,7 @@ class Purchase_model extends App_Model
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->pay_cert_c2_2) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->pay_cert_c2_3) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->pay_cert_c2_4) . '</td>
+                  <td>' . $pay_cert_data->c2_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_title">
                   <td>C</td>
@@ -18591,6 +18597,7 @@ class Purchase_model extends App_Model
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->net_advance_2) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->net_advance_3) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->net_advance_4) . '</td>
+                  <td>' . $pay_cert_data->c_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_title">
                   <td>D</td>
@@ -18599,6 +18606,7 @@ class Purchase_model extends App_Model
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->sub_total_ac_2) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->sub_total_ac_3) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->sub_total_ac_4) . '</td>
+                  <td>' . $pay_cert_data->d_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_value">
                   <td>E1</td>
@@ -18607,6 +18615,7 @@ class Purchase_model extends App_Model
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->ret_fund_2) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->ret_fund_3) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->ret_fund_4) . '</td>
+                  <td>' . $pay_cert_data->e1_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_value">
                   <td>E2</td>
@@ -18615,6 +18624,7 @@ class Purchase_model extends App_Model
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->works_exe_a_2) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->works_exe_a_3) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->works_exe_a_4) . '</td>
+                  <td>' . $pay_cert_data->e2_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_title">
                   <td>E</td>
@@ -18623,6 +18633,7 @@ class Purchase_model extends App_Model
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->less_ret_2) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->less_ret_3) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->less_ret_4) . '</td>
+                  <td>' . $pay_cert_data->e_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_title">
                   <td>F</td>
@@ -18631,6 +18642,7 @@ class Purchase_model extends App_Model
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->sub_t_de_2) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->sub_t_de_3) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->sub_t_de_4) . '</td>
+                  <td>' . $pay_cert_data->f_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_value">
                   <td>G1</td>
@@ -18639,6 +18651,7 @@ class Purchase_model extends App_Model
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->less_2) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->less_3) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->less_4) . '</td>
+                  <td>' . $pay_cert_data->g1_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_value">
                   <td>G2</td>
@@ -18647,6 +18660,7 @@ class Purchase_model extends App_Model
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->less_ah_2) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->less_ah_3) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->less_ah_4) . '</td>
+                  <td>' . $pay_cert_data->g2_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_value">
                   <td>G3</td>
@@ -18655,6 +18669,7 @@ class Purchase_model extends App_Model
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->less_aht_2) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->less_aht_3) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->less_aht_4) . '</td>
+                  <td>' . $pay_cert_data->g3_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_title">
                   <td>G</td>
@@ -18663,6 +18678,7 @@ class Purchase_model extends App_Model
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->less_ded_2) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->less_ded_3) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->less_ded_4) . '</td>
+                  <td>' . $pay_cert_data->g_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_title">
                   <td>H</td>
@@ -18671,6 +18687,7 @@ class Purchase_model extends App_Model
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->sub_fg_2) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->sub_fg_3) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->sub_fg_4) . '</td>
+                  <td>' . $pay_cert_data->h_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_value">
                   <td>I1</td>
@@ -18679,6 +18696,7 @@ class Purchase_model extends App_Model
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->cgst_on_a2) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->cgst_on_a3) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->cgst_on_a4) . '</td>
+                  <td>' . $pay_cert_data->i1_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_value">
                   <td>I2</td>
@@ -18687,6 +18705,7 @@ class Purchase_model extends App_Model
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->sgst_on_a2) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->sgst_on_a3) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->sgst_on_a4) . '</td>
+                  <td>' . $pay_cert_data->i2_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_value">
                   <td>I3</td>
@@ -18695,6 +18714,7 @@ class Purchase_model extends App_Model
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->igst_on_a2) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->igst_on_a3) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->igst_on_a4) . '</td>
+                  <td>' . $pay_cert_data->i3_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_value">
                   <td>I4</td>
@@ -18703,6 +18723,7 @@ class Purchase_model extends App_Model
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->labour_cess_2) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->labour_cess_3) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->labour_cess_4) . '</td>
+                  <td>' . $pay_cert_data->i4_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_title">
                   <td>I</td>
@@ -18711,6 +18732,7 @@ class Purchase_model extends App_Model
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->tot_app_tax_2) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->tot_app_tax_3) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->tot_app_tax_4) . '</td>
+                  <td>' . $pay_cert_data->i_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_title">
                   <td>J</td>
@@ -18719,6 +18741,7 @@ class Purchase_model extends App_Model
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->amount_rec_2) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->amount_rec_3) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->amount_rec_4) . '</td>
+                  <td>' . $pay_cert_data->j_remarks . '</td>
                 </tr>
             </tbody>
         </table>

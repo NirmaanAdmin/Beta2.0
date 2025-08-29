@@ -239,6 +239,7 @@
                       <label><input type="checkbox" class="column-toggle" data-column="3" checked=""> <?php echo _l('previous'); ?></label><br>
                       <label><input type="checkbox" class="column-toggle" data-column="4" checked=""> <?php echo _l('this_bill'); ?></label><br>
                       <label><input type="checkbox" class="column-toggle" data-column="5" checked=""> <?php echo _l('comulative'); ?></label><br>
+                       <label><input type="checkbox" class="column-toggle" data-column="6" checked=""> <?php echo _l('remarks'); ?></label><br>
                     </div>
                   </span>
                   <span style="padding: 0px;">
@@ -253,11 +254,12 @@
                           <thead>
                             <tr>
                               <th width="5%"><?php echo _l('serial_no'); ?></th>
-                              <th width="43%"><?php echo _l('decription'); ?></th>
+                              <th width="30%"><?php echo _l('decription'); ?></th>
                               <th width="13%"><?php echo _l('contract_amount'); ?></th>
                               <th width="13%"><?php echo _l('previous'); ?></th>
                               <th width="13%"><?php echo _l('this_bill'); ?></th>
                               <th width="13%"><?php echo _l('comulative'); ?></th>
+                              <th width="20%"><?php echo _l('remarks'); ?></th>
                             </tr>
                           </thead>
                           <tbody class="payment_certificate_body">
@@ -278,6 +280,12 @@
                                 ?>
                               </td>
                               <td class="po_comulative"></td>
+                              <td>
+                                <?php
+                                $a1_remarks = (isset($payment_certificate) ? $payment_certificate->a1_remarks : '');
+                                echo render_textarea('a1_remarks', '', $a1_remarks, ['rows' => 1]);
+                                ?>
+                              </td>
                             </tr>
                             <tr class="table_head">
                               <td>A</td>
@@ -286,10 +294,17 @@
                               <td class="total_po_previous"></td>
                               <td class="total_po_this_bill"></td>
                               <td class="po_comulative"></td>
+                              <td>
+                                <?php
+                                $a_remarks = (isset($payment_certificate) ? $payment_certificate->a_remarks : '');
+                                echo render_textarea('a_remarks', '', $a_remarks, ['rows' => 1]);
+                                ?>
+                              </td>
                             </tr>
                             <tr class="table_head">
                               <td>B</td>
                               <td><?php echo _l('pay_cert_b_title'); ?></td>
+                              <td></td>
                               <td></td>
                               <td></td>
                               <td></td>
@@ -332,6 +347,12 @@
                                 ?>
                               </td>
                               <td class="pay_cert_c1_4"></td>
+                              <td>
+                                <?php
+                                $c1_remarks = (isset($payment_certificate) ? $payment_certificate->c1_remarks : '');
+                                echo render_textarea('c1_remarks', '', $c1_remarks, ['rows' => 1]);
+                                ?>
+                              </td>
                             </tr>
                             <tr>
                               <td>C2</td>
@@ -355,6 +376,12 @@
                                 ?>
                               </td>
                               <td class="pay_cert_c2_4"></td>
+                              <td>
+                                <?php
+                                $c2_remarks = (isset($payment_certificate) ? $payment_certificate->c2_remarks : '');
+                                echo render_textarea('c2_remarks', '', $c2_remarks, ['rows' => 1]);
+                                ?>
+                              </td>
                             </tr>
                             <tr class="table_head">
                               <td>C</td>
@@ -363,6 +390,7 @@
                               <td class="net_advance_2"></td>
                               <td class="net_advance_3"></td>
                               <td class="net_advance_4"></td>
+                              <td></td>
                             </tr>
                             <tr class="table_head">
                               <td>D</td>
@@ -371,6 +399,12 @@
                               <td class="sub_total_ac_2"></td>
                               <td class="sub_total_ac_3"></td>
                               <td class="sub_total_ac_4"></td>
+                              <td>
+                                <?php
+                                $d_remarks = (isset($payment_certificate) ? $payment_certificate->d_remarks : '');
+                                echo render_textarea('d_remarks', '', $d_remarks, ['rows' => 1]);
+                                ?>
+                              </td>
                             </tr>
                             <tr>
                               <td>E1</td>
@@ -394,6 +428,12 @@
                                 ?>
                               </td>
                               <td class="ret_fund_4"></td>
+                              <td>
+                                <?php
+                                $e1_remarks = (isset($payment_certificate) ? $payment_certificate->e1_remarks : '');
+                                echo render_textarea('e1_remarks', '', $e1_remarks, ['rows' => 1]);
+                                ?>
+                              </td>
                             </tr>
                             <tr>
                               <td>E2</td>
@@ -430,6 +470,12 @@
                                 ?>
                               </td>
                               <td class="works_exe_a_4"></td>
+                              <td>
+                                <?php
+                                $e2_remarks = (isset($payment_certificate) ? $payment_certificate->e2_remarks : '');
+                                echo render_textarea('e2_remarks', '', $e2_remarks, ['rows' => 1]);
+                                ?>
+                              </td>
                             </tr>
                             <tr class="table_head">
                               <td>E</td>
@@ -438,6 +484,7 @@
                               <td class="less_ret_2"></td>
                               <td class="less_ret_3"></td>
                               <td class="less_ret_4"></td>
+                              <td></td>
                             </tr>
                             <tr class="table_head">
                               <td>F</td>
@@ -446,6 +493,12 @@
                               <td class="sub_t_de_2"></td>
                               <td class="sub_t_de_3"></td>
                               <td class="sub_t_de_4"></td>
+                              <td>
+                                <?php
+                                $f_remarks = (isset($payment_certificate) ? $payment_certificate->f_remarks : '');
+                                echo render_textarea('f_remarks', '', $f_remarks, ['rows' => 1]);
+                                ?>
+                              </td>
                             </tr>
                             <tr>
                               <td>G1</td>
@@ -469,6 +522,12 @@
                                 ?>
                               </td>
                               <td class="less_4"></td>
+                               <td>
+                                <?php
+                                $g1_remarks = (isset($payment_certificate) ? $payment_certificate->g1_remarks : '');
+                                echo render_textarea('g1_remarks', '', $g1_remarks, ['rows' => 1]);
+                                ?>
+                              </td>
                             </tr>
                             <tr>
                               <td>G2</td>
@@ -492,6 +551,12 @@
                                 ?>
                               </td>
                               <td class="less_ah_4"></td>
+                              <td>
+                                <?php
+                                $g2_remarks = (isset($payment_certificate) ? $payment_certificate->g2_remarks : '');
+                                echo render_textarea('g2_remarks', '', $g2_remarks, ['rows' => 1]);
+                                ?>
+                              </td>
                             </tr>
                             <tr>
                               <td>G3</td>
@@ -515,6 +580,12 @@
                                 ?>
                               </td>
                               <td class="less_aht_4"></td>
+                              <td>
+                                <?php
+                                $g3_remarks = (isset($payment_certificate) ? $payment_certificate->g3_remarks : '');
+                                echo render_textarea('g3_remarks', '', $g3_remarks, ['rows' => 1]);
+                                ?>
+                              </td>
                             </tr>
                             <tr class="table_head">
                               <td>G</td>
@@ -523,6 +594,7 @@
                               <td class="less_ded_2"></td>
                               <td class="less_ded_3"></td>
                               <td class="less_ded_4"></td>
+                              <td></td>
                             </tr>
                             <tr class="table_head">
                               <td>H</td>
@@ -531,6 +603,12 @@
                               <td class="sub_fg_2"></td>
                               <td class="sub_fg_3"></td>
                               <td class="sub_fg_4"></td>
+                              <td>
+                                <?php
+                                $h_remarks = (isset($payment_certificate) ? $payment_certificate->h_remarks : '');
+                                echo render_textarea('h_remarks', '', $h_remarks, ['rows' => 1]);
+                                ?>
+                              </td>
                             </tr>
                             <tr>
                               <td>I1</td>
@@ -563,6 +641,12 @@
                                 ?>
                               </td>
                               <td class="cgst_on_a4"></td>
+                              <td>
+                                <?php
+                                $i1_remarks = (isset($payment_certificate) ? $payment_certificate->i1_remarks : '');
+                                echo render_textarea('i1_remarks', '', $i1_remarks, ['rows' => 1]);
+                                ?>
+                              </td>
                             </tr>
                             <tr>
                               <td>I2</td>
@@ -595,6 +679,12 @@
                                 ?>
                               </td>
                               <td class="sgst_on_a4"></td>
+                              <td>
+                                <?php
+                                $i2_remarks = (isset($payment_certificate) ? $payment_certificate->i2_remarks : '');
+                                echo render_textarea('i2_remarks', '', $i2_remarks, ['rows' => 1]);
+                                ?>
+                              </td>
                             </tr>
                             <tr>
                               <td>I3</td>
@@ -627,6 +717,12 @@
                                 ?>
                               </td>
                               <td class="igst_on_a4"></td>
+                              <td>
+                                <?php
+                                $i3_remarks = (isset($payment_certificate) ? $payment_certificate->i3_remarks : '');
+                                echo render_textarea('i3_remarks', '', $i3_remarks, ['rows' => 1]);
+                                ?>
+                              </td>
                             </tr>
                             <tr>
                             <tr>
@@ -661,6 +757,12 @@
                                 ?>
                               </td>
                               <td class="labour_cess_4"></td>
+                              <td>
+                                <?php
+                                $i4_remarks = (isset($payment_certificate) ? $payment_certificate->i4_remarks : '');
+                                echo render_textarea('i4_remarks', '', $i4_remarks, ['rows' => 1]);
+                                ?>
+                              </td>
                             </tr>
                             <tr class="table_head">
                               <td>I</td>
@@ -669,6 +771,12 @@
                               <td class="tot_app_tax_2"></td>
                               <td class="tot_app_tax_3"></td>
                               <td class="tot_app_tax_4"></td>
+                              <td>
+                                <?php
+                                $i_remarks = (isset($payment_certificate) ? $payment_certificate->i_remarks : '');
+                                echo render_textarea('i_remarks', '', $i_remarks, ['rows' => 1]);
+                                ?>
+                              </td>
                             </tr>
                             <tr class="table_head">
                               <td>J</td>
@@ -677,6 +785,12 @@
                               <td class="amount_rec_2"></td>
                               <td class="amount_rec_3"></td>
                               <td class="amount_rec_4"></td>
+                              <td>
+                                <?php
+                                $j_remarks = (isset($payment_certificate) ? $payment_certificate->j_remarks : '');
+                                echo render_textarea('j_remarks', '', $j_remarks, ['rows' => 1]);
+                                ?>
+                              </td> 
                             </tr>
                           </tbody>
                         </table>
