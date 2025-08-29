@@ -16,7 +16,7 @@ $billing_status_filter_name = 'billing_status';
 $order_tagged_filter_name = 'order_tagged';
 $order_tagged_detail_filter_name = 'order_tagged_detail';
 $res_person_filter_name = 'res_person';
-
+$is_expense_filter_name = 'is_expense';
 $aColumns = [
     0,
     1,
@@ -37,6 +37,7 @@ $aColumns = [
     'vendor_note',
     db_prefix() . 'pur_invoices.id as inv_id',
     db_prefix() . 'pur_invoices.adminnote as adminnote',
+    'expense_convert',
     db_prefix() . 'pur_invoices.last_action',
 ];
 
@@ -168,6 +169,16 @@ if ($this->ci->input->post('billing_invoices') && $this->ci->input->post('billin
     }
 }
 
+if ($this->ci->input->post('is_expense') && $this->ci->input->post('is_expense') != '') {
+    $is_expense = $this->ci->input->post('is_expense');
+
+    if($is_expense == 1){
+        array_push($where, 'AND  ' . db_prefix() . 'pur_invoices.expense_convert != 0');
+    } elseif ($is_expense == 2) {
+       array_push($where, 'AND  ' . db_prefix() . 'pur_invoices.expense_convert = 0');
+    }
+}
+
 $budget_head = $this->ci->input->post('budget_head');
 if (isset($budget_head)) {
 
@@ -293,6 +304,10 @@ update_module_filter($module_name, $order_tagged_detail_filter_name, $order_tagg
 
 $res_person_filter_name_value = !empty($this->ci->input->post('res_person')) ? implode(',', $this->ci->input->post('res_person')) : NULL;
 update_module_filter($module_name, $res_person_filter_name, $res_person_filter_name_value);
+
+
+$is_expense_filter_name_value = !empty($this->ci->input->post('is_expense')) ? $this->ci->input->post('is_expense') : NULL;
+update_module_filter($module_name, $is_expense_filter_name, $is_expense_filter_name_value);
 
 $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [
     db_prefix() . 'pur_invoices.id as id',
@@ -443,6 +458,13 @@ foreach ($rResult as $aRow) {
             $_data = $order_data;
         } elseif ($aColumns[$i] == 'vendor_note') {
             $_data = render_tags($aRow['tags']);
+        } elseif ($aColumns[$i] == 'expense_convert') {
+            if($aRow['expense_convert'] == 0){
+                $expense_yes_no = 'No';
+            } else {
+                $expense_yes_no = 'Yes';
+            }
+            $_data = $expense_yes_no;
         } elseif ($aColumns[$i] == 'invoice_date') {
             $_data = '<input type="date" class="form-control invoice-date-input" value="' . $aRow['invoice_date'] . '" data-id="' . $aRow['id'] . '">';
         } elseif ($aColumns[$i] == 'vendor_submitted_amount_without_tax') {

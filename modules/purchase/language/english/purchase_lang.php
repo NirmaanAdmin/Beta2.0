@@ -967,3 +967,4 @@ $lang['submission_date'] = 'Submission Date';
 $lang['responsible_person'] = 'Responsible Person';
 $lang['payment_certificate_number'] = 'Payment certificate number';
 $lang['pending_approval'] = 'Pending approval';
+$lang['is_expense'] = 'Is Expense?';

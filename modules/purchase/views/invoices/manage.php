@@ -54,13 +54,16 @@
       text-align: center;
       font-weight: bold;
    }
+
    .n_width {
       width: 25% !important;
    }
+
    .dashboard_stat_title {
       font-size: 19px;
       font-weight: bold;
    }
+
    .dashboard_stat_value {
       font-size: 19px;
    }
@@ -80,8 +83,8 @@
                   </div>
                   <div class="row">
                      <div class="_buttons col-md-12">
-                        <button class="btn btn-info pull-left display-block" type="button" data-toggle="collapse" data-target="#vbt-charts-section" aria-expanded="true"aria-controls="vbt-charts-section">
-                         <?php echo _l('Vendor Billing Tracker Charts'); ?> <i class="fa fa-chevron-down toggle-icon"></i>
+                        <button class="btn btn-info pull-left display-block" type="button" data-toggle="collapse" data-target="#vbt-charts-section" aria-expanded="true" aria-controls="vbt-charts-section">
+                           <?php echo _l('Vendor Billing Tracker Charts'); ?> <i class="fa fa-chevron-down toggle-icon"></i>
                         </button>
                      </div>
                   </div>
@@ -91,75 +94,75 @@
                         <div class="col-md-12 mtop20">
                            <div class="row">
                               <div class="quick-stats-invoices col-md-3 tw-mb-2 sm:tw-mb-0 n_width">
-                                <div class="top_stats_wrapper">
-                                  <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
-                                    <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
-                                      <span class="tw-truncate dashboard_stat_title">Total certified amount</span>
+                                 <div class="top_stats_wrapper">
+                                    <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                       <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                          <span class="tw-truncate dashboard_stat_title">Total certified amount</span>
+                                       </div>
+                                       <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
                                     </div>
-                                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
-                                  </div>
-                                  <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
-                                    <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
-                                      <span class="tw-truncate dashboard_stat_value total_certified_amount"></span>
+                                    <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                                       <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                          <span class="tw-truncate dashboard_stat_value total_certified_amount"></span>
+                                       </div>
+                                       <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
                                     </div>
-                                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
-                                  </div>
-                                </div>
+                                 </div>
                               </div>
                               <div class="quick-stats-invoices col-md-3 tw-mb-2 sm:tw-mb-0 n_width">
-                                <div class="top_stats_wrapper">
-                                  <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
-                                    <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
-                                      <span class="tw-truncate dashboard_stat_title">Total untagged bills to orders</span>
+                                 <div class="top_stats_wrapper">
+                                    <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                       <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                          <span class="tw-truncate dashboard_stat_title">Total untagged bills to orders</span>
+                                       </div>
+                                       <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
                                     </div>
-                                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
-                                  </div>
-                                  <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
-                                    <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
-                                      <span class="tw-truncate dashboard_stat_value total_bills_not_tag_to_orders"></span>
+                                    <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                                       <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                          <span class="tw-truncate dashboard_stat_value total_bills_not_tag_to_orders"></span>
+                                       </div>
+                                       <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
                                     </div>
-                                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
-                                  </div>
-                                </div>
+                                 </div>
                               </div>
                               <div class="quick-stats-invoices col-md-3 tw-mb-2 sm:tw-mb-0 n_width">
-                                <div class="top_stats_wrapper">
-                                  <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
-                                    <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
-                                      <span class="tw-truncate dashboard_stat_title">Uninvoice bills</span>
+                                 <div class="top_stats_wrapper">
+                                    <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                       <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                          <span class="tw-truncate dashboard_stat_title">Uninvoice bills</span>
+                                       </div>
+                                       <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
                                     </div>
-                                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
-                                  </div>
-                                  <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
-                                    <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
-                                      <span class="tw-truncate dashboard_stat_value total_uninvoice_bills"></span>
+                                    <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                                       <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                          <span class="tw-truncate dashboard_stat_value total_uninvoice_bills"></span>
+                                       </div>
+                                       <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
                                     </div>
-                                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
-                                  </div>
-                                </div>
+                                 </div>
                               </div>
                               <div class="quick-stats-invoices col-md-3 tw-mb-2 sm:tw-mb-0 n_width">
-                                <div class="top_stats_wrapper">
-                                  <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
-                                    <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
-                                      <span class="tw-truncate dashboard_stat_title">To be invoiced</span>
+                                 <div class="top_stats_wrapper">
+                                    <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                       <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                          <span class="tw-truncate dashboard_stat_title">To be invoiced</span>
+                                       </div>
+                                       <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
                                     </div>
-                                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
-                                  </div>
-                                  <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
-                                    <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
-                                      <span class="tw-truncate dashboard_stat_value total_pending_amount_to_be_invoice"></span>
+                                    <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                                       <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                          <span class="tw-truncate dashboard_stat_value total_pending_amount_to_be_invoice"></span>
+                                       </div>
+                                       <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
                                     </div>
-                                    <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
-                                  </div>
-                                </div>
+                                 </div>
                               </div>
                            </div>
                            <div class="row mtop20">
                               <div class="col-md-4">
                                  <p class="mbot15 dashboard_stat_title">Top 10 Vendors by Total Certified Amount</p>
                                  <div style="width: 100%; height: 500px;">
-                                   <canvas id="barChartTopVendors"></canvas>
+                                    <canvas id="barChartTopVendors"></canvas>
                                  </div>
                               </div>
                               <div class="col-md-4">
@@ -281,7 +284,24 @@
                         <?php
                         $res_person_filter = get_module_filter($module_name, 'res_person');
                         $res_person_filter_val = !empty($res_person_filter) ? explode(",", $res_person_filter->filter_value) : [];
-                        echo render_select('res_person[]', $responsible_person, array('staffid', ['firstname','lastname']), '', $res_person_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('responsible_person'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
+                        echo render_select('res_person[]', $responsible_person, array('staffid', ['firstname', 'lastname']), '', $res_person_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('responsible_person'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
+                        ?>
+                     </div>
+                     <div class="col-md-3 form-group">
+                        <?php
+                        $is_expense_filter = get_module_filter($module_name, 'is_expense');
+                        $is_expense_filter_val = !empty($is_expense_filter) ? $is_expense_filter->filter_value : '';
+                        $is_expense_arr = [
+                           [
+                              'id' => 1,
+                              'name' => _l('Yes'),
+                           ],
+                           [
+                              'id' => 2,
+                              'name' => _l('No'),
+                           ]
+                        ];
+                        echo render_select('is_expense', $is_expense_arr, array('id', 'name'), '', $is_expense_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('is_expense'), '', 'data-actions-box' => true), array(), 'no-mbot', '', true);
                         ?>
                      </div>
                      <div class="col-md-1 form-group">
@@ -357,7 +377,7 @@
                            'id',
                            'invoice_code',
                            'invoice_number',
-                           'vendor',                      
+                           'vendor',
                            'invoice_date',
                            'Billing Budget Head',
                            'description_of_services',
@@ -372,6 +392,7 @@
                            'tag',
                            'attachment',
                            'adminnote',
+                           'is_expense',
                            'last_action_by',
                         ];
                         ?>
@@ -410,6 +431,7 @@
                               <th><?php echo _l('tag'); ?></th>
                               <th><?php echo _l('attachment'); ?></th>
                               <th><?php echo _l('adminnote'); ?></th>
+                              <th><?php echo _l('is_expense'); ?></th>
                               <th><?php echo _l('last_action_by'); ?></th>
                            </tr>
                         </thead>
@@ -429,6 +451,7 @@
                               <td class="total_vendor_submitted_amount_without_tax"></td>
                               <td class="total_vendor_submitted_tax_amount"></td>
                               <td class="total_final_certified_amount"></td>
+                              <td></td>
                               <td></td>
                               <td></td>
                               <td></td>
@@ -569,7 +592,9 @@
          <?php echo form_open(admin_url('purchase/add_bulk_convert_ril_bill'), array('id' => 'convert_ril_bill_form', 'class' => '')); ?>
          <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title"><div class="bulk_convert_title"></div></h4>
+            <h4 class="modal-title">
+               <div class="bulk_convert_title"></div>
+            </h4>
          </div>
          <div class="modal-body convert-bulk-actions-body">
          </div>
@@ -685,15 +710,15 @@
          });
       }
 
-      $('#vbt-charts-section').on('shown.bs.collapse', function () {
+      $('#vbt-charts-section').on('shown.bs.collapse', function() {
          $('.toggle-icon').removeClass('fa-chevron-up').addClass('fa-chevron-down');
       });
 
-      $('#vbt-charts-section').on('hidden.bs.collapse', function () {
+      $('#vbt-charts-section').on('hidden.bs.collapse', function() {
          $('.toggle-icon').removeClass('fa-chevron-down').addClass('fa-chevron-up');
       });
 
-      table.on('draw.dt', function () {
+      table.on('draw.dt', function() {
          $('.selectpicker').selectpicker('refresh');
       });
 
@@ -704,13 +729,13 @@
          $.post(admin_url + 'purchase/update_vbt_responsible_person', {
             id: id,
             responsible_person: responsible_person
-         }).done(function (response) {
+         }).done(function(response) {
             response = JSON.parse(response);
             if (response.success == true) {
                alert_float('success', response.message);
                table_payment_certificate.DataTable().ajax.reload();
             }
-          });
+         });
       });
    });
 
