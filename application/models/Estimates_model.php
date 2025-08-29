@@ -2426,7 +2426,8 @@ class Estimates_model extends App_Model
                 $budgetsummaryhtml .= '</select>';
                 $budgetsummaryhtml .= '</div>';
                 $budgetsummaryhtml .= '<div class="col-md-2 form-group">';
-                $budgetsummaryhtml .= render_date_input('project_awarded_date', 'Project Awarded Date', !empty($package_info) ? $package_info->project_awarded_date : '');
+                $project_awarded_date = (!empty($package_info) ? _d($package_info->project_awarded_date) : _d(date('Y-m-d')));
+                $budgetsummaryhtml .= render_date_input('project_awarded_date', 'Project Awarded Date', $project_awarded_date);
                 $budgetsummaryhtml .= '</div>';
                 $budgetsummaryhtml .= '<div class="col-md-2 form-group">';
                 $budgetsummaryhtml .= render_input('package_name', 'Package Name', !empty($package_info) ? $package_info->package_name : '');
