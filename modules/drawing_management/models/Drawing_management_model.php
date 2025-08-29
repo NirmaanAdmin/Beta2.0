@@ -508,6 +508,7 @@ class drawing_management_model extends app_model
 								'',
 								$creator_type,
 								$orginal_filename,
+								$filename
 							);
 							$totalUploaded++;
 						}
