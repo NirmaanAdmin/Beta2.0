@@ -787,4 +787,35 @@ class Estimates extends AdminController
         $value = $this->input->post('value');
         echo get_area_list($name, $value);
     }
+
+    public function get_package_budget_head_dropdown()
+    {
+        $estimateid = $this->input->post('estimateid');
+        $name = $this->input->post('name');
+        $value = $this->input->post('value');
+        echo get_package_budget_head_dropdown($estimateid, $name, $value);
+    }
+
+    public function get_package_kind_dropdown()
+    {
+        $name = $this->input->post('name');
+        $value = $this->input->post('value');
+        echo get_package_kind_dropdown($name, $value);
+    }
+
+    public function get_package_rli_filter_dropdown()
+    {
+        $name = $this->input->post('name');
+        $value = $this->input->post('value');
+        echo get_package_rli_filter_dropdown($name, $value);
+    }
+
+    public function add_bulk_package()
+    {
+        $data = $this->input->post();
+        $estimate_id = isset($data['bulk_estimate_id']) ? $data['bulk_estimate_id'] : NULL;
+        $this->estimates_model->add_bulk_package($data);
+        set_alert('success', 'Package is added successfully');
+        redirect($_SERVER['HTTP_REFERER'].'#'.$estimate_id);
+    }
 }

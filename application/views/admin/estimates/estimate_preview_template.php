@@ -920,6 +920,8 @@
                 <div role="tabpanel" class="tab-pane" id="tender_strategy">
                     <div class="row">
                         <div class="col-md-12">
+                            <button class="btn btn-info pull-left mright10 display-block" data-toggle="modal" data-target="#addNewBulkPackage"><i class="fa fa-plus"></i> Add Bulk Package
+                             </button>
                             <a href="#" class="btn btn-primary" onclick="view_package(<?php echo $estimate->id; ?>); return false;"><i class="fa-regular fa-plus tw-mr-1"></i>Add Package</a>
                             <hr />
 
@@ -1207,6 +1209,86 @@
    </div>
 </div>
 
+<div class="modal fade" id="addNewBulkPackage" tabindex="-1" role="dialog">
+   <div class="modal-dialog" role="document" style="width: 80%;">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h4 class="modal-title"><?php echo _l('Add Bulk Package'); ?></h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <div class="col-md-4 pull-right">
+                <?php echo render_input('file_csv', 'choose_excel_file', '', 'file'); ?>
+                <div class="form-group">
+                  <button id="uploadfile" type="button" class="btn btn-info import" onclick="return uploadbulkpackagecsv(this);"><?php echo _l('import'); ?></button>
+                  <a href="<?php echo site_url('uploads/estimates/file_sample/Sample_bulk_package_en.xlsx') ?>" class="btn btn-primary">Template</a>
+                </div>
+            </div>
+            <div class="col-md-12">
+               <div class="form-group pull-right" id="file_upload_response">
+               </div>
+            </div>
+            <div id="box-loading" class="pull-right">
+            </div>
+         </div>
+         <div class="modal-body invoice-item">
+            <div class="row">
+               <div class="col-md-12">
+                  <div class="table-responsive" style="overflow-x: unset !important;">
+                     <?php 
+                     echo form_open_multipart(admin_url('estimates/add_bulk_package'), array('id' => 'bulk_package_form')); 
+                     ?>
+                     <table class="table items table_bulk_package">
+                        <thead>
+                           <tr>
+                              <th align="left" width="19%"><?php echo _l('Budget Head'); ?></th>
+                              <th align="left" width="19%"><?php echo _l('Project Awarded Date'); ?></th>
+                              <th align="left" width="19%"><?php echo _l('Package Name'); ?></th>
+                              <th align="left" width="19%"><?php echo _l('cat'); ?></th>
+                              <th align="left" width="19%"><?php echo _l('rli_filter'); ?></th>
+                              <th align="center" width="5%"><i class="fa fa-cog"></i></th>
+                           </tr>
+                        </thead>
+                        <tbody style="border: 1px solid #ddd;">
+                            <?php echo form_hidden('bulk_estimate_id', $estimate->id); ?>
+                            <tr class="main">
+                                <td align="left">
+                                    <?php echo get_package_budget_head_dropdown($estimate->id, 'bulk_budget_head', ''); ?>
+                                </td>
+                                <td align="left">
+                                    <?php echo render_date_input('bulk_project_awarded_date', '', _d(date('Y-m-d'))); ?>
+                                </td>
+                                <td align="left">
+                                    <?php echo render_input('bulk_package_name'); ?>
+                                </td>
+                                <td align="left">
+                                    <?php echo get_package_kind_dropdown('bulk_kind', ''); ?>
+                                </td>
+                                <td align="left">
+                                    <?php echo get_package_rli_filter_dropdown('bulk_rli_filter', ''); ?>
+                                </td>
+                                <td align="center">
+                                    <button type="button"
+                                        onclick="add_bulk_package_item_to_table(
+                                            <?php echo $estimate->id; ?>,
+                                            undefined,
+                                            undefined
+                                        ); return false;"
+                                        class="btn pull-right btn-primary">
+                                        <i class="fa fa-check"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                     </table>
+                     <button type="submit" class="btn btn-info pull-right"><?php echo _l('Save'); ?></button>
+                     <?php echo form_close(); ?>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
 <script>
 init_items_sortable(true);
 init_btn_with_tooltips();
@@ -1458,7 +1540,187 @@ function update_lock_budget(id, status) {
     });
 }
 
+var tabKeyCounts = 0;
+function getNextItemKey() {
+  if (!tabKeyCounts) {
+    tabKeyCounts = 0;
+  }
+  tabKeyCounts += 1;
+  return tabKeyCounts;
+}
+
+function add_bulk_package_item_to_table(estimateid, data, itemid) {
+  data =
+    typeof data == "undefined" || data == "undefined"
+      ? get_bulk_package_item_preview_values()
+      : data;
+
+  var table_row = "";
+  var item_key = getNextItemKey();
+
+  table_row += '<tr class="items">';
+
+  var bulk_budget_head = "newbulkpackageitems[" + item_key + "][bulk_budget_head]";
+  var bulk_kind = "newbulkpackageitems[" + item_key + "][bulk_kind]";
+  var bulk_rli_filter = "newbulkpackageitems[" + item_key + "][bulk_rli_filter]";
+  $.when(
+    get_package_budget_head_dropdown(estimateid, bulk_budget_head, data.bulk_budget_head),
+    get_package_kind_dropdown(bulk_kind, data.bulk_kind),
+    get_package_rli_filter_dropdown(bulk_rli_filter, data.bulk_rli_filter)
+  ).done(function (package_budget_head_dropdown, package_kind_dropdown, package_rli_filter_dropdown) {
+    table_row += '<td>' + package_budget_head_dropdown[0] + '</td>';
+
+    table_row +=
+      '<td><input type="text" name="newbulkpackageitems[' +
+      item_key +
+      '][bulk_project_awarded_date]" value="' +
+      data.bulk_project_awarded_date +
+      '" class="form-control datepicker"></td>';
+
+    table_row +=
+      '<td><input type="text" name="newbulkpackageitems[' +
+      item_key +
+      '][bulk_package_name]" value="' +
+      data.bulk_package_name +
+      '" class="form-control"></td>';
+
+    table_row += '<td>' + package_kind_dropdown[0] + '</td>';
+
+    table_row += '<td>' + package_rli_filter_dropdown[0] + '</td>';
+
+    table_row +=
+      '<td><a href="#" class="btn btn-danger pull-left" onclick="delete_bulk_package_item(this,' +
+      itemid +
+      '); return false;"><i class="fa fa-trash"></i></a></td>';
+
+    table_row += "</tr>";
+
+    $('.table_bulk_package tbody').append(table_row);
+
+    $(document).trigger({
+      type: "item-added-to-table",
+      data: data,
+      row: table_row,
+    });
+
+    if (
+      $("#item_select").hasClass("ajax-search") &&
+      $("#item_select").selectpicker("val") !== ""
+    ) {
+      $("#item_select").prepend("<option></option>");
+    }
+
+    init_selectpicker();
+    init_datepicker();
+    init_color_pickers();
+    clear_bulk_package_item_preview_values();
+
+    $("body").find("#items-warning").remove();
+    $("body").find(".dt-loader").remove();
+    $("#item_select").selectpicker("val", "");
+
+    return true;
+  });
+  return false;
+}
+
+function get_bulk_package_item_preview_values() {
+  var response = {};
+  var tab = $('.table_bulk_package tbody');
+  response.bulk_budget_head = tab.find('select[name="bulk_budget_head"]').val();
+  response.bulk_project_awarded_date = tab.find('input[name="bulk_project_awarded_date"]').val();
+  response.bulk_package_name = tab.find('input[name="bulk_package_name"]').val();
+  response.bulk_kind = tab.find('select[name="bulk_kind"]').val();
+  response.bulk_rli_filter = tab.find('select[name="bulk_rli_filter"]').val();
+  return response;
+}
+
+function clear_bulk_package_item_preview_values(tab) {
+  var previewArea = $('.table_bulk_package tbody').find("tr").eq(0);
+  previewArea.find('input[name="bulk_package_name"]').val("");
+  previewArea.find('select[name="bulk_kind"]').selectpicker("val", "");
+  previewArea.find('select[name="bulk_rli_filter"]').selectpicker("val", "");
+}
+
+function get_package_budget_head_dropdown(estimateid, name, value) {
+  return $.post(admin_url + "estimates/get_package_budget_head_dropdown", {
+    estimateid: estimateid,
+    name: name,
+    value: value,
+  });
+}
+
+function get_package_kind_dropdown(name, value) {
+  return $.post(admin_url + "estimates/get_package_kind_dropdown", {
+    name: name,
+    value: value,
+  });
+}
+
+function get_package_rli_filter_dropdown(name, value) {
+  return $.post(admin_url + "estimates/get_package_rli_filter_dropdown", {
+    name: name,
+    value: value,
+  });
+}
+
+function delete_bulk_package_item(row, itemid) {
+    $(row)
+    .parents("tr")
+    .addClass("animated fadeOut", function () {
+      setTimeout(function () {
+        $(row).parents("tr").remove();
+      }, 50);
+    });
+}
+
+function uploadbulkpackagecsv() {
+    "use strict";
+    var fileInput = $('#file_csv')[0];
+    var file = fileInput?.files[0];
+    if (!file) {
+      alert("Please select a file.");
+      return;
+    }
+    var fileExtension = file.name.split('.').pop();
+    if (fileExtension !== 'xlsx') {
+      alert("Please upload a valid .xlsx file.");
+      return;
+    }
+    var reader = new FileReader();
+    reader.onload = function (e) {
+        var data = new Uint8Array(e.target.result);
+        var workbook = XLSX.read(data, { type: 'array' });
+        var firstSheetName = workbook.SheetNames[0];
+        var worksheet = workbook.Sheets[firstSheetName];
+        var jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+        var totalRows = jsonData.length;
+
+        if(totalRows > 0) {
+          var today = new Date();
+          var dd = String(today.getDate()).padStart(2, '0');
+          var mm = String(today.getMonth() + 1).padStart(2, '0');
+          var yyyy = today.getFullYear();
+          var formattedDate = dd + '-' + mm + '-' + yyyy;
+          var cleanedData = jsonData.map(row => ({
+            bulk_package_name: row["Package Name"]?.trim() || "",
+            bulk_project_awarded_date: formattedDate,
+            bulk_budget_head: "",
+            bulk_kind: "",
+            bulk_rli_filter: "",
+          }));
+          if(cleanedData.length > 0) {
+            cleanedData.forEach(function (row) {
+                add_bulk_package_item_to_table(estimate_id, row);
+            });
+            fileInput.value = '';
+          }
+        }
+    };
+    reader.readAsArrayBuffer(file);
+}
 
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <?php require 'modules/purchase/assets/js/cost_planning_js.php'; ?>
 <?php $this->load->view('admin/estimates/estimate_send_to_client'); ?>

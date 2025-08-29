@@ -3487,4 +3487,28 @@ class Estimates_model extends App_Model
         $this->db->where("FIND_IN_SET(" . $this->db->escape_str($id) . ", " . db_prefix() . "unawarded_budget_info.packages) !=", 0);
         return $this->db->get(db_prefix() . 'unawarded_budget_info')->row();
     }
+
+    public function add_bulk_package($data)
+    {
+        $estimate_id = isset($data['bulk_estimate_id']) ? $data['bulk_estimate_id'] : 0;
+        $newbulkpackageitems = isset($data['newbulkpackageitems']) ? $data['newbulkpackageitems'] : array();
+        if (!empty($newbulkpackageitems)) {
+            foreach ($newbulkpackageitems as $key => $value) {
+                $this->db->insert(db_prefix() . 'estimate_package_info', [
+                    'estimate_id' => $estimate_id,
+                    'budget_head' => $value['bulk_budget_head'],
+                    'project_awarded_date' => date('Y-m-d', strtotime($value['bulk_project_awarded_date'])),
+                    'package_name' => $value['bulk_package_name'],
+                    'sdeposit_percent' => 0,
+                    'sdeposit_value' => 0.00,
+                    'total_package' => 0.00,
+                    'awarded_value' => 0.00,
+                    'kind' => $value['bulk_kind'],
+                    'rli_filter' => $value['bulk_rli_filter'],
+                ]);
+            }
+        }
+
+        return true;
+    }
 }

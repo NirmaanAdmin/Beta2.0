@@ -543,3 +543,58 @@ function get_estimate_data($est_id)
     return null;
 
 }
+
+function get_package_budget_head_dropdown($id, $name, $value)
+{
+    $CI = &get_instance();
+    $CI->load->model('estimates_model');
+    $select  = '<select class="selectpicker" data-width="100%" name="'.$name.'" data-none-selected-text="' . _l('None') . '" data-live-search="true">';
+    $package_budget_head = $CI->estimates_model->get_estimate_budget_listing($id);
+    foreach ($package_budget_head as $item) {
+        $selected = ($item['annexure'] == $value) ? ' selected' : '';
+        $select .= '<option value="' . $item['annexure'] . '"' . $selected . '>' . $item['budget_head'] . '</option>';
+    }
+    $select .= '</select>';
+    return $select;
+}
+
+function get_package_kind_dropdown($name, $value)
+{
+    $select  = '<select class="selectpicker" data-width="100%" name="'.$name.'" data-none-selected-text="' . _l('None') . '" data-live-search="true">';
+    $kind_options = [
+        ['id' => _l('client_supply'), 'name' => _l('client_supply')],
+        ['id' => _l('bought_out_items'), 'name' => _l('bought_out_items')]
+    ];
+    $select .= '<option value=""></option>';
+    foreach ($kind_options as $item) {
+        $selected = ($item['id'] == $value) ? ' selected' : '';
+        $select .= '<option value="' . $item['id'] . '"' . $selected . '>' . $item['name'] . '</option>';
+    }
+    $select .= '</select>';
+    return $select;
+}
+
+function get_package_rli_filter_dropdown($name, $value)
+{
+    $select  = '<select class="selectpicker" data-width="100%" name="'.$name.'" data-none-selected-text="' . _l('None') . '" data-live-search="true">';
+    $status_labels = [
+        0 => ['label' => 'danger', 'table' => 'provided_by_ril', 'text' => _l('provided_by_ril')],
+        1 => ['label' => 'success', 'table' => 'new_item_service_been_addded_as_per_instruction', 'text' => _l('new_item_service_been_addded_as_per_instruction')],
+        2 => ['label' => 'info', 'table' => 'due_to_spec_change_then_original_cost', 'text' => _l('due_to_spec_change_then_original_cost')],
+        3 => ['label' => 'warning', 'table' => 'deal_slip', 'text' => _l('deal_slip')],
+        4 => ['label' => 'primary', 'table' => 'to_be_provided_by_ril_but_managed_by_bil', 'text' => _l('to_be_provided_by_ril_but_managed_by_bil')],
+        5 => ['label' => 'secondary', 'table' => 'due_to_additional_item_as_per_apex_instrution', 'text' => _l('due_to_additional_item_as_per_apex_instrution')],
+        6 => ['label' => 'purple', 'table' => 'event_expense', 'text' => _l('event_expense')],
+        7 => ['label' => 'teal', 'table' => 'pending_procurements', 'text' => _l('pending_procurements')],
+        8 => ['label' => 'orange', 'table' => 'common_services_in_ghj_scope', 'text' => _l('common_services_in_ghj_scope')],
+        9 => ['label' => 'green', 'table' => 'common_services_in_ril_scope', 'text' => _l('common_services_in_ril_scope')],
+        10 => ['label' => 'default', 'table' => 'due_to_site_specfic_constraint', 'text' => _l('due_to_site_specfic_constraint')],
+    ];
+    $select .= '<option value=""></option>';
+    foreach ($status_labels as $key => $status) {
+        $selected = ($key == $value) ? ' selected' : '';
+        $select .= '<option value="' . $key . '"' . $selected . '>' . $status['text'] . '</option>';
+    }
+    $select .= '</select>';
+    return $select;
+}
