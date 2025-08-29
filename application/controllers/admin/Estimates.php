@@ -720,9 +720,10 @@ class Estimates extends AdminController
     public function add_assign_unawarded_capex()
     {
         $data = $this->input->post();
+        $estimate_id = isset($data['estimate_id']) ? $data['estimate_id'] : 0;
         $this->estimates_model->add_assign_unawarded_capex($data);
         set_alert('success', 'Assign Unawarded Capex is updated successfully');
-        redirect(admin_url('estimates'));
+        redirect($_SERVER['HTTP_REFERER'].'#'.$estimate_id);
     }
 
     public function view_package()
@@ -736,13 +737,14 @@ class Estimates extends AdminController
     {
         $data = $this->input->post();
         $package_id = isset($data['package_id']) ? $data['package_id'] : NULL;
+        $estimate_id = isset($data['estimate_id']) ? $data['estimate_id'] : NULL;
         $this->estimates_model->save_package($data);
         if(!empty($package_id)) {
             set_alert('success', 'Package is updated successfully');
         } else {
             set_alert('success', 'Package is added successfully');
         }
-        redirect(admin_url('estimates'));
+        redirect($_SERVER['HTTP_REFERER'].'#'.$estimate_id);
     }
 
     public function delete_package($id)
