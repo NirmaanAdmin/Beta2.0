@@ -16,7 +16,7 @@ $aColumns = [
    'total_package',
    'awarded_value',
    'sdeposit_value',
-   'pending_value_in_package',
+   // 'pending_value_in_package',
    2,
    'percentage_of_capex_used',
    3,

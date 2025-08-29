@@ -182,7 +182,7 @@
                               _l('Package Value'),
                               _l('Awarded Value'),
                               _l('Secured Deposit Value'),
-                              _l('Pending Value In Package'),
+                              // _l('Pending Value In Package'),
                               _l('Package Status'),
                               _l('Percentage of Capex Used'),
                               _l('Book Order')
@@ -224,7 +224,7 @@
                                  <th><?php echo _l('Package Value'); ?></th>
                                  <th><?php echo _l('Awarded Value'); ?></th>
                                  <th><?php echo _l('Secured Deposit Value'); ?></th>
-                                 <th><?php echo _l('Pending Value In Package'); ?></th>
+                                 <!-- <th><?php echo _l('Pending Value In Package'); ?></th> -->
                                  <th><?php echo _l('Package Status'); ?></th>
                                  <th><?php echo _l('Percentage of Capex Used'); ?></th>
                                  <th><?php echo _l('Book Order'); ?></th>
