@@ -67,7 +67,7 @@ var expenseDropzone;
     get_vbt_dashboard();
   });
 
-  $(document).on('change', 'select[name="vendor_ft[]"], select[name="budget_head"]', function() {
+  $(document).on('change', 'select[name="vendor_ft[]"], select[name="budget_head"], select[name="is_expense"]', function() {
     get_vbt_dashboard();
   });
 
@@ -551,6 +551,7 @@ function get_vbt_dashboard() {
   var data = {
     vendors: $('select[name="vendor_ft[]"]').val(),
     group_pur: $('select[name="budget_head"]').val(),
+    is_expense: $('select[name="is_expense"]').val()
   }
 
   $.post(admin_url + 'purchase/get_vbt_dashboard', data).done(function(response){

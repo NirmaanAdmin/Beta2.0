@@ -22615,6 +22615,7 @@ class Purchase_model extends App_Model
         $response = array();
         $vendors = isset($data['vendors']) ? $data['vendors'] : '';
         $group_pur = isset($data['group_pur']) ? $data['group_pur'] : '';
+        $is_expense = isset($data['is_expense']) ? $data['is_expense'] : '';
         $this->load->model('currencies_model');
         $base_currency = $this->currencies_model->get_base_currency();
         if ($request->currency != 0 && $request->currency != null) {
@@ -22658,6 +22659,15 @@ class Purchase_model extends App_Model
         if (!empty($group_pur)) {
             $this->db->where(db_prefix() . 'pur_invoices.group_pur', $group_pur);
         }
+        if(!empty($is_expense)){
+            if($is_expense == 1){
+                $this->db->where(db_prefix() . 'pur_invoices.expense_convert >', 0);
+            }
+            if($is_expense == 2){
+                $this->db->where(db_prefix() . 'pur_invoices.expense_convert', 0);
+            }
+        }
+
         if (!empty($default_project)) {
             $this->db->where(db_prefix() . 'pur_invoices.project_id', $default_project);
         }
