@@ -37,7 +37,7 @@ $aColumns = [
     'vendor_note',
     db_prefix() . 'pur_invoices.id as inv_id',
     db_prefix() . 'pur_invoices.adminnote as adminnote',
-    'expense_convert',
+    'expense_convert as is_expense',
     db_prefix() . 'pur_invoices.last_action',
 ];
 
@@ -458,8 +458,8 @@ foreach ($rResult as $aRow) {
             $_data = $order_data;
         } elseif ($aColumns[$i] == 'vendor_note') {
             $_data = render_tags($aRow['tags']);
-        } elseif ($aColumns[$i] == 'expense_convert') {
-            if($aRow['expense_convert'] == 0){
+        } elseif ($aColumns[$i] == 'is_expense') {
+            if($aRow['is_expense'] == 0){
                 $expense_yes_no = 'No';
             } else {
                 $expense_yes_no = 'Yes';
