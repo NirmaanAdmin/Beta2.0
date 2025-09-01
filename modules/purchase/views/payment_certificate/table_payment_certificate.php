@@ -276,9 +276,9 @@ foreach ($rResult as $aRow) {
                 } else if ($aRow['approve_status'] == 3) {
                     $_data = '<span class="label label-danger">' . _l('rejected') . '</span>';
                 } else if (!empty($aRow['ot_id'])) {
-                    $_data = '<a data-toggle="tooltip" data-loading-text="' . _l('wait_text') . '" class="btn btn-success lead-top-btn lead-view" data-placement="top" href="#" onclick="send_payment_certificate_approve(' . pur_html_entity_decode($aRow['id']) . ', \'ot_payment_certificate\'); return false;">' . _l('send_request_approve_pur') . '</a>';
+                    $_data = '<a data-toggle="tooltip" data-loading-text="' . _l('wait_text') . '" class="btn btn-success lead-top-btn lead-view" data-placement="top" href="#" onclick="send_payment_certificate_approve(' . pur_html_entity_decode($aRow['id']) . ', \'ot_payment_certificate\'); return false;">' . _l('approval_request_send') . '</a>';
                 } else {
-                    $_data = '<span class="label label-primary">' . _l('send_request_approve_pur') . '</span>';
+                    $_data = '<span class="label label-primary">' . _l('approval_request_send') . '</span>';
                 }
             } else if ($aRow['approve_status'] == 1) {
                 $_data = '<span class="label label-primary">' . _l('pur_draft') . '</span>';

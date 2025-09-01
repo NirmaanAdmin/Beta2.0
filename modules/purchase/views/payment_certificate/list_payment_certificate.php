@@ -157,7 +157,7 @@ $module_name = 'payment_certificate'; ?>
                            $approval_status_type_filter = get_module_filter($module_name, 'approval_status');
                            $approval_status_type_filter_val = !empty($approval_status_type_filter) ? explode(",", $approval_status_type_filter->filter_value) : [];
                            $payment_status = [
-                              ['id' => 1, 'name' => 'Send approval request'],
+                              ['id' => 1, 'name' => _l('approval_request_send')],
                               ['id' => 2, 'name' => 'Approved'],
                               ['id' => 3, 'name' => 'Rejected'],
                            ];
