@@ -50,6 +50,7 @@
           }
       }
   }
+  $project_id = get_default_project();
 foreach ($statuses as $status) {
     $_where = '';
     if ($where == '') {
