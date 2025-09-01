@@ -405,7 +405,7 @@ foreach ($rResult as $aRow) {
             $_data = $budget_head;
         } else if ($aColumns[$i] == 'vendor_invoice_number') {
             if ($aRow['vendor_invoice_number'] != '') {
-                $_data = '<input type="text" class="form-control vin-input" placeholder="Enter invoice number" data-id="' . $aRow['id'] . '" value="' . $aRow['vendor_invoice_number'] . '" size="10">';
+                $_data = '<textarea data-id="' . $aRow['id'] . '" class="form-control vin-input" placeholder="Enter invoice number" rows="1">' . $aRow['vendor_invoice_number'] . '</textarea>';
             } else {
                 $_data = $aRow['invoice_number'];
             }
