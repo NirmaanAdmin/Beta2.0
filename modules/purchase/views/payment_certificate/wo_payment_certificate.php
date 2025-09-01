@@ -220,6 +220,7 @@
                         <select name="status" id="status" class="selectpicker" onchange="change_status_pay_cert(this,<?php echo ($payment_certificate_id); ?>); return false;" data-width="100%" data-live-search="true" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
                           <option value=""></option>
                           <option value="1"><?php echo _l('purchase_draft'); ?></option>
+                          <option value="4"><?php echo _l('approval_request_sent'); ?></option>
                           <option value="2"><?php echo _l('purchase_approved'); ?></option>
                           <option value="3"><?php echo _l('pur_rejected'); ?></option>
                         </select>

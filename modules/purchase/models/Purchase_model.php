@@ -18971,6 +18971,13 @@ class Purchase_model extends App_Model
     public function change_status_pay_cert($status, $id)
     {
         $payment_certificate = $this->get_payment_certificate($id);
+        if($status == 4) {
+            $this->db->where('id', $id);
+            $this->db->update(db_prefix() . 'payment_certificate', ['approve_status' => 1]);
+            $this->db->where('rel_id', $id);
+            $this->db->delete(db_prefix() . 'payment_certificate_details');
+            return true;
+        }
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'payment_certificate', ['approve_status' => $status]);
         if (!empty($payment_certificate->po_id)) {
