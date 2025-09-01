@@ -1,11 +1,11 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
 <div class="row">
     <?php if ($ticket->project_id) { ?>
-    <div class="col-md-12 single-ticket-project-area">
-        <div class="alert alert-info">
-            <?php echo _l('ticket_linked_to_project', '<a href="' . site_url('clients/project/' . $ticket->project_id) . '"><b>' . e(get_project_name_by_id($ticket->project_id)) . '</b></a>') ; ?>
+        <div class="col-md-12 single-ticket-project-area">
+            <div class="alert alert-info">
+                <?php echo _l('ticket_linked_to_project', '<a href="' . site_url('clients/project/' . $ticket->project_id) . '"><b>' . e(get_project_name_by_id($ticket->project_id)) . '</b></a>'); ?>
+            </div>
         </div>
-    </div>
     <?php } ?>
     <?php set_ticket_open($ticket->clientread, $ticket->ticketid, false); ?>
     <?php echo form_hidden('ticket_id', $ticket->ticketid); ?>
@@ -43,37 +43,37 @@
                                             style="background:<?php echo e($ticket->statuscolor); ?>">
                                             <?php echo e(ticket_status_translate($ticket->ticketstatusid)); ?>
                                             <?php if (get_option('allow_customer_to_change_ticket_status') == 1) { ?>
-                                            <i
-                                                class="fa-regular fa-pen-to-square pointer toggle-change-ticket-status"></i>
+                                                <i
+                                                    class="fa-regular fa-pen-to-square pointer toggle-change-ticket-status"></i>
                                         </span>
-                                        <?php } ?>
+                                    <?php } ?>
                                     </div>
                                     <?php if (can_change_ticket_status_in_clients_area()) { ?>
-                                    <div class="ticket-status hide tw-flex-1">
-                                        <div class="input-group input-group-sm">
-                                            <select
-                                                data-none-selected-text="<?php echo _l('dropdown_non_selected_tex'); ?>"
-                                                id="ticket_status_single" class="form-control"
-                                                name="ticket_status_single">
-                                                <?php foreach ($ticket_statuses as $status) {
-                                                if (!can_change_ticket_status_in_clients_area($status['ticketstatusid'])) {
-                                                    continue;
-                                                } ?>
-                                                <option value="<?php echo e($status['ticketstatusid']); ?>" <?php if ($status['ticketstatusid'] == $ticket->ticketstatusid) {
-                                                    echo 'selected';
-                                                } ?>>
-                                                    <?php echo e(ticket_status_translate($status['ticketstatusid'])); ?>
-                                                </option>
-                                                <?php } ?>
-                                            </select>
-                                            <span class="input-group-btn">
-                                                <button class="btn btn-default toggle-change-ticket-status"
-                                                    type="button">
-                                                    <i class="fa fa-remove pointer"></i>
-                                                </button>
-                                            </span>
+                                        <div class="ticket-status hide tw-flex-1">
+                                            <div class="input-group input-group-sm">
+                                                <select
+                                                    data-none-selected-text="<?php echo _l('dropdown_non_selected_tex'); ?>"
+                                                    id="ticket_status_single" class="form-control"
+                                                    name="ticket_status_single">
+                                                    <?php foreach ($ticket_statuses as $status) {
+                                                        if (!can_change_ticket_status_in_clients_area($status['ticketstatusid'])) {
+                                                            continue;
+                                                        } ?>
+                                                        <option value="<?php echo e($status['ticketstatusid']); ?>" <?php if ($status['ticketstatusid'] == $ticket->ticketstatusid) {
+                                                                                                                        echo 'selected';
+                                                                                                                    } ?>>
+                                                            <?php echo e(ticket_status_translate($status['ticketstatusid'])); ?>
+                                                        </option>
+                                                    <?php } ?>
+                                                </select>
+                                                <span class="input-group-btn">
+                                                    <button class="btn btn-default toggle-change-ticket-status"
+                                                        type="button">
+                                                        <i class="fa fa-remove pointer"></i>
+                                                    </button>
+                                                </span>
+                                            </div>
                                         </div>
-                                    </div>
                                     <?php } ?>
                                 </div>
                             </div>
@@ -81,22 +81,22 @@
                                 <?php echo _l('clients_ticket_single_priority', '<span class="tw-font-medium tw-text-neutral-700">' . e(ticket_priority_translate($ticket->priorityid)) . '</span>'); ?>
                             </p>
                             <?php if (get_option('services') == 1 && !empty($ticket->service_name)) { ?>
-                            <p class="tw-py-2.5 tw-mb-0 tw-text-neutral-500">
-                                <?php echo _l('service') . ': <span class="tw-font-medium tw-text-neutral-700">' . e($ticket->service_name) . '</span>'; ?>
-                            </p>
+                                <p class="tw-py-2.5 tw-mb-0 tw-text-neutral-500">
+                                    <?php echo _l('service') . ': <span class="tw-font-medium tw-text-neutral-700">' . e($ticket->service_name) . '</span>'; ?>
+                                </p>
                             <?php } ?>
                             <?php
-                                $custom_fields = get_custom_fields('tickets', ['show_on_client_portal' => 1]);
-                                foreach ($custom_fields as $field) {
-                                    $cfValue = get_custom_field_value($ticket->ticketid, $field['id'], 'tickets');
-                                    if (empty($cfValue)) {
-                                        continue;
-                                    } ?>
-                                    <p class="tw-py-2.5 tw-mb-0 tw-text-neutral-500">
-                                        <?php echo e($field['name']); ?>:
-                                        <span class="tw-font-medium tw-text-neutral-700"><?php echo $cfValue; ?></span>
-                                    </p>
-                                    <?php } ?>
+                            $custom_fields = get_custom_fields('tickets', ['show_on_client_portal' => 1]);
+                            foreach ($custom_fields as $field) {
+                                $cfValue = get_custom_field_value($ticket->ticketid, $field['id'], 'tickets');
+                                if (empty($cfValue)) {
+                                    continue;
+                                } ?>
+                                <p class="tw-py-2.5 tw-mb-0 tw-text-neutral-500">
+                                    <?php echo e($field['name']); ?>:
+                                    <span class="tw-font-medium tw-text-neutral-700"><?php echo $cfValue; ?></span>
+                                </p>
+                            <?php } ?>
                         </div>
                     </div>
                 </div>
@@ -111,9 +111,16 @@
         <div class="panel_s single-ticket-reply-area">
             <div class="panel-body">
                 <div class="form-group">
-                    <textarea name="message" class="form-control" rows="8"></textarea>
+                    <textarea name="message" class="form-control" rows="8" placeholder="Reply"></textarea>
                     <?php echo form_error('message'); ?>
                 </div>
+                <div class="form-group">
+                    <input type="text" name="name" class="form-control" required placeholder="Name*">
+                </div>
+                 <div class="form-group">
+                    <input type="email" name="email" class="form-control" required placeholder="Email">
+                </div>
+
                 <div class="attachments_area">
                     <div class="attachments">
                         <div class="attachment tw-max-w-md">
@@ -154,93 +161,44 @@
                 <div class="row">
                     <div class="col-md-3 border-right tw-font-medium">
                         <?php if ($ticket->admin == null || $ticket->admin == 0) { ?>
-                        <p><?php echo e($ticket->submitter); ?></p>
+                            <p><?php echo e($ticket->submitter); ?></p>
                         <?php } else { ?>
-                        <p><?php echo e($ticket->opened_by); ?></p>
-                        <p class="text-muted">
-                            <?php echo _l('ticket_staff_string'); ?>
-                        </p>
+                            <p><?php echo e($ticket->opened_by); ?></p>
+                            <p class="text-muted">
+                                <?php echo _l('ticket_staff_string'); ?>
+                            </p>
                         <?php } ?>
                     </div>
                     <div class="col-md-9">
                         <?php
-                            if(empty($ticket->admin)) {
-                                echo process_text_content_for_display($ticket->message);
-                            } else {
-                                echo check_for_links($ticket->message);
-                            }
+                        if (empty($ticket->admin)) {
+                            echo process_text_content_for_display($ticket->message);
+                        } else {
+                            echo check_for_links($ticket->message);
+                        }
                         ?>
                         <br />
                         <p>-----------------------------</p>
                         <?php if (count($ticket->attachments) > 0) {
-                                    echo '<hr />';
-                                    foreach ($ticket->attachments as $attachment) { ?>
-                        <?php
-                            $path     = get_upload_path_by_type('ticket') . $ticket->ticketid . '/' . $attachment['file_name'];
-                            $is_image = is_image($path);
-
-                            if ($is_image) {
-                                echo '<div class="preview_image">';
-                            }
-                            ?>
-                        <a href="<?php echo site_url('download/file/ticket/' . $attachment['id']); ?>"
-                            class="display-block mbot5">
-                            <i class="<?php echo get_mime_class($attachment['filetype']); ?>"></i>
-                            <?php echo e($attachment['file_name']); ?>
-                            <?php if ($is_image) { ?>
-                            <img src="<?php echo site_url('download/preview_image?path=' . protected_file_url_by_path($path) . '&type=' . $attachment['filetype']); ?>"
-                                class="mtop5">
-                            <?php } ?>
-                        </a>
-                        <?php if ($is_image) {
-                                echo '</div>';
-                            }
                             echo '<hr />';
-                        }
-                                } ?>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <?php foreach ($ticket_replies as $reply) { ?>
-        <div class="panel_s<?php echo $reply['admin'] == null ? ' client-reply' : ''; ?>">
-            <div class="panel-body">
-                <div class="row">
-                    <div class="col-md-3 border-right tw-font-medium">
-                        <p><?php echo e($reply['submitter']); ?></p>
-                        <p class="text-muted">
-                            <?php if ($reply['admin'] !== null) {
-                                echo _l('ticket_staff_string');
-                            } ?>
-                        </p>
-                    </div>
-                    <div class="col-md-9">
-                        <?php
-                            if(empty($reply['admin'])) {
-                                echo process_text_content_for_display($reply['message']);
-                            } else {
-                                echo check_for_links($reply['message']);
-                            }
-                        ?>
-                        <br />
-                        <p>-----------------------------</p>
-                        <?php if (count($reply['attachments']) > 0) {
-                            echo '<hr />';
-                            foreach ($reply['attachments'] as $attachment) {
+                            foreach ($ticket->attachments as $attachment) { ?>
+                                <?php
                                 $path     = get_upload_path_by_type('ticket') . $ticket->ticketid . '/' . $attachment['file_name'];
                                 $is_image = is_image($path);
+
                                 if ($is_image) {
                                     echo '<div class="preview_image">';
-                                } ?>
-                        <a href="<?php echo site_url('download/file/ticket/' . $attachment['id']); ?>"
-                            class="inline-block mbot5">
-                            <i class="<?php echo get_mime_class($attachment['filetype']); ?>"></i>
-                            <?php echo e($attachment['file_name']); ?>
-                            <?php if ($is_image) { ?>
-                            <img src="<?php echo site_url('download/preview_image?path=' . protected_file_url_by_path($path) . '&type=' . $attachment['filetype']); ?>"
-                                class="mtop5">
-                            <?php } ?>
-                        </a>
+                                }
+                                ?>
+                                <a href="<?php echo site_url('download/file/ticket/' . $attachment['id']); ?>"
+                                    class="display-block mbot5">
+                                    <i class="<?php echo get_mime_class($attachment['filetype']); ?>"></i>
+                                    <?php echo e($attachment['file_name']); ?>
+                                    <?php if ($is_image) { ?>
+                                        <img src="<?php echo site_url('download/preview_image?path=' . protected_file_url_by_path($path) . '&type=' . $attachment['filetype']); ?>"
+                                            class="mtop5">
+                                    <?php } ?>
+                                </a>
                         <?php if ($is_image) {
                                     echo '</div>';
                                 }
@@ -250,15 +208,64 @@
                     </div>
                 </div>
             </div>
-            <div class="panel-footer">
-                <span><?php echo e(_l('clients_single_ticket_replied', _dt($reply['date']))); ?></span>
-            </div>
         </div>
+        <?php foreach ($ticket_replies as $reply) { ?>
+            <div class="panel_s<?php echo $reply['admin'] == null ? ' client-reply' : ''; ?>">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-3 border-right tw-font-medium">
+                            <p><?php echo e($reply['submitter']); ?></p>
+                            <p class="text-muted">
+                                <?php if ($reply['admin'] !== null) {
+                                    echo _l('ticket_staff_string');
+                                } ?>
+                            </p>
+                        </div>
+                        <div class="col-md-9">
+                            <?php
+                            if (empty($reply['admin'])) {
+                                echo process_text_content_for_display($reply['message']);
+                            } else {
+                                echo check_for_links($reply['message']);
+                            }
+                            ?>
+                            <br />
+                            <p>-----------------------------</p>
+                            <?php if (count($reply['attachments']) > 0) {
+                                echo '<hr />';
+                                foreach ($reply['attachments'] as $attachment) {
+                                    $path     = get_upload_path_by_type('ticket') . $ticket->ticketid . '/' . $attachment['file_name'];
+                                    $is_image = is_image($path);
+                                    if ($is_image) {
+                                        echo '<div class="preview_image">';
+                                    } ?>
+                                    <a href="<?php echo site_url('download/file/ticket/' . $attachment['id']); ?>"
+                                        class="inline-block mbot5">
+                                        <i class="<?php echo get_mime_class($attachment['filetype']); ?>"></i>
+                                        <?php echo e($attachment['file_name']); ?>
+                                        <?php if ($is_image) { ?>
+                                            <img src="<?php echo site_url('download/preview_image?path=' . protected_file_url_by_path($path) . '&type=' . $attachment['filetype']); ?>"
+                                                class="mtop5">
+                                        <?php } ?>
+                                    </a>
+                            <?php if ($is_image) {
+                                        echo '</div>';
+                                    }
+                                    echo '<hr />';
+                                }
+                            } ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-footer">
+                    <span><?php echo e(_l('clients_single_ticket_replied', _dt($reply['date']))); ?></span>
+                </div>
+            </div>
         <?php } ?>
     </div>
 
 </div>
 <?php if (count($ticket_replies) > 1) { ?>
-<a href="#top" id="toplink">↑</a>
-<a href="#bot" id="botlink">↓</a>
+    <a href="#top" id="toplink">↑</a>
+    <a href="#bot" id="botlink">↓</a>
 <?php } ?>

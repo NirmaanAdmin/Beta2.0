@@ -673,17 +673,21 @@ class Forms extends ClientsController
 
         if ($this->input->post()) {
             $this->form_validation->set_rules('message', _l('ticket_reply'), 'required');
-
             if ($this->form_validation->run() !== false) {
                 $replyData = ['message' => $this->input->post('message')];
 
-                if ($ticket->userid && $ticket->contactid) {
-                    $replyData['userid']    = $ticket->userid;
-                    $replyData['contactid'] = $ticket->contactid;
-                } else {
-                    $replyData['name']  = $ticket->from_name;
-                    $replyData['email'] = $ticket->ticket_email;
-                }
+                // if ($ticket->userid && $ticket->contactid) {
+                //     $replyData['userid']    = $ticket->userid;
+                //     $replyData['contactid'] = $ticket->contactid;
+                // } else {
+                //     $replyData['name']  = $ticket->from_name;
+                //     $replyData['email'] = $ticket->ticket_email;
+                // }
+
+                if ($this->input->post('name') ||  $this->input->post('email')) {
+                    $replyData['name']    = $this->input->post('name');
+                    $replyData['email'] = $this->input->post('email');
+                } 
 
                 $replyid = $this->tickets_model->add_reply($replyData, $ticket->ticketid);
 

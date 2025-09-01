@@ -440,7 +440,7 @@ class Tickets_model extends App_Model
             $data['admin'] = $admin;
             $status        = $data['status'];
         } else {
-            $status = 1;
+            $status = 2;
         }
 
         if (isset($data['status'])) {
