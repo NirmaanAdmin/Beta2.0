@@ -17425,6 +17425,7 @@ class Purchase_model extends App_Model
     {
         $this->db->select('id, title');
         $this->db->from(db_prefix() . 'invoices');
+        $this->db->order_by('id', 'desc');
         $query = $this->db->get();
         $billing_invoices = $query->result_array();
 
@@ -18088,17 +18089,16 @@ class Purchase_model extends App_Model
                             <option value="none">' . _l('None') . '</option>
                             <option value="create_invoice">' . _l('expense_convert_to_invoice') . '</option>
                             <option value="applied_invoice">' . _l('applied_to_invoice') . '</option>
-                        </select>
-                    </div>';
+                        </select>';
 
-                    $html .= '<div class="col-md-2 bulk-applied-to-invoice hide">
-                    <br/>
+                    $html .= '<br/>
+                    <div class="bulk-applied-to-invoice hide">
                     <select class="selectpicker display-block" data-width="100%" name="' . $applied_to_invoice_name_attr . '" id="bulk_applied_to_invoice" data-id="' . $pvalue['id'] . '" data-none-selected-text="' . _l('applied_to_invoice') . '">
                     <option value=""></option>';
                     foreach ($invoices as $i) {
                         $html .= '<option value="' . $i['id'] . '">' . format_invoice_number($i['id']) . " (" . $i['title'] . ')</option>';
                     }
-                    $html .= '</select></div>';
+                    $html .= '</select></div></div>';
                     $html .= '<div class="col-md-2">';
                     $html .= '<select class="selectpicker display-block" multiple data-width="100%" name="' . $responsible_person_name_attr . '" id="bulk_responsible_person" data-none-selected-text="' . _l('none') . '" data-live-search="true">';
                     $saved_responsible = !empty($pvalue['responsible_person']) ? explode(',', $pvalue['responsible_person']) : [];
