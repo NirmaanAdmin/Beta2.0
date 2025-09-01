@@ -37,34 +37,34 @@
 				$('.ot_comulative').html(format_money_cert(ot_comulative, true));
 
 				var pay_cert_c1_1 = $('input[name="pay_cert_c1_1"]').val();
-				var mobilization_advance = $('select[name="mobilization_advance"]').val();
-				if (mobilization_advance) {
-					mobilization_advance = mobilization_advance.replace('%', '');
-					pay_cert_c1_1 = ot_contract_amount * (mobilization_advance / 100);
-					$('input[name="pay_cert_c1_1"]').val(format_amount_cert(pay_cert_c1_1));
-				} else {
-					pay_cert_c1_1 = 0;
-				}
+				// var mobilization_advance = $('select[name="mobilization_advance"]').val();
+				// if (mobilization_advance) {
+				// 	mobilization_advance = mobilization_advance.replace('%', '');
+				// 	pay_cert_c1_1 = ot_contract_amount * (mobilization_advance / 100);
+				// 	$('input[name="pay_cert_c1_1"]').val(format_amount_cert(pay_cert_c1_1));
+				// } else {
+				// 	pay_cert_c1_1 = 0;
+				// }
 
 				var pay_cert_c1_2 = $('input[name="pay_cert_c1_2"]').val();
-				var mobilization_advance = $('select[name="mobilization_advance"]').val();
-				if (mobilization_advance) {
-					mobilization_advance = mobilization_advance.replace('%', '');
-					pay_cert_c1_2 = ot_previous * (mobilization_advance / 100);
-					$('input[name="pay_cert_c1_2"]').val(format_amount_cert(pay_cert_c1_2));
-				} else {
-					pay_cert_c1_2 = 0;
-				}
+				// var mobilization_advance = $('select[name="mobilization_advance"]').val();
+				// if (mobilization_advance) {
+				// 	mobilization_advance = mobilization_advance.replace('%', '');
+				// 	pay_cert_c1_2 = ot_previous * (mobilization_advance / 100);
+				// 	$('input[name="pay_cert_c1_2"]').val(format_amount_cert(pay_cert_c1_2));
+				// } else {
+				// 	pay_cert_c1_2 = 0;
+				// }
 
 				var pay_cert_c1_3 = $('input[name="pay_cert_c1_3"]').val();
-				var mobilization_advance = $('select[name="mobilization_advance"]').val();
-				if (mobilization_advance) {
-					mobilization_advance = mobilization_advance.replace('%', '');
-					pay_cert_c1_3 = ot_this_bill * (mobilization_advance / 100);
-					$('input[name="pay_cert_c1_3"]').val(format_amount_cert(pay_cert_c1_3));
-				} else {
-					pay_cert_c1_3 = 0;
-				}
+				// var mobilization_advance = $('select[name="mobilization_advance"]').val();
+				// if (mobilization_advance) {
+				// 	mobilization_advance = mobilization_advance.replace('%', '');
+				// 	pay_cert_c1_3 = ot_this_bill * (mobilization_advance / 100);
+				// 	$('input[name="pay_cert_c1_3"]').val(format_amount_cert(pay_cert_c1_3));
+				// } else {
+				// 	pay_cert_c1_3 = 0;
+				// }
 
 				var pay_cert_c2_1 = $('input[name="pay_cert_c2_1"]').val();
 				pay_cert_c2_1 = pay_cert_c2_1.trim() != "" ? pay_cert_c2_1 : 0;
