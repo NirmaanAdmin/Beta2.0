@@ -38,13 +38,24 @@
     width: 100px !important;
   }
 
-  .mobilization_advance_class .bootstrap-select {
-    width: 100px !important;
+  .mobilization_advance_class {
+    white-space: nowrap;
   }
 
   .mobilization_advance_class .form-group {
-    width: 100px !important;
     display: inline-block;
+    margin-right: 10px;
+    vertical-align: middle;
+  }
+
+  .mobilization_advance_class input[name="mobilization_text"].form-control {
+    width: 263px !important;
+    display: inline-block !important;
+  }
+
+  .mobilization_advance_class input[name="payment_clause"].form-control {
+    width: 120px !important;
+    display: inline-block !important;
   }
 
   .cgst_tax_class .bootstrap-select,
@@ -315,16 +326,15 @@
                             <tr>
                               <td>C1</td>
                               <td class="mobilization_advance_class">
-                                Mobilization Advance payment
-                                <!-- <select name="mobilization_advance" id="mobilization_advance" class="selectpicker" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>" onchange="calculate_payment_certificate()">
-                                  <option value="0%" <?php if (isset($payment_certificate) && $payment_certificate->mobilization_advance == '0%') {
-                                                        echo 'selected';
-                                                      } ?>>0%</option>
-                                  <option value="2.5%" <?php if (isset($payment_certificate) && $payment_certificate->mobilization_advance == '2.5%') {
-                                                          echo 'selected';
-                                                        } ?>>2.5%</option>
-                                </select> -->
-                                as per clause
+                                Advance
+                                <?php
+                                if (isset($payment_certificate) && !empty($payment_certificate->mobilization_text)) {
+                                  $mobilization_text = $payment_certificate->mobilization_text;
+                                } else {
+                                  $mobilization_text = 'Mobilization payment as per clause';
+                                }
+                                echo render_input('mobilization_text', '', $mobilization_text);
+                                ?>
                                 <?php
                                 $payment_clause = (isset($payment_certificate) ? $payment_certificate->payment_clause  : '14.2');
                                 echo render_input('payment_clause', '', $payment_clause, 'number');
@@ -1134,8 +1144,10 @@
       const selectedOption = select ? select.options[select.selectedIndex].text : '';
       const clauseInput = cell.querySelector('input[name="payment_clause"]');
       const clauseValue = clauseInput ? clauseInput.value : '14.2';
+      const mobilizationInput = cell.querySelector('input[name="mobilization_text"]');
+      const mobilizationValue = mobilizationInput ? mobilizationInput.value : '';
 
-      return `${label} ${selectedOption} as per clause ${clauseValue}`;
+      return `Advance ${mobilizationValue} ${clauseValue}`;
     };
 
     // Process each row

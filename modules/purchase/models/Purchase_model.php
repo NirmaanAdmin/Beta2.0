@@ -18452,6 +18452,7 @@ class Purchase_model extends App_Model
         $pay_cert_data = (object) $pay_cert_data;
         $mobilization_advance = !empty($pay_cert_data->mobilization_advance) ? $pay_cert_data->mobilization_advance : '0%';
         $payment_clause = !empty($pay_cert_data->payment_clause) ? $pay_cert_data->payment_clause : '14.2';
+        $mobilization_text = !empty($pay_cert_data->mobilization_text) ? $pay_cert_data->mobilization_text : 'Mobilization payment as per clause';
         $cgst_tax = !empty($pay_cert_data->cgst_tax) ? $pay_cert_data->cgst_tax : '0%';
         $sgst_tax = !empty($pay_cert_data->sgst_tax) ? $pay_cert_data->sgst_tax : '0%';
         $igst_tax = !empty($pay_cert_data->igst_tax) ? $pay_cert_data->igst_tax : '0%';
@@ -18574,7 +18575,7 @@ class Purchase_model extends App_Model
                 </tr>
                 <tr class="pay_cert_value">
                   <td>C1</td>
-                  <td>Mobilization Advance payment ' . $mobilization_advance . ' as per clause ' . $payment_clause . '</td>
+                  <td>Advance ' . $mobilization_text . ' ' . $payment_clause . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->pay_cert_c1_1) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->pay_cert_c1_2) . '</td>
                   <td>' . check_value_pay_cert_pdf($pay_cert_data->pay_cert_c1_3) . '</td>
