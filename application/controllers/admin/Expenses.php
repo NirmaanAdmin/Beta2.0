@@ -53,7 +53,8 @@ class Expenses extends AdminController
         $this->load->view('admin/expenses/manage', $data);
     }
 
-    public function table_expenses(){
+    public function table_expenses()
+    {
         if ($this->input->is_ajax_request()) {
             $this->app->get_table_data('expenses_new');
         }
@@ -137,8 +138,8 @@ class Expenses extends AdminController
             if (staff_cant('edit', 'expenses')) {
                 set_alert('danger', _l('access_denied'));
                 echo json_encode([
-                        'url' => admin_url('expenses/expense/' . $id),
-                    ]);
+                    'url' => admin_url('expenses/expense/' . $id),
+                ]);
                 die;
             }
             $success = $this->expenses_model->update($this->input->post(), $id);
@@ -146,9 +147,9 @@ class Expenses extends AdminController
                 set_alert('success', _l('updated_successfully', _l('expense')));
             }
             echo json_encode([
-                    'url'       => admin_url('expenses/list_expenses/' . $id),
-                    'expenseid' => $id,
-                ]);
+                'url'       => admin_url('expenses/list_expenses/' . $id),
+                'expenseid' => $id,
+            ]);
             die;
         }
         if ($id == '') {
@@ -280,7 +281,7 @@ class Expenses extends AdminController
             if (count($data['expenses_years']) >= 1 && $data['expenses_years'][0]['year'] != date('Y')) {
                 array_unshift($data['expenses_years'], ['year' => date('Y')]);
             }
-            
+
             $data['expenses_years'] = Arr::uniqueByKey($data['expenses_years'], 'year');
 
             $data['_currency'] = $data['totals']['currencyid'];
@@ -492,7 +493,7 @@ class Expenses extends AdminController
         }
     }
 
-    public function applied_to_invoice() 
+    public function applied_to_invoice()
     {
         $response = array();
         $data = $this->input->post();
@@ -529,15 +530,17 @@ class Expenses extends AdminController
         die;
     }
 
-    public function convert_pur_invoice_from_expense($id, $rtype = 0)
+    public function convert_pur_invoice_from_expense($id, $rtype = 0, $expense_data = [])
     {
         if (!$id) {
             redirect(admin_url('expenses'));
         }
+
         $expense = $this->expenses_model->get($id);
         if (empty($expense)) {
             redirect(admin_url('expenses'));
         }
+
         $expense_vbt = $this->expenses_model->get_expense_with_vbt($id);
         if (!empty($expense_vbt)) {
             set_alert('warning', 'This expense has already been converted to a vendor bill.');
@@ -548,10 +551,18 @@ class Expenses extends AdminController
         $prefix = get_purchase_option('pur_inv_prefix');
         $next_number = get_purchase_option('next_inv_number');
         $invoice_number = $prefix . str_pad($next_number, 5, '0', STR_PAD_LEFT);
-        $group_pur = $this->expenses_model->find_budget_head_value($expense->category);
-        $vendor_submitted_amount_without_tax = !empty($expense->amount) ? $expense->amount : 0;
-        $taxrate1 = ($expense->amount * $expense->taxrate) / 100;
-        $taxrate2 = ($expense->amount * $expense->taxrate2) / 100;
+
+        // Use data from $expense_data if available, otherwise fallback to $expense object
+        $category = !empty($expense_data['category']) ? $expense_data['category'] : $expense->category;
+        $expense_name = !empty($expense_data['expense_name']) ? $expense_data['expense_name'] : $expense->expense_name;
+        $amount = !empty($expense_data['amount']) ? $expense_data['amount'] : $expense->amount;
+        $expense_date = !empty($expense_data['date']) ? $expense_data['date'] : date('Y-m-d');
+        $project_id = !empty($expense_data['project_id']) ? $expense_data['project_id'] : $expense->project_id;
+
+        $group_pur = $this->expenses_model->find_budget_head_value($category);
+        $vendor_submitted_amount_without_tax = !empty($amount) ? $amount : 0;
+        $taxrate1 = ($amount * $expense->taxrate) / 100;
+        $taxrate2 = ($amount * $expense->taxrate2) / 100;
         $vendor_submitted_tax_amount = $taxrate1 + $taxrate2;
         $vendor_submitted_amount = $vendor_submitted_amount_without_tax + $vendor_submitted_tax_amount;
 
@@ -559,30 +570,34 @@ class Expenses extends AdminController
         $input['vendor_invoice_number'] = NULL;
         $input['vendor'] = !empty($expense->vendor) ? $expense->vendor : 0;
         $input['group_pur'] = !empty($group_pur) ? $group_pur : 0;
-        $input['description_services'] = !empty($expense->expense_name) ? $expense->expense_name : '';
-        $input['invoice_date'] = date('Y-m-d');
+        $input['description_services'] = !empty($expense_name) ? $expense_name : '';
+        $input['invoice_date'] = $expense_date;
         $input['currency'] = 3;
         $input['to_currency'] = 3;
         $input['date_add'] = date('Y-m-d');
         $input['payment_status'] = 0;
-        $input['project_id'] = !empty($expense->project_id) ? $expense->project_id : 1;
+        $input['project_id'] = !empty($project_id) ? $project_id : 1;
         $input['vendor_submitted_amount_without_tax'] = $vendor_submitted_amount_without_tax;
         $input['vendor_submitted_tax_amount'] = $vendor_submitted_tax_amount;
         $input['vendor_submitted_amount'] = $vendor_submitted_amount;
         $input['final_certified_amount'] = $vendor_submitted_amount;
         $input['expense_id'] = $id;
         $input['add_from'] = get_staff_user_id();
+
         $this->db->insert(db_prefix() . 'pur_invoices', $input);
         $insert_id = $this->db->insert_id();
+
         if ($insert_id) {
             $this->db->where('option_name', 'next_inv_number');
             $this->db->update(db_prefix() . 'purchase_option', ['option_val' =>  $next_number + 1]);
             update_pur_invoices_last_action($insert_id);
         }
+
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'expenses', ['vbt_id' => $insert_id]);
         $this->expenses_model->copy_expense_files_to_vbt($id, $insert_id);
-        if($rtype == 0) {
+
+        if ($rtype == 0) {
             set_alert('success', _l('purchase_invoice') . ' ' . _l('added_successfully'));
             redirect(admin_url('purchase/pur_invoice/' . $insert_id));
         } else {
@@ -590,21 +605,93 @@ class Expenses extends AdminController
         }
     }
 
+    public function bulk_convert_expenses_to_vbt()
+    {
+        $response = array();
+        $data = $this->input->post();
+        unset(
+            $data['bulk_active_tab'],
+            $data['convert_expense_name'],
+            $data['convert_category'],
+            $data['convert_date']
+        );
+
+        $expense_vbt = $this->expenses_model->check_convert_expenses_to_vbt($data['ids']);
+
+        if (empty($expense_vbt)) {
+            $response['success'] = false;
+            $response['message'] = 'All the selected expenses have already been converted into vendor bills.';
+            set_alert('warning', 'All the selected expenses have already been converted into vendor bills.');
+            redirect(admin_url('expenses'));
+        } else {
+            // Create a mapping of expense IDs to their data from the newitems array
+            $expense_data_map = [];
+            foreach ($data['newitems'] as $item) {
+                // Assuming the IDs are in the same order as newitems
+                // You might need to adjust this logic based on your actual data structure
+                $expense_data_map[] = $item;
+            }
+
+            $expense_ids = explode(',', $data['ids']);
+
+            foreach ($expense_vbt as $key => $value) {
+                // Find the corresponding data for this expense ID
+                $expense_index = array_search($value['id'], $expense_ids);
+                if ($expense_index !== false && isset($expense_data_map[$expense_index])) {
+                    $this->convert_pur_invoice_from_expense($value['id'], 1, $expense_data_map[$expense_index]);
+                } else {
+                    // Fallback to original behavior if data not found
+                    $this->convert_pur_invoice_from_expense($value['id'], 1, []);
+                }
+            }
+
+            $response['success'] = true;
+            $response['message'] = 'All the selected expenses are now converted into vendor bills.';
+            set_alert('success', 'All the selected expenses are now converted into vendor bills.');
+            redirect(admin_url('expenses'));
+        }
+    }
+
     public function bulk_convert_expense_to_vbt()
     {
         $response = array();
         $data = $this->input->post();
-        $expense_vbt = $this->expenses_model->check_convert_expenses_to_vbt($data['ids']);
-        if(empty($expense_vbt)) {
-            $response['success'] = false;
-            $response['message'] = 'All the selected expenses have already been converted into vendor bills.';
-        } else {
-            foreach ($expense_vbt as $key => $value) {
-                $this->convert_pur_invoice_from_expense($value['id'], 1);
-            }
-            $response['success'] = true;
-            $response['message'] = 'All the selected expenses are now converted into vendor bills.';
+        $bulk_html = $this->expenses_model->bulk_convert_expense_to_vbt($data);
+        echo json_encode(['success' => true, 'bulk_html' => $bulk_html]);
+    }
+
+    public function get_order_options()
+    {
+        $type = $this->input->post('type');
+        $options = array();
+
+        switch ($type) {
+            case '1': // pur_order
+                $this->db->select('id, concat(pur_order_number, " ", pur_order_name) as name');
+                $this->db->from('tblpur_orders');
+                $orders = $this->db->get()->result_array();
+                break;
+
+            case '2': // wo_order
+                $this->db->select('id, concat(wo_order_number, " ", wo_order_name) as name');
+                $this->db->from('tblwo_orders');
+                $orders = $this->db->get()->result_array();
+                break;
+
+            case '3': // order_tracker
+                $this->db->select('id, pur_order_name as name');
+                $this->db->from('tblpur_order_tracker');
+                $orders = $this->db->get()->result_array();
+                break;
+
+            default:
+                $orders = array();
+                break;
         }
-        echo json_encode($response);
+
+        echo json_encode(array(
+            'success' => true,
+            'options' => $orders
+        ));
     }
 }

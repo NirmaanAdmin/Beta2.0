@@ -1139,4 +1139,100 @@ class Expenses_model extends App_Model
         $this->db->where('vbt_id IS NULL', null, false);
         return $this->db->get(db_prefix() . 'expenses')->result_array();
     }
+    public function bulk_convert_expense_to_vbt($data)
+    {
+        $html = '';
+        $final_ids = '';
+        $this->load->model('projects_model');
+        $this->load->model('expenses_model');
+
+        if (!empty($data)) {
+            $expense_ids = explode(",", $data['ids']);
+
+            if (!empty($expense_ids)) {
+                $expenses = $this->get_multiple_expenses_invoices($expense_ids);
+                $expense_categories = $this->expenses_model->get_category();
+                $invoices = get_all_applied_invoices();
+                $staff_list = $this->staff_model->get();
+
+                $html .= '<input type="hidden" name="bulk_active_tab" id="bulk_active_tab" value="bulk_action">';
+                $html .= '<input type="hidden" name="ids" id="ids" value="' . $data['ids'] . '">';
+                $html .= '<div class="row">
+                        <div class="col-md-1 bulk-title"></div>
+                        <div class="col-md-2 bulk-title">' . _l('description_of_services') . '</div>
+                        <div class="col-md-2 bulk-title">' . _l('group_pur') . '</div>
+                        <div class="col-md-2 bulk-title">' . _l('Expense Date') . '</div>
+                        <div class="col-md-1"></div>
+                    </div><br/>';
+
+                $html .= '<div class="row">';
+                $html .= '<div class="col-md-1"></div>';
+                $html .= '<div class="col-md-2">' . render_textarea('convert_expense_name', '', '', ['rows' => 3]) . '</div>';
+                $html .= '<div class="col-md-2">' . render_select('convert_category', $expense_categories, array('id', 'name')) . '</div>';
+                $html .= '<div class="col-md-2">' . render_date_input('convert_date') . '</div>';
+               
+                $html .= '<div class="col-md-1"><button type="button" class="btn btn-info update_vbt_convert">' . _l('update') . '</button></div>';
+                $html .= '</div><br/><hr>';
+
+                $html .= '<div class="row">
+                        <div class="col-md-1 bulk-title">' . _l('Expense ID') . '</div>
+                        <div class="col-md-2 bulk-title">' . _l('description_of_services') . '</div>
+                        <div class="col-md-2 bulk-title">' . _l('group_pur') . '</div>
+                        <div class="col-md-2 bulk-title">' . _l('Expense Date') . '</div>
+                        <div class="col-md-1 bulk-title">' . _l('expense_add_edit_amount') . '</div>
+                        
+                    </div><br/>';
+                // <div class="col-md-2 bulk-title">' . _l('Choose From Order') . '</div>
+                        // <div class="col-md-2 bulk-title">' . _l('Order List') . '</div>
+                foreach ($expenses as $pkey => $pvalue) {
+                    $project = $this->projects_model->get($pvalue['project_id']);
+                    $budget_head = $this->find_budget_head_value($pvalue['group_pur']);
+
+                    $project_name_attr = "newitems[$pkey][project_id]";
+                    $expense_name_attr = "newitems[$pkey][expense_name]";
+                    $category_name_attr = "newitems[$pkey][category]";
+                    $date_name_attr = "newitems[$pkey][date]";
+                    $amount_name_attr = "newitems[$pkey][amount]";
+                    $select_choose_from_order_name_attr = "newitems[$pkey][choose_from_order]";
+                    $order_list_name_attr = "newitems[$pkey][order_list]";
+
+                    $html .= '<div class="row">';
+                    $html .= form_hidden($project_name_attr, $pvalue['project_id']);
+
+                    $html .= '<div class="col-md-1 bulk-title">' . $pvalue['id'] . '</div>';
+
+                    $html .= '<div class="col-md-2  all_expense_name">' . render_textarea($expense_name_attr, '', $pvalue['expense_name'], ['rows' => 3]) . '</div>';
+
+                    $html .= '<div class="col-md-2 all_budget_head">' . render_select($category_name_attr, $expense_categories, array('id', 'name'), '', $budget_head) . '</div>';
+
+                    $html .= '<div class="col-md-2 all_invoice_date">' . render_date_input($date_name_attr, '', _d($pvalue['date'])) . '</div>';
+
+                    $html .= '<div class="col-md-1">' . render_input($amount_name_attr, '', $pvalue['amount'], 'number', ['readonly' => true]) . '</div>';
+
+                    // $html .= '<div class="col-md-2">
+                    //     <select class="selectpicker display-block" data-width="100%" name="' . $select_choose_from_order_name_attr . '" id="bulk_choose_from_order" data-id="' . $pvalue['id'] . '" data-none-selected-text="' . _l('none') . '">
+                    //         <option value="none">' . _l('None') . '</option>
+                    //         <option value="1">' . _l('pur_order') . '</option>
+                    //         <option value="2">' . _l('wo_order') . '</option>
+                    //         <option value="3">' . _l('order_tracker') . '</option>
+                    //     </select>
+                    // </div>';
+
+                    // $html .= '<div class="col-md-2">';
+                    // $html .= '<select class="selectpicker display-block"  data-width="100%" name="' . $order_list_name_attr . '" id="bulk_order_list" data-none-selected-text="' . _l('none') . '" data-live-search="true">';
+                    
+                    // $html .= '</select></div>';
+                    $html .= '</div><br/>';
+                }
+            }
+        }
+
+        return $html;
+    }
+
+    public function get_multiple_expenses_invoices($expense_ids)
+    {
+        $this->db->where_in('id', $expense_ids);
+        return $this->db->get(db_prefix() . 'expenses')->result_array();
+    }
 }

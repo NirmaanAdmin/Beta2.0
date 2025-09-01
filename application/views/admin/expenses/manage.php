@@ -135,40 +135,40 @@
             <div class="panel_s">
               <div class="panel-body">
                 <div class="clearfix"></div>
-                <div class="btn-group show_hide_columns" id="show_hide_columns" style="position: absolute !important; z-index: 99999; left: 387px !important; top: 117px;">
-                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding: 4px 7px;">
-                        <i class="fa fa-cog"></i> <?php  ?> <span class="caret"></span>
-                    </button>
-                    <div class="dropdown-menu" style="padding: 10px; min-width: 250px;">
-                        <div>
-                          <input type="checkbox" id="select-all-columns"> <strong><?php echo _l('select_all'); ?></strong>
-                        </div>
-                        <hr>
-                        <?php
-                        $columns = [
-                            'Checkbox',
-                            _l('the_number_sign'),
-                            _l('expense_dt_table_heading_category'),
-                            _l('expense_dt_table_heading_amount'),
-                            _l('expense_name'),
-                            _l('receipt'),
-                            _l('expense_dt_table_heading_date'),
-                            _l('project'),
-                            'Converted?',
-                            _l('invoice'),
-                            _l('expense_dt_table_heading_reference_no'),
-                            _l('expense_dt_table_heading_payment_mode'),
-                            'Vendor',
-                            'Options',
-                        ];
-                        ?>
-                        <div>
-                            <?php foreach ($columns as $key => $label): ?>
-                                <input type="checkbox" class="toggle-column" value="<?php echo $key; ?>" checked>
-                                <?php echo $label; ?><br>
-                            <?php endforeach; ?>
-                        </div>
+                <div class="btn-group show_hide_columns" id="show_hide_columns" style="position: absolute !important; z-index: 999; left: 387px !important; top: 117px;">
+                  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding: 4px 7px;">
+                    <i class="fa fa-cog"></i> <?php  ?> <span class="caret"></span>
+                  </button>
+                  <div class="dropdown-menu" style="padding: 10px; min-width: 250px;">
+                    <div>
+                      <input type="checkbox" id="select-all-columns"> <strong><?php echo _l('select_all'); ?></strong>
                     </div>
+                    <hr>
+                    <?php
+                    $columns = [
+                      'Checkbox',
+                      _l('the_number_sign'),
+                      _l('expense_dt_table_heading_category'),
+                      _l('expense_dt_table_heading_amount'),
+                      _l('expense_name'),
+                      _l('receipt'),
+                      _l('expense_dt_table_heading_date'),
+                      _l('project'),
+                      'Converted?',
+                      _l('invoice'),
+                      _l('expense_dt_table_heading_reference_no'),
+                      _l('expense_dt_table_heading_payment_mode'),
+                      'Vendor',
+                      'Options',
+                    ];
+                    ?>
+                    <div>
+                      <?php foreach ($columns as $key => $label): ?>
+                        <input type="checkbox" class="toggle-column" value="<?php echo $key; ?>" checked>
+                        <?php echo $label; ?><br>
+                      <?php endforeach; ?>
+                    </div>
+                  </div>
                 </div>
                 <!-- if expenseid found in url -->
                 <?php echo form_hidden('expenseid', $expenseid); ?>
@@ -536,15 +536,15 @@
       $(this).find('tfoot td.total_expense_amount').html(sums.total_expense_amount);
     });
 
-    $(document).on('change', 'select[name="expense_category[]"]', function () {
+    $(document).on('change', 'select[name="expense_category[]"]', function() {
       $('select[name="expense_category[]"]').selectpicker('refresh');
     });
 
-    $(document).on('change', 'select[name="payment_mode[]"]', function () {
+    $(document).on('change', 'select[name="payment_mode[]"]', function() {
       $('select[name="payment_mode[]"]').selectpicker('refresh');
     });
 
-    $(document).on('change', 'select[name="vendor[]"]', function () {
+    $(document).on('change', 'select[name="vendor[]"]', function() {
       $('select[name="vendor[]"]').selectpicker('refresh');
     });
 
@@ -553,36 +553,121 @@
       rows = $('.table-expenses').find('tbody tr');
       checked = $(this).prop('checked');
       $.each(rows, function() {
-          $($(this).find('td').eq(0)).find('input').prop('checked', checked);
+        $($(this).find('td').eq(0)).find('input').prop('checked', checked);
       });
     });
 
     var table_expenses = $('.table-expenses').DataTable();
     // Handle "Select All" checkbox
     $('#select-all-columns').on('change', function() {
-        var isChecked = $(this).is(':checked');
-        $('.toggle-column').prop('checked', isChecked).trigger('change');
+      var isChecked = $(this).is(':checked');
+      $('.toggle-column').prop('checked', isChecked).trigger('change');
     });
 
     // Handle individual column visibility toggling
     $('.toggle-column').on('change', function() {
-        var column = table_expenses.column($(this).val());
-        column.visible($(this).is(':checked'));
+      var column = table_expenses.column($(this).val());
+      column.visible($(this).is(':checked'));
 
-        // Sync "Select All" checkbox state
-        var allChecked = $('.toggle-column').length === $('.toggle-column:checked').length;
-        $('#select-all-columns').prop('checked', allChecked);
+      // Sync "Select All" checkbox state
+      var allChecked = $('.toggle-column').length === $('.toggle-column:checked').length;
+      $('#select-all-columns').prop('checked', allChecked);
     });
 
     // Sync checkboxes with column visibility on page load
     table_expenses.columns().every(function(index) {
-        var column = this;
-        $('.toggle-column[value="' + index + '"]').prop('checked', column.visible());
+      var column = this;
+      $('.toggle-column[value="' + index + '"]').prop('checked', column.visible());
     });
 
     // Prevent dropdown from closing when clicking inside
     $('.dropdown-menu').on('click', function(e) {
-        e.stopPropagation();
+      e.stopPropagation();
     });
   })(jQuery);
+</script>
+<script>
+  $(document).ready(function() {
+    // Event listener for the choose_from_order dropdown change
+    $(document).on('change', '[name*="[choose_from_order]"]', function() {
+      var selectedValue = $(this).val();
+      var pkey = $(this).attr('name').match(/\[(\d+)\]\[choose_from_order\]/)[1];
+      var orderListSelect = $('[name="newitems[' + pkey + '][order_list]"]');
+
+      // Clear previous options
+      orderListSelect.empty();
+
+      if (selectedValue === 'none') {
+        orderListSelect.append($('<option>', {
+          value: '',
+          text: '<?php echo _l("none"); ?>'
+        }));
+        orderListSelect.selectpicker('refresh');
+        return;
+      }
+
+      // Show loading indicator
+      orderListSelect.append($('<option>', {
+        value: '',
+        text: 'Loading...',
+        disabled: true
+      }));
+      orderListSelect.selectpicker('refresh');
+
+      // AJAX call to fetch options based on selection
+      $.ajax({
+        url: '<?php echo admin_url("expenses/get_order_options"); ?>',
+        type: 'POST',
+        data: {
+          type: selectedValue,
+          pkey: pkey
+        },
+        dataType: 'json',
+        success: function(response) {
+          orderListSelect.empty();
+
+          if (response.success && response.options.length > 0) {
+            $.each(response.options, function(index, option) {
+              orderListSelect.append($('<option>', {
+                value: option.id,
+                text: option.name
+              }));
+            });
+          } else {
+            orderListSelect.append($('<option>', {
+              value: '',
+              text: 'No options available'
+            }));
+          }
+          orderListSelect.selectpicker('refresh');
+        },
+        error: function() {
+          orderListSelect.empty();
+          orderListSelect.append($('<option>', {
+            value: '',
+            text: 'Error loading options'
+          }));
+          orderListSelect.selectpicker('refresh');
+        }
+      });
+    });
+  });
+
+  $('body').on('click', '.update_vbt_convert', function(e) {
+    e.preventDefault();
+    var convert_expense_name = $('#convert_expense_name').val();
+    var convert_category = $('#convert_category').val();
+    var convert_date = $('#convert_date').val();
+
+    if (convert_expense_name) {
+      $('.all_expense_name textarea').val(convert_expense_name);
+    }
+    if (convert_category) {
+      $('.all_budget_head select').val(convert_category).trigger('change');
+    }
+    if (convert_date) {
+      $('.all_invoice_date input').val(convert_date).trigger('change');
+    }
+    
+  });
 </script>
