@@ -3511,4 +3511,79 @@ class Estimates_model extends App_Model
 
         return true;
     }
+
+    public function table_estimate_items($estimate_id = '', $budget_head_id = '')
+    {
+        if ($this->input->is_ajax_request()) {
+            $base_currency = get_base_currency_pur();
+            $select = [
+                'it.item_code',
+                'it.long_description',
+                'it.sub_head',
+                'it.area',
+                'it.qty',
+                'it.rate',
+                '(it.qty * it.rate) as amount',
+                'it.remarks',
+            ];
+
+            $sTable       = db_prefix() . 'itemable it';
+            $sIndexColumn = 'it.id';
+
+            $join = [];
+
+            $where = [];
+            if ($estimate_id != '') {
+                $where[] = "AND it.rel_id = " . (int)$estimate_id;
+                $where[] = "AND it.rel_type = 'estimate'";
+            }
+            if ($budget_head_id != '') {
+                $where[] = "AND it.annexure = " . (int)$budget_head_id;
+            }
+
+            $sub_head = $this->input->post('sub_head');
+            if (!empty($sub_head)) {
+                $where[] = "AND it.sub_head = " . (int)$sub_head;
+            }
+
+            $areas = $this->input->post('area');
+            if (!empty($areas)) {
+                if (is_array($areas)) {
+                    $areas = array_map('intval', $areas);
+                    $where[] = "AND it.area IN (" . implode(',', $areas) . ")";
+                } else {
+                    $where[] = "AND it.area = " . (int)$areas;
+                }
+            }
+
+            $additionalSelect = [
+                'it.unit_id',
+            ];
+
+            $result  = data_tables_init($select, $sIndexColumn, $sTable, $join, $where, $additionalSelect);
+            $output  = $result['output'];
+            $rResult = $result['rResult'];
+
+            foreach ($rResult as $aRow) {
+                $row = [];
+
+                $row[] = get_purchase_items($aRow['item_code']);
+                $row[] = clear_textarea_breaks($aRow['long_description']);
+                $row[] = get_sub_head($aRow['sub_head']);
+                $row[] = get_area_name_by_id($aRow['area']);
+
+                $purchase_unit_name = get_purchase_unit($aRow['unit_id']);
+                $purchase_unit_name = !empty($purchase_unit_name) ? ' ' . $purchase_unit_name : '';
+                $row[] = number_format((float)$aRow['qty'], 2) . $purchase_unit_name;
+
+                $row[] = app_format_money($aRow['rate'], $base_currency);
+                $row[] = app_format_money($aRow['amount'], $base_currency);
+                $row[] = clear_textarea_breaks($aRow['remarks']);
+
+                $output['aaData'][] = $row;
+            }
+
+            return $output;
+        }
+    }
 }
