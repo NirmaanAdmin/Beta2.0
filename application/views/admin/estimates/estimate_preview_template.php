@@ -773,81 +773,46 @@
                             <button type="button" class="btn btn-info pull-right" id="download_historical_data" style="margin-left: 7px;"><?php echo _l('download_historical_data'); ?></button>
                             <button type="button" class="btn btn-info pull-right" id="cost_control_sheet"><?php echo _l('cost_control_sheet'); ?></button>
                         </div>
-                        <div class="table-responsive s_table">
-                            <table class="table estimate-items-table items table-main-estimate-edit has-calculations no-mtop">
-                                <thead>
-                                    <tr>
-                                        <th width="13%" align="left"><?php echo _l('estimate_table_item_heading'); ?></th>
-                                        <th width="16%" align="left"><?php echo _l('estimate_table_item_description'); ?></th>
-                                        <th width="10%" class="qty" align="right"><?php echo _l('sub_head'); ?></th>
-                                        <th width="12%" class="area" align="right"><?php echo _l('area'); ?></th>
-                                        <th width="10%" class="qty" align="right"><?php echo e(_l('estimate_table_quantity_heading')); ?></th>
-                                        <th width="13%" align="right"><?php echo _l('estimate_table_rate_heading'); ?></th>
-                                        <th width="13%" align="right"><?php echo _l('estimate_table_amount_heading'); ?></th>
-                                        <th width="13%" align="right"><?php echo _l('remarks'); ?></th>
-                                    </tr>
-                                    <tbody>
-                                        <?php
-                                        $estimate_item_rate = 0;
-                                        $estimate_item_amount = 0;
-                                        if(!empty($cost_planning_details['estimate_items'])) {
-                                            foreach ($cost_planning_details['estimate_items'] as $ankey => $item) {
-                                                if($item['annexure'] == $annexure['id']) { 
-                                                    $amount = $item['rate'] * $item['qty'];
-                                                    $estimate_item_rate = $estimate_item_rate + $item['rate'];
-                                                    $estimate_item_amount = $estimate_item_amount + $amount;
-                                                    $old_item_code = isset($root_estimate_data['estimate_items'][$ankey]['item_code']) ? $root_estimate_data['estimate_items'][$ankey]['item_code'] : '';
-                                                    $old_long_description = isset($root_estimate_data['estimate_items'][$ankey]['long_description']) ? $root_estimate_data['estimate_items'][$ankey]['long_description'] : '';
-                                                    $old_sub_head = isset($root_estimate_data['estimate_items'][$ankey]['sub_head']) ? $root_estimate_data['estimate_items'][$ankey]['sub_head'] : '';
-                                                    $old_area = isset($root_estimate_data['estimate_items'][$ankey]['area']) ? $root_estimate_data['estimate_items'][$ankey]['area'] : '';
-                                                    $old_unit_id = isset($root_estimate_data['estimate_items'][$ankey]['unit_id']) ? $root_estimate_data['estimate_items'][$ankey]['unit_id'] : '';
-                                                    $old_qty = isset($root_estimate_data['estimate_items'][$ankey]['qty']) ? $root_estimate_data['estimate_items'][$ankey]['qty'] : '';
-                                                    $old_rate = isset($root_estimate_data['estimate_items'][$ankey]['rate']) ? $root_estimate_data['estimate_items'][$ankey]['rate'] : '';
-                                                    $old_remarks = isset($root_estimate_data['estimate_items'][$ankey]['remarks']) ? $root_estimate_data['estimate_items'][$ankey]['remarks'] : '';
-                                                ?>
-                                                <tr>
-                                                    <td <?php echo find_estimate_revision_bold($old_item_code, $item['item_code']); ?>>
-                                                        <?php echo get_purchase_items($item['item_code']); ?>
-                                                    </td>
-                                                    <td <?php echo find_estimate_revision_bold($old_long_description, $item['long_description']); ?>>
-                                                        <?php echo clear_textarea_breaks($item['long_description']); ?>
-                                                    </td>
-                                                    <td align="right" <?php echo find_estimate_revision_bold($old_sub_head, $item['sub_head']); ?>>
-                                                        <?php echo get_sub_head($item['sub_head']); ?>
-                                                    </td>
-                                                    <td align="right" <?php echo find_estimate_revision_bold($old_area, $item['area']); ?>>
-                                                        <?php echo get_area_name_by_id($item['area']); ?>
-                                                    </td>
-                                                    <td align="right">
-                                                        <?php 
-                                                        $purchase_unit_name = get_purchase_unit($item['unit_id']);
-                                                        $purchase_unit_name = !empty($purchase_unit_name) ? ' '.$purchase_unit_name : '';
-                                                        ?>
-                                                        <span <?php echo find_estimate_revision_bold(number_format((float)$old_qty, 2), number_format((float)$item['qty'], 2)); ?>>
-                                                            <?php echo number_format((float)$item['qty'], 2); ?>
-                                                        </span>
-                                                        <span <?php echo find_estimate_revision_bold((int)$old_unit_id, (int)$item['unit_id']); ?>>
-                                                            <?php echo $purchase_unit_name; ?>
-                                                        </span>
-                                                    </td>
-                                                    <td align="right" <?php echo find_estimate_revision_bold($old_rate, $item['rate']); ?>>
-                                                        <?php echo app_format_money($item['rate'], $base_currency); ?>
-                                                    </td>
-                                                    <td align="right">
-                                                        <?php echo app_format_money($amount, $base_currency); ?>
-                                                    </td>
-                                                    <td align="right" <?php echo find_estimate_revision_bold($old_remarks, $item['remarks']); ?>>
-                                                        <?php echo clear_textarea_breaks($item['remarks']); ?>
-                                                    </td>
-                                                </tr>
-                                            <?php } }
-                                        } ?>
-                                    </tbody>
-                                </thead>
-                            </table>
+                        <div class="col-md-12">
+                            <div class="col-md-3" style="padding-left: 0px;">
+                                <?php echo get_sub_head_list('estimate_sub_head_'.$annexure['id'], ''); ?>
+                            </div>
+                            <div class="col-md-3">
+                                <?php echo get_area_list('estimate_area_'.$annexure['id'], ''); ?>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="table-responsive s_table">
+                                <table class="table estimate-items-table items table-main-estimate-edit has-calculations no-mtop table-table_estimate_items_<?php echo $annexure['id']; ?> scroll-responsive">
+                                    <thead>
+                                        <tr>
+                                            <th width="13%"><?php echo _l('estimate_table_item_heading'); ?></th>
+                                            <th width="16%"><?php echo _l('estimate_table_item_description'); ?></th>
+                                            <th width="10%" class="qty"><?php echo _l('sub_head'); ?></th>
+                                            <th width="12%" class="area"><?php echo _l('area'); ?></th>
+                                            <th width="10%" class="qty"><?php echo e(_l('estimate_table_quantity_heading')); ?></th>
+                                            <th width="13%"><?php echo _l('estimate_table_rate_heading'); ?></th>
+                                            <th width="13%"><?php echo _l('estimate_table_amount_heading'); ?></th>
+                                            <th width="13%"><?php echo _l('remarks'); ?></th>
+                                        </tr>
+                                        <tbody></tbody>
+                                    </thead>
+                                </table>
+                            </div>
                         </div>
                         <div class="col-md-8 col-md-offset-4">
                             <table class="table text-right">
+                                <?php
+                                $estimate_item_amount = 0;
+                                if(!empty($cost_planning_details['estimate_items'])) {
+                                    foreach ($cost_planning_details['estimate_items'] as $ankey => $item) {
+                                        if($item['annexure'] == $annexure['id']) {
+                                            $amount = $item['rate'] * $item['qty'];
+                                            $estimate_item_amount = $estimate_item_amount + $amount;
+                                        }
+                                    }
+                                }
+                                ?>
                                 <tbody>
                                     <tr id="subtotal">
                                         <td><span class="bold tw-text-neutral-700"><?php echo _l('cost_overall_area'); ?> :</span>
@@ -1719,6 +1684,40 @@ function uploadbulkpackagecsv() {
     };
     reader.readAsArrayBuffer(file);
 }
+
+var currentTable = null;
+var currentBudgetHead = null;
+$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+    var target = $(e.target).attr("href"); 
+    var $tabPane = $(target);
+    var budget_head_id = $tabPane.data('id');
+    var tableSelector = '.table-table_estimate_items_' + budget_head_id;
+    if (currentTable !== null) {
+        $(currentTable).DataTable().destroy();
+    }
+    var Params = {
+        "sub_head": "[name='estimate_sub_head_" + budget_head_id + "']",
+        "area": "[name='estimate_area_" + budget_head_id + "']"
+    };
+    initDataTable(
+        tableSelector,
+        admin_url + 'estimates/table_estimate_items/' + estimate_id + '/' + budget_head_id,
+        [],
+        [],
+        Params,
+        [0, 'desc']
+    );
+    currentTable = tableSelector;
+    currentBudgetHead = budget_head_id;
+    $(Params.sub_head + ', ' + Params.area).off('change').on('change', function () {
+        $(tableSelector).DataTable().ajax.reload();
+        $(Params.sub_head).selectpicker('refresh');
+        $(Params.area).selectpicker('refresh');
+    });
+    $(Params.sub_head).selectpicker('refresh');
+    $(Params.area).selectpicker('refresh');
+});
+
 
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
