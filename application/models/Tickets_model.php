@@ -1177,7 +1177,9 @@ class Tickets_model extends App_Model
         }
         if ($affectedRows > 0) {
             log_activity('Ticket Updated [ID: ' . $data['ticketid'] . ']');
-
+            $this->db->where('staffid', $data['assigned']);
+            $assignedEmail = $this->db->get(db_prefix() . 'staff')->row()->email;
+            send_mail_template('ticket_edit_to_staff', $assignedEmail, $data['assigned'], $data['ticketid'], $data['userid'], $data['contactid']);
             return true;
         }
 
