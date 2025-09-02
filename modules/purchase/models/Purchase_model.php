@@ -1392,7 +1392,7 @@ class Purchase_model extends App_Model
                 foreach ($detail_data as $key => $rqd) {
                     $dt_data = [];
                     $dt_data['pur_request'] = $insert_id;
-                    $dt_data['item_code'] = $rqd['item_code'];
+                    $dt_data['item_code'] = $rqd['item_text'];
                     $dt_data['description'] = nl2br($rqd['item_description']);
                     $dt_data['area'] = !empty($rqd['area']) ? implode(',', $rqd['area']) : NULL;
                     $dt_data['unit_id'] = isset($rqd['unit_id']) ? $rqd['unit_id'] : null;
@@ -1537,7 +1537,7 @@ class Purchase_model extends App_Model
             foreach ($new_purchase_request as $key => $rqd) {
                 $dt_data = [];
                 $dt_data['pur_request'] = $id;
-                $dt_data['item_code'] = $rqd['item_code'];
+                $dt_data['item_code'] = $rqd['item_text'];
                 $dt_data['description'] = nl2br($rqd['item_description']);
                 $dt_data['area'] = !empty($rqd['area']) ? implode(',', $rqd['area']) : NULL;
                 $dt_data['unit_id'] = isset($rqd['unit_id']) ? $rqd['unit_id'] : null;
@@ -1604,7 +1604,7 @@ class Purchase_model extends App_Model
             foreach ($update_purchase_request as $_key => $rqd) {
                 $dt_data = [];
                 $dt_data['pur_request'] = $id;
-                $dt_data['item_code'] = $rqd['item_code'];
+                $dt_data['item_code'] = $rqd['item_text'];
                 $dt_data['description'] = nl2br($rqd['item_description']);
                 $dt_data['area'] = !empty($rqd['area']) ? implode(',', $rqd['area']) : NULL;
                 $dt_data['unit_id'] = isset($rqd['unit_name']) ? $rqd['unit_name'] : null;
