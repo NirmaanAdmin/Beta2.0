@@ -49,9 +49,9 @@ if (isset($budget_head)) {
    $where_budget_head = '';
    if ($budget_head != '') {
       if ($where_budget_head == '') {
-         $where_budget_head .= ' AND (budget_head = "' . $budget_head . '"';
+         $where_budget_head .= 'AND (budget_head = "' . $budget_head . '"';
       } else {
-         $where_budget_head .= ' or budget_head = "' . $budget_head . '"';
+         $where_budget_head .= 'or budget_head = "' . $budget_head . '"';
       }
    }
    if ($where_budget_head != '') {
@@ -65,7 +65,7 @@ if (isset($project)) {
    $where_project = '';
    foreach ($project as $t) {
       if ($t != '') {
-         $where_project .= ' AND (project_id = "' . $t . '"';
+         $where_project .= 'AND (project_id = "' . $t . '"';
       }
    }
    if ($where_project != '') {
@@ -75,7 +75,7 @@ if (isset($project)) {
 }
 
 if($estimate_id != 0) {
-   array_push($where, ' AND (estimate_id = "' . $estimate_id . '")');
+   array_push($where, 'AND (estimate_id = "' . $estimate_id . '")');
 }
 
 $having = '';
