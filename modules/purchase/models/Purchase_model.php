@@ -18375,10 +18375,10 @@ class Purchase_model extends App_Model
         $result['net_advance_2'] = $result['pay_cert_c1_2'] + $result['pay_cert_c2_2'];
         $result['net_advance_3'] = $result['pay_cert_c1_3'] + $result['pay_cert_c2_3'];
         $result['net_advance_4'] = $result['pay_cert_c1_4'] + $result['pay_cert_c2_4'];
-        $result['sub_total_ac_1'] = $po_contract_amount - $result['net_advance_1'];
-        $result['sub_total_ac_2'] = $result['po_previous'] - $result['net_advance_2'];
-        $result['sub_total_ac_3'] = $result['po_this_bill'] - $result['net_advance_3'];
-        $result['sub_total_ac_4'] = $result['po_comulative'] - $result['net_advance_4'];
+        $result['sub_total_ac_1'] = $po_contract_amount + $result['net_advance_1'];
+        $result['sub_total_ac_2'] = $result['po_previous'] + $result['net_advance_2'];
+        $result['sub_total_ac_3'] = $result['po_this_bill'] + $result['net_advance_3'];
+        $result['sub_total_ac_4'] = $result['po_comulative'] + $result['net_advance_4'];
         $result['works_exe_a_4'] = $result['works_exe_a_2'] + $result['works_exe_a_3'];
         $result['works_exe_a_4'] = $result['works_exe_a_2'] + $result['works_exe_a_3'];
         $result['ret_fund_4'] = $result['ret_fund_2'] + $result['ret_fund_3'];

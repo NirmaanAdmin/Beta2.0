@@ -88,16 +88,16 @@
 				var net_advance_4 = parseFloat(pay_cert_c1_4) + parseFloat(pay_cert_c2_4);
 				$('.net_advance_4').html(format_money_cert(net_advance_4, true));
 
-				var sub_total_ac_1 = parseFloat(ot_contract_amount) - parseFloat(net_advance_1);
+				var sub_total_ac_1 = parseFloat(ot_contract_amount) + parseFloat(net_advance_1);
 				$('.sub_total_ac_1').html(format_money_cert(sub_total_ac_1, true));
 
-				var sub_total_ac_2 = parseFloat(ot_previous) - parseFloat(net_advance_2);
+				var sub_total_ac_2 = parseFloat(ot_previous) + parseFloat(net_advance_2);
 				$('.sub_total_ac_2').html(format_money_cert(sub_total_ac_2, true));
 
-				var sub_total_ac_3 = parseFloat(ot_this_bill) - parseFloat(net_advance_3);
+				var sub_total_ac_3 = parseFloat(ot_this_bill) + parseFloat(net_advance_3);
 				$('.sub_total_ac_3').html(format_money_cert(sub_total_ac_3, true));
 
-				var sub_total_ac_4 = parseFloat(ot_comulative) - parseFloat(net_advance_4);
+				var sub_total_ac_4 = parseFloat(ot_comulative) + parseFloat(net_advance_4);
 				$('.sub_total_ac_4').html(format_money_cert(sub_total_ac_4, true));
 
 				var works_exe_a_1 = $('input[name="works_exe_a_1"]').val();

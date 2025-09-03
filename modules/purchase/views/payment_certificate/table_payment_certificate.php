@@ -19,7 +19,7 @@ $aColumns = [
     db_prefix() . 'payment_certificate' . '.order_date as order_date',
     db_prefix() . 'assets_group' . '.group_name as group_name',
     '(' . db_prefix() . 'payment_certificate.po_this_bill 
-      - ' . db_prefix() . 'payment_certificate.pay_cert_c1_3 
+      + ' . db_prefix() . 'payment_certificate.pay_cert_c1_3 
       - ' . db_prefix() . 'payment_certificate.pay_cert_c2_3 
       - ' . db_prefix() . 'payment_certificate.ret_fund_3 
       - ' . db_prefix() . 'payment_certificate.works_exe_a_3
