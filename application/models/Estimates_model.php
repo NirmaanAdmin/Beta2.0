@@ -3586,4 +3586,170 @@ class Estimates_model extends App_Model
             return $output;
         }
     }
+
+    public function table_unawarded_capex_items($estimate_id = '')
+    {
+        if ($this->input->is_ajax_request()) {
+            $budget_head_id = $this->input->post('unawarded_budget_head');
+            $sub_head = $this->input->post('unawarded_sub_head');
+            $areas = $this->input->post('unawarded_area');
+
+            $this->db->order_by('id', 'desc');
+            if ($estimate_id != '') {
+                $this->db->where('estimate_id', $estimate_id);
+            }
+            if ($budget_head_id != '') {
+                $this->db->where('budget_head', $budget_head_id);
+            }
+            $all_packages = $this->db->get(db_prefix() . 'estimate_package_info')->result_array();
+
+            $base_currency = get_base_currency_pur();
+            $select = [
+                'it.item_code',
+                'it.long_description',
+                'it.area',
+                'it.sub_head',
+                'it.qty',
+                'it.rate',
+                '(it.qty * it.rate) as amount',
+                'it.remarks',
+                'ubi.packages',
+                1,
+                2,
+                3,
+            ];
+
+            $sTable       = db_prefix() . 'itemable it';
+            $sIndexColumn = 'it.id';
+
+            $join = [
+                'LEFT JOIN ' . db_prefix() . 'unawarded_budget_info ubi ON ubi.item_id = it.id AND ubi.budget_head = it.annexure AND ubi.estimate_id = it.rel_id',
+            ];
+
+            $where = [];
+            if ($estimate_id != '') {
+                $where[] = "AND it.rel_id = " . (int)$estimate_id;
+                $where[] = "AND it.rel_type = 'estimate'";
+            }
+            if ($budget_head_id != '') {
+                $where[] = "AND it.annexure = " . (int)$budget_head_id;
+            }
+
+            if (!empty($sub_head)) {
+                $where[] = "AND it.sub_head = " . (int)$sub_head;
+            }
+
+            if (!empty($areas)) {
+                if (is_array($areas)) {
+                    $areas = array_map('intval', $areas);
+                    $where[] = "AND it.area IN (" . implode(',', $areas) . ")";
+                } else {
+                    $where[] = "AND it.area = " . (int)$areas;
+                }
+            }
+
+            $additionalSelect = [
+                'it.unit_id',
+                'it.id',
+            ];
+
+            $result  = data_tables_init($select, $sIndexColumn, $sTable, $join, $where, $additionalSelect);
+            $output  = $result['output'];
+            $rResult = $result['rResult'];
+
+            foreach ($rResult as $key => $aRow) {
+                $row = [];
+
+                $non_break_description = strip_tags(
+                    str_replace(["\r", "\n", "<br />", "<br/>"], '', $aRow['long_description'])
+                );
+                $this->db->select('SUM(' . db_prefix() . 'pur_order_detail.total) AS total', false);
+                $this->db->select("
+                    REPLACE(
+                        REPLACE(
+                            REPLACE(
+                                REPLACE(" . db_prefix() . "pur_order_detail.description, '\r', ''),
+                            '\n', ''),
+                        '<br />', ''),
+                    '<br/>', '') AS non_break_description
+                ", false);
+                $this->db->from(db_prefix() . 'pur_order_detail');
+                $this->db->join(
+                    db_prefix() . 'pur_orders',
+                    db_prefix() . 'pur_orders.id = ' . db_prefix() . 'pur_order_detail.pur_order',
+                    'left'
+                );
+                $this->db->where(db_prefix() . 'pur_order_detail.item_code', $aRow['item_code']);
+                if ($estimate_id != '') {
+                    $this->db->where(db_prefix() . 'pur_orders.estimate', $estimate_id);
+                }
+                if ($budget_head_id != '') {
+                    $this->db->where(db_prefix() . 'pur_orders.group_pur', $budget_head_id);
+                }
+                $this->db->where(db_prefix() . 'pur_orders.approve_status', 2);
+                $this->db->where(db_prefix() . 'pur_order_detail.quantity >', 0);
+                $this->db->where(db_prefix() . 'pur_order_detail.total >', 0);
+                $this->db->group_by('non_break_description');  
+                $this->db->having('non_break_description', $non_break_description);
+                $query = $this->db->get();
+                $pur_order_detail = $query->row_array();
+                $booked_in_order = $pur_order_detail['total'] ?? 0;
+
+                $this->db->select('SUM(' . db_prefix() . 'estimate_package_items_info.package_qty * ' . db_prefix() . 'estimate_package_items_info.package_rate) AS total', false);
+                $this->db->from(db_prefix() . 'estimate_package_items_info');
+                $this->db->join(
+                    db_prefix() . 'estimate_package_info',
+                    db_prefix() . 'estimate_package_info.id = ' . db_prefix() . 'estimate_package_items_info.package_id',
+                    'left'
+                );
+                if ($estimate_id != '') {
+                    $this->db->where(db_prefix() . 'estimate_package_info.estimate_id', $estimate_id);
+                }
+                if ($budget_head_id != '') {
+                    $this->db->where(db_prefix() . 'estimate_package_info.budget_head', $budget_head_id);
+                }
+                $this->db->where(db_prefix() . 'estimate_package_items_info.item_id', $aRow['id']);
+                $query = $this->db->get();
+                $package_items_info = $query->row_array();
+                $booked_in_package = $package_items_info['total'] ?? 0;
+
+                $remaining_amount = $aRow['amount'] - $booked_in_order;
+
+                $packages_html = '';
+                $packages = !empty($aRow['packages']) ? explode(',', $aRow['packages']) : array();
+                $item_id_name_attr = "newitems[$key][item_id]";
+                $old_packages_name_attr = "newitems[$key][old_packages]";
+                $packages_name_attr = "newitems[$key][packages][]";
+                $packages_html .= form_hidden($item_id_name_attr, $aRow['id']);
+                if (!empty($packages)) {
+                    foreach ($packages as $pkg) {
+                        $packages_html .= form_hidden($old_packages_name_attr . '[]', $pkg);
+                    }
+                }
+
+                $packages_html .= render_select($packages_name_attr, $all_packages, array('id', 'package_name'), '', $packages, array('data-width' => '100%', 'data-none-selected-text' => _l('None'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
+
+                $row[] = get_purchase_items($aRow['item_code']);
+                $row[] = clear_textarea_breaks($aRow['long_description']);
+                $row[] = get_area_name_by_id($aRow['area']);
+                $row[] = get_sub_head_name_by_id($aRow['sub_head']);
+
+                $purchase_unit_name = get_purchase_unit($aRow['unit_id']);
+                $purchase_unit_name = !empty($purchase_unit_name) ? ' ' . $purchase_unit_name : '';
+                $row[] = number_format((float)$aRow['qty'], 2) . $purchase_unit_name;
+
+                $row[] = app_format_money($aRow['rate'], $base_currency);
+                $row[] = app_format_money($aRow['amount'], $base_currency);
+
+                $row[] = $packages_html;
+                $row[] = app_format_money($remaining_amount, $base_currency);
+                $row[] = app_format_money($booked_in_package, $base_currency);
+                $row[] = app_format_money($booked_in_order, $base_currency);
+
+                $output['aaData'][] = $row;
+            }
+
+            return $output;
+        }
+    }
 }

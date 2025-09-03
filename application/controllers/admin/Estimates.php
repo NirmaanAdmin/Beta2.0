@@ -825,4 +825,11 @@ class Estimates extends AdminController
         echo json_encode($output);
         die();
     }
+
+    public function table_unawarded_capex_items($estimate_id = '')
+    {
+        $output = $this->estimates_model->table_unawarded_capex_items($estimate_id);
+        echo json_encode($output);
+        die();
+    }
 }

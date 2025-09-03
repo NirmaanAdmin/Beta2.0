@@ -775,10 +775,16 @@
                         </div>
                         <div class="col-md-12">
                             <div class="col-md-3" style="padding-left: 0px;">
-                                <?php echo get_sub_head_list('estimate_sub_head_'.$annexure['id'], ''); ?>
+                                <?php 
+                                $get_sub_group = get_budget_sub_head_project_wise();
+                                echo render_select('estimate_sub_head_'.$annexure['id'], $get_sub_group, array('id', 'sub_group_name'), 'sub_head'); 
+                                ?>
                             </div>
                             <div class="col-md-3">
-                                <?php echo get_area_list('estimate_area_'.$annexure['id'], ''); ?>
+                                <?php 
+                                $get_area = get_area_project_wise();
+                                echo render_select('estimate_area_'.$annexure['id'], $get_area, array('id', 'area_name'), 'area'); 
+                                ?>
                             </div>
                         </div>
                         <div class="col-md-12">
@@ -1099,20 +1105,53 @@
    <div class="modal-dialog" role="document" style="width: 98%;">
       <div class="modal-content">
          <?php echo form_open(admin_url('estimates/add_assign_unawarded_capex'), array('id' => 'unawarded_capex_form', 'class' => '')); ?>
+         <?php echo form_hidden('estimate_id', $estimate->id); ?>
          <div class="modal-header">
             <h4 class="modal-title"><div class="unawarded_capex_title"></div></h4>
             <button type="button" class="close" data-dismiss="modal">&times;</button>
-            <div class="col-md-3 unawarded-budget-head" style="padding-left: 0px; padding-top: 5px;">
+            <div class="col-md-3 form-group" style="padding-left: 0px;">
+                <label for="unawarded_budget_head" class="control-label"><?php echo _l('Budget Head'); ?></label>
+                <select name="unawarded_budget_head" class="selectpicker" data-width="100%" data-none-selected-text="<?php echo _l('dropdown_non_selected_tex'); ?>" data-live-search="true">
+                    <?php foreach ($estimate_budget_listing as $item) { ?>
+                        <option value="<?php echo $item['annexure']; ?>"><?php echo $item['budget_head']; ?></option>
+                    <?php } ?>
+                </select>
             </div>
-            <div class="col-md-3 unawarded-sub-head" style="padding-left: 0px; padding-top: 5px;">
+            <div class="col-md-3">
+                <?php 
+                $get_sub_group = get_budget_sub_head_project_wise();
+                echo render_select('unawarded_sub_head', $get_sub_group, array('id', 'sub_group_name'), 'sub_head'); 
+                ?>
             </div>
-             <div class="col-md-3 unawarded-area" style="padding-left: 0px; padding-top: 5px;">
+            <div class="col-md-3">
+                <?php 
+                $get_area = get_area_project_wise();
+                echo render_select('unawarded_area[]', $get_area, array('id', 'area_name'), 'area', [], array('multiple' => true, 'data-actions-box' => true, 'data-width' => '100%'));
+                ?>
             </div>
          </div>
          <div class="modal-body">
             <div class="row">
                 <div class="col-md-12">
-                    <div class="unawarded-capex-body">
+                    <div class="col-md-12">
+                        <table class="table items table-table_unawarded_capex_items scroll-responsive">
+                            <thead>
+                                <tr>
+                                    <th><?php echo _l('estimate_table_item_heading'); ?></th>
+                                    <th><?php echo _l('estimate_table_item_description'); ?></th>
+                                    <th><?php echo _l('area'); ?></th>
+                                    <th><?php echo _l('sub_groups_pur'); ?></th>
+                                    <th><?php echo _l('budgeted_qty'); ?></th>
+                                    <th><?php echo _l('budgeted_rate'); ?></th>
+                                    <th><?php echo _l('budgeted_amount'); ?></th>
+                                    <th>Packages</th>
+                                    <th>Remaining Amount In Budget</th>
+                                    <th>Amount Booked In Package</th>
+                                    <th>Amount Booked In Order</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -1300,98 +1339,43 @@ function cost_control_sheet(el) {
   });
 }
 
+var table_unawarded_capex_items;
 function assign_unawarded_capex(id) {
-  $.post(admin_url + "estimates/assign_unawarded_capex", {
-    id: id,
-  }).done(function (res) {
-    var response = JSON.parse(res);
-    if (response.budgetsummaryhtml) {
-      $('.unawarded-budget-head').html('');
-      $('.unawarded-budget-head').html(response.budgetsummaryhtml);
-      $('.unawarded-sub-head').html('');
-      $('.unawarded-sub-head').html(response.subheadsummaryhtml);      
-      $('.unawarded-area').html('');
-      $('.unawarded-area').html(response.areasummaryhtml);
-      $('.unawarded-capex-body').html('');
-      $('.unawarded-capex-body').html(response.itemhtml);
-      $('.unawarded_capex_title').html('Assign Unawarded Capex');
-      $('#unawarded_capex_modal button[type="submit"]').show();
-      init_selectpicker();
-      calculate_unawarded_capex();
-      $('#unawarded_capex_modal').modal('show');
+    var estimate_id = <?php echo e($estimate->id); ?>;
+    var tableSelector = '.table-table_unawarded_capex_items';
+    var unawardedParams = {
+        "unawarded_budget_head": "[name='unawarded_budget_head']",
+        "unawarded_sub_head": "[name='unawarded_sub_head']",
+        "unawarded_area": "[name='unawarded_area[]']",
+    };
+    if ($.fn.DataTable.isDataTable(tableSelector)) {
+        $(tableSelector).DataTable().destroy();
     }
-  });
+    table_unawarded_capex_items = initDataTable(
+        tableSelector,
+        admin_url + 'estimates/table_unawarded_capex_items/' + estimate_id,
+        [],
+        [],
+        unawardedParams,
+        [0, 'desc']
+    );
+    $(tableSelector).on('draw.dt', function () {
+        $('select.selectpicker').selectpicker('render').selectpicker('refresh');
+    });
+    $('#unawarded_capex_modal').modal('show');
 }
-
-$("body").on("change", "select[name='unawarded_budget_head']", function (e) {
-  var id = $(this).find('option:selected').data('estimateid');
-  var unawarded_budget = $(this).val();
-  if(unawarded_budget != '') {
-    $.post(admin_url + "estimates/assign_unawarded_capex", {
-      id: id,
-      unawarded_budget: unawarded_budget,
-    }).done(function (res) {
-      var response = JSON.parse(res);
-      if (response.itemhtml) {
-        $('.unawarded-capex-body').html('');
-        $('.unawarded-capex-body').html(response.itemhtml);
-        $('#unawarded_capex_modal button[type="submit"]').show();
-        init_selectpicker();
-        calculate_unawarded_capex();
-      }
-    });
-  } else {
-    $('.unawarded-capex-body').html('');
-    init_selectpicker();
-  }
-});
-
-
-$("body").on("change", "select[name='unawarded_sub_head']", function (e) {
-  var id = $(this).find('option:selected').data('estimateid');
-  var unawarded_sub_head = $(this).val();
-  if(unawarded_sub_head != '') {
-    $.post(admin_url + "estimates/assign_unawarded_capex", {
-      id: id,
-      unawarded_sub_head: unawarded_sub_head,
-    }).done(function (res) {
-      var response = JSON.parse(res);
-      if (response.itemhtml) {
-        $('.unawarded-capex-body').html('');
-        $('.unawarded-capex-body').html(response.itemhtml);
-        $('#unawarded_capex_modal button[type="submit"]').show();
-        init_selectpicker();
-        calculate_unawarded_capex();
-      }
-    });
-  } else {
-    $('.unawarded-capex-body').html('');
-    init_selectpicker();
-  }
-});
-
-$("body").on("change", "select[name='unawarded_area']", function (e) {
-  var id = $(this).find('option:selected').data('estimateid');
-  var unawarded_area = $(this).val();
-  if(unawarded_area != '') {
-    $.post(admin_url + "estimates/assign_unawarded_capex", {
-      id: id,
-      unawarded_area: unawarded_area,
-    }).done(function (res) {
-      var response = JSON.parse(res);
-      if (response.itemhtml) {
-        $('.unawarded-capex-body').html('');
-        $('.unawarded-capex-body').html(response.itemhtml);
-        $('#unawarded_capex_modal button[type="submit"]').show();
-        init_selectpicker();
-        calculate_unawarded_capex();
-      }
-    });
-  } else {
-    $('.unawarded-capex-body').html('');
-    init_selectpicker();
-  }
-});
+$(document).on(
+    'change',
+    'select[name="unawarded_budget_head"], select[name="unawarded_sub_head"], select[name="unawarded_area[]"]',
+    function () {
+        $(this).selectpicker('render').selectpicker('refresh');
+        if (table_unawarded_capex_items) {
+            table_unawarded_capex_items.ajax.reload(function () {
+                $('select.selectpicker').selectpicker('render').selectpicker('refresh');
+            }, false);
+        }
+    }
+);
 
 $('#unawarded_capex_form').on('submit', function (e) {
     e.preventDefault();
@@ -1438,10 +1422,10 @@ function calculate_cost_control_sheet() {
 var table_unawarded_tracker;
 var estimate_id = <?php echo e($estimate->id); ?>;
 table_unawarded_tracker = $('.table-table_unawarded_tracker');
-var Params = {
+var packageParams = {
     "budget_head": "[name='package_budget_head']"
 };
-initDataTable('.table-table_unawarded_tracker', admin_url + 'purchase/table_unawarded_tracker/' + estimate_id, [], [], Params, [0, 'desc']);
+initDataTable('.table-table_unawarded_tracker', admin_url + 'purchase/table_unawarded_tracker/' + estimate_id, [], [], packageParams, [0, 'desc']);
 $(document).on('change', 'select[name="package_budget_head"]', function () {
     $('select[name="package_budget_head"]').selectpicker('refresh');
     table_unawarded_tracker.DataTable().ajax.reload();
@@ -1695,7 +1679,7 @@ $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
     if (currentTable !== null) {
         $(currentTable).DataTable().destroy();
     }
-    var Params = {
+    var EstimateParams = {
         "sub_head": "[name='estimate_sub_head_" + budget_head_id + "']",
         "area": "[name='estimate_area_" + budget_head_id + "']"
     };
@@ -1704,18 +1688,18 @@ $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
         admin_url + 'estimates/table_estimate_items/' + estimate_id + '/' + budget_head_id,
         [],
         [],
-        Params,
+        EstimateParams,
         [0, 'desc']
     );
     currentTable = tableSelector;
     currentBudgetHead = budget_head_id;
-    $(Params.sub_head + ', ' + Params.area).off('change').on('change', function () {
+    $(EstimateParams.sub_head + ', ' + EstimateParams.area).off('change').on('change', function () {
         $(tableSelector).DataTable().ajax.reload();
-        $(Params.sub_head).selectpicker('refresh');
-        $(Params.area).selectpicker('refresh');
+        $(EstimateParams.sub_head).selectpicker('refresh');
+        $(EstimateParams.area).selectpicker('refresh');
     });
-    $(Params.sub_head).selectpicker('refresh');
-    $(Params.area).selectpicker('refresh');
+    $(EstimateParams.sub_head).selectpicker('refresh');
+    $(EstimateParams.area).selectpicker('refresh');
 });
 
 
