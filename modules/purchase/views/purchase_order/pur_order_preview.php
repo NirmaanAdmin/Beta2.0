@@ -41,7 +41,7 @@ if ($estimate->currency != 0) {
                   </li> -->
                   <li role="presentation">
                      <a href="#bills" aria-controls="bills" role="tab" data-toggle="tab">
-                        <?php echo _l('bills'); ?>
+                        <?php echo _l('bill_bifurcation'); ?>
                      </a>
                   </li>
                   <li role="presentation">
@@ -1037,7 +1037,7 @@ if ($estimate->currency != 0) {
                </div>
                <div class="col-md-6 padr_div_0">
 
-                  <a href="<?php echo admin_url('purchase/pur_bills/' . $estimate->id . '?type=po'); ?>" class="btn btn-success pull-right"><i class="fa fa-plus"></i><?php echo ' ' . _l('Add a Bill'); ?></a>
+                  <a href="<?php echo admin_url('purchase/pur_bills/' . $estimate->id . '?type=po'); ?>" class="btn btn-success pull-right" target="_blank"><i class="fa fa-plus"></i><?php echo ' ' . _l('add_bill_bifurcation'); ?></a>
 
                </div>
                <div class="clearfix"></div>

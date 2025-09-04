@@ -969,3 +969,5 @@ $lang['payment_certificate_number'] = 'Payment certificate number';
 $lang['pending_approval'] = 'Pending approval';
 $lang['is_expense'] = 'Is Expense?';
 $lang['approval_request_sent'] = 'Approval request sent';
+$lang['bill_bifurcation'] = 'Bill Bifurcation';
+$lang['add_bill_bifurcation'] = 'Add Bill Bifurcation';
