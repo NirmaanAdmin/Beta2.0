@@ -68,17 +68,17 @@
 
 				var pay_cert_c2_1 = $('input[name="pay_cert_c2_1"]').val();
 				pay_cert_c2_1 = pay_cert_c2_1.trim() != "" ? pay_cert_c2_1 : 0;
-				var net_advance_1 = parseFloat(pay_cert_c1_1) + parseFloat(pay_cert_c2_1);
+				var net_advance_1 = parseFloat(pay_cert_c1_1) - parseFloat(pay_cert_c2_1);
 				$('.net_advance_1').html(format_money_cert(net_advance_1, true));
 
 				var pay_cert_c2_2 = $('input[name="pay_cert_c2_2"]').val();
 				pay_cert_c2_2 = pay_cert_c2_2.trim() != "" ? pay_cert_c2_2 : 0;
-				var net_advance_2 = parseFloat(pay_cert_c1_2) + parseFloat(pay_cert_c2_2);
+				var net_advance_2 = parseFloat(pay_cert_c1_2) - parseFloat(pay_cert_c2_2);
 				$('.net_advance_2').html(format_money_cert(net_advance_2, true));
 
 				var pay_cert_c2_3 = $('input[name="pay_cert_c2_3"]').val();
 				pay_cert_c2_3 = pay_cert_c2_3.trim() != "" ? pay_cert_c2_3 : 0;
-				var net_advance_3 = parseFloat(pay_cert_c1_3) + parseFloat(pay_cert_c2_3);
+				var net_advance_3 = parseFloat(pay_cert_c1_3) - parseFloat(pay_cert_c2_3);
 				$('.net_advance_3').html(format_money_cert(net_advance_3, true));
 
 				var pay_cert_c1_4 = parseFloat(pay_cert_c1_2) + parseFloat(pay_cert_c1_3);
