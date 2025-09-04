@@ -289,18 +289,13 @@
 		        				<thead>
 		        					<tr>
 		        						<th></th>
-		        						<th width="12%" align="left"><i class="fa fa-exclamation-circle" aria-hidden="true" data-toggle="tooltip" data-title="<?php echo _l('item_description_new_lines_notice'); ?>"></i> <?php echo _l('Uniclass Code'); ?></th>
+		        						<th width="15%" align="left"><?php echo _l('Uniclass Code'); ?></th>
 		        						<th width="15%" align="left"><?php echo _l('item_description'); ?></th>
-		        						<th width="10%" align="right"><?php echo _l('unit_price'); ?><span class="th_currency"><?php echo '('.$po_currency->name.')'; ?></span></th>
-		        						<th width="10%" align="right" class="qty"><?php echo _l('Ordered Quantity'); ?></th>
-		        						<th width="10%" align="right" class="qty"><?php echo _l('Billed Quantity'); ?></th>
-		        						<th width="12%" align="right"><?php echo _l('invoice_table_tax_heading'); ?></th>
-		        						<th width="10%" align="right"><?php echo _l('tax_value'); ?><span class="th_currency"><?php echo '('.$po_currency->name.')'; ?></span></th>
-		        						<th width="10%" align="right"><?php echo _l('pur_subtotal_after_tax'); ?><span class="th_currency"><?php echo '('.$po_currency->name.')'; ?></span></th>
-		        						<th width="7%" align="right"><?php echo _l('discount').'(%)'; ?></th>
-		        						<th width="10%" align="right"><?php echo _l('discount(money)'); ?><span class="th_currency"><?php echo '('.$po_currency->name.')'; ?></span></th>
-		        						<th width="10%" align="right"><?php echo _l('total'); ?><span class="th_currency"><?php echo '('.$po_currency->name.')'; ?></span></th>
-		        						<!-- <th align="center"><i class="fa fa-cog"></i></th> -->
+		        						<th width="14%" align="right"><?php echo _l('unit_price'); ?><span class="th_currency"><?php echo '('.$po_currency->name.')'; ?></span></th>
+		        						<th width="14%" align="right" class="qty"><?php echo _l('Ordered Quantity'); ?></th>
+		        						<th width="14%" align="right"><?php echo _l('bill_bifurcation'); ?></th>
+		        						<th width="14%" align="right"><?php echo _l('bill_percentage'); ?></th>
+		        						<th width="14%" align="right"><?php echo _l('total'); ?><span class="th_currency"><?php echo '('.$po_currency->name.')'; ?></span></th>
 		        					</tr>
 		        				</thead>
 		        				<tbody>
@@ -312,60 +307,6 @@
 		        	<div class="col-md-8 col-md-offset-4">
 		        		<table class="table text-right">
 		        			<tbody>
-		        				<tr id="subtotal">
-		        					<td><span class="bold"><?php echo _l('subtotal'); ?> :</span>
-		        						<?php echo form_hidden('total_mn', ''); ?>
-		        					</td>
-		        					<td class="wh-subtotal">
-		        					</td>
-		        				</tr>
-		        				
-		        				<tr id="order_discount_percent">
-		        					<td>
-		        						<div class="row">
-		        							<div class="col-md-7">
-		        								<span class="bold"><?php echo _l('pur_discount'); ?> <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="<?php echo _l('discount_percent_note'); ?>" ></i></span>
-		        							</div>
-		        							<div class="col-md-3">
-		        								<?php $discount_total = isset($pur_bill) ? $pur_bill->discount_total : '';
-		        								echo render_input('order_discount', '', $discount_total, 'number', ['onchange' => 'pur_calculate_total()', 'onblur' => 'pur_calculate_total()']); ?>
-		        							</div>
-		        							<div class="col-md-2">
-		        								<select name="add_discount_type" id="add_discount_type" class="selectpicker" onchange="pur_calculate_total(); return false;" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
-		        									<option value="percent">%</option>
-		        									<option value="amount" selected><?php echo _l('amount'); ?></option>
-		        								</select>
-		        							</div>
-		        						</div>
-		        					</td>
-		        					<td class="order_discount_value">
-
-		        					</td>
-		        				</tr>
-
-		        				<tr id="total_discount">
-		        					<td><span class="bold"><?php echo _l('total_discount'); ?> :</span>
-		        						<?php echo form_hidden('dc_total', ''); ?>
-		        					</td>
-		        					<td class="wh-total_discount">
-		        					</td>
-		        				</tr>
-
-		        				<tr>
-		        					<td>
-		        						<div class="row">
-		        							<div class="col-md-9">
-		        								<span class="bold"><?php echo _l('pur_shipping_fee'); ?></span>
-		        							</div>
-		        							<div class="col-md-3">
-		        								<input type="number" onchange="pur_calculate_total()" data-toggle="tooltip" value="<?php if(isset($pur_bill)){ echo $pur_bill->shipping_fee; }else{ echo '0';} ?>" class="form-control pull-left text-right" name="shipping_fee">
-		        							</div>
-		        						</div>
-		        					</td>
-		        					<td class="shiping_fee">
-		        					</td>
-		        				</tr>
-		        				
 		        				<tr id="totalmoney">
 		        					<td><span class="bold"><?php echo _l('grand_total'); ?> :</span>
 		        						<?php echo form_hidden('grand_total', ''); ?>

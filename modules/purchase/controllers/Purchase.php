@@ -15067,13 +15067,9 @@ class purchase extends AdminController
                     $index_order++;
                     $unit_name = pur_get_unit_name($inv_detail['unit_id']);
                     $taxname = $inv_detail['tax_name'];
-                    // $item_name = $inv_detail['item_name'];
-
-                    // if (strlen($item_name) == 0) {
                     $item_name = pur_get_item_variatiom($inv_detail['item_code']);
-                    // }
 
-                    $pur_bill_row_template .= $this->purchase_model->create_purchase_bill_row_template('newitems[' . $index_order . ']',  $item_name, $inv_detail['description'], $inv_detail['quantity'], $unit_name, $inv_detail['unit_price'], $taxname, $inv_detail['item_code'], $inv_detail['unit_id'], $inv_detail['tax_rate'],  $inv_detail['total_money'], $inv_detail['discount_percent'], $inv_detail['discount_money'], $inv_detail['total'], $inv_detail['into_money'], $inv_detail['tax'], $inv_detail['tax_value'], $inv_detail['id'], true, $currency_rate, $to_currency, '');
+                    $pur_bill_row_template .= $this->purchase_model->create_purchase_bill_row_template('newitems[' . $index_order . ']', $item_name, $inv_detail['description'], $inv_detail['item_code'], $inv_detail['quantity'], $inv_detail['unit_id'], $unit_name, $inv_detail['unit_price'], 0, 0, $inv_detail['id'], true, $currency_rate, $to_currency);
                 }
             }
         } else {
