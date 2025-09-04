@@ -15151,7 +15151,7 @@ class purchase extends AdminController
             $data['ajaxItems'] = true;
         }
 
-        $this->load->view('purchase_order/edit_pur_bills', $data);
+        $this->load->view('purchase_order/pur_bills', $data);
     }
     public function pur_bill_form()
     {

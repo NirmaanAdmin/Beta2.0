@@ -6,9 +6,9 @@
 
     <?php echo form_open_multipart(admin_url('purchase/pur_bill_form'),array('id'=>'pur_bill-form','class'=>'_pur_bill_form _transaction_form')); ?>
     	<?php
-    		// if(isset($pur_invoice)){
-		    //     echo form_hidden('isedit'); 
-		    // }
+    		if(isset($pur_bill)){
+		        echo form_hidden('isedit'); 
+		    }
     	 ?>
       <div class="col-md-12">
         <div class="panel_s accounting-template estimate">
@@ -16,7 +16,7 @@
 
           	<div class="row">
              <div class="col-md-12">
-              <h4 class="no-margin font-bold"><i class="fa <?php if(isset($pur_invoice)){ echo 'fa-pencil-square';}else{ echo 'fa-plus';} ?>" aria-hidden="true"></i> <?php echo _l($title); ?> <?php if(isset($pur_invoice)){ echo ' '.pur_html_entity_decode($pur_invoice->$bill_code); } ?></h4>
+              <h4 class="no-margin font-bold"><i class="fa <?php if(isset($pur_bill)){ echo 'fa-pencil-square';}else{ echo 'fa-plus';} ?>" aria-hidden="true"></i> <?php echo _l($title); ?> <?php if(isset($pur_bill)){ echo ' '.pur_html_entity_decode($pur_bill->$bill_code); } ?></h4>
               <hr />
              </div>
             </div> 
@@ -25,21 +25,21 @@
             	<?php $additional_discount = 0; ?>
                   <input type="hidden" name="additional_discount" value="<?php echo pur_html_entity_decode($additional_discount); ?>">
             	<div class="col-md-6">
-            		<?php echo form_hidden('id', (isset($pur_invoice) ? $pur_invoice->id : '') ); ?>
+            		<?php echo form_hidden('id', (isset($pur_bill) ? $pur_bill->id : '') ); ?>
 	            	<div class="col-md-6 pad_left_0">
 	            		<label for="bill_code"><span class="text-danger">* </span><?php echo _l('bill_code'); ?></label>
 		            	<?php
 	                    $prefix = get_purchase_option('pur_bill_prefix');
 	                    $next_number = get_purchase_option('next_bill_number');
-	                    $number = (isset($pur_invoice) ? $pur_invoice->number : $next_number);
+	                    $number = (isset($pur_bill) ? $pur_bill->number : $next_number);
 	                    echo form_hidden('number',$number); ?> 
 	                           
-	                    <?php $bill_code = ( isset($pur_invoice) ? $pur_invoice->bill_code : $prefix.str_pad($next_number,5,'0',STR_PAD_LEFT));
+	                    <?php $bill_code = ( isset($pur_bill) ? $pur_bill->bill_code : $prefix.str_pad($next_number,5,'0',STR_PAD_LEFT));
 	                    echo render_input('bill_code','',$bill_code ,'text',array('readonly' => '', 'required' => 'true')); ?>
 	                </div>
 
 	                <div class="col-md-6 pad_right_0">
-	                	<?php $bill_number = ( (isset($pur_invoice) && $pur_invoice->bill_number != '') ? $pur_invoice->bill_number : $bill_code);
+	                	<?php $bill_number = ( (isset($pur_bill) && $pur_bill->bill_number != '') ? $pur_bill->bill_number : $bill_code);
 	                    echo render_input('bill_number','bill_number',$bill_number ,'text',array()); ?>
 	                </div>
 
@@ -61,7 +61,7 @@
 	                    <select name="contract" id="contract" class="selectpicker" onchange="contract_change(this); return false;" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
 	                        <option value=""></option>
 	                        <?php foreach($contracts as $ct){ ?>
-	                        	<option value="<?php echo pur_html_entity_decode($ct['id']); ?>" <?php if(isset($pur_invoice) && $pur_invoice->contract == $ct['id']){ echo 'selected'; } ?>><?php echo pur_html_entity_decode($ct['contract_number']); ?></option>
+	                        	<option value="<?php echo pur_html_entity_decode($ct['id']); ?>" <?php if(isset($pur_bill) && $pur_bill->contract == $ct['id']){ echo 'selected'; } ?>><?php echo pur_html_entity_decode($ct['contract_number']); ?></option>
 	                        <?php } ?>
 	                    </select>
 	                </div>
@@ -80,13 +80,13 @@
 
 	                <div class="col-md-6 pad_right_0">
 	                	<label for="invoice_date"><span class="text-danger">* </span><?php echo _l('Bill Date'); ?></label>
-	                	<?php $invoice_date = ( isset($pur_invoice) ? _d($pur_invoice->invoice_date) : _d(date('Y-m-d')) );
+	                	<?php $invoice_date = ( isset($pur_bill) ? _d($pur_bill->invoice_date) : _d(date('Y-m-d')) );
 	                	 echo render_date_input('invoice_date','',$invoice_date,array( 'required' => 'true')); ?>
 	                </div>
 
 	                <div class="col-md-6 pad_left_0">
 	                	<label for="invoice_date"><?php echo _l('pur_due_date'); ?></label>
-	                	<?php $duedate = ( isset($pur_invoice) ? _d($pur_invoice->duedate) : _d(date('Y-m-d')) );
+	                	<?php $duedate = ( isset($pur_bill) ? _d($pur_bill->duedate) : _d(date('Y-m-d')) );
 	                	 echo render_date_input('duedate','',$duedate); ?>
 	                </div>
 					<div class="col-md-6 pad_right_0">
@@ -95,13 +95,13 @@
                           <option value=""></option>
                           <?php foreach ($projects as $s) { ?>
                             <option value="<?php echo pur_html_entity_decode($s['id']); ?>" <?php if (isset($project_id) && $s['id'] == $project_id) {                                                                                              echo 'selected';
-                            } else if (!isset($pur_invoice) && $s['id'] == $project_id) {                                                                                              echo 'selected';
+                            } else if (!isset($pur_bill) && $s['id'] == $project_id) {                                                                                              echo 'selected';
                             } ?>><?php echo pur_html_entity_decode($s['name']); ?></option>
                           <?php } ?>
                         </select>
 	                </div>
 
-	                <div id="recurring_div" class="<?php if(isset($pur_invoice) && $pur_invoice->pur_order != null){ echo 'hide';} ?>">
+	                <div id="recurring_div" class="<?php if(isset($pur_bill) && $pur_bill->pur_order != null){ echo 'hide';} ?>">
 
 	                <div class="form-group col-md-12 pad_left_0 pad_right_0">
 	                	<label for="recurring"><?php echo _l('Recurring Bill?'); ?></label>
@@ -109,9 +109,9 @@
 	                        <?php for($i = 0; $i <=12; $i++){ ?>
 	                        	<?php
                               $selected = '';
-                              if(isset($pur_invoice)){
+                              if(isset($pur_bill)){
                                 
-	                             if($pur_invoice->recurring == $i){
+	                             if($pur_bill->recurring == $i){
 	                               $selected = 'selected';
 	                             }
                               }
@@ -129,18 +129,18 @@
 	                    </select>
 	                </div>
 
-	                <div id="cycles_wrapper" class="<?php if(!isset($pur_invoice) || (isset($pur_invoice) && $pur_invoice->recurring == 0)){echo ' hide';}?>">
+	                <div id="cycles_wrapper" class="<?php if(!isset($pur_bill) || (isset($pur_bill) && $pur_bill->recurring == 0)){echo ' hide';}?>">
 	                     <div class="col-md-12 pad_left_0 pad_right_0">
-	                        <?php $value = (isset($pur_invoice) ? $pur_invoice->cycles : 0); ?>
+	                        <?php $value = (isset($pur_bill) ? $pur_bill->cycles : 0); ?>
 	                        <div class="form-group recurring-cycles">
 	                          <label for="cycles"><?php echo _l('recurring_total_cycles'); ?>
-	                            <?php if(isset($pur_invoice) && $pur_invoice->total_cycles > 0){
-	                              echo '<small>' . _l('cycles_passed', $pur_invoice->total_cycles) . '</small>';
+	                            <?php if(isset($pur_bill) && $pur_bill->total_cycles > 0){
+	                              echo '<small>' . _l('cycles_passed', $pur_bill->total_cycles) . '</small>';
 	                            }
 	                            ?>
 	                          </label>
 	                          <div class="input-group">
-	                            <input type="number" class="form-control"<?php if($value == 0){echo ' disabled'; } ?> name="cycles" id="cycles" value="<?php echo $value; ?>" <?php if(isset($pur_invoice) && $pur_invoice->total_cycles > 0){echo 'min="'.($pur_invoice->total_cycles).'"';} ?>>
+	                            <input type="number" class="form-control"<?php if($value == 0){echo ' disabled'; } ?> name="cycles" id="cycles" value="<?php echo $value; ?>" <?php if(isset($pur_bill) && $pur_bill->total_cycles > 0){echo 'min="'.($pur_bill->total_cycles).'"';} ?>>
 	                            <div class="input-group-addon">
 	                              <div class="checkbox">
 	                                <input type="checkbox"<?php if($value == 0){echo ' checked';} ?> id="unlimited_cycles">
@@ -164,8 +164,8 @@
 
                         $selected = '';
                         foreach($currencies as $currency){
-                          if(isset($pur_invoice) && $pur_invoice->currency != 0){
-                            if($currency['id'] == $pur_invoice->currency){
+                          if(isset($pur_bill) && $pur_bill->currency != 0){
+                            if($currency['id'] == $pur_bill->currency){
                               $selected = $currency['id'];
                             }
                           }else{
@@ -182,15 +182,15 @@
 	                <div class="col-md-6 form-group">
 	                    <div id="inputTagsWrapper">
 	                       <label for="tags" class="control-label"><i class="fa fa-tag" aria-hidden="true"></i> <?php echo _l('tags'); ?></label>
-	                       <input type="text" class="tagsinput" id="tags" name="tags" value="<?php echo (isset($pur_invoice) ? prep_tags_input(get_tags_in($pur_invoice->id,'pur_invoice')) : ''); ?>" data-role="tagsinput">
+	                       <input type="text" class="tagsinput" id="tags" name="tags" value="<?php echo (isset($pur_bill) ? prep_tags_input(get_tags_in($pur_bill->id,'pur_invoice')) : ''); ?>" data-role="tagsinput">
 	                    </div>
 	                </div>
 	                <div class="col-md-6 pad_left_0">
-	                	<?php $transactionid = ( isset($pur_invoice) ? $pur_invoice->transactionid : '');
+	                	<?php $transactionid = ( isset($pur_bill) ? $pur_bill->transactionid : '');
 	                	echo render_input('transactionid','transaction_id',$transactionid); ?>
 	                </div>
 	                <div class="col-md-6 pad_right_0">
-	                	<?php $transaction_date = ( isset($pur_invoice) ? $pur_invoice->transaction_date : '');
+	                	<?php $transaction_date = ( isset($pur_bill) ? $pur_bill->transaction_date : '');
 	                	echo render_date_input('transaction_date','transaction_date',$transaction_date); ?>
 	                </div>
 
@@ -203,13 +203,13 @@
                               data-none-selected-text="<?php echo _l('dropdown_non_selected_tex'); ?>">
                              
                               <option value="before_tax" <?php
-                        if (isset($pur_invoice)) {
-                            if ($pur_invoice->discount_type == 'before_tax') {
+                        if (isset($pur_bill)) {
+                            if ($pur_bill->discount_type == 'before_tax') {
                                 echo 'selected';
                             }
                         } ?>><?php echo _l('discount_type_before_tax'); ?></option>
-                              <option value="after_tax" <?php if (isset($pur_invoice)) {
-                            if ($pur_invoice->discount_type == 'after_tax' || $pur_invoice->discount_type == null) {
+                              <option value="after_tax" <?php if (isset($pur_bill)) {
+                            if ($pur_bill->discount_type == 'after_tax' || $pur_bill->discount_type == null) {
                                 echo 'selected';
                             }
                         }else {
@@ -241,7 +241,7 @@
 
             </div>
 
-			<?php $rel_id=( isset($pur_invoice) ? $pur_invoice->id : false); ?>
+			<?php $rel_id=( isset($pur_bill) ? $pur_bill->id : false); ?>
             <?php echo render_custom_fields( 'pur_invoice',$rel_id); ?>
         	
           </div>
@@ -259,11 +259,11 @@
 				        $base_currency = get_base_currency();
 
 		                $po_currency = $base_currency;
-		                if(isset($pur_invoice) && $pur_invoice->currency != 0){
-		                  $po_currency = pur_get_currency_by_id($pur_invoice->currency);
+		                if(isset($pur_bill) && $pur_bill->currency != 0){
+		                  $po_currency = pur_get_currency_by_id($pur_bill->currency);
 		                } 
 
-		                $from_currency = (isset($pur_invoice) && $pur_invoice->from_currency != null) ? $pur_invoice->from_currency : $base_currency->id;
+		                $from_currency = (isset($pur_bill) && $pur_bill->from_currency != null) ? $pur_bill->from_currency : $base_currency->id;
 		                echo form_hidden('from_currency', $from_currency);
 
 		              ?>
@@ -274,7 +274,7 @@
 		            </div>
 		            <div class="col-md-2 pull-right">
 		              <?php $currency_rate = 1;
-		                if(isset($pur_invoice) && $pur_invoice->currency != 0){
+		                if(isset($pur_bill) && $pur_bill->currency != 0){
 		                  $currency_rate = pur_get_currency_rate($base_currency->name, $po_currency->name);
 		                }
 		              echo render_input('currency_rate', '', $currency_rate, 'number', [], [], '', 'text-right'); 
@@ -327,7 +327,7 @@
 		                      <span class="bold"><?php echo _l('pur_discount'); ?> <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="<?php echo _l('discount_percent_note'); ?>" ></i></span>
 		                    </div>
 		                    <div class="col-md-3">
-		                      <?php $discount_total = isset($pur_invoice) ? $pur_invoice->discount_total : '';
+		                      <?php $discount_total = isset($pur_bill) ? $pur_bill->discount_total : '';
 		                      echo render_input('order_discount', '', $discount_total, 'number', ['onchange' => 'pur_calculate_total()', 'onblur' => 'pur_calculate_total()']); ?>
 		                    </div>
 		                     <div class="col-md-2">
@@ -358,7 +358,7 @@
 		                   <span class="bold"><?php echo _l('pur_shipping_fee'); ?></span>
 		                 </div>
 		                 <div class="col-md-3">
-		                  <input type="number" onchange="pur_calculate_total()" data-toggle="tooltip" value="<?php if(isset($pur_invoice)){ echo $pur_invoice->shipping_fee; }else{ echo '0';} ?>" class="form-control pull-left text-right" name="shipping_fee">
+		                  <input type="number" onchange="pur_calculate_total()" data-toggle="tooltip" value="<?php if(isset($pur_bill)){ echo $pur_bill->shipping_fee; }else{ echo '0';} ?>" class="form-control pull-left text-right" name="shipping_fee">
 		                </div>
 		              </div>
 		              </td>
@@ -384,16 +384,16 @@
 		          <div class="col-md-12 mtop15">
 		             <div class="panel-body bottom-transaction">
 		             	<div class="col-md-12 pad_left_0 pad_right_0">
-	                	<?php $adminnote = ( isset($pur_invoice) ? $pur_invoice->adminnote : '');
+	                	<?php $adminnote = ( isset($pur_bill) ? $pur_bill->adminnote : '');
 		                	echo render_textarea('adminnote','adminnote',$adminnote, array('rows' => 7)) ?>
 		                </div>
 
 		                <div class="col-md-12 pad_left_0 pad_right_0">
-		                	<?php $vendor_note = ( isset($pur_invoice) ? $pur_invoice->vendor_note : '');
+		                	<?php $vendor_note = ( isset($pur_bill) ? $pur_bill->vendor_note : '');
 		                	echo render_textarea('vendor_note','vendor_note',$vendor_note, array('rows' => 7)) ?>
 		                </div>
 		                <div class="col-md-12 pad_left_0 pad_right_0">
-		                	<?php $terms = ( isset($pur_invoice) ? $pur_invoice->terms : '');
+		                	<?php $terms = ( isset($pur_bill) ? $pur_bill->terms : '');
 		                	echo render_textarea('terms','terms',$terms, array('rows' => 7)) ?>
 		                </div>
 
