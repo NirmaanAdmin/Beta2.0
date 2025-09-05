@@ -21082,7 +21082,8 @@ class Purchase_model extends App_Model
 
     public function create_purchase_bill_row_template($name = '', $item_name = '', $item_description = '', $item_code = '', $quantity = '', $unit_id = '', $unit_name = '', $unit_price = '', $bill_percentage = 0, $total_money = 0, $item_key = '', $is_edit = false, $currency_rate = 1, $to_currency = '')
     {
-        $this->load->model('invoice_items_model');
+        $this->load->model('currencies_model');
+        $base_currency = $this->currencies_model->get_base_currency();
         $row = '';
 
         $name_item_code = 'item_code';
@@ -21101,7 +21102,7 @@ class Purchase_model extends App_Model
         if ($name == '') {
             $row .= '<tr class="main"><td></td>';
         } else {
-            $row .= '<tr class="sortable item">
+            $row .= '<tr class="sortable item list_item_' . $item_key . '">
                     <td class="dragger"><input type="hidden" class="order" name="' . $name . '[order]"><input type="hidden" class="ids" name="' . $name . '[id]" value="' . $item_key . '"></td>';
             $name_item_code = $name . '[item_code]';
             $name_item_name = $name . '[item_name]';
@@ -21130,15 +21131,15 @@ class Purchase_model extends App_Model
 
         $row .= '<td class="bill_bifurcation">
             <a href="javascript:void(0)" 
-               onclick="add_bill_bifurcation(' . (int)$item_key . '); return false;" 
+               onclick="add_bill_bifurcation(' . (int)$item_key . ', ' . $unit_price . '); return false;" 
                class="btn btn-success pull-right">'
                . _l('add_bill_bifurcation') .
             '</a>
          </td>';
 
-        $row .= '<td class="label_row_bill_percentage" align="right">' . app_format_number($bill_percentage) . '%</td>';
+        $row .= '<td class="label_row_bill_percentage" align="right">' . number_format((float)$bill_percentage, 2, '.', '') . '%</td>';
 
-        $row .= '<td class="label_row_total" align="right">' . app_format_number($total_money) . '</td>';
+        $row .= '<td class="label_row_total" align="right">' . app_format_money($total_money, $base_currency->symbol) . '</td>';
 
         $row .= '<td class="hide commodity_code">' . render_input($name_item_code, '', $item_code, 'text', ['placeholder' => _l('commodity_code')]) . '</td>';
 
@@ -21172,6 +21173,8 @@ class Purchase_model extends App_Model
         unset($data['total_money']);
         unset($data['additional_discount']);
         unset($data['tax_value']);
+        unset($data['final_percentage']);
+        unset($data['total_final_amount']);
 
         $order_detail = [];
         if (isset($data['newitems'])) {
@@ -21205,7 +21208,7 @@ class Purchase_model extends App_Model
         }
 
         while ($check_exist_number) {
-            $data['number'] = $data['number'] + 1;
+            $data['number'] = (int)$data['number'] + 1;
             $data['bill_number'] =  $prefix . str_pad($data['number'], 5, '0', STR_PAD_LEFT);
             $this->db->where('bill_number', $data['bill_number']);
             $check_exist_number = $this->db->get(db_prefix() . 'pur_bills')->row();
@@ -21265,13 +21268,17 @@ class Purchase_model extends App_Model
             $custom_fields = $data['custom_fields'];
             unset($data['custom_fields']);
         }
-        // echo '<pre>';
-        // print_r($data);
-        // die;
+
+        $newbillitems = [];
+        if (isset($data['newbillitems'])) {
+            $newbillitems = $data['newbillitems'];
+            unset($data['newbillitems']);
+        }
+        
         $this->db->insert(db_prefix() . 'pur_bills', $data);
         $insert_id = $this->db->insert_id();
         if ($insert_id) {
-            $next_number = $data['number'] + 1;
+            $next_number = (int)$data['number'] + 1;
             $this->db->where('option_name', 'next_bill_number');
             $this->db->update(db_prefix() . 'purchase_option', ['option_val' =>  $next_number,]);
 
@@ -21283,8 +21290,6 @@ class Purchase_model extends App_Model
 
             $total = [];
             $total['tax'] = 0;
-
-
 
             if (count($order_detail) > 0) {
                 foreach ($order_detail as $key => $rqd) {
@@ -21322,22 +21327,23 @@ class Purchase_model extends App_Model
                     $dt_data['tax_name'] = $tax_name;
 
                     $dt_data['quantity'] = ($rqd['quantity'] != '' && $rqd['quantity'] != null) ? $rqd['quantity'] : 0;
+                    $dt_data['bill_percentage'] = !empty($rqd['bill_percentage']) ? $rqd['bill_percentage'] : 0;
 
                     $this->db->insert(db_prefix() . 'pur_bill_details', $dt_data);
+                    $item_insert_id = $this->db->insert_id();
+                    if(isset($newbillitems[$rqd['id']])) {
+                        $billitem = $newbillitems[$rqd['id']];
+                        foreach ($billitem as $bkey => $bvalue) {
+                            $this->db->insert(db_prefix() . 'pur_bills_bifurcation', [
+                                'bill_item_id' => $item_insert_id,
+                                'item_id' => $bvalue['item_id'],
+                                'bill_percent' => $bvalue['bill_percent'],
+                                'hold' => $bvalue['hold'],
+                            ]);
+                        }
+                    }
                 }
             }
-
-
-            $_taxes = $this->get_html_tax_pur_bills($insert_id);
-            foreach ($_taxes['taxes_val'] as $tax_val) {
-                $total['tax'] += $tax_val;
-            }
-
-
-            $this->db->where('id', $insert_id);
-            $this->db->update(db_prefix() . 'pur_bills', $total);
-
-            // hooks()->do_action('after_pur_invoice_added', $insert_id);
 
             return $insert_id;
         }
@@ -21405,6 +21411,9 @@ class Purchase_model extends App_Model
         unset($data['additional_discount']);
         unset($data['tax_value']);
         unset($data['billed_quantity']);
+        unset($data['final_percentage']);
+        unset($data['total_final_amount']);
+        unset($data['pur_order']);
 
         unset($data['isedit']);
 
@@ -21471,6 +21480,12 @@ class Purchase_model extends App_Model
                 $affectedRows++;
             }
             unset($data['custom_fields']);
+        }
+
+        $newbillitems = [];
+        if (isset($data['newbillitems'])) {
+            $newbillitems = $data['newbillitems'];
+            unset($data['newbillitems']);
         }
 
         if (count($new_order) > 0) {
@@ -21554,11 +21569,35 @@ class Purchase_model extends App_Model
                 $dt_data['tax_name'] = $tax_name;
 
                 $dt_data['quantity'] = ($rqd['quantity'] != '' && $rqd['quantity'] != null) ? $rqd['quantity'] : 0;
+                $dt_data['bill_percentage'] = !empty($rqd['bill_percentage']) ? $rqd['bill_percentage'] : 0;
 
                 $this->db->where('id', $rqd['id']);
                 $this->db->update(db_prefix() . 'pur_bill_details', $dt_data);
                 if ($this->db->affected_rows() > 0) {
                     $affectedRows++;
+                }
+                if(isset($newbillitems[$rqd['id']])) {
+                    $billitem = $newbillitems[$rqd['id']];
+                    foreach ($billitem as $bkey => $bvalue) {
+                        $this->db->where('bill_item_id', $rqd['id']);
+                        $this->db->where('item_id', $bvalue['item_id']);
+                        $pur_bills_bifurcation = $this->db->get(db_prefix() . 'pur_bills_bifurcation')->row();
+                        if(!empty($pur_bills_bifurcation)) {
+                            $this->db->where('bill_item_id', $rqd['id']);
+                            $this->db->where('item_id', $bvalue['item_id']);
+                            $this->db->update(db_prefix() . 'pur_bills_bifurcation', [
+                                'bill_percent' => $bvalue['bill_percent'],
+                                'hold' => $bvalue['hold'],
+                            ]);
+                        } else {
+                            $this->db->insert(db_prefix() . 'pur_bills_bifurcation', [
+                                'bill_item_id' => $rqd['id'],
+                                'item_id' => $bvalue['item_id'],
+                                'bill_percent' => $bvalue['bill_percent'],
+                                'hold' => $bvalue['hold'],
+                            ]);
+                        }
+                    }
                 }
             }
         }
@@ -21686,6 +21725,9 @@ class Purchase_model extends App_Model
         if (!is_numeric($bill_id)) {
             throw new InvalidArgumentException('Bill ID must be a numeric value');
         }
+
+        $this->db->where('pur_bill', (int)$bill_id);
+        $this->db->delete(db_prefix() . 'pur_bill_details');
 
         $this->db->where('id', (int)$bill_id);
         $result = $this->db->delete(db_prefix() . 'pur_bills');
@@ -24490,5 +24532,111 @@ class Purchase_model extends App_Model
             }
         }
         exit;
+    }
+
+    public function get_purchase_bill_row_model($item_key, $item_name, $description, $unit_price, $bill_item_id = '')
+    {
+        $html  = '<div class="modal fade all_bill_row_model" id="bill_modal_' . $item_key . '" tabindex="-1" role="dialog">';
+        $html .= '<div class="modal-dialog" role="document" style="width:98%;">';
+        $html .= '<div class="modal-content">';
+
+        // Header
+        $html .= '<div class="modal-header">';
+        $html .= '<h4 class="modal-title">' . _l('bill_bifurcation') . '</h4>';
+        $html .= '<button type="button" class="close" data-dismiss="modal">&times;</button>';
+        $html .= '<div class="bill-head">';
+        $html .= '<span style="font-size: 15px">' . _l('Uniclass Code') . ': ' . htmlspecialchars($item_name) . '</span><br>';
+        $html .= '<span style="font-size: 15px">' . _l('item_description') . ': ' . htmlspecialchars($description) . '</span>';
+        $html .= '</div>';
+        $html .= '</div>';
+
+        // Body
+        $html .= '<div class="modal-body">';
+        $html .= '<div class="row">';
+        $html .= '<div class="col-md-12">';
+
+        // Table
+        $html .= '<div class="table-responsive s_table">';
+        $html .= '<table class="table items table_bill_rows">';
+        $html .= '<thead>';
+        $html .= '<tr>';
+        $html .= '<th width="20%" align="left">' . _l('Bill Description') . '</th>';
+        $html .= '<th width="16%" align="left">' . _l('bill_percentage') . '</th>';
+        $html .= '<th width="16%" align="left">' . _l('Bill Unit Price') . '</th>';
+        $html .= '<th width="16%" align="left">' . _l('Hold') . '</th>';
+        $html .= '<th width="16%" align="left">' . _l('Hold Amount') . '</th>';
+        $html .= '<th width="16%" align="left">' . _l('Final Amount') . '</th>';
+        $html .= '</tr>';
+        $html .= '</thead>';
+        $default_purchase_bill_rows = get_default_purchase_bill_rows();
+        $pur_bills_bifurcation = array();
+        if(!empty($bill_item_id)) {
+            $this->db->where('bill_item_id', $bill_item_id);
+            $pur_bills_bifurcation = $this->db->get(db_prefix() . 'pur_bills_bifurcation')->result_array();
+            if(!empty($pur_bills_bifurcation)) {
+                $default_purchase_bill_rows = $pur_bills_bifurcation;
+            }
+        }
+        $html .= '<tbody style="border: 1px solid #ddd;">';
+        $html .= form_hidden('final_percentage', 0);
+        $html .= form_hidden('total_final_amount', 0);
+        foreach ($default_purchase_bill_rows as $key => $value) {
+            $html .= '<tr class="bill_items">';
+            $html .= '<td class="hide">'.form_hidden('newbillitems['.$item_key.']['.$value['item_id'].'][item_id]', $value['item_id']).'</td>';
+            if(empty($pur_bills_bifurcation)) {
+                $html .= '<td align="left">'.$value['description'].'</td>';
+            } else {
+                $html .= '<td align="left">'.get_purchase_bill_description($value['item_id']).'</td>';
+            }
+            $html .= '<td align="left" class="all_bill_percentage">' 
+              . render_input('newbillitems['.$item_key.']['.$value['item_id'].'][bill_percent]', '', $value['bill_percent'], 'number', ['min' => 0, 'max' => 100, 'onblur' => 'calculate_bill_bifurcation('.$item_key.', '.$unit_price.');', 'onchange' => 'calculate_bill_bifurcation('.$item_key.', '.$unit_price.');']) 
+              . '</td>';
+            $html .= '<td align="left" class="all_bill_unit_price"></td>';
+            $html .= '<td align="left" class="all_hold">' 
+              . render_input('newbillitems['.$item_key.']['.$value['item_id'].'][hold]', '', $value['hold'], 'number', ['min' => 0, 'max' => 100, 'onblur' => 'calculate_bill_bifurcation('.$item_key.', '.$unit_price.');', 'onchange' => 'calculate_bill_bifurcation('.$item_key.', '.$unit_price.');']) 
+              . '</td>';
+            $html .= '<td align="left" class="all_hold_amount"></td>';
+            $html .= '<td align="left" class="all_final_amount"></td>';
+            $html .= '</tr>';
+        }
+        $html .= '</tbody>';
+        $html .= '</table>';
+        $html .= '</div>'; // table responsive
+
+        // Totals section
+        $html .= '<div class="col-md-8 col-md-offset-4">';
+        $html .= '<table class="table text-right">';
+        $html .= '<tbody>';
+        $html .= '<tr>';
+        $html .= '<td width="75%"><span class="bold tw-text-neutral-700">Total Bill Unit Price :</span></td>';
+        $html .= '<td width="25%" class="total_bill_unit_price"></td>';
+        $html .= '</tr>';
+        $html .= '<tr>';
+        $html .= '<td width="75%"><span class="bold tw-text-neutral-700">Total Hold Amount :</span></td>';
+        $html .= '<td width="25%" class="total_hold_amount"></td>';
+        $html .= '</tr>';
+        $html .= '<tr>';
+        $html .= '<td width="75%"><span class="bold tw-text-neutral-700">Total Final Amount :</span></td>';
+        $html .= '<td width="25%" class="total_final_amount"></td>';
+        $html .= '</tr>';
+        $html .= '</tbody>';
+        $html .= '</table>';
+        $html .= '</div>'; // totals section
+
+        $html .= '</div>'; // col-md-12
+        $html .= '</div>'; // row
+        $html .= '</div>'; // modal-body
+
+        // Footer
+        $html .= '<div class="modal-footer">';
+        $html .= '<button type="button" class="btn btn-default" data-dismiss="modal">' . _l('close') . '</button>';
+        $html .= '<button type="button" onclick="save_bill_row_model(' . $item_key . '); return false;" class="btn btn-info">' . _l('submit') . '</button>';
+        $html .= '</div>';
+
+        $html .= '</div>'; // modal-content
+        $html .= '</div>'; // modal-dialog
+        $html .= '</div>'; // modal
+
+        return $html;
     }
 }

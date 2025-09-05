@@ -4882,4 +4882,45 @@ function get_multiple_staff_names($userids = '')
     return '';
 }
 
+function get_default_purchase_bill_rows()
+{
+    $result = array();
+    $result = [
+        [
+            'item_id' => 1,
+            'description' => 'Adv against Material selection',
+            'bill_percent' => 0,
+            'hold' => 0,
+        ],
+        [
+            'item_id' => 2,
+            'description' => 'On Material Delivery',
+            'bill_percent' => 0,
+            'hold' => 0,
+        ],
+        [
+            'item_id' => 3,
+            'description' => 'On Installation',
+            'bill_percent' => 0,
+            'hold' => 0,
+        ],
+        [
+            'item_id' => 4,
+            'description' => 'On Handover',
+            'bill_percent' => 0,
+            'hold' => 0,
+        ],
+    ];
+    return $result;
+}
 
+function get_purchase_bill_description($item_id)
+{
+    $rows = get_default_purchase_bill_rows();
+    foreach ($rows as $row) {
+        if ($row['item_id'] == $item_id) {
+            return $row['description'];
+        }
+    }
+    return null;
+}

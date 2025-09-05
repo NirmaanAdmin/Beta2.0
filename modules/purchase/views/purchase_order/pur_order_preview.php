@@ -1060,12 +1060,12 @@ if ($estimate->currency != 0) {
                         ?>
                         <tr>
                            <td><?php echo $sr++; ?></td>
-                           <td><?php echo $bill['bill_code']; ?></td>
+                           <td><?php echo $bill['bill_number']; ?></td>
                            <td><?php echo app_format_money($bill['total'], $base_currency->symbol); ?></td>
                            <td><?php echo  date('d M, Y', strtotime($bill['invoice_date'])); ?></td>
                            <td>
                               <?php if (has_permission('purchase_invoices', '', 'edit') || is_admin()) { ?>
-                                 <a href="<?php echo admin_url('purchase/edit_pur_bills/' . $bill['id']); ?>" class="btn btn-default btn-icon" data-toggle="tooltip" data-placement="top" title="<?php echo _l('edit'); ?>"><i class="fa fa-pencil-square "></i></a>
+                                 <a href="<?php echo admin_url('purchase/edit_pur_bills/' . $bill['id']); ?>" target="_blank" class="btn btn-default btn-icon" data-toggle="tooltip" data-placement="top" title="<?php echo _l('edit'); ?>"><i class="fa fa-pencil-square "></i></a>
                               <?php } ?>
                               <?php if (has_permission('purchase_invoices', '', 'delete') || is_admin()) { ?>
                                  <a href="<?php echo admin_url('purchase/delete_bill/' . $bill['id'] . '/' . $estimate->id); ?>" class="btn btn-danger btn-icon _delete"><i class="fa fa-remove"></i></a>

@@ -351,6 +351,8 @@
 		      </div>
 		    </div>
 
+		    <?php echo $pur_bill_row_model; ?>
+
 		    <?php echo form_close(); ?>
 		  </div>
 		</div>
