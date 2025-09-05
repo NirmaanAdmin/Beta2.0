@@ -86,7 +86,7 @@
 				$('.pay_cert_c1_4').html(format_money_cert(pay_cert_c1_4, true));
 				var pay_cert_c2_4 = parseFloat(pay_cert_c2_2) + parseFloat(pay_cert_c2_3);
 				$('.pay_cert_c2_4').html(format_money_cert(pay_cert_c2_4, true));
-				var net_advance_4 = parseFloat(pay_cert_c1_4) + parseFloat(pay_cert_c2_4);
+				var net_advance_4 = parseFloat(pay_cert_c1_4) - parseFloat(pay_cert_c2_4);
 				$('.net_advance_4').html(format_money_cert(net_advance_4, true));
 
 				var sub_total_ac_1 = parseFloat(po_contract_amount) + parseFloat(net_advance_1);
