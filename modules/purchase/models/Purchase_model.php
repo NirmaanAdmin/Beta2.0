@@ -18371,9 +18371,9 @@ class Purchase_model extends App_Model
         $result['po_comulative'] = $result['po_previous'] + $result['po_this_bill'];
         $result['pay_cert_c1_4'] = $result['pay_cert_c1_2'] + $result['pay_cert_c1_3'];
         $result['pay_cert_c2_4'] = $result['pay_cert_c2_2'] + $result['pay_cert_c2_3'];
-        $result['net_advance_1'] = $result['pay_cert_c1_1'] + $result['pay_cert_c2_1'];
-        $result['net_advance_2'] = $result['pay_cert_c1_2'] + $result['pay_cert_c2_2'];
-        $result['net_advance_3'] = $result['pay_cert_c1_3'] + $result['pay_cert_c2_3'];
+        $result['net_advance_1'] = $result['pay_cert_c1_1'] - $result['pay_cert_c2_1'];
+        $result['net_advance_2'] = $result['pay_cert_c1_2'] - $result['pay_cert_c2_2'];
+        $result['net_advance_3'] = $result['pay_cert_c1_3'] - $result['pay_cert_c2_3'];
         $result['net_advance_4'] = $result['pay_cert_c1_4'] + $result['pay_cert_c2_4'];
         $result['sub_total_ac_1'] = $po_contract_amount + $result['net_advance_1'];
         $result['sub_total_ac_2'] = $result['po_previous'] + $result['net_advance_2'];
