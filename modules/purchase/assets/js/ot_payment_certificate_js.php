@@ -36,7 +36,7 @@
 				var ot_comulative = parseFloat(ot_previous) + parseFloat(ot_this_bill);
 				$('.ot_comulative').html(format_money_cert(ot_comulative, true));
 
-				var pay_cert_c1_1 = $('input[name="pay_cert_c1_1"]').val();
+				var pay_cert_c1_1 = parseFloat($('input[name="pay_cert_c1_1"]').val()) || 0;
 				// var mobilization_advance = $('select[name="mobilization_advance"]').val();
 				// if (mobilization_advance) {
 				// 	mobilization_advance = mobilization_advance.replace('%', '');
@@ -46,7 +46,7 @@
 				// 	pay_cert_c1_1 = 0;
 				// }
 
-				var pay_cert_c1_2 = $('input[name="pay_cert_c1_2"]').val();
+				var pay_cert_c1_2 = parseFloat($('input[name="pay_cert_c1_2"]').val()) || 0;
 				// var mobilization_advance = $('select[name="mobilization_advance"]').val();
 				// if (mobilization_advance) {
 				// 	mobilization_advance = mobilization_advance.replace('%', '');
@@ -56,7 +56,7 @@
 				// 	pay_cert_c1_2 = 0;
 				// }
 
-				var pay_cert_c1_3 = $('input[name="pay_cert_c1_3"]').val();
+				var pay_cert_c1_3 = parseFloat($('input[name="pay_cert_c1_3"]').val()) || 0;
 				// var mobilization_advance = $('select[name="mobilization_advance"]').val();
 				// if (mobilization_advance) {
 				// 	mobilization_advance = mobilization_advance.replace('%', '');
