@@ -21098,6 +21098,7 @@ class Purchase_model extends App_Model
         $array_qty_attr = ['min' => '0.0', 'step' => 'any'];
         $array_rate_attr = ['min' => '0.0', 'step' => 'any'];
         $text_right_class = 'text-right';
+        $amount = (float)$unit_price * (float)$quantity;
 
         if ($name == '') {
             $row .= '<tr class="main"><td></td>';
@@ -21131,7 +21132,7 @@ class Purchase_model extends App_Model
 
         $row .= '<td class="bill_bifurcation">
             <a href="javascript:void(0)" 
-               onclick="add_bill_bifurcation(' . (int)$item_key . ', ' . $unit_price . '); return false;" 
+               onclick="add_bill_bifurcation(' . (int)$item_key . ', ' . $amount . '); return false;" 
                class="btn btn-success pull-right">'
                . _l('add_bill_bifurcation') .
             '</a>
@@ -24534,7 +24535,7 @@ class Purchase_model extends App_Model
         exit;
     }
 
-    public function get_purchase_bill_row_model($item_key, $item_name, $description, $unit_price, $bill_item_id = '')
+    public function get_purchase_bill_row_model($item_key, $item_name, $description, $amount, $bill_item_id = '')
     {
         $html  = '<div class="modal fade all_bill_row_model" id="bill_modal_' . $item_key . '" tabindex="-1" role="dialog">';
         $html .= '<div class="modal-dialog" role="document" style="width:98%;">';
@@ -24589,11 +24590,11 @@ class Purchase_model extends App_Model
                 $html .= '<td align="left">'.get_purchase_bill_description($value['item_id']).'</td>';
             }
             $html .= '<td align="left" class="all_bill_percentage">' 
-              . render_input('newbillitems['.$item_key.']['.$value['item_id'].'][bill_percent]', '', $value['bill_percent'], 'number', ['min' => 0, 'max' => 100, 'onblur' => 'calculate_bill_bifurcation('.$item_key.', '.$unit_price.');', 'onchange' => 'calculate_bill_bifurcation('.$item_key.', '.$unit_price.');']) 
+              . render_input('newbillitems['.$item_key.']['.$value['item_id'].'][bill_percent]', '', $value['bill_percent'], 'number', ['min' => 0, 'max' => 100, 'onblur' => 'calculate_bill_bifurcation('.$item_key.', '.$amount.');', 'onchange' => 'calculate_bill_bifurcation('.$item_key.', '.$amount.');']) 
               . '</td>';
             $html .= '<td align="left" class="all_bill_unit_price"></td>';
             $html .= '<td align="left" class="all_hold">' 
-              . render_input('newbillitems['.$item_key.']['.$value['item_id'].'][hold]', '', $value['hold'], 'number', ['min' => 0, 'max' => 100, 'onblur' => 'calculate_bill_bifurcation('.$item_key.', '.$unit_price.');', 'onchange' => 'calculate_bill_bifurcation('.$item_key.', '.$unit_price.');']) 
+              . render_input('newbillitems['.$item_key.']['.$value['item_id'].'][hold]', '', $value['hold'], 'number', ['min' => 0, 'max' => 100, 'onblur' => 'calculate_bill_bifurcation('.$item_key.', '.$amount.');', 'onchange' => 'calculate_bill_bifurcation('.$item_key.', '.$amount.');']) 
               . '</td>';
             $html .= '<td align="left" class="all_hold_amount"></td>';
             $html .= '<td align="left" class="all_final_amount"></td>';

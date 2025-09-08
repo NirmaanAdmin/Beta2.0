@@ -494,12 +494,12 @@
     return d;
   }
 
-  function add_bill_bifurcation(id, unit_price) {
-    calculate_bill_bifurcation(id, unit_price);
+  function add_bill_bifurcation(id, amount) {
+    calculate_bill_bifurcation(id, amount);
     $('#bill_modal_'+id).modal('show');
   }
 
-  function calculate_bill_bifurcation(id, unit_price) {
+  function calculate_bill_bifurcation(id, amount) {
     var total_bill_unit_price = 0;
     var total_hold_amount = 0;
     var total_final_amount = 0;
@@ -515,11 +515,11 @@
       var hold_amount = 0;
       var final_amount = 0;
       if (bill_percentage > 0) {
-        bill_unit_price = (unit_price * bill_percentage) / 100;
+        bill_unit_price = (amount * bill_percentage) / 100;
       }
       total_bill_unit_price += bill_unit_price;
       if (hold_percentage > 0) {
-        hold_amount = (unit_price * hold_percentage) / 100;
+        hold_amount = (amount * hold_percentage) / 100;
       }
       total_hold_amount += hold_amount;
       final_amount = bill_unit_price - hold_amount;
