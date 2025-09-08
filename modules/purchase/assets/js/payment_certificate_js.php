@@ -8,10 +8,6 @@
 	}
 	get_po_pc_format();
 
-	appValidateForm($('#payment_certificate_form'), {
-    	po_this_bill: 'required',
-  	});
-
 	function calculate_payment_certificate() {
 		"use strict";
 		var po_id = $('input[name="po_id"]').val();

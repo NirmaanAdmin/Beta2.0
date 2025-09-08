@@ -8,10 +8,6 @@
 	}
 	get_wo_pc_format();
 
-	appValidateForm($('#payment_certificate_form'), {
-    	po_this_bill: 'required',
-  	});
-
 	function calculate_payment_certificate() {
 		"use strict";
 		var wo_id = $('input[name="wo_id"]').val();
