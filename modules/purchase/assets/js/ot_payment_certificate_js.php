@@ -8,6 +8,10 @@
 	}
 	get_ot_pc_format();
 
+	appValidateForm($('#payment_certificate_form'), {
+    	ot_this_bill: 'required',
+  	});
+
 	function calculate_payment_certificate() {
 		"use strict";
 		var ot_id = $('select[name="ot_id"]').val();

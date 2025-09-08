@@ -18203,7 +18203,7 @@ class Purchase_model extends App_Model
             $last_payment_certificate = $this->db->get(db_prefix() . 'payment_certificate')->row();
             if (!empty($last_payment_certificate)) {
                 $res = $this->get_payment_certificate_calc($last_payment_certificate->id);
-                $result['po_previous'] = $res['po_comulative'];
+                $result['po_previous'] = $res['total_previous'];
             }
         }
 
@@ -18422,6 +18422,7 @@ class Purchase_model extends App_Model
         $result['amount_rec_2'] = $result['sub_fg_2'] + $result['tot_app_tax_2'];
         $result['amount_rec_3'] = $result['sub_fg_3'] + $result['tot_app_tax_3'];
         $result['amount_rec_4'] = $result['amount_rec_2'] + $result['amount_rec_3'];
+        $result['total_previous'] = $result['po_previous'] + $result['amount_rec_3'];
         return $result;
     }
 
@@ -19103,7 +19104,7 @@ class Purchase_model extends App_Model
             $last_payment_certificate = $this->db->get(db_prefix() . 'payment_certificate')->row();
             if (!empty($last_payment_certificate)) {
                 $res = $this->get_payment_certificate_calc($last_payment_certificate->id);
-                $result['po_previous'] = $res['po_comulative'];
+                $result['po_previous'] = $res['total_previous'];
             }
         }
 
@@ -23930,7 +23931,7 @@ class Purchase_model extends App_Model
             $last_payment_certificate = $this->db->get(db_prefix() . 'payment_certificate')->row();
             if (!empty($last_payment_certificate)) {
                 $res = $this->get_payment_certificate_calc($last_payment_certificate->id);
-                $result['ot_previous'] = $res['po_comulative'];
+                $result['ot_previous'] = $res['total_previous'];
             }
         }
         return $result;
