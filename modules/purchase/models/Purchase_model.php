@@ -7432,6 +7432,9 @@ class Purchase_model extends App_Model
             $this->invoices_model->update_basic_invoice_details($itemable->rel_id);
         }
 
+        $this->db->where('pur_invoice_id', $id);
+        $this->db->update(db_prefix() . 'payment_certificate', ['pur_invoice_id' => NULL]);
+
         $this->db->where('id', $id);
         $this->db->delete(db_prefix() . 'pur_invoices');
         if ($this->db->affected_rows() > 0) {
