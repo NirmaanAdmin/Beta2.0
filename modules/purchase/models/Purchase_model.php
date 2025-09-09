@@ -24571,7 +24571,7 @@ class Purchase_model extends App_Model
         $html .= '<button type="button" class="close" data-dismiss="modal">&times;</button>';
         $html .= '<div class="bill-head">';
         $html .= '<span style="font-size: 15px">' . _l('Uniclass Code') . ': ' . htmlspecialchars($item_name) . '</span><br>';
-        $html .= '<span style="font-size: 15px">' . _l('item_description') . ': ' . htmlspecialchars($description) . '</span>';
+        $html .= '<span style="font-size: 15px">' . _l('item_description') . ': '. pur_html_entity_decode($description).'</span>';
         $html .= '</div>';
         $html .= '</div>';
 
