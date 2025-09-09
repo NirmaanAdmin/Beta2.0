@@ -18425,7 +18425,7 @@ class Purchase_model extends App_Model
         $result['amount_rec_2'] = $result['sub_fg_2'] + $result['tot_app_tax_2'];
         $result['amount_rec_3'] = $result['sub_fg_3'] + $result['tot_app_tax_3'];
         $result['amount_rec_4'] = $result['amount_rec_2'] + $result['amount_rec_3'];
-        $result['total_previous'] = $result['po_previous'] + $result['amount_rec_3'];
+        $result['total_previous'] = $result['po_previous'] + $result['sub_t_de_3'];
         return $result;
     }
 
