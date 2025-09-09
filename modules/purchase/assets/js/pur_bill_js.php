@@ -79,6 +79,11 @@
       pur_calculate_total();
     });
 
+    var clickedButton = null;
+    $("body").on("click", "form._transaction_form input[type=submit]", function () {
+        clickedButton = $(this).attr("name");
+    });
+
     $("body").on('submit', 'form._transaction_form', function (e) {
       e.preventDefault();
       var form = $(this);
@@ -115,6 +120,9 @@
         }
       });
       if (is_submit) {
+        if (clickedButton) {
+          form.append('<input type="hidden" name="' + clickedButton + '" value="1">');
+        }
         form.off('submit');
         form[0].submit();
       }
@@ -555,5 +563,30 @@
       $('#bill_modal_' + id).modal('hide');
     }
     pur_calculate_total();
+  }
+
+  function approve_bill_bifurcation_request(id) {
+    "use strict";
+    bill_bifurcation_request_approval_status(id, 2);
+  }
+
+  function deny_bill_bifurcation_request(id) {
+    "use strict";
+    bill_bifurcation_request_approval_status(id, 3);
+  }
+
+  function bill_bifurcation_request_approval_status(id, status) {
+    "use strict";
+    var data = {};
+    data.rel_id = id;
+    data.approve = status;
+    data.note = $('textarea[name="reason"]').val();
+    $.post(admin_url + 'purchase/bill_bifurcation_request/' + id, data).done(function(response) {
+      response = JSON.parse(response);
+      if (response.success === true || response.success == 'true') {
+        alert_float('success', response.message);
+        window.location.reload();
+      }
+    });
   }
 </script>

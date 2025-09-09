@@ -21274,10 +21274,17 @@ class Purchase_model extends App_Model
             unset($data['custom_fields']);
         }
 
+        $data['project_id'] = get_default_project();
+
         $newbillitems = [];
         if (isset($data['newbillitems'])) {
             $newbillitems = $data['newbillitems'];
             unset($data['newbillitems']);
+        }
+
+        if (isset($data['save_and_send'])) {
+            $save_and_send = $data['save_and_send'];
+            unset($data['save_and_send']);
         }
         
         $this->db->insert(db_prefix() . 'pur_bills', $data);
@@ -21348,6 +21355,10 @@ class Purchase_model extends App_Model
                         }
                     }
                 }
+            }
+
+            if(isset($save_and_send)) {
+                $this->send_bill_bifurcation_approve(['rel_id' => $insert_id]);
             }
 
             return $insert_id;
@@ -21493,6 +21504,11 @@ class Purchase_model extends App_Model
             unset($data['newbillitems']);
         }
 
+        if (isset($data['save_and_send'])) {
+            $save_and_send = $data['save_and_send'];
+            unset($data['save_and_send']);
+        }
+
         if (count($new_order) > 0) {
             foreach ($new_order as $key => $rqd) {
 
@@ -21627,6 +21643,10 @@ class Purchase_model extends App_Model
 
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'pur_bills', $total);
+
+        if(isset($save_and_send)) {
+            $this->send_bill_bifurcation_approve(['rel_id' => $id]);
+        }
 
         // $this->update_pur_invoice_status($id);
 
@@ -24643,5 +24663,107 @@ class Purchase_model extends App_Model
         $html .= '</div>'; // modal
 
         return $html;
+    }
+
+    public function get_list_pur_bills_approval_details($rel_id)
+    {
+        $this->db->select('*');
+        $this->db->where('rel_id', $rel_id);
+        return $this->db->get(db_prefix() . 'pur_bills_approval_details')->result_array();
+    }
+
+    public function check_pur_bills_approval_details($rel_id)
+    {
+        $this->db->where('rel_id', $rel_id);
+        $approve_status = $this->db->get(db_prefix() . 'pur_bills_approval_details')->result_array();
+        if (count($approve_status) > 0) {
+            foreach ($approve_status as $value) {
+                if ($value['staffid'] == get_staff_user_id()) {
+                    if ($value['approve'] == -1) {
+                        return 'reject';
+                    }
+                    if ($value['approve'] == 0) {
+                        $value['staffid'] = explode(', ', $value['staffid']);
+                        return $value;
+                    }
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public function get_pur_bills_staff_sign($rel_id)
+    {
+        $this->db->select('*');
+
+        $this->db->where('rel_id', $rel_id);
+        $this->db->where('action', 'sign');
+        $approve_status = $this->db->get(db_prefix() . 'pur_bills_approval_details')->result_array();
+        if (isset($approve_status)) {
+            $array_return = [];
+            foreach ($approve_status as $key => $value) {
+                array_push($array_return, $value['staffid']);
+            }
+            return $array_return;
+        }
+        return [];
+    }
+
+    public function send_bill_bifurcation_approve($data)
+    {
+        if (!isset($data['status'])) {
+            $data['status'] = '';
+        }
+        $date_send = date('Y-m-d H:i:s');
+        $sender = get_staff_user_id();
+        $project = 0;
+        $rel_name = 'bill_bifurcation';
+        $module = $this->get_pur_bill($data['rel_id']);
+        $data_new = $this->check_approval_setting($module->project_id, $rel_name, 1);
+        foreach ($data_new as $key => $value) {
+            $row = [];
+            $row['action'] = 'approve';
+            $row['staffid'] = $value['id'];
+            $row['date_send'] = $date_send;
+            $row['rel_id'] = $data['rel_id'];
+            $row['sender'] = $sender;
+            $this->db->insert('tblpur_bills_approval_details', $row);
+        }
+        return true;
+    }
+
+    public function update_pur_bills_approval_details($id, $data)
+    {
+        $data['date'] = date('Y-m-d H:i:s');
+        $this->db->where('id', $id);
+        $this->db->update(db_prefix() . 'pur_bills_approval_details', $data);
+        if ($this->db->affected_rows() > 0) {
+            return true;
+        }
+        return false;
+    }
+
+    public function update_pur_bills_approve_request($rel_id, $status)
+    {
+        $all_approved = $this->db->query("SELECT COUNT(*) = SUM(approve = 2) AS all_approved FROM tblpur_bills_approval_details WHERE rel_id = '" . $rel_id . "'")->result_array();
+
+        $all_rejected = $this->db->query("SELECT COUNT(*) = SUM(approve = 3) AS all_rejected FROM tblpur_bills_approval_details WHERE rel_id = '" . $rel_id . "'")->result_array();
+
+        if (!empty($all_approved)) {
+            if ($all_approved[0]['all_approved'] == 1) {
+                $this->db->where('id', $rel_id);
+                $this->db->update(db_prefix() . 'pur_bills', ['approve_status' => 2]);
+            }
+        }
+
+        if (!empty($all_rejected)) {
+            if ($all_rejected[0]['all_rejected'] == 1) {
+                $this->db->where('id', $rel_id);
+                $this->db->update(db_prefix() . 'pur_bills', ['approve_status' => 3]);
+            }
+        }
+
+        return true;
     }
 }

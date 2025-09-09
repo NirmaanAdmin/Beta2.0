@@ -339,7 +339,9 @@
 		      			</div>
 
 		      			<div class="btn-bottom-toolbar text-right">
-		      				
+		      				<?php if (count($list_approve_status) == 0) { ?>
+		                      <input type="submit" name="save_and_send" class="btn-tr save_detail btn btn-info mleft10 transaction-submit" value="Save & Send" />
+		                    <?php } ?>
 		      				<button type="button" class="btn-tr save_detail btn btn-info mleft10 transaction-submit">
 		      					<?php echo _l('submit'); ?>
 		      				</button>
@@ -356,6 +358,112 @@
 		    <?php echo form_close(); ?>
 		  </div>
 		</div>
+
+		<?php if (count($list_approve_status) > 0) { ?>
+	      <div class="row">
+	        <div class="col-md-12">
+	          <div class="panel_s">
+	            <div class="panel-body">
+	              <div class="project-overview-right">
+	                <div class="row">
+	                  <div class="col-md-12 project-overview-expenses-finance">
+	                    <?php
+	                    $this->load->model('staff_model');
+	                    $enter_charge_code = 0;
+	                    foreach ($list_approve_status as $value) {
+	                      $value['staffid'] = explode(', ', $value['staffid'] ?? '');
+
+	                      if ($value['action'] == 'sign') { ?>
+	                        <div class="col-md-4 apr_div">
+	                          <p class="text-uppercase text-muted no-mtop bold">
+	                            <?php
+	                            $staff_name = '';
+	                            $st = _l('status_0');
+	                            $color = 'warning';
+	                            foreach ($value['staffid'] as $key => $val) {
+	                              if ($staff_name != '') {
+	                                $staff_name .= ' or ';
+	                              }
+	                              $staff_name .= $this->staff_model->get($val)->firstname;
+	                            }
+	                            echo pur_html_entity_decode($staff_name);
+	                            ?>
+	                          </p>
+	                          <?php if ($value['approve'] == 2) {
+	                          ?>
+	                            <img src="<?php echo site_url(PURCHASE_PATH . 'pur_order/signature/' . $estimate->id . '/signature_' . $value['id'] . '.png'); ?>" class="img_style">
+	                            <br><br>
+	                            <p class="bold text-center text-success"><?php echo _l('signed') . ' ' . _dt($value['date']); ?></p>
+	                          <?php } ?>
+	                        </div>
+	                      <?php } else { ?>
+	                        <div class="col-md-4 apr_div">
+	                          <p class="text-uppercase text-muted no-mtop bold">
+	                            <?php
+	                            $staff_name = '';
+	                            foreach ($value['staffid'] as $key => $val) {
+	                              if ($staff_name != '') {
+	                                $staff_name .= ' or ';
+	                              }
+	                              $staff_name .= $this->staff_model->get($val)->firstname;
+	                            }
+	                            echo pur_html_entity_decode($staff_name);
+	                            ?>
+	                          </p>
+
+	                          <?php if ($value['approve'] == 2) {
+	                          ?>
+	                            <?php if ($value['approve_by_admin'] == 1) { ?>
+	                              <img src="<?php echo site_url(PURCHASE_PATH . 'approval/approved_by_admin.png'); ?>" class="img_style">
+	                            <?php } else { ?>
+	                              <img src="<?php echo site_url(PURCHASE_PATH . 'approval/approved.png'); ?>" class="img_style">
+	                            <?php } ?>
+	                          <?php } elseif ($value['approve'] == 3) { ?>
+	                            <img src="<?php echo site_url(PURCHASE_PATH . 'approval/rejected.png'); ?>" class="img_style">
+	                          <?php } ?>
+	                          <br><br>
+	                          <p><?php echo pur_html_entity_decode($value['note']) ?></p>
+	                          <p class="bold text-center text-<?php if ($value['approve'] == 2) {
+	                                                            echo 'success';
+	                                                          } elseif ($value['approve'] == 3) {
+	                                                            echo 'danger';
+	                                                          } ?>"><?php echo _dt($value['date']); ?>
+	                          </p>
+
+	                          <?php
+	                          if (isset($check_approve_status['staffid'])) {
+	                            if (in_array(get_staff_user_id(), $check_approve_status['staffid']) && !in_array(get_staff_user_id(), $get_staff_sign) && $value['staffid'] == $check_approve_status['staffid']) { ?>
+	                              <div class="btn-group">
+	                                <a href="#" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><?php echo _l('approve'); ?><span class="caret"></span></a>
+
+	                                <ul class="dropdown-menu dropdown-menu-right ul_style" style="width: max-content;">
+	                                  <li>
+	                                    <div class="col-md-12">
+	                                      <?php echo render_textarea('reason', 'reason'); ?>
+	                                    </div>
+	                                  </li>
+	                                  <li>
+	                                    <div class="row text-right col-md-12">
+	                                      <a href="#" data-loading-text="<?php echo _l('wait_text'); ?>" onclick="approve_bill_bifurcation_request(<?php echo pur_html_entity_decode($pur_bill->id); ?>); return false;" class="btn btn-success mright15"><?php echo _l('approve'); ?></a>
+	                                      <a href="#" data-loading-text="<?php echo _l('wait_text'); ?>" onclick="deny_bill_bifurcation_request(<?php echo pur_html_entity_decode($pur_bill->id); ?>); return false;" class="btn btn-warning"><?php echo _l('deny'); ?></a>
+	                                    </div>
+	                                  </li>
+	                                </ul>
+	                              </div>
+	                          <?php }
+	                          } ?>
+	                        </div>
+	                    <?php }
+	                    } ?>
+	                  </div>
+	                </div>
+	              </div>
+	            </div>
+	          </div>
+	        </div>
+	      </div>
+	    <?php } ?>
+    
 	</div>
 
 	<?php init_tail(); ?>

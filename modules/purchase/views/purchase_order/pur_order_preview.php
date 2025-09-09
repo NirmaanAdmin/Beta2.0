@@ -1047,6 +1047,7 @@ if ($estimate->currency != 0) {
                      <th><?php echo _l('Bill Code'); ?></th>
                      <th><?php echo _l('Amount'); ?></th>
                      <th><?php echo _l('Bill Date'); ?></th>
+                     <th><?php echo _l('approval_status'); ?></th>
                      <th><?php echo _l('options'); ?></th>
                   </thead>
                   <tbody></tbody>
@@ -1336,4 +1337,22 @@ if ($estimate->currency != 0) {
    }
    fnServerParams = {}
    initDataTable('.table-po-bills', admin_url + 'purchase/table_po_bills/'+po_id, false, false, fnServerParams, [1,'desc']);
+
+   function send_bill_bifurcation_approve(id){
+     "use strict";
+     var data = {};
+     data.rel_id = id;
+     $("body").append('<div class="dt-loader"></div>');
+       $.post(admin_url + 'purchase/send_bill_bifurcation_approve', data).done(function(response){
+           response = JSON.parse(response);
+           $("body").find('.dt-loader').remove();
+           if (response.success === true || response.success == 'true') {
+               alert_float('success', response.message);
+               window.location.reload();
+           }else{
+             alert_float('warning', response.message);
+               window.location.reload();
+           }
+       });
+   }
 </script>

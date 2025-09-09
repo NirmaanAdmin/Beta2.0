@@ -15081,6 +15081,9 @@ class purchase extends AdminController
 
         $data['pur_bill_row_template'] = $pur_bill_row_template;
         $data['pur_bill_row_model'] = $pur_bill_row_model;
+        $data['list_approve_status'] = array();
+        $data['check_approve_status'] = array();
+        $data['get_staff_sign'] = array();
 
         $data['ajaxItems'] = false;
         if (total_rows(db_prefix() . 'items') <= ajax_on_total_items()) {
@@ -15148,6 +15151,9 @@ class purchase extends AdminController
 
         $data['pur_bill_row_template'] = $pur_bill_row_template;
         $data['pur_bill_row_model'] = $pur_bill_row_model;
+        $data['list_approve_status'] = $this->purchase_model->get_list_pur_bills_approval_details($id);
+        $data['check_approve_status'] = $this->purchase_model->check_pur_bills_approval_details($id);
+        $data['get_staff_sign'] = $this->purchase_model->get_pur_bills_staff_sign($id);
 
         $data['ajaxItems'] = false;
         if (total_rows(db_prefix() . 'items') <= ajax_on_total_items()) {
@@ -16593,5 +16599,66 @@ class purchase extends AdminController
     {
         $this->app->get_table_data(module_views_path('purchase', 'purchase_order/table_po_bills'),
             ['po_id' => $po_id]);
+    }
+
+    public function send_bill_bifurcation_approve()
+    {
+        $data = $this->input->post();
+        $message = 'Send request approval fail';
+        $success = $this->purchase_model->send_bill_bifurcation_approve($data);
+        if ($success === true) {
+            $message = 'Send request approval success';
+            $data_new = [];
+            $data_new['send_mail_approve'] = $data;
+            $this->session->set_userdata($data_new);
+        } elseif ($success === false) {
+            $message = _l('no_matching_process_found');
+            $success = false;
+        } else {
+            $message = _l('could_not_find_approver_with', _l($success));
+            $success = false;
+        }
+        echo json_encode([
+            'success' => $success,
+            'message' => $message,
+        ]);
+        die;
+    }
+
+    public function bill_bifurcation_request()
+    {
+        $data = $this->input->post();
+        $data['staff_approve'] = get_staff_user_id();
+        $success = false;
+
+        $check_approve_status = $this->purchase_model->check_pur_bills_approval_details($data['rel_id']);
+        if (isset($check_approve_status)) {
+            if (isset($data['approve']) && in_array(get_staff_user_id(), $check_approve_status['staffid'])) {
+                $success = $this->purchase_model->update_pur_bills_approval_details($check_approve_status['id'], $data);
+                $message = _l('approved_successfully');
+
+                if ($success) {
+                    if ($data['approve'] == 2) {
+                        $message = _l('approved_successfully');
+                        $check_approve_status = $this->purchase_model->check_pur_bills_approval_details($data['rel_id']);
+                        if ($check_approve_status === true) {
+                            $this->purchase_model->update_pur_bills_approve_request($data['rel_id'], 2);
+                        }
+                    } else {
+                        $message = _l('rejected_successfully');
+                        $this->purchase_model->update_pur_bills_approve_request($data['rel_id'], '3');
+                    }
+                }
+            }
+        }
+
+        $data_new = [];
+        $data_new['send_mail_approve'] = $data;
+        $this->session->set_userdata($data_new);
+        echo json_encode([
+            'success' => $success,
+            'message' => $message,
+        ]);
+        die();
     }
 }
