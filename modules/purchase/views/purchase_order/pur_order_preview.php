@@ -1041,7 +1041,7 @@ if ($estimate->currency != 0) {
 
                </div>
                <div class="clearfix"></div>
-               <table class="table dt-table">
+               <table class="table table-po-bills scroll-responsive">
                   <thead>
                      <th>#</th>
                      <th><?php echo _l('Bill Code'); ?></th>
@@ -1049,31 +1049,7 @@ if ($estimate->currency != 0) {
                      <th><?php echo _l('Bill Date'); ?></th>
                      <th><?php echo _l('options'); ?></th>
                   </thead>
-                  <tbody>
-                     <?php $sr= 1; foreach ($bills_data as $bill) { ?>
-                        <?php
-                        $base_currency = $base_currency;
-                        $bill_currency_id = get_bill_currency_id($bill['pur_bill']);
-                        if ($bill_currency_id != 0) {
-                           $base_currency = pur_get_currency_by_id($bill_currency_id);
-                        }
-                        ?>
-                        <tr>
-                           <td><?php echo $sr++; ?></td>
-                           <td><?php echo $bill['bill_number']; ?></td>
-                           <td><?php echo app_format_money($bill['total'], $base_currency->symbol); ?></td>
-                           <td><?php echo  date('d M, Y', strtotime($bill['invoice_date'])); ?></td>
-                           <td>
-                              <?php if (has_permission('purchase_invoices', '', 'edit') || is_admin()) { ?>
-                                 <a href="<?php echo admin_url('purchase/edit_pur_bills/' . $bill['id']); ?>" target="_blank" class="btn btn-default btn-icon" data-toggle="tooltip" data-placement="top" title="<?php echo _l('edit'); ?>"><i class="fa fa-pencil-square "></i></a>
-                              <?php } ?>
-                              <?php if (has_permission('purchase_invoices', '', 'delete') || is_admin()) { ?>
-                                 <a href="<?php echo admin_url('purchase/delete_bill/' . $bill['id'] . '/' . $estimate->id); ?>" class="btn btn-danger btn-icon _delete"><i class="fa fa-remove"></i></a>
-                              <?php } ?>
-                           </td>
-                        </tr>
-                     <?php } ?>
-                  </tbody>
+                  <tbody></tbody>
                </table>
             </div>
 
@@ -1352,4 +1328,12 @@ if ($estimate->currency != 0) {
       "use strict";
       $('._project_file').modal('hide');
    }
+
+   var table_po_bills = $('.table-po-bills');
+   var po_id = <?php echo $estimate->id; ?>;
+   if ($.fn.DataTable.isDataTable('.table-po-bills')) {
+      $('.table-po-bills').DataTable().destroy();
+   }
+   fnServerParams = {}
+   initDataTable('.table-po-bills', admin_url + 'purchase/table_po_bills/'+po_id, false, false, fnServerParams, [1,'desc']);
 </script>

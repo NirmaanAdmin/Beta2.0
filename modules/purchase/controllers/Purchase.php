@@ -16588,4 +16588,10 @@ class purchase extends AdminController
         }
         redirect(admin_url('purchase/list_payment_certificate'));
     }
+
+    public function table_po_bills($po_id)
+    {
+        $this->app->get_table_data(module_views_path('purchase', 'purchase_order/table_po_bills'),
+            ['po_id' => $po_id]);
+    }
 }
