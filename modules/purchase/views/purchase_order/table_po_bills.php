@@ -62,7 +62,7 @@ foreach ($rResult as $key => $aRow) {
             <i class="fa fa-pencil-square"></i></a> ';
     }
     if (has_permission('purchase_invoices', '', 'delete') || is_admin()) {
-        $actions .= '<a href="' . admin_url('purchase/delete_bill/' . $aRow['id']) . '" 
+        $actions .= '<a href="' . admin_url('purchase/delete_bill/' . $aRow['id']) . '/'.$po_id.'" 
             class="btn btn-danger btn-icon _delete" 
             data-toggle="tooltip" 
             data-placement="top" 

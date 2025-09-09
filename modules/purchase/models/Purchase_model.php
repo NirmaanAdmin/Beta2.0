@@ -21752,7 +21752,21 @@ class Purchase_model extends App_Model
         }
 
         $this->db->where('pur_bill', (int)$bill_id);
+        $pur_bill_details = $this->db->get(db_prefix() . 'pur_bill_details')->result_array();
+        if (!empty($pur_bill_details)) {
+            $bill_item_ids = array_column($pur_bill_details, 'id');
+            if (!empty($bill_item_ids)) {
+                $bill_item_ids = array_map('intval', $bill_item_ids);
+                $this->db->where_in('bill_item_id', $bill_item_ids);
+                $this->db->delete(db_prefix() . 'pur_bills_bifurcation');
+            }
+        }
+        
+        $this->db->where('pur_bill', (int)$bill_id);
         $this->db->delete(db_prefix() . 'pur_bill_details');
+
+        $this->db->where('rel_id', (int)$bill_id);
+        $this->db->delete(db_prefix() . 'pur_bills_approval_details');
 
         $this->db->where('id', (int)$bill_id);
         $result = $this->db->delete(db_prefix() . 'pur_bills');
