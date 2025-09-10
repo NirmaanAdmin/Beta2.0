@@ -972,3 +972,5 @@ $lang['approval_request_sent'] = 'Approval request sent';
 $lang['bill_bifurcation'] = 'Bill Bifurcation';
 $lang['add_bill_bifurcation'] = 'Add Bill Bifurcation';
 $lang['bill_percentage'] = 'Bill Percentage';
+$lang['applied_to_payment_certificate'] = 'Applied to payment certificate';
+$lang['convert_to_payment_certificate'] = 'Convert to payment certificate';

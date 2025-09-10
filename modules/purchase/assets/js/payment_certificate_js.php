@@ -12,9 +12,15 @@
 		"use strict";
 		var po_id = $('input[name="po_id"]').val();
 		var payment_certificate_id = $('input[name="payment_certificate_id"]').val();
+		var url = new URL(window.location.href);
+		var bill_id = url.searchParams.get("bill_id") || null;
 
 		if (po_id != '') {
-			$.post(admin_url + 'purchase/get_po_contract_data/' + po_id + '/' + payment_certificate_id).done(function(response) {
+			$.post(admin_url + 'purchase/get_po_contract_data', {
+            	po_id: po_id,
+            	payment_certificate_id: payment_certificate_id,
+            	bill_id: bill_id
+        	}).done(function(response) {
 				response = JSON.parse(response);
 				$('.po_name').html(response.po_name);
 

@@ -986,9 +986,17 @@ if ($estimate->currency != 0) {
                               <?php } ?>
                            </td>
                            <td>
-                              <a href="<?php echo admin_url('purchase/payment_certificate/' . $estimate->id . '/' . $pay['id']); ?>" target="_blank" class="btn btn-default btn-icon" data-toggle="tooltip" data-placement="top" title="<?php echo _l('view'); ?>"><i class="fa fa-eye "></i></a>
+                              <?php
+                              $payment_certificate_url = '';
+                              if (!empty($pay['po_bill_id'])) {
+                                 $payment_certificate_url = admin_url('purchase/payment_certificate/' . $estimate->id . '/' . $pay['id'] . '?bill_id=' . $pay['po_bill_id']);
+                              } else {
+                                 $payment_certificate_url = admin_url('purchase/payment_certificate/' . $estimate->id . '/' . $pay['id']);
+                              }
+                              ?>
+                              <a href="<?php echo $payment_certificate_url; ?>" target="_blank" class="btn btn-default btn-icon" data-toggle="tooltip" data-placement="top" title="<?php echo _l('view'); ?>"><i class="fa fa-eye "></i></a>
                               <?php if ($pay['approve_status'] == 1) { ?>
-                                 <a href="<?php echo admin_url('purchase/payment_certificate/' . $estimate->id . '/' . $pay['id']); ?>" class="btn btn-default btn-icon" data-toggle="tooltip" data-placement="top" title="<?php echo _l('edit'); ?>"><i class="fa fa-pencil-square "></i></a>
+                                 <a href="<?php echo $payment_certificate_url; ?>" class="btn btn-default btn-icon" data-toggle="tooltip" data-placement="top" title="<?php echo _l('edit'); ?>"><i class="fa fa-pencil-square "></i></a>
                               <?php } ?>
                               <a href="<?php echo admin_url('purchase/delete_payment_certificate/' . $pay['id']); ?>" 
                                  class="btn btn-danger btn-icon delete_payment_cert">
@@ -1048,6 +1056,7 @@ if ($estimate->currency != 0) {
                      <th><?php echo _l('Amount'); ?></th>
                      <th><?php echo _l('Bill Date'); ?></th>
                      <th><?php echo _l('approval_status'); ?></th>
+                     <th><?php echo _l('applied_to_payment_certificate'); ?></th>
                      <th><?php echo _l('options'); ?></th>
                   </thead>
                   <tbody></tbody>
