@@ -1044,23 +1044,25 @@ if ($estimate->currency != 0) {
                   <h4 class="font-medium mbot15 bold text-success"><?php echo _l('bill_for_pur_order') . ' ' . $estimate->pur_order_number; ?></h4>
                </div>
                <div class="col-md-6 padr_div_0">
-
-                  <a href="<?php echo admin_url('purchase/pur_bills/' . $estimate->id . '?type=po'); ?>" class="btn btn-success pull-right" target="_blank"><i class="fa fa-plus"></i><?php echo ' ' . _l('add_bill_bifurcation'); ?></a>
-
+                  <?php if (has_permission('bill_bifurcation', '', 'create') || is_admin()) { ?>
+                     <a href="<?php echo admin_url('purchase/pur_bills/' . $estimate->id . '?type=po'); ?>" class="btn btn-success pull-right" target="_blank"><i class="fa fa-plus"></i><?php echo ' ' . _l('add_bill_bifurcation'); ?></a>
+                  <?php } ?>
                </div>
                <div class="clearfix"></div>
-               <table class="table table-po-bills scroll-responsive">
-                  <thead>
-                     <th>#</th>
-                     <th><?php echo _l('Bill Code'); ?></th>
-                     <th><?php echo _l('Amount'); ?></th>
-                     <th><?php echo _l('Bill Date'); ?></th>
-                     <th><?php echo _l('approval_status'); ?></th>
-                     <th><?php echo _l('applied_to_payment_certificate'); ?></th>
-                     <th><?php echo _l('options'); ?></th>
-                  </thead>
-                  <tbody></tbody>
-               </table>
+               <?php if (has_permission('bill_bifurcation', '', 'view') || is_admin()) { ?>
+                  <table class="table table-po-bills scroll-responsive">
+                     <thead>
+                        <th>#</th>
+                        <th><?php echo _l('Bill Code'); ?></th>
+                        <th><?php echo _l('Amount'); ?></th>
+                        <th><?php echo _l('Bill Date'); ?></th>
+                        <th><?php echo _l('approval_status'); ?></th>
+                        <th><?php echo _l('applied_to_payment_certificate'); ?></th>
+                        <th><?php echo _l('options'); ?></th>
+                     </thead>
+                     <tbody></tbody>
+                  </table>
+               <?php } ?>
             </div>
 
 

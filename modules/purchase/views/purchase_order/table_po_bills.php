@@ -69,7 +69,7 @@ foreach ($rResult as $key => $aRow) {
     }
     $row[] = $applied_to_payment_certificate;
     $actions = '';
-    if (has_permission('purchase_invoices', '', 'edit') || is_admin()) {
+    if (has_permission('bill_bifurcation', '', 'edit') || is_admin()) {
         $actions .= '<a href="' . admin_url('purchase/edit_pur_bills/' . $aRow['id']) . '" 
             target="_blank" 
             class="btn btn-default btn-icon" 
@@ -78,7 +78,7 @@ foreach ($rResult as $key => $aRow) {
             title="' . _l('edit') . '">
             <i class="fa fa-pencil-square"></i></a> ';
     }
-    if (has_permission('purchase_invoices', '', 'delete') || is_admin()) {
+    if (has_permission('bill_bifurcation', '', 'delete') || is_admin()) {
         $actions .= '<a href="' . admin_url('purchase/delete_bill/' . $aRow['id']) . '/'.$po_id.'" 
             class="btn btn-danger btn-icon _delete" 
             data-toggle="tooltip" 
