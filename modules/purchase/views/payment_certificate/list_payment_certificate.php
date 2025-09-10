@@ -239,6 +239,7 @@ $module_name = 'payment_certificate'; ?>
                               'approval_status',
                               'pending_approval',
                               'applied_to_vendor_bill',
+                              'Invoice',
                               _l('options'),
                               'responsible_person',
                               'last_action_by',
@@ -275,6 +276,7 @@ $module_name = 'payment_certificate'; ?>
                               <th><?php echo _l('approval_status'); ?></th>
                               <th><?php echo _l('pending_approval'); ?></th>
                               <th><?php echo _l('applied_to_vendor_bill'); ?></th>
+                              <th><?php echo _l('Invoice'); ?></th>
                               <th><?php echo _l('options'); ?></th>
                               <th><?php echo _l('responsible_person'); ?></th>
                               <th><?php echo _l('last_action_by'); ?></th>

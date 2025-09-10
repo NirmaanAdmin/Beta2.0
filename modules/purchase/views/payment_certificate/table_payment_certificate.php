@@ -35,6 +35,7 @@ $aColumns = [
         WHEN ' . db_prefix() . 'payment_certificate.approve_status = 2 AND ' . db_prefix() . 'payment_certificate.pur_invoice_id IS NULL THEN 1 
         ELSE 3 
      END) as applied_to_vendor_bill',
+    db_prefix() . 'payment_certificate.pur_invoice_id as pur_invoice_id',
     1,
     db_prefix() . 'payment_certificate' . '.responsible_person as responsible_person',
     db_prefix() . 'payment_certificate' . '.last_action as last_action',
@@ -55,6 +56,7 @@ $join = [
     'LEFT JOIN ' . db_prefix() . 'pur_vendor 
     ON ' . db_prefix() . 'pur_vendor.userid = ' . db_prefix() . 'payment_certificate.vendor',
     'LEFT JOIN ' . db_prefix() . 'assets_group ON ' . db_prefix() . 'assets_group.group_id = ' . db_prefix() . 'payment_certificate.group_pur',
+    'LEFT JOIN ' . db_prefix() . 'pur_invoices ON ' . db_prefix() . 'pur_invoices.id = ' . db_prefix() . 'payment_certificate.pur_invoice_id',
     'LEFT JOIN (
         SELECT rel_id, GROUP_CONCAT(staffid) AS pending_approval
         FROM ' . db_prefix() . 'payment_certificate_details
@@ -193,6 +195,7 @@ $result = data_tables_init(
             ELSE NULL 
          END) as project',
          db_prefix() . 'payment_certificate.po_bill_id',
+         db_prefix() . 'pur_invoices.invoice_number',
     ],
     '',
     [],
@@ -341,6 +344,11 @@ foreach ($rResult as $aRow) {
             $_data = $staff_html;
         } elseif ($aColumns[$i] == 'pending_approval') {
             $_data = get_multiple_staff_names($aRow['pending_approval']);
+        } elseif ($aColumns[$i] == 'pur_invoice_id') {
+            $_data = '';
+            if(!empty($aRow['pur_invoice_id'])) {
+                $_data = '<a href="' . admin_url('purchase/purchase_invoice/' . $aRow['pur_invoice_id']) . '" target="_blank">' . $aRow['invoice_number'] . '</a>';
+            }
         } else {
             if (strpos($aColumns[$i], 'date_picker_') !== false) {
                 $_data = (strpos($_data, ' ') !== false ? _dt($_data) : _d($_data));
