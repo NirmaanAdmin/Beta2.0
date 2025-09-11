@@ -114,6 +114,29 @@ if ($withBulkActions === true && $hasPermission) { ?>
       <option value="<?php echo pur_html_entity_decode($y3); ?>"><?php echo _l('year') . ' ' . pur_html_entity_decode($y3); ?></option>
     </select>
   </div>
+  <div class="col-md-3 form-group">
+    <?php
+    $order_tagged_filter = get_module_filter($module_name, 'order_tagged');
+    $order_tagged_filter_val = !empty($order_tagged_filter) ? $order_tagged_filter->filter_value : '';
+    $order_tagged = [
+       ['id' => 1, 'name' => _l('Yes')],
+       ['id' => 2, 'name' => _l('No')]
+    ];
+    ?>
+    <select name="order_tagged" class="selectpicker" data-width="100%" data-none-selected-text="<?php echo _l('Tagged to Order?'); ?>" data-actions-box="true">
+       <option value=""></option>
+       <?php foreach ($order_tagged as $value) { ?>
+          <option value="<?php echo $value['id']; ?>" <?php echo ($order_tagged_filter_val == $value['id']) ? 'selected' : ''; ?>><?php echo $value['name']; ?></option>
+       <?php } ?>
+    </select>
+  </div>
+  <div class="col-md-3 form-group">
+    <?php
+    $order_tagged_detail_filter = get_module_filter($module_name, 'order_tagged_detail');
+    $order_tagged_detail_filter_val = !empty($order_tagged_detail_filter) ? explode(",", $order_tagged_detail_filter->filter_value) : '';
+    echo render_select('order_tagged_detail[]', $order_tagged_detail, array('id', 'name'), '', $order_tagged_detail_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('Order Detail'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
+    ?>
+  </div>
 </div>
 
 <div class="row">

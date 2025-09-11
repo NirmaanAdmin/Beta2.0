@@ -49,6 +49,7 @@ class Expenses extends AdminController
         }
         // Pass the data to the view
         $data['chart_data'] = $chart_data;
+        $data['order_tagged_detail'] = $this->purchase_model->get_order_tagged_detail();
 
         $this->load->view('admin/expenses/manage', $data);
     }
