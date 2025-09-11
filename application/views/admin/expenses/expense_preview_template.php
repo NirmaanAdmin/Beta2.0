@@ -91,8 +91,7 @@
                             data-toggle="tooltip" data-placement="bottom" title="<?php echo _l('expense_edit'); ?>"><i
                                 class="fa-regular fa-pen-to-square"></i></a>
                         <?php } ?>
-                        <a class="btn btn-default btn-with-tooltip" href="#"
-                            onclick="print_expense_information(); return false;" data-toggle="tooltip"
+                        <a class="btn btn-default btn-with-tooltip" href="<?php echo admin_url('expenses/pdf/' . $expense->expenseid . '?print=true'); ?>" target="_blank" data-toggle="tooltip"
                             data-placement="bottom" title="<?php echo _l('print'); ?>">
                             <i class="fa fa-print"></i>
                         </a>
@@ -268,39 +267,44 @@
                             </span>
                         </h4>
 
-                        <?php if (empty($expense->attachment)) { ?>
+                        <?php if (empty($attachments)) { ?>
                         <?php echo form_open('admin/expenses/add_expense_attachment/' . $expense->expenseid, ['class' => 'mtop10 dropzone dropzone-expense-preview dropzone-manual', 'id' => 'expense-receipt-upload']); ?>
                         <div id="dropzoneDragArea" class="dz-default dz-message">
                             <span><?php echo _l('expense_add_edit_attach_receipt'); ?></span>
                         </div>
                         <?php echo form_close(); ?>
                         <?php } else { ?>
-                        <div class="row">
-                            <div class="col-md-10">
-                                <?php
-                                $path = get_upload_path_by_type('expense') . $expense->expenseid . '/' . $expense->attachment;
-                                $is_image = is_image($path);
-                                if ($is_image) {
-                                   echo '<div class="preview_image">';
-                                }
-                                ?>
-                                <a href="<?php echo site_url('download/file/expense/' . $expense->expenseid); ?>" class="display-block mbot5" <?php if ($is_image) { ?> data-lightbox="attachment-expense-<?php echo $expense->expenseid; ?>" <?php } ?>>
-                                   <a name="expense-btn" onclick="preview_expense_btn(this); return false;" id = "<?php echo $expense->expenseid; ?>" href="Javascript:void(0);" class="mbot10 mright5 btn btn-success pull-left" data-toggle="tooltip" title data-original-title="<?php echo _l('preview_file'); ?>"><i class="fa fa-eye"></i></a>
-                                   <?php echo $expense->attachment; ?>
-                                   <?php if ($is_image) { ?>
-                                      <img class="mtop5 hide" src="<?php echo site_url('download/preview_image?path=' . protected_file_url_by_path($path) . '&type=' . $expense->filetype); ?>" style="height: 165px;">
-                                   <?php } ?>
-                                </a>
-                            </div>
+                            <?php
+                            if(!empty($attachments)) { 
+                                foreach ($attachments as $akey => $avalue) { ?>
+                                    <div style="margin-bottom: 10px;">
+                                        <div class="col-md-10">
+                                            <?php
+                                            $path = get_upload_path_by_type('expense') . $expense->expenseid . '/' . $avalue['file_name'];
+                                            $is_image = is_image($path);
+                                            if ($is_image) {
+                                               echo '<div class="preview_image">';
+                                            }
+                                            ?>
+                                            <a href="<?php echo site_url('download/file/expense/' . $avalue['id']); ?>" class="display-block mbot5" <?php if ($is_image) { ?> data-lightbox="attachment-expense-<?php echo $avalue['id']; ?>" <?php } ?>>
+                                               <a name="expense-btn" onclick="preview_expense_btn(this); return false;" id = "<?php echo $avalue['id']; ?>" href="Javascript:void(0);" class="mbot10 mright5 btn btn-success pull-left" data-toggle="tooltip" title data-original-title="<?php echo _l('preview_file'); ?>"><i class="fa fa-eye"></i></a>
+                                               <?php echo $avalue['file_name']; ?>
+                                               <?php if ($is_image) { ?>
+                                                  <img class="mtop5 hide" src="<?php echo site_url('download/preview_image?path=' . protected_file_url_by_path($path) . '&type=' . $avalue['filetype']); ?>" style="height: 165px;">
+                                               <?php } ?>
+                                            </a>
+                                        </div>
 
-                            <?php if ($expense->attachment_added_from == get_staff_user_id() || is_admin()) { ?>
-                                <a class="_delete text-danger" href="<?php echo admin_url('expenses/delete_expense_attachment/' . $expense->expenseid . '/' . 'preview'); ?>" class="text-danger"><i class="fa fa fa-times"></i></a>
-                                <a class="text-danger mleft5" href="<?php echo site_url('download/preview_image?path=' . protected_file_url_by_path($path) . '&type=' . $expense->filetype); ?>"
-                                   download>
-                                   <i class="fa fa-solid fa-download"></i>
-                                </a>
+                                        <?php if ($avalue['staffid'] == get_staff_user_id() || is_admin()) { ?>
+                                            <a class="_delete text-danger" href="<?php echo admin_url('expenses/delete_expense_attachment/' . $avalue['id'] . '/' . 'preview'); ?>" class="text-danger"><i class="fa fa fa-times"></i></a>
+                                            <a class="text-danger mleft5" href="<?php echo site_url('download/preview_image?path=' . protected_file_url_by_path($path) . '&type=' . $avalue['filetype']); ?>"
+                                               download>
+                                               <i class="fa fa-solid fa-download"></i>
+                                            </a>
+                                        <?php } ?>
+                                    </div>
+                                <?php } ?>
                             <?php } ?>
-                        </div>
                         <?php } ?>
                         <?php hooks()->do_action('after_right_panel_expense_preview_template', $expense); ?>
                     </div>
@@ -380,7 +384,7 @@ if ($('#dropzoneDragArea').length > 0) {
     }
     expensePreviewDropzone = new Dropzone("#expense-receipt-upload", appCreateDropzoneOptions({
         clickable: '#dropzoneDragArea',
-        maxFiles: 1,
+        uploadMultiple: true,
         success: function(file, response) {
             init_expense(<?php echo e($expense->expenseid); ?>);
         }

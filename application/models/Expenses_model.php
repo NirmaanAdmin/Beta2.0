@@ -713,23 +713,46 @@ class Expenses_model extends App_Model
     }
 
     /**
-     * Delete Expense attachment
-     * @param  mixed $id expense id
-     * @return boolean
-     */
-    public function delete_expense_attachment($id)
+    * Delete Expense attachment
+    * @param  mixed $rel_id expense id
+    * @param  mixed $attachment_id file id (optional)
+    * @return boolean
+    */
+    public function delete_expense_attachment($rel_id, $attachment_id = '')
     {
-        if (is_dir(get_upload_path_by_type('expense') . $id)) {
-            if (delete_dir(get_upload_path_by_type('expense') . $id)) {
-                $this->db->where('rel_id', $id);
-                $this->db->where('rel_type', 'expense');
-                $this->db->delete(db_prefix() . 'files');
-                log_activity('Expense Receipt Deleted [ExpenseID: ' . $id . ']');
-
+        $path = get_upload_path_by_type('expense') . $rel_id . '/';
+        if (!empty($attachment_id)) {
+            $file = $this->db->where('id', $attachment_id)
+                ->where('rel_type', 'expense')
+                ->get(db_prefix() . 'files')
+                ->row();
+            if ($file) {
+                $file_path = $path . $file->file_name;
+                if (file_exists($file_path)) {
+                    unlink($file_path);
+                }
+                $this->db->where('id', $attachment_id)
+                    ->where('rel_type', 'expense')
+                    ->delete(db_prefix() . 'files');
+                log_activity('Expense Receipt Deleted [ExpenseID: ' . $rel_id . ']');
+                if (is_dir($path) && count(scandir($path)) <= 2) {
+                    rmdir($path);
+                }
                 return true;
             }
-        }
+            return false;
 
+        } else {
+            if (is_dir($path)) {
+                if (delete_dir($path)) {
+                    $this->db->where('rel_id', $rel_id)
+                        ->where('rel_type', 'expense')
+                        ->delete(db_prefix() . 'files');
+                    log_activity('Expense Receipt Deleted [ExpenseID: ' . $rel_id . ']');
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -938,7 +961,7 @@ class Expenses_model extends App_Model
 
     public function get_expense_file($id)
     {
-        $this->db->where('rel_id', $id);
+        $this->db->where('id', $id);
         $this->db->where('rel_type', 'expense');
         $file = $this->db->get(db_prefix() . 'files')->row();
         return $file;
@@ -1234,5 +1257,13 @@ class Expenses_model extends App_Model
     {
         $this->db->where_in('id', $expense_ids);
         return $this->db->get(db_prefix() . 'expenses')->result_array();
+    }
+
+    public function get_all_expense_files($id)
+    {
+        $this->db->where('rel_id', $id);
+        $this->db->where('rel_type', 'expense');
+        $file = $this->db->get(db_prefix() . 'files')->result_array();
+        return $file;
     }
 }

@@ -157,6 +157,7 @@ class Expenses extends AdminController
             $title = _l('add_new', _l('expense'));
         } else {
             $data['expense'] = $this->expenses_model->get($id);
+            $data['attachments'] = $this->expenses_model->get_all_expense_files($id);
 
             if (!$data['expense'] || (staff_cant('view', 'expenses') && $data['expense']->addedfrom != get_staff_user_id())) {
                 blank_page(_l('expense_not_found'));
@@ -387,6 +388,7 @@ class Expenses extends AdminController
         }
 
         $data['expense'] = $expense;
+        $data['attachments'] = $this->expenses_model->get_all_expense_files($id);
         if ($expense->billable == 1) {
             if ($expense->invoiceid !== null) {
                 $this->load->model('invoices_model');
@@ -473,21 +475,21 @@ class Expenses extends AdminController
 
     public function delete_expense_attachment($id, $preview = '')
     {
-        $this->db->where('rel_id', $id);
+        $this->db->where('id', $id);
         $this->db->where('rel_type', 'expense');
         $file = $this->db->get(db_prefix() . 'files')->row();
 
         if ($file->staffid == get_staff_user_id() || is_admin()) {
-            $success = $this->expenses_model->delete_expense_attachment($id);
+            $success = $this->expenses_model->delete_expense_attachment($file->rel_id, $id);
             if ($success) {
                 set_alert('success', _l('deleted', _l('expense_receipt')));
             } else {
                 set_alert('warning', _l('problem_deleting', _l('expense_receipt_lowercase')));
             }
             if ($preview == '') {
-                redirect(admin_url('expenses/expense/' . $id));
+                redirect(admin_url('expenses/expense/' . $file->rel_id));
             } else {
-                redirect(admin_url('expenses/list_expenses/' . $id));
+                redirect(admin_url('expenses/list_expenses/' . $file->rel_id));
             }
         } else {
             access_denied('expenses');

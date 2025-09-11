@@ -22,21 +22,23 @@
                         }
                         ?>
 
-                        <?php if (isset($expense) && $expense->attachment !== '') { ?>
-                            <div class="row">
-                                <div class="col-md-10">
-                                    <i class="<?php echo get_mime_class($expense->filetype); ?>"></i> <a
-                                        href="<?php echo site_url('download/file/expense/' . $expense->expenseid); ?>"><?php echo e($expense->attachment); ?></a>
-                                </div>
-                                <?php if ($expense->attachment_added_from == get_staff_user_id() || is_admin()) { ?>
-                                    <div class="col-md-2 text-right">
-                                        <a href="<?php echo admin_url('expenses/delete_expense_attachment/' . $expense->expenseid); ?>"
-                                            class="text-danger _delete"><i class="fa fa fa-times"></i></a>
+                        <?php if (isset($expense) && !empty($attachments)) {
+                            foreach ($attachments as $akey => $avalue) { ?>
+                                <div class="row" style="margin-bottom: 10px;">
+                                    <div class="col-md-10">
+                                        <i class="<?php echo get_mime_class($avalue['filetype']); ?>"></i> <a
+                                            href="<?php echo site_url('download/file/expense/' . $avalue['id']); ?>"><?php echo e($avalue['file_name']); ?></a>
                                     </div>
-                                <?php } ?>
-                            </div>
+                                    <?php if ($avalue['staffid'] == get_staff_user_id() || is_admin()) { ?>
+                                        <div class="col-md-2 text-right">
+                                            <a href="<?php echo admin_url('expenses/delete_expense_attachment/' . $avalue['id']); ?>"
+                                                class="text-danger _delete"><i class="fa fa fa-times"></i></a>
+                                        </div>
+                                    <?php } ?>
+                                </div>
+                            <?php } ?>
                         <?php } ?>
-                        <?php if (!isset($expense) || (isset($expense) && $expense->attachment == '')) { ?>
+                        <?php if (!isset($expense) || (isset($expense) && empty($attachments))) { ?>
                             <div id="dropzoneDragArea" class="dz-default dz-message">
                                 <span><?php echo _l('expense_add_edit_attach_receipt'); ?></span>
                             </div>
@@ -422,7 +424,8 @@
                 clickable: '#dropzoneDragArea',
                 previewsContainer: '.dropzone-previews',
                 addRemoveLinks: true,
-                maxFiles: 1,
+                uploadMultiple: true,
+                parallelUploads: 9999, 
                 success: function(file, response) {
                     response = JSON.parse(response);
                     if (this.getUploadingFiles().length === 0 && this.getQueuedFiles().length ===

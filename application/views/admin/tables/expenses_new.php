@@ -23,7 +23,7 @@ $aColumns = [
     db_prefix() . 'expenses_categories.name as category_name',
     db_prefix() . 'expenses.amount as amount',
     db_prefix() . 'expenses.expense_name as expense_name',
-    'file_name',
+    2,
     db_prefix() . 'expenses.date as date',
     db_prefix() . 'projects.name as project_name',
     '(CASE WHEN ' . db_prefix() . 'expenses.vbt_id IS NOT NULL THEN 2 ELSE 3 END) as converted',
@@ -53,7 +53,6 @@ $join = [
     'LEFT JOIN ' . db_prefix() . 'clients ON ' . db_prefix() . 'clients.userid = ' . db_prefix() . 'expenses.clientid',
     'JOIN ' . db_prefix() . 'expenses_categories ON ' . db_prefix() . 'expenses_categories.id = ' . db_prefix() . 'expenses.category',
     'LEFT JOIN ' . db_prefix() . 'projects ON ' . db_prefix() . 'projects.id = ' . db_prefix() . 'expenses.project_id',
-    'LEFT JOIN ' . db_prefix() . 'files ON ' . db_prefix() . 'files.rel_id = ' . db_prefix() . 'expenses.id AND rel_type="expense"',
     'LEFT JOIN ' . db_prefix() . 'currencies ON ' . db_prefix() . 'currencies.id = ' . db_prefix() . 'expenses.currency',
     'LEFT JOIN ' . db_prefix() . 'pur_vendor ON ' . db_prefix() . 'pur_vendor.userid = ' . db_prefix() . 'expenses.vendor',
     'LEFT JOIN ' . db_prefix() . 'pur_invoices ON ' . db_prefix() . 'pur_invoices.id = ' . db_prefix() . 'expenses.vbt_id',
@@ -224,7 +223,16 @@ foreach ($rResult as $aRow) {
     }
     $row[] = app_format_money($total, $aRow['currency_name']);
     $row[] = '<a href="' . admin_url('expenses/list_expenses/' . $aRow['id']) . '" onclick="init_expense(' . $aRow['id'] . ');return false;">' . e($aRow['expense_name']) . '</a>';
-    $row[] = !empty($aRow['file_name']) ? '<a href="' . site_url('download/file/expense/' . $aRow['id']) . '">' . e($aRow['file_name']) . '</a>' : '';
+    $expense_files = get_all_expense_files($aRow['id']);
+    if(!empty($expense_files)) {
+        $expense_files_listed = '';
+        foreach ($expense_files as $ekey => $evalue) {
+            $expense_files_listed .= '<a href="' . site_url('download/file/expense/' . $evalue['id']) . '">' . e($evalue['file_name']) . '</a><br>';
+        }
+        $row[] = $expense_files_listed;
+    } else {
+        $row[] = '';
+    }
     $row[] = date('d M, Y', strtotime($aRow['date']));
     $row[] = '<a href="' . admin_url('projects/view/' . $aRow['project_id']) . '">' . e($aRow['project_name']) . '</a>';
 

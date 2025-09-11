@@ -219,7 +219,7 @@ class Download extends App_Controller
             if (!is_staff_logged_in()) {
                 show_404();
             }
-            $this->db->where('rel_id', $attachmentid);
+            $this->db->where('id', $attachmentid);
             $this->db->where('rel_type', 'expense');
             $file = $this->db->get(db_prefix() . 'files')->row();
             $path = get_upload_path_by_type('expense') . $file->rel_id . '/' . $file->file_name;

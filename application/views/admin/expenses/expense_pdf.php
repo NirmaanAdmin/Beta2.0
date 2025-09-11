@@ -70,8 +70,14 @@ if (!empty($expense->note)) {
     $html .= '<p><strong>' . _l('expense_note') . '</strong> ' . $expense->note . '</p>';
 }
 
-if (!empty($expense->attachment)) {
-    $html .= '<p><strong>' . _l('expense_receipt') . ':</strong> ' . $expense->attachment . '</p>';
+$expense_files = get_all_expense_files($expense->id);
+
+if (!empty($expense_files)) {
+    $html .= '<p><strong>' . _l('expense_receipt') . ':</strong>';
+    foreach ($expense_files as $ekey => $evalue) {
+        $html .= '<br>'.$evalue['file_name'];
+    }
+    $html .= '</p>';
 }
 
 $custom_fields = get_custom_fields('expenses');

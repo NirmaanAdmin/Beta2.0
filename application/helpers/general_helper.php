@@ -1151,3 +1151,11 @@ function get_staff_department_name($department)
     }
     return '';
 }
+
+function get_all_expense_files($id)
+{
+    $CI = &get_instance();
+    $CI->db->where('rel_id', $id);
+    $CI->db->where('rel_type', 'expense');
+    return $CI->db->get(db_prefix() . 'files')->result_array();
+}

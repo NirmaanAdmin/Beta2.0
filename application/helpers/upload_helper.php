@@ -1226,44 +1226,73 @@ function handle_client_attachments_upload($id, $customer_upload = false)
     return (bool) $totalUploaded;
 }
 /**
- * Handles upload for expenses receipt
+ * Handles upload for expenses receipt (supports multiple files)
  * @param  mixed $id expense id
  * @return void
  */
 function handle_expense_attachments($id)
 {
-    if (isset($_FILES['file']) && _perfex_upload_error($_FILES['file']['error'])) {
-        header('HTTP/1.0 400 Bad error');
-        echo _perfex_upload_error($_FILES['file']['error']);
-        die;
-    }
-
-    $hookData = hooks()->apply_filters('before_handle_expense_attachment', [
-        'expense_id' => $id,
-        'index_name' => 'file',
-        'handled_externally' => false, // e.g. module upload to s3
-        'handled_externally_successfully' => false,
-        'files' => $_FILES
-    ]);
-
-    if ($hookData['handled_externally']) {
-        return $hookData['handled_externally_successfully'];
-    }
-
-
-    $path = get_upload_path_by_type('expense') . $id . '/';
     $CI   = &get_instance();
+    $path = get_upload_path_by_type('expense') . $id . '/';
 
-    if (isset($_FILES['file']['name'])) {
-        hooks()->do_action('before_upload_expense_attachment', $id);
-        // Get the temp file path
+    // Validate if files exist
+    if (isset($_FILES['file']) && is_array($_FILES['file']['name'])) {
+
+        // Loop through each file
+        for ($i = 0; $i < count($_FILES['file']['name']); $i++) {
+
+            if (_perfex_upload_error($_FILES['file']['error'][$i])) {
+                continue; // Skip files with errors
+            }
+
+            $hookData = hooks()->apply_filters('before_handle_expense_attachment', [
+                'expense_id' => $id,
+                'index_name' => 'file',
+                'handled_externally' => false, // e.g. module upload to s3
+                'handled_externally_successfully' => false,
+                'files' => $_FILES
+            ]);
+
+            if ($hookData['handled_externally']) {
+                return $hookData['handled_externally_successfully'];
+            }
+
+            hooks()->do_action('before_upload_expense_attachment', $id);
+
+            $tmpFilePath = $_FILES['file']['tmp_name'][$i];
+            $filename    = $_FILES['file']['name'][$i];
+
+            if (!empty($tmpFilePath) && $tmpFilePath != '') {
+                _maybe_create_upload_path($path);
+                $newFilePath = $path . $filename;
+
+                if (move_uploaded_file($tmpFilePath, $newFilePath)) {
+                    $attachment   = [];
+                    $attachment[] = [
+                        'file_name' => $filename,
+                        'filetype'  => $_FILES['file']['type'][$i],
+                    ];
+
+                    $CI->misc_model->add_attachment_to_database($id, 'expense', $attachment);
+                }
+            }
+        }
+
+    } elseif (isset($_FILES['file']['name'])) {
+        // ✅ Fallback: single file upload (for backward compatibility)
+        if (_perfex_upload_error($_FILES['file']['error'])) {
+            header('HTTP/1.0 400 Bad error');
+            echo _perfex_upload_error($_FILES['file']['error']);
+            die;
+        }
+
         $tmpFilePath = $_FILES['file']['tmp_name'];
-        // Make sure we have a filepath
+        $filename    = $_FILES['file']['name'];
+
         if (!empty($tmpFilePath) && $tmpFilePath != '') {
             _maybe_create_upload_path($path);
-            $filename    = $_FILES['file']['name'];
             $newFilePath = $path . $filename;
-            // Upload the file into the temp dir
+
             if (move_uploaded_file($tmpFilePath, $newFilePath)) {
                 $attachment   = [];
                 $attachment[] = [
