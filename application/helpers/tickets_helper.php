@@ -360,7 +360,7 @@ function can_staff_edit_ticket_message()
     return get_option('allow_non_admin_members_to_edit_ticket_messages') == '1';
 }
 
-function get_all_discipline()
+function get_all_discipline($id = '')
 {
     $result = array();
     $result = [
@@ -433,6 +433,14 @@ function get_all_discipline()
             'name' => 'Kitchen Equipment',
         ],
     ];
+    if ($id !== '' && is_numeric($id)) {
+        foreach ($result as $discipline) {
+            if ($discipline['id'] == $id) {
+                return $discipline['name'];
+            }
+        }
+        return null;
+    }
     return $result;
 }
 

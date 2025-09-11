@@ -811,6 +811,11 @@ $lang['clients_ticket_single_status']              = 'Status:';
 $lang['clients_ticket_single_priority']            = 'Priority: %s';
 $lang['clients_ticket_single_add_reply_btn']       = 'Add Reply';
 $lang['clients_ticket_single_add_reply_heading']   = 'Add reply to this RFI';
+$lang['clients_ticket_single_project']             = 'Project: %s';
+$lang['clients_ticket_single_due_date']            = 'Due Date: %s';
+$lang['clients_ticket_single_reference_drawings']  = 'Reference drawings: %s';
+$lang['clients_ticket_single_area']  			   = 'Area: %s';
+$lang['clients_ticket_single_discipline']  		   = 'Discipline: %s';
 
 # Login
 $lang['clients_login_heading_no_register'] = 'Vendor login';

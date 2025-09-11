@@ -22,6 +22,9 @@
                         </h4>
                         <div class="tw-divide-solid tw-divide-y tw-divide-neutral-100 tw-mt-4 [&>p:last-child]:tw-pb-0">
                             <p class="tw-py-2.5 tw-mb-0 tw-text-neutral-500">
+                                <?php echo _l('clients_ticket_single_project', '<span class="tw-font-medium tw-text-neutral-700">' . get_project_name_by_id($ticket->project_id) . '</span>'); ?>
+                            </p>
+                            <p class="tw-py-2.5 tw-mb-0 tw-text-neutral-500">
                                 <?php echo _l('clients_ticket_single_department', '<span class="tw-font-medium tw-text-neutral-700">' . e($ticket->department_name) . '</span>'); ?>
                             </p>
                             <p class="tw-py-2.5 tw-mb-0 tw-text-neutral-500">
@@ -97,6 +100,18 @@
                                     <span class="tw-font-medium tw-text-neutral-700"><?php echo $cfValue; ?></span>
                                 </p>
                             <?php } ?>
+                            <p class="tw-py-2.5 tw-mb-0 tw-text-neutral-500">
+                                <?php echo _l('clients_ticket_single_due_date', '<span class="tw-font-medium tw-text-neutral-700"></span>'); ?>
+                            </p>
+                            <p class="tw-py-2.5 tw-mb-0 tw-text-neutral-500">
+                                <?php echo _l('clients_ticket_single_reference_drawings', '<span class="tw-font-medium tw-text-neutral-700">'.$ticket->ref_drawing.'</span>'); ?>
+                            </p>
+                            <p class="tw-py-2.5 tw-mb-0 tw-text-neutral-500">
+                                <?php echo _l('clients_ticket_single_area', '<span class="tw-font-medium tw-text-neutral-700">'.get_area_name_by_id($ticket->area).'</span>'); ?>
+                            </p>
+                            <p class="tw-py-2.5 tw-mb-0 tw-text-neutral-500">
+                                <?php echo _l('clients_ticket_single_discipline', '<span class="tw-font-medium tw-text-neutral-700">'.get_all_discipline($ticket->discipline).'</span>'); ?>
+                            </p>
                         </div>
                     </div>
                 </div>
