@@ -77,35 +77,6 @@
                     <div class="visible-xs">
                         <div class="mtop10"></div>
                     </div>
-                    <?php if ($expense->billable == 1 && $expense->invoiceid == null) { ?>
-                    <?php if (staff_can('create',  'invoices')) { ?>
-                    <div class="row">
-                        <?php 
-                        $invoices = get_all_applied_invoices();
-                        if(!empty($invoices)) { ?>
-                            <div class="col-md-6">
-                                <select name="applied_to_invoice" id="applied_to_invoice" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('applied_to_invoice'); ?>">
-                                      <option value=""></option>
-                                      <?php
-                                      foreach ($invoices as $i) { ?>
-                                        <option value="<?php echo $i['id']; ?>"><?php echo e(format_invoice_number($i['id'])). " (".$i['title'].")"; ?></option>
-                                      <?php } ?>
-                                </select>
-                            </div>
-                        <?php } ?>
-                        <div class="col-md-6">
-                            <button type="button" class="btn btn-success pull-right mleft5 expense_convert_btn"
-                                data-id="<?php echo e($expense->expenseid); ?>" data-toggle="modal"
-                                data-target="#expense_convert_helper_modal">
-                                <?php echo _l('expense_convert_to_invoice'); ?>
-                            </button>
-                        </div>
-                    </div>
-                    <?php } ?>
-                    <?php } elseif ($expense->invoiceid != null) { ?>
-                    <a href="<?php echo admin_url('invoices/list_invoices/' . $expense->invoiceid); ?>"
-                        class="btn btn-primary mleft10 pull-right"><?php echo e(format_invoice_number($invoice->id)). " (".$invoice->title.")"; ?></a>
-                    <?php } ?>
                     <div class="pull-right">
                         <?php if(empty($expense->vbt_id)) { ?>
                             <a href="<?php echo admin_url('expenses/convert_pur_invoice_from_expense/' . $expense->id); ?>" class="btn btn-info convert-pur-invoice" data-url="<?php echo admin_url('expenses/convert_pur_invoice_from_expense/' . $expense->id); ?>">
@@ -228,19 +199,6 @@
                         ?>
                         <p><span class="bold"><?php echo _l('expense_date'); ?></span> <span
                                 class="text-muted"><?php echo e(_d($expense->date)); ?></span></p>
-                        <?php if ($expense->billable == 1) {
-                            if ($expense->invoiceid == null) {
-                                echo '<span class="text-danger">' . _l('expense_invoice_not_created') . '</span>';
-                            } else {
-                                echo '<span class="bold">' . e(format_invoice_number($invoice->id)) . ' - </span>';
-                                if ($invoice->status == 2) {
-                                    echo '<span class="text-success">' . _l('expense_billed') . '</span>';
-                                } else {
-                                    echo '<span class="text-danger">' . _l('expense_not_billed') . '</span>';
-                                }
-                            }
-                        } ?>
-                        </p>
                         <?php if (!empty($expense->reference_no)) { ?>
                             <p class="bold mbot15"><?php echo _l('expense_ref_noe'); ?> 
                                 <span class="text-muted">

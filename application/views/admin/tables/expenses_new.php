@@ -140,9 +140,6 @@ foreach ($rResult as $aRow) {
 
     $categoryOutput = '<a href="' . admin_url('expenses/list_expenses/' . $aRow['id']) . '" onclick="init_expense(' . $aRow['id'] . ');return false;">' . e($aRow['category_name']) . '</a>';
 
-    if ($aRow['billable'] == 1) {
-        $categoryOutput .= $aRow['invoiceid'] == null ? '<p class="text-danger">' . _l('expense_list_unbilled') . '</p>' : '<p class="text-success">' . _l('expense_list_invoice') . '</p>';
-    }
     if ($aRow['recurring'] == 1) {
         $categoryOutput .= '<span class="label label-primary"> ' . _l('expense_recurring_indicator') . '</span>';
     }
