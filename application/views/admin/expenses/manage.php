@@ -135,7 +135,7 @@
             <div class="panel_s">
               <div class="panel-body">
                 <div class="clearfix"></div>
-                <div class="btn-group show_hide_columns" id="show_hide_columns" style="position: absolute !important; z-index: 999; left: 387px !important; top: 117px;">
+                <div class="btn-group show_hide_columns hide" id="show_hide_columns" style="position: absolute !important; z-index: 999; left: 387px !important; top: 117px;">
                   <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding: 4px 7px;">
                     <i class="fa fa-cog"></i> <?php  ?> <span class="caret"></span>
                   </button>

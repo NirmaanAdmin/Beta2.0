@@ -19,16 +19,16 @@ $aColumns = [
     '1',
     db_prefix() . 'expenses.id as id',
     db_prefix() . 'expenses_categories.name as category_name',
-    'amount',
-    'expense_name',
+    db_prefix() . 'expenses.amount as amount',
+    db_prefix() . 'expenses.expense_name as expense_name',
     'file_name',
-    'date',
+    db_prefix() . 'expenses.date as date',
     db_prefix() . 'projects.name as project_name',
     '(CASE WHEN ' . db_prefix() . 'expenses.vbt_id IS NOT NULL THEN 2 ELSE 3 END) as converted',
-    'invoiceid',
-    'reference_no',
-    'paymentmode',
-    'vendor',
+    db_prefix() . 'expenses.vbt_id as vbt_id',
+    db_prefix() . 'expenses.reference_no as reference_no',
+    db_prefix() . 'expenses.paymentmode as paymentmode',
+    db_prefix() . 'expenses.vendor as vendor',
     1,
 ];
 
@@ -40,7 +40,7 @@ foreach ($custom_fields as $key => $field) {
     $aColumns[] = '(SELECT value FROM ' . db_prefix() . 'customfieldsvalues WHERE relid=' . db_prefix() . 'expenses.id AND fieldid=' . $field['id'] . ' AND fieldto="' . $field['fieldto'] . '" LIMIT 1) as ' . $selectAs;
 }
 
-$aColumns = hooks()->apply_filters('expenses_table_sql_columns', $aColumns);
+// $aColumns = hooks()->apply_filters('expenses_table_sql_columns', $aColumns);
 
 if (count($custom_fields) > 4) {
     @$CI->db->query('SET SQL_BIG_SELECTS=1');
@@ -54,6 +54,7 @@ $join = [
     'LEFT JOIN ' . db_prefix() . 'files ON ' . db_prefix() . 'files.rel_id = ' . db_prefix() . 'expenses.id AND rel_type="expense"',
     'LEFT JOIN ' . db_prefix() . 'currencies ON ' . db_prefix() . 'currencies.id = ' . db_prefix() . 'expenses.currency',
     'LEFT JOIN ' . db_prefix() . 'pur_vendor ON ' . db_prefix() . 'pur_vendor.userid = ' . db_prefix() . 'expenses.vendor',
+    'LEFT JOIN ' . db_prefix() . 'pur_invoices ON ' . db_prefix() . 'pur_invoices.id = ' . db_prefix() . 'expenses.vbt_id',
 ];
 
 if ($CI->input->post('filters')) {
@@ -67,7 +68,7 @@ if (staff_cant('view', 'expenses')) {
     $where[] = 'AND ' . db_prefix() . 'expenses.addedfrom=' . get_staff_user_id();
 }
 
-array_push($where, 'AND invoiceid IS NULL');
+array_push($where, 'AND ' . db_prefix() . 'expenses.invoiceid IS NULL');
 
 if (get_default_project()) {
     $where[] = 'AND ' . db_prefix() . 'expenses.project_id = ' . get_default_project();
@@ -78,14 +79,14 @@ if ($this->ci->input->post('expense_category') && count($this->ci->input->post('
 }
 
 if ($this->ci->input->post('payment_mode') && count($this->ci->input->post('payment_mode')) > 0) {
-    array_push($where, 'AND paymentmode IN (' . implode(',', $this->ci->input->post('payment_mode')) . ')');
+    array_push($where, 'AND ' . db_prefix() . 'expenses.paymentmode IN (' . implode(',', $this->ci->input->post('payment_mode')) . ')');
 }
 
 if ($this->ci->input->post('vendor') && count($this->ci->input->post('vendor')) > 0) {
-    array_push($where, 'AND vendor IN (' . implode(',', $this->ci->input->post('vendor')) . ')');
+    array_push($where, 'AND ' . db_prefix() . 'expenses.vendor IN (' . implode(',', $this->ci->input->post('vendor')) . ')');
 }
 
-$custom_date_select = $this->ci->purchase_model->get_where_report_period('date');
+$custom_date_select = $this->ci->purchase_model->get_where_report_period('' . db_prefix() . 'expenses.date');
 if ($custom_date_select != '') {
     $custom_date_select = trim($custom_date_select);
     if (!startsWith($custom_date_select, 'AND')) {
@@ -116,12 +117,12 @@ $result = data_tables_init(
         'billable',
         db_prefix() . 'currencies.name as currency_name',
         db_prefix() . 'expenses.clientid',
-        'tax',
-        'tax2',
-        'project_id',
-        'recurring',
-        'vbt_id',
+        db_prefix() . 'expenses.tax as tax',
+        db_prefix() . 'expenses.tax2 as tax2',
+        db_prefix() . 'expenses.project_id as project_id',
+        db_prefix() . 'expenses.recurring as recurring',
         db_prefix() . 'pur_vendor.company as vendor_name',
+        db_prefix() . 'pur_invoices.invoice_number as invoice_number',
     ]
 );
 
@@ -180,13 +181,8 @@ foreach ($rResult as $aRow) {
         $row[] = '';
     }
 
-    if ($aRow['vbt_id']) {
-        $pur_invoices = get_pur_invoices($aRow['vbt_id']);
-        if(!empty($pur_invoices)) {
-            $row[] = '<a href="' . admin_url('purchase/purchase_invoice/' . $aRow['vbt_id']) . '" target="_blank">' .$pur_invoices->invoice_number . '</a>';
-        } else {
-          $row[] = '';  
-        }
+    if (!empty($aRow['vbt_id'])) {
+        $row[] = '<a href="' . admin_url('purchase/purchase_invoice/' . $aRow['vbt_id']) . '" target="_blank">' .$aRow['invoice_number'] . '</a>';
     } else {
         $row[] = '';
     }

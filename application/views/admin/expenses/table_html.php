@@ -15,7 +15,7 @@ if ($withBulkActions === true && $hasPermission) { ?>
   $expense_category_filter = get_module_filter($module_name, 'expense_category');
   $expense_category_filter_val = !empty($expense_category_filter) ? explode(",", $expense_category_filter->filter_value) : [];
   ?>
-  <div class="col-md-2 form-group">
+  <div class="col-md-3 form-group">
     <label for="expense_category"><?php echo _l('expense_category'); ?></label>
     <select name="expense_category[]" id="expense_category" class="selectpicker" data-live-search="true" multiple="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
       <?php foreach ($categories as $s) { ?>
@@ -33,7 +33,7 @@ if ($withBulkActions === true && $hasPermission) { ?>
   $payment_mode_filter_val = !empty($payment_mode_filter) ? explode(",", $payment_mode_filter->filter_value) : [];
   ?>
 
-  <div class="col-md-2 form-group">
+  <div class="col-md-3 form-group">
     <label for="payment_mode"><?php echo _l('payment_mode'); ?></label>
     <select name="payment_mode[]" id="payment_mode" class="selectpicker" data-live-search="true" multiple="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
       <?php foreach ($payment_modes as $mode) { ?>
@@ -51,7 +51,7 @@ if ($withBulkActions === true && $hasPermission) { ?>
   $vendor_filter = get_module_filter($module_name, 'Vendor');
   $vendor_filter_val = !empty($vendor_filter) ? explode(",", $vendor_filter->filter_value) : [];
   ?>
-  <div class="col-md-2 form-group">
+  <div class="col-md-3 form-group">
     <label for="vendor"><?php echo _l('Vendor'); ?></label>
     <select name="vendor[]" id="vendor" class="selectpicker" data-live-search="true" multiple="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
       <?php foreach ($vendors as $vendor) { ?>
@@ -65,7 +65,7 @@ if ($withBulkActions === true && $hasPermission) { ?>
     </select>
   </div>
 
-  <div class="col-md-2 form-group" id="report-time">
+  <div class="col-md-3 form-group" id="report-time">
     <label for="months-report"><?php echo _l('period_datepicker'); ?></label><br />
     <select class="selectpicker" name="months-report" data-width="100%" data-none-selected-text="<?php echo _l('dropdown_non_selected_tex'); ?>">
       <option value=""><?php echo _l('report_sales_months_all_time'); ?></option>
@@ -80,7 +80,7 @@ if ($withBulkActions === true && $hasPermission) { ?>
     </select>
   </div>
   <div id="date-range" class="hide mbot15">
-    <div class="col-md-1 form-group">
+    <div class="col-md-2 form-group">
       <label for="report-from" class="control-label"><?php echo _l('report_sales_from_date'); ?></label>
       <div class="input-group date">
         <input type="text" class="form-control datepicker" id="report-from" name="report-from">
@@ -89,7 +89,7 @@ if ($withBulkActions === true && $hasPermission) { ?>
         </div>
       </div>
     </div>
-    <div class="col-md-1 form-group">
+    <div class="col-md-2 form-group">
       <label for="report-to" class="control-label"><?php echo _l('report_sales_to_date'); ?></label>
       <div class="input-group date">
         <input type="text" class="form-control datepicker" disabled="disabled" id="report-to" name="report-to">
@@ -113,13 +113,14 @@ if ($withBulkActions === true && $hasPermission) { ?>
       <option value="<?php echo pur_html_entity_decode($y2); ?>"><?php echo _l('year') . ' ' . pur_html_entity_decode($y2); ?></option>
       <option value="<?php echo pur_html_entity_decode($y3); ?>"><?php echo _l('year') . ' ' . pur_html_entity_decode($y3); ?></option>
     </select>
-  </div>     
-  <div class="row">
-    <div class="col-md-1 form-group" style="margin-top: 24px;">
-      <a href="javascript:void(0)" class="btn btn-info btn-icon reset_all_ot_filters">
-        <?php echo _l('reset_filter'); ?>
-      </a>
-    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-1 form-group">
+    <a href="javascript:void(0)" class="btn btn-info btn-icon reset_all_ot_filters">
+      <?php echo _l('reset_filter'); ?>
+    </a>
   </div>
 </div>
 
