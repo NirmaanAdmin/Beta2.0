@@ -37,7 +37,7 @@ $aColumns = [
     'vendor_note',
     db_prefix() . 'pur_invoices.id as inv_id',
     db_prefix() . 'pur_invoices.adminnote as adminnote',
-    'expense_convert as is_expense',
+    db_prefix() . 'pur_invoices.expense_id as expense_id',
     db_prefix() . 'pur_invoices.last_action',
 ];
 
@@ -171,11 +171,10 @@ if ($this->ci->input->post('billing_invoices') && $this->ci->input->post('billin
 
 if ($this->ci->input->post('is_expense') && $this->ci->input->post('is_expense') != '') {
     $is_expense = $this->ci->input->post('is_expense');
-
-    if($is_expense == 1){
-        array_push($where, 'AND  ' . db_prefix() . 'pur_invoices.expense_convert != 0');
+    if($is_expense == 1) {
+        array_push($where, 'AND (' . db_prefix() . 'pur_invoices.expense_id IS NOT NULL)');
     } elseif ($is_expense == 2) {
-       array_push($where, 'AND  ' . db_prefix() . 'pur_invoices.expense_convert = 0');
+       array_push($where, 'AND (' . db_prefix() . 'pur_invoices.expense_id IS NULL)');
     }
 }
 
@@ -458,11 +457,11 @@ foreach ($rResult as $aRow) {
             $_data = $order_data;
         } elseif ($aColumns[$i] == 'vendor_note') {
             $_data = render_tags($aRow['tags']);
-        } elseif ($aColumns[$i] == 'is_expense') {
-            if($aRow['is_expense'] == 0){
-                $expense_yes_no = 'No';
-            } else {
+        } elseif ($aColumns[$i] == 'expense_id') {
+            if(!empty($aRow['expense_id'])){
                 $expense_yes_no = 'Yes';
+            } else {
+                $expense_yes_no = 'No';
             }
             $_data = $expense_yes_no;
         } elseif ($aColumns[$i] == 'invoice_date') {
