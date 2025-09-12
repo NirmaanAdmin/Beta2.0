@@ -12958,10 +12958,9 @@ class purchase extends AdminController
         $this->load->view('payment_certificate/payment_certificate', $data);
     }
 
-    public function get_po_contract_data()
+    public function get_po_contract_data($po_id, $payment_certificate_id = '')
     {
-        $data = $this->input->post();
-        $po_contract_data = $this->purchase_model->get_po_contract_data($data['po_id'], $data['payment_certificate_id'], 1, $data['bill_id']);
+        $po_contract_data = $this->purchase_model->get_po_contract_data($po_id, $payment_certificate_id);
         echo json_encode($po_contract_data);
     }
 

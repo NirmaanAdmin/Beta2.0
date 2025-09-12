@@ -194,7 +194,6 @@ $result = data_tables_init(
             WHEN ' . db_prefix() . 'payment_certificate.ot_id IS NOT NULL THEN ' . db_prefix() . 'pur_order_tracker.project 
             ELSE NULL 
          END) as project',
-         db_prefix() . 'payment_certificate.po_bill_id',
          db_prefix() . 'pur_invoices.invoice_number',
     ],
     '',
@@ -233,11 +232,7 @@ foreach ($rResult as $aRow) {
         } elseif ($aColumns[$i] == 'id') {
             $numberOutput = '';
             if (!empty($aRow['po_id'])) {
-                if (!empty($aRow['po_bill_id'])) {
-                    $numberOutput .= '<a href="' . admin_url('purchase/payment_certificate/' . $aRow['po_id'] . '/' . $aRow['id'] . '?bill_id=' . $aRow['po_bill_id']) . '" target="_blank">' . _l('view') . '</a>';
-                } else {
-                    $numberOutput .= '<a href="' . admin_url('purchase/payment_certificate/' . $aRow['po_id'] . '/' . $aRow['id']) . '" target="_blank">' . _l('view') . '</a>';
-                }
+                $numberOutput .= '<a href="' . admin_url('purchase/payment_certificate/' . $aRow['po_id'] . '/' . $aRow['id']) . '" target="_blank">' . _l('view') . '</a>';
             }
             if (!empty($aRow['wo_id'])) {
                 $numberOutput .= '<a href="' . admin_url('purchase/wo_payment_certificate/' . $aRow['wo_id'] . '/' . $aRow['id']) . '" target="_blank">' . _l('view') . '</a>';
@@ -249,11 +244,7 @@ foreach ($rResult as $aRow) {
             $_data = $numberOutput;
         } elseif ($aColumns[$i] == 'pc_number') {
             if (!empty($aRow['po_id'])) {
-                if (!empty($aRow['po_bill_id'])) {
-                    $_data = '<a href="' . admin_url('purchase/payment_certificate/' . $aRow['po_id'] . '/' . $aRow['id'] . '?bill_id=' . $aRow['po_bill_id']) . '" target="_blank">' . $aRow['pc_number'] . '</a>';
-                } else {
-                    $_data = '<a href="' . admin_url('purchase/payment_certificate/' . $aRow['po_id'] . '/' . $aRow['id']) . '" target="_blank">' . $aRow['pc_number'] . '</a>';
-                }
+                $_data = '<a href="' . admin_url('purchase/payment_certificate/' . $aRow['po_id'] . '/' . $aRow['id']) . '" target="_blank">' . $aRow['pc_number'] . '</a>';
             }
             if (!empty($aRow['wo_id'])) {
                 $_data = '<a href="' . admin_url('purchase/wo_payment_certificate/' . $aRow['wo_id'] . '/' . $aRow['id']) . '" target="_blank">' . $aRow['pc_number'] . '</a>';

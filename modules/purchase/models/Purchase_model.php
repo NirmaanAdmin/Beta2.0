@@ -18142,7 +18142,7 @@ class Purchase_model extends App_Model
         return $result;
     }
 
-    public function get_po_contract_data($po_id, $payment_certificate_id = '', $cal = 1, $bill_id = NULL)
+    public function get_po_contract_data($po_id, $payment_certificate_id = '', $cal = 1)
     {
         $result = array();
         $payment_certificate = array();
@@ -18210,15 +18210,6 @@ class Purchase_model extends App_Model
             }
         }
 
-        if(!empty($bill_id)) {
-            $this->db->select('total');
-            $this->db->where('id', $bill_id);
-            $pur_bills = $this->db->get(db_prefix() . 'pur_bills')->row();
-            if(!empty($pur_bills)) {
-                $result['po_contract_amount'] = $pur_bills->total;
-            }
-        }
-
         return $result;
     }
 
@@ -18280,12 +18271,6 @@ class Purchase_model extends App_Model
                 'rel_id'   => $insert_id,
                 'rel_type' => isset($data['wo_id']) ? 'wo_payment_certificate' : 'po_payment_certificate',
             ]);
-        }
-        if (isset($data['po_bill_id'])) {
-            if(!empty($data['po_bill_id'])) {
-                $this->db->where('id', $data['po_bill_id']);
-                $this->db->update(db_prefix() . 'pur_bills', ['pc_id' => $insert_id]);
-            }
         }
         return true;
     }

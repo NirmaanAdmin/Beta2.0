@@ -162,10 +162,6 @@
                   <div class="row">
                     <?php echo form_hidden('po_id', $po_id); ?>
                     <?php echo form_hidden('payment_certificate_id', $payment_certificate_id); ?>
-                    <?php
-                    $bill_id = isset($_GET['bill_id']) ? $_GET['bill_id'] : null; 
-                    echo form_hidden('po_bill_id', $bill_id); 
-                    ?>
                     <div class="col-md-3">
                       <?php $serial_no = (isset($payment_certificate) ? $payment_certificate->serial_no : get_payment_certificate_serial_no());
                       echo render_input('serial_no', 'payment_certificate_no', $serial_no, 'text', ['readonly' => true]); ?>

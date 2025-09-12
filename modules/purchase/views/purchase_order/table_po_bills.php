@@ -10,11 +10,6 @@ $select = [
     'total',
     'invoice_date',
     'approve_status',
-    '(CASE 
-        WHEN pc_id IS NOT NULL THEN 2 
-        WHEN approve_status = 2 AND pc_id IS NULL THEN 1 
-        ELSE 3 
-     END) as applied_to_payment_certificate',
     1,
 ];
 
@@ -56,18 +51,6 @@ foreach ($rResult as $key => $aRow) {
         }
     }
     $row[] = $approve_status;
-    $applied_to_payment_certificate = '';
-    if ($aRow['applied_to_payment_certificate'] == 1) {
-        // $applied_to_payment_certificate = '<a href="' . admin_url('purchase/payment_certificate/' . $po_id . '?bill_id=' . $aRow['id']) . '" class="btn btn-info" target="_blank">' . _l('convert_to_payment_certificate') . '</a>';
-        $applied_to_payment_certificate = '';
-    } else if($aRow['applied_to_payment_certificate'] == 2) {
-        $applied_to_payment_certificate = '<span class="btn btn-success">Converted</span>';
-    } else if($aRow['applied_to_payment_certificate'] == 3) {
-        $applied_to_payment_certificate = '<span class="btn btn-warning">Pending</span>';
-    } else {
-        $applied_to_payment_certificate = '';
-    }
-    $row[] = $applied_to_payment_certificate;
     $actions = '';
     if (has_permission('bill_bifurcation', '', 'edit') || is_admin()) {
         $actions .= '<a href="' . admin_url('purchase/edit_pur_bills/' . $aRow['id']) . '" 
