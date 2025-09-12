@@ -1,4 +1,10 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
+<style>
+  .bulk-title {
+    text-align: center;
+    font-weight: bold;
+  }
+</style>
 <div class="modal fade bulk_actions" id="expenses_bulk_actions" tabindex="-1" role="dialog" data-table=".table-expenses">
   <div class="modal-dialog" role="document">
     <div class="modal-content">

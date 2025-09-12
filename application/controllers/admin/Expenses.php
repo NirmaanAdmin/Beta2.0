@@ -561,6 +561,18 @@ class Expenses extends AdminController
         $amount = !empty($expense_data['amount']) ? $expense_data['amount'] : $expense->amount;
         $expense_date = !empty($expense_data['date']) ? $expense_data['date'] : date('Y-m-d');
         $project_id = !empty($expense_data['project_id']) ? $expense_data['project_id'] : $expense->project_id;
+        $pur_order = NULL;
+        $wo_order = NULL;
+        $order_tracker_id = NULL;
+        if($expense_data['choose_from_order'] == "1") {
+            $pur_order = $expense_data['order_list'];
+        }
+        if($expense_data['choose_from_order'] == "2") {
+            $wo_order = $expense_data['order_list'];
+        }
+        if($expense_data['choose_from_order'] == "3") {
+            $order_tracker_id = $expense_data['order_list'];
+        }
 
         $group_pur = $this->expenses_model->find_budget_head_value($category);
         $vendor_submitted_amount_without_tax = !empty($amount) ? $amount : 0;
@@ -586,6 +598,9 @@ class Expenses extends AdminController
         $input['final_certified_amount'] = $vendor_submitted_amount;
         $input['expense_id'] = $id;
         $input['add_from'] = get_staff_user_id();
+        $input['pur_order'] = $pur_order;
+        $input['wo_order'] = $wo_order;
+        $input['order_tracker_id'] = $order_tracker_id;
 
         $this->db->insert(db_prefix() . 'pur_invoices', $input);
         $insert_id = $this->db->insert_id();

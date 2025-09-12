@@ -1232,19 +1232,19 @@ class Expenses_model extends App_Model
 
                     $html .= '<div class="col-md-1">' . render_input($amount_name_attr, '', $pvalue['amount'], 'number', ['readonly' => true]) . '</div>';
 
-                    // $html .= '<div class="col-md-2">
-                    //     <select class="selectpicker display-block" data-width="100%" name="' . $select_choose_from_order_name_attr . '" id="bulk_choose_from_order" data-id="' . $pvalue['id'] . '" data-none-selected-text="' . _l('none') . '">
-                    //         <option value="none">' . _l('None') . '</option>
-                    //         <option value="1">' . _l('pur_order') . '</option>
-                    //         <option value="2">' . _l('wo_order') . '</option>
-                    //         <option value="3">' . _l('order_tracker') . '</option>
-                    //     </select>
-                    // </div>';
+                    $html .= '<div class="col-md-2">
+                        <select class="selectpicker display-block" data-width="100%" name="' . $select_choose_from_order_name_attr . '" id="bulk_choose_from_order" data-id="' . $pvalue['id'] . '" data-none-selected-text="' . _l('none') . '">
+                            <option value="none">' . _l('None') . '</option>
+                            <option value="1">' . _l('pur_order') . '</option>
+                            <option value="2">' . _l('wo_order') . '</option>
+                            <option value="3">' . _l('order_tracker') . '</option>
+                        </select>
+                    </div>';
 
-                    // $html .= '<div class="col-md-2">';
-                    // $html .= '<select class="selectpicker display-block"  data-width="100%" name="' . $order_list_name_attr . '" id="bulk_order_list" data-none-selected-text="' . _l('none') . '" data-live-search="true">';
+                    $html .= '<div class="col-md-2">';
+                    $html .= '<select class="selectpicker display-block"  data-width="100%" name="' . $order_list_name_attr . '" id="bulk_order_list" data-none-selected-text="' . _l('none') . '" data-live-search="true">';
+                    $html .= '</select></div>';
                     
-                    // $html .= '</select></div>';
                     $html .= '</div><br/>';
                 }
             }
