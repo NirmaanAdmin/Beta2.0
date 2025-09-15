@@ -1037,7 +1037,7 @@ if ($estimate->currency != 0) {
                </div>
                <div class="col-md-6 padr_div_0">
                   <?php if (has_permission('bill_bifurcation', '', 'create') || is_admin()) { ?>
-                     <a href="<?php echo admin_url('purchase/pur_bills/' . $estimate->id . '?type=po'); ?>" class="btn btn-success pull-right" target="_blank"><i class="fa fa-plus"></i><?php echo ' ' . _l('add_bill_bifurcation'); ?></a>
+                     <?php /* <a href="<?php echo admin_url('purchase/pur_bills/' . $estimate->id . '?type=po'); ?>" class="btn btn-success pull-right" target="_blank"><i class="fa fa-plus"></i><?php echo ' ' . _l('add_bill_bifurcation'); ?></a> */ ?>
                   <?php } ?>
                </div>
                <div class="clearfix"></div>

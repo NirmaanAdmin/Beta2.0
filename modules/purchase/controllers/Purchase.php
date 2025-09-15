@@ -15068,11 +15068,10 @@ class purchase extends AdminController
                     $unit_name = pur_get_unit_name($inv_detail['unit_id']);
                     $taxname = $inv_detail['tax_name'];
                     $item_name = pur_get_item_variatiom($inv_detail['item_code']);
-                    $amount = (float)$inv_detail['unit_price'] * (float)$inv_detail['quantity'];
 
-                    $pur_bill_row_template .= $this->purchase_model->create_purchase_bill_row_template('newitems[' . $index_order . ']', $item_name, $inv_detail['description'], $inv_detail['item_code'], $inv_detail['quantity'], $inv_detail['unit_id'], $unit_name, $inv_detail['unit_price'], 0, 0, $key + 1, true, $currency_rate, $to_currency);
+                    $pur_bill_row_template .= $this->purchase_model->create_purchase_bill_row_template('newitems[' . $index_order . ']', $item_name, $inv_detail['description'], $inv_detail['item_code'], $inv_detail['quantity'], 0, $inv_detail['unit_id'], $unit_name, $inv_detail['unit_price'], 0, 0, 0, $key + 1, true, $currency_rate, $to_currency);
 
-                    $pur_bill_row_model .= $this->purchase_model->get_purchase_bill_row_model($key + 1, $item_name, $inv_detail['description'], $amount);
+                    $pur_bill_row_model .= $this->purchase_model->get_purchase_bill_row_model($key + 1, $item_name, $inv_detail['description'], $inv_detail['unit_price']);
                 }
             }
         } else {
@@ -15140,11 +15139,10 @@ class purchase extends AdminController
                 if (strlen($item_name) == 0) {
                     $item_name = pur_get_item_variatiom($bill_detail['item_code']);
                 }
-                $amount = (float)$bill_detail['unit_price'] * (float)$bill_detail['quantity'];
 
-                $pur_bill_row_template .= $this->purchase_model->create_purchase_bill_row_template('items[' . $index_order . ']', $item_name, $bill_detail['description'], $bill_detail['item_code'], $bill_detail['quantity'], $bill_detail['unit_id'], $unit_name, $bill_detail['unit_price'], $bill_detail['bill_percentage'], $bill_detail['total_money'], $bill_detail['id'], true, $currency_rate, $to_currency);
+                $pur_bill_row_template .= $this->purchase_model->create_purchase_bill_row_template('items[' . $index_order . ']', $item_name, $bill_detail['description'], $bill_detail['item_code'], $bill_detail['quantity'], $bill_detail['billed_quantity'], $bill_detail['unit_id'], $unit_name, $bill_detail['unit_price'], $bill_detail['bill_percentage'], $bill_detail['hold'], $bill_detail['total_money'], $bill_detail['id'], true, $currency_rate, $to_currency);
 
-                $pur_bill_row_model .= $this->purchase_model->get_purchase_bill_row_model($bill_detail['id'], $item_name, $bill_detail['description'], $amount, $bill_detail['id']);
+                $pur_bill_row_model .= $this->purchase_model->get_purchase_bill_row_model($bill_detail['id'], $item_name, $bill_detail['description'], $bill_detail['unit_price'], $bill_detail['id']);
             }
         }
 

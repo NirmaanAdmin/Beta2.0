@@ -18960,6 +18960,9 @@ class Purchase_model extends App_Model
             if ($all_approved[0]['all_approved'] == 1) {
                 $this->db->where('id', $rel_id);
                 $this->db->update(db_prefix() . 'payment_certificate', ['approve_status' => 2]);
+                if($rel_type == "po_payment_certificate") {
+                    $this->convert_pc_to_pur_bill($rel_id);
+                }
             }
         }
 
@@ -21084,7 +21087,7 @@ class Purchase_model extends App_Model
         return true;
     }
 
-    public function create_purchase_bill_row_template($name = '', $item_name = '', $item_description = '', $item_code = '', $quantity = '', $unit_id = '', $unit_name = '', $unit_price = '', $bill_percentage = 0, $total_money = 0, $item_key = '', $is_edit = false, $currency_rate = 1, $to_currency = '')
+    public function create_purchase_bill_row_template($name = '', $item_name = '', $item_description = '', $item_code = '', $quantity = '', $billed_quantity = '', $unit_id = '', $unit_name = '', $unit_price = '', $bill_percentage = 0, $hold = 0, $total_money = 0, $item_key = '', $is_edit = false, $currency_rate = 1, $to_currency = '')
     {
         $this->load->model('currencies_model');
         $base_currency = $this->currencies_model->get_base_currency();
@@ -21096,13 +21099,16 @@ class Purchase_model extends App_Model
         $name_unit_id = 'unit_id';
         $name_unit_name = 'unit_name';
         $name_quantity = 'quantity';
+        $name_billed_quantity = 'billed_quantity';
         $name_unit_price = 'unit_price';
         $name_bill_percentage = 'bill_percentage';
+        $name_hold = 'hold';
         $name_total_money = 'total_money';
         $array_qty_attr = ['min' => '0.0', 'step' => 'any'];
+        $array_billed_quantity_attr = ['min' => '0.0', 'step' => 'any'];
         $array_rate_attr = ['min' => '0.0', 'step' => 'any'];
+        $array_hold_attr = ['min' => '0.0', 'max' => '100.0'];
         $text_right_class = 'text-right';
-        $amount = (float)$unit_price * (float)$quantity;
 
         if ($name == '') {
             $row .= '<tr class="main"><td></td>';
@@ -21115,12 +21121,16 @@ class Purchase_model extends App_Model
             $name_unit_id = $name . '[unit_id]';
             $name_unit_name = '[unit_name]';
             $name_quantity = $name . '[quantity]';
+            $name_billed_quantity = $name . '[billed_quantity]';
             $name_unit_price = $name . '[unit_price]';
             $name_bill_percentage = $name . '[bill_percentage]';
+            $name_hold = $name . '[hold]';
             $name_total_money = $name . '[total_money]';
 
             $array_qty_attr = ['onblur' => 'pur_calculate_total();', 'onchange' => 'pur_calculate_total();', 'min' => '0.0', 'step' => 'any',  'data-quantity' => (float)$quantity, 'readonly' => true];
+            $array_billed_quantity_attr = ['onblur' => 'pur_calculate_total();', 'onchange' => 'pur_calculate_total();', 'min' => '0.0', 'step' => 'any'];
             $array_rate_attr = ['onblur' => 'pur_calculate_total();', 'onchange' => 'pur_calculate_total();', 'min' => '0.0', 'step' => 'any', 'data-amount' => 'invoice', 'placeholder' => _l('rate'), 'readonly' => true];
+            $array_hold_attr = ['onblur' => 'pur_calculate_total();', 'onchange' => 'pur_calculate_total();', 'min' => '0.0', 'max' => '100.0'];
         }
         $row .= '<td class="">' . render_textarea($name_item_name, '', $item_name, ['rows' => 2, 'placeholder' => _l('pur_item_name'), 'readonly' => true]) . '</td>';
 
@@ -21134,15 +21144,21 @@ class Purchase_model extends App_Model
             render_input($name_unit_name, '', $unit_name, 'text', ['placeholder' => _l('unit'), 'readonly' => true], [], 'no-margin', 'input-transparent text-right pur_input_none') .
         '</td>';
 
+        $row .= '<td class="billed_quantity">'.render_input($name_billed_quantity, '', $billed_quantity, 'number', $array_billed_quantity_attr, [], 'no-margin', $text_right_class).'</td>';
+
         $row .= '<td class="bill_bifurcation">
             <a href="javascript:void(0)" 
-               onclick="add_bill_bifurcation(' . (int)$item_key . ', ' . $amount . '); return false;" 
+               onclick="add_bill_bifurcation(' . (int)$item_key . ', ' . $unit_price . '); return false;" 
                class="btn btn-success pull-right">'
                . _l('add_bill_bifurcation') .
             '</a>
          </td>';
 
         $row .= '<td class="label_row_bill_percentage" align="right">' . number_format((float)$bill_percentage, 2, '.', '') . '%</td>';
+
+        $row .= '<td class="hold">' . render_input($name_hold, '', $hold, 'number', $array_hold_attr, [], 'no-margin', $text_right_class) . '</td>';
+
+        $row .= '<td class="hold_amount" align="right"></td>';
 
         $row .= '<td class="label_row_total" align="right">' . app_format_money($total_money, $base_currency->symbol) . '</td>';
 
@@ -21179,7 +21195,6 @@ class Purchase_model extends App_Model
         unset($data['additional_discount']);
         unset($data['tax_value']);
         unset($data['final_percentage']);
-        unset($data['total_final_amount']);
 
         $order_detail = [];
         if (isset($data['newitems'])) {
@@ -21340,6 +21355,7 @@ class Purchase_model extends App_Model
 
                     $dt_data['quantity'] = ($rqd['quantity'] != '' && $rqd['quantity'] != null) ? $rqd['quantity'] : 0;
                     $dt_data['bill_percentage'] = !empty($rqd['bill_percentage']) ? $rqd['bill_percentage'] : 0;
+                    $dt_data['hold'] = !empty($rqd['hold']) ? $rqd['hold'] : 0;
 
                     $this->db->insert(db_prefix() . 'pur_bill_details', $dt_data);
                     $item_insert_id = $this->db->insert_id();
@@ -21350,7 +21366,6 @@ class Purchase_model extends App_Model
                                 'bill_item_id' => $item_insert_id,
                                 'item_id' => $bvalue['item_id'],
                                 'bill_percent' => $bvalue['bill_percent'],
-                                'hold' => $bvalue['hold'],
                             ]);
                         }
                     }
@@ -21428,7 +21443,6 @@ class Purchase_model extends App_Model
         unset($data['tax_value']);
         unset($data['billed_quantity']);
         unset($data['final_percentage']);
-        unset($data['total_final_amount']);
         unset($data['pur_order']);
 
         unset($data['isedit']);
@@ -21591,6 +21605,7 @@ class Purchase_model extends App_Model
 
                 $dt_data['quantity'] = ($rqd['quantity'] != '' && $rqd['quantity'] != null) ? $rqd['quantity'] : 0;
                 $dt_data['bill_percentage'] = !empty($rqd['bill_percentage']) ? $rqd['bill_percentage'] : 0;
+                $dt_data['hold'] = !empty($rqd['hold']) ? $rqd['hold'] : 0;
 
                 $this->db->where('id', $rqd['id']);
                 $this->db->update(db_prefix() . 'pur_bill_details', $dt_data);
@@ -21608,14 +21623,12 @@ class Purchase_model extends App_Model
                             $this->db->where('item_id', $bvalue['item_id']);
                             $this->db->update(db_prefix() . 'pur_bills_bifurcation', [
                                 'bill_percent' => $bvalue['bill_percent'],
-                                'hold' => $bvalue['hold'],
                             ]);
                         } else {
                             $this->db->insert(db_prefix() . 'pur_bills_bifurcation', [
                                 'bill_item_id' => $rqd['id'],
                                 'item_id' => $bvalue['item_id'],
                                 'bill_percent' => $bvalue['bill_percent'],
-                                'hold' => $bvalue['hold'],
                             ]);
                         }
                     }
@@ -21648,13 +21661,7 @@ class Purchase_model extends App_Model
             $this->send_bill_bifurcation_approve(['rel_id' => $id]);
         }
 
-        // $this->update_pur_invoice_status($id);
-
-        // hooks()->do_action('after_pur_invoice_updated', $id);
-        if ($this->db->affected_rows() > 0) {
-            return true;
-        }
-        return false;
+        return true;
     }
 
     public function get_html_tax_pur_bills($id)
@@ -24573,10 +24580,10 @@ class Purchase_model extends App_Model
         exit;
     }
 
-    public function get_purchase_bill_row_model($item_key, $item_name, $description, $amount, $bill_item_id = '')
+    public function get_purchase_bill_row_model($item_key, $item_name, $description, $unit_price, $bill_item_id = '')
     {
         $html  = '<div class="modal fade all_bill_row_model" id="bill_modal_' . $item_key . '" tabindex="-1" role="dialog">';
-        $html .= '<div class="modal-dialog" role="document" style="width:98%;">';
+        $html .= '<div class="modal-dialog" role="document" style="width:70%;">';
         $html .= '<div class="modal-content">';
 
         // Header
@@ -24599,12 +24606,9 @@ class Purchase_model extends App_Model
         $html .= '<table class="table items table_bill_rows">';
         $html .= '<thead>';
         $html .= '<tr>';
-        $html .= '<th width="20%" align="left">' . _l('Bill Description') . '</th>';
-        $html .= '<th width="16%" align="left">' . _l('bill_percentage') . '</th>';
-        $html .= '<th width="16%" align="left">' . _l('Bill Unit Price') . '</th>';
-        $html .= '<th width="16%" align="left">' . _l('Hold') . '</th>';
-        $html .= '<th width="16%" align="left">' . _l('Hold Amount') . '</th>';
-        $html .= '<th width="16%" align="left">' . _l('Final Amount') . '</th>';
+        $html .= '<th align="left" width="33%">' . _l('Bill Description') . '</th>';
+        $html .= '<th align="left" width="33%">' . _l('bill_percentage') . '</th>';
+        $html .= '<th align="left" width="33%">' . _l('Bill Unit Price') . '</th>';
         $html .= '</tr>';
         $html .= '</thead>';
         $default_purchase_bill_rows = get_default_purchase_bill_rows();
@@ -24618,7 +24622,6 @@ class Purchase_model extends App_Model
         }
         $html .= '<tbody style="border: 1px solid #ddd;">';
         $html .= form_hidden('final_percentage', 0);
-        $html .= form_hidden('total_final_amount', 0);
         foreach ($default_purchase_bill_rows as $key => $value) {
             $html .= '<tr class="bill_items">';
             $html .= '<td class="hide">'.form_hidden('newbillitems['.$item_key.']['.$value['item_id'].'][item_id]', $value['item_id']).'</td>';
@@ -24628,14 +24631,9 @@ class Purchase_model extends App_Model
                 $html .= '<td align="left">'.get_purchase_bill_description($value['item_id']).'</td>';
             }
             $html .= '<td align="left" class="all_bill_percentage">' 
-              . render_input('newbillitems['.$item_key.']['.$value['item_id'].'][bill_percent]', '', $value['bill_percent'], 'number', ['min' => 0, 'max' => 100, 'onblur' => 'calculate_bill_bifurcation('.$item_key.', '.$amount.');', 'onchange' => 'calculate_bill_bifurcation('.$item_key.', '.$amount.');']) 
+              . render_input('newbillitems['.$item_key.']['.$value['item_id'].'][bill_percent]', '', $value['bill_percent'], 'number', ['min' => 0, 'max' => 100, 'onblur' => 'calculate_bill_bifurcation('.$item_key.', '.$unit_price.');', 'onchange' => 'calculate_bill_bifurcation('.$item_key.', '.$unit_price.');']) 
               . '</td>';
             $html .= '<td align="left" class="all_bill_unit_price"></td>';
-            $html .= '<td align="left" class="all_hold">' 
-              . render_input('newbillitems['.$item_key.']['.$value['item_id'].'][hold]', '', $value['hold'], 'number', ['min' => 0, 'max' => 100, 'onblur' => 'calculate_bill_bifurcation('.$item_key.', '.$amount.');', 'onchange' => 'calculate_bill_bifurcation('.$item_key.', '.$amount.');']) 
-              . '</td>';
-            $html .= '<td align="left" class="all_hold_amount"></td>';
-            $html .= '<td align="left" class="all_final_amount"></td>';
             $html .= '</tr>';
         }
         $html .= '</tbody>';
@@ -24649,14 +24647,6 @@ class Purchase_model extends App_Model
         $html .= '<tr>';
         $html .= '<td width="75%"><span class="bold tw-text-neutral-700">Total Bill Unit Price :</span></td>';
         $html .= '<td width="25%" class="total_bill_unit_price"></td>';
-        $html .= '</tr>';
-        $html .= '<tr>';
-        $html .= '<td width="75%"><span class="bold tw-text-neutral-700">Total Hold Amount :</span></td>';
-        $html .= '<td width="25%" class="total_hold_amount"></td>';
-        $html .= '</tr>';
-        $html .= '<tr>';
-        $html .= '<td width="75%"><span class="bold tw-text-neutral-700">Total Final Amount :</span></td>';
-        $html .= '<td width="25%" class="total_final_amount"></td>';
         $html .= '</tr>';
         $html .= '</tbody>';
         $html .= '</table>';
@@ -24775,6 +24765,87 @@ class Purchase_model extends App_Model
             if ($all_rejected[0]['all_rejected'] == 1) {
                 $this->db->where('id', $rel_id);
                 $this->db->update(db_prefix() . 'pur_bills', ['approve_status' => 3]);
+            }
+        }
+
+        return true;
+    }
+
+    public function convert_pc_to_pur_bill($pc_id)
+    {
+        $prefix = get_purchase_option('pur_bill_prefix');
+        $next_number = get_purchase_option('next_bill_number');
+        $bill_number = $prefix.str_pad($next_number,5,'0',STR_PAD_LEFT);
+        $payment_certificate = $this->get_payment_certificate($pc_id);
+        if(!empty($payment_certificate)) {
+            $pur_order = $this->get_pur_order($payment_certificate->po_id);
+            $this->db->where('pur_order', $pur_order->id);
+            $this->db->order_by('id', 'ASC');
+            $pur_order_details = $this->db->get(db_prefix() . 'pur_order_detail')->result_array();
+            $pur_bills = array();
+            $pur_bills['number'] = $next_number;
+            $pur_bills['bill_number'] = $bill_number;
+            $pur_bills['invoice_date'] = date('Y-m-d');
+            $pur_bills['total'] = 0.00;
+            $pur_bills['approve_status'] = 1;
+            $pur_bills['contract'] = 0;
+            $pur_bills['vendor'] = $payment_certificate->vendor;
+            $pur_bills['payment_status'] = 0;
+            $pur_bills['add_from'] = get_staff_user_id();
+            $pur_bills['date_add'] = date('Y-m-d');
+            $pur_bills['pur_order'] = $pur_order->id;
+            $pur_bills['wo_order'] = 0;
+            $pur_bills['recurring'] = 0;
+            $pur_bills['cycles'] = 0;
+            $pur_bills['total_cycles'] = 0;
+            $pur_bills['duedate'] = date('Y-m-d');
+            $pur_bills['currency'] = 3;
+            $pur_bills['currency_rate'] = 1.000000;
+            $pur_bills['from_currency'] = 3;
+            $pur_bills['to_currency'] = 3;
+            $pur_bills['bill_code'] = $bill_number;
+            $pur_bills['discount_type'] = 'after_tax';
+            $pur_bills['project_id'] = $pur_order->project;
+            $pur_bills['expense_convert'] = 0;
+            $pur_bills['group_pur'] = 0;
+            $pur_bills['bil_total'] = 0.00;
+            $pur_bills['pc_id'] = $payment_certificate->id;
+            $this->db->insert(db_prefix() . 'pur_bills', $pur_bills);
+            $pur_bill_id = $this->db->insert_id();
+
+            if(!empty($pur_order_details)) {
+                foreach ($pur_order_details as $pkey => $pvalue) {
+                    $pur_bill_details = array();
+                    $pur_bill_details['pur_bill'] = $pur_bill_id;
+                    $pur_bill_details['item_code'] = $pvalue['item_code'];
+                    $pur_bill_details['description'] = $pvalue['description'];
+                    $pur_bill_details['unit_id'] = $pvalue['unit_id'];
+                    $pur_bill_details['unit_price'] = $pvalue['unit_price'];
+                    $pur_bill_details['quantity'] = $pvalue['quantity'];
+                    $pur_bill_details['billed_quantity'] = 0.00;
+                    $pur_bill_details['total_money'] = 0.00;
+                    $pur_bill_details['item_name'] = pur_get_item_variatiom($pvalue['item_code']);
+                    $pur_bill_details['bill_percentage'] = 0.00;
+                    $pur_bill_details['hold'] = 0.00;
+                    $this->db->insert(db_prefix() . 'pur_bill_details', $pur_bill_details);
+                    $bill_item_id = $this->db->insert_id();
+
+                    if(!empty($bill_item_id)) {
+                        $default_purchase_bill_rows = get_default_purchase_bill_rows();
+                        foreach ($default_purchase_bill_rows as $pdkey => $pdvalue) {
+                            $pur_bills_bifurcation = array();
+                            $pur_bills_bifurcation['bill_item_id'] = $bill_item_id;
+                            $pur_bills_bifurcation['item_id'] = $pdvalue['item_id'];
+                            $pur_bills_bifurcation['bill_percent'] = $pdvalue['bill_percent'];
+                            $this->db->insert(db_prefix() . 'pur_bills_bifurcation', $pur_bills_bifurcation);
+                        }
+                    }
+                }
+            }
+
+            if ($pur_bill_id) {
+                $this->db->where('option_name', 'next_bill_number');
+                $this->db->update(db_prefix() . 'purchase_option', ['option_val' =>  $next_number + 1]);
             }
         }
 

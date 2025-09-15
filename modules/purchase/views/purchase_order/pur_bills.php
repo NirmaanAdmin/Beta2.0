@@ -289,13 +289,16 @@
 		        				<thead>
 		        					<tr>
 		        						<th></th>
-		        						<th width="15%" align="left"><?php echo _l('Uniclass Code'); ?></th>
-		        						<th width="15%" align="left"><?php echo _l('item_description'); ?></th>
-		        						<th width="14%" align="right"><?php echo _l('unit_price'); ?><span class="th_currency"><?php echo '('.$po_currency->name.')'; ?></span></th>
-		        						<th width="14%" align="right" class="qty"><?php echo _l('Ordered Quantity'); ?></th>
-		        						<th width="14%" align="right"><?php echo _l('bill_bifurcation'); ?></th>
-		        						<th width="14%" align="right"><?php echo _l('bill_percentage'); ?></th>
-		        						<th width="14%" align="right"><?php echo _l('total'); ?><span class="th_currency"><?php echo '('.$po_currency->name.')'; ?></span></th>
+		        						<th align="left"><?php echo _l('Uniclass Code'); ?></th>
+		        						<th align="left"><?php echo _l('item_description'); ?></th>
+		        						<th align="right"><?php echo _l('unit_price'); ?><span class="th_currency"><?php echo '('.$po_currency->name.')'; ?></span></th>
+		        						<th align="right" class="qty"><?php echo _l('Ordered Quantity'); ?></th>
+		        						<th align="right" class="billed_quantity"><?php echo _l('Bill Quantity'); ?></th>
+		        						<th align="right"><?php echo _l('bill_bifurcation'); ?></th>
+		        						<th align="right"><?php echo _l('bill_percentage'); ?></th>
+		        						<th align="right"><?php echo _l('Hold %'); ?></th>
+		        						<th align="right"><?php echo _l('Hold Amount'); ?></th>
+		        						<th align="right"><?php echo _l('Amount'); ?><span class="th_currency"></span></th>
 		        					</tr>
 		        				</thead>
 		        				<tbody>

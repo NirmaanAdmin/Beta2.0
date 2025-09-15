@@ -298,8 +298,26 @@
     var total = 0;
     var rows = $('.table.has-calculations tbody tr.item');
     $.each(rows, function() {
-      var row_total = parseFloat($(this).find('td.row_total input').val()) || 0;
-      total += row_total;
+      var row = $(this);
+      var bill_amount = 0;
+      var hold_amount = 0;
+      var final_amount = 0;
+      var bill_percentage = parseFloat(row.find("td.row_bill_percentage input").val()) || 0;
+      var hold_percentage = parseFloat(row.find('td.hold input').val()) || 0;
+      var billed_quantity = parseFloat(row.find('td.billed_quantity input[type="number"]').val()) || 0;
+      var rate = parseFloat(row.find('td.rate input').val()) || 0;
+      var amount = billed_quantity * rate;
+      if (bill_percentage > 0) {
+        bill_amount = (amount * bill_percentage) / 100;
+      }
+      if (hold_percentage > 0) {
+        hold_amount = (amount * hold_percentage) / 100;
+      }
+      final_amount = bill_amount - hold_amount;
+      row.find("td.hold_amount").html(format_money(hold_amount));
+      row.find("td.label_row_total").html(format_money(final_amount));
+      row.find("td.row_total").val(final_amount);
+      total += final_amount;
     });
     $('.wh-total').html(
       format_money(total) +
@@ -502,64 +520,41 @@
     return d;
   }
 
-  function add_bill_bifurcation(id, amount) {
-    calculate_bill_bifurcation(id, amount);
+  function add_bill_bifurcation(id, unit_price) {
+    calculate_bill_bifurcation(id, unit_price);
     $('#bill_modal_'+id).modal('show');
   }
 
-  function calculate_bill_bifurcation(id, amount) {
+  function calculate_bill_bifurcation(id, unit_price) {
     var total_bill_unit_price = 0;
-    var total_hold_amount = 0;
-    var total_final_amount = 0;
     var total_bill_percentage = 0;
-    var total_hold_percentage = 0;
-    var final_percentage = 0;
     var rows = $('#bill_modal_' + id + ' table tbody .bill_items');
     $.each(rows, function () {
       var row = $(this);
       var bill_percentage = parseFloat(row.find(".all_bill_percentage input").val()) || 0;
-      var hold_percentage = parseFloat(row.find(".all_hold input").val()) || 0;
       var bill_unit_price = 0;
-      var hold_amount = 0;
-      var final_amount = 0;
       if (bill_percentage > 0) {
-        bill_unit_price = (amount * bill_percentage) / 100;
+        bill_unit_price = (unit_price * bill_percentage) / 100;
       }
       total_bill_unit_price += bill_unit_price;
-      if (hold_percentage > 0) {
-        hold_amount = (amount * hold_percentage) / 100;
-      }
-      total_hold_amount += hold_amount;
-      final_amount = bill_unit_price - hold_amount;
-      total_final_amount += final_amount;
       row.find(".all_bill_unit_price").html(format_money(bill_unit_price));
-      row.find(".all_hold_amount").html(format_money(hold_amount));
-      row.find(".all_final_amount").html(format_money(final_amount));
       total_bill_percentage += bill_percentage;
-      total_hold_percentage += hold_percentage;
     });
     $('#bill_modal_' + id + ' .total_bill_unit_price').html(format_money(total_bill_unit_price));
-    $('#bill_modal_' + id + ' .total_hold_amount').html(format_money(total_hold_amount));
-    $('#bill_modal_' + id + ' .total_final_amount').html(format_money(total_final_amount));
-    final_percentage = total_bill_percentage - total_hold_percentage;
-    $('#bill_modal_' + id + ' input[name="final_percentage"]').val(final_percentage.toFixed(2));
-    $('#bill_modal_' + id + ' input[name="total_final_amount"]').val(total_final_amount.toFixed(2));
+    $('#bill_modal_' + id + ' input[name="final_percentage"]').val(total_bill_percentage.toFixed(2));
   }
 
   function save_bill_row_model(id) {
     var final_percentage = parseFloat($('#bill_modal_' + id + ' input[name="final_percentage"]').val()) || 0;
-    var total_final_amount = parseFloat($('#bill_modal_' + id + ' input[name="total_final_amount"]').val()) || 0;
     if (final_percentage > 100) {
-      alert_float('warning', "The combined Bill and Hold percentages cannot exceed 100.");
+      alert_float('warning', "The percentages cannot exceed 100.");
       return false;
     } else if (final_percentage < 0) {
-      alert_float('warning', "The combined Bill and Hold percentages cannot be negative.");
+      alert_float('warning', "The percentages cannot be negative.");
       return false;
     } else {
       $('.list_item_' + id + ' .label_row_bill_percentage').html(final_percentage.toFixed(2)+'%');
       $('.list_item_' + id + ' .row_bill_percentage input').val(final_percentage.toFixed(2));
-      $('.list_item_' + id + ' .label_row_total').html(format_money(total_final_amount));
-      $('.list_item_' + id + ' .row_total input').val(total_final_amount.toFixed(2));
       $('#bill_modal_' + id).modal('hide');
     }
     pur_calculate_total();
