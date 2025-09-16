@@ -21195,6 +21195,7 @@ class Purchase_model extends App_Model
         unset($data['additional_discount']);
         unset($data['tax_value']);
         unset($data['final_percentage']);
+        unset($data['payment_certificate_total']);
 
         $order_detail = [];
         if (isset($data['newitems'])) {
@@ -21443,6 +21444,7 @@ class Purchase_model extends App_Model
         unset($data['tax_value']);
         unset($data['billed_quantity']);
         unset($data['final_percentage']);
+        unset($data['payment_certificate_total']);
         unset($data['pur_order']);
 
         unset($data['isedit']);

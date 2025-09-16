@@ -91,34 +91,41 @@
       $('.all_bill_row_model').each(function () {
         var modal = $(this);
         var total_bill_percentage = 0;
-        var total_hold_percentage = 0;
         modal.find("tbody .bill_items").each(function () {
           var row = $(this);
           var bill_percentage = parseFloat(row.find(".all_bill_percentage input").val()) || 0;
-          var hold_percentage = parseFloat(row.find(".all_hold input").val()) || 0;
           total_bill_percentage += bill_percentage;
-          total_hold_percentage += hold_percentage;
         });
-        var final_percentage = total_bill_percentage - total_hold_percentage;
-        if (final_percentage > 100) {
+        if (total_bill_percentage > 100) {
           is_submit = false;
           alert_float(
             'warning',
-            "The combined Bill and Hold percentages cannot exceed 100 in modal"
+            "The percentages cannot exceed 100 in modal"
           );
           form.find('button.transaction-submit:disabled').prop('disabled', false);
           return false;
         }
-        if (final_percentage < 0) {
+        if (total_bill_percentage < 0) {
           is_submit = false;
           alert_float(
             'warning',
-            "The combined Bill and Hold percentages cannot be negative."
+            "The percentages cannot be negative in modal"
           );
           form.find('button.transaction-submit:disabled').prop('disabled', false);
           return false;
         }
       });
+      var grand_total = pur_calculate_total();
+      var payment_certificate_total = parseFloat($("input[name='payment_certificate_total']").val()) || 0;
+      if(grand_total > payment_certificate_total) {
+        is_submit = false;
+        alert_float(
+          'warning',
+          "The grand total should not be greater than the payment certificate total."
+        );
+        form.find('button.transaction-submit:disabled').prop('disabled', false);
+        return false;
+      }
       if (is_submit) {
         if (clickedButton) {
           form.append('<input type="hidden" name="' + clickedButton + '" value="1">');
@@ -323,7 +330,7 @@
       format_money(total) +
       hidden_input('grand_total', accounting.toFixed(total, app.options.decimal_places))
     );
-    $(document).trigger('purchase-quotation-total-calculated');
+    return total;
   }
 
   // Set the currency for accounting

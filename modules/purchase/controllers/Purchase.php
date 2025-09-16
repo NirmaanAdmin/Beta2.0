@@ -15160,6 +15160,8 @@ class purchase extends AdminController
             $data['items']     = [];
             $data['ajaxItems'] = true;
         }
+        $payment_certificate_calc = $this->purchase_model->get_payment_certificate_calc($data['pur_bill']->pc_id);
+        $data['payment_certificate_total'] = $payment_certificate_calc['sub_fg_3'];
 
         $this->load->view('purchase_order/pur_bills', $data);
     }

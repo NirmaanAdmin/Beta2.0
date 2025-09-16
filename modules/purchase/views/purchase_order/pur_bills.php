@@ -317,6 +317,14 @@
 		        					<td class="wh-total">
 		        					</td>
 		        				</tr>
+		        				<tr>
+		        					<td><span class="bold"><?php echo _l('Payment certificate total'); ?> :</span>
+		        						<?php echo form_hidden('payment_certificate_total', $payment_certificate_total); ?>
+		        					</td>
+		        					<td class="payment_certificate_total">
+		        						<?php echo app_format_money($payment_certificate_total, $base_currency->symbol); ?>
+		        					</td>
+		        				</tr>
 		        			</tbody>
 		        		</table>
 		        	</div>
