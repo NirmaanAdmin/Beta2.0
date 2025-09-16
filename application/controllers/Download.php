@@ -253,7 +253,19 @@ class Download extends App_Controller
             if (staff_can('view',  'customers') || is_customer_admin($attachment->rel_id) || is_client_logged_in()) {
                 $path = get_upload_path_by_type('customer') . $attachment->rel_id . '/' . $attachment->file_name;
             }
-        }  elseif ($folder_indicator == 'estimate_request_attachment') {
+        } elseif ($folder_indicator == 'debit_note') {
+            if (is_staff_logged_in() || is_vendor_logged_in()) {
+                if (!$attachmentid) {
+                    show_404();
+                }
+                $this->db->where('id', $attachmentid);
+                $attachment = $this->db->get(db_prefix() . 'pur_debit_notes_files')->row();
+                if (!$attachment) {
+                    show_404();
+                }
+                $path = get_upload_path_by_type('purchase') . 'debit_note/' . $attachment->rel_id . '/' . $attachment->file_name;
+            }
+        } elseif ($folder_indicator == 'estimate_request_attachment') {
             if (!is_staff_logged_in() && strpos($_SERVER['HTTP_REFERER'], 'forms/l/') === false) {
                 show_404();
             }

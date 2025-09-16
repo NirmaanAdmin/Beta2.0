@@ -9647,6 +9647,7 @@ class Purchase_model extends App_Model
 
         $this->db->insert(db_prefix() . 'pur_debit_notes', $data);
         $insert_id = $this->db->insert_id();
+        $this->save_debit_notes_files($insert_id);
         if ($insert_id) {
 
             // Update next credit note number in settings
@@ -10052,6 +10053,7 @@ class Purchase_model extends App_Model
 
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'pur_debit_notes', $data);
+        $this->save_debit_notes_files($id);
 
         if ($this->db->affected_rows() > 0) {
             $affectedRows++;
@@ -24894,5 +24896,57 @@ class Purchase_model extends App_Model
         $this->db->group_by('id');
         $this->db->having('non_break_description', $non_break_description);
         return $this->db->get(db_prefix() . 'pur_bill_details')->row();
+    }
+
+    public function get_debit_note_attachments($id)
+    {
+        $this->db->where('rel_id', $id);
+        $this->db->order_by('dateadded', 'desc');
+        $attachments = $this->db->get(db_prefix() . 'pur_debit_notes_files')->result_array();
+        return $attachments;
+    }
+
+    public function save_debit_notes_files($id)
+    {
+        $uploadedFiles = handle_debit_notes_attachments_array($id);
+        if ($uploadedFiles && is_array($uploadedFiles)) {
+            foreach ($uploadedFiles as $file) {
+                $data = array();
+                $data['dateadded'] = date('Y-m-d H:i:s');
+                $data['rel_id'] = $id;
+                $data['staffid'] = get_staff_user_id();
+                $data['attachment_key'] = app_generate_hash();
+                $data['file_name'] = $file['file_name'];
+                $data['filetype']  = $file['filetype'];
+                $this->db->insert(db_prefix() . 'pur_debit_notes_files', $data);
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Remove attachment by id
+     * @param  mixed $id attachment id
+     * @return boolean
+     */
+    public function delete_debit_note_attachment($id)
+    {
+        $deleted = false;
+        $this->db->where('id', $id);
+        $attachment = $this->db->get(db_prefix() . 'pur_debit_notes_files')->row();
+        if ($attachment) {
+            if (unlink(get_upload_path_by_type('purchase') . 'debit_note/' . $attachment->rel_id . '/' . $attachment->file_name)) {
+                $this->db->where('id', $attachment->id);
+                $this->db->delete(db_prefix() . 'pur_debit_notes_files');
+                $deleted = true;
+            }
+            // Check if no attachments left, so we can delete the folder also
+            $other_attachments = list_files(get_upload_path_by_type('purchase') . 'debit_note/' . $attachment->rel_id);
+            if (count($other_attachments) == 0) {
+                delete_dir(get_upload_path_by_type('purchase') . 'debit_note/' . $attachment->rel_id);
+            }
+        }
+
+        return $deleted;
     }
 }

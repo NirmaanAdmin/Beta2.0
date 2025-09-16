@@ -7548,6 +7548,7 @@ class purchase extends AdminController
             $data['edit']        = true;
             $title               = _l('edit', _l('debit_note')) . ' - ' . format_debit_note_number($debit_note->id);
             $data['isedit'] = true;
+            $data['attachments'] = $this->purchase_model->get_debit_note_attachments($id);
         }
 
         if ($this->input->get('customer_id')) {
@@ -16661,5 +16662,11 @@ class purchase extends AdminController
             'message' => $message,
         ]);
         die();
+    }
+
+    public function delete_debit_note_attachment($id)
+    {
+        $this->purchase_model->delete_debit_note_attachment($id);
+        redirect($_SERVER['HTTP_REFERER']);
     }
 }
