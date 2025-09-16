@@ -323,7 +323,7 @@
       final_amount = bill_amount - hold_amount;
       row.find("td.hold_amount").html(format_money(hold_amount));
       row.find("td.label_row_total").html(format_money(final_amount));
-      row.find("td.row_total").val(final_amount);
+      row.find("td.row_total input").val(final_amount);
       total += final_amount;
     });
     $('.wh-total').html(

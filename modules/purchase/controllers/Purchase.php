@@ -15140,7 +15140,7 @@ class purchase extends AdminController
                     $item_name = pur_get_item_variatiom($bill_detail['item_code']);
                 }
 
-                $pur_bill_row_template .= $this->purchase_model->create_purchase_bill_row_template('items[' . $index_order . ']', $item_name, $bill_detail['description'], $bill_detail['item_code'], $bill_detail['quantity'], $bill_detail['billed_quantity'], $bill_detail['unit_id'], $unit_name, $bill_detail['unit_price'], $bill_detail['bill_percentage'], $bill_detail['hold'], $bill_detail['total_money'], $bill_detail['id'], true, $currency_rate, $to_currency);
+                $pur_bill_row_template .= $this->purchase_model->create_purchase_bill_row_template('items[' . $index_order . ']', $item_name, $bill_detail['description'], $bill_detail['item_code'], $bill_detail['quantity'], $bill_detail['billed_quantity'], $bill_detail['unit_id'], $unit_name, $bill_detail['unit_price'], $bill_detail['bill_percentage'], $bill_detail['hold'], $bill_detail['total_money'], $bill_detail['id'], true, $currency_rate, $to_currency, $data['pur_bill']->id);
 
                 $pur_bill_row_model .= $this->purchase_model->get_purchase_bill_row_model($bill_detail['id'], $item_name, $bill_detail['description'], $bill_detail['unit_price'], $bill_detail['id']);
             }
@@ -15162,6 +15162,7 @@ class purchase extends AdminController
         }
         $payment_certificate_calc = $this->purchase_model->get_payment_certificate_calc($data['pur_bill']->pc_id);
         $data['payment_certificate_total'] = $payment_certificate_calc['sub_fg_3'];
+        $data['po_bills_columns'] = $this->purchase_model->get_all_po_bills_columns($id);
 
         $this->load->view('purchase_order/pur_bills', $data);
     }

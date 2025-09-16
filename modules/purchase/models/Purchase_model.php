@@ -21089,7 +21089,7 @@ class Purchase_model extends App_Model
         return true;
     }
 
-    public function create_purchase_bill_row_template($name = '', $item_name = '', $item_description = '', $item_code = '', $quantity = '', $billed_quantity = '', $unit_id = '', $unit_name = '', $unit_price = '', $bill_percentage = 0, $hold = 0, $total_money = 0, $item_key = '', $is_edit = false, $currency_rate = 1, $to_currency = '')
+    public function create_purchase_bill_row_template($name = '', $item_name = '', $item_description = '', $item_code = '', $quantity = '', $billed_quantity = '', $unit_id = '', $unit_name = '', $unit_price = '', $bill_percentage = 0, $hold = 0, $total_money = 0, $item_key = '', $is_edit = false, $currency_rate = 1, $to_currency = '', $pur_bill_id = '')
     {
         $this->load->model('currencies_model');
         $base_currency = $this->currencies_model->get_base_currency();
@@ -21146,8 +21146,6 @@ class Purchase_model extends App_Model
             render_input($name_unit_name, '', $unit_name, 'text', ['placeholder' => _l('unit'), 'readonly' => true], [], 'no-margin', 'input-transparent text-right pur_input_none') .
         '</td>';
 
-        $row .= '<td class="billed_quantity">'.render_input($name_billed_quantity, '', $billed_quantity, 'number', $array_billed_quantity_attr, [], 'no-margin', $text_right_class).'</td>';
-
         $row .= '<td class="bill_bifurcation">
             <a href="javascript:void(0)" 
                onclick="add_bill_bifurcation(' . (int)$item_key . ', ' . $unit_price . '); return false;" 
@@ -21161,6 +21159,17 @@ class Purchase_model extends App_Model
         $row .= '<td class="hold">' . render_input($name_hold, '', $hold, 'number', $array_hold_attr, [], 'no-margin', $text_right_class) . '</td>';
 
         $row .= '<td class="hold_amount" align="right"></td>';
+
+        $po_bills_columns = $this->get_all_po_bills_columns($pur_bill_id);
+        if(!empty($po_bills_columns)) {
+           foreach ($po_bills_columns as $pkey => $pvalue) {
+                $old_po_bills_columns = $this->get_old_po_bills_columns($pvalue['id'], $item_code, $item_description);
+                $row .= '<td align="right">'.$old_po_bills_columns->billed_quantity.'</td>';
+                $row .= '<td align="right">'.app_format_money($old_po_bills_columns->total_money, $base_currency->symbol).'</td>';
+           }
+        }
+
+        $row .= '<td class="billed_quantity">'.render_input($name_billed_quantity, '', $billed_quantity, 'number', $array_billed_quantity_attr, [], 'no-margin', $text_right_class).'</td>';
 
         $row .= '<td class="label_row_total" align="right">' . app_format_money($total_money, $base_currency->symbol) . '</td>';
 
@@ -24854,5 +24863,36 @@ class Purchase_model extends App_Model
         }
 
         return true;
+    }
+
+    public function get_all_po_bills_columns($id)
+    {
+        $pur_bills = $this->get_pur_bill($id);
+        $this->db->select('id');
+        $this->db->from(db_prefix() . 'pur_bills');
+        $this->db->where('pur_order', $pur_bills->pur_order);
+        $this->db->where('id <', (int)$id);
+        $this->db->order_by('id', 'ASC');
+        return $this->db->get()->result_array();
+    }
+
+    public function get_old_po_bills_columns($bill_id, $item_code, $item_description)
+    {
+        $non_break_description = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $item_description));
+        $this->db->select('*');
+        $this->db->select("
+            REPLACE(
+                REPLACE(
+                    REPLACE(
+                        REPLACE(description, '\r', ''),
+                    '\n', ''),
+                '<br />', ''),
+            '<br/>', '') AS non_break_description
+        ");
+        $this->db->where('pur_bill', $bill_id);
+        $this->db->where('item_code', $item_code);
+        $this->db->group_by('id');
+        $this->db->having('non_break_description', $non_break_description);
+        return $this->db->get(db_prefix() . 'pur_bill_details')->row();
     }
 }

@@ -293,12 +293,22 @@
 		        						<th align="left"><?php echo _l('item_description'); ?></th>
 		        						<th align="right"><?php echo _l('unit_price'); ?><span class="th_currency"><?php echo '('.$po_currency->name.')'; ?></span></th>
 		        						<th align="right" class="qty"><?php echo _l('Ordered Quantity'); ?></th>
-		        						<th align="right" class="billed_quantity"><?php echo _l('Bill Quantity'); ?></th>
 		        						<th align="right"><?php echo _l('bill_bifurcation'); ?></th>
 		        						<th align="right"><?php echo _l('bill_percentage'); ?></th>
 		        						<th align="right"><?php echo _l('Hold %'); ?></th>
 		        						<th align="right"><?php echo _l('Hold Amount'); ?></th>
-		        						<th align="right"><?php echo _l('Amount'); ?><span class="th_currency"></span></th>
+		        						<?php
+		        						if(!empty($po_bills_columns)) {
+		        							foreach ($po_bills_columns as $pkey => $pvalue) { ?>
+		        								<th align="right">Qty (PC-<?php echo $pkey+1; ?>)</th>
+		        								<th align="right">Amount (PC-<?php echo $pkey+1; ?>)</th>
+		        							<?php }
+		        						} ?>
+		        						<?php
+		        						$count_bills_columns = count($po_bills_columns) + 1;
+		        						?>
+		        						<th align="right">Qty (PC-<?php echo $count_bills_columns; ?>)</th>
+		        						<th align="right">Amount (PC-<?php echo $count_bills_columns; ?>)</th>
 		        					</tr>
 		        				</thead>
 		        				<tbody>
