@@ -789,10 +789,12 @@ class Purchase_model extends App_Model
      */
     public function get_approval_setting($id = '')
     {
+        $default_project = get_default_project();
         if (is_numeric($id)) {
             $this->db->where('id', $id);
             return $this->db->get(db_prefix() . 'pur_approval_setting')->row();
         }
+        $this->db->where('project_id', $default_project);
         return $this->db->get(db_prefix() . 'pur_approval_setting')->result_array();
     }
 
