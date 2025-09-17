@@ -18964,7 +18964,7 @@ class Purchase_model extends App_Model
             if ($all_approved[0]['all_approved'] == 1) {
                 $this->db->where('id', $rel_id);
                 $this->db->update(db_prefix() . 'payment_certificate', ['approve_status' => 2]);
-                if($rel_type == "po_payment_certificate") {
+                if($rel_type == "po_payment_certificate" || $rel_type == "wo_payment_certificate") {
                     $this->convert_pc_to_pur_bill($rel_id);
                 }
             }
@@ -21467,7 +21467,12 @@ class Purchase_model extends App_Model
         $this->db->update(db_prefix() . 'pur_bills', $total);
 
         if(isset($save_and_send)) {
-            $this->send_bill_bifurcation_approve(['rel_id' => $id]);
+            $pur_bill = $this->get_pur_bill($id);
+            if(!empty($pur_bill->pur_order)) {
+                $this->send_bill_bifurcation_approve(['rel_id' => $id, 'rel_type' => 'po_bill_bifurcation']);
+            } else if(!empty($pur_bill->wo_order)) {
+                $this->send_bill_bifurcation_approve(['rel_id' => $id, 'rel_type' => 'wo_bill_bifurcation']);
+            }
         }
 
         return true;
@@ -24527,15 +24532,15 @@ class Purchase_model extends App_Model
         $date_send = date('Y-m-d H:i:s');
         $sender = get_staff_user_id();
         $project = 0;
-        $rel_name = 'bill_bifurcation';
         $module = $this->get_pur_bill($data['rel_id']);
-        $data_new = $this->check_approval_setting($module->project_id, $rel_name, 1);
+        $data_new = $this->check_approval_setting($module->project_id, $data['rel_type'], 1);
         foreach ($data_new as $key => $value) {
             $row = [];
             $row['action'] = 'approve';
             $row['staffid'] = $value['id'];
             $row['date_send'] = $date_send;
             $row['rel_id'] = $data['rel_id'];
+            $row['rel_type'] = $data['rel_type'];
             $row['sender'] = $sender;
             $this->db->insert('tblpur_bills_approval_details', $row);
         }
@@ -24583,10 +24588,20 @@ class Purchase_model extends App_Model
         $bill_number = $prefix.str_pad($next_number,5,'0',STR_PAD_LEFT);
         $payment_certificate = $this->get_payment_certificate($pc_id);
         if(!empty($payment_certificate)) {
-            $pur_order = $this->get_pur_order($payment_certificate->po_id);
-            $this->db->where('pur_order', $pur_order->id);
-            $this->db->order_by('id', 'ASC');
-            $pur_order_details = $this->db->get(db_prefix() . 'pur_order_detail')->result_array();
+            if(!empty($payment_certificate->po_id)) {
+                $order = $this->get_pur_order($payment_certificate->po_id);
+                $this->db->where('pur_order', $order->id);
+                $this->db->order_by('id', 'ASC');
+                $order_details = $this->db->get(db_prefix() . 'pur_order_detail')->result_array();
+            } else if(!empty($payment_certificate->wo_id)) {
+                $order = $this->get_wo_order($payment_certificate->wo_id);
+                $this->db->where('wo_order', $order->id);
+                $this->db->order_by('id', 'ASC');
+                $order_details = $this->db->get(db_prefix() . 'wo_order_detail')->result_array();
+            } else {
+                $order = (object) array();
+                $order_details = array();
+            }
             $pur_bills = array();
             $pur_bills['number'] = $next_number;
             $pur_bills['bill_number'] = $bill_number;
@@ -24598,8 +24613,8 @@ class Purchase_model extends App_Model
             $pur_bills['payment_status'] = 0;
             $pur_bills['add_from'] = get_staff_user_id();
             $pur_bills['date_add'] = date('Y-m-d');
-            $pur_bills['pur_order'] = $pur_order->id;
-            $pur_bills['wo_order'] = 0;
+            $pur_bills['pur_order'] = !empty($payment_certificate->po_id) ? $payment_certificate->po_id : NULL;
+            $pur_bills['wo_order'] = !empty($payment_certificate->wo_id) ? $payment_certificate->wo_id : NULL;
             $pur_bills['recurring'] = 0;
             $pur_bills['cycles'] = 0;
             $pur_bills['total_cycles'] = 0;
@@ -24610,7 +24625,7 @@ class Purchase_model extends App_Model
             $pur_bills['to_currency'] = 3;
             $pur_bills['bill_code'] = $bill_number;
             $pur_bills['discount_type'] = 'after_tax';
-            $pur_bills['project_id'] = $pur_order->project;
+            $pur_bills['project_id'] = !empty($order) ? $order->project : get_default_project();
             $pur_bills['expense_convert'] = 0;
             $pur_bills['group_pur'] = 0;
             $pur_bills['bil_total'] = 0.00;
@@ -24618,8 +24633,8 @@ class Purchase_model extends App_Model
             $this->db->insert(db_prefix() . 'pur_bills', $pur_bills);
             $pur_bill_id = $this->db->insert_id();
 
-            if(!empty($pur_order_details)) {
-                foreach ($pur_order_details as $pkey => $pvalue) {
+            if(!empty($order_details)) {
+                foreach ($order_details as $pkey => $pvalue) {
                     $pur_bill_details = array();
                     $pur_bill_details['pur_bill'] = $pur_bill_id;
                     $pur_bill_details['item_code'] = $pvalue['item_code'];

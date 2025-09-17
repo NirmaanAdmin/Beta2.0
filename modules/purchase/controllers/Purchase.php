@@ -15111,14 +15111,13 @@ class purchase extends AdminController
      * Deletes a bill and redirects to the purchase order page
      * 
      * @param int $id The ID of the bill to delete
-     * @param int $pur_id The ID of the related purchase order for redirect
      * @return void
      * @throws Exception If deletion fails or invalid parameters provided
      */
-    public function delete_bill($id, $pur_id)
+    public function delete_bill($id)
     {
         // Validate input parameters
-        if (!is_numeric($id) || !is_numeric($pur_id)) {
+        if (!is_numeric($id)) {
             set_alert('warning', _l('invalid_parameters'));
             redirect(admin_url('purchase'));
         }
@@ -15137,9 +15136,7 @@ class purchase extends AdminController
             log_message('error', 'Bill deletion failed: ' . $e->getMessage());
             set_alert('danger', _l('bill_deletion_error'));
         }
-
-        // Redirect to purchase order page
-        redirect(admin_url('purchase/purchase_order/' . $pur_id));
+        redirect($_SERVER['HTTP_REFERER']);
     }
 
 
@@ -16507,10 +16504,9 @@ class purchase extends AdminController
         redirect(admin_url('purchase/list_payment_certificate'));
     }
 
-    public function table_po_bills($po_id)
+    public function table_po_bills()
     {
-        $this->app->get_table_data(module_views_path('purchase', 'purchase_order/table_po_bills'),
-            ['po_id' => $po_id]);
+        $this->app->get_table_data(module_views_path('purchase', 'purchase_order/table_po_bills'));
     }
 
     public function send_bill_bifurcation_approve()

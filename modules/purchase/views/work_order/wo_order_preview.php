@@ -40,6 +40,11 @@ if ($estimate->currency != 0) {
                      </a>
                   </li> -->
                   <li role="presentation">
+                     <a href="#bills" aria-controls="bills" role="tab" data-toggle="tab">
+                        <?php echo _l('bill_bifurcation'); ?>
+                     </a>
+                  </li>
+                  <li role="presentation">
                      <a href="#payment_certificate" aria-controls="payment_certificate" role="tab" data-toggle="tab">
                         <?php echo _l('payment_certificate'); ?>
                      </a>
@@ -1029,6 +1034,31 @@ if ($estimate->currency != 0) {
                </table>
             </div>
 
+            <div role="tabpanel" class="tab-pane" id="bills">
+               <div class="col-md-6 pad_div_0">
+                  <h4 class="font-medium mbot15 bold text-success"><?php echo _l('bill_for_pur_order') . ' ' . $estimate->wo_order_number; ?></h4>
+               </div>
+               <div class="col-md-6 padr_div_0">
+                  <?php if (has_permission('bill_bifurcation', '', 'create') || is_admin()) { ?>
+                     <?php /* <a href="<?php echo admin_url('purchase/pur_bills/' . $estimate->id . '?type=po'); ?>" class="btn btn-success pull-right" target="_blank"><i class="fa fa-plus"></i><?php echo ' ' . _l('add_bill_bifurcation'); ?></a> */ ?>
+                  <?php } ?>
+               </div>
+               <div class="clearfix"></div>
+               <?php if (has_permission('bill_bifurcation', '', 'view') || is_admin()) { ?>
+                  <table class="table table-po-bills scroll-responsive">
+                     <thead>
+                        <th>#</th>
+                        <th><?php echo _l('Bill Code'); ?></th>
+                        <th><?php echo _l('Amount'); ?></th>
+                        <th><?php echo _l('Bill Date'); ?></th>
+                        <th><?php echo _l('approval_status'); ?></th>
+                        <th><?php echo _l('options'); ?></th>
+                     </thead>
+                     <tbody></tbody>
+                  </table>
+               <?php } ?>
+            </div>
+
          </div>
       </div>
    </div>
@@ -1299,5 +1329,34 @@ if ($estimate->currency != 0) {
    function close_modal_preview() {
       "use strict";
       $('._project_file').modal('hide');
+   }
+
+   var table_po_bills = $('.table-po-bills');
+   if ($.fn.DataTable.isDataTable('.table-po-bills')) {
+      $('.table-po-bills').DataTable().destroy();
+   }
+   var fnServerParams;
+   fnServerParams = {
+      "wo_id" : '[name="_attachment_sale_id"]',
+   }
+   initDataTable('.table-po-bills', admin_url + 'purchase/table_po_bills', false, false, fnServerParams, [1,'desc']);
+
+   function send_bill_bifurcation_approve(id, rel_type){
+     "use strict";
+     var data = {};
+     data.rel_id = id;
+     data.rel_type = rel_type;
+     $("body").append('<div class="dt-loader"></div>');
+       $.post(admin_url + 'purchase/send_bill_bifurcation_approve', data).done(function(response){
+           response = JSON.parse(response);
+           $("body").find('.dt-loader').remove();
+           if (response.success === true || response.success == 'true') {
+               alert_float('success', response.message);
+               window.location.reload();
+           }else{
+             alert_float('warning', response.message);
+               window.location.reload();
+           }
+       });
    }
 </script>

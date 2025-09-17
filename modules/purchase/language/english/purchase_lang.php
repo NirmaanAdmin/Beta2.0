@@ -972,3 +972,5 @@ $lang['approval_request_sent'] = 'Approval request sent';
 $lang['bill_bifurcation'] = 'Bill Bifurcation';
 $lang['add_bill_bifurcation'] = 'Add Bill Bifurcation';
 $lang['bill_percentage'] = 'Bill Percentage';
+$lang['po_bill_bifurcation'] = 'PO Bill Bifurcation';
+$lang['wo_bill_bifurcation'] = 'WO Bill Bifurcation';

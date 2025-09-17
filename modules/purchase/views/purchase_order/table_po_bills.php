@@ -16,9 +16,14 @@ $select = [
 $join = [];
 
 $where = [];
-$po_id = isset($po_id) ? $po_id : null;
-if ($po_id) {
-    $where[] = 'AND pb.pur_order = ' . $po_id;
+$rel_type = '';
+if ($this->ci->input->post('po_id')) {
+    $where[] = 'AND pb.pur_order = ' . $this->ci->input->post('po_id');
+    $rel_type = "po_bill_bifurcation";
+}
+if ($this->ci->input->post('wo_id')) {
+    $where[] = 'AND pb.wo_order = ' . $this->ci->input->post('wo_id');
+    $rel_type = "wo_bill_bifurcation";
 }
 
 $additionalSelect = [];
@@ -45,7 +50,7 @@ foreach ($rResult as $key => $aRow) {
     } else {
         $list_approval_details = $this->ci->purchase_model->get_list_pur_bills_approval_details($aRow['id']);
         if (empty($list_approval_details)) {
-            $approve_status = '<a data-toggle="tooltip" data-loading-text="' . _l('wait_text') . '" class="btn btn-success lead-top-btn lead-view" data-placement="top" href="#" onclick="send_bill_bifurcation_approve(' . pur_html_entity_decode($aRow['id']) . '); return false;">' . _l('approval_request_sent') . '</a>';
+            $approve_status = '<a data-toggle="tooltip" data-loading-text="' . _l('wait_text') . '" class="btn btn-success lead-top-btn lead-view" data-placement="top" href="#" onclick="send_bill_bifurcation_approve(' . pur_html_entity_decode($aRow['id']) . ', \'' . $rel_type . '\'); return false;">' . _l('approval_request_sent') . '</a>';
         } else {
             $approve_status = '<span class="label label-primary">' . _l('approval_request_sent') . '</span>';
         }
@@ -62,7 +67,7 @@ foreach ($rResult as $key => $aRow) {
             <i class="fa fa-pencil-square"></i></a> ';
     }
     if (has_permission('bill_bifurcation', '', 'delete') || is_admin()) {
-        $actions .= '<a href="' . admin_url('purchase/delete_bill/' . $aRow['id']) . '/'.$po_id.'" 
+        $actions .= '<a href="' . admin_url('purchase/delete_bill/' . $aRow['id']) . '" 
             class="btn btn-danger btn-icon _delete" 
             data-toggle="tooltip" 
             data-placement="top" 

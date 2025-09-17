@@ -1333,17 +1333,20 @@ if ($estimate->currency != 0) {
    }
 
    var table_po_bills = $('.table-po-bills');
-   var po_id = <?php echo $estimate->id; ?>;
    if ($.fn.DataTable.isDataTable('.table-po-bills')) {
       $('.table-po-bills').DataTable().destroy();
    }
-   fnServerParams = {}
-   initDataTable('.table-po-bills', admin_url + 'purchase/table_po_bills/'+po_id, false, false, fnServerParams, [1,'desc']);
+   var fnServerParams;
+   fnServerParams = {
+      "po_id" : '[name="_attachment_sale_id"]',
+   }
+   initDataTable('.table-po-bills', admin_url + 'purchase/table_po_bills', false, false, fnServerParams, [1,'desc']);
 
-   function send_bill_bifurcation_approve(id){
+   function send_bill_bifurcation_approve(id, rel_type){
      "use strict";
      var data = {};
      data.rel_id = id;
+     data.rel_type = rel_type;
      $("body").append('<div class="dt-loader"></div>');
        $.post(admin_url + 'purchase/send_bill_bifurcation_approve', data).done(function(response){
            response = JSON.parse(response);
