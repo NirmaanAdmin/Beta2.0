@@ -71,7 +71,7 @@
 									<select name="pur_order" id="pur_order" class="selectpicker" disabled data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
 										<option value=""></option>
 										<?php foreach($pur_orders as $ct){ ?>
-											<option value="<?php echo pur_html_entity_decode($ct['id']); ?>" selected ><?php echo pur_html_entity_decode($ct['pur_order_number']); ?></option>
+											<option value="<?php echo pur_html_entity_decode($ct['id']); ?>" <?php if(isset($pur_bill) && $pur_bill->pur_order == $ct['id']){ echo 'selected'; } ?>><?php echo pur_html_entity_decode($ct['pur_order_number']); ?></option>
 										<?php }
 										echo form_hidden('pur_order',$po_id);
 										?>

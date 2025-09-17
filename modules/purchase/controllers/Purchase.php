@@ -15037,7 +15037,7 @@ class purchase extends AdminController
 
         $data['base_currency'] = $this->currencies_model->get_base_currency();
 
-        $data['pur_orders'] = $this->purchase_model->get_pur_order_approved($id);
+        $data['pur_orders'] = $this->purchase_model->get_pur_order_approved();
         $data['pur_bill'] = $this->purchase_model->get_pur_bill($id);
         $data['pur_bill_detail'] = $this->purchase_model->get_pur_bill_detail($id);
         $data['vendor_id'] = $data['pur_bill']->vendor;
