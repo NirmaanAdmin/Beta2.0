@@ -21187,214 +21187,6 @@ class Purchase_model extends App_Model
         return $row;
     }
 
-    public function add_pur_bill($data)
-    {
-        unset($data['item_select']);
-        unset($data['item_name']);
-        unset($data['description']);
-        unset($data['total']);
-        unset($data['quantity']);
-        unset($data['billed_quantity']);
-        unset($data['unit_price']);
-        unset($data['unit_name']);
-        unset($data['item_code']);
-        unset($data['unit_id']);
-        unset($data['discount']);
-        unset($data['into_money']);
-        unset($data['tax_rate']);
-        unset($data['tax_name']);
-        unset($data['discount_money']);
-        unset($data['total_money']);
-        unset($data['additional_discount']);
-        unset($data['tax_value']);
-        unset($data['final_percentage']);
-        unset($data['payment_certificate_total']);
-
-        $order_detail = [];
-        if (isset($data['newitems'])) {
-            $order_detail = $data['newitems'];
-            unset($data['newitems']);
-        }
-
-        $data['to_currency'] = $data['currency'];
-
-        if (isset($data['add_from'])) {
-            $data['add_from'] = $data['add_from'];
-        } else {
-            $data['add_from'] = get_staff_user_id();
-            $data['add_from_type'] = 'admin';
-        }
-        $data['date_add'] = date('Y-m-d');
-        $data['payment_status'] = 0;
-        $prefix = get_purchase_option('pur_bill_prefix');
-
-        $this->db->where('bill_number', $data['bill_number']);
-        $check_exist_number = $this->db->get(db_prefix() . 'pur_bills')->row();
-
-        if (!isset($data['order_tracker_id'])) {
-            $data['order_tracker_id'] = NULL;
-        }
-        if (!isset($data['pur_order'])) {
-            $data['pur_order'] = 0;
-        }
-        if (!isset($data['wo_order'])) {
-            $data['wo_order'] = 0;
-        }
-
-        while ($check_exist_number) {
-            $data['number'] = (int)$data['number'] + 1;
-            $data['bill_number'] =  $prefix . str_pad($data['number'], 5, '0', STR_PAD_LEFT);
-            $this->db->where('bill_number', $data['bill_number']);
-            $check_exist_number = $this->db->get(db_prefix() . 'pur_bills')->row();
-        }
-
-        $data['invoice_date'] = to_sql_date($data['invoice_date']);
-        if ($data['duedate'] != '') {
-            $data['duedate'] = to_sql_date($data['duedate']);
-        }
-        if ($data['bill_accept_date'] != '') {
-            $data['bill_accept_date'] = to_sql_date($data['bill_accept_date']);
-        }
-        if ($data['certified_bill_date'] != '') {
-            $data['certified_bill_date'] = to_sql_date($data['certified_bill_date']);
-        }
-        if ($data['payment_date'] != '') {
-            $data['payment_date'] = to_sql_date($data['payment_date']);
-        }
-        if ($data['payment_date_basilius'] != '') {
-            $data['payment_date_basilius'] = to_sql_date($data['payment_date_basilius']);
-        }
-        $data['transaction_date'] = to_sql_date($data['transaction_date']);
-
-        if (isset($data['order_discount'])) {
-            $order_discount = $data['order_discount'];
-            if ($data['add_discount_type'] == 'percent') {
-                $data['discount_percent'] = $order_discount;
-            }
-
-            unset($data['order_discount']);
-        }
-
-        unset($data['add_discount_type']);
-
-        if (isset($data['dc_total'])) {
-            $data['discount_total'] = $data['dc_total'];
-            unset($data['dc_total']);
-        }
-
-        if (isset($data['total_mn'])) {
-            $data['subtotal'] = $data['total_mn'];
-            unset($data['total_mn']);
-        }
-
-        if (isset($data['grand_total'])) {
-            $data['total'] = $data['grand_total'];
-            unset($data['grand_total']);
-        }
-
-        $tags = '';
-        if (isset($data['tags'])) {
-            $tags = $data['tags'];
-            unset($data['tags']);
-        }
-
-        if (isset($data['custom_fields'])) {
-            $custom_fields = $data['custom_fields'];
-            unset($data['custom_fields']);
-        }
-
-        $data['project_id'] = get_default_project();
-
-        $newbillitems = [];
-        if (isset($data['newbillitems'])) {
-            $newbillitems = $data['newbillitems'];
-            unset($data['newbillitems']);
-        }
-
-        if (isset($data['save_and_send'])) {
-            $save_and_send = $data['save_and_send'];
-            unset($data['save_and_send']);
-        }
-        
-        $this->db->insert(db_prefix() . 'pur_bills', $data);
-        $insert_id = $this->db->insert_id();
-        if ($insert_id) {
-            $next_number = (int)$data['number'] + 1;
-            $this->db->where('option_name', 'next_bill_number');
-            $this->db->update(db_prefix() . 'purchase_option', ['option_val' =>  $next_number,]);
-
-            handle_tags_save($tags, $insert_id, 'pur_bill');
-
-            if (isset($custom_fields)) {
-                handle_custom_fields_post($insert_id, $custom_fields);
-            }
-
-            $total = [];
-            $total['tax'] = 0;
-
-            if (count($order_detail) > 0) {
-                foreach ($order_detail as $key => $rqd) {
-                    $dt_data = [];
-                    $dt_data['pur_bill'] = $insert_id;
-                    $dt_data['item_code'] = $rqd['item_code'];
-                    $dt_data['unit_id'] = isset($rqd['unit_id']) ? $rqd['unit_id'] : null;
-                    $dt_data['unit_price'] = $rqd['unit_price'];
-                    $dt_data['into_money'] = $rqd['into_money'];
-                    $dt_data['total'] = $rqd['total'];
-                    $dt_data['tax_value'] = $rqd['tax_value'];
-                    $dt_data['item_name'] = $rqd['item_name'];
-                    $dt_data['description'] = nl2br($rqd['item_description']);
-                    $dt_data['total_money'] = $rqd['total_money'];
-                    $dt_data['discount_money'] = $rqd['discount_money'];
-                    $dt_data['discount_percent'] = $rqd['discount'];
-                    $dt_data['billed_quantity'] = $rqd['billed_quantity'];
-
-                    $tax_money = 0;
-                    $tax_rate_value = 0;
-                    $tax_rate = null;
-                    $tax_id = null;
-                    $tax_name = null;
-
-                    if (isset($rqd['tax_select'])) {
-                        $tax_rate_data = $this->pur_get_tax_rate($rqd['tax_select']);
-                        $tax_rate_value = $tax_rate_data['tax_rate'];
-                        $tax_rate = $tax_rate_data['tax_rate_str'];
-                        $tax_id = $tax_rate_data['tax_id_str'];
-                        $tax_name = $tax_rate_data['tax_name_str'];
-                    }
-
-                    $dt_data['tax'] = $tax_id;
-                    $dt_data['tax_rate'] = $tax_rate;
-                    $dt_data['tax_name'] = $tax_name;
-
-                    $dt_data['quantity'] = ($rqd['quantity'] != '' && $rqd['quantity'] != null) ? $rqd['quantity'] : 0;
-                    $dt_data['bill_percentage'] = !empty($rqd['bill_percentage']) ? $rqd['bill_percentage'] : 0;
-                    $dt_data['hold'] = !empty($rqd['hold']) ? $rqd['hold'] : 0;
-
-                    $this->db->insert(db_prefix() . 'pur_bill_details', $dt_data);
-                    $item_insert_id = $this->db->insert_id();
-                    if(isset($newbillitems[$rqd['id']])) {
-                        $billitem = $newbillitems[$rqd['id']];
-                        foreach ($billitem as $bkey => $bvalue) {
-                            $this->db->insert(db_prefix() . 'pur_bills_bifurcation', [
-                                'bill_item_id' => $item_insert_id,
-                                'item_id' => $bvalue['item_id'],
-                                'bill_percent' => $bvalue['bill_percent'],
-                            ]);
-                        }
-                    }
-                }
-            }
-
-            if(isset($save_and_send)) {
-                $this->send_bill_bifurcation_approve(['rel_id' => $insert_id]);
-            }
-
-            return $insert_id;
-        }
-        return false;
-    }
-
     public function get_bills_data($po_id)
     {
         $this->db->select('*');
@@ -21637,12 +21429,14 @@ class Purchase_model extends App_Model
                             $this->db->where('bill_item_id', $rqd['id']);
                             $this->db->where('item_id', $bvalue['item_id']);
                             $this->db->update(db_prefix() . 'pur_bills_bifurcation', [
+                                'item_description' => $bvalue['item_description'],
                                 'bill_percent' => $bvalue['bill_percent'],
                             ]);
                         } else {
                             $this->db->insert(db_prefix() . 'pur_bills_bifurcation', [
                                 'bill_item_id' => $rqd['id'],
                                 'item_id' => $bvalue['item_id'],
+                                'item_description' => $bvalue['item_description'],
                                 'bill_percent' => $bvalue['bill_percent'],
                             ]);
                         }
@@ -24640,11 +24434,7 @@ class Purchase_model extends App_Model
         foreach ($default_purchase_bill_rows as $key => $value) {
             $html .= '<tr class="bill_items">';
             $html .= '<td class="hide">'.form_hidden('newbillitems['.$item_key.']['.$value['item_id'].'][item_id]', $value['item_id']).'</td>';
-            if(empty($pur_bills_bifurcation)) {
-                $html .= '<td align="left">'.$value['description'].'</td>';
-            } else {
-                $html .= '<td align="left">'.get_purchase_bill_description($value['item_id']).'</td>';
-            }
+            $html .= '<td align="left">' . render_textarea('newbillitems['.$item_key.']['.$value['item_id'].'][item_description]', '', $value['item_description'], ['rows' => 2]) . '</td>';
             $html .= '<td align="left" class="all_bill_percentage">' 
               . render_input('newbillitems['.$item_key.']['.$value['item_id'].'][bill_percent]', '', $value['bill_percent'], 'number', ['min' => 0, 'max' => 100, 'onblur' => 'calculate_bill_bifurcation('.$item_key.', '.$unit_price.');', 'onchange' => 'calculate_bill_bifurcation('.$item_key.', '.$unit_price.');']) 
               . '</td>';
@@ -24851,6 +24641,7 @@ class Purchase_model extends App_Model
                             $pur_bills_bifurcation = array();
                             $pur_bills_bifurcation['bill_item_id'] = $bill_item_id;
                             $pur_bills_bifurcation['item_id'] = $pdvalue['item_id'];
+                            $pur_bills_bifurcation['item_description'] = $pdvalue['item_description'];
                             $pur_bills_bifurcation['bill_percent'] = $pdvalue['bill_percent'];
                             $this->db->insert(db_prefix() . 'pur_bills_bifurcation', $pur_bills_bifurcation);
                         }

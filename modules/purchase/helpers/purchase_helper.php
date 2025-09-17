@@ -4888,39 +4888,28 @@ function get_default_purchase_bill_rows()
     $result = [
         [
             'item_id' => 1,
-            'description' => 'Adv against Material selection',
+            'item_description' => 'Adv against Material selection',
             'bill_percent' => 0,
             'hold' => 0,
         ],
         [
             'item_id' => 2,
-            'description' => 'On Material Delivery',
+            'item_description' => 'On Material Delivery',
             'bill_percent' => 0,
             'hold' => 0,
         ],
         [
             'item_id' => 3,
-            'description' => 'On Installation',
+            'item_description' => 'On Installation',
             'bill_percent' => 0,
             'hold' => 0,
         ],
         [
             'item_id' => 4,
-            'description' => 'On Handover',
+            'item_description' => 'On Handover',
             'bill_percent' => 0,
             'hold' => 0,
         ],
     ];
     return $result;
-}
-
-function get_purchase_bill_description($item_id)
-{
-    $rows = get_default_purchase_bill_rows();
-    foreach ($rows as $row) {
-        if ($row['item_id'] == $item_id) {
-            return $row['description'];
-        }
-    }
-    return null;
 }
