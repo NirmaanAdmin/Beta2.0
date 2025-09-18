@@ -21162,10 +21162,10 @@ class Purchase_model extends App_Model
 
         $row .= '<td class="hold_amount" align="right"></td>';
 
-        $po_bills_columns = $this->get_all_po_bills_columns($pur_bill_id);
+        $po_bills_columns = $this->get_all_order_bills_columns($pur_bill_id);
         if(!empty($po_bills_columns)) {
            foreach ($po_bills_columns as $pkey => $pvalue) {
-                $old_po_bills_columns = $this->get_old_po_bills_columns($pvalue['id'], $item_code, $item_description);
+                $old_po_bills_columns = $this->get_old_order_bills_columns($pvalue['id'], $item_code, $item_description);
                 $row .= '<td align="right">'.$old_po_bills_columns->billed_quantity.'</td>';
                 $row .= '<td align="right">'.app_format_money($old_po_bills_columns->total_money, $base_currency->symbol).'</td>';
            }
@@ -21250,7 +21250,6 @@ class Purchase_model extends App_Model
         unset($data['billed_quantity']);
         unset($data['final_percentage']);
         unset($data['payment_certificate_total']);
-        unset($data['pur_order']);
 
         unset($data['isedit']);
 
@@ -24673,18 +24672,29 @@ class Purchase_model extends App_Model
         return true;
     }
 
-    public function get_all_po_bills_columns($id)
+    public function get_all_order_bills_columns($id)
     {
         $pur_bills = $this->get_pur_bill($id);
-        $this->db->select('id');
-        $this->db->from(db_prefix() . 'pur_bills');
-        $this->db->where('pur_order', $pur_bills->pur_order);
-        $this->db->where('id <', (int)$id);
-        $this->db->order_by('id', 'ASC');
-        return $this->db->get()->result_array();
+        if(!empty($pur_bills->pur_order)) {
+            $this->db->select('id');
+            $this->db->from(db_prefix() . 'pur_bills');
+            $this->db->where('pur_order', $pur_bills->pur_order);
+            $this->db->where('id <', (int)$id);
+            $this->db->order_by('id', 'ASC');
+            return $this->db->get()->result_array();
+        } else if(!empty($pur_bills->wo_order)) {
+            $this->db->select('id');
+            $this->db->from(db_prefix() . 'pur_bills');
+            $this->db->where('wo_order', $pur_bills->wo_order);
+            $this->db->where('id <', (int)$id);
+            $this->db->order_by('id', 'ASC');
+            return $this->db->get()->result_array();
+        } else {
+            return array();
+        }
     }
 
-    public function get_old_po_bills_columns($bill_id, $item_code, $item_description)
+    public function get_old_order_bills_columns($bill_id, $item_code, $item_description)
     {
         $non_break_description = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $item_description));
         $this->db->select('*');

@@ -66,17 +66,31 @@
 									</select>
 								</div>
 								
-								<div class="col-md-6 form-group pad_left_0">
-									<label for="pur_order"><?php echo _l('pur_order'); ?></label>
-									<select name="pur_order" id="pur_order" class="selectpicker" disabled data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
-										<option value=""></option>
-										<?php foreach($pur_orders as $ct){ ?>
-											<option value="<?php echo pur_html_entity_decode($ct['id']); ?>" <?php if(isset($pur_bill) && $pur_bill->pur_order == $ct['id']){ echo 'selected'; } ?>><?php echo pur_html_entity_decode($ct['pur_order_number']); ?></option>
-										<?php }
-										echo form_hidden('pur_order',$po_id);
-										?>
-									</select>
-								</div>
+								<?php
+								if(!empty($pur_bill->pur_order)) { ?>
+									<div class="col-md-6 form-group pad_left_0">
+										<label for="pur_order"><?php echo _l('pur_order'); ?></label>
+										<select name="pur_order" id="pur_order" class="selectpicker" disabled data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
+											<option value=""></option>
+											<?php foreach($pur_orders as $ct){ ?>
+												<option value="<?php echo pur_html_entity_decode($ct['id']); ?>" <?php if(isset($pur_bill) && $pur_bill->pur_order == $ct['id']){ echo 'selected'; } ?>><?php echo pur_html_entity_decode($ct['pur_order_number']); ?></option>
+											<?php } ?>
+										</select>
+									</div>
+								<?php } ?>
+
+								<?php
+								if(!empty($pur_bill->wo_order)) { ?>
+									<div class="col-md-6 form-group pad_left_0">
+										<label for="wo_order"><?php echo _l('wo_order'); ?></label>
+										<select name="wo_order" id="wo_order" class="selectpicker" disabled data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
+											<option value=""></option>
+											<?php foreach($wo_orders as $ct){ ?>
+												<option value="<?php echo pur_html_entity_decode($ct['id']); ?>" <?php if(isset($pur_bill) && $pur_bill->wo_order == $ct['id']){ echo 'selected'; } ?>><?php echo pur_html_entity_decode($ct['wo_order_number']); ?></option>
+											<?php } ?>
+										</select>
+									</div>
+								<?php } ?>
 
 								<div class="col-md-6 pad_right_0">
 									<label for="invoice_date"><span class="text-danger">* </span><?php echo _l('Bill Date'); ?></label>
@@ -298,14 +312,14 @@
 		        						<th align="right"><?php echo _l('Hold %'); ?></th>
 		        						<th align="right"><?php echo _l('Hold Amount'); ?></th>
 		        						<?php
-		        						if(!empty($po_bills_columns)) {
-		        							foreach ($po_bills_columns as $pkey => $pvalue) { ?>
+		        						if(!empty($order_bills_columns)) {
+		        							foreach ($order_bills_columns as $pkey => $pvalue) { ?>
 		        								<th align="right">Qty (PC-<?php echo $pkey+1; ?>)</th>
 		        								<th align="right">Amount (PC-<?php echo $pkey+1; ?>)</th>
 		        							<?php }
 		        						} ?>
 		        						<?php
-		        						$count_bills_columns = count($po_bills_columns) + 1;
+		        						$count_bills_columns = count($order_bills_columns) + 1;
 		        						?>
 		        						<th align="right">Qty (PC-<?php echo $count_bills_columns; ?>)</th>
 		        						<th align="right">Amount (PC-<?php echo $count_bills_columns; ?>)</th>

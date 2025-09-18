@@ -15038,6 +15038,7 @@ class purchase extends AdminController
         $data['base_currency'] = $this->currencies_model->get_base_currency();
 
         $data['pur_orders'] = $this->purchase_model->get_pur_order_approved();
+        $data['wo_orders'] = $this->purchase_model->get_wo_order_approved();
         $data['pur_bill'] = $this->purchase_model->get_pur_bill($id);
         $data['pur_bill_detail'] = $this->purchase_model->get_pur_bill_detail($id);
         $data['vendor_id'] = $data['pur_bill']->vendor;
@@ -15086,7 +15087,7 @@ class purchase extends AdminController
         }
         $payment_certificate_calc = $this->purchase_model->get_payment_certificate_calc($data['pur_bill']->pc_id);
         $data['payment_certificate_total'] = $payment_certificate_calc['sub_fg_3'];
-        $data['po_bills_columns'] = $this->purchase_model->get_all_po_bills_columns($id);
+        $data['order_bills_columns'] = $this->purchase_model->get_all_order_bills_columns($id);
 
         $this->load->view('purchase_order/pur_bills', $data);
     }
@@ -15103,7 +15104,7 @@ class purchase extends AdminController
             } else {
                 set_alert('warning', _l('update_purchase_bill_fail'));
             }
-            redirect(admin_url('purchase/purchase_order/' . $data['pur_order']));
+            redirect($_SERVER['HTTP_REFERER']);
         }
     }
 
