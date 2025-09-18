@@ -33,7 +33,7 @@ class document_management_model extends app_model
 			$this->db->where('id', $id);
 			return $this->db->get(db_prefix() . 'dmg_items')->row();
 		} else {
-			$this->db->order_by('position', 'ASC');
+			$this->db->order_by('dateadded', 'DESC');
 			if ($where != '') {
 				$this->db->where($where);
 			}
