@@ -65,12 +65,12 @@
             </div>
             <div class="col-md-8">
               <div class="pull-right _buttons">
-                <?php if (has_permission('warehouse', '', 'view') || is_admin()) { ?>
+                <!-- <?php if (has_permission('warehouse', '', 'view') || is_admin()) { ?>
                   <a href="<?php echo admin_url('warehouse/edit_delivery/' . $goods_delivery->id); ?>" class="btn btn-default btn-with-tooltip" data-toggle="tooltip" title="<?php echo _l('view'); ?>" data-placement="bottom"><i class="fa fa-eye"></i></a>
-                <?php } ?>
+                <?php } ?> -->
 
                 <!-- send mail -->
-                <a href="#" onclick="get_goods_delivery_ajax('<?php echo html_entity_decode($goods_delivery->id); ?>', '<?php echo html_entity_decode($goods_delivery->invoice_id); ?>'); return false;" class="btn btn-success mleft5"><i class="fa fa-envelope" data-toggle="tooltip" title="<?php echo _l('send_mail') ?>"></i></a>
+                <!-- <a href="#" onclick="get_goods_delivery_ajax('<?php echo html_entity_decode($goods_delivery->id); ?>', '<?php echo html_entity_decode($goods_delivery->invoice_id); ?>'); return false;" class="btn btn-success mleft5"><i class="fa fa-envelope" data-toggle="tooltip" title="<?php echo _l('send_mail') ?>"></i></a> -->
 
               </div>
 

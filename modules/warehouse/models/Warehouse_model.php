@@ -22579,29 +22579,26 @@ class Warehouse_model extends App_Model
 		$this->db->select('*');
 
 		// 2. Set goods_delivery as the FROM table
-		$this->db->from(db_prefix() . 'goods_delivery');
+		$this->db->from(db_prefix() . 'goods_receipt');
 
 		// 3. LEFT JOIN goods_delivery_detail on the delivery_id
 		$this->db->join(
-			db_prefix() . 'goods_delivery_detail',
-			db_prefix() . 'goods_delivery_detail.goods_delivery_id = '
-				. db_prefix() . 'goods_delivery.id',
+			db_prefix() . 'goods_receipt_detail',
+			db_prefix() . 'goods_receipt_detail.goods_receipt_id = '
+				. db_prefix() . 'goods_receipt.id',
 			'left'
 		);
 
 		// 4. Add your filters
 		$this->db->where(
-			db_prefix() . 'goods_delivery.approval',
+			db_prefix() . 'goods_receipt.approval',
 			1
 		);
 		$this->db->where(
-			db_prefix() . 'goods_delivery.pr_order_id',
+			db_prefix() . 'goods_receipt.pr_order_id',
 			$pur_order
 		);
-		$this->db->where(
-			db_prefix() . 'goods_delivery_detail.returnable',
-			1
-		);
+		
 
 		// 5. Execute
 		$goods_delivery_description = $this->db->get()->result_array();
