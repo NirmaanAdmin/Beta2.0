@@ -822,7 +822,7 @@ if ($estimate->currency != 0) {
                                  <?php foreach ($changes as $change) { ?>
 
                                     <tr>
-                                       <td><?php echo '<a href="' . admin_url('changee/pur_order/' . $change['id']) . '" target="_blank"><p>' . $change['pur_order_number'] . '</p></a>' ?></td>
+                                       <td><?php echo '<a href="' . admin_url('changee/changee_order#' . $change['id']) . '" target="_blank"><p>' . $change['pur_order_number'] . '</p></a>' ?></td>
                                        <td><?php echo date('d M Y', strtotime($change['datecreated'])) ?></td>
                                        <td><?php echo app_format_money($change['co_value'], $base_currency->symbol); ?></td>
 
