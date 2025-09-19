@@ -16576,4 +16576,27 @@ class purchase extends AdminController
         $this->purchase_model->delete_debit_note_attachment($id);
         redirect($_SERVER['HTTP_REFERER']);
     }
+
+    public function bulk_transfer_invoices()
+    {
+        $response = array();
+        $data = $this->input->post();
+        $bulk_html = $this->purchase_model->bulk_transfer_invoices($data);
+        if (!empty($bulk_html)) {
+            $response['success'] = true;
+            $response['bulk_html'] = $bulk_html;
+        } else {
+            $response['success'] = false;
+            $response['message'] = _l('you_have_not_select_the_convert_button_rows');
+        }
+        echo json_encode($response);
+    }
+
+    public function save_bulk_transfer_invoices()
+    {
+        $data = $this->input->post();
+        $this->purchase_model->save_bulk_transfer_invoices($data);
+        set_alert('success', 'Selected invoices were transferred successfully');
+        redirect(admin_url('purchase/invoices'));
+    }
 }

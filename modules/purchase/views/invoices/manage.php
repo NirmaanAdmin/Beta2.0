@@ -4,7 +4,7 @@
    .show_hide_columns {
       position: absolute;
       z-index: 999;
-      left: 384px
+      left: 505px
    }
 
    /* Ensure the table uses correct layout */
@@ -330,6 +330,7 @@
                   <div class="row">
                      <a onclick="bulk_convert_ril_bill(); return false;" data-toggle="modal" data-table=".table-table_pur_invoices" class=" hide bulk-actions-btn table-btn">Bulk Convert</a>
                      <a onclick="bulk_assign_ril_bill(); return false;" data-toggle="modal" data-table=".table-table_pur_invoices" class=" hide bulk-actions-btn table-btn">Bulk Assign</a>
+                     <a onclick="bulk_transfer_invoices(); return false;" data-toggle="modal" data-table=".table-table_pur_invoices" class=" hide bulk-actions-btn table-btn">Transfer Invoices</a>
                   </div>
 
                   <?php
@@ -597,6 +598,27 @@
             </h4>
          </div>
          <div class="modal-body convert-bulk-actions-body">
+         </div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo _l('close'); ?></button>
+            <button type="submit" class="btn btn-info"><?php echo _l('submit'); ?></button>
+         </div>
+         <?php echo form_close(); ?>
+      </div>
+   </div>
+</div>
+
+<div class="modal fade" id="bulk_transfer_invoices" tabindex="-1" role="dialog">
+   <div class="modal-dialog" role="document" style="width: 65%;">
+      <div class="modal-content">
+         <?php echo form_open(admin_url('purchase/save_bulk_transfer_invoices'), array('id' => 'convert_ril_bill_form', 'class' => '')); ?>
+         <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">
+               <div class="bulk_transfer_title"></div>
+            </h4>
+         </div>
+         <div class="modal-body convert-bulk-transfer-body">
          </div>
          <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo _l('close'); ?></button>

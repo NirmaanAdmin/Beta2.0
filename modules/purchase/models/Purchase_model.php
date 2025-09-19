@@ -24765,4 +24765,86 @@ class Purchase_model extends App_Model
 
         return $deleted;
     }
+
+    public function bulk_transfer_invoices($data)
+    {
+        $html = '';
+        $final_ids = '';
+        if (!empty($data)) {
+            $pur_ids = explode(",", $data['ids']);
+            $this->db->select('pi.id, pi.invoice_number, pi.expense_convert, it.rel_id as invoice_id');
+            $this->db->from(db_prefix() . 'pur_invoices as pi');
+            $this->db->join(db_prefix() . 'itemable as it', 'it.vbt_id = pi.id', 'left');
+            $this->db->where_in('pi.id', $pur_ids);
+            $this->db->where('it.rel_type', 'invoice');
+            $this->db->where('it.rel_id IS NOT NULL');
+            $this->db->order_by('pi.id', 'DESC');
+            $pur_invoices = $this->db->get()->result_array();
+            if (!empty($pur_invoices)) {
+                $invoices = get_all_applied_invoices();
+
+                $html .= '<div class="row">
+                    <div class="col-md-2 bulk-title">' . _l('Invoice') . '</div>
+                    <div class="col-md-5 bulk-title">' . _l('From Invoice') . '</div>
+                    <div class="col-md-5 bulk-title">' . _l('To Invoice') . '</div>
+                </div><br/>';
+
+                foreach ($pur_invoices as $pkey => $pvalue) {
+                    $pur_invoice_name_attr = "newitems[$pkey][pur_invoice]";
+                    $expense_convert_name_attr = "newitems[$pkey][expense_convert]";
+                    $from_invoice_name_attr = "newitems[$pkey][from_invoice]";
+                    $to_invoice_name_attr = "newitems[$pkey][to_invoice]";
+
+                    $html .= '<div class="row">';
+                    $html .= form_hidden($pur_invoice_name_attr, $pvalue['id']);
+                    $html .= form_hidden($expense_convert_name_attr, $pvalue['expense_convert']);
+                    $html .= form_hidden($from_invoice_name_attr, $pvalue['invoice_id']);
+                    $html .= '<div class="col-md-2 bulk-title">' . $pvalue['invoice_number'] . '</div>';
+                    $html .= '<div class="col-md-5">
+                    <select class="selectpicker display-block" data-width="100%" name="' . $from_invoice_name_attr . '" data-none-selected-text="' . _l('From Invoice') . '" disabled>
+                    <option value=""></option>';
+                    foreach ($invoices as $i) {
+                        $selected = ($pvalue['invoice_id'] == $i['id']) ? ' selected' : '';
+                        $html .= '<option value="' . $i['id'] . '"' . $selected . '>' . format_invoice_number($i['id']) . " (" . $i['title'] . ')</option>';
+                    }
+                    $html .= '</select></div>';
+                    $html .= '<div class="col-md-5">
+                    <select class="selectpicker display-block" data-width="100%" name="' . $to_invoice_name_attr . '" data-none-selected-text="' . _l('To Invoice') . '">
+                    <option value=""></option>';
+                    foreach ($invoices as $i) {
+                        $selected = ($pvalue['invoice_id'] == $i['id']) ? ' selected' : '';
+                        $html .= '<option value="' . $i['id'] . '"' . $selected . '>' . format_invoice_number($i['id']) . " (" . $i['title'] . ')</option>';
+                    }
+                    $html .= '</select></div>';
+                    $html .= '</div><br/>';
+                }
+            }
+        }
+
+        return $html;
+    }
+
+    public function save_bulk_transfer_invoices($data)
+    {
+        $newitems = $data['newitems'];
+        if(!empty($newitems)) {
+            $this->load->model('invoices_model');
+            foreach ($newitems as $key => $value) {
+                if($value['from_invoice'] != $value['to_invoice']) {
+                    $this->db->where('id', $value['expense_convert']);
+                    $this->db->update(db_prefix() . 'expenses', ['invoiceid' =>  $value['to_invoice']]);
+
+                    $this->db->where('vbt_id', $value['pur_invoice']);
+                    $this->db->where('rel_id', $value['from_invoice']);
+                    $this->db->where('rel_type', 'invoice');
+                    $this->db->update(db_prefix() . 'itemable', ['rel_id' =>  $value['to_invoice']]);
+
+                    $this->invoices_model->update_basic_invoice_details($value['from_invoice']);
+                    $this->invoices_model->update_basic_invoice_details($value['to_invoice']);
+                }
+            }
+        }
+
+        return true;
+    }
 }

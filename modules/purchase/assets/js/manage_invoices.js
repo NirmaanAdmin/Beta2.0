@@ -545,6 +545,39 @@ function bulk_assign_ril_bill() {
   }
 }
 
+function bulk_transfer_invoices() {
+  "use strict";
+  var print_id = '';
+  var rows = $('.table-table_pur_invoices').find('tbody tr');
+  $.each(rows, function() {
+    var checkbox = $($(this).find('td').eq(0)).find('input');
+    if (checkbox.prop('checked') === true) {
+        if (print_id !== '') {
+            print_id += ','; // Append a comma before adding the next value
+        }
+        print_id += checkbox.val();
+    }
+  });
+  if (print_id !== '') {
+    $.post(admin_url + 'purchase/bulk_transfer_invoices', {
+      ids: print_id,
+    }).done(function (response) {
+      response = JSON.parse(response);
+      if (response.success) {
+        $('.convert-bulk-transfer-body').html('');
+        $('.convert-bulk-transfer-body').html(response.bulk_html);
+        $('.bulk_transfer_title').html('Transfer Invoices');
+        init_selectpicker();
+        $('#bulk_transfer_invoices').modal('show');
+      } else {
+        alert_float('danger', response.message);
+      }
+    });
+  } else {
+    alert_float('danger', 'Please select at least one item from the list');
+  }
+}
+
 function get_vbt_dashboard() {
   "use strict";
 
