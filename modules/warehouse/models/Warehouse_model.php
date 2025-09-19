@@ -22589,11 +22589,7 @@ class Warehouse_model extends App_Model
 			'left'
 		);
 
-		// 4. Add your filters
-		$this->db->where(
-			db_prefix() . 'goods_receipt.approval',
-			1
-		);
+		
 		$this->db->where(
 			db_prefix() . 'goods_receipt.pr_order_id',
 			$pur_order
@@ -22731,7 +22727,6 @@ class Warehouse_model extends App_Model
 		$arr_pur_resquest['result'] = $stock_reconciliation_row_template;
 		$arr_pur_resquest['additional_discount'] = $additional_discount;
 		$arr_pur_resquest['goods_delivery_exist'] = $goods_delivery_exist;
-
 		return $arr_pur_resquest;
 	}
 
@@ -23861,28 +23856,20 @@ class Warehouse_model extends App_Model
 		$this->db->select('*');
 
 		// 2. Set goods_delivery as the FROM table
-		$this->db->from(db_prefix() . 'goods_delivery');
+		$this->db->from(db_prefix() . 'goods_receipt');
 
 		// 3. LEFT JOIN goods_delivery_detail on the delivery_id
 		$this->db->join(
-			db_prefix() . 'goods_delivery_detail',
-			db_prefix() . 'goods_delivery_detail.goods_delivery_id = '
-				. db_prefix() . 'goods_delivery.id',
+			db_prefix() . 'goods_receipt_detail',
+			db_prefix() . 'goods_receipt_detail.goods_receipt_id = '
+				. db_prefix() . 'goods_receipt.id',
 			'left'
 		);
 
-		// 4. Add your filters
+		
 		$this->db->where(
-			db_prefix() . 'goods_delivery.approval',
-			1
-		);
-		$this->db->where(
-			db_prefix() . 'goods_delivery.wo_order_id',
+			db_prefix() . 'goods_receipt.wo_order_id',
 			$wo_order_id
-		);
-		$this->db->where(
-			db_prefix() . 'goods_delivery_detail.returnable',
-			1
 		);
 
 		// 5. Execute
