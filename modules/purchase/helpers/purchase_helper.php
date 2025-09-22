@@ -4913,3 +4913,28 @@ function get_default_purchase_bill_rows()
     ];
     return $result;
 }
+
+function update_pur_bills_last_action($id)
+{
+    $CI = &get_instance();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $CI->db->update(db_prefix() . 'pur_bills', [
+            'last_action' => get_staff_user_id()
+        ]);
+    }
+    return true;
+}
+
+function get_list_pur_bills_approval_details($rel_id, $rel_type)
+{
+    $CI = &get_instance();
+    $CI->db->select('*');
+    $CI->db->where('rel_id', $rel_id);
+    if (is_array($rel_type)) {
+        $CI->db->where_in('rel_type', $rel_type);
+    } else {
+        $CI->db->where('rel_type', $rel_type);
+    }
+    return $CI->db->get(db_prefix() . 'pur_bills_approval_details')->result_array();
+}

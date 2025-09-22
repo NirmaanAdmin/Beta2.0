@@ -21474,6 +21474,8 @@ class Purchase_model extends App_Model
             }
         }
 
+        update_pur_bills_last_action($id);
+
         return true;
     }
 

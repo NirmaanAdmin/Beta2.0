@@ -974,3 +974,4 @@ $lang['add_bill_bifurcation'] = 'Add Bill Bifurcation';
 $lang['bill_percentage'] = 'Bill Percentage';
 $lang['po_bill_bifurcation'] = 'PO Bill Bifurcation';
 $lang['wo_bill_bifurcation'] = 'WO Bill Bifurcation';
+$lang['payment_certificate_date'] = 'Payment certificate date';

@@ -16599,4 +16599,15 @@ class purchase extends AdminController
         set_alert('success', 'Selected invoices were transferred successfully');
         redirect(admin_url('purchase/invoices'));
     }
+
+    public function list_pur_bills()
+    {
+        $data['title'] = _l('bill_bifurcation');
+        $this->load->view('pur_bills/list_pur_bills', $data);
+    }
+
+    public function table_pur_bills()
+    {
+        $this->app->get_table_data(module_views_path('purchase', 'pur_bills/table_pur_bills'));
+    }
 }
