@@ -394,6 +394,14 @@ function purchase_module_init_menu_items()
         'position' => 21,
     ]);
 
+    $CI->app_menu->add_sidebar_children_item('purchase', [
+        'slug' => 'bill-bifurcation',
+        'name' => _l('bill_bifurcation'),
+        'icon' => 'fa fa-check',
+        'href' => admin_url('purchase/list_pur_bills'),
+        'position' => 22,
+    ]);
+
     if (has_permission('order_tracker', '', 'view')) {
 
         $CI->app_menu->add_sidebar_children_item('purchase', [

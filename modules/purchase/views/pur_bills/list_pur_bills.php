@@ -107,7 +107,7 @@ $module_name = 'pur_bills'; ?>
    $(document).ready(function() {
       var table_pur_bills = $('.table-table_pur_bills');
       var Params = {};
-      initDataTable(table_pur_bills, admin_url + 'purchase/table_pur_bills', [], [], Params, [5, 'desc']);
+      initDataTable(table_pur_bills, admin_url + 'purchase/table_pur_bills', [], [], Params, [2, 'desc']);
 
       // Handle "Select All" checkbox
       $('#select-all-columns').on('change', function() {
