@@ -117,7 +117,7 @@ class document_management_model extends app_model
 		}
 		$affectedRows = 0;
 		$id = $data['id'];
-		$data_item = $this->get_item($id, '', 'name');
+		$data_item = $this->get_item($id, '', 'name, parent_id');
 		if ($data_item) {
 			if (isset($data['parent_id'])) {
 				$data['master_id'] = $this->get_master_id($data['parent_id']);
@@ -161,7 +161,7 @@ class document_management_model extends app_model
 			if ($this->db->affected_rows() > 0) {
 				// Rename file if name has been changed
 				if (isset($data['name']) && ($data_item->name != $data['name'])) {
-					$this->change_file_name($id, $data['name']);
+					$this->change_file_name($id, $data['name'], $data_item->parent_id, $data_item->name);
 				}
 				$affectedRows++;
 			}
@@ -556,18 +556,18 @@ class document_management_model extends app_model
 	 * @param  string $new_name 
 	 * @return boolean           
 	 */
-	public function change_file_name($id, $new_name)
+	public function change_file_name($id, $new_name, $parent_id, $old_name)
 	{
-		$data_item = $this->get_item($id, '', 'name, parent_id');
-		if ($data_item) {
-			$path = DOCUMENT_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/files/' . $data_item->parent_id . '/';
-			$new_path = $path . $new_name;
-			$old_path = $path . $data_item->name;
-			if (file_exists($old_path)) {
-				rename($old_path, $new_path);
-				return true;
-			}
+		// $data_item = $this->get_item($id, '', 'name, parent_id');
+		// if ($data_item) {
+		$path = DOCUMENT_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/files/' . $parent_id . '/';
+		$new_path = $path . $new_name;
+		$old_path = $path . $old_name;
+		if (file_exists($old_path)) {
+			rename($old_path, $new_path);
+			return true;
 		}
+		// }
 		return false;
 	}
 
@@ -2005,14 +2005,14 @@ class document_management_model extends app_model
 		$this->db->select(db_prefix() . 'dmg_items.*, parent.project_id AS master_project_id');
 		$this->db->from(db_prefix() . 'dmg_items');
 		$this->db->join(
-		    db_prefix() . 'dmg_items AS parent',
-		    'parent.id = ' . db_prefix() . 'dmg_items.master_id',
-		    'left'
+			db_prefix() . 'dmg_items AS parent',
+			'parent.id = ' . db_prefix() . 'dmg_items.master_id',
+			'left'
 		);
 		$this->db->group_start();
 		$this->db->where_in(db_prefix() . 'dmg_items.parent_id', $searchable_folder_ids);
 		if (!$folder_id) {
-		    $this->db->or_where(db_prefix() . 'dmg_items.parent_id IS NULL');
+			$this->db->or_where(db_prefix() . 'dmg_items.parent_id IS NULL');
 		}
 		$this->db->group_end();
 		$this->db->where(db_prefix() . 'dmg_items.filetype !=', 'folder');
@@ -2025,9 +2025,9 @@ class document_management_model extends app_model
 		$this->db->select(db_prefix() . 'dmg_items.*, parent.project_id AS master_project_id');
 		$this->db->from(db_prefix() . 'dmg_items');
 		$this->db->join(
-		    db_prefix() . 'dmg_items AS parent',
-		    'parent.id = ' . db_prefix() . 'dmg_items.master_id',
-		    'left'
+			db_prefix() . 'dmg_items AS parent',
+			'parent.id = ' . db_prefix() . 'dmg_items.master_id',
+			'left'
 		);
 		$this->db->where(db_prefix() . 'dmg_items.filetype', 'folder');
 		$this->db->where(db_prefix() . 'dmg_items.parent_id', $folder_id);
@@ -2188,7 +2188,6 @@ class document_management_model extends app_model
 		$this->db->group_end();
 		$this->db->order_by("creator_id", "desc");
 		return $this->db->get(db_prefix() . 'dmg_items')->result_array();
-
 	}
 
 	public function get_default_dmg_project($project_id)
@@ -2197,11 +2196,9 @@ class document_management_model extends app_model
 		$this->db->select('id');
 		$this->db->where('project_id', $project_id);
 		$data = $this->db->get(db_prefix() . 'dmg_items')->row();
-		if(!empty($data)) {
+		if (!empty($data)) {
 			$master_id = $data->id;
 		}
 		return $master_id;
 	}
-
-
 }
