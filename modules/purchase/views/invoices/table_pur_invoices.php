@@ -161,11 +161,14 @@ if (isset($vendors)) {
     }
 }
 
-if ($this->ci->input->post('billing_invoices') && $this->ci->input->post('billing_invoices') != '') {
-    if ($this->ci->input->post('billing_invoices') == "None") {
+if ($this->ci->input->post('billing_invoices') && !empty($this->ci->input->post('billing_invoices'))) {
+    $billing_invoices = $this->ci->input->post('billing_invoices');
+    if (in_array("None", $billing_invoices)) {
         array_push($where, 'AND (ril.id IS NULL)');
     } else {
-        array_push($where, 'AND (ril.id = '.$this->ci->input->post('billing_invoices').')');
+        $billing_invoice_ids = array_map('intval', $billing_invoices);
+        $ids = implode(",", $billing_invoice_ids);
+        array_push($where, "AND (ril.id IN ($ids))");
     }
 }
 
@@ -179,41 +182,35 @@ if ($this->ci->input->post('is_expense') && $this->ci->input->post('is_expense')
 }
 
 $budget_head = $this->ci->input->post('budget_head');
-if (isset($budget_head)) {
-
-    $where_budget_head = '';
-
-
-    if ($budget_head != '') {
-        if ($where_budget_head == '') {
-            $where_budget_head .= ' AND (' . db_prefix() . 'pur_invoices.group_pur = "' . $budget_head . '"';
-        } else {
-            $where_budget_head .= ' or ' . db_prefix() . 'pur_invoices.group_pur = "' . $budget_head . '"';
-        }
-    }
-    if ($where_budget_head != '') {
-        $where_budget_head .= ')';
-        array_push($where, $where_budget_head);
+if (!empty($budget_head)) {
+    if (in_array("None", $budget_head)) {
+        array_push($where, 'AND (' . db_prefix() . 'pur_invoices.group_pur IS NULL)');
+    } else {
+        $budget_head_ids = array_map('intval', $budget_head);
+        $ids = implode(",", $budget_head_ids);
+        array_push($where, 'AND (' . db_prefix() . "pur_invoices.group_pur IN ($ids))");
     }
 }
+
 $billing_status = $this->ci->input->post('billing_status');
-if (isset($billing_status)) {
-
-    $where_billing_status = '';
-    if ($billing_status == 8) {
-        $billing_status = 0;
+if (!empty($billing_status)) {
+    if (!is_array($billing_status)) {
+        $billing_status = [$billing_status];
     }
-
-    if ($billing_status != '') {
-        if ($where_billing_status == '') {
-            $where_billing_status .= ' AND (' . db_prefix() . 'pur_invoices.payment_status = "' . $billing_status . '"';
+    $status_ids = [];
+    foreach ($billing_status as $status) {
+        if ($status == 8) {
+            $status_ids[] = 0;
+        } elseif ($status === 'None') {
+            $status_ids[] = "'paid'";
+            $status_ids[] = "'partially_paid'";
         } else {
-            $where_billing_status .= ' or ' . db_prefix() . 'pur_invoices.payment_status = "' . $billing_status . '"';
+            $status_ids[] = (int)$status;
         }
     }
-    if ($where_billing_status != '') {
-        $where_billing_status .= ')';
-        array_push($where, $where_billing_status);
+    if (!empty($status_ids)) {
+        $ids = implode(",", $status_ids);
+        array_push($where, 'AND (' . db_prefix() . "pur_invoices.payment_status IN ($ids))");
     }
 }
 
@@ -286,13 +283,13 @@ update_module_filter($module_name, $to_date_filter_name, $to_date_filter_value);
 $vendors_filter_value = !empty($this->ci->input->post('vendors')) ? implode(',', $this->ci->input->post('vendors')) : NULL;
 update_module_filter($module_name, $vendors_filter_name, $vendors_filter_value);
 
-$billing_invoices_filter_value = !empty($this->ci->input->post('billing_invoices')) ? $this->ci->input->post('billing_invoices') : NULL;
+$billing_invoices_filter_value = !empty($this->ci->input->post('billing_invoices')) ? implode(',', $this->ci->input->post('billing_invoices')) : NULL;
 update_module_filter($module_name, $billing_invoices_filter_name, $billing_invoices_filter_value);
 
-$budget_head_filter_name_value = !empty($this->ci->input->post('budget_head')) ? $this->ci->input->post('budget_head') : NULL;
+$budget_head_filter_name_value = !empty($this->ci->input->post('budget_head')) ? implode(',', $this->ci->input->post('budget_head')) : NULL;
 update_module_filter($module_name, $budget_head_filter_name, $budget_head_filter_name_value);
 
-$billing_status_filter_name_value = !empty($this->ci->input->post('billing_status')) ? $this->ci->input->post('billing_status') : NULL;
+$billing_status_filter_name_value = !empty($this->ci->input->post('billing_status')) ? implode(',', $this->ci->input->post('billing_status')) : NULL;
 update_module_filter($module_name, $billing_status_filter_name, $billing_status_filter_name_value);
 
 $order_tagged_filter_name_value = !empty($this->ci->input->post('order_tagged')) ? $this->ci->input->post('order_tagged') : NULL;

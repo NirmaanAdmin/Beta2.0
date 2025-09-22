@@ -15089,7 +15089,7 @@ class purchase extends AdminController
         $data['payment_certificate_total'] = $payment_certificate_calc['sub_fg_3'];
         $data['order_bills_columns'] = $this->purchase_model->get_all_order_bills_columns($id);
 
-        $this->load->view('purchase_order/pur_bills', $data);
+        $this->load->view('pur_bills/pur_bills', $data);
     }
     public function pur_bill_form()
     {
@@ -16507,7 +16507,7 @@ class purchase extends AdminController
 
     public function table_po_bills()
     {
-        $this->app->get_table_data(module_views_path('purchase', 'purchase_order/table_po_bills'));
+        $this->app->get_table_data(module_views_path('purchase', 'pur_bills/table_po_bills'));
     }
 
     public function send_bill_bifurcation_approve()

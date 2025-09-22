@@ -204,30 +204,28 @@
                            <div class="col-md-3 form-group">
                               <?php
                               $budget_head_filter = get_module_filter($module_name, 'budget_head');
-                              $budget_head_filter_val = !empty($budget_head_filter) ? $budget_head_filter->filter_value : '';
+                              $budget_head_filter_val = !empty($budget_head_filter) ? explode(",", $budget_head_filter->filter_value) : [];
+                              $budget_head_options   = [];
+                              $budget_head_options[] = ['id' => 'None', 'value' => 'None'];
+                              foreach ($budget_head as $head) {
+                                 $budget_head_options[] = ['id' => $head['id'], 'value' => $head['name']];
+                              }
+                              echo render_select('budget_head[]', $budget_head_options, ['id', 'value'], '', $budget_head_filter_val, ['data-width' => '100%', 'data-none-selected-text' => _l('group_pur'), 'multiple' => true, 'data-actions-box' => true], [], 'no-mbot', '', false);
                               ?>
-                              <select name="budget_head" class="selectpicker" data-width="100%" data-none-selected-text="<?php echo _l('group_pur'); ?>" data-actions-box="true">
-                                 <option value=""></option>
-                                 <option value="None">None</option>
-                                 <?php foreach ($budget_head as $head) { ?>
-                                    <option value="<?php echo $head['id']; ?>" <?php echo ($budget_head_filter == $head['id']) ? 'selected' : ''; ?>><?php echo $head['name']; ?></option>
-                                 <?php } ?>
-                              </select>
                            </div>
 
                            <div class="col-md-3 form-group">
                               <?php
                               $billing_invoices_filter = get_module_filter($module_name, 'billing_invoices');
-                              $billing_invoices_filter_val = !empty($billing_invoices_filter) ? $billing_invoices_filter->filter_value : '';
+                              $billing_invoices_filter_val = !empty($billing_invoices_filter) ? explode(",", $billing_invoices_filter->filter_value) : [];
+                              $billing_invoice_options = [];
+                              $billing_invoice_options[] = ['id' => 'to_be_converted', 'value' => _l('To Be Converted')];
+                              $billing_invoice_options[] = ['id' => 'converted', 'value' => _l('Converted')];
+                              foreach ($billing_invoices as $invoice) {
+                                 $billing_invoice_options[] = ['id' => $invoice['id'], 'value' => $invoice['value']];
+                              }
+                              echo render_select('billing_invoices[]', $billing_invoice_options, ['id', 'value'], '', $billing_invoices_filter_val, ['data-width' => '100%', 'data-none-selected-text' => _l('pur_invoices'), 'multiple' => true, 'data-actions-box' => true], [], 'no-mbot', '', false);
                               ?>
-                              <select name="billing_invoices" class="selectpicker" data-width="100%" data-none-selected-text="<?php echo _l('pur_invoices'); ?>" data-actions-box="true" data-live-search="true">
-                                 <option value=""></option>
-                                 <option value="to_be_converted" <?php echo ($billing_invoices_filter_val == 'to_be_converted') ? 'selected' : ''; ?>>To Be Converted</option>
-                                 <option value="converted" <?php echo ($billing_invoices_filter_val == 'converted') ? 'selected' : ''; ?>>Converted</option>
-                                 <?php foreach ($billing_invoices as $invoice) { ?>
-                                    <option value="<?php echo $invoice['id']; ?>" <?php echo ($billing_invoices_filter_val == $invoice['id']) ? 'selected' : ''; ?>><?php echo $invoice['value']; ?></option>
-                                 <?php } ?>
-                              </select>
                            </div>
 
                            <div class="col-md-3 form-group">

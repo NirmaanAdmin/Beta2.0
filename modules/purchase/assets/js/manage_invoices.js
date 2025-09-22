@@ -10,9 +10,9 @@ var expenseDropzone;
     "pur_orders": "[name='pur_orders[]']",
     "wo_orders": "[name='wo_orders[]']",
     "vendors": "[name='vendor_ft[]']",
-    "billing_invoices": "[name='billing_invoices']",
-    "budget_head": "[name='budget_head']",
-    "billing_status": "[name='billing_status']",
+    "billing_invoices": "[name='billing_invoices[]']",
+    "budget_head": "[name='budget_head[]']",
+    "billing_status": "[name='billing_status[]']",
     "order_tagged": "[name='order_tagged']",
     "order_tagged_detail": "[name='order_tagged_detail[]']",
     "res_person": "[name='res_person[]']",
@@ -37,14 +37,14 @@ var expenseDropzone;
     $('select[name="vendor_ft[]"]').selectpicker('refresh');
   });
 
-  $(document).on('change', 'select[name="billing_invoices"]', function () {
-    $('select[name="billing_invoices"]').selectpicker('refresh');
+  $(document).on('change', 'select[name="billing_invoices[]"]', function () {
+    $('select[name="billing_invoices[]"]').selectpicker('refresh');
   });
-  $(document).on('change', 'select[name="budget_head"]', function () {
-    $('select[name="budget_head"]').selectpicker('refresh');
+  $(document).on('change', 'select[name="budget_head[]"]', function () {
+    $('select[name="budget_head[]"]').selectpicker('refresh');
   });
-  $(document).on('change', 'select[name="billing_status"]', function () {
-    $('select[name="billing_status"]').selectpicker('refresh');
+  $(document).on('change', 'select[name="billing_status[]"]', function () {
+    $('select[name="billing_status[]"]').selectpicker('refresh');
   });
   $(document).on('change', 'select[name="order_tagged"]', function () {
     $('select[name="order_tagged"]').selectpicker('refresh');
