@@ -5,8 +5,8 @@
     "from_date": 'input[name="from_date"]',
     "to_date": 'input[name="to_date"]',
     "vendors": "[name='vendor_ft[]']",
-    "budget_head": "[name='budget_head']",
-    "billing_invoices": "[name='billing_invoices']",
+    "budget_head": "[name='budget_head[]']",
+    "billing_invoices": "[name='billing_invoices[]']",
     "bil_payment_status": "[name='bil_payment_status']",
     "order_tagged_detail": "[name='order_tagged_detail[]']",
   };
@@ -28,11 +28,11 @@
   $(document).on('change', 'select[name="vendor_ft[]"]', function () {
     $('select[name="vendor_ft[]"]').selectpicker('refresh');
   });
-  $(document).on('change', 'select[name="budget_head"]', function () {
-    $('select[name="budget_head"]').selectpicker('refresh');
+  $(document).on('change', 'select[name="budget_head[]"]', function () {
+    $('select[name="budget_head[]"]').selectpicker('refresh');
   });
-  $(document).on('change', 'select[name="billing_invoices"]', function () {
-    $('select[name="billing_invoices"]').selectpicker('refresh');
+  $(document).on('change', 'select[name="billing_invoices[]"]', function () {
+    $('select[name="billing_invoices[]"]').selectpicker('refresh');
   });
   $(document).on('change', 'select[name="bil_payment_status"]', function () {
     $('select[name="bil_payment_status"]').selectpicker('refresh');

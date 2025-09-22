@@ -37,14 +37,14 @@ var expenseDropzone;
     $('select[name="vendor_ft[]"]').selectpicker('refresh');
   });
 
-  $(document).on('change', 'select[name="billing_invoices"]', function () {
-    $('select[name="billing_invoices"]').selectpicker('refresh');
+  $(document).on('change', 'select[name="billing_invoices[]"]', function () {
+    $('select[name="billing_invoices[]"]').selectpicker('refresh');
   });
-  $(document).on('change', 'select[name="budget_head"]', function () {
-    $('select[name="budget_head"]').selectpicker('refresh');
+  $(document).on('change', 'select[name="budget_head[]"]', function () {
+    $('select[name="budget_head[]"]').selectpicker('refresh');
   });
-  $(document).on('change', 'select[name="billing_status"]', function () {
-    $('select[name="billing_status"]').selectpicker('refresh');
+  $(document).on('change', 'select[name="billing_status[]"]', function () {
+    $('select[name="billing_status[]"]').selectpicker('refresh');
   });
   $(document).on('change', 'select[name="order_tagged"]', function () {
     $('select[name="order_tagged"]').selectpicker('refresh');
