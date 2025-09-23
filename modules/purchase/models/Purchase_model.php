@@ -21258,7 +21258,7 @@ class Purchase_model extends App_Model
             unset($data['dc_total']);
         }
 
-        $data['to_currency'] = $data['currency'];
+        $data['to_currency'] = 3;
 
         if (isset($data['total_mn'])) {
             $data['subtotal'] = $data['total_mn'];

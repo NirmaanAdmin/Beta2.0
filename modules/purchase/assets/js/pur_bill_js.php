@@ -13,9 +13,6 @@
 
     var vendor = $('select[name="vendor"]').val();
 
-
-    init_pi_currency();
-
     <?php if (get_purchase_option('item_by_vendor') != 1) { ?>
       init_ajax_search('items', '#item_select.ajax-search', undefined, admin_url + 'purchase/pur_commodity_code_search');
     <?php } ?>
