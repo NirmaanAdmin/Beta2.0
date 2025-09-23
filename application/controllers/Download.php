@@ -265,6 +265,18 @@ class Download extends App_Controller
                 }
                 $path = get_upload_path_by_type('purchase') . 'debit_note/' . $attachment->rel_id . '/' . $attachment->file_name;
             }
+        } elseif ($folder_indicator == 'pur_bills') {
+            if (is_staff_logged_in() || is_vendor_logged_in()) {
+                if (!$attachmentid) {
+                    show_404();
+                }
+                $this->db->where('id', $attachmentid);
+                $attachment = $this->db->get(db_prefix() . 'pur_bills_files')->row();
+                if (!$attachment) {
+                    show_404();
+                }
+                $path = get_upload_path_by_type('purchase') . 'pur_bills/' . $attachment->rel_id . '/' . $attachment->file_name;
+            }
         } elseif ($folder_indicator == 'estimate_request_attachment') {
             if (!is_staff_logged_in() && strpos($_SERVER['HTTP_REFERER'], 'forms/l/') === false) {
                 show_404();

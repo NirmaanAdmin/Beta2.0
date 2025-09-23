@@ -21455,6 +21455,7 @@ class Purchase_model extends App_Model
 
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'pur_bills', $data);
+        $this->save_pur_bills_files($id);
 
         $total['tax'] = 0;
         $_taxes = $this->get_html_tax_pur_bills($id);
@@ -24852,5 +24853,57 @@ class Purchase_model extends App_Model
         }
 
         return true;
+    }
+
+    public function get_pur_bills_attachments($id)
+    {
+        $this->db->where('rel_id', $id);
+        $this->db->order_by('dateadded', 'desc');
+        $attachments = $this->db->get(db_prefix() . 'pur_bills_files')->result_array();
+        return $attachments;
+    }
+
+    public function save_pur_bills_files($id)
+    {
+        $uploadedFiles = handle_pur_bills_attachments_array($id);
+        if ($uploadedFiles && is_array($uploadedFiles)) {
+            foreach ($uploadedFiles as $file) {
+                $data = array();
+                $data['dateadded'] = date('Y-m-d H:i:s');
+                $data['rel_id'] = $id;
+                $data['staffid'] = get_staff_user_id();
+                $data['attachment_key'] = app_generate_hash();
+                $data['file_name'] = $file['file_name'];
+                $data['filetype']  = $file['filetype'];
+                $this->db->insert(db_prefix() . 'pur_bills_files', $data);
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Remove attachment by id
+     * @param  mixed $id attachment id
+     * @return boolean
+     */
+    public function delete_pur_bills_attachment($id)
+    {
+        $deleted = false;
+        $this->db->where('id', $id);
+        $attachment = $this->db->get(db_prefix() . 'pur_bills_files')->row();
+        if ($attachment) {
+            if (unlink(get_upload_path_by_type('purchase') . 'pur_bills/' . $attachment->rel_id . '/' . $attachment->file_name)) {
+                $this->db->where('id', $attachment->id);
+                $this->db->delete(db_prefix() . 'pur_bills_files');
+                $deleted = true;
+            }
+            // Check if no attachments left, so we can delete the folder also
+            $other_attachments = list_files(get_upload_path_by_type('purchase') . 'pur_bills/' . $attachment->rel_id);
+            if (count($other_attachments) == 0) {
+                delete_dir(get_upload_path_by_type('purchase') . 'pur_bills/' . $attachment->rel_id);
+            }
+        }
+
+        return $deleted;
     }
 }
