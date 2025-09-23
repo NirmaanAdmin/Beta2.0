@@ -16611,6 +16611,8 @@ class purchase extends AdminController
     public function list_pur_bills()
     {
         $data['title'] = _l('bill_bifurcation');
+        $data['vendors'] = $this->purchase_model->get_vendor();
+        $data['order_tagged_detail'] = $this->purchase_model->get_order_tagged_detail();
         $this->load->view('pur_bills/list_pur_bills', $data);
     }
 

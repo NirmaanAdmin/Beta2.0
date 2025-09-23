@@ -2,6 +2,9 @@
 
 defined('BASEPATH') or exit('No direct script access allowed');
 $module_name = 'pur_bills';
+$vendors_filter_name = 'vendors';
+$approval_status_filter_name = 'approval_status';
+$order_tagged_detail_filter_name = 'order_tagged_detail';
 
 $aColumns = [
     0,
@@ -34,6 +37,47 @@ $join = [
 ];
 
 $where = [];
+if ($this->ci->input->post('vendors') && count($this->ci->input->post('vendors')) > 0) {
+    $vendors = implode(',', $this->ci->input->post('vendors'));
+    $where_vendors = 'AND ' . db_prefix() . "pur_bills.vendor IN (" . $vendors . ")";
+    array_push($where, $where_vendors);
+}
+
+if ($this->ci->input->post('approval_status') && count($this->ci->input->post('approval_status')) > 0) {
+    array_push($where, 'AND (' . db_prefix() . 'pur_bills.approve_status IN (' . implode(',', $this->ci->input->post('approval_status')) . '))');
+}
+
+$order_tagged_detail = $this->ci->input->post('order_tagged_detail');
+if (isset($order_tagged_detail) && is_array($order_tagged_detail) && !empty($order_tagged_detail)) {
+    $or_conditions = [];
+    foreach ($order_tagged_detail as $t) {
+        if (!empty($t)) {
+            if (strpos($t, 'po_') === 0) {
+                $id = str_replace('po_', '', $t);
+                $or_conditions[] = db_prefix() . "pur_bills.pur_order = '$id'";
+            } elseif (strpos($t, 'wo_') === 0) {
+                $id = str_replace('wo_', '', $t);
+                $or_conditions[] = db_prefix() . "pur_bills.wo_order = '$id'";
+            } elseif (strpos($t, 'ot_') === 0) {
+                $id = str_replace('ot_', '', $t);
+                $or_conditions[] = db_prefix() . "pur_bills.order_tracker_id = '$id'";
+            }
+        }
+    }
+    if (!empty($or_conditions)) {
+        $where_order_tagged_detail = ' AND (' . implode(' OR ', $or_conditions) . ')';
+        array_push($where, $where_order_tagged_detail);
+    }
+}
+
+$vendors_filter_name_value = !empty($this->ci->input->post('vendors')) ? implode(',', $this->ci->input->post('vendors')) : NULL;
+update_module_filter($module_name, $vendors_filter_name, $vendors_filter_name_value);
+
+$approval_status_filter_name_value = !empty($this->ci->input->post('approval_status')) ? implode(',', $this->ci->input->post('approval_status')) : NULL;
+update_module_filter($module_name, $approval_status_filter_name, $approval_status_filter_name_value);
+
+$order_tagged_detail_filter_name_value = !empty($this->ci->input->post('order_tagged_detail')) ? implode(',', $this->ci->input->post('order_tagged_detail')) : NULL;
+update_module_filter($module_name, $order_tagged_detail_filter_name, $order_tagged_detail_filter_name_value);
 
 $having = '';
 

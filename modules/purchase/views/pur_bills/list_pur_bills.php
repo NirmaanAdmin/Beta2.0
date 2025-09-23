@@ -36,6 +36,41 @@ $module_name = 'pur_bills'; ?>
                         </div>
                      </div>
 
+                     <div class="row all_ot_filters mtop20">
+                        <div class="col-md-3">
+                           <?php
+                           $vendors_type_filter = get_module_filter($module_name, 'vendors');
+                           $vendors_type_filter_val = !empty($vendors_type_filter) ? explode(",", $vendors_type_filter->filter_value) : [];
+                           echo render_select('vendors[]', $vendors, array('userid', 'company'), '', $vendors_type_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('pur_vendor'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
+                           ?>
+                        </div>
+                        <div class="col-md-3">
+                           <?php
+                           $order_tagged_detail_filter = get_module_filter($module_name, 'order_tagged_detail');
+                           $order_tagged_detail_filter_val = !empty($order_tagged_detail_filter) ? explode(",", $order_tagged_detail_filter->filter_value) : '';
+                           echo render_select('order_tagged_detail[]', $order_tagged_detail, array('id', 'name'), '', $order_tagged_detail_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('Order Detail'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
+                           ?>
+                        </div>
+                        <div class="col-md-3">
+                           <?php
+                           $approval_status_type_filter = get_module_filter($module_name, 'approval_status');
+                           $approval_status_type_filter_val = !empty($approval_status_type_filter) ? explode(",", $approval_status_type_filter->filter_value) : [];
+                           $payment_status = [
+                              ['id' => 1, 'name' => 'Draft'],
+                              ['id' => 2, 'name' => 'Approved'],
+                              ['id' => 3, 'name' => 'Rejected'],
+                           ];
+                           echo render_select('approval_status[]', $payment_status, array('id', 'name'), '', $approval_status_type_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('approval_status'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
+                           ?>
+                        </div>
+                        <div class="col-md-1 form-group ">
+                           <a href="javascript:void(0)" class="btn btn-info btn-icon reset_all_ot_filters">
+                              <?php echo _l('reset_filter'); ?>
+                           </a>
+                        </div>
+                     </div>
+                     <br>
+
                      <div class="btn-group show_hide_columns" id="show_hide_columns">
                         <!-- Settings Icon -->
                         <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding: 4px 7px;">
@@ -106,8 +141,23 @@ $module_name = 'pur_bills'; ?>
 <script>
    $(document).ready(function() {
       var table_pur_bills = $('.table-table_pur_bills');
-      var Params = {};
+      var Params = {
+         "vendors": "[name='vendors[]']",
+         "approval_status": "[name='approval_status[]']",
+         "order_tagged_detail": "[name='order_tagged_detail[]']",
+      };
       initDataTable(table_pur_bills, admin_url + 'purchase/table_pur_bills', [], [], Params, [2, 'desc']);
+      $.each(Params, function(i, obj) {
+         $('select' + obj).on('change', function() {
+            table_pur_bills.DataTable().ajax.reload();
+         });
+      });
+      $(document).on('click', '.reset_all_ot_filters', function() {
+         var filterArea = $('.all_ot_filters');
+         filterArea.find('input').val("");
+         filterArea.find('select').selectpicker("val", "");
+         table_pur_bills.DataTable().ajax.reload();
+      });
 
       // Handle "Select All" checkbox
       $('#select-all-columns').on('change', function() {
