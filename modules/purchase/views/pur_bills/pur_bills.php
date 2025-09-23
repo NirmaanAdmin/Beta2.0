@@ -73,7 +73,7 @@
 										<select name="pur_order" id="pur_order" class="selectpicker" disabled data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
 											<option value=""></option>
 											<?php foreach($pur_orders as $ct){ ?>
-												<option value="<?php echo pur_html_entity_decode($ct['id']); ?>" <?php if(isset($pur_bill) && $pur_bill->pur_order == $ct['id']){ echo 'selected'; } ?>><?php echo pur_html_entity_decode($ct['pur_order_number']); ?></option>
+												<option value="<?php echo pur_html_entity_decode($ct['id']); ?>" <?php if(isset($pur_bill) && $pur_bill->pur_order == $ct['id']){ echo 'selected'; } ?>><?php echo pur_html_entity_decode($ct['pur_order_number'] . ' - ' . $ct['pur_order_name']); ?></option>
 											<?php } ?>
 										</select>
 									</div>
@@ -86,7 +86,7 @@
 										<select name="wo_order" id="wo_order" class="selectpicker" disabled data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
 											<option value=""></option>
 											<?php foreach($wo_orders as $ct){ ?>
-												<option value="<?php echo pur_html_entity_decode($ct['id']); ?>" <?php if(isset($pur_bill) && $pur_bill->wo_order == $ct['id']){ echo 'selected'; } ?>><?php echo pur_html_entity_decode($ct['wo_order_number']); ?></option>
+												<option value="<?php echo pur_html_entity_decode($ct['id']); ?>" <?php if(isset($pur_bill) && $pur_bill->wo_order == $ct['id']){ echo 'selected'; } ?>><?php echo pur_html_entity_decode($ct['wo_order_number'] . ' - ' . $ct['wo_order_name']); ?></option>
 											<?php } ?>
 										</select>
 									</div>

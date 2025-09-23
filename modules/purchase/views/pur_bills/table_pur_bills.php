@@ -46,8 +46,10 @@ $result = data_tables_init(
     [
         db_prefix() . 'pur_bills.pur_order',
         db_prefix() . 'pur_bills.wo_order',
-        db_prefix() . 'pur_orders.pur_order_number as po_number',
-        db_prefix() . 'wo_orders.wo_order_number as wo_number',
+        db_prefix() . 'pur_orders.pur_order_number',
+        db_prefix() . 'pur_orders.pur_order_name',
+        db_prefix() . 'wo_orders.wo_order_number',
+        db_prefix() . 'wo_orders.wo_order_name',
         db_prefix() . 'pur_bills.vendor',
     ],
     '',
@@ -90,10 +92,10 @@ foreach ($rResult as $aRow) {
         } elseif ($aColumns[$i] == 'order_type') {
             $_data = '';
             if ($aRow['order_type'] == 1) {
-                $_data = '<a href="' . admin_url('purchase/purchase_order/' . $aRow['pur_order']) . '" target="_blank">' . $aRow['po_number'] . '</a>';
+                $_data = '<a href="' . admin_url('purchase/purchase_order/' . $aRow['pur_order']) . '" target="_blank">' . pur_html_entity_decode($aRow['pur_order_number'] . ' - ' . $aRow['pur_order_name']) . '</a>';
             }
             if ($aRow['order_type'] == 2) {
-                $_data = '<a href="' . admin_url('purchase/work_order/' . $aRow['wo_order']) . '" target="_blank">' . $aRow['wo_number'] . '</a>';
+                $_data = '<a href="' . admin_url('purchase/work_order/' . $aRow['wo_order']) . '" target="_blank">' . pur_html_entity_decode($aRow['wo_order_number'] . ' - ' . $aRow['wo_order_name']) . '</a>';
             }
         } elseif ($aColumns[$i] == 'company') {
             $_data = '<a href="' . admin_url('purchase/vendor/' . $aRow['vendor']) . '" target="_blank">' . $aRow['company'] . '</a>';
