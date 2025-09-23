@@ -13084,7 +13084,7 @@ class purchase extends AdminController
         $pdf->Output($pdf_name, $type);
     }
 
-    public function convert_pur_invoice_from_po($id)
+    public function convert_pur_invoice_from_po($id, $redirect = true)
     {
         if (!$id) {
             redirect(admin_url('purchase/list_payment_certificate'));
@@ -13146,8 +13146,10 @@ class purchase extends AdminController
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'payment_certificate', ['pur_invoice_id' => $insert_id]);
         $this->purchase_model->copy_pc_files_to_vbt($id, $insert_id);
-        set_alert('success', _l('purchase_invoice') . ' ' . _l('added_successfully'));
-        redirect(admin_url('purchase/pur_invoice/' . $insert_id));
+        if($redirect) {
+            set_alert('success', _l('purchase_invoice') . ' ' . _l('added_successfully'));
+            redirect(admin_url('purchase/pur_invoice/' . $insert_id));
+        }
     }
 
     public function send_payment_certificate_approve()
@@ -16496,12 +16498,18 @@ class purchase extends AdminController
         $input = $this->input->post();
         if (!empty($input)) {
             unset($input['convert_responsible_person']);
-            $input = $input['newitems'];
-            foreach ($input as $ikey => $data) {
+            $newitems = $input['newitems'];
+            foreach ($newitems as $ikey => $data) {
                 $this->purchase_model->update_bulk_payment_certificate($data);
-                set_alert('success', 'Responsible persons have been updated.');
+                if(isset($input['save_convert_to_vendor_bill'])) {
+                    $pc_with_vbt = $this->purchase_model->get_pc_with_vbt($data['id']);
+                    if (empty($pc_with_vbt)) {
+                        $this->convert_pur_invoice_from_po($data['id'], false);
+                    }
+                }
             }
         }
+        set_alert('success', 'Responsible persons have been updated.');
         redirect(admin_url('purchase/list_payment_certificate'));
     }
 

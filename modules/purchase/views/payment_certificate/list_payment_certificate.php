@@ -306,6 +306,7 @@ $module_name = 'payment_certificate'; ?>
          </div>
          <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo _l('close'); ?></button>
+            <button type="submit" name="save_convert_to_vendor_bill" value="1" class="btn btn-info">Save & Convert to Vendor Bill</button>
             <button type="submit" class="btn btn-info"><?php echo _l('submit'); ?></button>
          </div>
          <?php echo form_close(); ?>
