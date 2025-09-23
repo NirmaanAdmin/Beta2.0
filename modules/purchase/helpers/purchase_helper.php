@@ -4925,16 +4925,3 @@ function update_pur_bills_last_action($id)
     }
     return true;
 }
-
-function get_list_pur_bills_approval_details($rel_id, $rel_type)
-{
-    $CI = &get_instance();
-    $CI->db->select('*');
-    $CI->db->where('rel_id', $rel_id);
-    if (is_array($rel_type)) {
-        $CI->db->where_in('rel_type', $rel_type);
-    } else {
-        $CI->db->where('rel_type', $rel_type);
-    }
-    return $CI->db->get(db_prefix() . 'pur_bills_approval_details')->result_array();
-}

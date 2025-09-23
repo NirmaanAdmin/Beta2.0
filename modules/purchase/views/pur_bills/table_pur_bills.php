@@ -102,33 +102,14 @@ foreach ($rResult as $aRow) {
         } elseif ($aColumns[$i] == 'total') {
             $_data = app_format_money($aRow['total'], $base_currency->symbol);
         } elseif ($aColumns[$i] == 'approve_status') {
-            $_data = '';
-            $list_approval_details = get_list_pur_bills_approval_details($aRow['id'], ['po_bill_bifurcation', 'wo_bill_bifurcation']);
-            if (empty($list_approval_details)) {
-                if ($aRow['approve_status'] == 2) {
-                    $_data = '<span class="label label-success">' . _l('approved') . '</span>';
-                } else if ($aRow['approve_status'] == 3) {
-                    $_data = '<span class="label label-danger">' . _l('rejected') . '</span>';
-                } else if ($aRow['approve_status'] == 1) {
-                    $rel_type = '';
-                    if ($aRow['order_type'] == 1) {
-                        $rel_type = 'po_bill_bifurcation';
-                    }
-                    if ($aRow['order_type'] == 2) {
-                        $rel_type = 'wo_bill_bifurcation';
-                    }
-                    $_data = '<a data-toggle="tooltip" data-loading-text="' . _l('wait_text') . '" class="btn btn-success lead-top-btn lead-view" data-placement="top" href="#" onclick="send_bill_bifurcation_approve(' . pur_html_entity_decode($aRow['id']) . ', \'' . pur_html_entity_decode($rel_type) . '\'); return false;">' . _l('approval_request_sent') . '</a>';
-                } else {
-                    $_data = '<span class="label label-primary">' . _l('approval_request_sent') . '</span>';
-                }
-            } else if ($aRow['approve_status'] == 1) {
+            if ($aRow['approve_status'] == 1) {
                 $_data = '<span class="label label-primary">' . _l('pur_draft') . '</span>';
             } else if ($aRow['approve_status'] == 2) {
                 $_data = '<span class="label label-success">' . _l('approved') . '</span>';
             } else if ($aRow['approve_status'] == 3) {
                 $_data = '<span class="label label-danger">' . _l('rejected') . '</span>';
             } else {
-                $_data = '';
+                $_data = '<span class="label label-primary">' . _l('pur_draft') . '</span>';
             }
         } elseif ($aColumns[$i] == 1) {
             $pdf = '';
