@@ -4890,25 +4890,31 @@ function get_default_purchase_bill_rows()
             'item_id' => 1,
             'item_description' => 'Adv against Material selection',
             'bill_percent' => 0,
-            'hold' => 0,
         ],
         [
             'item_id' => 2,
             'item_description' => 'On Material Delivery',
             'bill_percent' => 0,
-            'hold' => 0,
         ],
         [
             'item_id' => 3,
             'item_description' => 'On Installation',
             'bill_percent' => 0,
-            'hold' => 0,
         ],
         [
             'item_id' => 4,
             'item_description' => 'On Handover',
             'bill_percent' => 0,
-            'hold' => 0,
+        ],
+        [
+            'item_id' => 5,
+            'item_description' => 'Extra 1',
+            'bill_percent' => 0,
+        ],
+        [
+            'item_id' => 6,
+            'item_description' => 'Extra 2',
+            'bill_percent' => 0,
         ],
     ];
     return $result;

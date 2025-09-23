@@ -13,6 +13,8 @@
 
     var vendor = $('select[name="vendor"]').val();
 
+    pur_calculate_total();
+
     <?php if (get_purchase_option('item_by_vendor') != 1) { ?>
       init_ajax_search('items', '#item_select.ajax-search', undefined, admin_url + 'purchase/pur_commodity_code_search');
     <?php } ?>
@@ -545,6 +547,7 @@
       total_bill_percentage += bill_percentage;
     });
     $('#bill_modal_' + id + ' .total_bill_unit_price').html(format_money(total_bill_unit_price));
+    $('#bill_modal_' + id + ' .total_bill_percentage').html(total_bill_percentage.toFixed(2)+'%');
     $('#bill_modal_' + id + ' input[name="final_percentage"]').val(total_bill_percentage.toFixed(2));
   }
 

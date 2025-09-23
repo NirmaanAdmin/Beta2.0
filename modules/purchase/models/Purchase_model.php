@@ -24456,6 +24456,10 @@ class Purchase_model extends App_Model
         $html .= '<table class="table text-right">';
         $html .= '<tbody>';
         $html .= '<tr>';
+        $html .= '<td width="75%"><span class="bold tw-text-neutral-700">Total Bill Percentage :</span></td>';
+        $html .= '<td width="25%" class="total_bill_percentage"></td>';
+        $html .= '</tr>';
+        $html .= '<tr>';
         $html .= '<td width="75%"><span class="bold tw-text-neutral-700">Total Bill Unit Price :</span></td>';
         $html .= '<td width="25%" class="total_bill_unit_price"></td>';
         $html .= '</tr>';
