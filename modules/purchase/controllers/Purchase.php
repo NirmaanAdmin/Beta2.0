@@ -16627,4 +16627,26 @@ class purchase extends AdminController
         $this->purchase_model->delete_pur_bills_attachment($id);
         redirect($_SERVER['HTTP_REFERER']);
     }
+
+    public function bill_bifurcation_pdf($id)
+    {
+        if (!$id) {
+            redirect(admin_url('purchase/list_pur_bills'));
+        }
+        $bill_bifurcation = $this->purchase_model->get_bill_bifurcation_pdf_html($id);
+        try {
+            $pdf = $this->purchase_model->bill_bifurcation_pdf($bill_bifurcation);
+        } catch (Exception $e) {
+            echo pur_html_entity_decode($e->getMessage());
+            die;
+        }
+        $type = 'D';
+        if ($this->input->get('output_type')) {
+            $type = $this->input->get('output_type');
+        }
+        if ($this->input->get('print')) {
+            $type = 'I';
+        }
+        $pdf->Output('bill_bifurcation.pdf', $type);
+    }
 }

@@ -162,10 +162,10 @@ foreach ($rResult as $aRow) {
             $pdf = '<div class="btn-group display-flex">';
             $pdf .= '<a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-file-pdf"></i><span class="caret"></span></a>';
             $pdf .= '<ul class="dropdown-menu dropdown-menu-right">';
-            $pdf .= '<li class="hidden-xs"><a href="#">' . _l('view_pdf') . '</a></li>';
-            $pdf .= '<li class="hidden-xs"><a href="#" target="_blank">' . _l('view_pdf_in_new_window') . '</a></li>';
-            $pdf .= '<li><a href="#">' . _l('download') . '</a></li>';
-            $pdf .= '<li><a href="#" target="_blank">' . _l('print') . '</a></li>';
+            $pdf .= '<li class="hidden-xs"><a href="' . admin_url('purchase/bill_bifurcation_pdf/' . $aRow['id'] . '?output_type=I') . '">' . _l('view_pdf') . '</a></li>';
+            $pdf .= '<li class="hidden-xs"><a href="' . admin_url('purchase/bill_bifurcation_pdf/' . $aRow['id'] . '?output_type=I') . '" target="_blank">' . _l('view_pdf_in_new_window') . '</a></li>';
+            $pdf .= '<li><a href="' . admin_url('purchase/bill_bifurcation_pdf/' . $aRow['id']) . '">' . _l('download') . '</a></li>';
+            $pdf .= '<li><a href="' . admin_url('purchase/bill_bifurcation_pdf/' . $aRow['id'] . '?print=true') . '" target="_blank">' . _l('print') . '</a></li>';
             $pdf .= '</ul>';
             $pdf .= '</div>';
             $_data = $pdf;

@@ -24928,4 +24928,131 @@ class Purchase_model extends App_Model
 
         return $deleted;
     }
+
+    public function bill_bifurcation_pdf($bill_bifurcation)
+    {
+        return app_pdf('bill_bifurcation', module_dir_path(PURCHASE_MODULE_NAME, 'libraries/pdf/Bill_bifurcation_pdf'), $bill_bifurcation);
+    }
+
+    public function get_bill_bifurcation_pdf_html($id)
+    {
+        $html = '';
+        $this->load->model('currencies_model');
+        $base_currency = $this->currencies_model->get_base_currency();
+        $pur_bill = $this->get_pur_bill($id);
+        $pur_bill_detail = $this->get_pur_bill_detail($id);
+        $logo = '';
+        $company_logo = get_option('company_logo_dark');
+        if (!empty($company_logo)) {
+            $logo = '<img src="' . base_url('uploads/company/' . $company_logo) . '" width="230" height="160">';
+        }
+
+        $html .= '<div class="payment_certificate_main_title" style="font-size:22px; font-weight: bold; text-align: center;">' . mb_strtoupper(_l('bill_bifurcation')) . '</div>';
+
+        $html .= '<table class="table" style="font-size:13px">
+            <tbody>
+                <tr>
+                    <td>
+                        ' . $logo . '
+                        ' . format_organization_info() . '
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <br>';
+
+        $title_type = '';
+        $title_value = '';
+        if(!empty($pur_bill->pur_order)) {
+            $title_type = _l('pur_order');
+            $pur_order = $this->get_pur_order($pur_bill->pur_order);
+            $title_value = pur_html_entity_decode($pur_order->pur_order_number . ' - ' . $pur_order->pur_order_name);
+        }
+        if(!empty($pur_bill->wo_order)) {
+            $title_type = _l('wo_order');
+            $wo_order = $this->get_wo_order($pur_bill->wo_order);
+            $title_value = pur_html_entity_decode($wo_order->wo_order_number . ' - ' . $wo_order->wo_order_name);
+        }
+
+        $html .= '<table class="table" style="width: 100%" border="1" style="font-size:13px">
+            <tbody>
+                <tr>
+                  <td class="cert_title">' . _l('bill_code') . '</td>
+                  <td>' . $pur_bill->bill_code . '</td>
+                  <td class="cert_title">' . _l('bill_number') . '</td>
+                  <td>' . $pur_bill->bill_number . '</td>
+                </tr>
+                <tr>
+                  <td class="cert_title">' . _l('vendor') . '</td>
+                  <td>' . get_vendor_company_name($pur_bill->vendor) . '</td>
+                  <td class="cert_title">' . $title_type . '</td>
+                  <td>' . $title_value . '</td>
+                </tr>
+                <tr>
+                  <td class="cert_title">' . _l('Bill Date') . '</td>
+                  <td>' . _d($pur_bill->invoice_date) . '</td>
+                  <td class="cert_title">' . _l('pur_due_date') . '</td>
+                  <td>' . _d($pur_bill->duedate) . '</td>
+                </tr>
+                <tr>
+                  <td class="cert_title">' . _l('project') . '</td>
+                  <td>' . get_project_name_by_id($pur_bill->project_id) . '</td>
+                  <td class="cert_title">' . _l('transaction_id') . '</td>
+                  <td>' . $pur_bill->transactionid . '</td>
+                </tr>
+            </tbody>
+        </table>
+        <br>';
+
+        $html .= '<table class="table" style="width: 100%" border="1" style="font-size:12px">
+            <tbody>
+                <tr class="pay_cert_title">
+                  <td style="width:15%">' . _l('Uniclass Code') . '</td>
+                  <td style="width:20%">' . _l('item_description') . '</td>
+                  <td style="width:13%">' . _l('unit_price') . '</td>
+                  <td style="width:14%">' . _l('Ordered Quantity') . '</td>
+                  <td style="width:15%">' . _l('bill_percentage') . '</td>
+                  <td style="width:10%">' . _l('Qty') . '</td>
+                  <td style="width:13%">' . _l('Amount') . '</td>
+                </tr>';
+
+        if(!empty($pur_bill_detail)) {
+            foreach ($pur_bill_detail as $pkey => $pvalue) {
+                $item_name = pur_get_item_variatiom($pvalue['item_code']);
+                $html .= '<tr class="pay_cert_value">
+                  <td>'.$item_name.'</td>
+                  <td>'.pur_html_entity_decode($pvalue['description']).'</td>
+                  <td>'.app_format_money($pvalue['unit_price'], $base_currency->symbol).'</td>
+                  <td>'.$pvalue['quantity'].'</td>
+                  <td>'.$pvalue['bill_percentage'].'%</td>
+                  <td>'.$pvalue['billed_quantity'].'</td>
+                  <td>'.app_format_money($pvalue['total_money'], $base_currency->symbol).'</td>
+                </tr>';
+
+                $this->db->where('bill_item_id', $pvalue['id']);
+                $this->db->where('bill_percent >', 0, false);
+                $pur_bills_bifurcation = $this->db->get(db_prefix() . 'pur_bills_bifurcation')->result_array();
+                if(!empty($pur_bills_bifurcation)) {
+                    foreach ($pur_bills_bifurcation as $bkey => $bvalue) {
+                        $bill_unit_price = $pvalue['unit_price'] * ($bvalue['bill_percent'] / 100);
+                        $html .= '<tr class="pay_cert_subrow">
+                            <td colspan="7">
+                                <strong>Bill Bifurcation Details</strong><br>
+                                '._l('Bill Description').': ' . $bvalue['item_description'] . '<br>
+                                '._l('bill_percentage').': ' . $bvalue['bill_percent'] . '%<br>
+                                '._l('Bill Unit Price').': '.app_format_money($bill_unit_price, $base_currency->symbol).'
+                            </td>
+                        </tr>';
+                    }
+                }
+
+            }
+        }
+
+        $html .= '</tbody></table>';
+
+        $html .= '<link href="' . module_dir_url(PURCHASE_MODULE_NAME, 'assets/css/payment_certificate_style.css') . '"  rel="stylesheet" type="text/css" />';
+
+        return $html;
+    }
 }
