@@ -639,7 +639,7 @@ class drawing_management_model extends app_model
 	 * @param [type] $version   
 	 * @param [type] $filetype  
 	 */
-	public function add_attachment_file_to_database($name, $parent_id, $version, $filetype, $log_text = '', $old_item_id = '', $creator_id = '', $creator_type = 'staff', $orginal_filename = '')
+	public function add_attachment_file_to_database($name, $parent_id, $version, $filetype, $log_text = '', $old_item_id = '', $creator_id = '', $creator_type = 'staff', $orginal_filename = '', $duplicate = '')
 	{
 		if (is_numeric($old_item_id) && $old_item_id > 0) {
 			$data_item = $this->get_item($old_item_id);
@@ -672,7 +672,7 @@ class drawing_management_model extends app_model
 			$data['filetype'] = $filetype;
 			$data['hash'] = app_generate_hash();
 			$data['master_id'] = $this->get_master_id($parent_id);
-			$data['orginal_filename'] = $orginal_filename;
+			// $data['orginal_filename'] = $orginal_filename;
 		}
 		$this->db->insert(db_prefix() . 'dms_items', $data);
 		$insert_id = $this->db->insert_id();
@@ -821,29 +821,52 @@ class drawing_management_model extends app_model
 
 			// drop nulls
 			$update_data = array_filter($update_data, static fn($v) => $v !== null);
+			if ($duplicate != '') {
+			} else {
+				// Try to rename the physical file to include the document number
+				if (is_numeric($old_item_id) && $old_item_id > 0) {
+					$file_record = $this->db->select('name,orginal_filename')->where('id', (int)$insert_id)->get(db_prefix() . 'dms_items')->row();
+					if ($file_record && !empty($file_record->orginal_filename)) {
+						$upload_dir = rtrim(DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER, '/')
+							. '/files/' . (int)$new_parent_id . '/';
 
-			// Try to rename the physical file to include the document number
-			if (is_numeric($old_item_id) && $old_item_id > 0) {
-				$file_record = $this->db->select('name,orginal_filename')->where('id', (int)$insert_id)->get(db_prefix() . 'dms_items')->row();
-				if ($file_record && !empty($file_record->orginal_filename)) {
-					$upload_dir = rtrim(DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER, '/')
-						. '/files/' . (int)$new_parent_id . '/';
+						$old_filename = $file_record->name;
+						$old_filename_original_name = $file_record->orginal_filename;
+						$file_parts   = pathinfo($old_filename_original_name);
+						$basename     = $file_parts['filename'] ?? '';
+						$ext          = isset($file_parts['extension']) ? ('.' . $file_parts['extension']) : '';
 
-					$old_filename = $file_record->name;
-					$old_filename_original_name = $file_record->orginal_filename;
-					$file_parts   = pathinfo($old_filename_original_name);
-					$basename     = $file_parts['filename'] ?? '';
-					$ext          = isset($file_parts['extension']) ? ('.' . $file_parts['extension']) : '';
+						if ($basename !== '' && strpos($basename, $document_number) === false) {
+							$new_filename = $document_number . '-' . $basename . $ext;
+							$old_path = $upload_dir . $old_filename;
+							$new_path = $upload_dir . $new_filename;
 
-					if ($basename !== '' && strpos($basename, $document_number) === false) {
-						$new_filename = $document_number . '-' . $basename . $ext;
-						$old_path = $upload_dir . $old_filename;
-						$new_path = $upload_dir . $new_filename;
+							if (is_file($old_path) && @rename($old_path, $new_path)) {
+								$update_data['name'] = $new_filename;
+							}
+						} elseif ($file_record && !empty($file_record->name)) {
+							$upload_dir = rtrim(DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER, '/')
+								. '/files/' . (int)$new_parent_id . '/';
 
-						if (is_file($old_path) && @rename($old_path, $new_path)) {
-							$update_data['name'] = $new_filename;
+							$old_filename = $file_record->name;
+							$file_parts   = pathinfo($old_filename);
+							$basename     = $file_parts['filename'] ?? '';
+							$ext          = isset($file_parts['extension']) ? ('.' . $file_parts['extension']) : '';
+
+							if ($basename !== '' && strpos($basename, $document_number) === false) {
+								$new_filename = $document_number . '-' . $basename . $ext;
+								$old_path = $upload_dir . $old_filename;
+								$new_path = $upload_dir . $new_filename;
+
+								if (is_file($old_path) && @rename($old_path, $new_path)) {
+									$update_data['name'] = $new_filename;
+								}
+							}
 						}
-					} elseif ($file_record && !empty($file_record->name)) {
+					}
+				} else {
+					$file_record = $this->db->select('name')->where('id', (int)$insert_id)->get(db_prefix() . 'dms_items')->row();
+					if ($file_record && !empty($file_record->name)) {
 						$upload_dir = rtrim(DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER, '/')
 							. '/files/' . (int)$new_parent_id . '/';
 
@@ -863,33 +886,14 @@ class drawing_management_model extends app_model
 						}
 					}
 				}
-			} else {
-				$file_record = $this->db->select('name')->where('id', (int)$insert_id)->get(db_prefix() . 'dms_items')->row();
-				if ($file_record && !empty($file_record->name)) {
-					$upload_dir = rtrim(DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER, '/')
-						. '/files/' . (int)$new_parent_id . '/';
-
-					$old_filename = $file_record->name;
-					$file_parts   = pathinfo($old_filename);
-					$basename     = $file_parts['filename'] ?? '';
-					$ext          = isset($file_parts['extension']) ? ('.' . $file_parts['extension']) : '';
-
-					if ($basename !== '' && strpos($basename, $document_number) === false) {
-						$new_filename = $document_number . '-' . $basename . $ext;
-						$old_path = $upload_dir . $old_filename;
-						$new_path = $upload_dir . $new_filename;
-
-						if (is_file($old_path) && @rename($old_path, $new_path)) {
-							$update_data['name'] = $new_filename;
-						}
-					}
-				}
 			}
+
 
 			// Final update
 			if (!empty($update_data)) {
 				$this->db->where('id', (int)$insert_id)->update(db_prefix() . 'dms_items', $update_data);
 			}
+
 
 
 
@@ -1311,7 +1315,7 @@ class drawing_management_model extends app_model
 				$newFilePath = $path . $filename;
 				// Upload the file into the temp dir
 				if ($this->copy_file($oldFilePath, $newFilePath)) {
-					$this->add_attachment_file_to_database($filename, $folder_id, $data_item->version, $data_item->filetype, '', '', $data_item->creator_id, $data_item->creator_type);
+					$this->add_attachment_file_to_database($filename, $folder_id, $data_item->version, $data_item->filetype, '', '', $data_item->creator_id, $data_item->creator_type, $data_item->orginal_filename, $duplicate = 1);
 					$affectedRows++;
 				}
 			}
