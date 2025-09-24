@@ -15424,6 +15424,14 @@ class Purchase_model extends App_Model
                     $template = mail_template('payment_certificate_to_approver', 'purchase', $data);
                     $template->send();
                 }
+
+                if ($rel_name == 'bill_bifurcation') {
+                    $data['mail_to'] = $value['email'];
+                    $data['pb_id'] = $id;
+                    $data = (object) $data;
+                    $template = mail_template('bill_bifurcation_to_approver', 'purchase', $data);
+                    $template->send();
+                }
             }
         }
 
@@ -21466,8 +21474,8 @@ class Purchase_model extends App_Model
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'pur_bills', $total);
 
+        $pur_bill = $this->get_pur_bill($id);
         if(isset($save_and_send)) {
-            $pur_bill = $this->get_pur_bill($id);
             if(!empty($pur_bill->pur_order)) {
                 $this->send_bill_bifurcation_approve(['rel_id' => $id, 'rel_type' => 'po_bill_bifurcation']);
             } else if(!empty($pur_bill->wo_order)) {
@@ -21476,6 +21484,20 @@ class Purchase_model extends App_Model
         }
 
         update_pur_bills_last_action($id);
+
+        $cron_email = array();
+        $cron_email_options = array();
+        $cron_email['type'] = "purchase";
+        $cron_email_options['rel_type'] = !empty($pur_bill->pur_order) ? 'po_bill_bifurcation' : 'wo_bill_bifurcation';
+        $cron_email_options['rel_name'] = 'bill_bifurcation';
+        $cron_email_options['insert_id'] = $id;
+        $cron_email_options['user_id'] = get_staff_user_id();
+        $cron_email_options['status'] = 1;
+        $cron_email_options['approver'] = 'yes';
+        $cron_email_options['project'] = $pur_bill->project_id;
+        $cron_email_options['requester'] = get_staff_user_id();
+        $cron_email['options'] = json_encode($cron_email_options, true);
+        $this->db->insert(db_prefix() . 'cron_email', $cron_email);
 
         return true;
     }
