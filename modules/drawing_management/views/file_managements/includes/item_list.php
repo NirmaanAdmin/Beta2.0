@@ -58,7 +58,13 @@
 					<?php echo drawing_htmldecode($a1 . _dt($value['dateadded']) . $a2); ?>
 				</td>
 				<td>
-					<?php echo get_last_action_full_name($value['last_action']); ?>
+					<?php
+					if($value['last_action'] > 0){
+						echo get_last_action_full_name($value['last_action']);
+					}else{
+						echo get_last_action_full_name($value['creator_id']);
+					}
+					  ?> 
 				</td>
 				<td>
 					<div class="dropdown pull-right">
