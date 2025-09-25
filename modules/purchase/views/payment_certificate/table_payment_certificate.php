@@ -231,16 +231,20 @@ foreach ($rResult as $aRow) {
             $_data = '<div class="checkbox"><input type="checkbox" value="' . $aRow['id'] . '"><label></label></div>';
         } elseif ($aColumns[$i] == 'id') {
             $numberOutput = '';
-            if (!empty($aRow['po_id'])) {
-                $numberOutput .= '<a href="' . admin_url('purchase/payment_certificate/' . $aRow['po_id'] . '/' . $aRow['id']) . '" target="_blank">' . _l('view') . '</a>';
+            if (has_permission('payment_certificate', '', 'edit') || is_admin()) {
+                if (!empty($aRow['po_id'])) {
+                    $numberOutput .= '<a href="' . admin_url('purchase/payment_certificate/' . $aRow['po_id'] . '/' . $aRow['id']) . '" target="_blank">' . _l('view') . '</a>';
+                }
+                if (!empty($aRow['wo_id'])) {
+                    $numberOutput .= '<a href="' . admin_url('purchase/wo_payment_certificate/' . $aRow['wo_id'] . '/' . $aRow['id']) . '" target="_blank">' . _l('view') . '</a>';
+                }
+                if (!empty($aRow['ot_id'])) {
+                    $numberOutput .= '<a href="' . admin_url('purchase/ot_payment_certificate/' . $aRow['ot_id'] . '/' . $aRow['id']) . '" target="_blank">' . _l('view') . '</a>';
+                }
             }
-            if (!empty($aRow['wo_id'])) {
-                $numberOutput .= '<a href="' . admin_url('purchase/wo_payment_certificate/' . $aRow['wo_id'] . '/' . $aRow['id']) . '" target="_blank">' . _l('view') . '</a>';
+            if (has_permission('payment_certificate', '', 'delete') || is_admin()) {
+                $numberOutput .= ' | <a href="' . admin_url('purchase/delete_payment_certificate/' . $aRow['id']) . '" class="text-danger delete_payment_cert">' . _l('delete') . '</a>';
             }
-            if (!empty($aRow['ot_id'])) {
-                $numberOutput .= '<a href="' . admin_url('purchase/ot_payment_certificate/' . $aRow['ot_id'] . '/' . $aRow['id']) . '" target="_blank">' . _l('view') . '</a>';
-            }
-            $numberOutput .= ' | <a href="' . admin_url('purchase/delete_payment_certificate/' . $aRow['id']) . '" class="text-danger delete_payment_cert">' . _l('delete') . '</a>';
             $_data = $numberOutput;
         } elseif ($aColumns[$i] == 'pc_number') {
             if (!empty($aRow['po_id'])) {

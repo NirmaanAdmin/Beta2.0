@@ -510,6 +510,7 @@ function purchase_permissions()
     register_staff_capabilities('purchase_tender', $capabilities_own, _l('purchase_tender'));
     register_staff_capabilities('purchase_quotations', $capabilities_own, _l('purchase_quotations'));
     register_staff_capabilities('purchase_orders', $capabilities_own, _l('purchase_orders'));
+    register_staff_capabilities('payment_certificate', $capabilities, _l('payment_certificate'));
     register_staff_capabilities('bill_bifurcation', $capabilities, _l('bill_bifurcation'));
     register_staff_capabilities('work_orders', $capabilities_own, _l('work_order'));
     register_staff_capabilities('unawarded_tracker', $capabilities_own, _l('unawarded_tracker'));

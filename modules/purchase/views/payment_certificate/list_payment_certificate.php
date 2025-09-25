@@ -41,9 +41,11 @@ $module_name = 'payment_certificate'; ?>
                            <hr />
                         </div>
                         <div class="col-md-3">
-                           <a href="<?php echo admin_url('purchase/ot_payment_certificate'); ?>" class="btn btn-info pull-left mright10 display-block">
-                           <?php echo _l('new_payment_certificate'); ?>
-                           </a>
+                           <?php if (has_permission('payment_certificate', '', 'create') || is_admin()) { ?>
+                              <a href="<?php echo admin_url('purchase/ot_payment_certificate'); ?>" class="btn btn-info pull-left mright10 display-block">
+                              <?php echo _l('new_payment_certificate'); ?>
+                              </a>
+                           <?php } ?>
                            <button class="btn btn-info display-block" type="button" data-toggle="collapse" data-target="#pc-charts-section" aria-expanded="true" aria-controls="pc-charts-section">
                               <?php echo _l('Payment Certificate Charts'); ?> <i class="fa fa-chevron-down toggle-icon"></i>
                            </button>
@@ -212,79 +214,81 @@ $module_name = 'payment_certificate'; ?>
                      </div>
                      <br>
 
-                     <div class="btn-group show_hide_columns" id="show_hide_columns">
-                        <!-- Settings Icon -->
-                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding: 4px 7px;">
-                           <i class="fa fa-cog"></i> <?php  ?> <span class="caret"></span>
-                        </button>
-                        <!-- Dropdown Menu with Checkboxes -->
-                        <div class="dropdown-menu" style="padding: 10px; min-width: 250px;">
-                           <!-- Select All / Deselect All -->
-                           <div>
-                              <input type="checkbox" id="select-all-columns"> <strong><?php echo _l('select_all'); ?></strong>
-                           </div>
-                           <hr>
-                           <!-- Column Checkboxes -->
-                           <?php
-                           $columns = [
-                              'Checkbox',
-                              'Payment cert',
-                              'payment_certificate_number',
-                              'order_name',
-                              'vendor',
-                              'order_date',
-                              'group_pur',
-                              'this_bill',
-                              'submission_date',
-                              'approval_status',
-                              'pending_approval',
-                              'applied_to_vendor_bill',
-                              'Invoice',
-                              _l('options'),
-                              'responsible_person',
-                              'last_action_by',
-                           ];
-                           ?>
-                           <div>
-                              <?php foreach ($columns as $key => $label): ?>
-                                 <input type="checkbox" class="toggle-column" data-id="<?php echo $label; ?>" value="<?php echo $key; ?>" checked>
-                                 <?php echo _l($label); ?><br>
-                              <?php endforeach; ?>
-                           </div>
+                     <?php if (has_permission('payment_certificate', '', 'view') || is_admin()) { ?>
+                        <div class="btn-group show_hide_columns" id="show_hide_columns">
+                           <!-- Settings Icon -->
+                           <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding: 4px 7px;">
+                              <i class="fa fa-cog"></i> <?php  ?> <span class="caret"></span>
+                           </button>
+                           <!-- Dropdown Menu with Checkboxes -->
+                           <div class="dropdown-menu" style="padding: 10px; min-width: 250px;">
+                              <!-- Select All / Deselect All -->
+                              <div>
+                                 <input type="checkbox" id="select-all-columns"> <strong><?php echo _l('select_all'); ?></strong>
+                              </div>
+                              <hr>
+                              <!-- Column Checkboxes -->
+                              <?php
+                              $columns = [
+                                 'Checkbox',
+                                 'Payment cert',
+                                 'payment_certificate_number',
+                                 'order_name',
+                                 'vendor',
+                                 'order_date',
+                                 'group_pur',
+                                 'this_bill',
+                                 'submission_date',
+                                 'approval_status',
+                                 'pending_approval',
+                                 'applied_to_vendor_bill',
+                                 'Invoice',
+                                 _l('options'),
+                                 'responsible_person',
+                                 'last_action_by',
+                              ];
+                              ?>
+                              <div>
+                                 <?php foreach ($columns as $key => $label): ?>
+                                    <input type="checkbox" class="toggle-column" data-id="<?php echo $label; ?>" value="<?php echo $key; ?>" checked>
+                                    <?php echo _l($label); ?><br>
+                                 <?php endforeach; ?>
+                              </div>
 
+                           </div>
                         </div>
-                     </div>
 
-                     <div class="row">
-                        <a onclick="bulk_convert_payment_certificate(); return false;" data-toggle="modal" data-table=".table-table_payment_certificate" class=" hide bulk-actions-btn table-btn">Bulk Convert</a>
-                     </div>
+                        <div class="row">
+                           <a onclick="bulk_convert_payment_certificate(); return false;" data-toggle="modal" data-table=".table-table_payment_certificate" class=" hide bulk-actions-btn table-btn">Bulk Convert</a>
+                        </div>
 
-                     <table class="dt-table-loading table table-table_payment_certificate">
-                        <thead>
-                           <tr>
-                              <th style="width: 5px"><span class="hide"> - </span>
-                                 <div class="checkbox mass_select_all_wrap"><input type="checkbox" id="mass_select_all" data-to-table="table_payment_certificate"><label></label></div>
-                              </th>
-                              <th><?php echo _l('Payment cert'); ?></th>
-                              <th><?php echo _l('payment_certificate_number'); ?></th>
-                              <th><?php echo _l('order_name'); ?></th>
-                              <th><?php echo _l('vendor'); ?></th>
-                              <th><?php echo _l('order_date'); ?></th>
-                              <th><?php echo _l('group_pur'); ?></th>
-                              <th><?php echo _l('this_bill'); ?></th>
-                              <th><?php echo _l('submission_date'); ?></th>
-                              <th><?php echo _l('approval_status'); ?></th>
-                              <th><?php echo _l('pending_approval'); ?></th>
-                              <th><?php echo _l('applied_to_vendor_bill'); ?></th>
-                              <th><?php echo _l('Invoice'); ?></th>
-                              <th><?php echo _l('options'); ?></th>
-                              <th><?php echo _l('responsible_person'); ?></th>
-                              <th><?php echo _l('last_action_by'); ?></th>
-                           </tr>
-                        </thead>
-                        <tbody></tbody>
-                        <tbody></tbody>
-                     </table>
+                        <table class="dt-table-loading table table-table_payment_certificate">
+                           <thead>
+                              <tr>
+                                 <th style="width: 5px"><span class="hide"> - </span>
+                                    <div class="checkbox mass_select_all_wrap"><input type="checkbox" id="mass_select_all" data-to-table="table_payment_certificate"><label></label></div>
+                                 </th>
+                                 <th><?php echo _l('Payment cert'); ?></th>
+                                 <th><?php echo _l('payment_certificate_number'); ?></th>
+                                 <th><?php echo _l('order_name'); ?></th>
+                                 <th><?php echo _l('vendor'); ?></th>
+                                 <th><?php echo _l('order_date'); ?></th>
+                                 <th><?php echo _l('group_pur'); ?></th>
+                                 <th><?php echo _l('this_bill'); ?></th>
+                                 <th><?php echo _l('submission_date'); ?></th>
+                                 <th><?php echo _l('approval_status'); ?></th>
+                                 <th><?php echo _l('pending_approval'); ?></th>
+                                 <th><?php echo _l('applied_to_vendor_bill'); ?></th>
+                                 <th><?php echo _l('Invoice'); ?></th>
+                                 <th><?php echo _l('options'); ?></th>
+                                 <th><?php echo _l('responsible_person'); ?></th>
+                                 <th><?php echo _l('last_action_by'); ?></th>
+                              </tr>
+                           </thead>
+                           <tbody></tbody>
+                           <tbody></tbody>
+                        </table>
+                     <?php } ?>
 
                   </div>
                </div>

@@ -966,72 +966,80 @@ if ($estimate->currency != 0) {
                   <h4 class="font-medium mbot15 bold text-success"><?php echo _l('payment_certificate_for_wo_order') . ' ' . $estimate->wo_order_number; ?></h4>
                </div>
                <div class="col-md-6 padr_div_0">
-                  <a href="<?php echo admin_url('purchase/wo_payment_certificate/' . $estimate->id); ?>" target="_blank" class="btn btn-success pull-right"><i class="fa fa-plus"></i><?php echo ' ' . _l('payment_certificate'); ?></a>
+                  <?php if (has_permission('payment_certificate', '', 'create') || is_admin()) { ?>
+                     <a href="<?php echo admin_url('purchase/wo_payment_certificate/' . $estimate->id); ?>" target="_blank" class="btn btn-success pull-right"><i class="fa fa-plus"></i><?php echo ' ' . _l('payment_certificate'); ?></a>
+                  <?php } ?>
                </div>
                <div class="clearfix"></div>
-               <table class="table dt-table">
-                  <thead>
-                     <th><?php echo _l('serial_no'); ?></th>
-                     <th><?php echo _l('wo_no'); ?></th>
-                     <th><?php echo _l('convert'); ?></th>
-                     <th><?php echo _l('options'); ?></th>
-                     <th><?php echo _l('approval_status'); ?></th>
-                  </thead>
-                  <tbody>
-                     <?php foreach ($payment_certificate as $pay) { ?>
-                        <tr>
-                           <td><?php echo $pay['serial_no']; ?></td>
-                           <td><?php echo $estimate->wo_order_number; ?></td>
-                           <td>
-                              <?php if ($pay['approve_status'] == 2) { ?>
-                                 <a href="<?php echo admin_url('purchase/convert_pur_invoice_from_po/' . $pay['id']); ?>" class="btn btn-info convert-pur-invoice" target="_blank"><?php echo _l('convert_to_vendor_bill'); ?></a>
-                              <?php } ?>
-                           </td>
-                           <td>
-                              <a href="<?php echo admin_url('purchase/wo_payment_certificate/' . $estimate->id . '/' . $pay['id']); ?>" target="_blank" class="btn btn-default btn-icon" data-toggle="tooltip" data-placement="top" title="<?php echo _l('view'); ?>"><i class="fa fa-eye "></i></a>
-                              <?php if ($pay['approve_status'] == 1) { ?>
-                                 <a href="<?php echo admin_url('purchase/wo_payment_certificate/' . $estimate->id . '/' . $pay['id']); ?>" class="btn btn-default btn-icon" data-toggle="tooltip" data-placement="top" title="<?php echo _l('edit'); ?>"><i class="fa fa-pencil-square "></i></a>
-                              <?php } ?>
-                              <a href="<?php echo admin_url('purchase/delete_payment_certificate/' . $pay['id']); ?>" 
-                                 class="btn btn-danger btn-icon delete_payment_cert">
-                                 <i class="fa fa-remove"></i>
-                              </a>
-                              <div class="btn-group">
-                                 <a href="javascript:void(0)" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-file-pdf"></i><span class="caret"></span></a>
-                                 <ul class="dropdown-menu dropdown-menu-right">
-                                    <li class="hidden-xs"><a href="<?php echo admin_url('purchase/payment_certificate_pdf/' . $pay['id'] . '?output_type=I'); ?>"><?php echo _l('view_pdf'); ?></a></li>
-                                    <li class="hidden-xs"><a href="<?php echo admin_url('purchase/payment_certificate_pdf/' . $pay['id'] . '?output_type=I'); ?>" target="_blank"><?php echo _l('view_pdf_in_new_window'); ?></a></li>
-                                    <li><a href="<?php echo admin_url('purchase/payment_certificate_pdf/' . $pay['id']); ?>"><?php echo _l('download'); ?></a></li>
-                                    <li>
-                                       <a href="<?php echo admin_url('purchase/payment_certificate_pdf/' . $pay['id'] . '?print=true'); ?>" target="_blank">
-                                          <?php echo _l('print'); ?>
-                                       </a>
-                                    </li>
-                                 </ul>
-                              </div>
-                           </td>
-                           <td>
-                              <?php
-                              $list_approval_details = get_list_approval_details($pay['id'], 'wo_payment_certificate');
-                              if (empty($list_approval_details)) { ?>
+               <?php if (has_permission('payment_certificate', '', 'view') || is_admin()) { ?>
+                  <table class="table dt-table">
+                     <thead>
+                        <th><?php echo _l('serial_no'); ?></th>
+                        <th><?php echo _l('wo_no'); ?></th>
+                        <th><?php echo _l('convert'); ?></th>
+                        <th><?php echo _l('options'); ?></th>
+                        <th><?php echo _l('approval_status'); ?></th>
+                     </thead>
+                     <tbody>
+                        <?php foreach ($payment_certificate as $pay) { ?>
+                           <tr>
+                              <td><?php echo $pay['serial_no']; ?></td>
+                              <td><?php echo $estimate->wo_order_number; ?></td>
+                              <td>
                                  <?php if ($pay['approve_status'] == 2) { ?>
-                                    <span class="label label-primary"><?php echo _l('approved'); ?></span>
-                                 <?php } else { ?>
-                                    <a data-toggle="tooltip" data-loading-text="<?php echo _l('wait_text'); ?>" class="btn btn-success lead-top-btn lead-view" data-placement="top" href="#" onclick="send_payment_certificate_approve(<?php echo pur_html_entity_decode($pay['id']); ?>); return false;"><?php echo _l('send_request_approve_pur'); ?></a>
+                                    <a href="<?php echo admin_url('purchase/convert_pur_invoice_from_po/' . $pay['id']); ?>" class="btn btn-info convert-pur-invoice" target="_blank"><?php echo _l('convert_to_vendor_bill'); ?></a>
                                  <?php } ?>
-                              <?php } else if ($pay['approve_status'] == 1) { ?>
-                                 <span class="label label-primary"><?php echo _l('pur_draft'); ?></span>
-                              <?php } else if ($pay['approve_status'] == 2) { ?>
-                                 <span class="label label-primary"><?php echo _l('approved'); ?></span>
-                              <?php } else if ($pay['approve_status'] == 3) { ?>
-                                 <span class="label label-danger"><?php echo _l('rejected'); ?></span>
-                              <?php } else { ?>
-                              <?php } ?>
-                           </td>
-                        </tr>
-                     <?php } ?>
-                  </tbody>
-               </table>
+                              </td>
+                              <td>
+                                 <?php if (has_permission('payment_certificate', '', 'edit') || is_admin()) { ?>
+                                    <a href="<?php echo admin_url('purchase/wo_payment_certificate/' . $estimate->id . '/' . $pay['id']); ?>" target="_blank" class="btn btn-default btn-icon" data-toggle="tooltip" data-placement="top" title="<?php echo _l('view'); ?>"><i class="fa fa-eye "></i></a>
+                                    <?php if ($pay['approve_status'] == 1) { ?>
+                                       <a href="<?php echo admin_url('purchase/wo_payment_certificate/' . $estimate->id . '/' . $pay['id']); ?>" class="btn btn-default btn-icon" data-toggle="tooltip" data-placement="top" title="<?php echo _l('edit'); ?>"><i class="fa fa-pencil-square "></i></a>
+                                    <?php } ?>
+                                 <?php } ?>
+                                 <?php if (has_permission('payment_certificate', '', 'delete') || is_admin()) { ?>
+                                    <a href="<?php echo admin_url('purchase/delete_payment_certificate/' . $pay['id']); ?>" 
+                                       class="btn btn-danger btn-icon delete_payment_cert">
+                                       <i class="fa fa-remove"></i>
+                                    </a>
+                                 <?php } ?>
+                                 <div class="btn-group">
+                                    <a href="javascript:void(0)" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-file-pdf"></i><span class="caret"></span></a>
+                                    <ul class="dropdown-menu dropdown-menu-right">
+                                       <li class="hidden-xs"><a href="<?php echo admin_url('purchase/payment_certificate_pdf/' . $pay['id'] . '?output_type=I'); ?>"><?php echo _l('view_pdf'); ?></a></li>
+                                       <li class="hidden-xs"><a href="<?php echo admin_url('purchase/payment_certificate_pdf/' . $pay['id'] . '?output_type=I'); ?>" target="_blank"><?php echo _l('view_pdf_in_new_window'); ?></a></li>
+                                       <li><a href="<?php echo admin_url('purchase/payment_certificate_pdf/' . $pay['id']); ?>"><?php echo _l('download'); ?></a></li>
+                                       <li>
+                                          <a href="<?php echo admin_url('purchase/payment_certificate_pdf/' . $pay['id'] . '?print=true'); ?>" target="_blank">
+                                             <?php echo _l('print'); ?>
+                                          </a>
+                                       </li>
+                                    </ul>
+                                 </div>
+                              </td>
+                              <td>
+                                 <?php
+                                 $list_approval_details = get_list_approval_details($pay['id'], 'wo_payment_certificate');
+                                 if (empty($list_approval_details)) { ?>
+                                    <?php if ($pay['approve_status'] == 2) { ?>
+                                       <span class="label label-primary"><?php echo _l('approved'); ?></span>
+                                    <?php } else { ?>
+                                       <a data-toggle="tooltip" data-loading-text="<?php echo _l('wait_text'); ?>" class="btn btn-success lead-top-btn lead-view" data-placement="top" href="#" onclick="send_payment_certificate_approve(<?php echo pur_html_entity_decode($pay['id']); ?>); return false;"><?php echo _l('send_request_approve_pur'); ?></a>
+                                    <?php } ?>
+                                 <?php } else if ($pay['approve_status'] == 1) { ?>
+                                    <span class="label label-primary"><?php echo _l('pur_draft'); ?></span>
+                                 <?php } else if ($pay['approve_status'] == 2) { ?>
+                                    <span class="label label-primary"><?php echo _l('approved'); ?></span>
+                                 <?php } else if ($pay['approve_status'] == 3) { ?>
+                                    <span class="label label-danger"><?php echo _l('rejected'); ?></span>
+                                 <?php } else { ?>
+                                 <?php } ?>
+                              </td>
+                           </tr>
+                        <?php } ?>
+                     </tbody>
+                  </table>
+               <?php } ?>
             </div>
 
             <div role="tabpanel" class="tab-pane" id="bills">

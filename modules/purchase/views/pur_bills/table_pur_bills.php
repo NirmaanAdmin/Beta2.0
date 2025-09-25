@@ -128,8 +128,12 @@ foreach ($rResult as $aRow) {
             $_data = '<div class="checkbox"><input type="checkbox" value="' . $aRow['id'] . '"><label></label></div>';
         } elseif ($aColumns[$i] == 'id') {
             $numberOutput = '';
-            $numberOutput .= '<a href="' . admin_url('purchase/edit_pur_bills/' . $aRow['id']) . '" target="_blank">' . _l('edit') . '</a>';
-            $numberOutput .= ' | <a href="' . admin_url('purchase/delete_bill/' . $aRow['id']) . '" class="text-danger delete_bill">' . _l('delete') . '</a>';
+            if (has_permission('bill_bifurcation', '', 'edit') || is_admin()) {
+                $numberOutput .= '<a href="' . admin_url('purchase/edit_pur_bills/' . $aRow['id']) . '" target="_blank">' . _l('edit') . '</a>';
+            }
+            if (has_permission('bill_bifurcation', '', 'delete') || is_admin()) {
+                $numberOutput .= ' | <a href="' . admin_url('purchase/delete_bill/' . $aRow['id']) . '" class="text-danger delete_bill">' . _l('delete') . '</a>';
+            }
             $_data = $numberOutput;
         } elseif ($aColumns[$i] == 'bill_number') {
             $_data = '<a href="' . admin_url('purchase/edit_pur_bills/' . $aRow['id']) . '" target="_blank">' . $aRow['bill_number'] . '</a>';
