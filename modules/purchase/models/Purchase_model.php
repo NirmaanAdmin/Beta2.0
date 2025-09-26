@@ -24867,10 +24867,8 @@ class Purchase_model extends App_Model
             foreach ($newitems as $key => $value) {
                 if($value['from_invoice'] != $value['to_invoice']) {
                     $pur_invoice = $this->get_pur_invoice($value['pur_invoice']);
-                    $this->db->where('id', $value['from_invoice']);
-                    $from_invoice_detail = $this->db->get(db_prefix() . 'invoices')->row();
-                    $this->db->where('id', $value['to_invoice']);
-                    $to_invoice_detail = $this->db->get(db_prefix() . 'invoices')->row();
+                    $from_invoice_detail = get_invoice_data($value['from_invoice']);
+                    $to_invoice_detail = get_invoice_data($value['to_invoice']);
                     update_vbt_activity_log($value['pur_invoice'], _l('ril_invoice'), format_invoice_number($from_invoice_detail->id).' ('.$from_invoice_detail->title.')', format_invoice_number($to_invoice_detail->id).' ('.$to_invoice_detail->title.')');
                     $this->db->where('id', $value['expense_convert']);
                     $this->db->update(db_prefix() . 'expenses', ['invoiceid' =>  $value['to_invoice']]);

@@ -3533,6 +3533,9 @@ class purchase extends AdminController
                 if (isset($data['vbt_id'])) {
                     update_pur_invoices_last_action($data['vbt_id']);
                 }
+                $pur_invoice_detail = $this->purchase_model->get_pur_invoice($pur_invoice);
+                $ril_invoice_data = get_invoice_data($invoiceid);
+                update_vbt_activity_log($pur_invoice, _l('ril_invoice'), '', format_invoice_number($ril_invoice_data->id).' ('.$ril_invoice_data->title.')');
 
                 // set_alert('success', _l('converted', _l('expense')));
                 // echo json_encode([
