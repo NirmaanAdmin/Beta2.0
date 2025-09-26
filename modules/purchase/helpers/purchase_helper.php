@@ -4991,14 +4991,15 @@ function remove_vbt_activity_log($id)
     return true;
 }
 
-function add_bulk_assign_vbt_activity_log($id, $field)
+function add_bulk_assign_vbt_activity_log($id, $field, $new_value)
 {
     $CI = &get_instance();
     if(!empty($id)) {
         $CI->db->where('id', $id);
         $pur_invoices = $CI->db->get(db_prefix() . 'pur_invoices')->row();
         if(!empty($pur_invoices)) {
-            $description = "".$field." field is updated in vendor bill <b>".$pur_invoices->invoice_number."</b>.";
+            $new_value = !empty($new_value) ? $new_value : 'None';
+            $description = "".$field." field is updated to <b>".$new_value."</b> in vendor bill <b>".$pur_invoices->invoice_number."</b>.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'vbt',
                 'description' => $description,

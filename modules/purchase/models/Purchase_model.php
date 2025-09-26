@@ -20846,7 +20846,7 @@ class Purchase_model extends App_Model
                     'order_tracker_id' => null
                 ]
             );
-            add_bulk_assign_vbt_activity_log($data['pur_invoice'], _l('pur_order'));
+            add_bulk_assign_vbt_activity_log($data['pur_invoice'], _l('pur_order'), $pur_order->pur_order_number);
         } elseif (isset($data['wo_order']) && !empty($data['wo_order'])) {
             $wo_order = $this->get_wo_order($data['wo_order']);
             $this->db->where('id', $data['pur_invoice']);
@@ -20860,7 +20860,7 @@ class Purchase_model extends App_Model
                     'order_tracker_id' => null
                 ]
             );
-            add_bulk_assign_vbt_activity_log($data['pur_invoice'], _l('wo_order'));
+            add_bulk_assign_vbt_activity_log($data['pur_invoice'], _l('wo_order'), $wo_order->wo_order_number);
         } elseif (isset($data['order_tracker']) && !empty($data['order_tracker'])) {
             $order_tracker = $this->get_order_tracker($data['order_tracker']);
             $this->db->where('id', $data['pur_invoice']);
@@ -20873,7 +20873,7 @@ class Purchase_model extends App_Model
                     'wo_order' => null
                 ]
             );
-            add_bulk_assign_vbt_activity_log($data['pur_invoice'], _l('get_from_order_tracker'));
+            add_bulk_assign_vbt_activity_log($data['pur_invoice'], _l('get_from_order_tracker'), $order_tracker->pur_order_name);
         }
         update_pur_invoices_last_action($data['pur_invoice']);
 
