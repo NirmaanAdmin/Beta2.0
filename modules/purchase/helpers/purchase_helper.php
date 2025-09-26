@@ -4960,7 +4960,7 @@ function update_vbt_activity_log($id, $field, $old_value, $new_value)
         if(!empty($pur_invoices)) {
             $old_value = !empty($old_value) ? $old_value : 'None';
             $new_value = !empty($new_value) ? $new_value : 'None';
-            $description = "".$field." is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in vendor bill <b>".$pur_invoices->invoice_number."</b>.";
+            $description = "".$field." field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in vendor bill <b>".$pur_invoices->invoice_number."</b>.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'vbt',
                 'description' => $description,
@@ -4980,6 +4980,25 @@ function remove_vbt_activity_log($id)
         $pur_invoices = $CI->db->get(db_prefix() . 'pur_invoices')->row();
         if(!empty($pur_invoices)) {
             $description = "Vendor bill <b>".$pur_invoices->invoice_number."</b> has been deleted.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'vbt',
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id()
+            ]);
+        }
+    }
+    return true;
+}
+
+function add_bulk_assign_vbt_activity_log($id, $field)
+{
+    $CI = &get_instance();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $pur_invoices = $CI->db->get(db_prefix() . 'pur_invoices')->row();
+        if(!empty($pur_invoices)) {
+            $description = "".$field." field is updated in vendor bill <b>".$pur_invoices->invoice_number."</b>.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'vbt',
                 'description' => $description,
