@@ -1,0 +1,80 @@
+<?php
+
+defined('BASEPATH') or exit('No direct script access allowed');
+$module_name = 'module_activity_log';
+$module_name_filter_name = 'module_name';
+
+$aColumns = [
+    db_prefix() . 'module_activity_log' . '.description as description',
+    db_prefix() . 'module_activity_log' . '.date as date',
+    db_prefix() . 'module_activity_log' . '.staffid as staffid',
+];
+
+$sIndexColumn = 'id';
+$sTable = db_prefix() . 'module_activity_log';
+$join = [];
+
+$where = [];
+
+if ($this->ci->input->post('module_name') && count($this->ci->input->post('module_name')) > 0) {
+    $modules = array_map(function($m) {
+        return "'" . $m . "'";
+    }, $this->ci->input->post('module_name'));
+    array_push(
+        $where,
+        'AND ' . db_prefix() . 'module_activity_log.module_name IN (' . implode(',', $modules) . ')'
+    );
+}
+
+$module_name_filter_name_value = !empty($this->ci->input->post('module_name')) ? implode(',', $this->ci->input->post('module_name')) : NULL;
+update_module_filter($module_name, $module_name_filter_name, $module_name_filter_name_value);
+
+$having = '';
+
+$result = data_tables_init(
+    $aColumns,
+    $sIndexColumn,
+    $sTable,
+    $join,
+    $where,
+    [],
+    '',
+    [],
+    $having
+);
+
+$output  = $result['output'];
+$rResult = $result['rResult'];
+
+$aColumns = array_map(function ($col) {
+    $col = trim($col);
+    if (stripos($col, ' as ') !== false) {
+        $parts = preg_split('/\s+as\s+/i', $col);
+        return trim($parts[1], '"` ');
+    }
+    return trim($col, '"` ');
+}, $aColumns);
+
+foreach ($rResult as $aRow) {
+    $row = [];
+
+    for ($i = 0; $i < count($aColumns); $i++) {
+        $_data = $aRow[$aColumns[$i]];
+
+        if ($aColumns[$i] == 'description') {
+            $_data = html_entity_decode($aRow['description']);
+        } elseif ($aColumns[$i] == 'date') {
+            $_data = _dt($aRow['date']);
+        } elseif ($aColumns[$i] == 'staffid') {
+            $_data = get_last_action_full_name($aRow['staffid']);
+        } else {
+            if (strpos($aColumns[$i], 'date_picker_') !== false) {
+                $_data = (strpos($_data, ' ') !== false ? _dt($_data) : _d($_data));
+            }
+        }
+
+        $row[] = $_data;
+    }
+    $output['aaData'][] = $row;
+    $sr++;
+}

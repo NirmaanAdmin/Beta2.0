@@ -149,6 +149,14 @@ function app_init_admin_sidebar_menu_items()
         ]);
     }
 
+    $CI->app_menu->add_sidebar_menu_item('module_activity_log', [
+        'name'     => _l('activity_log'),
+        'href'     => admin_url('purchase/activity_log'),
+        'icon'     => 'fa-solid fa-wave-square',
+        'position' => 20,
+        'badge'    => [],
+    ]);
+
     if (staff_can('view',  'contracts') || staff_can('view_own',  'contracts')) {
         $CI->app_menu->add_sidebar_menu_item('contracts', [
             'name'     => _l('contracts'),

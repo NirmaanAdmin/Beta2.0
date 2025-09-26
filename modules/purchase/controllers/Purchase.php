@@ -6731,6 +6731,8 @@ class purchase extends AdminController
 
     public function change_payment_status($status, $invoice_id)
     {
+        $pur_invoice = $this->purchase_model->get_pur_invoice($invoice_id);
+        update_vbt_activity_log($invoice_id, _l('billing_status'), get_vbt_payment_status($pur_invoice->payment_status), get_vbt_payment_status($status));
         $success = $this->purchase_model->change_payment_status($status, $invoice_id);
         $message = '';
         $html = '';
@@ -11889,6 +11891,9 @@ class purchase extends AdminController
             return;
         }
 
+        $pur_invoice = $this->purchase_model->get_pur_invoice($id);
+        update_vbt_activity_log($id, _l('invoice_code'), $pur_invoice->vendor_invoice_number, $vin);
+
         // Perform the update
         $this->db->where('id', $id);
         $success = $this->db->update('tblpur_invoices', ['vendor_invoice_number' => $vin]);
@@ -11910,6 +11915,9 @@ class purchase extends AdminController
             echo json_encode(['success' => false, 'message' => _l('invalid_request')]);
             return;
         }
+
+        $pur_invoice = $this->purchase_model->get_pur_invoice($id);
+        update_vbt_activity_log($id, _l('invoice_date'), _d($pur_invoice->invoice_date), _d($invoice_date));
 
         // Perform the update
         $this->db->where('id', $id);
@@ -11933,6 +11941,9 @@ class purchase extends AdminController
             echo json_encode(['success' => false, 'message' => _l('invalid_request')]);
             return;
         }
+
+        $pur_invoice = $this->purchase_model->get_pur_invoice($id);
+        update_vbt_activity_log($id, _l('adminnote'), $pur_invoice->adminnote, $admin_note);
 
         // Perform the update
         $this->db->where('id', $id);
@@ -11958,6 +11969,9 @@ class purchase extends AdminController
             return;
         }
 
+        $pur_invoice = $this->purchase_model->get_pur_invoice($id);
+        update_vbt_activity_log($id, _l('description_of_services'), $pur_invoice->description_services, $update_description_services);
+
         // Perform the update
         $this->db->where('id', $id);
         $success = $this->db->update('tblpur_invoices', ['description_services' => $update_description_services]);
@@ -11972,6 +11986,8 @@ class purchase extends AdminController
 
     public function change_budget_head($budgetid, $invoice_id)
     {
+        $pur_invoice = $this->purchase_model->get_pur_invoice($invoice_id);
+        update_vbt_activity_log($invoice_id, _l('Billing Budget Head'), get_group_name_by_id($pur_invoice->group_pur), get_group_name_by_id($budgetid));
         $success = $this->purchase_model->change_budget_head($budgetid, $invoice_id);
         $message = '';
         $html = '';
@@ -12425,6 +12441,11 @@ class purchase extends AdminController
             return;
         }
 
+        $this->load->model('currencies_model');
+        $base_currency = $this->currencies_model->get_base_currency();
+        $pur_invoice = $this->purchase_model->get_pur_invoice($id);
+        update_vbt_activity_log($id, _l('amount_without_tax'), app_format_money($pur_invoice->vendor_submitted_amount_without_tax, $base_currency->symbol), app_format_money($amount, $base_currency->symbol));
+
         // Perform the update
         $this->db->where('id', $id);
         $success = $this->db->update('tblpur_invoices', ['vendor_submitted_amount_without_tax' => $amount]);
@@ -12447,6 +12468,11 @@ class purchase extends AdminController
             echo json_encode(['success' => false, 'message' => _l('invalid_request')]);
             return;
         }
+
+        $this->load->model('currencies_model');
+        $base_currency = $this->currencies_model->get_base_currency();
+        $pur_invoice = $this->purchase_model->get_pur_invoice($id);
+        update_vbt_activity_log($id, _l('vendor_submitted_tax_amount'), app_format_money($pur_invoice->vendor_submitted_tax_amount, $base_currency->symbol), app_format_money($amount, $base_currency->symbol));
 
         // Perform the update
         $this->db->where('id', $id);
@@ -16472,6 +16498,8 @@ class purchase extends AdminController
         } else {
             $responsible_persons = NULL;
         }
+        $pur_invoice = $this->purchase_model->get_pur_invoice($id);
+        update_vbt_activity_log($id, _l('responsible_person'), get_multiple_staff_names($pur_invoice->responsible_person), get_multiple_staff_names($responsible_persons));
         $this->db->where('id', $id);
         $success = $this->db->update('tblpur_invoices', [
             'responsible_person' => $responsible_persons
@@ -16648,5 +16676,16 @@ class purchase extends AdminController
             $type = 'I';
         }
         $pdf->Output('bill_bifurcation.pdf', $type);
+    }
+
+    public function activity_log()
+    {
+        $data['title'] = _l('activity_log');
+        $this->load->view('activity_log/activity_log', $data);
+    }
+
+    public function table_activity_log()
+    {
+        $this->app->get_table_data(module_views_path('purchase', 'activity_log/table_activity_log'));
     }
 }

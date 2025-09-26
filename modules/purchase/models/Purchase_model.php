@@ -7116,6 +7116,7 @@ class Purchase_model extends App_Model
             $this->db->where('id', $insert_id);
             $this->db->update(db_prefix() . 'pur_invoices', $total);
             update_pur_invoices_last_action($insert_id);
+            add_vbt_activity_log($insert_id);
 
             hooks()->do_action('after_pur_invoice_added', $insert_id);
 
@@ -7393,6 +7394,8 @@ class Purchase_model extends App_Model
      */
     public function delete_pur_invoice($id)
     {
+        remove_vbt_activity_log($id);
+        
         $this->db->where('rel_type', 'pur_invoice');
         $this->db->where('rel_id', $id);
         $this->db->delete(db_prefix() . 'taggables');
