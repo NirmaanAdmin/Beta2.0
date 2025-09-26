@@ -158,7 +158,7 @@ class drawing_management_model extends app_model
 		}
 		$affectedRows = 0;
 		$id = $data['id'];
-		$data_item = $this->get_item($id, '', 'name');
+		$data_item = $this->get_item($id, '', 'name,parent_id');
 		if ($data_item) {
 			if (isset($data['parent_id'])) {
 				$data['master_id'] = $this->get_master_id($data['parent_id']);
@@ -299,7 +299,7 @@ class drawing_management_model extends app_model
 				update_drawing_last_action($id);
 				// Rename file if name has been changed
 				if (isset($data['name']) && ($data_item->name != $data['name'])) {
-					$this->change_file_name($id, $data['name']);
+					$this->change_file_name($id, $data['name'],$data_item->parent_id, $data_item->name);
 				}
 				$affectedRows++;
 			}
@@ -1016,18 +1016,18 @@ class drawing_management_model extends app_model
 	 * @param  string $new_name 
 	 * @return boolean           
 	 */
-	public function change_file_name($id, $new_name)
+	public function change_file_name($id, $new_name, $parent_id, $old_name)
 	{
-		$data_item = $this->get_item($id, '', 'name, parent_id');
-		if ($data_item) {
-			$path = DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/files/' . $data_item->parent_id . '/';
+		// $data_item = $this->get_item($id, '', 'name, parent_id');
+		// if ($data_item) {
+			$path = DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/files/' . $parent_id . '/';
 			$new_path = $path . $new_name;
-			$old_path = $path . $data_item->name;
+			$old_path = $path . $old_name;
 			if (file_exists($old_path)) {
 				rename($old_path, $new_path);
 				return true;
 			}
-		}
+		// }
 		return false;
 	}
 
