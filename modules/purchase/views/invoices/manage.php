@@ -86,6 +86,9 @@
                         <button class="btn btn-info pull-left display-block" type="button" data-toggle="collapse" data-target="#vbt-charts-section" aria-expanded="true" aria-controls="vbt-charts-section">
                            <?php echo _l('Vendor Billing Tracker Charts'); ?> <i class="fa fa-chevron-down toggle-icon"></i>
                         </button>
+                        <a href="<?php echo admin_url('purchase/activity_log?module=vbt'); ?>" class="btn btn-info pull-left mleft10 display-block" target="_blank">
+                           <?php echo _l('activity_log'); ?>
+                        </a>
                      </div>
                   </div>
 
