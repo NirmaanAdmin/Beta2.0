@@ -4932,14 +4932,14 @@ function update_pur_bills_last_action($id)
     return true;
 }
 
-function add_vbt_activity_log($id)
+function add_vbt_activity_log($id, $by_module = '')
 {
     $CI = &get_instance();
     if(!empty($id)) {
         $CI->db->where('id', $id);
         $pur_invoices = $CI->db->get(db_prefix() . 'pur_invoices')->row();
         if(!empty($pur_invoices)) {
-            $description = "Vendor bill <b>".$pur_invoices->invoice_number."</b> has been created.";
+            $description = "Vendor bill <b>".$pur_invoices->invoice_number."</b> has been created<b>".$by_module."</b>.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'vbt',
                 'description' => $description,
