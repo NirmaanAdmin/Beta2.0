@@ -24866,7 +24866,6 @@ class Purchase_model extends App_Model
             $this->load->model('invoices_model');
             foreach ($newitems as $key => $value) {
                 if($value['from_invoice'] != $value['to_invoice']) {
-                    $pur_invoice = $this->get_pur_invoice($value['pur_invoice']);
                     $from_invoice_detail = get_invoice_data($value['from_invoice']);
                     $to_invoice_detail = get_invoice_data($value['to_invoice']);
                     update_vbt_activity_log($value['pur_invoice'], _l('ril_invoice'), format_invoice_number($from_invoice_detail->id).' ('.$from_invoice_detail->title.')', format_invoice_number($to_invoice_detail->id).' ('.$to_invoice_detail->title.')');

@@ -3533,7 +3533,6 @@ class purchase extends AdminController
                 if (isset($data['vbt_id'])) {
                     update_pur_invoices_last_action($data['vbt_id']);
                 }
-                $pur_invoice_detail = $this->purchase_model->get_pur_invoice($pur_invoice);
                 $ril_invoice_data = get_invoice_data($invoiceid);
                 update_vbt_activity_log($pur_invoice, _l('ril_invoice'), '', format_invoice_number($ril_invoice_data->id).' ('.$ril_invoice_data->title.')');
 
@@ -12893,6 +12892,8 @@ class purchase extends AdminController
                                 update_client_invoices_last_action($invoiceid);
                                 set_alert('success', _l('vendor_bills_converted_to_ril_invoices'));
                             }
+                            $ril_invoice_data = get_invoice_data($invoiceid);
+                            update_vbt_activity_log($pur_invoice, _l('ril_invoice'), '', format_invoice_number($ril_invoice_data->id).' ('.$ril_invoice_data->title.')');
                         }
                         if (isset($data['vbt_id'])) {
                             update_pur_invoices_last_action($data['vbt_id']);
@@ -13175,7 +13176,6 @@ class purchase extends AdminController
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'payment_certificate', ['pur_invoice_id' => $insert_id]);
         $this->purchase_model->copy_pc_files_to_vbt($id, $insert_id);
-        $pur_invoice = $this->purchase_model->get_pur_invoice($insert_id);
         add_vbt_activity_log($insert_id, ' by payment certificate');
         if($redirect) {
             set_alert('success', _l('purchase_invoice') . ' ' . _l('added_successfully'));
