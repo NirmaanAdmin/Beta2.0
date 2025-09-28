@@ -1159,3 +1159,32 @@ function get_all_expense_files($id)
     $CI->db->where('rel_type', 'expense');
     return $CI->db->get(db_prefix() . 'files')->result_array();
 }
+
+function get_staff_department($staff_id)
+{
+    $CI = &get_instance();
+    $CI->db->select('departmentid');
+    $CI->db->from('tblstaff_departments');
+    $CI->db->where('staffid', $staff_id);
+    $query = $CI->db->get();
+    return $query->row()->departmentid;
+}
+
+function check_emp_leave_balance($staff_id)
+{
+    $CI = &get_instance();
+    $currentYear = date('Y'); // Get the current year
+
+    // Query the leave balance for the specific staff member
+    $CI->db->select('total, remain, accumulated, days_off');
+    $CI->db->from('tbltimesheets_day_off');
+    $CI->db->where('staffid', $staff_id);
+    $CI->db->where('year', $currentYear);
+    $CI->db->where('type_of_leave', 1);
+    $CI->db->or_where('type_of_leave', 'religiuos-leave-rl');
+    $CI->db->or_where('type_of_leave', 'casual-leave-cl');
+    $query = $CI->db->get();
+
+    // Return leave balance details or null if no record exists
+    return $query->row_array();
+}

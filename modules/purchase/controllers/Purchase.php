@@ -12984,7 +12984,7 @@ class purchase extends AdminController
         $data['get_staff_sign'] = $this->purchase_model->get_pay_cert_staff_sign($payment_certificate_id, 'po_payment_certificate');
         $data['goods_receipt'] = $this->warehouse_model->get_po_goods_receipt($po_id);
         $data['goods_delivery'] = $this->warehouse_model->get_po_goods_delivery($po_id);
-
+        $data['stock_reconciliation'] = $this->warehouse_model->get_po_stock_reconciliation($po_id);
         $data['activity'] = $this->purchase_model->get_pay_cert_activity($payment_certificate_id);
         $this->load->view('payment_certificate/payment_certificate', $data);
     }
@@ -13302,6 +13302,7 @@ class purchase extends AdminController
         $data['activity'] = $this->purchase_model->get_pay_cert_activity($payment_certificate_id);
         $data['goods_receipt'] = $this->warehouse_model->get_wo_goods_receipt($wo_id);
         $data['goods_delivery'] = $this->warehouse_model->get_wo_goods_delivery($wo_id);
+        $data['stock_reconciliation'] = $this->warehouse_model->get_wo_stock_reconciliation($wo_id);
         $this->load->view('payment_certificate/wo_payment_certificate', $data);
     }
 

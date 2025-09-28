@@ -1035,7 +1035,7 @@ class timesheets extends AdminController
 		$data['type_of_leave'] = $this->timesheets_model->get_type_of_leave();
 		$data['staffs'] = $this->staff_model->get();
 
-		$this->load->view('timesheets/timekeeping/manage_requisition_hrm', $data);
+		$this->load->view('timesheets/timekeeping/manage_requisition_hrm', $data); 
 	}
 
 	/**
@@ -4116,10 +4116,13 @@ class timesheets extends AdminController
 		$data_staff = $this->timesheets_model->get_staff_query($query);
 		foreach ($data_staff as $key => $value) {
 			$result = $this->get_norms_of_leave_staff($value, $year, $type_of_leave);
+			// echo '<pre>'; print_r($result); echo '</pre>';
 			if ($result) {
 				array_push($new_array_obj, $result);
 			}
 		}
+		// echo '<pre>'; print_r($new_array_obj); echo '</pre>';exit;
+		
 		echo json_encode([
 			'data' => $new_array_obj,
 		]);
@@ -7281,8 +7284,14 @@ class timesheets extends AdminController
 			if ($data_leave->total != '') {
 				$day = $data_leave->total;
 			}
-			if ($data_leave->remain != '') {
+			// if ($data_leave->remain != '') {
+			// 	$remain_day = $data_leave->remain;
+			// }
+			
+			if($data_leave->remain <= $day){
 				$remain_day = $data_leave->remain;
+			}else{
+				$remain_day = '-'.$data_leave->remain;
 			}
 		}
 		return array('staffid' => $data_staff['staffid'], 'staffcode' => $data_staff['staff_identifi'], 'staff' => $data_staff['firstname'] . ' ' . $data_staff['lastname'], 'department' => $department_name, 'role' => $role_name, 'maximum_leave_of_the_year' => $day, 'number_of_leave_days_remaining' => $remain_day);

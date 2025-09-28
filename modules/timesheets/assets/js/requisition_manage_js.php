@@ -562,7 +562,7 @@
     $('input[name="number_of_leaving_day"]').val(0.5);
     $.post(admin_url + 'timesheets/get_remain_day_of/' + staff_id + '/' + type_of_leave).done(function(response) {
       response = JSON.parse(response);
-      $('#number_days_off_2').html(response.html);
+      // $('#number_days_off_2').html(response.html);
       $('input[name="start_time"]').val(response.valid_date);
       $('input[name="end_time"]').val(response.valid_date);
       $('#requisition-form .btn-submit').removeAttr('disabled');

@@ -71,7 +71,7 @@
               <?php } else {
 
               } ?>
-            </td>
+            </td> 
             <td>
               <a href="<?php echo admin_url('warehouse/stock_import_pdf/' . $value['id'] . '/?output_type=I') ?>" 
                  target="_blank"
@@ -101,6 +101,34 @@
             </td>
             <td>
               <a href="<?php echo admin_url('warehouse/stock_export_pdf/' . $value['id'] . '/?output_type=I') ?>" 
+                 target="_blank"
+                 class="btn btn-success btn-sm mright5" 
+                 data-toggle="tooltip" 
+                 title="<?php echo _l('preview_file'); ?>">
+                 <i class="fa fa-eye"></i>
+              </a>
+            </td>
+            <td>
+            </td>
+          </tr>
+        <?php } } ?>
+
+        <?php if (isset($stock_reconciliation) && count($stock_reconciliation) > 0) { 
+          foreach ($stock_reconciliation as $value) { ?>
+          <tr>
+            <td>
+            </td>
+            <td>
+              <?php if(!empty($value['pr_order_id'])) { ?>
+                <a href="<?php echo admin_url('purchase/purchase_order/' . $value['pr_order_id']) ?>"><?php echo get_pur_order_name($value['pr_order_id']).' ('._l('Stock Reconciliation').')' ?></a>
+              <?php } elseif (!empty($value['wo_order_id'])) { ?>
+                <a href="<?php echo admin_url('purchase/work_order/' . $value['wo_order_id']) ?>"><?php echo get_wo_order_name($value['wo_order_id']).' ('._l('Stock Reconciliation').')' ?></a>
+              <?php } else {
+
+              } ?>
+            </td>
+            <td>
+              <a href="<?php echo admin_url('warehouse/stock_reconcile_export_pdf/' . $value['id'] . '/?output_type=I') ?>" 
                  target="_blank"
                  class="btn btn-success btn-sm mright5" 
                  data-toggle="tooltip" 

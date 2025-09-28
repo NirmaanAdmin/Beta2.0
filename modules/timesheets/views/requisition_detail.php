@@ -177,7 +177,7 @@ $check = $this->input->get('check'); ?>
                       <td><?php echo _l('Number_of_leaving_day'); ?></td>
                       <td><?php echo ts_htmldecode($request_leave->number_of_leaving_day); ?></td>
                     </tr>
-                    <tr>
+                    <!-- <tr>
                       <td><?php echo _l('number_of_leave_days_allowed'); ?></td>
                       <td><?php 
                       if($request_leave->number_of_days != ''){
@@ -185,7 +185,7 @@ $check = $this->input->get('check'); ?>
                       }
                       echo ts_htmldecode($number_day_off); 
                     ?></td>
-                  </tr>
+                  </tr> -->
                 <?php } ?>
                 <tr>
                   <td><?php echo _l('reason'); ?></td>
