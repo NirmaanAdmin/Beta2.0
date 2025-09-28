@@ -10120,7 +10120,7 @@ class warehouse extends AdminController
 			$type = 'I';
 		}
 
-		$pdf->Output('goods_delivery_' . strtotime(date('Y-m-d H:i:s')) . '.pdf', $type);
+		$pdf->Output('stock_reconciliation' . strtotime(date('Y-m-d H:i:s')) . '.pdf', $type);
 	}
 
 	public function edit_reconcile($id)
