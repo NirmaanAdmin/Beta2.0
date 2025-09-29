@@ -458,3 +458,397 @@ function update_drawing_last_action($id)
 	}
 	return true;
 }
+
+function add_dms_activity_log($id, $by_module = '')
+{
+	$CI = &get_instance();
+	if (!empty($id)) {
+		$CI->db->where('id', $id);
+		$dms_item = $CI->db->get(db_prefix() . 'dms_items')->row();
+
+		if (!empty($dms_item)) {
+			// Build the complete path by traversing parent hierarchy
+			$path_names = [];
+			$current_item = $dms_item;
+
+			// Start with current item name
+			$current_name = $current_item->name;
+
+			// Traverse up the parent hierarchy until parent_id = 0 or no parent found
+			while (!empty($current_item->parent_id) && $current_item->parent_id != 0) {
+				$CI->db->where('id', $current_item->parent_id);
+				$parent_item = $CI->db->get(db_prefix() . 'dms_items')->row();
+
+				if (!empty($parent_item) && $parent_item->parent_id != 0) {
+					$path_names[] = $parent_item->name;
+					$current_item = $parent_item;
+				} else {
+					break; // Parent not found, exit loop
+				}
+			}
+
+			// Reverse the array to show from top-level parent to current item
+			$path_names = array_reverse($path_names);
+
+			// Build the description with the complete path
+			$path_string = implode(' > ', $path_names);
+			$description = "Drawing <b>" . $current_name . "</b> has been uploaded" . $by_module . " at <b>" . $path_string . "</b>.";
+			$CI->load->model('projects_model');
+			$project_id = get_default_project();
+			$CI->db->insert(db_prefix() . 'module_activity_log', [
+				'module_name' => 'dms',
+				'description' => $description,
+				'date' => date('Y-m-d H:i:s'),
+				'staffid' => get_staff_user_id(),
+				'project_id' => $project_id
+			]);
+		}
+	}
+	return true;
+}
+
+function duplicate_dms_activity_log($parent_id, $item_id)
+{
+	$CI = &get_instance();
+	if (!empty($item_id)) {
+		$CI->db->where('id', $item_id);
+		$dms_item = $CI->db->get(db_prefix() . 'dms_items')->row();
+
+		if (!empty($dms_item)) {
+			// Build the complete path for source item (item_id)
+			$source_path_names = [];
+			$current_item = $dms_item;
+
+			// Start with current item name
+			$current_name = $current_item->name;
+
+			// Traverse up the parent hierarchy until parent_id = 0 or no parent found
+			while (!empty($current_item->parent_id) && $current_item->parent_id != 0) {
+				$CI->db->where('id', $current_item->parent_id);
+				$parent_item = $CI->db->get(db_prefix() . 'dms_items')->row();
+
+				if (!empty($parent_item) && $parent_item->parent_id != 0) {
+					$source_path_names[] = $parent_item->name;
+					$current_item = $parent_item;
+				} else {
+					break; // Parent not found, exit loop
+				}
+			}
+
+			// Reverse the array to show from top-level parent to current item
+			$source_path_names = array_reverse($source_path_names);
+			$source_path_string = implode(' > ', $source_path_names);
+
+			// Build the complete path for destination folder (parent_id)
+			$destination_path_names = [];
+			if (!empty($parent_id) && $parent_id != 0) {
+				$CI->db->where('id', $parent_id);
+				$parent_folder = $CI->db->get(db_prefix() . 'dms_items')->row();
+
+				if (!empty($parent_folder)) {
+					$current_parent = $parent_folder;
+
+					// Start with parent folder name
+					$destination_path_names[] = $current_parent->name;
+
+					// Traverse up the parent hierarchy until parent_id = 0 or no parent found
+					while (!empty($current_parent->parent_id) && $current_parent->parent_id != 0) {
+						$CI->db->where('id', $current_parent->parent_id);
+						$grandparent_item = $CI->db->get(db_prefix() . 'dms_items')->row();
+
+						if (!empty($grandparent_item) && $grandparent_item->parent_id != 0) {
+							$destination_path_names[] = $grandparent_item->name;
+							$current_parent = $grandparent_item;
+						} else {
+							break; // Parent not found, exit loop
+						}
+					}
+
+					// Reverse the array to show from top-level parent to current parent
+					$destination_path_names = array_reverse($destination_path_names);
+				}
+			}
+
+			$destination_path_string = implode(' > ', $destination_path_names);
+
+			// Build the description with both paths
+			$description = "Drawing <b>" . $current_name . "</b> has been duplicated from <b>" . $source_path_string . "</b> to <b>" . $destination_path_string . "</b>.";
+			$CI->load->model('projects_model');
+			$project_id = get_default_project();
+			$CI->db->insert(db_prefix() . 'module_activity_log', [
+				'module_name' => 'dms',
+				'description' => $description,
+				'date' => date('Y-m-d H:i:s'),
+				'staffid' => get_staff_user_id(),
+				'project_id' => $project_id
+			]);
+		}
+	}
+	return true;
+}
+
+
+function moved_dms_activity_log($data_item, $insert_id)
+{
+	$CI = &get_instance();
+	if (!empty($insert_id)) {
+		$CI->db->where('id', $insert_id);
+		$dms_item = $CI->db->get(db_prefix() . 'dms_items')->row();
+
+		if (!empty($dms_item)) {
+			// Build the complete path for new location (destination)
+			$destination_path_names = [];
+			$current_item = $dms_item;
+
+			// Start with current item name
+			$current_name = $current_item->name;
+
+			// Traverse up the parent hierarchy until parent_id = 0 or no parent found
+			while (!empty($current_item->parent_id) && $current_item->parent_id != 0) {
+				$CI->db->where('id', $current_item->parent_id);
+				$parent_item = $CI->db->get(db_prefix() . 'dms_items')->row();
+
+				if (!empty($parent_item) && $parent_item->parent_id != 0) {
+					$destination_path_names[] = $parent_item->name;
+					$current_item = $parent_item;
+				} else {
+					break; // Parent not found, exit loop
+				}
+			}
+
+			// Reverse the array to show from top-level parent to current item
+			$destination_path_names = array_reverse($destination_path_names);
+			$destination_path_string = implode(' > ', $destination_path_names);
+
+			// Build the complete path for old location (source from $data_item)
+			$source_path_names = [];
+			if (!empty($data_item->parent_id) && $data_item->parent_id != 0) {
+				$CI->db->where('id', $data_item->parent_id);
+				$old_parent = $CI->db->get(db_prefix() . 'dms_items')->row();
+
+				if (!empty($old_parent)) {
+					$current_old_parent = $old_parent;
+
+					// Start with old parent name
+					$source_path_names[] = $current_old_parent->name;
+
+					// Traverse up the parent hierarchy until parent_id = 0 or no parent found
+					while (!empty($current_old_parent->parent_id) && $current_old_parent->parent_id != 0) {
+						$CI->db->where('id', $current_old_parent->parent_id);
+						$old_grandparent = $CI->db->get(db_prefix() . 'dms_items')->row();
+
+						if (!empty($old_grandparent) && $old_grandparent->parent_id != 0) {
+							$source_path_names[] = $old_grandparent->name;
+							$current_old_parent = $old_grandparent;
+						} else {
+							break; // Parent not found, exit loop
+						}
+					}
+
+					// Reverse the array to show from top-level parent to old parent
+					$source_path_names = array_reverse($source_path_names);
+				}
+			}
+
+			$source_path_string = implode(' > ', $source_path_names);
+
+			// Build the description with both paths
+			$description = "Drawing <b>" . $current_name . "</b> has been moved from <b>" . $source_path_string . "</b> to <b>" . $destination_path_string . "</b>.";
+			$CI->load->model('projects_model');
+			$project_id = get_default_project();
+			$CI->db->insert(db_prefix() . 'module_activity_log', [
+				'module_name' => 'dms',
+				'description' => $description,
+				'date' => date('Y-m-d H:i:s'),
+				'staffid' => get_staff_user_id(),
+				'project_id' => $project_id
+			]);
+		}
+	}
+	return true;
+}
+
+
+function update_dms_activity_log($id, $data, $original_data, $by_module = '')
+{
+	$CI = &get_instance();
+
+	if (!empty($id)) {
+		$CI->db->where('id', $id);
+		$dms_item = $CI->db->get(db_prefix() . 'dms_items')->row();
+
+		if (!empty($dms_item)) {
+			$changes = [];
+
+			// Define fields to track
+			$tracked_fields = [
+				'name',
+				'discipline',
+				'signed_by',
+				'issue_date',
+				'design_stage',
+				'purpose',
+				'ocr_language',
+				'document_number',
+				'status',
+				'controlled_document',
+				'note',
+				'custom_field',
+				'related_file'
+			];
+
+			// Get discipline names
+			$disciplines = $CI->drawing_management_model->get_discipline();
+			$discipline_names = [];
+			foreach ($disciplines as $discipline) {
+				$discipline_names[$discipline['id']] = $discipline['name'];
+			}
+
+			// Design stages array
+			$design_stages = [
+				1 => 'Documents Under Review',
+				2 => 'Briefs',
+				3 => 'Concept',
+				4 => 'Schematic',
+				5 => 'Design Development',
+				6 => 'Tender Documents',
+				7 => 'Construction Documents',
+				8 => 'Shop Drawings',
+				9 => 'As-Built'
+			];
+
+			foreach ($tracked_fields as $field) {
+				if (isset($data[$field]) && array_key_exists($field, $original_data)) {
+					$new_value = $data[$field];
+					$old_value = $original_data[$field];
+
+					// Check if the value has actually changed
+					if ($new_value != $old_value) {
+
+						// Format values for display - handle empty/0 values
+						$formatted_old = format_value_for_display($old_value, $field, $discipline_names, $design_stages);
+						$formatted_new = format_value_for_display($new_value, $field, $discipline_names, $design_stages);
+
+						$changes[] = [
+							'field' => $field,
+							'old' => $formatted_old,
+							'new' => $formatted_new
+						];
+					}
+				}
+			}
+
+			// If there are changes, log them
+			if (!empty($changes)) {
+				$change_descriptions = [];
+				foreach ($changes as $change) {
+					$field_name = str_replace('_', ' ', ucfirst($change['field']));
+					$change_descriptions[] = "{$field_name} changed from '{$change['old']}' to '{$change['new']}'";
+				}
+				if($dms_item->filetype == 'folder'){
+					$description = "Folder <b>{$dms_item->name}</b> has been updated. Changes: <b>" . implode(', ', $change_descriptions)."</b>";
+				}else{
+					$description = "Drawing <b>{$dms_item->name}</b> has been updated. Changes: <b>" . implode(', ', $change_descriptions)."</b>";
+				}
+				$CI->load->model('projects_model');
+				$project_id = get_default_project();
+				$CI->db->insert(db_prefix() . 'module_activity_log', [
+					'module_name' => 'dms',
+					'description' => $description,
+					'date' => date('Y-m-d H:i:s'),
+					'staffid' => get_staff_user_id(),
+					'project_id' => $project_id
+				]);
+			}
+		}
+	}
+	return true;
+}
+
+// Helper function to format values for display
+function format_value_for_display($value, $field, $discipline_names, $design_stages)
+{
+	// Check if value is empty, null, or 0
+	if ($value === '' || $value === null || $value === 0 || $value === '0') {
+		return 'Empty';
+	}
+
+	// Handle specific field types
+	switch ($field) {
+		case 'discipline':
+			return isset($discipline_names[$value]) ? $discipline_names[$value] : 'Empty';
+
+		case 'design_stage':
+			return isset($design_stages[$value]) ? $design_stages[$value] : 'Empty';
+
+		case 'controlled_document':
+			return $value ? 'Yes' : 'No';
+
+		case 'status':
+			$status_names = [
+				'under_review' => 'Under Review',
+				'approved' => 'Approved',
+				'rejected' => 'Rejected'
+				// Add more status mappings as needed
+			];
+			return isset($status_names[$value]) ? $status_names[$value] : 'Empty';
+
+		case 'issue_date':
+			// Handle date fields - if empty date, return Empty
+			if ($value === '0000-00-00' || $value === '0000-00-00 00:00:00') {
+				return 'Empty';
+			}
+			return $value;
+
+		default:
+			return $value;
+	}
+}
+
+function create_folder_dms_activity_log($id, $by_module = '')
+{
+	$CI = &get_instance();
+	if (!empty($id)) {
+		$CI->db->where('id', $id);
+		$dms_item = $CI->db->get(db_prefix() . 'dms_items')->row();
+
+		if (!empty($dms_item)) {
+			// Build the complete path by traversing parent hierarchy
+			$path_names = [];
+			$current_item = $dms_item;
+
+			// Start with current item name
+			$current_name = $current_item->name;
+
+			// Traverse up the parent hierarchy until parent_id = 0 or no parent found
+			while (!empty($current_item->parent_id) && $current_item->parent_id != 0) {
+				$CI->db->where('id', $current_item->parent_id);
+				$parent_item = $CI->db->get(db_prefix() . 'dms_items')->row();
+
+				if (!empty($parent_item) && $parent_item->parent_id != 0) {
+					$path_names[] = $parent_item->name;
+					$current_item = $parent_item;
+				} else {
+					break; // Parent not found, exit loop
+				}
+			}
+
+			// Reverse the array to show from top-level parent to current item
+			$path_names = array_reverse($path_names);
+
+			// Build the description with the complete path
+			$path_string = implode(' > ', $path_names);
+			$description = "Folder <b>" . $current_name . "</b> has been created at <b>" . $path_string . "</b>.";
+			$CI->load->model('projects_model');
+			$project_id = get_default_project();
+			$CI->db->insert(db_prefix() . 'module_activity_log', [
+				'module_name' => 'dms',
+				'description' => $description,
+				'date' => date('Y-m-d H:i:s'),
+				'staffid' => get_staff_user_id(),
+				'project_id' => $project_id
+			]);
+		}
+	}
+	return true;
+}

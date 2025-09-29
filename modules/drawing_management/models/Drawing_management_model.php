@@ -69,10 +69,75 @@ class drawing_management_model extends app_model
 	 * @param  integer $id 
 	 * @return boolean     
 	 */
+	// public function delete_item($id)
+	// {
+	// 	$data_item = $this->get_item($id, '', 'filetype, parent_id, name');
+	// 	if ($data_item) {
+	// 		$this->db->where('id', $id);
+	// 		$this->db->delete(db_prefix() . 'dms_items');
+	// 		if ($this->db->affected_rows() > 0) {
+	// 			if ($data_item->filetype != 'folder') {
+	// 				// Delete physical file
+	// 				$this->delete_file_item(DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/files/' . $data_item->parent_id . '/' . $data_item->name);
+	// 				// Delete all version file
+	// 				$data_log_version = $this->get_log_version_by_parent($id, '', 'id');
+	// 				foreach ($data_log_version as $key => $value) {
+	// 					$this->delete_log_version($value['id']);
+	// 				}
+	// 			} else {
+	// 				// Delete child item of folder
+	// 				$child_data = $this->get_item('', 'parent_id = ' . $id, 'id');
+	// 				foreach ($child_data as $key => $value) {
+	// 					$this->delete_item($value['id']);
+	// 				}
+	// 			}
+	// 			return true;
+	// 		}
+	// 	}
+	// 	return false;
+	// }
+
+	// New helper function for activity logs
+	private function insert_dms_activity_log($description)
+	{
+		$this->db->insert(db_prefix() . 'module_activity_log', [
+			'module_name' => 'dms',
+			'description' => $description,
+			'date' => date('Y-m-d H:i:s'),
+			'staffid' => get_staff_user_id()
+		]);
+	}
+
 	public function delete_item($id)
 	{
 		$data_item = $this->get_item($id, '', 'filetype, parent_id, name');
 		if ($data_item) {
+			// Build hierarchical path before deletion
+			$path_names = [];
+			$current_item = $data_item;
+
+			// Start with current item name
+			$current_name = $current_item->name;
+
+			// Traverse up the parent hierarchy until parent_id = 0 or no parent found
+			while (!empty($current_item->parent_id) && $current_item->parent_id != 0) {
+				$parent_item = $this->get_item($current_item->parent_id);
+				if (!empty($parent_item)) {
+					$path_names[] = $parent_item->name;
+					$current_item = $parent_item;
+				} else {
+					break;
+				}
+			}
+
+			// Build the path string
+			$path_string = implode(' > ', array_reverse($path_names));
+
+			// If path is empty, it means the item is in root
+			if (empty($path_string)) {
+				$path_string = "Last deleted folder.";
+			}
+
 			$this->db->where('id', $id);
 			$this->db->delete(db_prefix() . 'dms_items');
 			if ($this->db->affected_rows() > 0) {
@@ -84,19 +149,34 @@ class drawing_management_model extends app_model
 					foreach ($data_log_version as $key => $value) {
 						$this->delete_log_version($value['id']);
 					}
+
+					// Log drawing deletion
+					$description = "Drawing <b>{$current_name}</b> has been deleted from <b>{$path_string}</b>.";
+					$this->insert_dms_activity_log($description);
 				} else {
-					// Delete child item of folder
+					// Count child items before deletion for logging
 					$child_data = $this->get_item('', 'parent_id = ' . $id, 'id');
+					$child_count = count($child_data);
+
+					// Delete child items of folder
 					foreach ($child_data as $key => $value) {
 						$this->delete_item($value['id']);
 					}
+
+					// Log folder deletion with child count
+					$description = "Folder <b>{$current_name}</b> has been deleted from <b>{$path_string}</b>";
+					if ($child_count > 0) {
+						$description .= " along with {$child_count} item" . ($child_count > 1 ? 's' : '');
+					}
+					$description .= ".";
+
+					$this->insert_dms_activity_log($description);
 				}
 				return true;
 			}
 		}
 		return false;
 	}
-
 	/**
 	 * create new folder
 	 * @param array $data 
@@ -118,7 +198,9 @@ class drawing_management_model extends app_model
 		$data['dateadded'] = date('Y-m-d H:i:s');
 		$data['hash'] = app_generate_hash();
 		$this->db->insert(db_prefix() . 'dms_items', $data);
-		return $this->db->insert_id();
+		$insert_id = $this->db->insert_id();
+		create_folder_dms_activity_log($insert_id);
+		return $insert_id;
 	}
 	/**
 	 * update folder
@@ -130,10 +212,10 @@ class drawing_management_model extends app_model
 
 		if (isset($data['controlled_document'])) {
 			if ($data['controlled_document'] == 'on') {
-				echo $data['controlled_document'] = 1;
+				$data['controlled_document'] = 1;
 			}
 		} else {
-			echo $data['controlled_document'] = 0;
+			$data['controlled_document'] = 0;
 		}
 
 		if (isset($data['duedate']) && $data['duedate'] == '') {
@@ -158,7 +240,7 @@ class drawing_management_model extends app_model
 		}
 		$affectedRows = 0;
 		$id = $data['id'];
-		$data_item = $this->get_item($id, '', 'name,parent_id');
+		$data_item = $this->get_item($id, '', 'name,parent_id,filetype');
 		if ($data_item) {
 			if (isset($data['parent_id'])) {
 				$data['master_id'] = $this->get_master_id($data['parent_id']);
@@ -200,106 +282,120 @@ class drawing_management_model extends app_model
 					// set_alert('danger', _l('only_dwg_xref_files_allowed'));
 				}
 			}
-			$this->load->model('projects_model');
-			$get_project_id = get_default_project();
-			$project_name = $this->projects_model->get($get_project_id);
-			$project_name = $project_name->name;
+			if ($data_item->filetype != 'folder') {
 
-			// Define mapping arrays from your Excel data
-			$design_stages = [
-				1 => 'DUR',   // Documents Under Review
-				2 => 'BRFs',  // Briefs
-				3 => 'CON',   // Concept
-				4 => 'SD',    // Schematic
-				5 => 'DD',    // Design Development
-				6 => 'TD',    // Tender Documents
-				7 => 'CD',    // Construction Documents
-				8 => 'SHD',   // Shop Drawings
-				9 => 'AsB'    // As-Built
-			];
+				$this->load->model('projects_model');
+				$get_project_id = get_default_project();
+				$project_name = $this->projects_model->get($get_project_id);
+				$project_name = $project_name->name;
 
-			$purpose_codes = [
-				'Issued for Information' => 'IFI',
-				'Issued for review' => 'IFR',
-				'Issued for approval' => 'IFA',
-				'Issued for tender' => 'IFT',
-				'Issued for construction' => 'IFC'
-			];
+				// Define mapping arrays from your Excel data
+				$design_stages = [
+					1 => 'DUR',   // Documents Under Review
+					2 => 'BRFs',  // Briefs
+					3 => 'CON',   // Concept
+					4 => 'SD',    // Schematic
+					5 => 'DD',    // Design Development
+					6 => 'TD',    // Tender Documents
+					7 => 'CD',    // Construction Documents
+					8 => 'SHD',   // Shop Drawings
+					9 => 'AsB'    // As-Built
+				];
 
-			$status_codes = [
-				'under_review' => 'URV',
-				'released' => 'RLS',
-				'released_with_comments' => 'RWC',
-				'rejected' => 'RJC'
-			];
+				$purpose_codes = [
+					'Issued for Information' => 'IFI',
+					'Issued for review' => 'IFR',
+					'Issued for approval' => 'IFA',
+					'Issued for tender' => 'IFT',
+					'Issued for construction' => 'IFC'
+				];
 
-			// Discipline mapping from Excel - column H to G
-			$discipline_codes = [
-				'1' => 'ACO',
-				'2' => 'ARC',
-				'3' => 'AV',
-				'4' => 'BMS',
-				'5' => 'STR',
-				'6' => 'EL',
-				'7' => 'ENG',
-				'8' => 'FAC',
-				'9' => 'FEG',
-				'10' => 'FAPA',
-				'11' => 'FF',
-				'12' => 'FLS',
-				'13' => 'FS',
-				'14' => 'HVAC',
-				'15' => 'ICS',
-				'16' => 'ID',
-				'17' => 'LD',
-				'18' => 'LGT',
-				'19' => 'TRA',
-				'20' => 'MAT',
-				'21' => 'MEC',
-				'22' => 'MEP',
-				'23' => 'OPS',
-				'24' => 'OPL',
-				'25' => 'PM',
-				'26' => 'QS',
-				'27' => 'SNG',
-				'28' => 'SLP',
-				'29' => 'SDG',
-				'30' => 'VT',
-				'31' => 'GD',
-				'32' => 'EQP'
-			];
+				$status_codes = [
+					'under_review' => 'URV',
+					'released' => 'RLS',
+					'released_with_comments' => 'RWC',
+					'rejected' => 'RJC'
+				];
 
-			// Get codes using the standardized abbreviations
-			$discipline_code = $discipline_codes[$data['discipline']] ?? ''; // Default to GEN if not found
-			$design_stage_code = $design_stages[$data['design_stage']] ?? ''; // Default to GEN if not found
-			$purpose_code = $purpose_codes[$data['purpose']] ?? ''; // Default to GEN if not found
-			$status_code = $status_codes[$data['status']] ?? ''; // Default to GEN if not found
+				// Discipline mapping from Excel - column H to G
+				$discipline_codes = [
+					'1' => 'ACO',
+					'2' => 'ARC',
+					'3' => 'AV',
+					'4' => 'BMS',
+					'5' => 'STR',
+					'6' => 'EL',
+					'7' => 'ENG',
+					'8' => 'FAC',
+					'9' => 'FEG',
+					'10' => 'FAPA',
+					'11' => 'FF',
+					'12' => 'FLS',
+					'13' => 'FS',
+					'14' => 'HVAC',
+					'15' => 'ICS',
+					'16' => 'ID',
+					'17' => 'LD',
+					'18' => 'LGT',
+					'19' => 'TRA',
+					'20' => 'MAT',
+					'21' => 'MEC',
+					'22' => 'MEP',
+					'23' => 'OPS',
+					'24' => 'OPL',
+					'25' => 'PM',
+					'26' => 'QS',
+					'27' => 'SNG',
+					'28' => 'SLP',
+					'29' => 'SDG',
+					'30' => 'VT',
+					'31' => 'GD',
+					'32' => 'EQP'
+				];
 
-			// Only generate document number if it's empty
-			// if (empty($data['document_number'])) {
-			// Build project code (first 3 letters of project name)
-			$project_code = strtoupper(substr($project_name, 0, 3));
+				// Get codes using the standardized abbreviations
+				$discipline_code = $discipline_codes[$data['discipline']] ?? ''; // Default to GEN if not found
+				$design_stage_code = $design_stages[$data['design_stage']] ?? ''; // Default to GEN if not found
+				$purpose_code = $purpose_codes[$data['purpose']] ?? ''; // Default to GEN if not found
+				$status_code = $status_codes[$data['status']] ?? ''; // Default to GEN if not found
 
-			// Build document number without numeric suffix
-			$document_number = implode('-', [
-				$project_code,
-				$discipline_code,
-				$design_stage_code,
-				$purpose_code,
-				$status_code
-			]);
+				// Only generate document number if it's empty
+				// if (empty($data['document_number'])) {
+				// Build project code (first 3 letters of project name)
+				$project_code = strtoupper(substr($project_name, 0, 3));
 
-			$data['document_number'] = $document_number;
+				// Build document number without numeric suffix
+				$document_number = implode('-', [
+					$project_code,
+					$discipline_code,
+					$design_stage_code,
+					$purpose_code,
+					$status_code
+				]);
+
+				$data['document_number'] = $document_number;
+			}
 			// }
+			// echo '<pre>';
+			// print_r($data);
+			// echo '</pre>';
+			// die;
+			// First, get the original data before update
+			$this->db->where('id', $id);
+			$original_data = $this->db->get(db_prefix() . 'dms_items')->row_array();
 
+			// Your update code
 			$this->db->where('id', $id);
 			$this->db->update(db_prefix() . 'dms_items', $data);
+
+			// Log the changes
+			update_dms_activity_log($id, $data, $original_data, 'by_module_name');
 
 			if ($this->db->affected_rows() > 0) {
 				update_drawing_last_action($id);
 				// Rename file if name has been changed
 				if (isset($data['name']) && ($data_item->name != $data['name'])) {
-					$this->change_file_name($id, $data['name'],$data_item->parent_id, $data_item->name);
+					$this->change_file_name($id, $data['name'], $data_item->parent_id, $data_item->name);
 				}
 				$affectedRows++;
 			}
@@ -498,6 +594,7 @@ class drawing_management_model extends app_model
 							if (is_client_logged_in()) {
 								$creator_type = 'customer';
 							}
+
 							$this->add_attachment_file_to_database(
 								$filename,
 								$id,
@@ -507,8 +604,7 @@ class drawing_management_model extends app_model
 								'',
 								'',
 								$creator_type,
-								$orginal_filename,
-								$filename
+								$orginal_filename
 							);
 							$totalUploaded++;
 						}
@@ -567,7 +663,7 @@ class drawing_management_model extends app_model
 							'',
 							'',
 							'',
-							is_client_logged_in() ? 'customer' : 'staff'
+							is_client_logged_in() ? 'customer' : 'staff',
 						);
 						$totalUploaded++;
 					}
@@ -639,7 +735,7 @@ class drawing_management_model extends app_model
 	 * @param [type] $version   
 	 * @param [type] $filetype  
 	 */
-	public function add_attachment_file_to_database($name, $parent_id, $version, $filetype, $log_text = '', $old_item_id = '', $creator_id = '', $creator_type = 'staff', $orginal_filename = '', $duplicate = '')
+	public function add_attachment_file_to_database($name, $parent_id, $version, $filetype, $log_text = '', $old_item_id = '', $creator_id = '', $creator_type = 'staff', $orginal_filename = '', $duplicate = '', $item_id = '')
 	{
 		if (is_numeric($old_item_id) && $old_item_id > 0) {
 			$data_item = $this->get_item($old_item_id);
@@ -822,9 +918,12 @@ class drawing_management_model extends app_model
 			// drop nulls
 			$update_data = array_filter($update_data, static fn($v) => $v !== null);
 			if ($duplicate != '') {
+				duplicate_dms_activity_log($parent_id, $item_id);
 			} else {
+
 				// Try to rename the physical file to include the document number
 				if (is_numeric($old_item_id) && $old_item_id > 0) {
+
 					$file_record = $this->db->select('name,orginal_filename')->where('id', (int)$insert_id)->get(db_prefix() . 'dms_items')->row();
 					if ($file_record && !empty($file_record->orginal_filename)) {
 						$upload_dir = rtrim(DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER, '/')
@@ -864,7 +963,9 @@ class drawing_management_model extends app_model
 							}
 						}
 					}
+					moved_dms_activity_log($data_item, $insert_id);
 				} else {
+
 					$file_record = $this->db->select('name')->where('id', (int)$insert_id)->get(db_prefix() . 'dms_items')->row();
 					if ($file_record && !empty($file_record->name)) {
 						$upload_dir = rtrim(DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER, '/')
@@ -876,7 +977,7 @@ class drawing_management_model extends app_model
 						$ext          = isset($file_parts['extension']) ? ('.' . $file_parts['extension']) : '';
 
 						if ($basename !== '' && strpos($basename, $document_number) === false) {
-							$new_filename = $document_number . '-' . $basename . $ext;
+							$new_filename =  $basename . $ext;
 							$old_path = $upload_dir . $old_filename;
 							$new_path = $upload_dir . $new_filename;
 
@@ -885,6 +986,7 @@ class drawing_management_model extends app_model
 							}
 						}
 					}
+					add_dms_activity_log($insert_id);
 				}
 			}
 
@@ -1020,13 +1122,13 @@ class drawing_management_model extends app_model
 	{
 		// $data_item = $this->get_item($id, '', 'name, parent_id');
 		// if ($data_item) {
-			$path = DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/files/' . $parent_id . '/';
-			$new_path = $path . $new_name;
-			$old_path = $path . $old_name;
-			if (file_exists($old_path)) {
-				rename($old_path, $new_path);
-				return true;
-			}
+		$path = DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/files/' . $parent_id . '/';
+		$new_path = $path . $new_name;
+		$old_path = $path . $old_name;
+		if (file_exists($old_path)) {
+			rename($old_path, $new_path);
+			return true;
+		}
 		// }
 		return false;
 	}
@@ -1305,6 +1407,74 @@ class drawing_management_model extends app_model
 				$new_path = DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/files/' . $insert_id . '/';
 				_maybe_create_upload_path($new_path);
 				$data_child = $this->get_item('', 'parent_id = ' . $item_id, 'id, name, filetype, parent_id');
+
+				// Build hierarchical paths for source and destination
+				$source_path_names = [];
+				$destination_path_names = [];
+
+				// Build source path (original folder location)
+				$current_source_item = $data_item;
+
+				// Start with original folder name
+				$original_folder_name = $current_source_item->name;
+
+				// Traverse up the source parent hierarchy
+				while (!empty($current_source_item->parent_id) && $current_source_item->parent_id != 0) {
+					$source_parent = $this->get_item($current_source_item->parent_id);
+					if (!empty($source_parent) && $source_parent->parent_id != 0) {
+						$source_path_names[] = $source_parent->name;
+						$current_source_item = $source_parent;
+					} else {
+						break;
+					}
+				}
+
+				// Reverse the source array to show from top-level parent to current item
+				$source_path_names = array_reverse($source_path_names);
+				$source_path_string = implode(' > ', $source_path_names);
+
+				// Build destination path (new folder location)
+				if (!empty($folder_id) && $folder_id != 0) {
+					$current_dest_item = $this->get_item($folder_id);
+					if (!empty($current_dest_item)) {
+						// Start with destination parent folder
+						$destination_path_names[] = $current_dest_item->name;
+
+						// Traverse up the destination parent hierarchy
+						while (!empty($current_dest_item->parent_id) && $current_dest_item->parent_id != 0) {
+							$dest_parent = $this->get_item($current_dest_item->parent_id);
+							if (!empty($dest_parent) && $dest_parent->parent_id != 0) {
+								$destination_path_names[] = $dest_parent->name;
+								$current_dest_item = $dest_parent;
+							} else {
+								break;
+							}
+						}
+
+						// Reverse the destination array to show from top-level parent to current parent
+						$destination_path_names = array_reverse($destination_path_names);
+					}
+				}
+
+				$destination_path_string = implode(' > ', $destination_path_names);
+				$new_folder_name = $data["name"];
+
+				// Build the description with hierarchical paths
+				$description = "Folder <b>{$original_folder_name}</b> has been duplicated from <b>{$source_path_string}</b> to <b>{$destination_path_string}</b> as <b>{$new_folder_name}</b>";
+
+				// Count child items for more detailed logging
+				$child_count = count($data_child);
+				if ($child_count > 0) {
+					$description .= " with {$child_count} item" . ($child_count > 1 ? 's' : '');
+				}
+
+				$this->db->insert(db_prefix() . 'module_activity_log', [
+					'module_name' => 'dms',
+					'description' => $description,
+					'date' => date('Y-m-d H:i:s'),
+					'staffid' => get_staff_user_id()
+				]);
+
 				foreach ($data_child as $key => $value) {
 					$this->duplicate_item($insert_id, $value['id']);
 				}
@@ -1315,7 +1485,7 @@ class drawing_management_model extends app_model
 				$newFilePath = $path . $filename;
 				// Upload the file into the temp dir
 				if ($this->copy_file($oldFilePath, $newFilePath)) {
-					$this->add_attachment_file_to_database($filename, $folder_id, $data_item->version, $data_item->filetype, '', '', $data_item->creator_id, $data_item->creator_type, $data_item->orginal_filename, $duplicate = 1);
+					$this->add_attachment_file_to_database($filename, $folder_id, $data_item->version, $data_item->filetype, '', '', $data_item->creator_id, $data_item->creator_type, $data_item->orginal_filename, $duplicate = 1, $item_id);
 					$affectedRows++;
 				}
 			}
@@ -1347,6 +1517,74 @@ class drawing_management_model extends app_model
 				$new_path = DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/files/' . $insert_id . '/';
 				_maybe_create_upload_path($new_path);
 				$data_child = $this->get_item('', 'parent_id = ' . $item_id, 'id, name, filetype, parent_id');
+
+				// Build hierarchical paths for source and destination
+				$source_path_names = [];
+				$destination_path_names = [];
+
+				// Build source path (original folder location)
+				$current_source_item = $data_item;
+
+				// Start with original folder name
+				$original_folder_name = $current_source_item->name;
+
+				// Traverse up the source parent hierarchy
+				while (!empty($current_source_item->parent_id) && $current_source_item->parent_id != 0) {
+					$source_parent = $this->get_item($current_source_item->parent_id);
+					if (!empty($source_parent) && $source_parent->parent_id != 0) {
+						$source_path_names[] = $source_parent->name;
+						$current_source_item = $source_parent;
+					} else {
+						break;
+					}
+				}
+
+				// Reverse the source array to show from top-level parent to current item
+				$source_path_names = array_reverse($source_path_names);
+				$source_path_string = implode(' > ', $source_path_names);
+
+				// Build destination path (new folder location)
+				if (!empty($folder_id) && $folder_id != 0) {
+					$current_dest_item = $this->get_item($folder_id);
+					if (!empty($current_dest_item)) {
+						// Start with destination parent folder
+						$destination_path_names[] = $current_dest_item->name;
+
+						// Traverse up the destination parent hierarchy
+						while (!empty($current_dest_item->parent_id) && $current_dest_item->parent_id != 0) {
+							$dest_parent = $this->get_item($current_dest_item->parent_id);
+							if (!empty($dest_parent) && $dest_parent->parent_id != 0) {
+								$destination_path_names[] = $dest_parent->name;
+								$current_dest_item = $dest_parent;
+							} else {
+								break;
+							}
+						}
+
+						// Reverse the destination array to show from top-level parent to current parent
+						$destination_path_names = array_reverse($destination_path_names);
+					}
+				}
+
+				$destination_path_string = implode(' > ', $destination_path_names);
+				$new_folder_name = $data["name"];
+
+				// Build the description with hierarchical paths
+				$description = "Folder <b>{$original_folder_name}</b> has been moved from <b>{$source_path_string}</b> to <b>{$destination_path_string}</b>";
+
+				// Count child items for more detailed logging
+				$child_count = count($data_child);
+				if ($child_count > 0) {
+					$description .= " with {$child_count} item" . ($child_count > 1 ? 's' : '');
+				}
+
+				$this->db->insert(db_prefix() . 'module_activity_log', [
+					'module_name' => 'dms',
+					'description' => $description,
+					'date' => date('Y-m-d H:i:s'),
+					'staffid' => get_staff_user_id()
+				]);
+
 				foreach ($data_child as $key => $value) {
 					$this->move_item($insert_id, $value['id']);
 				}
@@ -1358,7 +1596,7 @@ class drawing_management_model extends app_model
 				// Upload the file into the temp dir
 				if ($this->copy_file($oldFilePath, $newFilePath)) {
 					$log_text = _l('dmg_moved_file_from') . ' ' . drawing_dmg_get_file_name($data_item->parent_id) . ' ' . _l('dmg_to') . ' ' . drawing_dmg_get_file_name($folder_id);
-					$this->add_attachment_file_to_database($filename, $folder_id, $data_item->version, $data_item->filetype, $log_text, $item_id, $data_item->creator_id, $data_item->creator_type, '');
+					$this->add_attachment_file_to_database($filename, $folder_id, $data_item->version, $data_item->filetype, $log_text, $item_id, $data_item->creator_id, $data_item->creator_type, '', '', '');
 					$affectedRows++;
 				}
 			}

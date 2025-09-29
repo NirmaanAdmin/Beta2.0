@@ -20,6 +20,9 @@ $module_name = 'module_activity_log'; ?>
    .bulk-title {
       font-weight: bold;
    }
+   b{
+      font-weight: 700;
+   }
 </style>
 <div id="wrapper">
    <div class="content">
@@ -46,6 +49,7 @@ $module_name = 'module_activity_log'; ?>
                            }
                            $module_name_list = [
                               ['id' => 'vbt', 'name' => _l('vendor_billing_tracker')],
+                              ['id' => 'dms', 'name' => _l('Drawing Management')],
                            ];
                            echo render_select('module_name[]', $module_name_list, array('id', 'name'), '', $module_name_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('module'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
                            ?>

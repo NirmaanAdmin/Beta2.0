@@ -15,9 +15,16 @@ $sTable = db_prefix() . 'module_activity_log';
 $join = [];
 
 $where = [];
+$this->ci->load->model('projects_model');
+$get_project_id = get_default_project();
+
+
+if (isset($get_project_id)) {
+    array_push($where, ' AND '.db_prefix().'module_activity_log.project_id = '.$get_project_id);
+}
 
 if ($this->ci->input->post('module_name') && count($this->ci->input->post('module_name')) > 0) {
-    $modules = array_map(function($m) {
+    $modules = array_map(function ($m) {
         return "'" . $m . "'";
     }, $this->ci->input->post('module_name'));
     array_push(
