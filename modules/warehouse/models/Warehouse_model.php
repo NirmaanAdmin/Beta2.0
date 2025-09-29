@@ -22579,19 +22579,19 @@ class Warehouse_model extends App_Model
 		$this->db->select('*');
 
 		// 2. Set goods_delivery as the FROM table
-		$this->db->from(db_prefix() . 'goods_receipt');
+		$this->db->from(db_prefix() . 'goods_delivery');
 
 		// 3. LEFT JOIN goods_delivery_detail on the delivery_id
 		$this->db->join(
-			db_prefix() . 'goods_receipt_detail',
-			db_prefix() . 'goods_receipt_detail.goods_receipt_id = '
-				. db_prefix() . 'goods_receipt.id',
+			db_prefix() . 'goods_delivery_detail',
+			db_prefix() . 'goods_delivery_detail.goods_delivery_id = '
+				. db_prefix() . 'goods_delivery.id',
 			'left'
 		);
 
 		
 		$this->db->where(
-			db_prefix() . 'goods_receipt.pr_order_id',
+			db_prefix() . 'goods_delivery.pr_order_id',
 			$pur_order
 		);
 		
@@ -22624,7 +22624,6 @@ class Warehouse_model extends App_Model
 					'returnable'     => $delivery['returnable'],
 					'vendor_dates' => [],
 					'unit_id' => $delivery['unit_id'],
-					// Add other fields you need...
 				];
 			}
 
@@ -23527,7 +23526,7 @@ class Warehouse_model extends App_Model
 		<tbody>
 		<tr>
 		<td rowspan="2" width="50%" class="text-left">' . pdf_logo_url() . '</td>
-		<td class="text_right_weight "><h3>' . mb_strtoupper(_l('delivery')) . '</h3></td>
+		<td class="text_right_weight "><h3>' . mb_strtoupper(_l('Stock Reconciliation')) . '</h3></td>
 		</tr>
 
 		<tr>
@@ -23848,6 +23847,21 @@ class Warehouse_model extends App_Model
 		$this->db->where('wo_order_id', $wo_order_id);
 		return $this->db->get(db_prefix() . 'goods_delivery')->result_array();
 	}
+
+	public function get_po_stock_reconciliation($pr_order_id)
+	{
+		$this->db->select('id, pr_order_id, wo_order_id');
+		$this->db->where('pr_order_id', $pr_order_id);
+		return $this->db->get(db_prefix() . 'stock_reconciliation')->result_array();
+	}
+
+	public function get_wo_stock_reconciliation($wo_order_id)
+	{
+		$this->db->select('id, pr_order_id, wo_order_id');
+		$this->db->where('wo_order_id', $wo_order_id);
+		return $this->db->get(db_prefix() . 'stock_reconciliation')->result_array();
+	}
+
 
 	public function reconciliation_delivery_get_wo_order($wo_order_id)
 	{
