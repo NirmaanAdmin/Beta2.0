@@ -267,10 +267,18 @@ class App
      * @param  string $name
      * @return string
      */
-    public function get_option($name)
+    public function get_option($name, $project = false)
     {
         $val  = '';
         $name = trim($name);
+        $default_project = get_default_project();
+        if($project) {
+            $this->ci->db->select('value');
+            $this->ci->db->where('name', $name);
+            $this->ci->db->where('project', $default_project);
+            $row = $this->ci->db->get(db_prefix() . 'options')->row();
+            return !empty($row) ? $row->value : '';
+        }
 
         if (!isset($this->options[$name])) {
             // is not auto loaded

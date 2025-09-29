@@ -42,6 +42,40 @@
   <?php echo render_input('pur_invoice_auto_operations_hour','pur_invoice_auto_operations_hour',get_option('pur_invoice_auto_operations_hour'),'number', array('data-toggle'=>'tooltip','data-title'=>_l('hour_of_day_perform_auto_operations_format'),'max'=>23)); ?>
 </div>
 
+<div class="col-md-12">
+  <h4 class="bold"><?php echo _l('pur_billing_infor'); ?></h4>
+  <hr class="bold mtop5">
+</div>
+
+<div class="col-md-6">
+  <?php echo render_textarea('billing_company_address','billing_company_address',get_option('billing_company_address', true), ['rows' => 7]); ?>
+
+  <?php echo render_input('billing_company_zipcode','billing_company_zipcode',get_option('billing_company_zipcode', true),'text'); ?>
+</div>
+
+<div class="col-md-6">
+  <div class="row">
+    <div class="col-md-12">
+      <?php echo render_input('billing_company_city','billing_company_city',get_option('billing_company_city', true),'text'); ?>
+    </div>
+    <div class="col-md-12">
+      <?php echo render_input('billing_company_state','billing_company_state',get_option('billing_company_state', true),'text'); ?>
+    </div>
+
+    <div class="col-md-12">
+      <?php echo render_input('billing_company_country_text','billing_company_country_text',get_option('billing_company_country_text', true),'text'); ?>
+    </div>
+
+    <div class="col-md-12">
+      <?php $countries= get_all_countries();
+       $billing_company_country_code = get_option('billing_company_country_code', true);
+       $selected = $billing_company_country_code;
+       echo render_select('billing_company_country_code',$countries,array( 'country_id',array( 'short_name')), 'billing_company_country_code',$selected,array('data-none-selected-text'=>_l('dropdown_non_selected_tex')));
+       ?>
+
+    </div>
+  </div>
+</div>
 
 <div class="col-md-12">
   <h4 class="bold"><?php echo _l('pur_shipping_infor'); ?></h4>
@@ -49,27 +83,27 @@
 </div>
 
 <div class="col-md-6">
-  <?php echo render_textarea('pur_company_address','pur_company_address',get_option('pur_company_address'), ['rows' => 7]); ?>
+  <?php echo render_textarea('pur_company_address','pur_company_address',get_option('pur_company_address', true), ['rows' => 7]); ?>
 
-  <?php echo render_input('pur_company_zipcode','pur_company_zipcode',get_option('pur_company_zipcode'),'text'); ?>
+  <?php echo render_input('pur_company_zipcode','pur_company_zipcode',get_option('pur_company_zipcode', true),'text'); ?>
 </div>
 
 <div class="col-md-6">
   <div class="row">
     <div class="col-md-12">
-      <?php echo render_input('pur_company_city','pur_company_city',get_option('pur_company_city'),'text'); ?>
+      <?php echo render_input('pur_company_city','pur_company_city',get_option('pur_company_city', true),'text'); ?>
     </div>
     <div class="col-md-12">
-      <?php echo render_input('pur_company_state','pur_company_state',get_option('pur_company_state'),'text'); ?>
+      <?php echo render_input('pur_company_state','pur_company_state',get_option('pur_company_state', true),'text'); ?>
     </div>
 
     <div class="col-md-12">
-      <?php echo render_input('pur_company_country_text','pur_company_country_text',get_option('pur_company_country_text'),'text'); ?>
+      <?php echo render_input('pur_company_country_text','pur_company_country_text',get_option('pur_company_country_text', true),'text'); ?>
     </div>
 
     <div class="col-md-12">
       <?php $countries= get_all_countries();
-       $pur_company_country_code = get_option('pur_company_country_code');
+       $pur_company_country_code = get_option('pur_company_country_code', true);
        $selected = $pur_company_country_code;
        echo render_select('pur_company_country_code',$countries,array( 'country_id',array( 'short_name')), 'pur_company_country_code',$selected,array('data-none-selected-text'=>_l('dropdown_non_selected_tex')));
        ?>
