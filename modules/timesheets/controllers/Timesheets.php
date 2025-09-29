@@ -1035,7 +1035,7 @@ class timesheets extends AdminController
 		$data['type_of_leave'] = $this->timesheets_model->get_type_of_leave();
 		$data['staffs'] = $this->staff_model->get();
 
-		$this->load->view('timesheets/timekeeping/manage_requisition_hrm', $data); 
+		$this->load->view('timesheets/timekeeping/manage_requisition_hrm', $data);
 	}
 
 	/**
@@ -4122,7 +4122,7 @@ class timesheets extends AdminController
 			}
 		}
 		// echo '<pre>'; print_r($new_array_obj); echo '</pre>';exit;
-		
+
 		echo json_encode([
 			'data' => $new_array_obj,
 		]);
@@ -7287,11 +7287,11 @@ class timesheets extends AdminController
 			// if ($data_leave->remain != '') {
 			// 	$remain_day = $data_leave->remain;
 			// }
-			
-			if($data_leave->remain <= $day){
+
+			if ($data_leave->remain <= $day) {
 				$remain_day = $data_leave->remain;
-			}else{
-				$remain_day = '-'.$data_leave->remain;
+			} else {
+				$remain_day = '-' . $data_leave->remain;
 			}
 		}
 		return array('staffid' => $data_staff['staffid'], 'staffcode' => $data_staff['staff_identifi'], 'staff' => $data_staff['firstname'] . ' ' . $data_staff['lastname'], 'department' => $department_name, 'role' => $role_name, 'maximum_leave_of_the_year' => $day, 'number_of_leave_days_remaining' => $remain_day);
@@ -8194,5 +8194,60 @@ class timesheets extends AdminController
 			set_alert('warning', _l('problem_deleting'));
 		}
 		redirect(admin_url('timesheets/requisition_manage?tab=missed_punch'));
+	}
+
+	public function add_monthly_leaves()
+	{
+		$currentDate   = date("Y-m-d");
+		$lastDayOfMonth = date("Y-m-t");
+
+		if ($currentDate !== $lastDayOfMonth) {
+			echo "Not the last day of month. Skipped.";
+			return;
+		}
+
+		$staffList = $this->db->select('staffid')
+			->from('tblstaff')
+			->where('active', 1)
+			->get()
+			->result_array();
+
+		$currentYear = date("Y");
+
+		foreach ($staffList as $staff) {
+			$staffId = (int)$staff['staffid'];
+			$cl = $this->db->select('id,total,remain')
+				->from('tbltimesheets_day_off')
+				->where('staffid', $staffId)
+				->where('year', $currentYear)
+				->where('type_of_leave', 'casual-leave-cl')
+				->get()
+				->row();
+
+			if ($cl) {
+				$this->db->where('id', $cl->id)
+					->update('tbltimesheets_day_off', [
+						'total'  => $cl->total + 1,
+						'remain' => $cl->remain + 1
+					]);
+			}
+			$sl = $this->db->select('id,total,remain')
+				->from('tbltimesheets_day_off')
+				->where('staffid', $staffId)
+				->where('year', $currentYear)
+				->where('type_of_leave', 'sick-leave-sl')
+				->get()
+				->row();
+
+			if ($sl) {
+				$this->db->where('id', $sl->id)
+					->update('tbltimesheets_day_off', [
+						'total'  => $sl->total + 1,
+						'remain' => $sl->remain + 1
+					]);
+			}
+		}
+
+		echo "Monthly leaves updated successfully.";
 	}
 }

@@ -65,7 +65,7 @@ $relTypeMap = [
 ];
 
 // Get all tasks that are not completed (status != 5)
-$query = "SELECT id, rel_id, rel_type FROM tbltasks WHERE status != 5";
+$query = "SELECT id, rel_id, rel_type FROM tbltasks WHERE status != 5 and rel_type != '' AND rel_id !='' and rel_type != 'meeting_minutes'";
 $result = $conn->query($query);
 
 if ($result->num_rows > 0) {
