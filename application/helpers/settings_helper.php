@@ -45,7 +45,7 @@ function add_option($name, $value = '', $autoload = 1)
  * @param  string $name Option name
  * @return mixed
  */
-function get_option($name)
+function get_option($name, $project = false)
 {
     $CI = & get_instance();
 
@@ -53,7 +53,7 @@ function get_option($name)
         $CI->load->library('app');
     }
 
-    return $CI->app->get_option($name);
+    return $CI->app->get_option($name, $project);
 }
 
 /**

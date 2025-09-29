@@ -512,32 +512,47 @@ if (!function_exists('format_organization_info')) {
         $pan    = get_option('company_pan');
 
         $format = _info_format_replace('company_name', '<b style="color:black" class="company-name-formatted">' . get_option('invoice_company_name') . '</b>', $format);
-        $format = _info_format_replace('street', get_option('invoice_company_address'), $format);
-        $format = _info_format_replace('city', get_option('invoice_company_city'), $format);
-        $format = _info_format_replace('state', get_option('company_state'), $format);
-
-        $format = _info_format_replace('zip_code', get_option('invoice_company_postal_code'), $format);
-        $format = _info_format_replace('country_code', get_option('invoice_company_country_code'), $format);
+        $format = _info_format_replace('street', '<b>Billing: </b>'.get_option('billing_company_address', true), $format);
+        $format = _info_format_replace('city', get_option('billing_company_city', true), $format);
+        $format = _info_format_replace('state', get_option('billing_company_state', true), $format);
+        $format = _info_format_replace('zip_code', get_option('billing_company_zipcode', true), $format);
+        $format = _info_format_replace('country_code', get_option('billing_company_country_code', true), $format);
         $format = _info_format_replace('phone', get_option('invoice_company_phonenumber'), $format);
         $format = _info_format_replace('vat_number', $vat, $format);
         $format = _info_format_replace('vat_number_with_label', $vat == '' ? '':_l('company_vat_number') . ': ' . $vat, $format);
         $format = _info_format_replace('pan_number', $pan, $format);
         $format = _info_format_replace('pan_number_with_label', $pan == '' ? '':_l('pan') . ': ' . $pan, $format);
-
-        $custom_company_fields = get_company_custom_fields();
-
-        foreach ($custom_company_fields as $field) {
-            $format = _info_format_custom_field($field['id'], $field['label'], $field['value'], $format);
-        }
-
-        $format = _info_format_custom_fields_check($custom_company_fields, $format);
         $format = _maybe_remove_first_and_last_br_tag($format);
-
         // Remove multiple white spaces
         $format = preg_replace('/\s+/', ' ', $format);
         $format = trim($format);
 
-        return hooks()->apply_filters('organization_info_text', $format);
+        $shipping_format = '';
+        if(get_option('pur_company_address', true)) {
+            $shipping_format = get_option('company_info_format');
+            $vat    = get_option('company_vat');
+            $pan    = get_option('company_pan');
+
+            $shipping_format = _info_format_replace('company_name', '', $shipping_format);
+            $shipping_format = _info_format_replace('street', '<br><b>Shipping: </b>'.get_option('pur_company_address', true), $shipping_format);
+            $shipping_format = _info_format_replace('city', get_option('pur_company_city', true), $shipping_format);
+            $shipping_format = _info_format_replace('state', get_option('pur_company_state', true), $shipping_format);
+            $shipping_format = _info_format_replace('zip_code', get_option('pur_company_zipcode', true), $shipping_format);
+            $shipping_format = _info_format_replace('country_code', get_option('pur_company_country_code', true), $shipping_format);
+            $shipping_format = _info_format_replace('phone', get_option('invoice_company_phonenumber'), $shipping_format);
+            $shipping_format = _info_format_replace('vat_number', $vat, $shipping_format);
+            $shipping_format = _info_format_replace('vat_number_with_label', $vat == '' ? '':_l('company_vat_number') . ': ' . $vat, $shipping_format);
+            $shipping_format = _info_format_replace('pan_number', $pan, $shipping_format);
+            $shipping_format = _info_format_replace('pan_number_with_label', $pan == '' ? '':_l('pan') . ': ' . $pan, $shipping_format);
+            $shipping_format = _maybe_remove_first_and_last_br_tag($shipping_format);
+            // Remove multiple white spaces
+            $shipping_format = preg_replace('/\s+/', ' ', $shipping_format);
+            $shipping_format = trim($shipping_format);
+        }
+
+        $final_format = $format.$shipping_format;
+
+        return hooks()->apply_filters('organization_info_text', $final_format);
     }
     function format_organization_info_name()
     {
