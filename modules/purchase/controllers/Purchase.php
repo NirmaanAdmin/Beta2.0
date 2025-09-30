@@ -6637,7 +6637,7 @@ class purchase extends AdminController
             11 => ['label' => 'label-danger', 'table' => 'provided_by_ril', 'text' => _l('provided_by_ril')],
 
         ];
-        $success = $this->purchase_model->change_rli_filter($status, $id, $table_name);
+        $success = $this->purchase_model->change_rli_filter($status, $id, $table_name, $status_labels);
         $message = $success ? _l('change_rli_filter_successfully') : _l('change_rli_filter_fail');
 
         $html = '';

@@ -8331,7 +8331,7 @@ class Purchase_model extends App_Model
         }
         return false;
     }
-    public function change_rli_filter($status, $id, $table_name)
+    public function change_rli_filter($status, $id, $table_name, $status_labels)
     {
         if ($table_name === 'pur_orders') {
             $tableName = 'pur_orders';
@@ -8340,6 +8340,11 @@ class Purchase_model extends App_Model
         } elseif ($table_name === 'order_tracker') {
             $tableName = 'pur_order_tracker';
         }
+
+        $this->db->where('id', $id);
+        $module_detail = $this->db->get(db_prefix() . $tableName)->row();
+        update_ot_activity_log($id, $table_name, _l('rli_filter'), $status_labels[$module_detail->rli_filter]['text'], $status_labels[$status]['text']);
+        
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . $tableName, ['rli_filter' => $status]);
         if ($table_name === 'pur_orders') {
