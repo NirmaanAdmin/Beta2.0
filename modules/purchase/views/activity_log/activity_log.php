@@ -44,7 +44,7 @@ $module_name = 'module_activity_log'; ?>
                            <?php
                            $module_name_filter = get_module_filter($module_name, 'module_name');
                            $module_name_filter_val = !empty($module_name_filter) ? explode(",", $module_name_filter->filter_value) : [];
-                           if (isset($_GET['module'])) {
+                           if (isset($_GET['module']) && $_GET['module'] == 'vbt') {
                               $module_name_filter_val = $_GET['module'];
                            }
                            $module_name_list = [
