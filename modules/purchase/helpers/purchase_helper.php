@@ -4935,6 +4935,7 @@ function update_pur_bills_last_action($id)
 function add_vbt_activity_log($id, $by_module = '')
 {
     $CI = &get_instance();
+    $default_project = get_default_project();
     if(!empty($id)) {
         $CI->db->where('id', $id);
         $pur_invoices = $CI->db->get(db_prefix() . 'pur_invoices')->row();
@@ -4944,7 +4945,8 @@ function add_vbt_activity_log($id, $by_module = '')
                 'module_name' => 'vbt',
                 'description' => $description,
                 'date' => date('Y-m-d H:i:s'),
-                'staffid' => get_staff_user_id()
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
             ]);
         }
     }
@@ -4954,6 +4956,7 @@ function add_vbt_activity_log($id, $by_module = '')
 function update_vbt_activity_log($id, $field, $old_value, $new_value)
 {
     $CI = &get_instance();
+    $default_project = get_default_project();
     if(!empty($id)) {
         $CI->db->where('id', $id);
         $pur_invoices = $CI->db->get(db_prefix() . 'pur_invoices')->row();
@@ -4965,7 +4968,8 @@ function update_vbt_activity_log($id, $field, $old_value, $new_value)
                 'module_name' => 'vbt',
                 'description' => $description,
                 'date' => date('Y-m-d H:i:s'),
-                'staffid' => get_staff_user_id()
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
             ]);
         }
     }
@@ -4975,6 +4979,7 @@ function update_vbt_activity_log($id, $field, $old_value, $new_value)
 function remove_vbt_activity_log($id)
 {
     $CI = &get_instance();
+    $default_project = get_default_project();
     if(!empty($id)) {
         $CI->db->where('id', $id);
         $pur_invoices = $CI->db->get(db_prefix() . 'pur_invoices')->row();
@@ -4984,7 +4989,8 @@ function remove_vbt_activity_log($id)
                 'module_name' => 'vbt',
                 'description' => $description,
                 'date' => date('Y-m-d H:i:s'),
-                'staffid' => get_staff_user_id()
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
             ]);
         }
     }
@@ -4994,6 +5000,7 @@ function remove_vbt_activity_log($id)
 function add_bulk_assign_vbt_activity_log($id, $field, $new_value)
 {
     $CI = &get_instance();
+    $default_project = get_default_project();
     if(!empty($id)) {
         $CI->db->where('id', $id);
         $pur_invoices = $CI->db->get(db_prefix() . 'pur_invoices')->row();
@@ -5004,7 +5011,8 @@ function add_bulk_assign_vbt_activity_log($id, $field, $new_value)
                 'module_name' => 'vbt',
                 'description' => $description,
                 'date' => date('Y-m-d H:i:s'),
-                'staffid' => get_staff_user_id()
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
             ]);
         }
     }
