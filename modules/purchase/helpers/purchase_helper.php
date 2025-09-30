@@ -5027,7 +5027,7 @@ function add_ot_activity_log($id)
         $CI->db->where('id', $id);
         $pur_order_tracker = $CI->db->get(db_prefix() . 'pur_order_tracker')->row();
         if(!empty($pur_order_tracker)) {
-            $description = "Order tracker <b>".$pur_order_tracker->pur_order_name."</b> has been created.";
+            $description = 'Order tracker with contract/order scope <b>' . $pur_order_tracker->pur_order_name . '</b> has been created.';
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'ot',
                 'description' => $description,
@@ -5048,7 +5048,7 @@ function remove_ot_activity_log($id)
         $CI->db->where('id', $id);
         $pur_order_tracker = $CI->db->get(db_prefix() . 'pur_order_tracker')->row();
         if(!empty($pur_order_tracker)) {
-            $description = "Order tracker <b>".$pur_order_tracker->pur_order_name."</b> has been deleted.";
+            $description = 'Order tracker with contract/order scope <b>' . $pur_order_tracker->pur_order_name . '</b> has been deleted.';
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'ot',
                 'description' => $description,
