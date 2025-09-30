@@ -54,6 +54,7 @@ $module_name = 'module_activity_log'; ?>
                               ['id' => 'vbt', 'name' => _l('vendor_billing_tracker')],
                               ['id' => 'ot', 'name' => _l('order_tracker')],
                               ['id' => 'dms', 'name' => _l('Drawing Management')],
+                              ['id' => 'dmg', 'name' => _l('Document Management')],
                            ];
                            echo render_select('module_name[]', $module_name_list, array('id', 'name'), '', $module_name_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('module'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
                            ?>

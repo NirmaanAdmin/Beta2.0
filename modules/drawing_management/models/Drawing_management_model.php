@@ -100,11 +100,14 @@ class drawing_management_model extends app_model
 	// New helper function for activity logs
 	private function insert_dms_activity_log($description)
 	{
+		$this->load->model('projects_model');
+		$project_id = get_default_project();
 		$this->db->insert(db_prefix() . 'module_activity_log', [
 			'module_name' => 'dms',
 			'description' => $description,
 			'date' => date('Y-m-d H:i:s'),
-			'staffid' => get_staff_user_id()
+			'staffid' => get_staff_user_id(),
+			'project_id' => $project_id
 		]);
 	}
 
@@ -376,10 +379,6 @@ class drawing_management_model extends app_model
 				$data['document_number'] = $document_number;
 			}
 			// }
-			// echo '<pre>';
-			// print_r($data);
-			// echo '</pre>';
-			// die;
 			// First, get the original data before update
 			$this->db->where('id', $id);
 			$original_data = $this->db->get(db_prefix() . 'dms_items')->row_array();
@@ -389,7 +388,7 @@ class drawing_management_model extends app_model
 			$this->db->update(db_prefix() . 'dms_items', $data);
 
 			// Log the changes
-			update_dms_activity_log($id, $data, $original_data, 'by_module_name');
+			update_dms_activity_log($id, $data, $original_data);
 
 			if ($this->db->affected_rows() > 0) {
 				update_drawing_last_action($id);
@@ -1467,12 +1466,14 @@ class drawing_management_model extends app_model
 				if ($child_count > 0) {
 					$description .= " with {$child_count} item" . ($child_count > 1 ? 's' : '');
 				}
-
+				$this->load->model('projects_model');
+				$project_id = get_default_project();
 				$this->db->insert(db_prefix() . 'module_activity_log', [
 					'module_name' => 'dms',
 					'description' => $description,
 					'date' => date('Y-m-d H:i:s'),
-					'staffid' => get_staff_user_id()
+					'staffid' => get_staff_user_id(),
+					'project_id' => $project_id
 				]);
 
 				foreach ($data_child as $key => $value) {
@@ -1577,12 +1578,14 @@ class drawing_management_model extends app_model
 				if ($child_count > 0) {
 					$description .= " with {$child_count} item" . ($child_count > 1 ? 's' : '');
 				}
-
+				$this->load->model('projects_model');
+				$project_id = get_default_project();
 				$this->db->insert(db_prefix() . 'module_activity_log', [
 					'module_name' => 'dms',
 					'description' => $description,
 					'date' => date('Y-m-d H:i:s'),
-					'staffid' => get_staff_user_id()
+					'staffid' => get_staff_user_id(),
+					'project_id' => $project_id
 				]);
 
 				foreach ($data_child as $key => $value) {

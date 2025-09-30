@@ -669,7 +669,7 @@ function moved_dms_activity_log($data_item, $insert_id)
 }
 
 
-function update_dms_activity_log($id, $data, $original_data, $by_module = '')
+function update_dms_activity_log($id, $data, $original_data)
 {
 	$CI = &get_instance();
 
@@ -692,9 +692,7 @@ function update_dms_activity_log($id, $data, $original_data, $by_module = '')
 				'document_number',
 				'status',
 				'controlled_document',
-				'note',
-				'custom_field',
-				'related_file'
+				'note'
 			];
 
 			// Get discipline names
@@ -745,11 +743,42 @@ function update_dms_activity_log($id, $data, $original_data, $by_module = '')
 					$field_name = str_replace('_', ' ', ucfirst($change['field']));
 					$change_descriptions[] = "{$field_name} changed from '{$change['old']}' to '{$change['new']}'";
 				}
-				if($dms_item->filetype == 'folder'){
-					$description = "Folder <b>{$dms_item->name}</b> has been updated. Changes: <b>" . implode(', ', $change_descriptions)."</b>";
-				}else{
-					$description = "Drawing <b>{$dms_item->name}</b> has been updated. Changes: <b>" . implode(', ', $change_descriptions)."</b>";
+				
+				// Build hierarchical path for the item
+				$path_names = [];
+				$current_item = $dms_item;
+				
+				// Start with current item name
+				$current_item_name = $current_item->name;
+				
+				// Traverse up the parent hierarchy
+				while (!empty($current_item->parent_id) && $current_item->parent_id != 0) {
+					$parent = $CI->db->where('id', $current_item->parent_id)->get(db_prefix() . 'dms_items')->row();
+					if (!empty($parent) && $parent->parent_id != 0) {
+						$path_names[] = $parent->name;
+						$current_item = $parent;
+					} else {
+						break;
+					}
 				}
+				
+				// Reverse the array to show from top-level parent to current item
+				$path_names = array_reverse($path_names);
+				$path_string = implode(' > ', $path_names);
+				
+				// Add current item to the path if it's not empty
+				if (!empty($path_string)) {
+					$full_path = $path_string . ' > ' . $current_item_name;
+				} else {
+					$full_path = $current_item_name;
+				}
+
+				if($dms_item->filetype == 'folder'){
+					$description = "Folder <b>{$dms_item->name}</b> located at <b>{$full_path}</b> has been updated. Changes: <b>" . implode(', ', $change_descriptions)."</b>";
+				}else{
+					$description = "Drawing <b>{$dms_item->name}</b> located at <b>{$full_path}</b> has been updated. Changes: <b>" . implode(', ', $change_descriptions)."</b>";
+				}
+				
 				$CI->load->model('projects_model');
 				$project_id = get_default_project();
 				$CI->db->insert(db_prefix() . 'module_activity_log', [

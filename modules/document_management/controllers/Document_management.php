@@ -9,7 +9,7 @@ use PhpOffice\PhpWord\Shared\Html;
  * document_management
  */
 class document_management extends AdminController
-{
+{ 
 	public function __construct()
 	{
 		parent::__construct();

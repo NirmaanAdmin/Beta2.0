@@ -40,16 +40,81 @@ class document_management_model extends app_model
 			return $this->db->get(db_prefix() . 'dmg_items')->result_array();
 		}
 	}
-
+	private function insert_dmg_activity_log($description)
+	{
+		$this->load->model('projects_model');
+		$project_id = get_default_project();
+		$this->db->insert(db_prefix() . 'module_activity_log', [
+			'module_name' => 'dmg',
+			'description' => $description,
+			'date' => date('Y-m-d H:i:s'),
+			'staffid' => get_staff_user_id(),
+			'project_id' => $project_id
+		]);
+	}
 	/**
 	 * delete item
 	 * @param  integer $id 
 	 * @return boolean     
 	 */
+	// public function delete_item($id)
+	// {
+	// 	$data_item = $this->get_item($id, '', 'filetype, parent_id, name');
+	// 	if ($data_item) {
+	// 		$this->db->where('id', $id);
+	// 		$this->db->delete(db_prefix() . 'dmg_items');
+	// 		if ($this->db->affected_rows() > 0) {
+	// 			if ($data_item->filetype != 'folder') {
+	// 				// Delete physical file
+	// 				$this->delete_file_item(DOCUMENT_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/files/' . $data_item->parent_id . '/' . $data_item->name);
+	// 				// Delete all version file
+	// 				$data_log_version = $this->get_log_version_by_parent($id, '', 'id');
+	// 				foreach ($data_log_version as $key => $value) {
+	// 					$this->delete_log_version($value['id']);
+	// 				}
+	// 			} else {
+	// 				// Delete child item of folder
+	// 				$child_data = $this->get_item('', 'parent_id = ' . $id, 'id');
+	// 				foreach ($child_data as $key => $value) {
+	// 					$this->delete_item($value['id']);
+	// 				}
+	// 			}
+	// 			return true;
+	// 		}
+	// 	}
+	// 	return false;
+	// }
+
 	public function delete_item($id)
 	{
 		$data_item = $this->get_item($id, '', 'filetype, parent_id, name');
 		if ($data_item) {
+			// Build hierarchical path before deletion
+			$path_names = [];
+			$current_item = $data_item;
+
+			// Start with current item name
+			$current_name = $current_item->name;
+
+			// Traverse up the parent hierarchy until parent_id = 0 or no parent found
+			while (!empty($current_item->parent_id) && $current_item->parent_id != 0) {
+				$parent_item = $this->get_item($current_item->parent_id);
+				if (!empty($parent_item)) {
+					$path_names[] = $parent_item->name;
+					$current_item = $parent_item;
+				} else {
+					break;
+				}
+			}
+
+			// Build the path string
+			$path_string = implode(' > ', array_reverse($path_names));
+
+			// If path is empty, it means the item is in root
+			if (empty($path_string)) {
+				$path_string = "Last deleted folder.";
+			}
+
 			$this->db->where('id', $id);
 			$this->db->delete(db_prefix() . 'dmg_items');
 			if ($this->db->affected_rows() > 0) {
@@ -61,19 +126,34 @@ class document_management_model extends app_model
 					foreach ($data_log_version as $key => $value) {
 						$this->delete_log_version($value['id']);
 					}
+
+					// Log document deletion
+					$description = "Document <b>{$current_name}</b> has been deleted from <b>{$path_string}</b>.";
+					$this->insert_dmg_activity_log($description);
 				} else {
-					// Delete child item of folder
+					// Count child items before deletion for logging
 					$child_data = $this->get_item('', 'parent_id = ' . $id, 'id');
+					$child_count = count($child_data);
+
+					// Delete child items of folder
 					foreach ($child_data as $key => $value) {
 						$this->delete_item($value['id']);
 					}
+
+					// Log folder deletion with child count
+					$description = "Folder <b>{$current_name}</b> has been deleted from <b>{$path_string}</b>";
+					if ($child_count > 0) {
+						$description .= " along with {$child_count} item" . ($child_count > 1 ? 's' : '');
+					}
+					$description .= ".";
+
+					$this->insert_dmg_activity_log($description);
 				}
 				return true;
 			}
 		}
 		return false;
 	}
-
 	/**
 	 * create new folder
 	 * @param array $data 
@@ -95,7 +175,9 @@ class document_management_model extends app_model
 		$data['dateadded'] = date('Y-m-d H:i:s');
 		$data['hash'] = app_generate_hash();
 		$this->db->insert(db_prefix() . 'dmg_items', $data);
-		return $this->db->insert_id();
+		$insert_id = $this->db->insert_id();
+		create_folder_dmg_activity_log($insert_id);
+		return $insert_id;
 	}
 	/**
 	 * update folder
@@ -156,8 +238,17 @@ class document_management_model extends app_model
 					// set_alert('warning', _l('file_upload_failed'));
 				}
 			}
+
+			// First, get the original data before update
+			$this->db->where('id', $id);
+			$original_data = $this->db->get(db_prefix() . 'dmg_items')->row_array();
+			// Your update code
 			$this->db->where('id', $id);
 			$this->db->update(db_prefix() . 'dmg_items', $data);
+
+			// Log the changes
+			update_dmg_activity_log($id, $data, $original_data);
+
 			if ($this->db->affected_rows() > 0) {
 				// Rename file if name has been changed
 				if (isset($data['name']) && ($data_item->name != $data['name'])) {
@@ -417,7 +508,7 @@ class document_management_model extends app_model
 	 * @param [type] $version   
 	 * @param [type] $filetype  
 	 */
-	public function add_attachment_file_to_database($name, $parent_id, $version, $filetype, $log_text = '', $old_item_id = '', $creator_id = '', $creator_type = 'staff')
+	public function add_attachment_file_to_database($name, $parent_id, $version, $filetype, $log_text = '', $old_item_id = '', $creator_id = '', $creator_type = 'staff', $duplicate = '', $item_id = '')
 	{
 		if (is_numeric($old_item_id) && $old_item_id > 0) {
 			$data_item = $this->get_item($old_item_id);
@@ -454,6 +545,15 @@ class document_management_model extends app_model
 		$this->db->insert(db_prefix() . 'dmg_items', $data);
 		$insert_id = $this->db->insert_id();
 		if ($insert_id) {
+			if ($duplicate != '') {
+				duplicate_dmg_activity_log($parent_id, $item_id);
+			} else {
+				if (is_numeric($old_item_id) && $old_item_id > 0) {
+					moved_dmg_activity_log($data_item, $insert_id);
+				} else {
+					add_dmg_activity_log($insert_id);
+				}
+			}
 			if ($log_text == '') {
 				$this->add_audit_log($insert_id, _l('dmg_added_file'));
 			} else {
@@ -825,6 +925,76 @@ class document_management_model extends app_model
 				$new_path = DOCUMENT_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/files/' . $insert_id . '/';
 				_maybe_create_upload_path($new_path);
 				$data_child = $this->get_item('', 'parent_id = ' . $item_id, 'id, name, filetype, parent_id');
+
+				// Build hierarchical paths for source and destination
+				$source_path_names = [];
+				$destination_path_names = [];
+
+				// Build source path (original folder location)
+				$current_source_item = $data_item;
+
+				// Start with original folder name
+				$original_folder_name = $current_source_item->name;
+
+				// Traverse up the source parent hierarchy
+				while (!empty($current_source_item->parent_id) && $current_source_item->parent_id != 0) {
+					$source_parent = $this->get_item($current_source_item->parent_id);
+					if (!empty($source_parent) && $source_parent->parent_id != 0) {
+						$source_path_names[] = $source_parent->name;
+						$current_source_item = $source_parent;
+					} else {
+						break;
+					}
+				}
+
+				// Reverse the source array to show from top-level parent to current item
+				$source_path_names = array_reverse($source_path_names);
+				$source_path_string = implode(' > ', $source_path_names);
+
+				// Build destination path (new folder location)
+				if (!empty($folder_id) && $folder_id != 0) {
+					$current_dest_item = $this->get_item($folder_id);
+					if (!empty($current_dest_item)) {
+						// Start with destination parent folder
+						$destination_path_names[] = $current_dest_item->name;
+
+						// Traverse up the destination parent hierarchy
+						while (!empty($current_dest_item->parent_id) && $current_dest_item->parent_id != 0) {
+							$dest_parent = $this->get_item($current_dest_item->parent_id);
+							if (!empty($dest_parent) && $dest_parent->parent_id != 0) {
+								$destination_path_names[] = $dest_parent->name;
+								$current_dest_item = $dest_parent;
+							} else {
+								break;
+							}
+						}
+
+						// Reverse the destination array to show from top-level parent to current parent
+						$destination_path_names = array_reverse($destination_path_names);
+					}
+				}
+
+				$destination_path_string = implode(' > ', $destination_path_names);
+				$new_folder_name = $data["name"];
+
+				// Build the description with hierarchical paths
+				$description = "Folder <b>{$original_folder_name}</b> has been duplicated from <b>{$source_path_string}</b> to <b>{$destination_path_string}</b> as <b>{$new_folder_name}</b>";
+
+				// Count child items for more detailed logging
+				$child_count = count($data_child);
+				if ($child_count > 0) {
+					$description .= " with {$child_count} item" . ($child_count > 1 ? 's' : '');
+				}
+				$this->load->model('projects_model');
+				$project_id = get_default_project();
+				$this->db->insert(db_prefix() . 'module_activity_log', [
+					'module_name' => 'dmg',
+					'description' => $description,
+					'date' => date('Y-m-d H:i:s'),
+					'staffid' => get_staff_user_id(),
+					'project_id' => $project_id,
+				]);
+
 				foreach ($data_child as $key => $value) {
 					$this->duplicate_item($insert_id, $value['id']);
 				}
@@ -835,7 +1005,7 @@ class document_management_model extends app_model
 				$newFilePath = $path . $filename;
 				// Upload the file into the temp dir
 				if ($this->copy_file($oldFilePath, $newFilePath)) {
-					$this->add_attachment_file_to_database($filename, $folder_id, $data_item->version, $data_item->filetype, '', '', $data_item->creator_id, $data_item->creator_type);
+					$this->add_attachment_file_to_database($filename, $folder_id, $data_item->version, $data_item->filetype, '', '', $data_item->creator_id, $data_item->creator_type, $duplicate = 1, $item_id);
 					$affectedRows++;
 				}
 			}
@@ -867,6 +1037,76 @@ class document_management_model extends app_model
 				$new_path = DOCUMENT_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/files/' . $insert_id . '/';
 				_maybe_create_upload_path($new_path);
 				$data_child = $this->get_item('', 'parent_id = ' . $item_id, 'id, name, filetype, parent_id');
+
+				// Build hierarchical paths for source and destination
+				$source_path_names = [];
+				$destination_path_names = [];
+
+				// Build source path (original folder location)
+				$current_source_item = $data_item;
+
+				// Start with original folder name
+				$original_folder_name = $current_source_item->name;
+
+				// Traverse up the source parent hierarchy
+				while (!empty($current_source_item->parent_id) && $current_source_item->parent_id != 0) {
+					$source_parent = $this->get_item($current_source_item->parent_id);
+					if (!empty($source_parent) && $source_parent->parent_id != 0) {
+						$source_path_names[] = $source_parent->name;
+						$current_source_item = $source_parent;
+					} else {
+						break;
+					}
+				}
+
+				// Reverse the source array to show from top-level parent to current item
+				$source_path_names = array_reverse($source_path_names);
+				$source_path_string = implode(' > ', $source_path_names);
+
+				// Build destination path (new folder location)
+				if (!empty($folder_id) && $folder_id != 0) {
+					$current_dest_item = $this->get_item($folder_id);
+					if (!empty($current_dest_item)) {
+						// Start with destination parent folder
+						$destination_path_names[] = $current_dest_item->name;
+
+						// Traverse up the destination parent hierarchy
+						while (!empty($current_dest_item->parent_id) && $current_dest_item->parent_id != 0) {
+							$dest_parent = $this->get_item($current_dest_item->parent_id);
+							if (!empty($dest_parent) && $dest_parent->parent_id != 0) {
+								$destination_path_names[] = $dest_parent->name;
+								$current_dest_item = $dest_parent;
+							} else {
+								break;
+							}
+						}
+
+						// Reverse the destination array to show from top-level parent to current parent
+						$destination_path_names = array_reverse($destination_path_names);
+					}
+				}
+
+				$destination_path_string = implode(' > ', $destination_path_names);
+				$new_folder_name = $data["name"];
+
+				// Build the description with hierarchical paths
+				$description = "Folder <b>{$original_folder_name}</b> has been moved from <b>{$source_path_string}</b> to <b>{$destination_path_string}</b>";
+
+				// Count child items for more detailed logging
+				$child_count = count($data_child);
+				if ($child_count > 0) {
+					$description .= " with {$child_count} item" . ($child_count > 1 ? 's' : '');
+				}
+				$this->load->model('projects_model');
+				$project_id = get_default_project();
+				$this->db->insert(db_prefix() . 'module_activity_log', [
+					'module_name' => 'dmg',
+					'description' => $description,
+					'date' => date('Y-m-d H:i:s'),
+					'staffid' => get_staff_user_id(),
+					'project_id' => $project_id
+				]);
+
 				foreach ($data_child as $key => $value) {
 					$this->move_item($insert_id, $value['id']);
 				}
