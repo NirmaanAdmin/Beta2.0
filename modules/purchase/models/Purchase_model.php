@@ -8380,6 +8380,11 @@ class Purchase_model extends App_Model
         } elseif ($table_name === 'order_tracker') {
             $tableName = 'pur_order_tracker';
         }
+
+        $this->db->where('id', $id);
+        $module_detail = $this->db->get(db_prefix() . $tableName)->row();
+        update_ot_activity_log($id, $table_name, _l('group_pur'), get_group_name_by_id($module_detail->group_pur), get_group_name_by_id($status));
+
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . $tableName, ['group_pur' => $status]);
         if ($table_name === 'pur_orders') {
@@ -21040,6 +21045,8 @@ class Purchase_model extends App_Model
                 $data['file_name'] = $file['file_name'];
                 $data['filetype']  = $file['filetype'];
                 $this->db->insert(db_prefix() . 'order_tracker_files', $data);
+
+                update_ot_activity_log($input['id'], $input['source'], _l('attachment_upload'), '', $file['file_name']);
             }
         }
         return $uploadedFiles;
@@ -25209,5 +25216,22 @@ class Purchase_model extends App_Model
         $html .= '<link href="' . module_dir_url(PURCHASE_MODULE_NAME, 'assets/css/payment_certificate_style.css') . '"  rel="stylesheet" type="text/css" />';
 
         return $html;
+    }
+
+    /**
+     * Gets the pur order tracker.
+     *
+     * @param      string  $id     The identifier
+     *
+     * @return       The pur order tracker.
+     */
+    public function get_pur_order_tracker($id = '')
+    {
+        if ($id != '') {
+            $this->db->where('id', $id);
+            return $this->db->get(db_prefix() . 'pur_order_tracker')->row();
+        } else {
+            return $this->db->get(db_prefix() . 'pur_order_tracker')->result_array();
+        }
     }
 }

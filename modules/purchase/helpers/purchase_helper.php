@@ -5040,6 +5040,41 @@ function add_ot_activity_log($id)
     return true;
 }
 
+function update_ot_activity_log($id, $table_name, $field, $old_value, $new_value)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $order_scope = '';
+        if ($table_name == 'pur_orders') {
+            $CI->db->where('id', $id);
+            $pur_orders = $CI->db->get(db_prefix() . 'pur_orders')->row();
+            $order_scope = $pur_orders->pur_order_number . '-' . $pur_orders->pur_order_name;
+        } elseif ($table_name == 'wo_orders') {
+            $CI->db->where('id', $id);
+            $wo_orders = $CI->db->get(db_prefix() . 'wo_orders')->row();
+            $order_scope = $wo_orders->wo_order_number . '-' . $wo_orders->wo_order_name;
+        } elseif ($table_name == 'order_tracker') {
+            $CI->db->where('id', $id);
+            $pur_order_tracker = $CI->db->get(db_prefix() . 'pur_order_tracker')->row();
+            $order_scope = $pur_order_tracker->pur_order_name;
+        }
+        if(!empty($order_scope)) {
+            $old_value = !empty($old_value) ? $old_value : 'None';
+            $new_value = !empty($new_value) ? $new_value : 'None';
+            $description = "".$field." field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in contract/order scope <b>".$order_scope."</b>.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'ot',
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
+
 function remove_ot_activity_log($id)
 {
     $CI = &get_instance();

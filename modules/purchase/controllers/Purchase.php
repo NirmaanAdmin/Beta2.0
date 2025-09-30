@@ -11020,6 +11020,10 @@ class purchase extends AdminController
             $tableName = 'tblpur_order_tracker';
         }
 
+        $this->db->where('id', $id);
+        $module_detail = $this->db->get($tableName)->row();
+        update_ot_activity_log($id, $table, _l('completion_date'), _d($module_detail->completion_date), _d($completion_date));
+
         // Perform the update
         $this->db->where('id', $id);
         $success = $this->db->update($tableName, ['completion_date' => $completion_date]);
@@ -11057,6 +11061,10 @@ class purchase extends AdminController
         } elseif ($table === 'order_tracker') {
             $tableName = 'tblpur_order_tracker';
         }
+
+        $this->db->where('id', $id);
+        $module_detail = $this->db->get($tableName)->row();
+        update_ot_activity_log($id, $table, _l('order_date'), _d($module_detail->order_date), _d($order_date));
 
         // Perform the update
         $this->db->where('id', $id);
@@ -11096,6 +11104,12 @@ class purchase extends AdminController
             $tableName = 'tblpur_order_tracker';
         }
 
+        $this->load->model('currencies_model');
+        $base_currency = $this->currencies_model->get_base_currency();
+        $this->db->where('id', $id);
+        $module_detail = $this->db->get($tableName)->row();
+        update_ot_activity_log($id, $table, _l('budget_ro_projection'), app_format_money($module_detail->budget, $base_currency->symbol), app_format_money($budget, $base_currency->symbol));
+
         // Perform the update
         $this->db->where('id', $id);
         $success = $this->db->update($tableName, ['budget' => $budget]);
@@ -11129,6 +11143,12 @@ class purchase extends AdminController
             $tableName = 'tblpur_order_tracker';
         }
 
+        $this->load->model('currencies_model');
+        $base_currency = $this->currencies_model->get_base_currency();
+        $this->db->where('id', $id);
+        $module_detail = $this->db->get($tableName)->row();
+        update_ot_activity_log($id, $table, _l('committed_contract_amount'), app_format_money($module_detail->total, $base_currency->symbol), app_format_money($total, $base_currency->symbol));
+
         // Perform the update
         $this->db->where('id', $id);
         $success = $this->db->update($tableName, ['total' => $total]);
@@ -11161,6 +11181,12 @@ class purchase extends AdminController
         } elseif ($table === 'order_tracker') {
             $tableName = 'tblpur_order_tracker';
         }
+
+        $this->load->model('currencies_model');
+        $base_currency = $this->currencies_model->get_base_currency();
+        $this->db->where('id', $id);
+        $module_detail = $this->db->get($tableName)->row();
+        update_ot_activity_log($id, $table, _l('anticipate_variation'), app_format_money($module_detail->anticipate_variation, $base_currency->symbol), app_format_money($anticipate_variation, $base_currency->symbol));
 
         $this->db->where('id', $id);
         $success = $this->db->update($tableName, ['anticipate_variation' => $anticipate_variation]);
@@ -11230,10 +11256,18 @@ class purchase extends AdminController
         } elseif ($table === 'order_tracker') {
             $tableName = 'tblpur_order_tracker';
         }
+
+        $this->load->model('currencies_model');
+        $base_currency = $this->currencies_model->get_base_currency();
+        $this->db->where('id', $id);
+        $module_detail = $this->db->get($tableName)->row();
+
         if ($table == 'pur_orders' || $table == 'wo_orders') {
+            update_ot_activity_log($id, $table, _l('change_order_amount'), app_format_money($module_detail->total, $base_currency->symbol), app_format_money($changeOrderAmount, $base_currency->symbol));
             $this->db->where($aColumn_name, $id);
             $success = $this->db->update($tableName, ['total' => $changeOrderAmount]);
         } else {
+            update_ot_activity_log($id, $table, _l('change_order_amount'), app_format_money($module_detail->co_total, $base_currency->symbol), app_format_money($changeOrderAmount, $base_currency->symbol));
             $this->db->where('id', $id);
             $success = $this->db->update($tableName, ['co_total' => $changeOrderAmount]);
         }
@@ -11262,6 +11296,10 @@ class purchase extends AdminController
         } elseif ($table === 'order_tracker') {
             $tableName = 'tblpur_order_tracker';
         }
+
+        $this->db->where('id', $id);
+        $module_detail = $this->db->get($tableName)->row();
+        update_ot_activity_log($id, $table, _l('order_date'), $module_detail->remarks, $remarks);
 
         $this->db->where('id', $id);
         $success = $this->db->update($tableName, ['remarks' => $remarks]);
@@ -13858,6 +13896,9 @@ class purchase extends AdminController
 
         // Convert to integer (empty string becomes 0)
         $vendorId = (int)trim($vendorId);
+
+        $pur_order_tracker = $this->purchase_model->get_pur_order_tracker($id);
+        update_ot_activity_log($id, 'order_tracker', _l('contractor'), get_vendor_company_name($pur_order_tracker->vendor), get_vendor_company_name($vendorId));
 
         // Update database with single vendor ID (or empty if 0)
         $this->db->where('id', $id);
