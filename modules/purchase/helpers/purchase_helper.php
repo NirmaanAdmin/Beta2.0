@@ -5018,3 +5018,45 @@ function add_bulk_assign_vbt_activity_log($id, $field, $new_value)
     }
     return true;
 }
+
+function add_ot_activity_log($id)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $pur_order_tracker = $CI->db->get(db_prefix() . 'pur_order_tracker')->row();
+        if(!empty($pur_order_tracker)) {
+            $description = "Order tracker <b>".$pur_order_tracker->pur_order_name."</b> has been created.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'ot',
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
+
+function remove_ot_activity_log($id)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $pur_order_tracker = $CI->db->get(db_prefix() . 'pur_order_tracker')->row();
+        if(!empty($pur_order_tracker)) {
+            $description = "Order tracker <b>".$pur_order_tracker->pur_order_name."</b> has been deleted.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'ot',
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}

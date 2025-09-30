@@ -17981,7 +17981,9 @@ class Purchase_model extends App_Model
                 $dt_data['last_action'] = get_staff_user_id();
 
                 $this->db->insert(db_prefix() . 'pur_order_tracker', $dt_data);
-                $last_insert_id[] = $this->db->insert_id();
+                $insert_id = $this->db->insert_id();
+                $last_insert_id[] = $insert_id;
+                add_ot_activity_log($insert_id);
             }
             return $last_insert_id;
         }
@@ -19288,7 +19290,7 @@ class Purchase_model extends App_Model
         $this->db->delete(db_prefix() . 'pur_order_tracker');
 
         if ($this->db->affected_rows() > 0) {
-
+            remove_ot_activity_log($id);
             return true;
         }
 

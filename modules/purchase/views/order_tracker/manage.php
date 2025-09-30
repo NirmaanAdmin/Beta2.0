@@ -99,6 +99,9 @@
                      <button class="btn btn-info pull-left mleft10 display-block" type="button" data-toggle="collapse" data-target="#ot-charts-section" aria-expanded="true" aria-controls="ot-charts-section">
                         <?php echo _l('Order Tracker Charts'); ?> <i class="fa fa-chevron-down toggle-icon"></i>
                      </button>
+                     <a href="<?php echo admin_url('purchase/activity_log?module=ot'); ?>" class="btn btn-info pull-left mleft10 display-block" target="_blank">
+                        <?php echo _l('activity_log'); ?>
+                     </a>
                   </div>
                </div>
 
