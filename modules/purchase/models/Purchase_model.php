@@ -8351,7 +8351,7 @@ class Purchase_model extends App_Model
         }
         return true;
     }
-    public function change_aw_unw_order_status($status, $id, $table_name)
+    public function change_aw_unw_order_status($status, $id, $table_name, $status_labels_aw_uw)
     {
         if ($table_name === 'pur_orders') {
             $tableName = 'pur_orders';
@@ -8360,6 +8360,11 @@ class Purchase_model extends App_Model
         } elseif ($table_name === 'order_tracker') {
             $tableName = 'pur_order_tracker';
         }
+
+        $this->db->where('id', $id);
+        $module_detail = $this->db->get(db_prefix() . $tableName)->row();
+        update_ot_activity_log($id, $table_name, _l('order_status'), $status_labels_aw_uw[$module_detail->aw_unw_order_status]['text'], $status_labels_aw_uw[$status]['text']);
+
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . $tableName, ['aw_unw_order_status' => $status]);
         if ($table_name === 'pur_orders') {
