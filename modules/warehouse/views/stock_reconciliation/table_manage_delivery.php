@@ -4,6 +4,8 @@ $module_name = 'warehouse_stock_reconciliation';
 $day_vouchers_name = 'day_vouchers';
 $approval_filter_name = 'approval';
 $delivery_status_filter_name = 'delivery_status';
+$vendor_filter_name = 'vendor';
+$wo_po_orders_filter_name = 'wo_po_order';
 $aColumns = [
     'id',
     'goods_delivery_code',
@@ -50,6 +52,38 @@ if ($this->ci->input->post('delivery_status')) {
     }
 }
 
+if ($this->ci->input->post('vendor')) {
+    $vendor = $this->ci->input->post('vendor');
+    if ($vendor) {
+        // Use subqueries to check vendor in related tables without causing duplicates
+        $where[] = 'AND (' . $sTable . '.pr_order_id IN (SELECT id FROM ' . db_prefix() . 'pur_orders WHERE vendor IN(' . implode(',', $vendor) . ')) 
+                     OR ' . $sTable . '.wo_order_id IN (SELECT id FROM ' . db_prefix() . 'wo_orders WHERE vendor IN(' . implode(',', $vendor) . ')))'; 
+    }
+}
+
+$wo_po_orders = $this->ci->input->post('wo_po_order') ? $this->ci->input->post('wo_po_order') : [];
+
+if (!empty($wo_po_orders)) {
+    $where_conditions = [];
+    foreach ($wo_po_orders as $order_value) {
+        // Split the value into type and id (format: "type-id")
+        $parts = explode('-', $order_value);
+        if (count($parts) === 3) {
+            $order_type = (int)$parts[1];
+            $order_id = (int)$parts[0];
+            
+            if ($order_type === 2) { // Purchase Order
+                $where_conditions[] = '(pr_order_id = ' . $order_id . ')';
+            } elseif ($order_type === 3) { // Work Order
+                $where_conditions[] = '(wo_order_id = ' . $order_id . ')';
+            }
+        }
+    }
+    if (!empty($where_conditions)) {
+        $where[] = 'AND (' . implode(' OR ', $where_conditions) . ')';
+    }
+}
+
 if(get_default_project()) {
     $where[] = 'AND project = "' . get_default_project() . '"';
 }
@@ -64,6 +98,14 @@ update_module_filter($module_name, $approval_filter_name, $approval_filter_name_
 // Update delivery status filter
 $delivery_status_filter_name_value = !empty($this->ci->input->post('delivery_status')) ? $this->ci->input->post('delivery_status') : '';
 update_module_filter($module_name, $delivery_status_filter_name, $delivery_status_filter_name_value);
+
+// Update vendor filter
+$vendor_filter_name_value = !empty($this->ci->input->post('vendor')) ? implode(',', $this->ci->input->post('vendor')) : NULL;
+update_module_filter($module_name, $vendor_filter_name, $vendor_filter_name_value);
+
+// Update work order / purchase order filter
+$wo_po_orders_filter_name_value = !empty($this->ci->input->post('wo_po_order')) ? implode(',', $this->ci->input->post('wo_po_order')) : NULL;
+update_module_filter($module_name, $wo_po_orders_filter_name, $wo_po_orders_filter_name_value);
 
 // Add any extra fields you want to retrieve
 $additionalSelect = [

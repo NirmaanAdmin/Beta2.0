@@ -57,7 +57,7 @@ if ($this->ci->input->post('vendor')) {
     if ($vendor) {
         // Use subqueries to check vendor in related tables without causing duplicates
         $where[] = 'AND (' . $sTable . '.pr_order_id IN (SELECT id FROM ' . db_prefix() . 'pur_orders WHERE vendor IN(' . implode(',', $vendor) . ')) 
-                     OR ' . $sTable . '.wo_order_id IN (SELECT id FROM ' . db_prefix() . 'wo_orders WHERE vendor IN(' . implode(',', $vendor) . ')))';
+                     OR ' . $sTable . '.wo_order_id IN (SELECT id FROM ' . db_prefix() . 'wo_orders WHERE vendor IN(' . implode(',', $vendor) . ')))'; 
     }
 }
 $wo_po_orders = $this->ci->input->post('wo_po_order') ? $this->ci->input->post('wo_po_order') : [];

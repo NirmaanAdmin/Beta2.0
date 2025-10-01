@@ -247,6 +247,22 @@ $module_name = 'warehouse_goods_receipt';
                   </div>
                 </div>
               </div>
+              <div class="col-md-3 form-group">
+                <?php
+                $wo_po_orders_filter = get_module_filter($module_name, 'wo_po_order');
+                $wo_po_orders_filter_val = !empty($wo_po_orders_filter) ? explode(",", $wo_po_orders_filter->filter_value) : [];
+                ?>
+                <select name="wo_po_order[]" id="wo_po_order" multiple class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('Choose From Order'); ?>">
+                  <?php
+                  $po_wo_orders = get_purchase_work_order();
+                  foreach ($po_wo_orders as $key => $value) {
+                    $option_value = $value['id'] . '-' . $value['type'] . '-' . $value['goods_id'];
+                    $selected = in_array($option_value, $wo_po_orders_filter_val) ? 'selected' : '';
+                    echo '<option value="' . $option_value . '" ' . $selected . '>' . $value['name'] . '</option>';
+                  }
+                  ?>
+                </select>
+              </div>
               <div class="row">
                 <div class="col-md-1 form-group">
                   <a href="javascript:void(0)" class="btn btn-info btn-icon reset_all_ot_filters">

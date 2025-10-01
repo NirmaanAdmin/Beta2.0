@@ -7,6 +7,7 @@ $vendor_filter_name = 'vendor';
 $day_vouchers_name = 'day_vouchers';
 $kind_filter_name = 'kind';
 $report_months_filter_name = 'report_months';
+$wo_po_orders_filter_name = 'wo_po_order';
 $aColumns = [
     'id',
     'goods_receipt_code',
@@ -37,11 +38,11 @@ if ($this->ci->input->post('kind')) {
     $kind = $this->ci->input->post('kind');
 }
 
-if($this->ci->input->post('vendor')){
+if ($this->ci->input->post('vendor')) {
     $vendor = $this->ci->input->post('vendor');
 }
 
-if($this->ci->input->post('status')){
+if ($this->ci->input->post('status')) {
     $status = $this->ci->input->post('status');
 }
 
@@ -53,22 +54,44 @@ if (isset($kind)) {
     $where[] = 'AND tblgoods_receipt.kind = "' . $kind . '"';
 }
 
-if(!empty($vendor)){
+if (!empty($vendor)) {
     $where[] = 'AND tblgoods_receipt.supplier_code IN(' . implode(',', $vendor) . ')';
 }
 
 
 // $status = $this->ci->input->post('status');
 if (isset($status)) {
-    if($status == 'approved'){
+    if ($status == 'approved') {
         $where[] = 'AND tblgoods_receipt.approval = 1';
-    }elseif ($status == 'not_yet_approve') {
+    } elseif ($status == 'not_yet_approve') {
         $where[] = 'AND tblgoods_receipt.approval = 0';
     }
 }
+$wo_po_orders = $this->ci->input->post('wo_po_order') ? $this->ci->input->post('wo_po_order') : [];
 
-if(get_default_project()) {
-    $where[] = 'AND ' . db_prefix() . 'goods_receipt.project = '.get_default_project().'';
+if (!empty($wo_po_orders)) {
+    $where_conditions = [];
+    foreach ($wo_po_orders as $order_value) {
+        // Split the value into type and id (format: "type-id")
+        $parts = explode('-', $order_value);
+        if (count($parts) === 3) {
+            $order_type = (int)$parts[1];
+            $order_id = (int)$parts[0];
+
+            if ($order_type === 2) { // Purchase Order
+                $where_conditions[] = '(pr_order_id = ' . $order_id . ')';
+            } elseif ($order_type === 3) { // Work Order
+                $where_conditions[] = '(wo_order_id = ' . $order_id . ')';
+            }
+        }
+    }
+    if (!empty($where_conditions)) {
+        $where[] = 'AND (' . implode(' OR ', $where_conditions) . ')';
+    }
+}
+
+if (get_default_project()) {
+    $where[] = 'AND ' . db_prefix() . 'goods_receipt.project = ' . get_default_project() . '';
 }
 
 
@@ -86,6 +109,10 @@ update_module_filter($module_name, $kind_filter_name, $kind_filter_name_value);
 
 $report_months_name_value = !empty($this->ci->input->post('report_months')) ? $this->ci->input->post('report_months') : '';
 update_module_filter($module_name, $report_months_filter_name, $report_months_name_value);
+
+// Update work order / purchase order filter
+$wo_po_orders_filter_name_value = !empty($this->ci->input->post('wo_po_order')) ? implode(',', $this->ci->input->post('wo_po_order')) : NULL;
+update_module_filter($module_name, $wo_po_orders_filter_name, $wo_po_orders_filter_name_value);
 
 $this->ci->load->model('purchase/purchase_model');
 $custom_date_select = $this->ci->purchase_model->get_where_report_period(db_prefix() . 'goods_receipt.date_add');
@@ -126,7 +153,7 @@ foreach ($rResult as $aRow) {
             $name .= '<div class="row-options">';
 
             // $name .= '<a href="' . admin_url('warehouse/edit_purchase/' . $aRow['id']) . '" >' . _l('view') . '</a>';
-            $name .= '<a href="' . admin_url('warehouse/view_purchase/' . $aRow['id']) . '" onclick="init_goods_receipt(' . $aRow['id'] . ');    return false;">' . _l('view'). '</a>';
+            $name .= '<a href="' . admin_url('warehouse/view_purchase/' . $aRow['id']) . '" onclick="init_goods_receipt(' . $aRow['id'] . ');    return false;">' . _l('view') . '</a>';
 
             if ((has_permission('warehouse', '', 'edit') || is_admin()) && ($aRow['approval'] == 0)) {
                 $name .= ' | <a href="' . admin_url('warehouse/manage_goods_receipt/' . $aRow['id']) . '" >' . _l('edit') . '</a>';

@@ -1,5 +1,6 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
-<?php init_head(); $module_name = 'warehouse_stock_reconciliation'; ?>
+<?php init_head();
+$module_name = 'warehouse_stock_reconciliation'; ?>
 <div id="wrapper">
   <div class="content">
     <div class="row">
@@ -30,7 +31,7 @@
             </div>
             <br />
             <div class="row all_ot_filters">
-              <div class="col-md-3">
+              <div class="col-md-2">
                 <?php
                 $input_attr_e = [];
                 $input_attr_e['placeholder'] = _l('day_vouchers');
@@ -51,7 +52,7 @@
                   <option value="-1" <?php echo ($approval_filter_val === '-1') ? 'selected' : ''; ?>><?php echo _l('reject'); ?></option>
                 </select>
               </div> -->
-              <div class="col-md-3">
+              <div class="col-md-2">
                 <?php
                 $delivery_status_filter = get_module_filter($module_name, 'delivery_status');
                 $delivery_status_filter_val = !empty($delivery_status_filter) ? $delivery_status_filter->filter_value : '';
@@ -64,6 +65,39 @@
                   <option value="received" <?php echo ($delivery_status_filter_val === 'received') ? 'selected' : ''; ?>><?php echo _l('wh_received'); ?></option>
                   <option value="returned" <?php echo ($delivery_status_filter_val === 'returned') ? 'selected' : ''; ?>><?php echo _l('wh_returned'); ?></option>
                   <option value="not_delivered" <?php echo ($delivery_status_filter_val === 'not_delivered') ? 'selected' : ''; ?>><?php echo _l('wh_not_delivered_new'); ?></option>
+                </select>
+              </div>
+              <div class="col-md-3 form-group">
+                <?php
+                $vendor_type_filter = get_module_filter($module_name, 'vendor');
+                $vendor_type_filter_val = !empty($vendor_type_filter) ? explode(",", $vendor_type_filter->filter_value) : [];
+                ?>
+                <select name="vendor[]" id="vendor" class="selectpicker" multiple="true" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('vendor'); ?>">
+                  <?php
+                  $vendor = get_pur_vendor_list();
+                  foreach ($vendor as $vendors) {
+                    $selected = in_array($vendors['userid'], $vendor_type_filter_val) ? 'selected' : '';
+                  ?>
+                    <option value="<?php echo $vendors['userid']; ?>" <?php echo $selected; ?>>
+                      <?php echo $vendors['company']; ?>
+                    </option>
+                  <?php  } ?>
+                </select>
+              </div>
+              <div class="col-md-3 form-group">
+                <?php
+                $wo_po_orders_filter = get_module_filter($module_name, 'wo_po_order');
+                $wo_po_orders_filter_val = !empty($wo_po_orders_filter) ? explode(",", $wo_po_orders_filter->filter_value) : [];
+                ?>
+                <select name="wo_po_order[]" id="wo_po_order" multiple class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('Choose From Order'); ?>">
+                  <?php
+                  $po_wo_orders = get_purchase_work_order();
+                  foreach ($po_wo_orders as $key => $value) {
+                    $option_value = $value['id'] . '-' . $value['type'] . '-' . $value['goods_id'];
+                    $selected = in_array($option_value, $wo_po_orders_filter_val) ? 'selected' : '';
+                    echo '<option value="' . $option_value . '" ' . $selected . '>' . $value['name'] . '</option>';
+                  }
+                  ?>
                 </select>
               </div>
               <div class="row">

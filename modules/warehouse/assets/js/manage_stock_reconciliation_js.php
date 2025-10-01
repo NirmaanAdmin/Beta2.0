@@ -6,6 +6,8 @@
             "day_vouchers": "input[name='date_add']",
             "approval": "select[name='approval']",
             "delivery_status": "select[name='delivery_status']",
+            "vendor": "select[name='vendor[]']",
+            "wo_po_order": "select[name='wo_po_order[]']",
         };
     <?php } else { ?>
         var InvoiceServerParams = {
@@ -13,6 +15,8 @@
             "day_vouchers": "input[name='date_add']",
             "approval": "select[name='approval']",
             "delivery_status": "select[name='delivery_status']",
+            "vendor": "select[name='vendor[]']",
+            "wo_po_order": "select[name='wo_po_order[]']",
         };
 
     <?php } ?>
@@ -34,6 +38,12 @@
     });
 
     $('#delivery_status').on('change', function() {
+        table_manage_delivery.DataTable().ajax.reload();
+    });
+    $('#vendor').on('change', function() {
+        table_manage_delivery.DataTable().ajax.reload();
+    });
+    $('#wo_po_order').on('change', function() {
         table_manage_delivery.DataTable().ajax.reload();
     });
     $(document).on('click', '.reset_all_ot_filters', function() {

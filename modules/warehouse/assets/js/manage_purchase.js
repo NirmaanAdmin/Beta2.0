@@ -9,7 +9,8 @@ var GoodsreceiptParams = {
   "status": "select[name='status']",
   "report_months": '[name="months-report"]',
   "report_from": '[name="report-from"]',
-  "report_to": '[name="report-to"]'
+  "report_to": '[name="report-to"]',
+  'wo_po_order': 'select[name="wo_po_order[]"]',
 };
 var report_from = $('input[name="report-from"]');
 var report_to = $('input[name="report-to"]');
@@ -32,6 +33,9 @@ $('#vendor').on('change', function () {
   table_manage_goods_receipt.DataTable().ajax.reload();
 });
 $('#status').on('change', function () {
+  table_manage_goods_receipt.DataTable().ajax.reload();
+});
+$('#wo_po_order').on('change', function () {
   table_manage_goods_receipt.DataTable().ajax.reload();
 });
 
