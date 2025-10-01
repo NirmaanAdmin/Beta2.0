@@ -15,13 +15,13 @@
             </div>
             <div class="row">
               <div class="_buttons col-md-3">
-                <?php if (!isset($invoice_id)) { ?>
+                <!-- <?php if (!isset($invoice_id)) { ?>
                   <?php if (has_permission('warehouse', '', 'create') || is_admin()) { ?>
                     <a href="<?php echo admin_url('warehouse/add_stock_reconciliation'); ?>" class="btn btn-info pull-left mright10 display-block">
                       Add New
                     </a>
                   <?php } ?>
-                <?php } ?>
+                <?php } ?> -->
 
               </div>
               <div class="col-md-1 pull-right">
