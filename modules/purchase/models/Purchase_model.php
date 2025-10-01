@@ -22009,9 +22009,9 @@ class Purchase_model extends App_Model
                 db_prefix() . 'co_order_detail.unit_id, ' .
                 db_prefix() . 'co_order_detail.area as area, ' .
                 db_prefix() . 'co_order_detail.original_quantity as quantity, ' .
-                db_prefix() . 'co_order_detail.quantity as amendment_qty, ' .
+                'SUM(`' . db_prefix() . 'co_order_detail`.`quantity` - `' . db_prefix() . 'co_order_detail`.`original_quantity`) as amendment_qty, ' .
+                'SUM(`' . db_prefix() . 'co_order_detail`.`unit_price` - `' . db_prefix() . 'co_order_detail`.`original_unit_price`) as amendment_rate, ' .
                 db_prefix() . 'co_order_detail.original_unit_price as unit_price, ' .
-                db_prefix() . 'co_order_detail.unit_price as amendment_rate, ' .
                 db_prefix() . 'co_order_detail.into_money_updated as into_money, ' .
                 db_prefix() . 'co_order_detail.total as total, ' .
                 db_prefix() . 'co_order_detail.total as total_money, ' .
@@ -22035,7 +22035,10 @@ class Purchase_model extends App_Model
             $this->db->where(db_prefix() . 'co_orders.wo_order_id', $order_id);
         }
         $this->db->where(db_prefix() . 'co_order_detail.tender_item', 1);
-        $this->db->group_by(db_prefix() . 'co_order_detail.id');
+        $this->db->group_by([
+            db_prefix() . 'co_order_detail.item_code',
+            db_prefix() . 'co_order_detail.description'
+        ]);
         return $this->db->get()->result_array();
     }
 

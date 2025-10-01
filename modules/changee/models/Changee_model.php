@@ -11323,7 +11323,11 @@ class Changee_model extends App_Model
             $row .= '<span>' . _l('this_is_non_tendor_item') . '</span>';
         }
         $row .= '</td>';
-        $row .= '<td class="">' . render_textarea($name_item_description, '', $item_description, ['rows' => 2, 'placeholder' => _l('item_description'), 'readonly' => 'readonly']) . '</td>';
+        if (!empty($name)) {
+            $row .= '<td class="">' . render_textarea($name_item_description, '', $item_description, ['rows' => 2, 'placeholder' => _l('item_description'), 'readonly' => 'readonly']) . '</td>';
+        } else {
+            $row .= '<td class="">' . render_textarea($name_item_description, '', $item_description, ['rows' => 2, 'placeholder' => _l('item_description')]) . '</td>';
+        }
         $row .= '<td class="area">' . get_area_list_changee($name_area, $area) . '</td>';
         $row .= '<td class="original_rate">' . render_input($name_original_unit_price, '', $original_unit_price, 'number', ['readonly' => true], [], 'no-margin') . '<span class="variation">Amendment : </span></td>';
         $row .= '<td class="rate">' . render_input($name_unit_price, '', $unit_price, 'number', $array_rate_attr, [], 'no-margin', $text_right_class);
