@@ -986,3 +986,4 @@ $lang['billing_company_city'] = 'City';
 $lang['billing_company_state'] = 'State';
 $lang['billing_company_country_text'] = 'Country Code';
 $lang['billing_company_country_code'] = 'Country';
+$lang['this_is_non_tendor_item'] = 'This is non tender item';

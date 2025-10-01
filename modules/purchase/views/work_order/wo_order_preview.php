@@ -558,15 +558,23 @@ if ($estimate->currency != 0) {
                                              } ?>
                                           </td>
                                           <td class="description" align="left">
-                                             <div style="width: 250px"><span><strong><?php
-                                                                                       $item = get_item_hp($es['item_code']);
-                                                                                       if (isset($item) && isset($item->commodity_code) && isset($item->description)) {
-                                                                                          echo pur_html_entity_decode($item->commodity_code . ' - ' . $item->description);
-                                                                                       } else {
-                                                                                          echo pur_html_entity_decode($es['item_name']);
-                                                                                       }
-                                                                                       ?></strong>
-                                                   <!-- <?php if ($es['description'] != '') { ?><br><span><?php echo pur_html_entity_decode($es['description']); ?></span><?php } ?> -->
+                                             <div style="width: 250px">
+                                                <span>
+                                                   <strong>
+                                                      <?php
+                                                      $item = get_item_hp($es['item_code']);
+                                                      if (isset($item) && isset($item->commodity_code) && isset($item->description)) {
+                                                         echo pur_html_entity_decode($item->commodity_code . ' - ' . $item->description);
+                                                      } else {
+                                                         echo pur_html_entity_decode($es['item_name']);
+                                                      }
+                                                      ?>
+                                                   </strong>
+                                                </span>
+                                                <?php
+                                                if($es['non_budget_item'] == 1) { ?>
+                                                   <br><span style="display: block;font-size: 10px;font-style: italic;"><?php echo _l('this_is_non_tendor_item'); ?></span>
+                                                <?php } ?>
                                              </div>
                                           </td>
                                           <td align="left">
