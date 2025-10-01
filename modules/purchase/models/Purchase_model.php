@@ -17568,8 +17568,18 @@ class Purchase_model extends App_Model
      */
     public function get_change_wo_order($id)
     {
-        $this->db->where('wo_order_id', $id);
-        return $this->db->get('tblco_orders')->result_array();
+        $this->db->select(db_prefix() . 'co_orders.*');
+        $this->db->select('SUM(' . db_prefix() . 'co_order_detail.into_money_updated) AS contract_value_incl_co');
+        $this->db->select('SUM(' . db_prefix() . 'co_order_detail.total) AS co_order_detail_total');
+        $this->db->from(db_prefix() . 'co_orders');
+        $this->db->join(
+            db_prefix() . 'co_order_detail',
+            db_prefix() . 'co_order_detail.pur_order = ' . db_prefix() . 'co_orders.id',
+            'left'
+        );
+        $this->db->where(db_prefix() . 'co_orders.wo_order_id', $id);
+        $this->db->group_by(db_prefix() . 'co_orders.id');
+        return $this->db->get()->result_array();
     }
 
     /**
