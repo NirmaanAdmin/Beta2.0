@@ -39,7 +39,7 @@
 
                 echo render_date_input('date_add', '', $day_vouchers_filter_val, $input_attr_e); ?>
               </div>
-              <div class="col-md-3">
+              <!-- <div class="col-md-3">
                 <?php
                 $approval_filter = get_module_filter($module_name, 'approval');
                 $approval_filter_val = !empty($approval_filter) ? $approval_filter->filter_value : '';
@@ -50,7 +50,7 @@
                   <option value="1" <?php echo ($approval_filter_val === '1') ? 'selected' : ''; ?>><?php echo _l('approved'); ?></option>
                   <option value="-1" <?php echo ($approval_filter_val === '-1') ? 'selected' : ''; ?>><?php echo _l('reject'); ?></option>
                 </select>
-              </div>
+              </div> -->
               <div class="col-md-3">
                 <?php
                 $delivery_status_filter = get_module_filter($module_name, 'delivery_status');
@@ -83,7 +83,7 @@
               _l('Reconciliation Date'),
               // _l('invoices'),
               // _l('staff_id'),
-              _l('status_label'),
+              // _l('status_label'),
               _l('Reconciliation Status'),
               _l('options'),
             ), 'table_manage_delivery', ['delivery_sm' => 'delivery_sm']); ?>

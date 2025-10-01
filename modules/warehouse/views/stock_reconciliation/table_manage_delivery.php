@@ -9,7 +9,7 @@ $aColumns = [
     'goods_delivery_code',
     'pr_order_id',
     'date_add',
-    'approval',
+    // 'approval',
     'delivery_status',
     'id as pdf' // we’ll handle 'pdf' separately, not as 'id as pdf'
 ];
@@ -34,14 +34,14 @@ if ($this->ci->input->post('invoice_id')) {
     }
 }
 
-$approval = $this->ci->input->post('approval');
-if ($approval == 0) {
-    $where[] = 'AND ' . $sTable . '.approval = 0';
-} else if ($approval == 1) {
-    $where[] = 'AND ' . $sTable . '.approval = 1';
-} else if ($approval == -1) {
-    $where[] = 'AND ' . $sTable . '.approval = -1';
-}
+// $approval = $this->ci->input->post('approval');
+// if ($approval == 0) {
+//     $where[] = 'AND ' . $sTable . '.approval = 0';
+// } else if ($approval == 1) {
+//     $where[] = 'AND ' . $sTable . '.approval = 1';
+// } else if ($approval == -1) {
+//     $where[] = 'AND ' . $sTable . '.approval = -1';
+// }
 
 if ($this->ci->input->post('delivery_status')) {
     $delivery_status = $this->ci->input->post('delivery_status');
@@ -143,15 +143,15 @@ foreach ($rResult as $aRow) {
                 $_data = $name;
                 break;
 
-            case 'approval':
-                if ($aRow['approval'] == 1) {
-                    $_data = '<span class="label label-tag label-tab1"><span class="tag">' . _l('approved') . '</span></span>';
-                } elseif ($aRow['approval'] == 0) {
-                    $_data = '<span class="label label-tag label-tab2"><span class="tag">' . _l('not_yet_approve') . '</span></span>';
-                } elseif ($aRow['approval'] == -1) {
-                    $_data = '<span class="label label-tag label-tab3"><span class="tag">' . _l('reject') . '</span></span>';
-                }
-                break;
+            // case 'approval':
+            //     if ($aRow['approval'] == 1) {
+            //         $_data = '<span class="label label-tag label-tab1"><span class="tag">' . _l('approved') . '</span></span>';
+            //     } elseif ($aRow['approval'] == 0) {
+            //         $_data = '<span class="label label-tag label-tab2"><span class="tag">' . _l('not_yet_approve') . '</span></span>';
+            //     } elseif ($aRow['approval'] == -1) {
+            //         $_data = '<span class="label label-tag label-tab3"><span class="tag">' . _l('reject') . '</span></span>';
+            //     }
+            //     break;
 
             case 'delivery_status':
                 $_data = render_delivery_status_html($aRow['id'], 'reconciliation', $aRow['delivery_status']);
