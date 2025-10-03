@@ -1157,7 +1157,7 @@ class Warehouse_model extends App_Model
 	{
 
 		$inventory_receipts = $production_approval = $checklist_id_arr = $required_arr = [];
-
+		$insert_id = '';
 		if (isset($data['newitems'])) {
 			$inventory_receipts = $data['newitems'];
 			unset($data['newitems']);
@@ -1283,20 +1283,20 @@ class Warehouse_model extends App_Model
 				$this->db->where('id', $data['pr_order_id']);
 				$this->db->update(db_prefix() . 'pur_orders', ['goods_id' => 1]);
 
-				// $this->db->where('pr_order_id', $data['pr_order_id']);
-				// $check_po_in_stock_reconciliation = $this->db->get(db_prefix() . 'stock_reconciliation')->row();
-				// if ($check_po_in_stock_reconciliation) {
-				// 	$stock_updated_reconciliation_id = $check_po_in_stock_reconciliation->id;
-				// } else {
-				// 	$stock_reconciliation = [];
-				// 	$stock_reconciliation['pr_order_id'] = $data['pr_order_id'];
-				// 	$stock_reconciliation['goods_delivery_code'] =  $this->create_stock_reconciliation_code();
-				// 	$stock_reconciliation['project'] = $data['project'];
-				// 	$stock_reconciliation['date_add'] = $data['date_add'];
-				// 	$stock_reconciliation['addedfrom'] = get_staff_user_id();
-				// 	$this->db->insert(db_prefix() . 'stock_reconciliation', $stock_reconciliation);
-				// 	$stock_insert_reconciliation_id = $this->db->insert_id();
-				// }
+				$this->db->where('pr_order_id', $data['pr_order_id']);
+				$check_po_in_stock_reconciliation = $this->db->get(db_prefix() . 'stock_reconciliation')->row();
+				if ($check_po_in_stock_reconciliation) {
+					$stock_updated_reconciliation_id = $check_po_in_stock_reconciliation->id;
+				} else {
+					$stock_reconciliation = [];
+					$stock_reconciliation['pr_order_id'] = $data['pr_order_id'];
+					$stock_reconciliation['goods_delivery_code'] =  $this->create_stock_reconciliation_code();
+					$stock_reconciliation['project'] = $data['project'];
+					$stock_reconciliation['date_add'] = $data['date_add'];
+					$stock_reconciliation['addedfrom'] = get_staff_user_id();
+					$this->db->insert(db_prefix() . 'stock_reconciliation', $stock_reconciliation);
+					$stock_insert_reconciliation_id = $this->db->insert_id();
+				}
 			} else if ($data['wo_order_id'] != '' && $data['wo_order_id'] != 0) {
 				$this->db->where('id', $data['wo_order_id']);
 				$this->db->update(db_prefix() . 'wo_orders', ['goods_id' => 1]);
@@ -1420,14 +1420,56 @@ class Warehouse_model extends App_Model
 
 				$this->db->insert(db_prefix() . 'goods_receipt_detail', $inventory_receipt);
 			}
-			// if($stock_insert_reconciliation_id){
-			// 	$stock_reconciliation_details_data = $this->reconciliation_goods_receipt_get_pur_order($data['pr_order_id']);
-			// 	foreach($stock_reconciliation_details_data as $key => $value){
-			// 		$value['goods_delivery_id'] = $stock_insert_reconciliation_id;
-			// 		$this->db->insert(db_prefix() . 'stock_reconciliation_detail', $value);
-			// 	}
-			// }
-			
+			if ($stock_insert_reconciliation_id) {
+				$stock_reconciliation_details_data = $this->reconciliation_goods_receipt_get_pur_order($data['pr_order_id']);
+				foreach ($stock_reconciliation_details_data as $key => $value) {
+					$value['goods_delivery_id'] = $stock_insert_reconciliation_id;
+					$this->db->insert(db_prefix() . 'stock_reconciliation_detail', $value);
+				}
+			}
+
+			if ($stock_updated_reconciliation_id) {
+				$get_stock_reconciliation_details_data = $this->get_stock_reconciliation_detail($stock_updated_reconciliation_id);
+
+				// Function to normalize description
+				function normalizeDescription($description)
+				{
+					return strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $description));
+				}
+
+				// Loop through inventory receipts
+				foreach ($inventory_receipts as $receipt) {
+					// Normalize receipt description
+					$normalized_receipt_desc = normalizeDescription($receipt['description']);
+
+					// Find matching item in stock reconciliation data
+					foreach ($get_stock_reconciliation_details_data as $reconciliation_item) {
+						// Normalize reconciliation description
+						$normalized_reconciliation_desc = normalizeDescription($reconciliation_item['description']);
+
+						// Check if commodity_code, commodity_name, and normalized description match
+						if (
+							$reconciliation_item['commodity_code'] == $receipt['commodity_code'] &&
+							$reconciliation_item['commodity_name'] == $receipt['commodity_name'] &&
+							$normalized_reconciliation_desc == $normalized_receipt_desc
+						) {
+
+							// Calculate new received_quantity (existing + quantities from receipt)
+							$quantities_to_add = !empty($receipt['quantities']) ? $receipt['quantities'] : 0;
+							$new_received_quantity = $reconciliation_item['received_quantity'] + $quantities_to_add;
+
+							// Update the database
+							$this->db->where('id', $reconciliation_item['id']);
+							$this->db->update(db_prefix() . 'stock_reconciliation_detail', [
+								'received_quantity' => $new_received_quantity
+							]);
+
+							// Break inner loop once match is found
+							break;
+						}
+					}
+				}
+			}
 			if (isset($checklist_id_arr) && !empty($checklist_id_arr)) {
 				// Loop through checklist_ids (they should match the required array keys)
 				foreach ($checklist_id_arr as $key => $checklist_id) {
@@ -22909,7 +22951,9 @@ class Warehouse_model extends App_Model
 				'commodity_code' => $delivery_detail['commodity_code'],
 				'description' => $delivery_detail['description'],
 				'quantities_json' => $delivery_detail['quantities_json'],
-				'received_quantity' => get_stock_received_quantity($pur_order, $delivery_detail['description'],'', $delivery_detail['commodity_code']),
+				'received_quantity' => get_stock_received_quantity($pur_order, $delivery_detail['description'], '', 
+				$delivery_detail['commodity_code']),
+				'area' => $delivery_detail['area'],
 			];
 		}
 
