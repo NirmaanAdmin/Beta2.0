@@ -22601,19 +22601,19 @@ class Warehouse_model extends App_Model
 		$this->db->select('*');
 
 		// 2. Set goods_delivery as the FROM table
-		$this->db->from(db_prefix() . 'goods_delivery');
+		$this->db->from(db_prefix() . 'goods_receipt');
 
 		// 3. LEFT JOIN goods_delivery_detail on the delivery_id
 		$this->db->join(
-			db_prefix() . 'goods_delivery_detail',
-			db_prefix() . 'goods_delivery_detail.goods_delivery_id = '
-				. db_prefix() . 'goods_delivery.id',
+			db_prefix() . 'goods_receipt_detail',
+			db_prefix() . 'goods_receipt_detail.goods_receipt_id = '
+				. db_prefix() . 'goods_receipt.id',
 			'left'
 		);
 
 
 		$this->db->where(
-			db_prefix() . 'goods_delivery.pr_order_id',
+			db_prefix() . 'goods_receipt.pr_order_id',
 			$pur_order
 		);
 
