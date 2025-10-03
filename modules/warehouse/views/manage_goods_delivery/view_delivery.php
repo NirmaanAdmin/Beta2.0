@@ -316,7 +316,7 @@
                         if (!empty($delivery_value['quantities_json'])) {
                           $quantities_json = json_decode($delivery_value['quantities_json'], true);
                           foreach ($quantities_json as $key => $value) {
-                            $all_quantities .= get_vendor_name($key) . ": " . _d($value) . ", ";
+                            $all_quantities .= get_vendor_name($key) . ": " . $value . ", ";
                           }
                           $all_quantities = rtrim($all_quantities, ', ');
                         }
