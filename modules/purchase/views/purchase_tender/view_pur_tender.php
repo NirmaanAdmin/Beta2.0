@@ -54,6 +54,13 @@
                         <?php echo _l('pur_attachment'); ?>
                       </a>
                     </li>
+                    <li role="presentation" class="<?php if ($this->input->get('tab') == 'tender_document') {
+                                                      echo 'active';
+                                                    } ?> ">
+                      <a href="#tender_document" aria-controls="tender_document" role="tab" data-toggle="tab">
+                        <?php echo _l('tender_document'); ?>
+                      </a>
+                    </li>
                     <li role="presentation" class="<?php if ($this->input->get('tab') == 'task_tab') {
                                                       echo 'active';
                                                     } ?> ">
@@ -555,6 +562,65 @@
                     } ?>
                   </div>
                 </div>
+
+                <div role="tabpanel" class="tab-pane  <?php if ($this->input->get('tab') == 'tender_document') {
+                                                        echo 'active';
+                                                      } ?>" id="tender_document">
+                  <?php
+                  if ($tender_document_detail == '') { ?>
+
+                    <a href="javascript:void(0);" class="btn btn-primary pull-left mright5" onclick="add_document(); return false;">
+                      <i class="fa-regular fa-plus tw-mr-1"></i>Add Document
+                    </a>
+                  <?php }
+                  ?>
+
+                  <?php if ($tender_document_detail) { ?>
+                    <table border="1" style="width: 100%; border-collapse: collapse;">
+                      <thead>
+                        <tr style="background-color: #f2f2f2;">
+                          <th style="padding: 10px; text-align: left;">Sr No.</th>
+                          <th style="padding: 10px; text-align: left;">Document Name</th>
+                          <th style="padding: 10px; text-align: left;">Date</th>
+                          <th style="padding: 10px; text-align: left;">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <?php
+                        $counter = 1;
+                        foreach ($tender_document_detail as $value) { ?>
+                          <tr>
+                            <td style="padding: 8px;"><?php echo $counter++; ?></td>
+                            <td style="padding: 8px;"><?php echo $value['document_name'] ?? 'Letter Of Agreement'; ?></td>
+                            <td style="padding: 8px;"><?php echo date('d M, Y', strtotime($value['date'])) ?? 'N/A'; ?></td>
+                            <td style="padding: 8px;">
+                              <div class="btn-group">
+                                <a href="<?php echo admin_url('purchase/view_latter_of_agreement/' . $value['id']); ?>" class="btn btn-default btn-icon" style="padding: 10px !important"><i class="fa fa-pencil-square"></i></a>
+                                <a href="javascript:void(0)" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding: 7px !important"><i class="fa fa-file-pdf"></i><?php if (is_mobile()) {
+                                                                                                                                                                                                                                        echo ' PDF';
+                                                                                                                                                                                                                                      } ?> <span class="caret"></span></a>
+                                <ul class="dropdown-menu dropdown-menu-right">
+                                  <li class="hidden-xs"><a href="<?php echo admin_url('purchase/agreement_of_sale_pdf/' . $value['id'] . '?output_type=I'); ?>"><?php echo _l('view_pdf'); ?></a></li>
+                                  <li class="hidden-xs"><a href="<?php echo admin_url('purchase/aggrement_of_sale_pdf/' . $value['id'] . '?output_type=I'); ?>" target="_blank"><?php echo _l('view_pdf_in_new_window'); ?></a></li>
+                                  <li><a href="<?php echo admin_url('purchase/aggrement_of_sale_pdf/' . $value['id']); ?>"><?php echo _l('download'); ?></a></li>
+                                  <li>
+                                    <a href="<?php echo admin_url('purchase/sale_deed_pdf/' . $value['id'] . '?print=true'); ?>" target="_blank">
+                                      <?php echo _l('print'); ?>
+                                    </a>
+                                  </li>
+                                </ul>
+
+                              </div>
+                            </td>
+                          </tr>
+                        <?php } ?>
+                      </tbody>
+                    </table>
+                  <?php } else { ?>
+                    <p>No documents found.</p>
+                  <?php } ?>
+
+                </div>
                 <div role="tabpanel" class="tab-pane  <?php if ($this->input->get('tab') == 'task_tab') {
                                                         echo 'active';
                                                       } ?>" id="task_tab">
@@ -699,15 +765,15 @@
                               } ?>
                             </td>
                             <td>
-                             
+
                             </td>
                           </tr>
 
 
                           <tr class="project-overview">
-                            <td  class="bold " ><?php echo _l('vendors'); ?></td>
-                            <td  class="bold " ></td>
-                            <td  class="bold " ></td>
+                            <td class="bold "><?php echo _l('vendors'); ?></td>
+                            <td class="bold "></td>
+                            <td class="bold "></td>
                           </tr>
                           <?php
 
@@ -872,8 +938,39 @@
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 
+<div class="modal fade" id="addDocumentModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog">
+    <?php echo form_open(admin_url('purchase/add_tender_document/' . $pur_tender->id), array('id' => 'add_ternder_document-form')); ?>
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4>
+          <?php echo _l('Add Document'); ?>
+        </h4>
+      </div>
+      <div class="modal-body">
+        <div class="col-md-12">
+          <input type="hidden" name="tender_id" value="<?php echo pur_html_entity_decode($pur_tender->id); ?>">
+          <?php echo render_date_input('date', 'Date'); ?>
+          <?php echo render_select('vendor_id', $vendors, array('userid', 'company'), 'Vendor'); ?>
+          <?php echo render_select('project_id', $projects, array('id', 'name'), 'Project'); ?>
+        </div>
+        <div class="clearfix"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="" class="btn btn-default" data-dismiss="modal"><?php echo _l('close'); ?></button>
+        <button class="btn btn-info btn-missed-punch"><?php echo _l('submit'); ?></button>
+      </div>
+      <?php echo form_close(); ?>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div>
 <?php init_tail(); ?>
 <script>
+  function add_document() {
+    "use strict";
+    $('#addDocumentModal').modal();
+  }
   // Toggle dropdown
   document.getElementById('settings-toggle').addEventListener('click', function() {
     const dropdown = document.getElementById('settings-dropdown');

@@ -25271,4 +25271,23 @@ class Purchase_model extends App_Model
             return $this->db->get(db_prefix() . 'pur_order_tracker')->result_array();
         }
     }
+
+    public function add_tender_document($data)
+    {
+        if($data['date']){
+            $data['date'] = to_sql_date($data['date']);
+        }
+        $this->db->insert(db_prefix() . 'tender_documents', $data);
+        $insert_id = $this->db->insert_id();
+        if ($insert_id) {
+            return true;
+        }
+        return false;
+
+    }
+
+    public function get_tender_document_detail($tender_id){
+        $this->db->where('tender_id', $tender_id);
+        return $this->db->get(db_prefix() . 'tender_documents')->result_array();
+    }
 }

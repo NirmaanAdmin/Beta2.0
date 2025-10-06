@@ -15606,6 +15606,9 @@ class purchase extends AdminController
         $data['sub_groups_request'] = $this->purchase_model->get_sub_group();
         $data['area_request'] = $this->purchase_model->get_area();
         $data['activity'] = $this->purchase_model->get_pr_activity($id);
+        $data['vendors'] = $this->purchase_model->get_vendor();
+        $data['projects'] = $this->projects_model->get_items();
+        $data['tender_document_detail'] = $this->purchase_model->get_tender_document_detail($id);
         $this->load->view('purchase_tender/view_pur_tender', $data);
     }
 
@@ -16734,5 +16737,29 @@ class purchase extends AdminController
     public function table_activity_log()
     {
         $this->app->get_table_data(module_views_path('purchase', 'activity_log/table_activity_log'));
+    }
+
+
+    public function add_tender_document($tender_id)
+    {
+        if ($this->input->post()) {
+            $data = $this->input->post();
+            $success = $this->purchase_model->add_tender_document($this->input->post(), $tender_id);
+            if ($success) {
+                set_alert('success', _l('added_successfully', _l('tender_document')));
+            }
+            redirect(admin_url('purchase/view_pur_tender/' . $tender_id));
+        }
+        $data['title'] = _l('add_tender_document');
+        $data['tender_id'] = $tender_id;
+        $this->load->view('purchase_tender/add_tender_document', $data);
+
+    }
+
+    public function view_latter_of_agreement($tender_id){
+        $data['title'] = _l('Latter of Agreement');
+        $data['tender_id'] = $tender_id;
+        $data['tender_data'] = $this->purchase_model->get_tender_document_detail($tender_id);
+        $this->load->view('purchase_tender/latter_of_agreement', $data);
     }
 }

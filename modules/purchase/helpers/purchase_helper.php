@@ -5095,3 +5095,27 @@ function remove_ot_activity_log($id)
     }
     return true;
 }
+
+function get_vendor_all_details_by_id($vendor_id)
+{
+    $CI = &get_instance();
+    $vendor = $CI->db->select('*')
+        ->where('userid', $vendor_id)
+        ->from(db_prefix() . 'pur_vendor')
+        ->get()
+        ->row();
+
+    return $vendor;
+}
+
+function tender_name_by_id($tender_id)
+{
+    $CI = &get_instance();
+    $tender = $CI->db->select('pur_tn_name')
+        ->where('id', $tender_id)
+        ->from(db_prefix() . 'pur_tender')
+        ->get()
+        ->row();
+
+    return $tender ? $tender->pur_tn_name : '';
+}

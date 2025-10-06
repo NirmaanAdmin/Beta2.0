@@ -990,3 +990,4 @@ $lang['this_is_non_tendor_item'] = 'This is non tender item';
 $lang['change_order_value'] = 'Change Order Value';
 $lang['updated_subtotal_before_tax'] = 'Contract Value Incl CO(before tax)';
 $lang['non_tender_items_in_change_order'] = 'Non tender items in CO';
+$lang['tender_document'] = 'Documents';
