@@ -566,14 +566,14 @@
                 <div role="tabpanel" class="tab-pane  <?php if ($this->input->get('tab') == 'tender_document') {
                                                         echo 'active';
                                                       } ?>" id="tender_document">
-                  <?php
-                  if ($tender_document_detail == '') { ?>
+                  <!-- <?php
+                  if ($tender_document_detail == '') { ?> -->
 
                     <a href="javascript:void(0);" class="btn btn-primary pull-left mright5" onclick="add_document(); return false;">
                       <i class="fa-regular fa-plus tw-mr-1"></i>Add Document
                     </a>
-                  <?php }
-                  ?>
+                  <!-- <?php }
+                  ?> -->
 
                   <?php if ($tender_document_detail) { ?>
                     <table border="1" style="width: 100%; border-collapse: collapse;">
