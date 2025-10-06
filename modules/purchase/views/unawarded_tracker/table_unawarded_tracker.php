@@ -16,9 +16,8 @@ $aColumns = [
    'total_package',
    'awarded_value',
    'sdeposit_value',
-   // 'pending_value_in_package',
+   'pending_value_in_package',
    2,
-   'percentage_of_capex_used',
    3,
 ];
 
@@ -32,9 +31,8 @@ if($estimate_id != 0) {
       'total_package',
       'awarded_value',
       'sdeposit_value',
-      // 'pending_value_in_package',
+      'pending_value_in_package',
       2,
-      'percentage_of_capex_used',
       3,
    ];
 }
@@ -122,8 +120,6 @@ foreach ($rResult as $aRow) {
          $_data = app_format_money($aRow['awarded_value'], $base_currency->symbol);
       } elseif ($column == 'pending_value_in_package') {
          $_data = app_format_money($aRow['pending_value_in_package'], $base_currency->symbol);
-      } elseif ($column == 'percentage_of_capex_used') {
-         $_data = round($aRow['percentage_of_capex_used']).'%';
       } elseif ($column == 'kind') {
          $_data = $aRow['kind'];
       } elseif ($column == 'rli_filter') {

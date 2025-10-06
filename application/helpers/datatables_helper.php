@@ -806,47 +806,37 @@ function data_tables_init_union_unawarded($aColumns, $sIndexColumn, $combinedTab
             pr.id as project_id,
             pr.name as project,
             p.estimate_id,
-            budget_head,
+            p.budget_head,
             ig.name as budget_head_name,
             p.project_awarded_date,
             p.package_name,
             p.sdeposit_percent,
             p.sdeposit_value,
             p.total_package,
-            p.awarded_value,
+            IFNULL(SUM(po.total),0) + IFNULL(SUM(wo.total),0) AS awarded_value,
             p.kind,
             p.rli_filter,
-            (
+            (p.total_package - 
                 (
-                    SELECT SUM(unawarded_qty * unawarded_rate) 
-                    FROM tblunawarded_budget_info 
-                    WHERE tblunawarded_budget_info.estimate_id = p.estimate_id 
-                      AND tblunawarded_budget_info.budget_head = p.budget_head
-                ) - p.awarded_value + p.sdeposit_value
-            ) AS pending_value_in_package,
-            (
-                CASE 
-                    WHEN (
-                        SELECT SUM(unawarded_qty * unawarded_rate) 
-                        FROM tblunawarded_budget_info 
-                        WHERE tblunawarded_budget_info.estimate_id = p.estimate_id 
-                          AND tblunawarded_budget_info.budget_head = p.budget_head
-                    ) > 0 
-                    THEN 
-                        (p.total_package / 
-                            (
-                                SELECT SUM(unawarded_qty * unawarded_rate) 
-                                FROM tblunawarded_budget_info 
-                                WHERE tblunawarded_budget_info.estimate_id = p.estimate_id 
-                                  AND tblunawarded_budget_info.budget_head = p.budget_head
-                            ) * 100)
-                    ELSE 0
-                END
-            ) AS percentage_of_capex_used
+                    (
+                        SELECT IFNULL(SUM(total),0)
+                        FROM tblpur_orders 
+                        WHERE package_id = p.id
+                    ) +
+                    (
+                        SELECT IFNULL(SUM(total),0)
+                        FROM tblwo_orders 
+                        WHERE package_id = p.id
+                    )
+                )
+            ) AS pending_value_in_package
         FROM tblestimate_package_info p
         LEFT JOIN tblestimates est ON est.id = p.estimate_id
         LEFT JOIN tblprojects pr ON pr.id = est.project_id
         LEFT JOIN tblitems_groups ig ON ig.id = p.budget_head
+        LEFT JOIN tblpur_orders po ON po.package_id = p.id
+        LEFT JOIN tblwo_orders wo ON wo.package_id = p.id
+        GROUP BY p.id
     ) AS combined_orders";
 
     $allColumns = [];
