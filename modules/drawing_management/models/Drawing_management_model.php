@@ -895,15 +895,19 @@ class drawing_management_model extends app_model
 					$purpose_code = 'IFC';
 					break;
 			}
+			if ($filetype === 'folder') {
+				$document_number = '';
+			} else {
+				// 7) Build document number without numeric suffix
+				$document_number = implode('-', [
+					$project_code,
+					$discipline_code,
+					$design_stage_code,
+					$purpose_code,
+					$status_code
+				]);
+			}
 
-			// 7) Build document number without numeric suffix
-			$document_number = implode('-', [
-				$project_code,
-				$discipline_code,
-				$design_stage_code,
-				$purpose_code,
-				$status_code
-			]);
 
 			// 8) Prepare update payload
 			$update_data = [
