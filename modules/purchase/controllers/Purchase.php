@@ -8507,7 +8507,8 @@ class purchase extends AdminController
         $currency_rate = $this->input->post('currency_rate');
         $to_currency = $this->input->post('to_currency');
         $sub_groups_pur = $this->input->post('sub_groups_pur');
-        echo $this->purchase_model->create_wo_order_row_template($name, $item_name, $item_description, $area, $image, $quantity, $unit_name, $unit_price, $taxname, $item_code, $unit_id, $tax_rate, '', $discount, '', '', '', '', '', $item_key, false, $currency_rate, $to_currency, [], false, $sub_groups_pur);
+        $non_budget_item = $this->input->post('non_budget_item');
+        echo $this->purchase_model->create_wo_order_row_template($name, $item_name, $item_description, $area, $image, $quantity, $unit_name, $unit_price, $taxname, $item_code, $unit_id, $tax_rate, '', $discount, '', '', '', '', '', $item_key, false, $currency_rate, $to_currency, [], false, $sub_groups_pur, '', $non_budget_item);
     }
     /**
      * currency rate table
@@ -10067,6 +10068,7 @@ class purchase extends AdminController
         $data['area_pur'] = get_area_project_wise();
         $this->load->model('invoices_model');
         $data['get_hsn_sac_code'] = $this->invoices_model->get_hsn_sac_code();
+        $data['budgets'] = $this->purchase_model->get_all_estimates();
         $data['ajaxItems'] = false;
 
         if (total_rows(db_prefix() . 'items') <= ajax_on_total_items()) {
@@ -10087,6 +10089,28 @@ class purchase extends AdminController
                 $data['selected_head'] = $purchase_request->group_pur;
                 $data['selected_sub_head'] = $purchase_request->sub_groups_pur;
                 $data['selected_area'] = $purchase_request->area_pur;
+            }
+        }
+
+        $data['book_order'] = false;
+        $package = $this->input->get('package', TRUE);
+        if (!empty($package)) {
+            $cost_package_detail = $this->purchase_model->get_cost_package_detail($package);
+            if (!empty($cost_package_detail)) {
+                $data['book_order'] = true;
+                $data['cost_package_detail'] = $cost_package_detail;
+                $package_items_info = $this->purchase_model->get_package_items_info($package);
+                if (!empty($package_items_info)) {
+                    $index_order = 0;
+                    $wo_order_row_template = '';
+                    $wo_order_row_template .= $this->purchase_model->create_wo_order_row_template();
+                    foreach ($package_items_info as $order_detail) {
+                        $index_order++;
+                        $package_item_total = $order_detail['package_qty'] * $order_detail['package_rate'];
+                        $wo_order_row_template .= $this->purchase_model->create_wo_order_row_template('items[' . $index_order . ']',  $order_detail['item_code'], $order_detail['long_description'], '', '', $order_detail['package_qty'], $order_detail['unit_id'], $order_detail['package_rate'], '', $order_detail['item_code'], $order_detail['unit_id'], '',  $package_item_total, '', '', $package_item_total, $package_item_total, '', '', '', false, 1, $data['base_currency']->name, array(), false, $order_detail['sub_head'], '', 0);
+                    }
+                    $data['wo_order_row_template'] = $wo_order_row_template;
+                }
             }
         }
 

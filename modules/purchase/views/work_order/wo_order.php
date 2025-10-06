@@ -36,6 +36,28 @@
         echo form_hidden('isedit');
       }
       ?>
+      <?php
+      if ($book_order) {
+        $prefix = get_purchase_option('wo_order_prefix');
+        $next_number = get_purchase_option('next_wo_number');
+        $wo_order_number = $prefix . '-' . str_pad($next_number, 5, '0', STR_PAD_LEFT) . '-' . date('M-Y');
+        if (get_option('po_only_prefix_and_number') == 1) {
+          $wo_order_number = $prefix . '-' . str_pad($next_number, 5, '0', STR_PAD_LEFT);
+        }
+        $wo_order['wo_order_name'] = $cost_package_detail->package_name;
+        $wo_order['wo_order_number'] = $wo_order_number;
+        $wo_order['number'] = $next_number;
+        $wo_order['estimate'] = $cost_package_detail->estimate_id;
+        $wo_order['group_pur'] = $cost_package_detail->budget_head;
+        $wo_order['project'] = $cost_package_detail->project_id;
+        $wo_order['kind'] = $cost_package_detail->kind;
+        $wo_order['budget'] = $cost_package_detail->total_package;
+        $wo_order['order_date'] = _d(date('Y-m-d'));
+        $wo_order['buyer'] = get_staff_user_id();
+        $wo_order = (object) $wo_order;
+        echo form_hidden('package_id', $cost_package_detail->id);
+      }
+      ?>
       <div class="col-md-12">
         <div class="panel_s accounting-template estimate">
           <div class="panel-body">
@@ -99,23 +121,21 @@
 
                     <div class="row">
                       <div class="form-group col-md-6">
-
                         <label for="vendor"><?php echo _l('vendor'); ?></label>
                         <select name="vendor" id="vendor" class="selectpicker" <?php if (isset($wo_order)) {
-                                                                                  echo 'disabled';
-                                                                                } ?> onchange="estimate_by_vendor(this); return false;" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
-                          <option value=""></option>
-                          <?php foreach ($vendors as $s) { ?>
-                            <option value="<?php echo pur_html_entity_decode($s['userid']); ?>" <?php if (isset($wo_order) && $wo_order->vendor == $s['userid']) {
-                                                                                                  echo 'selected';
-                                                                                                } else {
-                                                                                                  if (isset($ven) && $ven == $s['userid']) {
-                                                                                                    echo 'selected';
-                                                                                                  }
-                                                                                                } ?>><?php echo pur_html_entity_decode($s['company']); ?></option>
-                          <?php } ?>
+                          echo '';
+                        } ?> onchange="estimate_by_vendor(this); return false;" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
+                        <option value=""></option>
+                        <?php foreach ($vendors as $s) { ?>
+                          <option value="<?php echo pur_html_entity_decode($s['userid']); ?>" <?php if (isset($wo_order) && $wo_order->vendor == $s['userid']) {
+                            echo 'selected';
+                          } else {
+                            if (isset($ven) && $ven == $s['userid']) {
+                              echo 'selected';
+                            }
+                          } ?>><?php echo pur_html_entity_decode($s['company']); ?></option>
+                        <?php } ?>
                         </select>
-
                       </div>
 
                       <?php
@@ -131,49 +151,37 @@
                           <option value=""></option>
                           <?php foreach ($pur_request as $s) { ?>
                             <option value="<?php echo pur_html_entity_decode($s['id']); ?>" <?php if (isset($wo_order) && $wo_order->pur_request != '' && $wo_order->pur_request == $s['id']) {
-                                                                                              echo 'selected';
-                                                                                            } ?>><?php echo pur_html_entity_decode($s['pur_rq_code'] . ' - ' . $s['pur_rq_name']); ?></option>
+                              echo 'selected';
+                            } ?>><?php echo pur_html_entity_decode($s['pur_rq_code'] . ' - ' . $s['pur_rq_name']); ?></option>
                           <?php } ?>
                         </select>
                       </div>
-
-
                     </div>
 
                     <div class="row">
-                      <?php if (get_purchase_option('purchase_order_setting') == 0) { ?>
-                        <div class="col-md-6 form-group">
-                          <label for="estimate"><?php echo _l('estimates'); ?></label>
-                          <select name="estimate" id="estimate" class="selectpicker  <?php if (isset($wo_order)) {
-                                                                                        echo 'disabled';
-                                                                                      } ?>" onchange="coppy_pur_estimate(); return false;" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
-                            <?php if (isset($wo_order)) { ?>
-                              <option value=""></option>
-                              <?php foreach ($estimates as $s) { ?>
-                                <option value="<?php echo pur_html_entity_decode($s['id']); ?>" <?php if (isset($wo_order) && $wo_order->estimate != '' && $wo_order->estimate == $s['id']) {
-                                                                                                  echo 'selected';
-                                                                                                } ?>><?php echo format_pur_estimate_number($s['id']); ?></option>
-                              <?php } ?>
+                      <div class="col-md-6 form-group">
+                        <label for="budget"><?php echo _l('budget'); ?></label>
+                        <select name="estimate" id="estimate" class="selectpicker  <?php if (isset($wo_order)) { echo 'disabled';} ?>" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
+                            <option value=""></option>
+                            <?php foreach ($budgets as $s) { ?>
+                              <option value="<?php echo pur_html_entity_decode($s['id']); ?>" <?php if (isset($wo_order) && $wo_order->estimate != '' && $wo_order->estimate == $s['id']) { echo 'selected';} ?>>
+                              <?php echo format_estimate_number($s['id']); ?>
+                              <?php echo !empty($s['budget_description']) ? ' - '.$s['budget_description'] : ''; ?>
+                              </option>
                             <?php } ?>
-                          </select>
-
-                        </div>
-                      <?php } ?>
-                      <div class="col-md-<?php if (get_purchase_option('purchase_order_setting') == 1) {
-                                            echo '12';
-                                          } else {
-                                            echo '6';
-                                          }; ?> form-group">
+                        </select>
+                      </div>
+                      <div class="col-md-6 form-group">
                         <label for="department"><?php echo _l('department'); ?></label>
                         <select name="department" id="department" class="selectpicker" <?php if (isset($wo_order)) {
-                                                                                          echo 'disabled';
-                                                                                        } ?> data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
-                          <option value=""></option>
-                          <?php foreach ($departments as $s) { ?>
-                            <option value="<?php echo pur_html_entity_decode($s['departmentid']); ?>" <?php if (isset($wo_order) && $s['departmentid'] == $wo_order->department) {
-                                                                                                        echo 'selected';
-                                                                                                      } ?>><?php echo pur_html_entity_decode($s['name']); ?></option>
-                          <?php } ?>
+                          
+                        } ?> data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
+                        <option value=""></option>
+                        <?php foreach ($departments as $s) { ?>
+                          <option value="<?php echo pur_html_entity_decode($s['departmentid']); ?>" <?php if (isset($wo_order) && $s['departmentid'] == $wo_order->department) {
+                            echo 'selected';
+                          } ?>><?php echo pur_html_entity_decode($s['name']); ?></option>
+                        <?php } ?>
                         </select>
                       </div>
                     </div>
@@ -192,10 +200,10 @@
                           <option value=""></option>
                           <?php foreach ($projects as $s) { ?>
                             <option value="<?php echo pur_html_entity_decode($s['id']); ?>" <?php if (isset($wo_order) && $s['id'] == $wo_order->project) {
-                                                                                              echo 'selected';
-                                                                                            } else if (!isset($wo_order) && $s['id'] == $project_id) {
-                                                                                              echo 'selected';
-                                                                                            } ?>><?php echo pur_html_entity_decode($s['name']); ?></option>
+                              echo 'selected';
+                            } else if (!isset($wo_order) && $s['id'] == $project_id) {
+                              echo 'selected';
+                            } ?>><?php echo pur_html_entity_decode($s['name']); ?></option>
                           <?php } ?>
                         </select>
                       </div>
@@ -205,11 +213,11 @@
                         <select name="type" id="type" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
                           <option value=""></option>
                           <option value="capex" <?php if (isset($wo_order) && $wo_order->type == 'capex') {
-                                                  echo 'selected';
-                                                } ?>><?php echo _l('capex'); ?></option>
+                            echo 'selected';
+                          } ?>><?php echo _l('capex'); ?></option>
                           <option value="opex" <?php if (isset($wo_order) && $wo_order->type == 'opex') {
-                                                  echo 'selected';
-                                                } ?>><?php echo _l('opex'); ?></option>
+                            echo 'selected';
+                          } ?>><?php echo _l('opex'); ?></option>
                         </select>
                       </div>
                     </div>
@@ -292,24 +300,24 @@
                       <div class="col-md-6 ">
                         <div class="form-group select-placeholder">
                           <label for="discount_type"
-                            class="control-label"><?php echo _l('discount_type'); ?></label>
+                          class="control-label"><?php echo _l('discount_type'); ?></label>
                           <select name="discount_type" class="selectpicker" data-width="100%"
-                            data-none-selected-text="<?php echo _l('dropdown_non_selected_tex'); ?>">
+                          data-none-selected-text="<?php echo _l('dropdown_non_selected_tex'); ?>">
 
-                            <option value="before_tax" <?php
-                                                        if (isset($wo_order)) {
-                                                          if ($wo_order->discount_type == 'before_tax') {
-                                                            echo 'selected';
-                                                          }
-                                                        } ?>><?php echo _l('discount_type_before_tax'); ?></option>
-                            <option value="after_tax" <?php if (isset($wo_order)) {
-                                                        if ($wo_order->discount_type == 'after_tax' || $wo_order->discount_type == null) {
-                                                          echo 'selected';
-                                                        }
-                                                      } else {
-                                                        echo 'selected';
-                                                      } ?>><?php echo _l('discount_type_after_tax'); ?></option>
-                          </select>
+                          <option value="before_tax" <?php
+                          if (isset($wo_order)) {
+                            if ($wo_order->discount_type == 'before_tax') {
+                              echo 'selected';
+                            }
+                          } ?>><?php echo _l('discount_type_before_tax'); ?></option>
+                          <option value="after_tax" <?php if (isset($wo_order)) {
+                            if ($wo_order->discount_type == 'after_tax' || $wo_order->discount_type == null) {
+                              echo 'selected';
+                            }
+                          } else {
+                            echo 'selected';
+                          } ?>><?php echo _l('discount_type_after_tax'); ?></option>
+                        </select>
                         </div>
                       </div>
                     </div>
@@ -380,33 +388,6 @@
                           <?php endforeach; ?>
                         </select>
                       </div>
-
-                      <!-- <div class="col-md-6 form-group select-placeholder">
-                        <label for="clients" class="control-label"><?php echo _l('clients'); ?></label>
-                        <select id="clients" name="clients[]" data-live-search="true" onchange="client_change(this); return false;" multiple data-width="100%" class="ajax-search client-ajax-search" data-none-selected-text="<?php echo _l('dropdown_non_selected_tex'); ?>">
-                          <?php
-                          foreach ($clients_ed as $client_id) {
-                            $selected = (is_numeric($client_id) ? $client_id : '');
-                            if ($selected != '') {
-                              $rel_data = get_relation_data('customer', $selected);
-                              $rel_val = get_relation_values($rel_data, 'customer');
-                              echo '<option value="' . $rel_val['id'] . '" selected>' . $rel_val['name'] . '</option>';
-                            }
-                          }
-                          ?>
-                        </select>
-                      </div> -->
-                      <!-- <div class="col-md-6 form-group ">
-                        <label for="sale_invoice"><?php echo _l('sale_invoice'); ?></label>
-                        <select name="sale_invoice" id="sale_invoice" class="selectpicker" onchange="coppy_sale_invoice(); return false;" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
-                          <option value=""></option>
-                          <?php foreach ($invoices as $inv) { ?>
-                            <option value="<?php echo pur_html_entity_decode($inv['id']); ?>" <?php if (isset($wo_order) && $inv['id'] == $wo_order->sale_invoice) {
-                                                                                                echo 'selected';
-                                                                                              } ?>><?php echo format_invoice_number($inv['id']); ?></option>
-                          <?php } ?>
-                        </select>
-                      </div> -->
                     </div>
 
                     <!-- <div class="row">
@@ -564,11 +545,52 @@
             } ?>
           </div>
 
+          <div class="cost_complete_sheet" style="display: none;">
+            <div class="panel-body">
+              <div class="row">
+                <div class="col-md-3 pull-right">
+                  <button type="button" class="btn btn-info pull-right" id="download_historical_data" style="margin-left: 7px;"><?php echo _l('download_historical_data'); ?></button>
+                  <button type="button" class="btn btn-info pull-right" id="cost_control_sheet"><?php echo _l('cost_control_sheet'); ?></button>
+                </div>
+              </div>
+              <div class="clearfix"></div>
+            </div>
+          </div>
+
+          <div class="modal fade" id="cost_complete_modal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document" style="width: 98%;">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title">View Items</h4>
+                  <button type="button" class="close" data-dismiss="modal">&times;</button>
+                  <div class="col-md-3" style="padding-left: 0px; padding-top: 5px;">
+                    <?php
+                    echo render_select('cost_sub_head', $sub_groups_pur, array('id', 'sub_group_name'), 'Sub Head');
+                    ?>
+                  </div>
+                </div>
+
+                <div class="modal-body">
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div class="view_cost_control_sheet">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="panel-body mtop10 invoice-item">
 
             <div class="row">
               <div class="col-md-4">
-                <!-- <?php $this->load->view('purchase/item_include/main_item_select'); ?> -->
+                <div class="cost_complete_sheet" style="display: none;">
+                  <button type="button" class="btn btn-info enable_item_select mbot5">
+                    <?php echo _l('add_non_budgeted_items'); ?>
+                  </button>
+                </div>
               </div>
               <?php if (!$is_edit) { ?>
                 <div class="col-md-8">
@@ -718,10 +740,10 @@
                           </div>
                           <div class="col-md-3">
                             <input type="number" onchange="pur_calculate_total()" data-toggle="tooltip" value="<?php if (isset($wo_order)) {
-                                                                                                                  echo $wo_order->shipping_fee;
-                                                                                                                } else {
-                                                                                                                  echo '0';
-                                                                                                                } ?>" class="form-control pull-left text-right" name="shipping_fee">
+                              echo $wo_order->shipping_fee;
+                            } else {
+                              echo '0';
+                            } ?>" class="form-control pull-left text-right" name="shipping_fee">
                           </div>
                         </div>
                       </td>
@@ -742,6 +764,10 @@
               <div id="removed-items"></div>
             </div>
           </div>
+          <?php
+          if ($book_order) {
+            unset($wo_order);
+          } ?>
           <div class="row">
             <div class="col-md-12 mtop15">
               <div class="panel-body bottom-transaction">
@@ -806,8 +832,8 @@
     $.post(admin_url + 'purchase/coppy_pur_request_for_po/' + pur_request + '/' + vendor).done(function(response) {
       response = JSON.parse(response);
       if (response) {
-        $('select[name="estimate"]').html(response.estimate_html);
-        $('select[name="estimate"]').selectpicker('refresh');
+        // $('select[name="estimate"]').html(response.estimate_html);
+        // $('select[name="estimate"]').selectpicker('refresh');
 
         $('select[name="currency"]').val(response.currency).change();
         $('input[name="currency_rate"]').val(response.currency_rate).change();

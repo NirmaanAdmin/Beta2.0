@@ -3325,6 +3325,28 @@ class Estimates_model extends App_Model
                     $this->db->having('non_break_description', $non_break_description);
                     $pur_order_detail = $this->db->get()->result_array();
 
+                    $this->db->select(db_prefix() . 'wo_order_detail.id as id, ' . db_prefix() . 'wo_order_detail.quantity as quantity, ' . db_prefix() . 'wo_order_detail.total as total');
+                    $this->db->select("
+                        REPLACE(
+                            REPLACE(
+                                REPLACE(
+                                    REPLACE(" . db_prefix() . "wo_order_detail.description, '\r', ''),
+                                '\n', ''),
+                            '<br />', ''),
+                        '<br/>', '') AS non_break_description
+                    ");
+                    $this->db->from(db_prefix() . 'wo_order_detail');
+                    $this->db->join(db_prefix() . 'wo_orders', db_prefix() . 'wo_orders.id = ' . db_prefix() . 'wo_order_detail.wo_order', 'left');
+                    $this->db->where(db_prefix() . 'wo_order_detail.item_code', $item['item_code']);
+                    $this->db->where(db_prefix() . 'wo_orders.estimate', $estimates->id);
+                    $this->db->where(db_prefix() . 'wo_orders.group_pur', $unawarded_budget);
+                    $this->db->where(db_prefix() . 'wo_orders.approve_status', 2);
+                    $this->db->where(db_prefix() . 'wo_order_detail.quantity' . ' >', 0, false);
+                    $this->db->where(db_prefix() . 'wo_order_detail.total' . ' >', 0, false);
+                    $this->db->group_by(db_prefix() . 'wo_order_detail.id');
+                    $this->db->having('non_break_description', $non_break_description);
+                    $wo_order_detail = $this->db->get()->result_array();
+
                     $budgeted_qty = number_format($item['qty'], 2, '.', '');
                     $budgeted_rate = number_format($item['rate'], 2, '.', '');
                     $budgeted_amount = number_format($budgeted_qty * $budgeted_rate, 2, '.', '');
@@ -3337,11 +3359,17 @@ class Estimates_model extends App_Model
                             $used_qty += (float)$srow['quantity'];
                             $used_amount += (float)$srow['total'];
                         }
-                        $remaining_qty = $budgeted_qty - $used_qty;
-                        $remaining_qty = number_format($remaining_qty, 2, '.', '');
-                        $remaining_amount = $budgeted_amount - $used_amount;
-                        $remaining_amount = number_format($remaining_amount, 2, '.', '');
                     }
+                    if (!empty($wo_order_detail)) {
+                        foreach ($wo_order_detail as $srow) {
+                            $used_qty += (float)$srow['quantity'];
+                            $used_amount += (float)$srow['total'];
+                        }
+                    }
+                    $remaining_qty = $budgeted_qty - $used_qty;
+                    $remaining_qty = number_format($remaining_qty, 2, '.', '');
+                    $remaining_amount = $budgeted_amount - $used_amount;
+                    $remaining_amount = number_format($remaining_amount, 2, '.', '');   
                     $item_id_name_attr = "newitems[$key][item_id]";
                     $budgeted_qty_name_attr = "newitems[$key][budgeted_qty]";
                     $budgeted_unit_name_attr = "newitems[$key][budgeted_unit]";
@@ -3659,6 +3687,7 @@ class Estimates_model extends App_Model
 
             foreach ($rResult as $key => $aRow) {
                 $row = [];
+                $booked_in_order = 0;
 
                 $non_break_description = strip_tags(
                     str_replace(["\r", "\n", "<br />", "<br/>"], '', $aRow['long_description'])
@@ -3693,7 +3722,39 @@ class Estimates_model extends App_Model
                 $this->db->having('non_break_description', $non_break_description);
                 $query = $this->db->get();
                 $pur_order_detail = $query->row_array();
-                $booked_in_order = $pur_order_detail['total'] ?? 0;
+                $booked_in_order += $pur_order_detail['total'] ?? 0;
+
+                $this->db->select('SUM(' . db_prefix() . 'wo_order_detail.total) AS total', false);
+                $this->db->select("
+                    REPLACE(
+                        REPLACE(
+                            REPLACE(
+                                REPLACE(" . db_prefix() . "wo_order_detail.description, '\r', ''),
+                            '\n', ''),
+                        '<br />', ''),
+                    '<br/>', '') AS non_break_description
+                ", false);
+                $this->db->from(db_prefix() . 'wo_order_detail');
+                $this->db->join(
+                    db_prefix() . 'wo_orders',
+                    db_prefix() . 'wo_orders.id = ' . db_prefix() . 'wo_order_detail.wo_order',
+                    'left'
+                );
+                $this->db->where(db_prefix() . 'wo_order_detail.item_code', $aRow['item_code']);
+                if ($estimate_id != '') {
+                    $this->db->where(db_prefix() . 'wo_orders.estimate', $estimate_id);
+                }
+                if ($budget_head_id != '') {
+                    $this->db->where(db_prefix() . 'wo_orders.group_pur', $budget_head_id);
+                }
+                $this->db->where(db_prefix() . 'wo_orders.approve_status', 2);
+                $this->db->where(db_prefix() . 'wo_order_detail.quantity >', 0);
+                $this->db->where(db_prefix() . 'wo_order_detail.total >', 0);
+                $this->db->group_by('non_break_description');  
+                $this->db->having('non_break_description', $non_break_description);
+                $query = $this->db->get();
+                $wo_order_detail = $query->row_array();
+                $booked_in_order += $wo_order_detail['total'] ?? 0;
 
                 $this->db->select('SUM(' . db_prefix() . 'estimate_package_items_info.package_qty * ' . db_prefix() . 'estimate_package_items_info.package_rate) AS total', false);
                 $this->db->from(db_prefix() . 'estimate_package_items_info');

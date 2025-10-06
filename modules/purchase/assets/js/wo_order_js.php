@@ -241,6 +241,112 @@ $(function(){
         var order_date = $(this).val();
         get_order_date(order_date);
       });
+
+      toggleCostDownloadButtons();
+
+      $("body").on('change', 'select[name="estimate"], select[name="group_pur"]', function() {
+        toggleCostDownloadButtons();
+      });
+
+      function toggleCostDownloadButtons() {
+        var estimate = $('select[name="estimate"]').val();
+        var budgetHead = $('select[name="group_pur"]').val();
+
+        if (estimate && budgetHead) {
+          $('.cost_complete_sheet').show();
+          $('select[name="item_name"]').prop('disabled', true);
+        } else {
+          $('.cost_complete_sheet').hide();
+          $('select[name="item_name"]').prop('disabled', false);
+        }
+        $('select[name="item_name"]').selectpicker('refresh');
+      }
+
+      $("body").on('click', '#cost_control_sheet', function () {
+        cost_control_sheet();
+      });
+
+      $("body").on('change', 'select[name="cost_sub_head"]', function () {
+        cost_control_sheet();
+      });
+
+      function cost_control_sheet() {
+        var estimate_id = $('select[name="estimate"]').val();
+        var budget_head_id = $('select[name="group_pur"]').val();
+        var cost_sub_head = $('select[name="cost_sub_head"]').val();
+        if (estimate_id !== '' && budget_head_id !== '') {
+          $.post(admin_url + 'purchase/get_cost_control_sheet', {
+            estimate_id: estimate_id,
+            budget_head_id: budget_head_id,
+            cost_sub_head: cost_sub_head,
+            module: 'pur_orders'
+          }).done(function (response) {
+            response = JSON.parse(response);
+            if (response.result) {
+              $('.view_cost_control_sheet').html('');
+              $('.view_cost_control_sheet').html(response.result);
+              $('#cost_complete_modal').modal('show');
+            } else {
+              $('.view_cost_control_sheet').html('');
+              alert_float('warning', "No any items have found");
+            }
+          });
+        }
+      }
+
+      $("body").on('click', '#download_historical_data', function() {
+        var estimate_id = $('select[name="estimate"]').val();
+        var budget_head_id = $('select[name="group_pur"]').val();
+        if (estimate_id !== '' && budget_head_id !== '') {
+          var url = admin_url + 'purchase/download_revision_historical_data?estimate_id='+encodeURIComponent(estimate_id)+'&budget_head_id=' + encodeURIComponent(budget_head_id);
+          window.location.href = url;
+        }
+      });
+
+      $("body").on('click', '.cost_fetch_pur_item', function() {
+        var itemableid = $(this).data('itemableid');
+        var package_id = $(this).data('package');
+        if (package_id) {
+          $.post(admin_url + 'purchase/cost_fetch_pur_item', {
+            package_id: package_id,
+            itemableid: itemableid,
+          }).done(function (res) {
+            var response = JSON.parse(res);
+            if (response.result && Array.isArray(response.result) && response.result.length > 0) {
+              var item = response.result[0];
+              var itemData = {
+                area: [],
+                description: item.long_description,
+                discount: undefined,
+                item_code: item.item_code,
+                item_name: undefined,
+                quantity: item.package_qty,
+                sub_groups_pur: item.sub_head,
+                tax_rate: undefined,
+                taxname: [],
+                unit_id: item.unit_id,
+                unit_name: item.unit_id,
+                unit_price: item.package_rate
+              };
+              pur_add_item_to_table(itemData, 'undefined', '0');
+              alert_float('success', "Cost item has been added to the table");
+            } else {
+              alert_float('warning', "No item found for the selected package.");
+            }
+          });
+        }
+      });
+
+      $("body").on('click', '.enable_item_select', function() {
+        $('select[name="item_name"]').prop('disabled', false);
+        $('select[name="item_name"]').selectpicker('refresh');
+        if ($('select[name="item_name"]').prop('disabled')) {
+          $('button[onclick*="pur_add_item_to_table"]').attr('onclick', "pur_add_item_to_table('undefined','undefined','0'); return false;");
+        } else {
+          $('button[onclick*="pur_add_item_to_table"]').attr('onclick', "pur_add_item_to_table('undefined','undefined','1'); return false;");
+        }
+      });
+
     });
 
 var lastAddedItemKey = null;
@@ -251,9 +357,9 @@ function estimate_by_vendor(invoker){
   if(invoker.value != 0){
     $.post(admin_url + 'purchase/estimate_by_vendor/'+invoker.value).done(function(response){
       response = JSON.parse(response);
-      $('select[name="estimate"]').html('');
-      $('select[name="estimate"]').append(response.result);
-      $('select[name="estimate"]').selectpicker('refresh');
+      // $('select[name="estimate"]').html('');
+      // $('select[name="estimate"]').append(response.result);
+      // $('select[name="estimate"]').selectpicker('refresh');
       $('#vendor_data').html('');
       $('#vendor_data').append(response.ven_html);
       $('select[name="currency"]').val(response.currency_id).change();
@@ -313,8 +419,8 @@ function coppy_pur_request(){
     $.post(admin_url + 'purchase/coppy_pur_request_for_wo/'+pur_request+'/'+vendor).done(function(response){
         response = JSON.parse(response);
         if(response){ 
-          $('select[name="estimate"]').html(response.estimate_html);
-          $('select[name="estimate"]').selectpicker('refresh');
+          // $('select[name="estimate"]').html(response.estimate_html);
+          // $('select[name="estimate"]').selectpicker('refresh');
 
           $('select[name="currency"]').val(response.currency).change();
           $('input[name="currency_rate"]').val(response.currency_rate).change();
@@ -850,7 +956,7 @@ function pur_add_item_to_preview(id) {
   });
 }
 
-function pur_add_item_to_table(data, itemid) {
+function pur_add_item_to_table(data, itemid, non_budget_item) {
   "use strict";
 
   data = typeof (data) == 'undefined' || data == 'undefined' ? pur_get_item_preview_values() : data;
@@ -869,7 +975,7 @@ function pur_add_item_to_table(data, itemid) {
   var item_key = lastAddedItemKey ? lastAddedItemKey += 1 : $("body").find('.invoice-items-table tbody .item').length + 1;
   lastAddedItemKey = item_key;
   $("body").append('<div class="dt-loader"></div>');
-  wo_get_item_row_template('newitems[' + item_key + ']',data.item_name, data.description, data.area, data.image, data.quantity, data.unit_name, data.unit_price, data.taxname, data.item_code, data.unit_id, data.tax_rate, data.discount, itemid, currency_rate, to_currency, data.sub_groups_pur).done(function(output){
+  wo_get_item_row_template('newitems[' + item_key + ']',data.item_name, data.description, data.area, data.image, data.quantity, data.unit_name, data.unit_price, data.taxname, data.item_code, data.unit_id, data.tax_rate, data.discount, itemid, currency_rate, to_currency, data.sub_groups_pur, non_budget_item).done(function(output){
     table_row += output;
 
     $('.invoice-item table.invoice-items-table.items tbody').append(table_row);
@@ -952,7 +1058,7 @@ function pur_delete_item(row, itemid,parent) {
   }
 }
 
-function wo_get_item_row_template(name, item_name, description, area, image, quantity, unit_name, unit_price, taxname,  item_code, unit_id, tax_rate, discount, item_key, currency_rate, to_currency, sub_groups_pur)  {
+function wo_get_item_row_template(name, item_name, description, area, image, quantity, unit_name, unit_price, taxname,  item_code, unit_id, tax_rate, discount, item_key, currency_rate, to_currency, sub_groups_pur, non_budget_item)  {
   "use strict";
 
   jQuery.ajaxSetup({
@@ -976,7 +1082,8 @@ function wo_get_item_row_template(name, item_name, description, area, image, qua
     item_key : item_key,
     currency_rate: currency_rate,
     to_currency: to_currency,
-    sub_groups_pur: sub_groups_pur
+    sub_groups_pur: sub_groups_pur,
+    non_budget_item: non_budget_item,
   });
   jQuery.ajaxSetup({
     async: true

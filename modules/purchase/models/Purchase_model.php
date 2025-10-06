@@ -16407,6 +16407,10 @@ class Purchase_model extends App_Model
             $order_detail = $data['newitems'];
             unset($data['newitems']);
         }
+        if (isset($data['items'])) {
+            $order_detail = $data['items'];
+            unset($data['items']);
+        }
 
         $prefix = get_purchase_option('wo_order_prefix');
 
@@ -16478,6 +16482,20 @@ class Purchase_model extends App_Model
             $data['total'] = $data['grand_total'];
             unset($data['grand_total']);
         }
+
+        if (isset($data['cost_control_remarks'])) {
+            $cost_control_remarks = $data['cost_control_remarks'];
+            unset($data['cost_control_remarks']);
+        }
+
+        if (isset($data['cost_sub_head'])) {
+            unset($data['cost_sub_head']);
+        }
+
+        if (isset($data['non_budget_item'])) {
+            unset($data['non_budget_item']);
+        }
+
         if (isset($data['pur_request']) && $data['pur_request'] > 0) {
             $this->db->where('id', $data['pur_request']);
             $this->db->update(db_prefix() . 'pur_request', ['status' => 4]);
@@ -16536,6 +16554,7 @@ class Purchase_model extends App_Model
         $this->db->insert(db_prefix() . 'cron_email', $cron_email);
 
         $this->save_work_order_files('wo_order', $insert_id);
+        $this->update_cost_control_remarks($cost_control_remarks, $insert_id);
 
         if ($insert_id) {
             // Update next work order number in settings
@@ -16564,6 +16583,7 @@ class Purchase_model extends App_Model
                     $dt_data['discount_%'] = $rqd['discount'];
                     $dt_data['sub_groups_pur'] = $rqd['sub_groups_pur'];
                     $dt_data['serial_no'] = $rqd['serial_no'];
+                    $dt_data['non_budget_item'] = !empty($rqd['non_budget_item']) ? $rqd['non_budget_item'] : 0;
 
                     $tax_money = 0;
                     $tax_rate_value = 0;
@@ -17202,7 +17222,7 @@ class Purchase_model extends App_Model
         $rs['taxes_val'] = $tax_val_rs;
         return $rs;
     }
-    public function create_wo_order_row_template($name = '', $item_name = '', $item_description = '', $area = '', $image = '', $quantity = '', $unit_name = '', $unit_price = '', $taxname = '',  $item_code = '', $unit_id = '', $tax_rate = '', $total_money = '', $discount = '', $discount_money = '', $total = '', $into_money = '', $tax_id = '', $tax_value = '', $item_key = '', $is_edit = false, $currency_rate = 1, $to_currency = '', $order_detail = array(), $hide_add_button = false, $sub_groups_pur = '', $serial_no = '')
+    public function create_wo_order_row_template($name = '', $item_name = '', $item_description = '', $area = '', $image = '', $quantity = '', $unit_name = '', $unit_price = '', $taxname = '',  $item_code = '', $unit_id = '', $tax_rate = '', $total_money = '', $discount = '', $discount_money = '', $total = '', $into_money = '', $tax_id = '', $tax_value = '', $item_key = '', $is_edit = false, $currency_rate = 1, $to_currency = '', $order_detail = array(), $hide_add_button = false, $sub_groups_pur = '', $serial_no = '', $non_budget_item = 0)
     {
 
         $this->load->model('invoice_items_model');
@@ -17254,7 +17274,7 @@ class Purchase_model extends App_Model
             $sub_total = 0;
         } else {
             $row .= '<tr class="sortable item">
-                    <td class="dragger"><input type="hidden" class="order" name="' . $name . '[order]"><input type="hidden" class="ids" name="' . $name . '[id]" value="' . $item_key . '"></td>';
+                    <td class="dragger"><input type="hidden" class="order" name="' . $name . '[order]"><input type="hidden" class="ids" name="' . $name . '[id]" value="' . $item_key . '"><input type="hidden" class="non_budget_item" name="' . $name . '[non_budget_item]" value="' . $non_budget_item . '"></td>';
             $name_item_code = $name . '[item_code]';
             $name_item_name = $name . '[item_name]';
             $name_item_description = $name . '[item_description]';
@@ -17340,11 +17360,14 @@ class Purchase_model extends App_Model
             $row .= '<td class="">
             <select id="' . $name_item_name . '" name="' . $name_item_name . '" data-selected-id="' . $item_code . '" class="form-control selectpicker item-select" data-live-search="true" >
                 <option value="">Type at least 3 letters...</option>
-            </select>
-         </td>';
+            </select>';
         } else {
-            $row .= '<td class="">' . $get_selected_item . '</td>';
+            $row .= '<td class="">' . $get_selected_item;
         }
+        if ($non_budget_item == 1) {
+            $row .= '<span>' . _l('this_is_non_budgeted_item') . '</span>';
+        }
+        $row .= '</td>';
 
         $style_description = '';
         if ($is_edit) {
@@ -20845,38 +20868,63 @@ class Purchase_model extends App_Model
                 $pur_detail_amount = 0;
                 $package_amount_class = '';
 
-                if ($module == 'pur_orders') {
-                    $non_break_description = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $item['long_description']));
-                    $this->db->select(db_prefix() . 'pur_order_detail.id as id, ' . db_prefix() . 'pur_order_detail.quantity as quantity, ' . db_prefix() . 'pur_order_detail.total as total');
-                    $this->db->select("
+                $non_break_description = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $item['long_description']));
+                $this->db->select(db_prefix() . 'pur_order_detail.id as id, ' . db_prefix() . 'pur_order_detail.quantity as quantity, ' . db_prefix() . 'pur_order_detail.total as total');
+                $this->db->select("
+                    REPLACE(
                         REPLACE(
                             REPLACE(
-                                REPLACE(
-                                    REPLACE(" . db_prefix() . "pur_order_detail.description, '\r', ''),
-                                '\n', ''),
-                            '<br />', ''),
-                        '<br/>', '') AS non_break_description
-                    ");
-                    $this->db->from(db_prefix() . 'pur_order_detail');
-                    $this->db->join(db_prefix() . 'pur_orders', db_prefix() . 'pur_orders.id = ' . db_prefix() . 'pur_order_detail.pur_order', 'left');
-                    $this->db->where(db_prefix() . 'pur_order_detail.item_code', $item['item_code']);
-                    $this->db->where(db_prefix() . 'pur_orders.estimate', $estimate_id);
-                    $this->db->where(db_prefix() . 'pur_orders.group_pur', $budget_head_id);
-                    $this->db->where(db_prefix() . 'pur_orders.approve_status', 2);
-                    $this->db->where(db_prefix() . 'pur_order_detail.quantity' . ' >', 0, false);
-                    $this->db->where(db_prefix() . 'pur_order_detail.total' . ' >', 0, false);
-                    $this->db->group_by(db_prefix() . 'pur_order_detail.id');
-                    $this->db->having('non_break_description', $non_break_description);
-                    $pur_order_detail_qty_total = $this->db->get()->result_array();
-                    if (!empty($pur_order_detail_qty_total)) {
-                        foreach ($pur_order_detail_qty_total as $srow) {
-                            $pur_detail_quantity += (float)$srow['quantity'];
-                            $pur_detail_amount += (float)$srow['total'];
-                        }
+                                REPLACE(" . db_prefix() . "pur_order_detail.description, '\r', ''),
+                            '\n', ''),
+                        '<br />', ''),
+                    '<br/>', '') AS non_break_description
+                ");
+                $this->db->from(db_prefix() . 'pur_order_detail');
+                $this->db->join(db_prefix() . 'pur_orders', db_prefix() . 'pur_orders.id = ' . db_prefix() . 'pur_order_detail.pur_order', 'left');
+                $this->db->where(db_prefix() . 'pur_order_detail.item_code', $item['item_code']);
+                $this->db->where(db_prefix() . 'pur_orders.estimate', $estimate_id);
+                $this->db->where(db_prefix() . 'pur_orders.group_pur', $budget_head_id);
+                $this->db->where(db_prefix() . 'pur_orders.approve_status', 2);
+                $this->db->where(db_prefix() . 'pur_order_detail.quantity' . ' >', 0, false);
+                $this->db->where(db_prefix() . 'pur_order_detail.total' . ' >', 0, false);
+                $this->db->group_by(db_prefix() . 'pur_order_detail.id');
+                $this->db->having('non_break_description', $non_break_description);
+                $pur_order_detail_qty_total = $this->db->get()->result_array();
+                if (!empty($pur_order_detail_qty_total)) {
+                    foreach ($pur_order_detail_qty_total as $srow) {
+                        $pur_detail_quantity += (float)$srow['quantity'];
+                        $pur_detail_amount += (float)$srow['total'];
                     }
-                    $remaining_qty = $item['package_qty'] - $pur_detail_quantity;
-                    $remaining_qty = number_format($remaining_qty, 2);
                 }
+                $this->db->select(db_prefix() . 'wo_order_detail.id as id, ' . db_prefix() . 'wo_order_detail.quantity as quantity, ' . db_prefix() . 'wo_order_detail.total as total');
+                $this->db->select("
+                    REPLACE(
+                        REPLACE(
+                            REPLACE(
+                                REPLACE(" . db_prefix() . "wo_order_detail.description, '\r', ''),
+                            '\n', ''),
+                        '<br />', ''),
+                    '<br/>', '') AS non_break_description
+                ");
+                $this->db->from(db_prefix() . 'wo_order_detail');
+                $this->db->join(db_prefix() . 'wo_orders', db_prefix() . 'wo_orders.id = ' . db_prefix() . 'wo_order_detail.wo_order', 'left');
+                $this->db->where(db_prefix() . 'wo_order_detail.item_code', $item['item_code']);
+                $this->db->where(db_prefix() . 'wo_orders.estimate', $estimate_id);
+                $this->db->where(db_prefix() . 'wo_orders.group_pur', $budget_head_id);
+                $this->db->where(db_prefix() . 'wo_orders.approve_status', 2);
+                $this->db->where(db_prefix() . 'wo_order_detail.quantity' . ' >', 0, false);
+                $this->db->where(db_prefix() . 'wo_order_detail.total' . ' >', 0, false);
+                $this->db->group_by(db_prefix() . 'wo_order_detail.id');
+                $this->db->having('non_break_description', $non_break_description);
+                $wo_order_detail_qty_total = $this->db->get()->result_array();
+                if (!empty($wo_order_detail_qty_total)) {
+                    foreach ($wo_order_detail_qty_total as $srow) {
+                        $pur_detail_quantity += (float)$srow['quantity'];
+                        $pur_detail_amount += (float)$srow['total'];
+                    }
+                }
+                $remaining_qty = $item['package_qty'] - $pur_detail_quantity;
+                $remaining_qty = number_format($remaining_qty, 2);
                 if ($pur_detail_amount > $package_amount) {
                     $package_amount_class = 'remaining_qty_red_class';
                 }
