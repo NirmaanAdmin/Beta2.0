@@ -159,15 +159,18 @@ foreach ($rResult as $aRow) {
             $_data = '';
          }
       } elseif ($column == 3) {
-         $_data = '<div class="btn-group mright5">
-            <a href="#" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" >
-               Book Order <span class="caret"></span>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-right">
-               <li class="hidden-xs"><a href="' . admin_url('purchase/pur_order?package='.$aRow['id'].'') . '" target="_blank">Purchase Order</a></li>
-               <li class="hidden-xs"><a href="' . admin_url('purchase/wo_order?package='.$aRow['id'].'') . '" target="_blank">Work Order</a></li>
-            </ul>
-         </div>';
+         $_data = '';
+         if ($aRow['awarded_value'] == 0 || $aRow['pending_value_in_package'] > 0) {
+            $_data = '<div class="btn-group mright5">
+               <a href="#" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" >
+                  Book Order <span class="caret"></span>
+               </a>
+               <ul class="dropdown-menu dropdown-menu-right">
+                  <li class="hidden-xs"><a href="' . admin_url('purchase/pur_order?package='.$aRow['id'].'') . '" target="_blank">Purchase Order</a></li>
+                  <li class="hidden-xs"><a href="' . admin_url('purchase/wo_order?package='.$aRow['id'].'') . '" target="_blank">Work Order</a></li>
+               </ul>
+            </div>';
+         }
       } else {
          $_data = '';
       }
