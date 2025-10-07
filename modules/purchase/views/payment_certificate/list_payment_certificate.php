@@ -46,6 +46,9 @@ $module_name = 'payment_certificate'; ?>
                               <?php echo _l('new_payment_certificate'); ?>
                               </a>
                            <?php } ?>
+                           <a href="<?php echo admin_url('purchase/activity_log?module=pc'); ?>" class="btn btn-info pull-left mright10 display-block" target="_blank">
+                           <?php echo _l('activity_log'); ?>
+                           </a>
                            <button class="btn btn-info display-block" type="button" data-toggle="collapse" data-target="#pc-charts-section" aria-expanded="true" aria-controls="pc-charts-section">
                               <?php echo _l('Payment Certificate Charts'); ?> <i class="fa fa-chevron-down toggle-icon"></i>
                            </button>

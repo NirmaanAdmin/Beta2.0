@@ -5124,3 +5124,71 @@ function tender_name_by_id($tender_id)
 
     return $tender ? $tender->pur_tn_name : '';
 }
+
+function add_pc_activity_log($id)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $payment_certificate = $CI->db->get(db_prefix() . 'payment_certificate')->row();
+        if(!empty($payment_certificate)) {
+            $description = "Payment certificate <b>".$payment_certificate->pc_number."</b> has been created.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'pc',
+                'rel_id' => $id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
+
+function update_pc_activity_log($id, $field, $old_value, $new_value)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $payment_certificate = $CI->db->get(db_prefix() . 'payment_certificate')->row();
+        if(!empty($payment_certificate)) {
+            $old_value = !empty($old_value) ? $old_value : 'None';
+            $new_value = !empty($new_value) ? $new_value : 'None';
+            $description = "".$field." field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in payment certificate <b>".$payment_certificate->pc_number."</b>.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'pc',
+                'rel_id' => $id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
+
+function remove_pc_activity_log($id)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $payment_certificate = $CI->db->get(db_prefix() . 'payment_certificate')->row();
+        if(!empty($payment_certificate)) {
+            $description = "Payment certificate <b>".$payment_certificate->pc_number."</b> has been deleted.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'pc',
+                'rel_id' => $id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}

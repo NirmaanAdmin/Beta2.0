@@ -18479,6 +18479,7 @@ class Purchase_model extends App_Model
                 'rel_type' => isset($data['wo_id']) ? 'wo_payment_certificate' : 'po_payment_certificate',
             ]);
         }
+        add_pc_activity_log($insert_id);
         return true;
     }
 
@@ -18538,6 +18539,7 @@ class Purchase_model extends App_Model
 
     public function delete_payment_certificate($id)
     {
+        remove_pc_activity_log($id);
         $this->db->where('rel_id', $id);
         $this->db->delete('tblpayment_certificate_activity');
 
@@ -24111,6 +24113,7 @@ class Purchase_model extends App_Model
         if(isset($save_and_send)) {
             $this->send_payment_certificate_approve(['rel_id' => $insert_id, 'rel_type' => 'ot_payment_certificate']);
         }
+        add_pc_activity_log($insert_id);
         return true;
     }
 

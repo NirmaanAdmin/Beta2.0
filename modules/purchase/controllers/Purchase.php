@@ -16556,6 +16556,8 @@ class purchase extends AdminController
         } else {
             $responsible_persons = NULL;
         }
+        $payment_certificate = $this->purchase_model->get_payment_certificate($id);
+        update_pc_activity_log($id, _l('responsible_person'), get_multiple_staff_names($payment_certificate->responsible_person), get_multiple_staff_names($responsible_persons));
         $this->db->where('id', $id);
         $success = $this->db->update('tblpayment_certificate', [
             'responsible_person' => $responsible_persons
