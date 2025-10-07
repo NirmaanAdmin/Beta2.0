@@ -4944,6 +4944,7 @@ function add_vbt_activity_log($id, $by_module = '')
             $description = "Vendor bill <b>".$pur_invoices->invoice_number."</b> has been created<b>".$by_module."</b>.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'vbt',
+                'rel_id' => $id,
                 'description' => $description,
                 'date' => date('Y-m-d H:i:s'),
                 'staffid' => get_staff_user_id(),
@@ -4967,6 +4968,7 @@ function update_vbt_activity_log($id, $field, $old_value, $new_value)
             $description = "".$field." field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in vendor bill <b>".$pur_invoices->invoice_number."</b>.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'vbt',
+                'rel_id' => $id,
                 'description' => $description,
                 'date' => date('Y-m-d H:i:s'),
                 'staffid' => get_staff_user_id(),
@@ -4988,6 +4990,7 @@ function remove_vbt_activity_log($id)
             $description = "Vendor bill <b>".$pur_invoices->invoice_number."</b> has been deleted.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'vbt',
+                'rel_id' => $id,
                 'description' => $description,
                 'date' => date('Y-m-d H:i:s'),
                 'staffid' => get_staff_user_id(),
@@ -5010,6 +5013,7 @@ function add_bulk_assign_vbt_activity_log($id, $field, $new_value)
             $description = "".$field." field is updated to <b>".$new_value."</b> in vendor bill <b>".$pur_invoices->invoice_number."</b>.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'vbt',
+                'rel_id' => $id,
                 'description' => $description,
                 'date' => date('Y-m-d H:i:s'),
                 'staffid' => get_staff_user_id(),
