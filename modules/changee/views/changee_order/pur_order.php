@@ -716,6 +716,7 @@
                   }
                 }
                 $formatted_date = getOrdinalSuffix($day) . " " . $month . " " . $year;
+                $default_project = get_default_project();
                 if (!isset($pur_order) && $pur_order->order_summary == '') {
                   $value = '<strong>CHANGE ORDER</strong><br><br>
 
@@ -723,7 +724,7 @@
                 <span class="vendor_address"></span><br>
                 <span class="vendor_city"></span><span class="vendor_state"></span><span class="vendor_pincode"></span></span><span class="vendor_country"></span><br><br>
 
-                <strong>C.O. Number:</strong> BI/JAMNAGAR/24-25/' . str_pad($next_number, 5, '0', STR_PAD_LEFT) . '<br>
+                <strong>C.O. Number:</strong> BI/'.($default_project == 8 ? 'ALIBAUG' : 'JAMNAGAR').'/24-25/' . str_pad($next_number, 5, '0', STR_PAD_LEFT) . '<br>
                 <strong>C.O. Date:</strong> <span class="order_full_date">' . date("d-M-y") . '</span><br>
                 <strong>Rev. No.:</strong><br>
                 <strong>Rev. Date:</strong><br><br>

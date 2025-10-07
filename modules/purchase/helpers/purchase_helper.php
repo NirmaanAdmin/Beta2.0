@@ -3709,10 +3709,11 @@ function get_sub_head_name_by_id($id)
 function get_by_deafult_order_summary()
 {
     $next_number = get_purchase_option('next_wo_number');
+    $default_project = get_default_project();
     $val = '<p class="p1"></p>
 <p class="p2" style="text-align: center;"><span class="s1"><b>WORK ORDER</b></span></p>
 <p class="p1"><b><span class="Apple-converted-space">                                                                                                            </span></b></p>
-<p class="p3">Ref: Bl/JAMNAGR/24-25/' . str_pad($next_number, 5, '0', STR_PAD_LEFT) . ' <strong><br>Dated: <span class="order_full_date">' . date("d-M-Y") . '</span></strong></p>
+<p class="p3">Ref: Bl/'.($default_project == 8 ? 'ALIBAUG' : 'JAMNAGAR').'/24-25/' . str_pad($next_number, 5, '0', STR_PAD_LEFT) . ' <strong><br>Dated: <span class="order_full_date">' . date("d-M-Y") . '</span></strong></p>
 <p class="p5">To,<b></b></p>
 <p class="p6"><b>M/s. <span class="vendor_name"></span><br></b><span class="vendor_address"></span><br><span class="vendor_city"></span><span class="vendor_state"></span><span class="vendor_pincode"></span></span><span class="vendor_country"></span><br>Email:<span class="s2"> </span><span class="s1"><span class="vendor_contact_email"></span></span> <br>Contact - <span class="vendor_contact_phone"><br>GST Registration no- <span class="vendor_gst"></span><br>Bank Details:<span class="vendor_bank_details"></span></p>
 <p class="p5">Dear Mr. <span class="vendor_name"></span>,</p>
