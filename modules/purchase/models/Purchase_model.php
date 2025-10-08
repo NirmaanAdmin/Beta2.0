@@ -24640,6 +24640,8 @@ class Purchase_model extends App_Model
             $dt_data = [
                 'responsible_person' => !empty($data['responsible_person']) ? implode(',', $data['responsible_person']) : NULL,
             ];
+            $payment_certificate = $this->purchase_model->get_payment_certificate($data['id']);
+            update_pc_activity_log($data['id'], _l('responsible_person'), get_multiple_staff_names($payment_certificate->responsible_person), get_multiple_staff_names($dt_data['responsible_person']));
             $this->db->where('id', $data['id']);
             $this->db->update(db_prefix() . 'payment_certificate', $dt_data);
 

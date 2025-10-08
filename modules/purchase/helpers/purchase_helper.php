@@ -5192,3 +5192,27 @@ function remove_pc_activity_log($id)
     }
     return true;
 }
+
+function add_converted_to_vendor_bill_pc_activity_log($id)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $payment_certificate = $CI->db->get(db_prefix() . 'payment_certificate')->row();
+        $CI->db->where('id', $payment_certificate->pur_invoice_id);
+        $pur_invoices = $CI->db->get(db_prefix() . 'pur_invoices')->row();
+        if(!empty($payment_certificate)) {
+            $description = "Payment certificate <b>".$payment_certificate->pc_number."</b> has been converted to vendor bill <b>".$pur_invoices->invoice_number."</b>.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'pc',
+                'rel_id' => $id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}

@@ -13239,6 +13239,7 @@ class purchase extends AdminController
         $this->db->update(db_prefix() . 'payment_certificate', ['pur_invoice_id' => $insert_id]);
         $this->purchase_model->copy_pc_files_to_vbt($id, $insert_id);
         add_vbt_activity_log($insert_id, ' by payment certificate');
+        add_converted_to_vendor_bill_pc_activity_log($id);
         if($redirect) {
             set_alert('success', _l('purchase_invoice') . ' ' . _l('added_successfully'));
             redirect(admin_url('purchase/pur_invoice/' . $insert_id));
