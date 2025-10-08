@@ -20019,6 +20019,7 @@ class Purchase_model extends App_Model
                 $data['filetype']  = $file['filetype'];
                 $data['position']  = $position;
                 $this->db->insert(db_prefix() . 'payment_certificate_files', $data);
+                add_pc_attachment_activity_log($id, $file['file_name'], true);
             }
         }
         return true;
@@ -20065,6 +20066,7 @@ class Purchase_model extends App_Model
             if (count($other_attachments) == 0) {
                 delete_dir(get_upload_path_by_type('purchase') . $rel_type . '/' . $attachment->rel_id);
             }
+            add_pc_attachment_activity_log($attachment->rel_id, $attachment->file_name, false);
         }
 
         return $deleted;
