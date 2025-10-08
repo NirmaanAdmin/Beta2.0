@@ -16789,4 +16789,32 @@ class purchase extends AdminController
         $data['tender_data'] = $this->purchase_model->get_tender_document_detail($tender_id);
         $this->load->view('purchase_tender/latter_of_agreement', $data);
     }
+     public function view_appendix_to_contract($tender_id){
+        $data['title'] = _l('Appendix to Contract');
+        $data['tender_id'] = $tender_id;
+        $data['tender_data'] = $this->purchase_model->get_tender_document_detail($tender_id);
+        $this->load->view('purchase_tender/appendix_to_contract', $data);
+    }
+
+     public function view_particular_conditions_of_contract($tender_id){
+        $data['title'] = _l('Particular Conditions of Contract');
+        $data['tender_id'] = $tender_id;
+        $data['tender_data'] = $this->purchase_model->get_tender_document_detail($tender_id);
+        $this->load->view('purchase_tender/particular_conditions_of_contract', $data);
+    }
+
+
+     public function view_contractor_general_obligations($tender_id){
+        $data['title'] = _l('Contractor General Obligations');
+        $data['tender_id'] = $tender_id;
+        $data['tender_data'] = $this->purchase_model->get_tender_document_detail($tender_id);
+        $this->load->view('purchase_tender/contractor_general_obligations', $data);
+    }
+
+    public function view_fidic_condition_of_contract($tender_id){
+        $data['title'] = _l('FIDIC Condition of Contract');
+        $data['tender_id'] = $tender_id;
+        $data['tender_data'] = $this->purchase_model->get_tender_document_detail($tender_id);
+        $this->load->view('purchase_tender/fidic_condition_of_contract', $data);
+    }
 }

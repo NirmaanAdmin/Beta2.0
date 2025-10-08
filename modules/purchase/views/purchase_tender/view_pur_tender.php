@@ -566,11 +566,11 @@
                 <div role="tabpanel" class="tab-pane  <?php if ($this->input->get('tab') == 'tender_document') {
                                                         echo 'active';
                                                       } ?>" id="tender_document">
-                 
 
-                    <a href="javascript:void(0);" class="btn btn-primary pull-left mright5" onclick="add_document(); return false;">
-                      <i class="fa-regular fa-plus tw-mr-1"></i>Add Document
-                    </a>
+
+                  <a href="javascript:void(0);" class="btn btn-primary pull-left mright5" onclick="add_document(); return false;">
+                    <i class="fa-regular fa-plus tw-mr-1"></i>Add Document
+                  </a>
 
                   <?php if ($tender_document_detail) { ?>
                     <table border="1" style="width: 100%; border-collapse: collapse;">
@@ -585,28 +585,50 @@
                       <tbody>
                         <?php
                         $counter = 1;
-                        foreach ($tender_document_detail as $value) { ?>
+                        $document_types = [
+                          "Letter Of Agreement" => "view_latter_of_agreement",
+                          "Appendix to Contract" => "view_appendix_to_contract",
+                          "Particular Conditions of Contract" => "view_particular_conditions_of_contract",
+                          "Contractor General Obligations" => "view_contractor_general_obligations",
+                          "FIDIC Condition of Contract" => "view_fidic_condition_of_contract",
+                          "Environmental Health & Safety Manual" => "view_environmental_health_safety_manual"
+                        ];
+
+                        foreach ($document_types as $doc_type => $view_function) { ?>
                           <tr>
                             <td style="padding: 8px;"><?php echo $counter++; ?></td>
-                            <td style="padding: 8px;"><?php echo $value['document_name'] ?? 'Letter Of Agreement'; ?></td>
-                            <td style="padding: 8px;"><?php echo date('d M, Y', strtotime($value['date'])) ?? 'N/A'; ?></td>
+                            <td style="padding: 8px;"><?php echo $doc_type; ?></td>
+                            <td style="padding: 8px;">
+                              <?php
+                              echo date('d M, Y', strtotime($tender_document_detail[0]['date']));
+                              ?>
+                            </td>
                             <td style="padding: 8px;">
                               <div class="btn-group">
-                                <a href="<?php echo admin_url('purchase/view_latter_of_agreement/' . $value['id']); ?>" class="btn btn-default btn-icon" style="padding: 10px !important"><i class="fa fa-pencil-square"></i></a>
-                                <a href="javascript:void(0)" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding: 7px !important"><i class="fa fa-file-pdf"></i><?php if (is_mobile()) {
-                                                                                                                                                                                                                                        echo ' PDF';
-                                                                                                                                                                                                                                      } ?> <span class="caret"></span></a>
+                                <a href="<?php echo admin_url('purchase/' . $view_function . '/'.$pur_tender->id); ?>" class="btn btn-default btn-icon" style="padding: 10px !important">
+                                  <i class="fa fa-pencil-square"></i>
+                                </a>
+                                <a href="javascript:void(0)" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding: 7px !important">
+                                  <i class="fa fa-file-pdf"></i>
+                                  <?php if (is_mobile()) {
+                                    echo ' PDF';
+                                  } ?>
+                                  <span class="caret"></span>
+                                </a>
                                 <ul class="dropdown-menu dropdown-menu-right">
-                                  <li class="hidden-xs"><a href="<?php echo admin_url('purchase/agreement_of_sale_pdf/' . $value['id'] . '?output_type=I'); ?>"><?php echo _l('view_pdf'); ?></a></li>
-                                  <li class="hidden-xs"><a href="<?php echo admin_url('purchase/aggrement_of_sale_pdf/' . $value['id'] . '?output_type=I'); ?>" target="_blank"><?php echo _l('view_pdf_in_new_window'); ?></a></li>
-                                  <li><a href="<?php echo admin_url('purchase/aggrement_of_sale_pdf/' . $value['id']); ?>"><?php echo _l('download'); ?></a></li>
+                                  <li class="hidden-xs">
+                                    <a href="javascript:void(0)"><?php echo _l('view_pdf'); ?></a>
+                                  </li>
+                                  <li class="hidden-xs">
+                                    <a href="javascript:void(0)" target="_blank"><?php echo _l('view_pdf_in_new_window'); ?></a>
+                                  </li>
                                   <li>
-                                    <a href="<?php echo admin_url('purchase/sale_deed_pdf/' . $value['id'] . '?print=true'); ?>" target="_blank">
-                                      <?php echo _l('print'); ?>
-                                    </a>
+                                    <a href="javascript:void(0)"><?php echo _l('download'); ?></a>
+                                  </li>
+                                  <li>
+                                    <a href="javascript:void(0)" target="_blank"><?php echo _l('print'); ?></a>
                                   </li>
                                 </ul>
-
                               </div>
                             </td>
                           </tr>
