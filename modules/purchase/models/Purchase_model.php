@@ -18505,6 +18505,7 @@ class Purchase_model extends App_Model
             $save_and_send = $data['save_and_send'];
             unset($data['save_and_send']);
         }
+        update_all_pc_fields_activity_log($id, $data);
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'payment_certificate', $data);
         $this->log_pay_cer_activity($id, 'pay_cert_activity_updated');
@@ -24159,6 +24160,7 @@ class Purchase_model extends App_Model
             unset($data['save_and_send']);
         }
         $data['vendor'] = !empty($data['vendor']) ? $data['vendor'] : NULL;
+        update_all_pc_fields_activity_log($id, $data);
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'payment_certificate', $data);
         $this->log_pay_cer_activity($id, 'pay_cert_activity_updated');

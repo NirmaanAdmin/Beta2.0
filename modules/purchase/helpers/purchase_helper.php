@@ -5269,3 +5269,126 @@ function add_pc_status_activity_log($id)
     }
     return true;
 }
+
+function update_all_pc_fields_activity_log($id, $new_data)
+{
+    $CI = &get_instance();
+    $CI->load->model('currencies_model');
+    $base_currency = $CI->currencies_model->get_base_currency();
+    if (empty($id)) {
+        return false;
+    }
+    $payment_certificate = $CI->db->where('id', $id)
+        ->get(db_prefix() . 'payment_certificate')
+        ->row();
+    if (!$payment_certificate) {
+        return false;
+    }
+    $old_data = (array)$payment_certificate;
+    $normalize = function ($value) {
+        $value = trim((string)$value);
+        if (in_array(strtolower($value), ['null', 'none', 'nil', 'n/a', '-', '--'])) {
+            return '';
+        }
+        if ($value === '0000-00-00') {
+            return '';
+        }
+        if (is_numeric($value)) {
+            $num = (float)$value;
+            return ($num == 0.0) ? '' : $num;
+        }
+        return strtolower($value);
+    };
+    $norm_old = array_map($normalize, $old_data);
+    $norm_new = array_map($normalize, $new_data);
+    $changes = array_diff_assoc($norm_new, $norm_old);
+    if (empty($changes)) {
+        return true;
+    }
+    $field_map = [
+        'pay_cert_options' => _l('type'),
+        'location' => _l('Location'),
+        'invoice_ref' => _l('invoice_ref'),
+        'bill_period_upto' => _l('bill_period_upto'),
+        'bill_received_on' => _l('bill_received_on'),
+        'invoice_date' => _l('invoice_date'),
+        'po_previous' => _l('previous'),
+        'po_this_bill' => _l('this_bill'),
+        'a1_remarks' => _l('A1 Remarks'),
+        'a_remarks' => _l('A Remarks'),
+        'pay_cert_c1_1' => _l('C1 Contract Amount'),
+        'pay_cert_c1_2' => _l('C1 Previous'),
+        'pay_cert_c1_3' => _l('C1 This Bill'),
+        'c1_remarks' => _l('C1 Remarks'),
+        'pay_cert_c2_1' => _l('C2 Contract Amount'),
+        'pay_cert_c2_2' => _l('C2 Previous'),
+        'pay_cert_c2_3' => _l('C2 This Bill'),
+        'c2_remarks' => _l('C2 Remarks'),
+        'd_remarks' => _l('D Remarks'),
+        'ret_fund_1' => _l('E1 Contract Amount'),
+        'ret_fund_2' => _l('E1 Previous'),
+        'ret_fund_3' => _l('E1 This Bill'),
+        'e1_remarks' => _l('E1 Remarks'),
+        'works_exe_a_1' => _l('E2 Contract Amount'),
+        'works_exe_a_2' => _l('E2 Previous'),
+        'works_exe_a_3' => _l('E2 This Bill'),
+        'e2_remarks' => _l('E2 Remarks'),
+        'f_remarks' => _l('F Remarks'),
+        'less_1' => _l('G1 Contract Amount'),
+        'less_2' => _l('G1 Previous'),
+        'less_3' => _l('G1 This Bill'),
+        'g1_remarks' => _l('G1 Remarks'),
+        'less_ah_1' => _l('G2 Contract Amount'),
+        'less_ah_2' => _l('G2 Previous'),
+        'less_ah_3' => _l('G2 This Bill'),
+        'g2_remarks' => _l('G2 Remarks'),
+        'less_aht_1' => _l('G3 Contract Amount'),
+        'less_aht_2' => _l('G3 Previous'),
+        'less_aht_3' => _l('G3 This Bill'),
+        'g3_remarks' => _l('G3 Remarks'),
+        'h_remarks' => _l('H Remarks'),
+        'cgst_prev_bill' => _l('I1 Previous'),
+        'cgst_this_bill' => _l('I1 This Bill'),
+        'i1_remarks' => _l('I1 Remarks'),
+        'sgst_prev_bill' => _l('I2 Previous'),
+        'sgst_this_bill' => _l('I2 This Bill'),
+        'i2_remarks' => _l('I2 Remarks'),
+        'igst_prev_bill' => _l('I3 Previous'),
+        'igst_this_bill' => _l('I3 This Bill'),
+        'i3_remarks' => _l('I3 Remarks'),
+        'labour_cess_1' => _l('I4 Contract Amount'),
+        'labour_cess_2' => _l('I4 Previous'),
+        'labour_cess_3' => _l('I4 This Bill'),
+        'i4_remarks' => _l('I4 Remarks'),
+        'i_remarks' => _l('I Remarks'),
+        'j_remarks' => _l('J Remarks'),
+    ];
+    foreach ($changes as $field => $dummy) {
+        if (!isset($field_map[$field])) {
+            continue;
+        }
+        $old_value = $old_data[$field] ?? '';
+        $new_value = $new_data[$field] ?? '';
+        if ($field === 'pay_cert_options') {
+            $opts = [
+                'interim' => _l('option_interim'),
+                'ad_hoc'  => _l('option_ad_hoc'),
+                'final'   => _l('option_final'),
+            ];
+            $old_value = $opts[$old_value] ?? '';
+            $new_value = $opts[$new_value] ?? '';
+        }
+        if (preg_match('/(_1|_2|_3|prev_bill|this_bill)$/', $field)) {
+            $old_value = app_format_money($old_value, $base_currency->symbol);
+            $new_value = app_format_money($new_value, $base_currency->symbol);
+        }
+        $c_old = strtolower(strip_tags($old_value));
+        $c_new = strtolower(strip_tags($new_value));
+        if (in_array($c_old, ['₹0.00', '0', '0.00', '', 'none'])
+            && in_array($c_new, ['₹0.00', '0', '0.00', '', 'none'])) {
+            continue;
+        }
+        update_pc_activity_log($id, $field_map[$field], $old_value, $new_value);
+    }
+    return true;
+}
