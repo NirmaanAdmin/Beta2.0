@@ -19058,6 +19058,8 @@ class Purchase_model extends App_Model
             $row['rel_type'] = $data['rel_type'];
             $row['sender'] = $sender;
             $this->db->insert('tblpayment_certificate_details', $row);
+            $payment_certificate_details_id = $this->db->insert_id();
+            add_pc_status_activity_log($payment_certificate_details_id);
 
             $this->db->where('rel_type', $data['rel_type']);
             $this->db->where('rel_id', $data['rel_id']);
@@ -19154,6 +19156,7 @@ class Purchase_model extends App_Model
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'payment_certificate_details', $data);
         if ($this->db->affected_rows() > 0) {
+            add_pc_status_activity_log($id);
             return true;
         }
         return false;

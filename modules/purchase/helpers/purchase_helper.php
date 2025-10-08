@@ -5200,9 +5200,9 @@ function add_converted_to_vendor_bill_pc_activity_log($id)
     if(!empty($id)) {
         $CI->db->where('id', $id);
         $payment_certificate = $CI->db->get(db_prefix() . 'payment_certificate')->row();
-        $CI->db->where('id', $payment_certificate->pur_invoice_id);
-        $pur_invoices = $CI->db->get(db_prefix() . 'pur_invoices')->row();
         if(!empty($payment_certificate)) {
+            $CI->db->where('id', $payment_certificate->pur_invoice_id);
+            $pur_invoices = $CI->db->get(db_prefix() . 'pur_invoices')->row();
             $description = "Payment certificate <b>".$payment_certificate->pc_number."</b> has been converted to vendor bill <b>".$pur_invoices->invoice_number."</b>.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'pc',
@@ -5230,6 +5230,36 @@ function add_pc_attachment_activity_log($id, $file_name, $is_create = true)
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'pc',
                 'rel_id' => $id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
+
+function add_pc_status_activity_log($id)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $payment_certificate_details = $CI->db->get(db_prefix() . 'payment_certificate_details')->row();
+        if(!empty($payment_certificate_details)) {
+            $CI->db->where('id', $payment_certificate_details->rel_id);
+            $payment_certificate = $CI->db->get(db_prefix() . 'payment_certificate')->row();
+            if(empty($payment_certificate_details->approve)) {
+                $description = "An approval request has been created for payment certificate <b>".$payment_certificate->pc_number."</b> by <b>".get_last_action_full_name($payment_certificate_details->sender)."</b>.";
+            } else if($payment_certificate_details->approve == 2) {
+                $description = "Payment certificate <b>".$payment_certificate->pc_number."</b> has been approved by <b>".get_last_action_full_name($payment_certificate_details->staff_approve)."</b>.";
+            } else if($payment_certificate_details->approve == 3) {
+                $description = "Payment certificate <b>".$payment_certificate->pc_number."</b> has been approved by <b>".get_last_action_full_name($payment_certificate_details->staff_approve)."</b>.";
+            }
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'pc',
+                'rel_id' => $payment_certificate_details->rel_id,
                 'description' => $description,
                 'date' => date('Y-m-d H:i:s'),
                 'staffid' => get_staff_user_id(),
