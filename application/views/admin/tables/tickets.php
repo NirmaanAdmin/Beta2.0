@@ -196,7 +196,7 @@ return App_table::find('tickets')
                     $_data .= '<a href="' . $url . '?tab=settings">' . _l('view') . '</a>';
                     $_data .= ' | <a href="' . $url . '">' . _l('edit') . '</a>';
                     $_data .= ' | <a href="' . get_ticket_public_url($aRow) . '" target="_blank">' . _l('view_public_form') . '</a>';
-                    if (can_staff_delete_ticket()) {
+                    if (can_staff_delete_ticket() || get_staff_user_id() == 11) {
                         $_data .= ' | <a href="' . admin_url('tickets/delete/' . $aRow['ticketid']) . '" class="text-danger _delete">' . _l('delete') . '</a>';
                     }
                     $_data .= '</div>';

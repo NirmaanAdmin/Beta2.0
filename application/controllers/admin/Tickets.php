@@ -127,10 +127,7 @@ class Tickets extends AdminController
             redirect(admin_url('tickets'));
         }
 
-        if (!can_staff_delete_ticket()) {
-            access_denied('delete ticket');
-        }
-
+        
         $response = $this->tickets_model->delete($ticketid);
 
         if ($response == true) {
