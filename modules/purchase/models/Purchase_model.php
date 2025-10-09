@@ -16739,6 +16739,19 @@ class Purchase_model extends App_Model
             unset($data['custom_fields']);
         }
 
+        if (isset($data['cost_control_remarks'])) {
+            $cost_control_remarks = $data['cost_control_remarks'];
+            unset($data['cost_control_remarks']);
+        }
+
+        if (isset($data['cost_sub_head'])) {
+            unset($data['cost_sub_head']);
+        }
+
+        if (isset($data['non_budget_item'])) {
+            unset($data['non_budget_item']);
+        }
+
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'wo_orders', $data);
 
