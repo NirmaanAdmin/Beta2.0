@@ -125,122 +125,77 @@
                         <div class="panel-body">
                             <div class='doc'>
                                 <h1>Contractor’s General Obligations</h1>
-                                <table class='doc-table'>
+                                <table border="1" cellspacing="0" cellpadding="6" style="border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; font-size: 13px;">
                                     <tr>
-                                        <td>DOCUMENT CONTROL SHEET</td>
-                                        <td>DOCUMENT CONTROL SHEET</td>
-                                        <td>DOCUMENT CONTROL SHEET</td>
-                                        <td>DOCUMENT CONTROL SHEET</td>
-                                        <td>DOCUMENT CONTROL SHEET</td>
-                                        <td>DOCUMENT CONTROL SHEET</td>
+                                        <th colspan="2" style="text-align:left;">DOCUMENT CONTROL SHEET</th>
                                     </tr>
+
                                     <tr>
-                                        <td>QMS Reference</td>
-                                        <td>QMS Reference</td>
-                                        <td>QMS Reference</td>
-                                        <td>QMS-PMC-TDO-CGO-UGFID-R0</td>
-                                        <td>QMS-PMC-TDO-CGO-UGFID-R0</td>
+                                        <th style="width:40%;">QMS Reference</th>
                                         <td>QMS-PMC-TDO-CGO-UGFID-R0</td>
                                     </tr>
                                     <tr>
-                                        <td>Document number</td>
-                                        <td>Document number</td>
-                                        <td>Document number</td>
-                                        <td>BGJ-LOA-UGFID-017-R0</td>
-                                        <td>BGJ-LOA-UGFID-017-R0</td>
+                                        <th>Document number</th>
                                         <td>BGJ-LOA-UGFID-017-R0</td>
                                     </tr>
                                     <tr>
-                                        <td>Document title</td>
-                                        <td>Document title</td>
-                                        <td>Document title</td>
-                                        <td>Contractor’s General Obligations</td>
-                                        <td>Contractor’s General Obligations</td>
-                                        <td>Contractor’s General Obligations</td>
+                                        <th>Document title</th>
+                                        <td>Contractor's General Obligations</td>
                                     </tr>
                                     <tr>
-                                        <td>Document purpose</td>
-                                        <td>Document purpose</td>
-                                        <td>Document purpose</td>
-                                        <td>Issued for Tenders</td>
-                                        <td>Issued for Tenders</td>
+                                        <th>Document purpose</th>
                                         <td>Issued for Tenders</td>
                                     </tr>
                                     <tr>
-                                        <td>Document status</td>
-                                        <td>Document status</td>
-                                        <td>Document status</td>
-                                        <td>Approved</td>
-                                        <td>Approved</td>
+                                        <th>Document status</th>
                                         <td>Approved</td>
                                     </tr>
                                     <tr>
-                                        <td>No. of pages (including this page)</td>
-                                        <td>No. of pages (including this page)</td>
-                                        <td>No. of pages (including this page)</td>
-                                        <td>34</td>
-                                        <td>34</td>
+                                        <th>No. of pages (including this page)</th>
                                         <td>34</td>
                                     </tr>
+
+                                    <!-- Revision Control -->
                                     <tr>
-                                        <td>Revision Control</td>
-                                        <td>Revision Control</td>
-                                        <td>Revision Control</td>
-                                        <td>Revision Control</td>
-                                        <td>Revision Control</td>
-                                        <td>Revision Control</td>
+                                        <th colspan="2" style="text-align:left;">Revision Control</th>
                                     </tr>
                                     <tr>
-                                        <td>Rev. no.</td>
-                                        <td>Prepared by</td>
-                                        <td>Approved by</td>
-                                        <td>Approved by</td>
-                                        <td>Effective from</td>
-                                        <td>Effective to</td>
+                                        <td colspan="2">
+                                            <table border="1" cellspacing="0" cellpadding="5" style="border-collapse: collapse; width: 100%; font-size: 13px;">
+                                                <tr>
+                                                    <th style="width:15%;">Rev. no.</th>
+                                                    <th style="width:25%;">Prepared by</th>
+                                                    <th style="width:25%;">Approved by</th>
+                                                    <th style="width:20%;">Effective from</th>
+                                                    <th style="width:15%;">Effective to</th>
+                                                </tr>
+                                                <tr>
+                                                    <td>R0</td>
+                                                    <td></td>
+                                                    <td>Abhishek Intodia</td>
+                                                    <td>01 Oct 2025</td>
+                                                    <td>-</td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Revision History -->
+                                    <tr>
+                                        <th colspan="2" style="text-align:left;">Revision History</th>
                                     </tr>
                                     <tr>
-                                        <td>R0</td>
-                                        <td></td>
-                                        <td>Abhishek Intodia</td>
-                                        <td>Abhishek Intodia</td>
-                                        <td>01 Oct 2025</td>
-                                        <td>-</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Revision History</td>
-                                        <td>Revision History</td>
-                                        <td>Revision History</td>
-                                        <td>Revision History</td>
-                                        <td>Revision History</td>
-                                        <td>Revision History</td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
+                                        <td colspan="2" style="text-align:center; font-style: italic; color:#7f8c8d;">
+                                            No revision history available
+                                        </td>
                                     </tr>
                                 </table>
+
+
                                 <div class='top-toc'>
                                     <details open>
                                         <summary><strong>Table of Contents</strong></summary>
                                         <ul>
-                                            <li><a href='#alibaug-guest-house-maharastra'>ALIBAUG GUEST HOUSE, MAHARASTRA</a></li>
-                                            <li><a href='#contractor-s-general-obligations'>CONTRACTOR’S GENERAL OBLIGATIONS</a></li>
-                                            <li><a href='#for'>FOR</a></li>
-                                            <li><a href='#interior-works-works'>INTERIOR WORKS WORKS</a></li>
-                                            <li><a href='#contractor-s-general-obligations'>CONTRACTOR’S GENERAL OBLIGATIONS</a></li>
-                                            <li><a href='#table-of-contents'>TABLE OF CONTENTS</a></li>
                                             <li><a href='#general'>GENERAL</a></li>
                                             <li><a href='#the-site'>THE SITE</a></li>
                                             <li><a href='#site-location'>Site Location</a></li>
@@ -1823,7 +1778,7 @@
         </div>
     </div>
 
-    <?php init_tail(); ?>
+   <?php init_tail(); ?>
 </body>
 
-</html>
+</html> 

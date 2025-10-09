@@ -16817,4 +16817,11 @@ class purchase extends AdminController
         $data['tender_data'] = $this->purchase_model->get_tender_document_detail($tender_id);
         $this->load->view('purchase_tender/fidic_condition_of_contract', $data);
     }
+
+    public function view_environmental_health_safety($tender_id){
+        $data['title'] = _l('Environmental Health & Safety');
+        $data['tender_id'] = $tender_id;
+        $data['tender_data'] = $this->purchase_model->get_tender_document_detail($tender_id);
+        $this->load->view('purchase_tender/environmental_health_safety', $data);
+    }
 }
