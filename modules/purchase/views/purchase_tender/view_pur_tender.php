@@ -591,7 +591,7 @@
                           "Particular Conditions of Contract" => "view_particular_conditions_of_contract",
                           "Contractor General Obligations" => "view_contractor_general_obligations",
                           "FIDIC Condition of Contract" => "view_fidic_condition_of_contract",
-                          "Environmental Health & Safety Manual" => "view_environmental_health_safety_manual"
+                          "Environmental Health & Safety Manual" => "view_environmental_health_safety"
                         ];
 
                         foreach ($document_types as $doc_type => $view_function) { ?>
