@@ -139,6 +139,7 @@ $valid_cur_date = $this->timesheets_model->get_next_shift_date(get_staff_user_id
                   _l('reason'),
                   _l('Type'),
                   _l('status'),
+                  _l('Available Leave'),
                   _l('date_created'),
                   _l('options'),
                 );

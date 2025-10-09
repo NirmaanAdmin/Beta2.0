@@ -18,6 +18,7 @@ $aColumns = [
 	db_prefix() . 'timesheets_requisition_leave.end_time',
 	'(SELECT GROUP_CONCAT(staffid SEPARATOR ",") FROM ' . db_prefix() . 'timesheets_approval_details WHERE rel_id = ' . db_prefix() . 'timesheets_requisition_leave.id and ' . db_prefix() . 'timesheets_approval_details.rel_type <> "additional_timesheets") as approver',
 	db_prefix() . 'timesheets_requisition_leave.status',
+	'2',
 	db_prefix() . 'timesheets_requisition_leave.datecreated',
 	db_prefix() . 'timesheets_requisition_leave.id',
 ];
@@ -245,7 +246,7 @@ foreach ($rResult as $aRow) {
 	} else {
 		$row[] = '<span class="label label-danger  mr-1 mb-1 mt-1">' . _l('Reject') . '</span>';
 	}
-
+	$row[] = get_staff_all_leaves($aRow[db_prefix() . 'timesheets_requisition_leave.staff_id']);
 	$row[] = _d(date('Y-m-d', strtotime($aRow[db_prefix() . 'timesheets_requisition_leave.datecreated'])));
 	$flag = 0;
 	$action_option = '<div class="row">';

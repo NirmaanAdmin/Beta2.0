@@ -537,3 +537,20 @@ function get_company_name_for_attendance()
 	}
 	return '';
 }
+
+function get_staff_all_leaves($staff_id){
+    $CI = &get_instance();
+    $CI->db->select('SUM(remain) as available_leave');
+    $CI->db->from(db_prefix() . 'timesheets_day_off');
+    $CI->db->where('staffid', $staff_id);
+	$CI->db->where('year', date('Y'));
+    $query = $CI->db->get();
+    $result = $query->result_array();
+    
+    // Check if result exists and has a valid available_leave value
+    if (!empty($result) && isset($result[0]['available_leave']) && $result[0]['available_leave'] !== null) {
+        return $result[0]['available_leave'];
+    } else {
+        return 0;
+    }
+}
