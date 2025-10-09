@@ -219,8 +219,24 @@ if (isset($invoice->scheduled_email) && $invoice->scheduled_email) { ?>
                                 <tr>
                                     <th width="25%" align="left"><?php echo _l('description_of_services'); ?></th>
                                     <th width="15%" align="right"><?php echo _l('rate_without_tax'); ?></th>
-                                    <th width="15%" align="right"><?php echo _l('cgst_tax'); ?></th>
-                                    <th width="15%" align="right"><?php echo _l('sgst_tax'); ?></th>
+                                    <th width="15%" align="right">
+                                      <?php 
+                                        echo _l('cgst_tax') . ' (' . 
+                                        (($invoice->cgst == intval($invoice->cgst)) 
+                                            ? intval($invoice->cgst) 
+                                            : number_format($invoice->cgst, 2)) 
+                                        . '%)'; 
+                                      ?>
+                                    </th>
+                                    <th width="15%" align="right">
+                                      <?php 
+                                        echo _l('sgst_tax') . ' (' . 
+                                        (($invoice->sgst == intval($invoice->sgst)) 
+                                            ? intval($invoice->sgst) 
+                                            : number_format($invoice->sgst, 2)) 
+                                        . '%)'; 
+                                      ?>
+                                    </th>
                                     <th width="15%" align="right"><?php echo _l('invoice_table_amount_heading'); ?></th>
                                     <th width="15%" align="right"><?php echo _l('remarks'); ?></th>
                                 </tr>
@@ -266,7 +282,15 @@ if (isset($invoice->scheduled_email) && $invoice->scheduled_email) { ?>
                                 </tr>
                                 <tr id="total_tax">
                                     <td>
-                                        <span class="bold tw-text-neutral-700"><?php echo _l('cgst_tax'); ?> :</span>
+                                        <span class="bold tw-text-neutral-700">
+                                            <?php 
+                                                echo _l('cgst_tax') . ' (' . 
+                                                (($invoice->cgst == intval($invoice->cgst)) 
+                                                    ? intval($invoice->cgst) 
+                                                    : number_format($invoice->cgst, 2)) 
+                                                . '%)'; 
+                                            ?> :
+                                        </span>
                                     </td>
                                     <td>
                                         <?php echo app_format_money($annexure_invoice['final_invoice']['cgst_tax'], $base_currency); ?>
@@ -274,7 +298,15 @@ if (isset($invoice->scheduled_email) && $invoice->scheduled_email) { ?>
                                 </tr>
                                 <tr id="total_tax">
                                     <td>
-                                        <span class="bold tw-text-neutral-700"><?php echo _l('sgst_tax'); ?> :</span>
+                                        <span class="bold tw-text-neutral-700">
+                                            <?php 
+                                                echo _l('sgst_tax') . ' (' . 
+                                                (($invoice->sgst == intval($invoice->sgst)) 
+                                                    ? intval($invoice->sgst) 
+                                                    : number_format($invoice->sgst, 2)) 
+                                                . '%)'; 
+                                            ?> :
+                                        </span>
                                     </td>
                                     <td>
                                         <?php echo app_format_money($annexure_invoice['final_invoice']['sgst_tax'], $base_currency); ?>

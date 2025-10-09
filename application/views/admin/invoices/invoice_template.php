@@ -249,6 +249,12 @@
                         <?php echo render_date_input('duedate', 'invoice_add_edit_duedate', $value); ?>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <?php $deal_slip_no = (isset($invoice) && $invoice->deal_slip_no != '' ? $invoice->deal_slip_no : ''); ?>
+                        <?php echo render_input('deal_slip_no', 'deal_slip_no', $deal_slip_no) ?>
+                    </div>
+                </div>
 
                 <?php if (is_invoices_overdue_reminders_enabled()) { ?>
                     <div class="form-group">
@@ -272,7 +278,7 @@
             <div class="col-md-6">
                 <div class="tw-ml-3">
                     <div class="row">
-                        <div class="form-group col-md-4">
+                        <div class="col-md-4">
                             <label for="tags" class="control-label"><i class="fa fa-tag" aria-hidden="true"></i>
                                 <?php echo _l('tags'); ?></label>
                             <input type="text" class="tagsinput" id="tags" name="tags"
@@ -510,7 +516,7 @@
                         </div>
                     </div>
                     <?php $value = (isset($invoice) ? $invoice->adminnote : ''); ?>
-                    <?php echo render_textarea('adminnote', 'invoice_add_edit_admin_note', $value); ?>
+                    <?php echo render_textarea('adminnote', 'invoice_add_edit_admin_note', $value, ['rows' => 3]); ?>
 
                     <div class="row">
                         <div class="col-md-6">
@@ -549,8 +555,12 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <?php $deal_slip_no = (isset($invoice) && $invoice->deal_slip_no != '' ? $invoice->deal_slip_no : ''); ?>
-                            <?php echo render_input('deal_slip_no', 'deal_slip_no', $deal_slip_no) ?>
+                            <?php $cgst = (isset($invoice) && $invoice->cgst != '' ? $invoice->cgst : 0); ?>
+                            <?php echo render_input('cgst', 'cgst_tax', $cgst) ?>
+                        </div>
+                        <div class="col-md-6">
+                            <?php $sgst = (isset($invoice) && $invoice->sgst != '' ? $invoice->sgst : 0); ?>
+                            <?php echo render_input('sgst', 'sgst_tax', $sgst) ?>
                         </div>
                     </div>
 
@@ -633,8 +643,24 @@
                                 ?>
                                 <?php /* <th width="10%" align="right" class="qty"><?php echo e($qty_heading); ?></th> */ ?>
                                 <th width="15%" align="right"><?php echo _l('rate_without_tax'); ?></th>
-                                <th width="15%" align="right"><?php echo _l('cgst_tax'); ?></th>
-                                <th width="15%" align="right"><?php echo _l('sgst_tax'); ?></th>
+                                <th width="15%" align="right">
+                                  <?php 
+                                    echo _l('cgst_tax') . ' (' . 
+                                    (($invoice->cgst == intval($invoice->cgst)) 
+                                        ? intval($invoice->cgst) 
+                                        : number_format($invoice->cgst, 2)) 
+                                    . '%)'; 
+                                  ?>
+                                </th>
+                                <th width="15%" align="right">
+                                  <?php 
+                                    echo _l('sgst_tax') . ' (' . 
+                                    (($invoice->sgst == intval($invoice->sgst)) 
+                                        ? intval($invoice->sgst) 
+                                        : number_format($invoice->sgst, 2)) 
+                                    . '%)'; 
+                                  ?>
+                                </th>
                                 <th width="15%" align="right"><?php echo _l('invoice_table_amount_heading'); ?></th>
                                 <th width="15%" align="right"><?php echo _l('remarks'); ?></th>
                             </tr>
@@ -742,7 +768,15 @@
                                     */ ?>
                             <tr id="total_tax">
                                 <td>
-                                    <span class="bold tw-text-neutral-700"><?php echo _l('cgst_tax'); ?> :</span>
+                                    <span class="bold tw-text-neutral-700">
+                                        <?php 
+                                            echo _l('cgst_tax') . ' (' . 
+                                            (($invoice->cgst == intval($invoice->cgst)) 
+                                                ? intval($invoice->cgst) 
+                                                : number_format($invoice->cgst, 2)) 
+                                            . '%)'; 
+                                        ?> :
+                                    </span>
                                 </td>
                                 <td>
                                     <?php echo app_format_money($annexure_invoice['final_invoice']['cgst_tax'], $base_currency); ?>
@@ -750,7 +784,15 @@
                             </tr>
                             <tr id="total_tax">
                                 <td>
-                                    <span class="bold tw-text-neutral-700"><?php echo _l('sgst_tax'); ?> :</span>
+                                    <span class="bold tw-text-neutral-700">
+                                        <?php 
+                                            echo _l('sgst_tax') . ' (' . 
+                                            (($invoice->sgst == intval($invoice->sgst)) 
+                                                ? intval($invoice->sgst) 
+                                                : number_format($invoice->sgst, 2)) 
+                                            . '%)'; 
+                                        ?> :
+                                    </span>
                                 </td>
                                 <td>
                                     <?php echo app_format_money($annexure_invoice['final_invoice']['sgst_tax'], $base_currency); ?>

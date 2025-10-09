@@ -136,8 +136,8 @@ $tblinvoicehtml .= '
      <th width="23%" align="center">Description of Material / Services</th>
      <th width="12%" align="center">HSN / SAC Code</th>
      <th width="16%" align="center">Taxable</th>
-     <th width="13%" align="center">CGST</th>
-     <th width="13%" align="center">SGST</th>
+     <th width="13%" align="center">'._l('cgst_tax'). ' (' .(($invoice->cgst == intval($invoice->cgst)) ? intval($invoice->cgst) : number_format($invoice->cgst, 2)). '%)</th>
+     <th width="13%" align="center">'._l('sgst_tax'). ' (' .(($invoice->sgst == intval($invoice->sgst)) ? intval($invoice->sgst) : number_format($invoice->sgst, 2)). '%)</th>
      <th width="17%" align="right">Grand Total</th>
   </tr>
 </thead>';
