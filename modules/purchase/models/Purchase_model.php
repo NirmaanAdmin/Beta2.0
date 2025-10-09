@@ -3575,12 +3575,14 @@ class Purchase_model extends App_Model
         $approve_status = $this->db->get(db_prefix() . 'pur_approval_details')->result_array();
         if (count($approve_status) > 0) {
             foreach ($approve_status as $value) {
-                if ($value['approve'] == -1) {
-                    return 'reject';
-                }
-                if ($value['approve'] == 0) {
-                    $value['staffid'] = explode(', ', $value['staffid']);
-                    return $value;
+                if ($value['staffid'] == get_staff_user_id()) {
+                    if ($value['approve'] == -1) {
+                        return 'reject';
+                    }
+                    if ($value['approve'] == 0) {
+                        $value['staffid'] = explode(', ', $value['staffid']);
+                        return $value;
+                    }
                 }
             }
             return true;
@@ -4096,6 +4098,12 @@ class Purchase_model extends App_Model
                 $data_update['status'] = $status;
                 $this->db->where('id', $rel_id);
                 $this->db->update(db_prefix() . 'pur_estimates', $data_update);
+                return true;
+                break;
+            case 'wo_order':
+                $data_update['approve_status'] = $status;
+                $this->db->where('id', $rel_id);
+                $this->db->update(db_prefix() . 'wo_orders', $data_update);
                 return true;
                 break;
             case 'pur_order':
