@@ -16758,6 +16758,7 @@ class purchase extends AdminController
     public function activity_log()
     {
         $data['title'] = _l('activity_log');
+        $data['staff'] = $this->staff_model->get();
         $this->load->view('activity_log/activity_log', $data);
     }
 

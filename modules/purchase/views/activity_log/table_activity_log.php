@@ -1,8 +1,11 @@
 <?php
 
 defined('BASEPATH') or exit('No direct script access allowed');
+
+$this->ci->load->model('purchase/purchase_model');
 $module_name = 'module_activity_log';
 $module_name_filter_name = 'module_name';
+$staff_filter_name = 'staff';
 
 $aColumns = [
     db_prefix() . 'module_activity_log' . '.description as description',
@@ -33,8 +36,29 @@ if ($this->ci->input->post('module_name') && count($this->ci->input->post('modul
     );
 }
 
+if ($this->ci->input->post('staff') && count($this->ci->input->post('staff')) > 0) {
+    $staffs = $this->ci->input->post('staff');
+    $conditions = [];
+    foreach ($staffs as $p) {
+        $conditions[] = "FIND_IN_SET(" . (int)$p . ", " . db_prefix() . "module_activity_log.staffid)";
+    }
+    $where[] = "AND (" . implode(' OR ', $conditions) . ")";
+}
+
+$custom_date_select = $this->ci->purchase_model->get_where_report_period(db_prefix().'module_activity_log.date');
+if ($custom_date_select != '') {
+    $custom_date_select = trim($custom_date_select);
+    if (!startsWith($custom_date_select, 'AND')) {
+        $custom_date_select = 'AND ' . $custom_date_select;
+    }
+    $where[] = $custom_date_select;
+}
+
 $module_name_filter_name_value = !empty($this->ci->input->post('module_name')) ? implode(',', $this->ci->input->post('module_name')) : NULL;
 update_module_filter($module_name, $module_name_filter_name, $module_name_filter_name_value);
+
+$staff_filter_name_value = !empty($this->ci->input->post('staff')) ? implode(',', $this->ci->input->post('staff')) : NULL;
+update_module_filter($module_name, $staff_filter_name, $staff_filter_name_value);
 
 $having = '';
 
