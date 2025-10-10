@@ -5392,3 +5392,44 @@ function update_all_pc_fields_activity_log($id, $new_data)
     }
     return true;
 }
+
+function update_pc_approval_status_activity_log($id, $to_status)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $payment_certificate = $CI->db->get(db_prefix() . 'payment_certificate')->row();
+        if(!empty($payment_certificate)) {
+            $from_status = $payment_certificate->approve_status;
+            if($from_status == 1) {
+                $from_status_name = _l('purchase_draft');
+            } else if($from_status == 2) {
+                $from_status_name = _l('purchase_approved');
+            } else if($from_status == 3) {
+                $from_status_name = _l('pur_rejected');
+            } else {
+                $from_status_name = _l('purchase_draft');
+            }
+            if($to_status == 1) {
+                $to_status_name = _l('purchase_draft');
+            } else if($to_status == 2) {
+                $to_status_name = _l('purchase_approved');
+            } else if($to_status == 3) {
+                $to_status_name = _l('pur_rejected');
+            } else {
+                $to_status_name = _l('purchase_draft');
+            }
+            $description = "An approval status is updated from <b>".$from_status_name."</b> to <b>".$to_status_name."</b> in payment certificate <b>".$payment_certificate->pc_number."</b>.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'pc',
+                'rel_id' => $id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}

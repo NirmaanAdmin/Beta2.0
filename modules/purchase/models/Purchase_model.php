@@ -19229,6 +19229,7 @@ class Purchase_model extends App_Model
 
     public function change_status_pay_cert($status, $id)
     {
+        update_pc_approval_status_activity_log($id, $status);
         $payment_certificate = $this->get_payment_certificate($id);
         if($status == 4) {
             $this->db->where('id', $id);
