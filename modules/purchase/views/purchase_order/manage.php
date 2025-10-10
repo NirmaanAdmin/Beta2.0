@@ -36,6 +36,9 @@
                            <?php echo _l('new_pur_order'); ?>
                         </a>
                      <?php } ?>
+                     <a href="<?php echo admin_url('purchase/activity_log?module=po'); ?>" class="btn btn-info pull-left display-block" target="_blank">
+                     <?php echo _l('activity_log'); ?>
+                     </a>
                      <button class="btn btn-info pull-left mleft10 display-block" type="button" data-toggle="collapse" data-target="#po-charts-section" aria-expanded="true"aria-controls="po-charts-section">
                          <?php echo _l('PO Charts'); ?> <i class="fa fa-chevron-down toggle-icon"></i>
                      </button>

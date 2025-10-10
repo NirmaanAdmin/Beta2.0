@@ -30,6 +30,9 @@
                            <?php echo _l('new_wo_order'); ?>
                         </a>
                      <?php } ?>
+                     <a href="<?php echo admin_url('purchase/activity_log?module=wo'); ?>" class="btn btn-info pull-left display-block" target="_blank">
+                     <?php echo _l('activity_log'); ?>
+                     </a>
                      <button class="btn btn-info pull-left mleft10 display-block" type="button" data-toggle="collapse" data-target="#wo-charts-section" aria-expanded="true"aria-controls="wo-charts-section">
                          <?php echo _l('WO Charts'); ?> <i class="fa fa-chevron-down toggle-icon"></i>
                      </button>
