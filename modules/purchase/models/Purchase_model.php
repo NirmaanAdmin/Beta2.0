@@ -2936,7 +2936,7 @@ class Purchase_model extends App_Model
             $this->db->where('id', $insert_id);
             $this->db->update(db_prefix() . 'pur_orders', $total);
 
-            $this->log_po_activity($insert_id, 'po_activity_created');
+            add_po_activity_log($insert_id);
             // warehouse module hook after purchase order add
             hooks()->do_action('after_purchase_order_add', $insert_id);
 
@@ -3260,7 +3260,7 @@ class Purchase_model extends App_Model
      */
     public function delete_pur_order($id)
     {
-
+        remove_po_activity_log($id);
         hooks()->do_action('before_pur_order_deleted', $id);
 
         $affectedRows = 0;
@@ -15780,6 +15780,12 @@ class Purchase_model extends App_Model
                 $data['file_name'] = $file['file_name'];
                 $data['filetype']  = $file['filetype'];
                 $this->db->insert(db_prefix() . 'purchase_files', $data);
+                if($related == 'pur_order') {
+                    add_po_attachment_activity_log($id, $file['file_name'], true);
+                }
+                if($related == 'wo_order') {
+                    add_wo_attachment_activity_log($id, $file['file_name'], true);
+                }
             }
         }
         return true;
@@ -15814,6 +15820,12 @@ class Purchase_model extends App_Model
             $other_attachments = list_files(get_upload_path_by_type('purchase') . $attachment->rel_type . '/' . $attachment->rel_id);
             if (count($other_attachments) == 0) {
                 delete_dir(get_upload_path_by_type('purchase') . $attachment->rel_type . '/' . $attachment->rel_id);
+            }
+            if($attachment->rel_type == 'pur_order') {
+                add_po_attachment_activity_log($attachment->rel_id, $attachment->file_name, false);
+            }
+            if($attachment->rel_type == 'wo_order') {
+                add_wo_attachment_activity_log($attachment->rel_id, $attachment->file_name, false);
             }
         }
 
@@ -16566,7 +16578,7 @@ class Purchase_model extends App_Model
         $cron_email['options'] = json_encode($cron_email_options, true);
         $this->db->insert(db_prefix() . 'cron_email', $cron_email);
 
-        $this->save_work_order_files('wo_order', $insert_id);
+        $this->save_purchase_files('wo_order', $insert_id);
         $this->update_cost_control_remarks($cost_control_remarks, $insert_id);
 
         if ($insert_id) {
@@ -16650,7 +16662,7 @@ class Purchase_model extends App_Model
             $this->db->where('id', $insert_id);
             $this->db->update(db_prefix() . 'wo_orders', $total);
 
-            $this->log_wo_activity($insert_id, 'wo_activity_created');
+            add_wo_activity_log($insert_id);
             // warehouse module hook after purchase order add
             hooks()->do_action('after_work_order_add', $insert_id);
 
@@ -16952,25 +16964,6 @@ class Purchase_model extends App_Model
 
         return false;
     }
-    public function save_work_order_files($related, $id)
-    {
-        $uploadedFiles = handle_purchase_attachments_array($related, $id);
-
-        if ($uploadedFiles && is_array($uploadedFiles)) {
-            foreach ($uploadedFiles as $file) {
-                $data = array();
-                $data['dateadded'] = date('Y-m-d H:i:s');
-                $data['rel_type'] = $related;
-                $data['rel_id'] = $id;
-                $data['staffid'] = get_staff_user_id();
-                $data['attachment_key'] = app_generate_hash();
-                $data['file_name'] = $file['file_name'];
-                $data['filetype']  = $file['filetype'];
-                $this->db->insert(db_prefix() . 'purchase_files', $data);
-            }
-        }
-        return true;
-    }
     public function get_work_order_attachments($related, $id)
     {
         $this->db->where('rel_id', $id);
@@ -16981,7 +16974,7 @@ class Purchase_model extends App_Model
     }
     public function delete_wo_order($id)
     {
-
+        remove_wo_activity_log($id);
         hooks()->do_action('before_wo_order_deleted', $id);
 
         $affectedRows = 0;

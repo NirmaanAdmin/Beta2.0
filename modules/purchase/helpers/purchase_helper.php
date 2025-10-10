@@ -5433,3 +5433,137 @@ function update_pc_approval_status_activity_log($id, $to_status)
     }
     return true;
 }
+
+function add_po_activity_log($id)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $pur_orders = $CI->db->get(db_prefix() . 'pur_orders')->row();
+        if(!empty($pur_orders)) {
+            $description = "Purchase order <b>".$pur_orders->pur_order_number." - ".$pur_orders->pur_order_name."</b> has been created.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'po',
+                'rel_id' => $id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
+
+function remove_po_activity_log($id)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $pur_orders = $CI->db->get(db_prefix() . 'pur_orders')->row();
+        if(!empty($pur_orders)) {
+            $description = "Purchase order <b>".$pur_orders->pur_order_number." - ".$pur_orders->pur_order_name."</b> has been deleted.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'po',
+                'rel_id' => $id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
+
+function add_po_attachment_activity_log($id, $file_name, $is_create = true)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $pur_orders = $CI->db->get(db_prefix() . 'pur_orders')->row();
+        if(!empty($pur_orders)) {
+            $is_create_value = $is_create ? 'added' : 'removed';
+            $description = "Attachment <b>".$file_name."</b> has been ".$is_create_value." for purchase order <b>".$pur_orders->pur_order_number." - ".$pur_orders->pur_order_name."</b>.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'po',
+                'rel_id' => $id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
+
+function add_wo_activity_log($id)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $wo_orders = $CI->db->get(db_prefix() . 'wo_orders')->row();
+        if(!empty($wo_orders)) {
+            $description = "Work order <b>".$wo_orders->wo_order_number." - ".$wo_orders->wo_order_name."</b> has been created.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'wo',
+                'rel_id' => $id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
+
+function remove_wo_activity_log($id)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $wo_orders = $CI->db->get(db_prefix() . 'wo_orders')->row();
+        if(!empty($wo_orders)) {
+            $description = "Work order <b>".$wo_orders->wo_order_number." - ".$wo_orders->wo_order_name."</b> has been deleted.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'wo',
+                'rel_id' => $id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
+
+function add_wo_attachment_activity_log($id, $file_name, $is_create = true)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $wo_orders = $CI->db->get(db_prefix() . 'wo_orders')->row();
+        if(!empty($wo_orders)) {
+            $is_create_value = $is_create ? 'added' : 'removed';
+            $description = "Attachment <b>".$file_name."</b> has been ".$is_create_value." for work order <b>".$wo_orders->wo_order_number." - ".$wo_orders->wo_order_name."</b>.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'wo',
+                'rel_id' => $id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}

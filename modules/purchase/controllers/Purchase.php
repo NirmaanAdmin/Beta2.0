@@ -10187,7 +10187,7 @@ class purchase extends AdminController
     }
     public function delete_work_order_attachment($id)
     {
-        $this->purchase_model->delete_wo_order_attachment($id);
+        $this->purchase_model->delete_purchase_attachment($id);
         redirect($_SERVER['HTTP_REFERER']);
     }
     public function send_wo()
