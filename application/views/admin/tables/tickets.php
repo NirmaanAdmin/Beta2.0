@@ -215,7 +215,7 @@ return App_table::find('tickets')
                 } elseif ($colName == 'status') {
                     $_data = '<span class="label ticket-status-' . $aRow['status'] . '" style="border:1px solid ' . adjust_hex_brightness($aRow['statuscolor'], 0.4) . '; color:' . $aRow['statuscolor'] . ';background: ' . adjust_hex_brightness($aRow['statuscolor'], 0.04) . ';">' . e(ticket_status_translate($aRow['status'])) . '</span>';
                 } elseif ($colName == 'date') {
-                    $_data = e(_dt($aRow['date']));
+                    $_data = e(_dt($aRow['tbltickets.date']));
                 } elseif ($colName == 'priority') {
                     $_data = e(ticket_priority_translate($aRow['priority']));
                 } elseif ($colName == '2') {
