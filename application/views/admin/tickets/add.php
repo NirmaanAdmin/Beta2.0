@@ -136,6 +136,9 @@
                                     <div class="col-md-6">
                                         <?php echo render_input('ref_drawing', 'reference_drawings'); ?>
                                     </div>
+                                    <div class="col-md-6">
+                                        <?php echo render_select('dms_items[]', $dms_items, array('id', 'name'), 'Drawings', '', array('data-width' => '100%', 'data-none-selected-text' => _l('Drawings'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false); ?>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-md-12">

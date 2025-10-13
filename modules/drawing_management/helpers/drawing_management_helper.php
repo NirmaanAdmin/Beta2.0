@@ -881,3 +881,12 @@ function create_folder_dms_activity_log($id, $by_module = '')
 	}
 	return true;
 }
+
+function get_rfi_dms_items($id)
+{
+    $CI = &get_instance();
+    $CI->db->select('ticketid, subject');
+    $CI->db->where('FIND_IN_SET(' . $CI->db->escape($id) . ', dms_items) !=', 0, false);
+    $tickets = $CI->db->get(db_prefix() . 'tickets')->result_array();
+    return $tickets;
+}

@@ -113,6 +113,19 @@
 					<td class="text-nowrap"><?php echo _l('dmg_notes'); ?></td>
 					<td><?php echo ($item->note != null ? drawing_nlbr($item->note) : ''); ?></td>
 				</tr>
+				<tr>
+					<td class="text-nowrap"><?php echo _l('RFI'); ?></td>
+					<td>
+						<?php 
+						$rfi_dms_items = get_rfi_dms_items($item->id);
+						if(!empty($rfi_dms_items)) {
+							foreach ($rfi_dms_items as $rkey => $rvalue) { ?>
+								<a href="<?php echo admin_url('tickets/ticket/'.$rvalue['ticketid'].'?tab=settings'); ?>" target="_blank"><?php echo $rvalue['subject']; ?></a><br>
+							<?php }
+						}
+						?>
+					</td>
+				</tr>
 				<?php
 				if (strpos($item->name, '.pdf') !== false) { ?>
 					<tr>

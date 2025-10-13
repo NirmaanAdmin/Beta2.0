@@ -562,6 +562,15 @@
                                                 echo render_input('ref_drawing', 'reference_drawings', $ref_drawing);
                                                 ?>
                                             </div>
+                                            <div class="col-md-6">
+                                                <?php
+                                                $dms_items_selected = isset($ticket) ? $ticket->dms_items : '';
+                                                if (!empty($dms_items_selected)) {
+                                                    $dms_items_selected = explode(",", $dms_items_selected);
+                                                } 
+                                                echo render_select('dms_items[]', $dms_items, array('id', 'name'), 'Drawings', $dms_items_selected, array('data-width' => '100%', 'data-none-selected-text' => _l('Drawings'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false); 
+                                                ?>
+                                            </div>
                                         </div>
 
                                     </div>

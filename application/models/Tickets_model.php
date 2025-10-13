@@ -845,6 +845,10 @@ class Tickets_model extends App_Model
             $data['area']  = implode(',', $data['area']);
         }
 
+        if (isset($data['dms_items']) && $data['dms_items'] != '') {
+            $data['dms_items']  = implode(',', $data['dms_items']);
+        }
+
         // $data['message'] = remove_emojis($data['message']);
         $data            = hooks()->apply_filters('before_ticket_created', $data, $admin);
 
@@ -1112,6 +1116,10 @@ class Tickets_model extends App_Model
 
         if (isset($data['area']) && $data['area'] != '') {
             $data['area']  = implode(',', $data['area']);
+        }
+
+        if (isset($data['dms_items']) && $data['dms_items'] != '') {
+            $data['dms_items']  = implode(',', $data['dms_items']);
         }
 
         $this->db->where('ticketid', $data['ticketid']);
@@ -1753,5 +1761,23 @@ class Tickets_model extends App_Model
         $this->db->where(db_prefix() . 'projects.id', $project_id);
         $contacts = $this->db->get(db_prefix() . 'contacts')->result_array();
         return $contacts;
+    }
+
+    public function get_dms_items()
+    {
+        $result = array();
+        $default_project = get_default_project();
+        $this->db->select('id');
+        $this->db->where('project_id', $default_project);
+        $this->db->where('parent_id', 0);
+        $dms_items = $this->db->get(db_prefix() . 'dms_items')->row();
+        if(!empty($dms_items)) {
+            $this->db->select('id, name');
+            $this->db->where('master_id', $dms_items->id);
+            $this->db->where('filetype !=', 'folder');
+            $this->db->order_by('id', 'asc');
+            $result = $this->db->get(db_prefix() . 'dms_items')->result_array();
+        }
+        return $result;
     }
 }

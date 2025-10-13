@@ -117,6 +117,7 @@ class Tickets extends AdminController
         $data['projects'] = $this->projects_model->get_items();
         $this->load->model('purchase/purchase_model');
         $data['area'] = $this->purchase_model->get_area();
+        $data['dms_items'] = $this->tickets_model->get_dms_items();
         add_admin_tickets_js_assets();
         $this->load->view('admin/tickets/add', $data);
     }
@@ -256,6 +257,7 @@ class Tickets extends AdminController
         $data['projects'] = $this->projects_model->get_items();
         $this->load->model('purchase/purchase_model');
         $data['area'] = $this->purchase_model->get_area();
+        $data['dms_items'] = $this->tickets_model->get_dms_items();
         add_admin_tickets_js_assets();
         $this->load->view('admin/tickets/single', $data);
     }
