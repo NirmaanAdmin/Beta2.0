@@ -471,9 +471,10 @@ class Staff_model extends App_Model
                 send_mail_template('staff_created', $data['email'], $staffid, $original_password);
             }
 
+            $slug = slug_it($slug);
             $this->db->where('staffid', $staffid);
             $this->db->update(db_prefix() . 'staff', [
-                'media_path_slug' => slug_it($slug),
+                'media_path_slug' => $slug,
             ]);
 
             if (isset($custom_fields)) {
