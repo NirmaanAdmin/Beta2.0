@@ -184,7 +184,7 @@ function timesheets_module_init_menu_items() {
 		if (has_permission('leave_management', '', 'view_own') || has_permission('leave_management', '', 'view') || is_admin()) {
 			$CI->app_menu->add_sidebar_children_item('timesheets', [
 				'slug' => 'timesheets_timekeeping_mnrh',
-				'name' => _l('leave'),
+				'name' => _l('Leave / Miss Punch'),
 				'icon' => 'fa fa-clipboard',
 				'href' => admin_url('timesheets/requisition_manage'),
 				'position' => 2,

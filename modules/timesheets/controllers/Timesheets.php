@@ -1029,7 +1029,7 @@ class timesheets extends AdminController
 		$this->load->model('staff_model');
 		$data['pro'] = $this->staff_model->get('', 'active = 1');
 		$data['tab'] = $this->input->get('tab');
-		$data['title'] = _l('leave');
+		$data['title'] = _l('Leave / Miss Punch');
 		$data['additional_timesheets_id'] = $this->input->get('additional_timesheets_id');
 		$data['additional_timesheets'] = $this->timesheets_model->get_additional_timesheets();
 		$data['type_of_leave'] = $this->timesheets_model->get_type_of_leave();
