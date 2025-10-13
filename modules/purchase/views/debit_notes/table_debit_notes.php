@@ -73,9 +73,6 @@ if(isset($vendor)){
 }
 
 $having = '';
-if(get_default_project()) {
-    $having = 'project = "'.get_default_project().'"';
-}
 
 $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [
     db_prefix() . 'pur_debit_notes.id',

@@ -4,7 +4,7 @@
      $.each($('._hidden_inputs._filters input'),function(){
        Debit_Notes_ServerParams[$(this).attr('name')] = '[name="'+$(this).attr('name')+'"]';
      });
-     initDataTable('.table-debit-notes', admin_url+'purchase/debit_notes_table', ['undefined'], ['undefined'], Debit_Notes_ServerParams, [[1,'desc'], [0,'desc']]);
+     initDataTable('.table-debit-notes', admin_url+'purchase/debit_notes_table', ['undefined'], ['undefined'], Debit_Notes_ServerParams, [0,'desc']);
      init_debit_note();
   });
 
