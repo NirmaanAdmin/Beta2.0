@@ -441,16 +441,16 @@
               <div role="tabpanel" class="tab-pane" id="shipping_infor">
                 <div class="row">
                   <div class="col-md-6">
-                    <?php $shipping_address = isset($wo_order) ? $wo_order->shipping_address : get_option('pur_company_address');
+                    <?php $shipping_address = isset($wo_order) ? $wo_order->shipping_address : get_option('pur_company_address', true);
                     if ($shipping_address == '') {
-                      $shipping_address = get_option('pur_company_address');
+                      $shipping_address = get_option('pur_company_address', true);
                     }
 
                     echo render_textarea('shipping_address', 'pur_company_address', $shipping_address, ['rows' => 7]); ?>
 
-                    <?php $shipping_zip = isset($wo_order) ? $wo_order->shipping_zip : get_option('pur_company_zipcode');
+                    <?php $shipping_zip = isset($wo_order) ? $wo_order->shipping_zip : get_option('pur_company_zipcode', true);
                     if ($shipping_zip == '') {
-                      $shipping_zip = get_option('pur_company_zipcode');
+                      $shipping_zip = get_option('pur_company_zipcode', true);
                     }
                     echo render_input('shipping_zip', 'pur_company_zipcode', $shipping_zip, 'text'); ?>
                   </div>
@@ -458,31 +458,31 @@
                   <div class="col-md-6">
                     <div class="row">
                       <div class="col-md-12">
-                        <?php $shipping_city = isset($wo_order) ? $wo_order->shipping_city : get_option('pur_company_zipcode');
+                        <?php $shipping_city = isset($wo_order) ? $wo_order->shipping_city : get_option('pur_company_city', true);
                         if ($shipping_city == '') {
-                          $shipping_city = get_option('pur_company_city');
+                          $shipping_city = get_option('pur_company_city', true);
                         }
                         echo render_input('shipping_city', 'pur_company_city', $shipping_city, 'text'); ?>
                       </div>
                       <div class="col-md-12">
-                        <?php $shipping_state = isset($wo_order) ? $wo_order->shipping_state : get_option('pur_company_state');
+                        <?php $shipping_state = isset($wo_order) ? $wo_order->shipping_state : get_option('pur_company_state', true);
                         if ($shipping_state == '') {
-                          $shipping_state = get_option('pur_company_state');
+                          $shipping_state = get_option('pur_company_state', true);
                         }
                         echo render_input('shipping_state', 'pur_company_state', $shipping_state, 'text'); ?>
                       </div>
 
                       <div class="col-md-12">
-                        <?php $shipping_country_text = isset($wo_order) ? $wo_order->shipping_country_text : get_option('pur_company_country_text');
+                        <?php $shipping_country_text = isset($wo_order) ? $wo_order->shipping_country_text : get_option('pur_company_country_text', true);
                         if ($shipping_country_text == '') {
-                          $shipping_country_text = get_option('pur_company_country_text');
+                          $shipping_country_text = get_option('pur_company_country_text', true);
                         }
                         echo render_input('shipping_country_text', 'pur_company_country_text', $shipping_country_text, 'text'); ?>
                       </div>
 
                       <div class="col-md-12">
                         <?php $countries = get_all_countries();
-                        $pur_company_country_code = get_option('pur_company_country_code');
+                        $pur_company_country_code = get_option('pur_company_country_code', true);
                         $selected = isset($wo_order) ? $wo_order->shipping_country : $pur_company_country_code;
                         if ($selected == '') {
                           $selected = $pur_company_country_code;

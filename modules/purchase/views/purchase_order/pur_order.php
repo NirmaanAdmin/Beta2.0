@@ -492,7 +492,7 @@
                   <div class="col-md-6">
                     <div class="row">
                       <div class="col-md-12">
-                        <?php $shipping_city = isset($pur_order) ? $pur_order->shipping_city : get_option('pur_company_zipcode', true);
+                        <?php $shipping_city = isset($pur_order) ? $pur_order->shipping_city : get_option('pur_company_city', true);
                         if ($shipping_city == '') {
                           $shipping_city = get_option('pur_company_city', true);
                         }
