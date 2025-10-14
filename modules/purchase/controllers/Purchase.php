@@ -12938,6 +12938,7 @@ class purchase extends AdminController
                         $this->purchase_model->update_bulk_pur_invoices($data);
                         set_alert('success', _l('updated_successfully', _l('vendor_bills')));
                     } else {
+                        unset($data['responsible_person']);
                         $id = $this->expenses_model->add($data);
                         if ($id) {
                             if ($select_invoice == "create_invoice") {
