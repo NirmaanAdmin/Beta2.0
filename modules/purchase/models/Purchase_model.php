@@ -18319,7 +18319,7 @@ class Purchase_model extends App_Model
 
                     $html .= '<div class="col-md-2 all_expense_name">' . render_textarea($expense_name_attr, '', $pvalue['description_services'], ['rows' => 3]) . '</div>';
 
-                    $html .= '<div class="col-md-2 all_budget_head">' . render_select($category_name_attr, $expense_categories, array('id', 'name'), '', $budget_head) . '</div>';
+                    $html .= '<div class="col-md-2 all_budget_head">' . render_select($category_name_attr, $expense_categories, array('id', 'name'), '', $budget_head, ['required' => true]) . '</div>';
 
                     $html .= '<div class="col-md-2 all_invoice_date">' . render_date_input($date_name_attr, '', _d($pvalue['invoice_date'])) . '</div>';
 

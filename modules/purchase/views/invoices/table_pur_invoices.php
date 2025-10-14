@@ -613,8 +613,9 @@ foreach ($rResult as $aRow) {
             $_data = '<a href="' . admin_url('purchase/vendor/' . $aRow['vendor_id']) . '" target="_blank">' .  $aRow[db_prefix() . 'pur_vendor.company'] . '</a>';
         } elseif ($aColumns[$i] == 'expense_convert') {
             $expense_convert = '';
+            $onclick = empty($aRow['name']) ? 'disabled' : 'onclick="convert_expense(' . $aRow['id'] . ',' . $aRow['final_certified_amount'] . '); return false;"';
             if ($aRow['expense_convert'] == 0) {
-                $expense_convert = '<a href="javascript:void(0)" onclick="convert_expense(' . $aRow['id'] . ',' . $aRow['final_certified_amount'] . '); return false;" class="btn btn-warning btn-icon">' . _l('convert') . '</a>';
+                $expense_convert = '<a href="javascript:void(0)" ' . $onclick . ' class="btn btn-warning btn-icon">' . _l('convert') . '</a>';
             } else {
                 $expense_convert_check = get_expense_data($aRow['expense_convert']);
                 if (!empty($expense_convert_check)) {
@@ -628,7 +629,7 @@ foreach ($rResult as $aRow) {
                         }
                     }
                 } else {
-                    $expense_convert = '<a href="javascript:void(0)" onclick="convert_expense(' . $aRow['id'] . ',' . $aRow['final_certified_amount'] . '); return false;" class="btn btn-warning btn-icon">' . _l('convert') . '</a>';
+                    $expense_convert = '<a href="javascript:void(0)" ' . $onclick . ' class="btn btn-warning btn-icon">' . _l('convert') . '</a>';
                 }
             }
             $_data = $expense_convert;
