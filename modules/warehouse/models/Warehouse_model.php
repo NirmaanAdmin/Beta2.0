@@ -1296,6 +1296,7 @@ class Warehouse_model extends App_Model
 					$stock_reconciliation['addedfrom'] = get_staff_user_id();
 					$this->db->insert(db_prefix() . 'stock_reconciliation', $stock_reconciliation);
 					$stock_insert_reconciliation_id = $this->db->insert_id();
+					$this->update_inventory_setting(['next_inventory_stock_reconciliation_mumber' =>  get_warehouse_option('next_inventory_stock_reconciliation_mumber') + 1]);
 				}
 			} else if ($data['wo_order_id'] != '' && $data['wo_order_id'] != 0) {
 				$this->db->where('id', $data['wo_order_id']);
