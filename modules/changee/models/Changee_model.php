@@ -676,10 +676,12 @@ class Changee_model extends App_Model
      */
     public function get_approval_setting($id = '')
     {
+        $default_project = get_default_project();
         if (is_numeric($id)) {
             $this->db->where('id', $id);
             return $this->db->get(db_prefix() . 'co_approval_setting')->row();
         }
+        $this->db->where('project_id', $default_project);
         return $this->db->get(db_prefix() . 'co_approval_setting')->result_array();
     }
 
@@ -3179,12 +3181,14 @@ class Changee_model extends App_Model
         $approve_status = $this->db->get(db_prefix() . 'co_approval_details')->result_array();
         if (count($approve_status) > 0) {
             foreach ($approve_status as $value) {
-                if ($value['approve'] == -1) {
-                    return 'reject';
-                }
-                if ($value['approve'] == 0) {
-                    $value['staffid'] = explode(', ', $value['staffid']);
-                    return $value;
+                if ($value['staffid'] == get_staff_user_id()) {
+                    if ($value['approve'] == -1) {
+                        return 'reject';
+                    }
+                    if ($value['approve'] == 0) {
+                        $value['staffid'] = explode(', ', $value['staffid']);
+                        return $value;
+                    }
                 }
             }
             return true;
@@ -3247,6 +3251,7 @@ class Changee_model extends App_Model
         foreach ($data_new as $key => $value) {
             $row = [];
             $this->db->select('rel_id');
+            $this->db->where('staffid', $value['id']);
             $this->db->where('rel_id', $data['rel_id']);
             $this->db->where('rel_type', $data['rel_type']);
             $rel_id_data = $this->db->get(db_prefix() . 'co_approval_details')->result_array();
@@ -3644,6 +3649,23 @@ class Changee_model extends App_Model
      */
     public function update_approve_request($rel_id, $rel_type, $status)
     {
+        $summary = $this->db->query("
+            SELECT 
+                SUM(approve = 2) AS approved_count,
+                SUM(approve = 3) AS rejected_count,
+                COUNT(*) AS total_count
+            FROM " . db_prefix() . "co_approval_details
+            WHERE rel_id = ? AND rel_type = ?
+        ", [$rel_id, $rel_type])->row();
+        if (!$summary || $summary->total_count == 0) {
+            return false;
+        }
+        $all_approved = ((int)$summary->approved_count === (int)$summary->total_count);
+        $all_rejected = ((int)$summary->rejected_count === (int)$summary->total_count);
+        if (!($all_approved || $all_rejected)) {
+            return false;
+        }
+
         $data_update = [];
 
         switch ($rel_type) {
@@ -14525,29 +14547,32 @@ class Changee_model extends App_Model
 
         if ($response == 1) {
             $intersect = array_values($intersect);
-            $this->db->select('staffid as id, "approve" as action', FALSE);
-            $this->db->where('admin', 1);
-            $this->db->order_by('staffid', 'desc');
-            $this->db->limit(1);
-            $staffs = $this->db->get('tblstaff')->result_array();
-            $intersect = array_merge($intersect, $staffs);
-            $intersect = array_unique($intersect, SORT_REGULAR);
-            $intersect = array_values($intersect);
+            // $this->db->select('staffid as id, "approve" as action', FALSE);
+            // $this->db->where('admin', 1);
+            // $this->db->order_by('staffid', 'desc');
+            // $this->db->limit(1);
+            // $staffs = $this->db->get('tblstaff')->result_array();
+            // $intersect = array_merge($intersect, $staffs);
+            // $intersect = array_unique($intersect, SORT_REGULAR);
+            // $intersect = array_values($intersect);
             return $intersect;
         } else {
             if (!empty($intersect)) {
-                $intersect = array_filter($intersect, function ($var) {
+                $intersect = array_filter($intersect, function ($var) use ($user_id) {
                     return ($var['id'] == $user_id);
                 });
                 if (!empty($intersect)) {
                     $check_status = true;
                 }
+            } else {
+                $check_status = true;
             }
         }
 
         $this->db->select('staffid as id', 'email', 'firstname', 'lastname');
         $this->db->where('staffid', $user_id);
         $this->db->where('admin', 1);
+        $this->db->where('role', 0);
         $staffs = $this->db->get('tblstaff')->result_array();
         if (count($staffs) > 0) {
             $check_status = true;

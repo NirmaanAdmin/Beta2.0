@@ -8642,12 +8642,8 @@ class changee extends AdminController
     public function find_project_members()
     {
         $response = array();
-        if ($this->input->post()) {
-            $data = $this->input->post();
-            if (!empty($data['project_id'])) {
-                $response = $this->staff_model->find_project_members($data['project_id']);
-            }
-        }
+        $default_project = get_default_project();
+        $response = $this->staff_model->find_project_members($default_project);
         echo json_encode($response);
     }
 
