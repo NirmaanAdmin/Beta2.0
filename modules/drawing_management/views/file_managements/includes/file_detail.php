@@ -120,7 +120,11 @@
 						$rfi_dms_items = get_rfi_dms_items($item->id);
 						if(!empty($rfi_dms_items)) {
 							foreach ($rfi_dms_items as $rkey => $rvalue) { ?>
-								<a href="<?php echo admin_url('tickets/ticket/'.$rvalue['ticketid'].'?tab=settings'); ?>" target="_blank"><?php echo $rvalue['subject']; ?></a><br>
+								<a href="<?php echo admin_url('tickets/ticket/'.$rvalue['ticketid'].'?tab=settings'); ?>" target="_blank"><?php echo $rvalue['subject']; ?></a>
+								<a href="<?php echo admin_url('tickets/pdf/'.$rvalue['ticketid'].''); ?>" class="btn btn-primary btn-sm mleft5" title="Download">
+								   <i class="fa fa-download"></i>
+								</a>
+								<br>
 							<?php }
 						}
 						?>
