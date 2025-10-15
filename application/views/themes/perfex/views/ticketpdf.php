@@ -4,7 +4,7 @@ $project_name = get_project($ticket->project_id);
 $dept_name = department_pur_request_name($ticket->department);
 $project_prefix = strtoupper(substr($project_name->name, 0, 3));
 $dept_prefix = strtoupper(substr($dept_name, 0, 3));
-if($dept_prefix == 'INT'){
+if ($dept_prefix == 'INT') {
     $dept_prefix = 'ID';
 }
 $formatted_ticket_id = str_pad($ticket->ticketid, 2, '0', STR_PAD_LEFT);
@@ -184,6 +184,68 @@ $tickethtml .= '</tbody>';
 $tickethtml .= '</table>';
 
 $pdf->writeHTML($tickethtml, true, false, false, false, '');
+
+// --- COMMENTS (TICKET + REPLIES) SECTION IN PDF ---
+$commenthtml = '<h3 style="text-align:center;">Comments</h3>';
+
+if (!empty($ticket)) {
+    $commenthtml .= '<div style="border:1px solid #000; margin-bottom:15px; padding:8px;">';
+    $commenthtml .= '<table width="100%" cellpadding="5" cellspacing="0" border="0">';
+
+    // Apply the condition to determine the submitter display
+    $submitterDisplay = '';
+
+    if ($ticket->admin == null || $ticket->admin == 0) {
+        if ($ticket->userid != 0) {
+            $submitterDisplay = htmlspecialchars($ticket->submitter);
+        } else {
+            $submitterDisplay = htmlspecialchars($ticket->submitter) . '<br>' . htmlspecialchars($ticket->ticket_email);
+        }
+    } else {
+        $submitterDisplay = htmlspecialchars($ticket->opened_by);
+    }
+
+    $commenthtml .= '<tr>
+        <td width="25%" valign="top" style="border-right:1px solid #ccc;">
+            <b>' . $submitterDisplay . '</b><br>
+            <span style="font-size:12px; color:#555;">' . (!empty($ticket->admin) ? 'Staff' : 'Client') . '</span><br>
+            <span style="font-size:11px; color:#777;">' . date('d M, Y H:i', strtotime($ticket->date)) . '</span>
+        </td>
+        <td width="75%" valign="top" style="font-size:13px;">' . htmlspecialchars(strip_tags($ticket->message)) . '</td>
+    </tr>';
+
+    $commenthtml .= '</table></div>';
+}
+
+// --- REPLIES LOOP ---
+if (!empty($ticket_replies)) {
+    foreach ($ticket_replies as $reply) {
+        $role = (!empty($reply['is_consultant']) && $reply['is_consultant'] == 1)
+            ? 'Consultant'
+            : ((!empty($reply['admin'])) ? 'Staff' : 'Client');
+
+        $commenthtml .= '<div style="border:1px solid #000; margin-bottom:15px; padding:8px;">';
+        $commenthtml .= '<table width="100%" cellpadding="5" cellspacing="0" border="0">';
+        $commenthtml .= '
+        <tr>
+            <td width="25%" valign="top" style="border-right:1px solid #ccc;">
+                <b>' . htmlspecialchars($reply['submitter']) . '</b><br>
+                <span style="font-size:12px; color:#555;">' . $role . '</span><br>
+                <span style="font-size:11px; color:#777;">' . date('d M, Y H:i', strtotime($reply['date'])) . '</span>
+            </td>
+            <td width="75%" valign="top" style="font-size:13px;">' . nl2br(htmlspecialchars(strip_tags($reply['message']))) . '</td>
+        </tr>';
+        $commenthtml .= '</table></div>';
+    }
+} else {
+    $commenthtml .= '<p style="text-align:center;">No comments or replies available.</p>';
+}
+
+$pdf->writeHTML($commenthtml, true, false, false, false, '');
+
+
+
+
 if (!empty($ticket->attachments)) {
     $formhtml = '';
     // Add page break before the image grid starts
