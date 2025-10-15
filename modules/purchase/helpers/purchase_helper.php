@@ -5567,3 +5567,85 @@ function add_wo_attachment_activity_log($id, $file_name, $is_create = true)
     }
     return true;
 }
+
+function add_order_notes_activity_log($id)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $notes = $CI->db->get(db_prefix() . 'notes')->row();
+        if(!empty($notes)) {
+            $module_name = '';
+            $rel_id = '';
+            $description = '';
+            if($notes->rel_type == 'purchase_order') {
+                $CI->db->where('id', $notes->rel_id);
+                $pur_orders = $CI->db->get(db_prefix() . 'pur_orders')->row();
+                $description = "Notes <b>".$notes->description."</b> has been added for purchase order <b>".$pur_orders->pur_order_number." - ".$pur_orders->pur_order_name."</b>.";
+                $module_name = 'po';
+                $rel_id = $pur_orders->id;
+            }
+            if($notes->rel_type == 'wo_order') {
+                $CI->db->where('id', $notes->rel_id);
+                $wo_orders = $CI->db->get(db_prefix() . 'wo_orders')->row();
+                $description = "Notes <b>".$notes->description."</b> has been added for work order <b>".$wo_orders->wo_order_number." - ".$wo_orders->wo_order_name."</b>.";
+                $module_name = 'wo';
+                $rel_id = $wo_orders->id;
+            }
+            if(!empty($description)) {
+                $CI->db->insert(db_prefix() . 'module_activity_log', [
+                    'module_name' => $module_name,
+                    'rel_id' => $rel_id,
+                    'description' => $description,
+                    'date' => date('Y-m-d H:i:s'),
+                    'staffid' => get_staff_user_id(),
+                    'project_id' => $default_project
+                ]);
+            }
+        }
+    }
+    return true;
+}
+
+function update_order_notes_activity_log($id, $old_value, $new_value)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $notes = $CI->db->get(db_prefix() . 'notes')->row();
+        if(!empty($notes)) {
+            $module_name = '';
+            $rel_id = '';
+            $description = '';
+            $old_value = !empty($old_value) ? $old_value : 'None';
+            $new_value = !empty($new_value) ? $new_value : 'None';
+            if($notes->rel_type == 'purchase_order') {
+                $CI->db->where('id', $notes->rel_id);
+                $pur_orders = $CI->db->get(db_prefix() . 'pur_orders')->row();
+                $description = "Notes field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in purchase order <b>".$pur_orders->pur_order_number." - ".$pur_orders->pur_order_name."</b>.";
+                $module_name = 'po';
+                $rel_id = $pur_orders->id;
+            }
+            if($notes->rel_type == 'wo_order') {
+                $CI->db->where('id', $notes->rel_id);
+                $wo_orders = $CI->db->get(db_prefix() . 'wo_orders')->row();
+                $description = "Notes field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in work order <b>".$wo_orders->wo_order_number." - ".$wo_orders->wo_order_name."</b>.";
+                $module_name = 'wo';
+                $rel_id = $wo_orders->id;
+            }
+            if(!empty($description)) {
+                $CI->db->insert(db_prefix() . 'module_activity_log', [
+                    'module_name' => $module_name,
+                    'rel_id' => $rel_id,
+                    'description' => $description,
+                    'date' => date('Y-m-d H:i:s'),
+                    'staffid' => get_staff_user_id(),
+                    'project_id' => $default_project
+                ]);
+            }
+        }
+    }
+    return true;
+}

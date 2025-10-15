@@ -296,6 +296,7 @@ class Misc_model extends App_Model
 
         $this->db->insert(db_prefix() . 'notes', $data);
         $insert_id = $this->db->insert_id();
+        add_order_notes_activity_log($insert_id);
 
         if ($insert_id) {
             hooks()->do_action('note_created', $insert_id, $data);
@@ -312,6 +313,10 @@ class Misc_model extends App_Model
             'data' => $data,
             'id'   => $id,
         ]);
+
+        $this->db->where('id', $id);
+        $notes = $this->db->get(db_prefix() . 'notes')->row();
+        update_order_notes_activity_log($id, $notes->description, $data['description']);
 
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'notes', $data = [
