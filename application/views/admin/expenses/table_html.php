@@ -137,6 +137,22 @@ if ($withBulkActions === true && $hasPermission) { ?>
     echo render_select('order_tagged_detail[]', $order_tagged_detail, array('id', 'name'), '', $order_tagged_detail_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('Order Detail'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
     ?>
   </div>
+  <div class="col-md-3 form-group">
+    <?php
+    $converted_filter = get_module_filter($module_name, 'converted');
+    $converted_filter_val = !empty($converted_filter) ? $converted_filter->filter_value : '';
+    $converted = [
+       ['id' => 1, 'name' => _l('Yes')],
+       ['id' => 2, 'name' => _l('No')]
+    ];
+    ?>
+    <select name="converted" class="selectpicker" data-width="100%" data-none-selected-text="<?php echo _l('Converted?'); ?>" data-actions-box="true">
+       <option value=""></option>
+       <?php foreach ($converted as $value) { ?>
+          <option value="<?php echo $value['id']; ?>" <?php echo ($converted_filter_val == $value['id']) ? 'selected' : ''; ?>><?php echo $value['name']; ?></option>
+       <?php } ?>
+    </select>
+  </div>
 </div>
 
 <div class="row">

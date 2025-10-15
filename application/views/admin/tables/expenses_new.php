@@ -8,6 +8,7 @@ $payment_mode_name = 'payment_mode';
 $vendor_name = 'vendor';
 $order_tagged_filter_name = 'order_tagged';
 $order_tagged_detail_filter_name = 'order_tagged_detail';
+$converted_filter_name = 'converted';
 
 $CI = &get_instance();
 $CI->load->model('expenses_model');
@@ -111,6 +112,15 @@ if (isset($order_tagged) && $order_tagged !== '') {
     }
 }
 
+if ($this->ci->input->post('converted') && $this->ci->input->post('converted') != '') {
+    $converted = $this->ci->input->post('converted');
+    if($converted == 1) {
+        array_push($where, 'AND (' . db_prefix() . 'expenses.vbt_id IS NOT NULL)');
+    } elseif ($converted == 2) {
+       array_push($where, 'AND (' . db_prefix() . 'expenses.vbt_id IS NULL)');
+    }
+}
+
 $order_tagged_detail = $this->ci->input->post('order_tagged_detail');
 if (isset($order_tagged_detail) && is_array($order_tagged_detail) && !empty($order_tagged_detail)) {
     $or_conditions = [];
@@ -157,6 +167,9 @@ update_module_filter($module_name, $order_tagged_filter_name, $order_tagged_filt
 
 $order_tagged_detail_filter_name_value = !empty($this->ci->input->post('order_tagged_detail')) ? implode(',', $this->ci->input->post('order_tagged_detail')) : NULL;
 update_module_filter($module_name, $order_tagged_detail_filter_name, $order_tagged_detail_filter_name_value);
+
+$converted_filter_name_value = !empty($this->ci->input->post('converted')) ? $this->ci->input->post('converted') : NULL;
+update_module_filter($module_name, $converted_filter_name, $converted_filter_name_value);
 
 $sIndexColumn = 'id';
 $sTable = db_prefix() . 'expenses';

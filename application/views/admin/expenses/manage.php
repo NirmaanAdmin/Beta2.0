@@ -461,6 +461,7 @@
       "year_requisition": "[name='year_requisition']",
       "order_tagged": "[name='order_tagged']",
       "order_tagged_detail": "[name='order_tagged_detail[]']",
+      "converted": "[name='converted']",
     };
 
     initDataTable('.table-expenses', admin_url + 'expenses/table_expenses', [], [0], Params, [6, 'desc']);
@@ -556,6 +557,10 @@
     
     $(document).on('change', 'select[name="order_tagged_detail[]"]', function () {
       $('select[name="order_tagged_detail[]"]').selectpicker('refresh');
+    });
+
+    $(document).on('change', 'select[name="converted"]', function () {
+      $('select[name="converted"]').selectpicker('refresh');
     });
 
     $("body").on('change', '#mass_select_all', function() {
