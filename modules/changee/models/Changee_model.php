@@ -11345,7 +11345,7 @@ class Changee_model extends App_Model
             $row .= '<span>' . _l('this_is_non_tendor_item') . '</span>';
         }
         $row .= '</td>';
-        if (!empty($name)) {
+        if (!empty($name) && $tender_item == 0) {
             $row .= '<td class="">' . render_textarea($name_item_description, '', $item_description, ['rows' => 2, 'placeholder' => _l('item_description'), 'readonly' => 'readonly']) . '</td>';
         } else {
             $row .= '<td class="">' . render_textarea($name_item_description, '', $item_description, ['rows' => 2, 'placeholder' => _l('item_description')]) . '</td>';
