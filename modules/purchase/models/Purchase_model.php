@@ -2565,8 +2565,6 @@ class Purchase_model extends App_Model
                 $to_status = 'Rejected';
             }
 
-            $this->log_po_activity($id, "Purchase order status updated from " . $from_status . " to " . $to_status . "");
-
             $this->db->where('rel_id', $id);
             $this->db->where('rel_type', 'pur_order');
             $this->db->where('staffid', get_staff_user_id());
@@ -3089,7 +3087,6 @@ class Purchase_model extends App_Model
                 $this->db->update(db_prefix() . 'pur_orders', $status_array);
                 $from_status = 'Rejected';
                 $to_status = 'Draft';
-                $this->log_po_activity($id, "Purchase order status updated from " . $from_status . " to " . $to_status . "");
             }
         }
 
@@ -3138,9 +3135,6 @@ class Purchase_model extends App_Model
                 $new_quote_insert_id = $this->db->insert_id();
                 if ($new_quote_insert_id) {
                     $affectedRows++;
-                    $this->log_po_activity($id, 'purchase_order_activity_added_item', false, serialize([
-                        $this->get_items_by_id($rqd['item_code'])->description,
-                    ]));
                 }
                 $iuploadedFiles = handle_purchase_item_attachment_array('pur_order', $id, $new_quote_insert_id, 'newitems', $key);
                 if ($iuploadedFiles && is_array($iuploadedFiles)) {
@@ -3220,9 +3214,6 @@ class Purchase_model extends App_Model
                 $this->db->where('id', $remove_id);
                 if ($this->db->delete(db_prefix() . 'pur_order_detail')) {
                     $affectedRows++;
-                    $this->log_po_activity($id, 'purchase_order_activity_removed_item', false, serialize([
-                        $item_detail->description,
-                    ]));
                 }
             }
         }
@@ -4280,8 +4271,6 @@ class Purchase_model extends App_Model
         if (!empty($data['note'])) {
             $comment = " with reason " . $data['note'];
         }
-
-        $this->log_po_activity($data['rel_id'], "Purchase order status updated from " . $from_status . " to " . $to_status . $comment . "");
     }
 
     /**
@@ -16065,8 +16054,6 @@ class Purchase_model extends App_Model
                 $to_status = 'Rejected';
             }
 
-            $this->log_wo_activity($id, "Work order status updated from " . $from_status . " to " . $to_status . "");
-
             $this->db->where('rel_id', $id);
             $this->db->where('rel_type', 'wo_order');
             $this->db->where('staffid', get_staff_user_id());
@@ -16811,7 +16798,6 @@ class Purchase_model extends App_Model
                 $this->db->update(db_prefix() . 'wo_orders', $status_array);
                 $from_status = 'Rejected';
                 $to_status = 'Draft';
-                $this->log_wo_activity($id, "Work order status updated from " . $from_status . " to " . $to_status . "");
             }
         }
 
@@ -16860,9 +16846,6 @@ class Purchase_model extends App_Model
                 $new_quote_insert_id = $this->db->insert_id();
                 if ($new_quote_insert_id) {
                     $affectedRows++;
-                    $this->log_wo_activity($id, 'work_order_activity_added_item', false, serialize([
-                        $this->get_items_by_id($rqd['item_code'])->description,
-                    ]));
                 }
                 $iuploadedFiles = handle_purchase_item_attachment_array('wo_order', $id, $new_quote_insert_id, 'newitems', $key);
                 if ($iuploadedFiles && is_array($iuploadedFiles)) {
@@ -16940,9 +16923,6 @@ class Purchase_model extends App_Model
                 $this->db->where('id', $remove_id);
                 if ($this->db->delete(db_prefix() . 'wo_order_detail')) {
                     $affectedRows++;
-                    $this->log_wo_activity($id, 'work_order_activity_removed_item', false, serialize([
-                        $item_detail->description,
-                    ]));
                 }
             }
         }
