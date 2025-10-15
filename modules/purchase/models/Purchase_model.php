@@ -8724,6 +8724,7 @@ class Purchase_model extends App_Model
         $data['content'] = nl2br($data['content']);
         $this->db->insert(db_prefix() . 'pur_comments', $data);
         $insert_id = $this->db->insert_id();
+        add_order_comments_activity_log($insert_id, true);
 
         if ($insert_id) {
 
@@ -8744,6 +8745,10 @@ class Purchase_model extends App_Model
     public function edit_comment($data, $id)
     {
         $this->db->where('id', $id);
+        $pur_comments = $this->db->get(db_prefix() . 'pur_comments')->row();
+        update_order_comments_activity_log($id, $pur_comments->content, $data['content']);
+        
+        $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'pur_comments', [
             'content' => nl2br($data['content']),
         ]);
@@ -8762,6 +8767,7 @@ class Purchase_model extends App_Model
      */
     public function remove_comment($id)
     {
+        add_order_comments_activity_log($id, false);
         $this->db->where('id', $id);
         $this->db->delete(db_prefix() . 'pur_comments');
         if ($this->db->affected_rows() > 0) {
