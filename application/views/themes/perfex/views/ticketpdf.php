@@ -4,6 +4,9 @@ $project_name = get_project($ticket->project_id);
 $dept_name = department_pur_request_name($ticket->department);
 $project_prefix = strtoupper(substr($project_name->name, 0, 3));
 $dept_prefix = strtoupper(substr($dept_name, 0, 3));
+if($dept_prefix == 'INT'){
+    $dept_prefix = 'ID';
+}
 $formatted_ticket_id = str_pad($ticket->ticketid, 2, '0', STR_PAD_LEFT);
 $tickethtml = '';
 $tickethtml .= '<table width="100%" cellspacing="0" cellpadding="5" border="1">';
@@ -28,7 +31,7 @@ $tickethtml .= '
 $tickethtml .= '
 <tr style="font-size:13px; text-align: center">
     <td><b>RFI No.</b></td>
-    <td>' . $project_prefix . '-' . $dept_prefix . '-' . 'RIF' . '-' .  $formatted_ticket_id . '</td>
+    <td>' . $project_prefix . '-' . $dept_prefix . '-' . 'RFI' . '-' .  $formatted_ticket_id . '</td>
     <td><b>Subject</b></td>
     <td>' . $ticket->subject . '</td>
 </tr>';
