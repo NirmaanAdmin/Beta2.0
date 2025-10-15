@@ -2133,9 +2133,9 @@ class Estimates_model extends App_Model
 
             $this->db->select(
                 db_prefix() . 'itemable.*,' .
-                db_prefix() . 'unawarded_budget_info.unawarded_qty,' .
-                db_prefix() . 'unawarded_budget_info.unawarded_rate,' .
-                db_prefix() . 'unawarded_budget_info.packages'
+                    db_prefix() . 'unawarded_budget_info.unawarded_qty,' .
+                    db_prefix() . 'unawarded_budget_info.unawarded_rate,' .
+                    db_prefix() . 'unawarded_budget_info.packages'
             );
             $this->db->from(db_prefix() . 'itemable');
             $this->db->join(db_prefix() . 'unawarded_budget_info', db_prefix() . 'unawarded_budget_info.item_id = ' . db_prefix() . 'itemable.id', 'left');
@@ -2222,7 +2222,7 @@ class Estimates_model extends App_Model
                     $this->db->where(db_prefix() . 'pur_orders.approve_status', 2);
                     $this->db->where(db_prefix() . 'pur_order_detail.quantity >', 0);
                     $this->db->where(db_prefix() . 'pur_order_detail.total >', 0);
-                    $this->db->group_by('non_break_description');  
+                    $this->db->group_by('non_break_description');
                     $this->db->having('non_break_description', $non_break_description);
                     $query = $this->db->get();
                     $pur_order_detail = $query->row_array();
@@ -2250,7 +2250,7 @@ class Estimates_model extends App_Model
                     $packages = !empty($item['packages']) ? explode(',', $item['packages']) : array();
                     $remaining_amount = $budgeted_amount - $booked_in_order;
                     $remaining_amount = number_format($remaining_amount, 2, '.', '');
-                    
+
                     $item_id_name_attr = "newitems[$key][item_id]";
                     $budgeted_qty_name_attr = "newitems[$key][budgeted_qty]";
                     $budgeted_unit_name_attr = "newitems[$key][budgeted_unit]";
@@ -2350,18 +2350,45 @@ class Estimates_model extends App_Model
                         'packages' => !empty($value['packages']) ? implode(',', $value['packages']) : NULL,
                     ]);
                 }
-                if(!empty($added)) {
+                if (!empty($added)) {
                     foreach ($added as $akey => $avalue) {
                         $this->db->insert(db_prefix() . 'estimate_package_items_info', [
                             'package_id' => $avalue,
                             'item_id' => $value['item_id'],
                         ]);
+                        $this->db->where('package_id', $avalue);
+                        $this->db->where('estimate_id', $estimate_id);
+                        $this->db->where('group_pur', $budget_head);
+                        $tender_exists = $this->db->get(db_prefix() . 'pur_tender')->row();
+
+                        if ($tender_exists) {
+                            $tender_id = $tender_exists->id;
+                            $this->db->where('id', $value['item_id']);
+                            $get_desc = $this->db->get(db_prefix() . 'itemable')->row();
+                            $tender_detail_arr = [
+                                'pur_tender' => $tender_id,
+                                'item_code'  => $value['item_id'],
+                                'description' => $get_desc->long_description,
+                                'unit_price' => 0.00,
+                                'quantity'   => 0.00,
+                                'area' => get_area_name_by_id($get_desc->area),
+                                'sub_head' => get_sub_head_name_by_id($get_desc->sub_head),
+                                'package_id' => $avalue,
+                            ];
+
+                            $this->db->insert(db_prefix() . 'pur_tender_detail', $tender_detail_arr);
+                        }
                     }
                 }
-                if(!empty($removed)) {
+                if (!empty($removed)) {
                     $this->db->where('item_id', $value['item_id']);
                     $this->db->where_in('package_id', $removed);
                     $this->db->delete(db_prefix() . 'estimate_package_items_info');
+
+
+                    $this->db->where('item_code', $value['item_id']);
+                    $this->db->where_in('package_id', $removed);
+                    $this->db->delete(db_prefix() . 'pur_tender_detail');
 
                     foreach ($removed as $rkey => $rvalue) {
                         $this->db->where('id', $rvalue);
@@ -2372,8 +2399,8 @@ class Estimates_model extends App_Model
                         $estimate_package_items_info_data = $estimate_package_items_info_query->row_array();
                         $total_amount = $estimate_package_items_info_data['total_amount'] ?? 0.00;
                         $total_package = !empty($estimate_package_info->sdeposit_percent)
-                        ? $total_amount + ($total_amount * ($estimate_package_info->sdeposit_percent / 100))
-                        : $total_amount;
+                            ? $total_amount + ($total_amount * ($estimate_package_info->sdeposit_percent / 100))
+                            : $total_amount;
                         $sdeposit_value = $total_package - $total_amount;
 
                         $this->db->where('id', $rvalue);
@@ -2464,16 +2491,16 @@ class Estimates_model extends App_Model
             }
 
             $package_items = array();
-            if(!empty($package_id)) {
+            if (!empty($package_id)) {
                 $this->db->select(
                     db_prefix() . 'itemable.qty,' .
-                    db_prefix() . 'itemable.rate,' .
-                    db_prefix() . 'itemable.unit_id,' .
-                    db_prefix() . 'itemable.item_code,' .
-                    db_prefix() . 'itemable.long_description,' .
-                    db_prefix() . 'itemable.sub_head,' .
-                    db_prefix() . 'itemable.area,' .
-                    db_prefix() . 'estimate_package_items_info.*'
+                        db_prefix() . 'itemable.rate,' .
+                        db_prefix() . 'itemable.unit_id,' .
+                        db_prefix() . 'itemable.item_code,' .
+                        db_prefix() . 'itemable.long_description,' .
+                        db_prefix() . 'itemable.sub_head,' .
+                        db_prefix() . 'itemable.area,' .
+                        db_prefix() . 'estimate_package_items_info.*'
                 );
                 $this->db->from(db_prefix() . 'estimate_package_items_info');
                 $this->db->join(db_prefix() . 'itemable', db_prefix() . 'itemable.id = ' . db_prefix() . 'estimate_package_items_info.item_id', 'left');
@@ -2481,7 +2508,7 @@ class Estimates_model extends App_Model
                 $this->db->group_by(db_prefix() . 'estimate_package_items_info.id');
                 $package_items = $this->db->get()->result_array();
             }
-            if(!empty($package_id)) {
+            if (!empty($package_id)) {
                 $itemhtml .= '<div class="table-responsive s_table">';
                 $itemhtml .= '<table class="table items">';
                 $itemhtml .= '<thead>
@@ -2532,7 +2559,7 @@ class Estimates_model extends App_Model
                     </button>
                 </td>';
                 $itemhtml .= '</tr>';
-                if(!empty($package_items)) {
+                if (!empty($package_items)) {
                     foreach ($package_items as $key => $item) {
                         $item_qty = !empty($item['qty']) ? number_format($item['qty'], 2, '.', '') : 0.00;
                         $item_rate = !empty($item['rate']) ? number_format($item['rate'], 2, '.', '') : 0.00;
@@ -2630,317 +2657,6 @@ class Estimates_model extends App_Model
         return $response;
     }
 
-    // public function save_package($data)
-    // {
-    //     $items = isset($data['items']) ? $data['items'] : array();
-    //     $package_id = isset($data['package_id']) ? $data['package_id'] : NULL;
-    //     $estimate_id = isset($data['estimate_id']) ? $data['estimate_id'] : NULL;
-    //     $budget_head = isset($data['package_budget_head']) ? $data['package_budget_head'] : NULL;
-    //     $project_awarded_date = isset($data['project_awarded_date']) ? $data['project_awarded_date'] : NULL;
-    //     $package_name = isset($data['package_name']) ? $data['package_name'] : NULL;
-    //     $sdeposit_percent = isset($data['sdeposit_percent']) ? $data['sdeposit_percent'] : NULL;
-    //     $sdeposit_value = isset($data['sdeposit_value']) ? $data['sdeposit_value'] : NULL;
-    //     $total_package = isset($data['total_package']) ? $data['total_package'] : NULL;
-    //     $newpackageitems = isset($data['newpackageitems']) ? $data['newpackageitems'] : array();
-    //     $kind = isset($data['kind']) ? $data['kind'] : NULL;
-    //     $rli_filter = isset($data['rli_filter']) ? $data['rli_filter'] : NULL;
-
-    //     if(!empty($package_id)) {
-    //         $this->db->where('id', $package_id);
-    //         $this->db->update(db_prefix() . 'estimate_package_info', [
-    //             'estimate_id' => $estimate_id,
-    //             'budget_head' => $budget_head,
-    //             'project_awarded_date' => date('Y-m-d', strtotime($project_awarded_date)),
-    //             'package_name' => $package_name,
-    //             'sdeposit_percent' => $sdeposit_percent,
-    //             'sdeposit_value' => $sdeposit_value,
-    //             'total_package' => $total_package,
-    //             'kind' => $kind,
-    //             'rli_filter' => $rli_filter,
-    //         ]);
-    //         if(!empty($items)) {
-    //             foreach ($items as $key => $value) {
-    //                 $this->db->where('package_id', $package_id);
-    //                 $this->db->where('item_id', $value['item_id']);
-    //                 $this->db->update(db_prefix() . 'estimate_package_items_info', [
-    //                     'package_qty' => $value['package_qty'],
-    //                     'package_rate' => $value['package_rate'],
-    //                     'remarks' => $value['remarks'],
-    //                 ]);
-    //             }
-    //         }
-    //     } else {
-    //         $this->db->insert(db_prefix() . 'estimate_package_info', [
-    //             'estimate_id' => $estimate_id,
-    //             'budget_head' => $budget_head,
-    //             'project_awarded_date' => date('Y-m-d', strtotime($project_awarded_date)),
-    //             'package_name' => $package_name,
-    //             'sdeposit_percent' => $sdeposit_percent,
-    //             'sdeposit_value' => $sdeposit_value,
-    //             'total_package' => $total_package,
-    //             'kind' => $kind,
-    //             'rli_filter' => $rli_filter,
-    //         ]);
-    //         $package_id = $this->db->insert_id();
-    //         if(!empty($items)) {
-    //             foreach ($items as $key => $value) {
-    //                 $this->db->insert(db_prefix() . 'estimate_package_items_info', [
-    //                     'package_id' => $package_id,
-    //                     'item_id' => $value['item_id'],
-    //                     'package_qty' => $value['package_qty'],
-    //                     'package_rate' => $value['package_rate'],
-    //                     'remarks' => $value['remarks'],
-    //                 ]);
-    //             }
-    //         }
-    //     }
-
-    //     if(!empty($newpackageitems)) {
-    //         foreach ($newpackageitems as $key => $value) {
-    //             $this->db->insert(db_prefix() . 'itemable', [
-    //                 'rel_id' => $estimate_id,
-    //                 'rel_type' => 'estimate',
-    //                 'long_description' => $value['long_description'],
-    //                 'annexure' => $budget_head,
-    //                 'item_code' => $value['item_name'],
-    //             ]);
-    //             $itemable_id = $this->db->insert_id();
-    //             $this->db->insert(db_prefix() . 'unawarded_budget_info', [
-    //                 'estimate_id' => $estimate_id,
-    //                 'budget_head' => $budget_head,
-    //                 'item_id' => $itemable_id,
-    //             ]);
-    //             $this->db->insert(db_prefix() . 'estimate_package_items_info', [
-    //                 'package_id' => $package_id,
-    //                 'item_id' => $itemable_id,
-    //                 'package_qty' => $value['package_qty'],
-    //                 'package_rate' => $value['package_rate'],
-    //                 'remarks' => $value['remarks'],
-    //             ]);
-    //         }
-    //     }
-
-    //     return true;
-    // }
-
-    // public function save_package($data)
-    // {
-    //     $items = isset($data['items']) ? $data['items'] : array();
-    //     $package_id = isset($data['package_id']) ? $data['package_id'] : NULL;
-    //     $estimate_id = isset($data['estimate_id']) ? $data['estimate_id'] : NULL;
-    //     $budget_head = isset($data['package_budget_head']) ? $data['package_budget_head'] : NULL;
-    //     $project_awarded_date = isset($data['project_awarded_date']) ? $data['project_awarded_date'] : NULL;
-    //     $package_name = isset($data['package_name']) ? $data['package_name'] : NULL;
-    //     $sdeposit_percent = isset($data['sdeposit_percent']) ? $data['sdeposit_percent'] : NULL;
-    //     $sdeposit_value = isset($data['sdeposit_value']) ? $data['sdeposit_value'] : NULL;
-    //     $total_package = isset($data['total_package']) ? $data['total_package'] : NULL;
-    //     $newpackageitems = isset($data['newpackageitems']) ? $data['newpackageitems'] : array();
-    //     $kind = isset($data['kind']) ? $data['kind'] : NULL;
-    //     $rli_filter = isset($data['rli_filter']) ? $data['rli_filter'] : NULL;
-    //     $get_est_data = get_estimate_data($estimate_id);
-
-    //     $this->db->where('id', $estimate_id);
-    //     $estimates = $this->db->get(db_prefix() . 'estimates')->row();
-
-    //     $package_budget_head = $this->get_estimate_budget_listing($estimates->id);
-
-    //     if (!empty($package_budget_head)) {
-    //         $package_budget = isset($package_budget_head[0]) ? $package_budget_head[0]['annexure'] : '';
-
-    //         $this->db->select(
-    //             db_prefix() . 'itemable.*'
-    //         );
-
-    //         $this->db->from(db_prefix() . 'itemable');
-    //         $this->db->join(db_prefix() . 'unawarded_budget_info', db_prefix() . 'unawarded_budget_info.item_id = ' . db_prefix() . 'itemable.id', 'left');
-    //         $this->db->where('rel_id', $estimates->id);
-    //         $this->db->where('rel_type', 'estimate');
-    //         $this->db->where('annexure', $budget_head);
-    //         $this->db->group_by(db_prefix() . 'itemable.id');
-    //         $unawarded_budget_itemable = $this->db->get()->result_array();
-    //     }
-
-    //     $unawarded_map = [];
-    //     if (!empty($unawarded_budget_itemable)) {
-    //         foreach ($unawarded_budget_itemable as $ubi) {
-    //             $unawarded_map[$ubi['id']] = [
-    //                 'description' => $ubi['long_description'],
-    //                 'sub_head'    => $ubi['sub_head']
-    //             ];
-    //         }
-    //     }
-    //     if (!empty($package_id)) {
-    //         // Update existing package
-    //         $this->db->where('id', $package_id);
-    //         $this->db->update(db_prefix() . 'estimate_package_info', [
-    //             'estimate_id' => $estimate_id,
-    //             'budget_head' => $budget_head,
-    //             'project_awarded_date' => date('Y-m-d', strtotime($project_awarded_date)),
-    //             'package_name' => $package_name,
-    //             'sdeposit_percent' => $sdeposit_percent,
-    //             'sdeposit_value' => $sdeposit_value,
-    //             'total_package' => $total_package,
-    //             'kind' => $kind,
-    //             'rli_filter' => $rli_filter,
-    //         ]);
-
-    //         if (!empty($items)) {
-    //             foreach ($items as $key => $value) {
-    //                 $this->db->where('package_id', $package_id);
-    //                 $this->db->where('item_id', $value['item_id']);
-    //                 $this->db->update(db_prefix() . 'estimate_package_items_info', [
-    //                     'package_qty' => $value['package_qty'],
-    //                     'package_rate' => $value['package_rate'],
-    //                     'remarks' => $value['remarks'],
-    //                 ]);
-    //             }
-    //         }
-
-    //         // Update tender inform ation
-    //         $this->db->where('package_id', $package_id);
-    //         $tender_exists = $this->db->get(db_prefix() . 'pur_tender')->row();
-
-    //         if ($tender_exists) {
-    //             // Update existing tender
-    //             $this->db->where('package_id', $package_id);
-    //             $this->db->update(db_prefix() . 'pur_tender', [
-    //                 'estimate_id' => $estimate_id,
-    //                 'pur_tn_name' => $package_name,
-    //                 'group_pur' => $budget_head,
-    //                 'request_date' => date('Y-m-d H:i:s'),
-    //             ]);
-    //             $tender_id = $tender_exists->id;
-
-    //             // Delete existing tender items to reinsert them
-    //             $this->db->where('pur_tender', $tender_id);
-    //             $this->db->delete(db_prefix() . 'pur_tender_detail');
-    //         }
-    //     } else {
-    //         $prefix = get_purchase_option('pur_tender_prefix');
-    //         $next_number = get_purchase_option('next_tender_number');
-
-    //         if ($get_est_data->project_id != '' && $get_est_data->project_id > 0) {
-    //             // Get project name
-    //             $this->db->where('id', $get_est_data->project_id);
-    //             $project = $this->db->get(db_prefix() . 'projects')->row();
-
-    //             if ($project) {
-    //                 // Extract clean 3-letter project code
-    //                 $project_code = strtoupper(preg_replace('/[^a-zA-Z]/', '', substr($project->name, 0, 3)));
-
-    //                 // Reconstruct with project code inserted after sequential number
-    //                 $new_po_parts = [
-    //                     $prefix,  // #TN
-    //                     str_pad($next_number, 4, '0', STR_PAD_LEFT),  // 00080
-    //                     $project_code, // SUR
-    //                     date('Y'), // year
-    //                 ];
-
-    //                 $pur_tn_code = implode('-', $new_po_parts);
-    //             }
-    //         }
-
-    //         // Insert new package
-    //         $this->db->insert(db_prefix() . 'estimate_package_info', [
-    //             'estimate_id' => $estimate_id,
-    //             'budget_head' => $budget_head,
-    //             'project_awarded_date' => date('Y-m-d', strtotime($project_awarded_date)),
-    //             'package_name' => $package_name,
-    //             'sdeposit_percent' => $sdeposit_percent,
-    //             'sdeposit_value' => $sdeposit_value,
-    //             'total_package' => $total_package,
-    //             'kind' => $kind,
-    //             'rli_filter' => $rli_filter,
-    //         ]);
-    //         $package_id = $this->db->insert_id();
-
-    //         if (!empty($items)) {
-    //             foreach ($items as $key => $value) {
-    //                 $this->db->insert(db_prefix() . 'estimate_package_items_info', [
-    //                     'package_id' => $package_id,
-    //                     'item_id' => $value['item_id'],
-    //                     'package_qty' => $value['package_qty'],
-    //                     'package_rate' => $value['package_rate'],
-    //                     'remarks' => $value['remarks'],
-    //                 ]);
-    //             }
-    //         }
-
-    //         // Insert new tender
-    //         $this->db->insert(db_prefix() . 'pur_tender', [
-    //             'pur_tn_code' => $pur_tn_code,
-    //             'pur_tn_name' => $package_name,
-    //             'package_id' => $package_id,
-    //             'estimate_id' => $estimate_id,
-    //             'group_pur' => $budget_head,
-    //             'project' => $get_est_data->project_id,
-    //             'request_date' => date('Y-m-d H:i:s'),
-    //         ]);
-    //         $tender_id = $this->db->insert_id();
-    //         if (isset($tender_id)) {
-    //             $next_number = $next_number + 1;
-    //             $this->db->where('option_name', 'next_tender_number');
-    //             $this->db->update(db_prefix() . 'purchase_option', ['option_val' =>  $next_number,]);
-    //         }
-    //     }
-
-    //     // Insert items into tender_detail (for both new and updated tenders)
-    //     if (!empty($items) && isset($tender_id)) {
-    //         foreach ($items as $key => $value) {
-    //             $desc = isset($unawarded_map[$value['item_id']]) ? $unawarded_map[$value['item_id']]['description'] : '';
-    //             $sub  = isset($unawarded_map[$value['item_id']]) ? $unawarded_map[$value['item_id']]['sub_head']    : '';
-    //             $this->db->insert(db_prefix() . 'pur_tender_detail', [
-    //                 'pur_tender' => $tender_id,
-    //                 'item_code' => $value['item_id'],
-    //                 'quantity' => $value['package_qty'],
-    //                 'unit_price' => $value['package_rate'],
-    //                 'remarks' => $value['remarks'],
-    //                 'description' => $desc,
-    //                 'sub_head' => $sub,
-    //             ]);
-    //         }
-    //     }
-
-    //     if (!empty($newpackageitems)) {
-    //         foreach ($newpackageitems as $key => $value) {
-    //             $this->db->insert(db_prefix() . 'itemable', [
-    //                 'rel_id' => $estimate_id,
-    //                 'rel_type' => 'estimate',
-    //                 'long_description' => $value['long_description'],
-    //                 'annexure' => $budget_head,
-    //                 'item_code' => $value['item_name'],
-    //             ]);
-    //             $itemable_id = $this->db->insert_id();
-    //             $this->db->insert(db_prefix() . 'unawarded_budget_info', [
-    //                 'estimate_id' => $estimate_id,
-    //                 'budget_head' => $budget_head,
-    //                 'item_id' => $itemable_id,
-    //             ]);
-    //             $this->db->insert(db_prefix() . 'estimate_package_items_info', [
-    //                 'package_id' => $package_id,
-    //                 'item_id' => $itemable_id,
-    //                 'package_qty' => $value['package_qty'],
-    //                 'package_rate' => $value['package_rate'],
-    //                 'remarks' => $value['remarks'],
-    //             ]);
-
-    //             // Also insert into tender_detail if tender exists
-    //             if (isset($tender_id)) {
-    //                 $this->db->insert(db_prefix() . 'pur_tender_detail', [
-    //                     'pur_tender' => $tender_id,
-    //                     'item_code' => $itemable_id,
-    //                     'quantity' => $value['package_qty'],
-    //                     'unit_price' => $value['package_rate'],
-    //                     'remarks' => $value['remarks'],
-    //                     'description' => $value['long_description'],
-    //                     'sub_head' => $value['sub_head'] ?? '', // Assuming sub_head is
-    //                 ]);
-    //             }
-    //         }
-    //     }
-
-    //     return true;
-    // }
 
     public function save_package($data)
     {
@@ -3369,7 +3085,7 @@ class Estimates_model extends App_Model
                     $remaining_qty = $budgeted_qty - $used_qty;
                     $remaining_qty = number_format($remaining_qty, 2, '.', '');
                     $remaining_amount = $budgeted_amount - $used_amount;
-                    $remaining_amount = number_format($remaining_amount, 2, '.', '');   
+                    $remaining_amount = number_format($remaining_amount, 2, '.', '');
                     $item_id_name_attr = "newitems[$key][item_id]";
                     $budgeted_qty_name_attr = "newitems[$key][budgeted_qty]";
                     $budgeted_unit_name_attr = "newitems[$key][budgeted_unit]";
@@ -3718,7 +3434,7 @@ class Estimates_model extends App_Model
                 $this->db->where(db_prefix() . 'pur_orders.approve_status', 2);
                 $this->db->where(db_prefix() . 'pur_order_detail.quantity >', 0);
                 $this->db->where(db_prefix() . 'pur_order_detail.total >', 0);
-                $this->db->group_by('non_break_description');  
+                $this->db->group_by('non_break_description');
                 $this->db->having('non_break_description', $non_break_description);
                 $query = $this->db->get();
                 $pur_order_detail = $query->row_array();
@@ -3750,7 +3466,7 @@ class Estimates_model extends App_Model
                 $this->db->where(db_prefix() . 'wo_orders.approve_status', 2);
                 $this->db->where(db_prefix() . 'wo_order_detail.quantity >', 0);
                 $this->db->where(db_prefix() . 'wo_order_detail.total >', 0);
-                $this->db->group_by('non_break_description');  
+                $this->db->group_by('non_break_description');
                 $this->db->having('non_break_description', $non_break_description);
                 $query = $this->db->get();
                 $wo_order_detail = $query->row_array();

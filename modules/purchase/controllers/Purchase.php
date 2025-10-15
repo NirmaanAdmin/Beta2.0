@@ -15706,7 +15706,7 @@ class purchase extends AdminController
                         $item_text = pur_get_item_variatiom($tender_detail['item_code']);
                     }
 
-                    $purchase_request_row_template .= $this->purchase_model->create_purchase_tender_row_template('items[' . $index_request . ']', $tender_detail['item_code'], $tender_detail['description'], $tender_detail['area'], $tender_detail['image'], $tender_detail['quantity'], $tender_detail['tn_id'],  true, $tender_detail, $tender_detail['remarks']);
+                    $purchase_request_row_template .= $this->purchase_model->create_purchase_tender_row_template('items[' . $index_request . ']', $tender_detail['item_code'], $tender_detail['description'], $tender_detail['area'], $tender_detail['image'], $tender_detail['quantity'], $tender_detail['tn_id'],  true, $tender_detail, $tender_detail['remarks'],$tender_detail['unit_price']);
                 }
             }
         }

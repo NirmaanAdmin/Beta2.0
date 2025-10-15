@@ -22932,7 +22932,7 @@ class Purchase_model extends App_Model
         return $pur_tender_lst;
     }
 
-    public function create_purchase_tender_row_template($name = '', $item_code = '', $item_description = '', $area = '', $image = '', $quantity = '', $item_key = '', $is_edit = false, $tender_detail = [], $remarks = '')
+    public function create_purchase_tender_row_template($name = '', $item_code = '', $item_description = '', $area = '', $image = '', $quantity = '', $item_key = '', $is_edit = false, $tender_detail = [], $remarks = '', $unit_price = '')
     {
         $this->load->model('invoice_items_model');
         $row = '';
@@ -22943,6 +22943,7 @@ class Purchase_model extends App_Model
         $name_image = 'image';
         $name_quantity = 'quantity';
         $name_remarks = 'remarks';
+        $name_unit_price = 'unit_price';
 
         $text_right_class = 'text-right';
         $array_qty_attr = []; // Added missing variable initialization
@@ -22960,6 +22961,7 @@ class Purchase_model extends App_Model
             $name_image = $name . '[image]';
             $name_quantity = $name . '[quantity]';
             $name_remarks = $name . '[remarks]';
+            $name_unit_price = $name . '[unit_price]';
         }
 
         $full_item_image = '';
@@ -22991,6 +22993,10 @@ class Purchase_model extends App_Model
 
         $row .= '<td class="quantities">' .
             render_input($name_quantity, '', $quantity, 'number', $array_qty_attr, [], 'no-margin', $text_right_class) .
+            '</td>';
+
+        $row .= '<td class="unit_name">' .
+            render_input($name_unit_price, '', $unit_price, 'number', $array_qty_attr, [], 'no-margin', $text_right_class) .
             '</td>';
 
         // Fixed typo: render_textare -> render_textarea
@@ -23051,6 +23057,7 @@ class Purchase_model extends App_Model
                 $dt_data['pur_tender'] = $id;
                 $dt_data['area'] = !empty($rqd['area']) ? implode(',', $rqd['area']) : NULL;
                 $dt_data['quantity'] = ($rqd['quantity'] != '' && $rqd['quantity'] != null) ? $rqd['quantity'] : 0;
+                $dt_data['unit_price'] = ($rqd['unit_price'] != '' && $rqd['unit_price'] != null) ? $rqd['unit_price'] : 0;
                 $dt_data['remarks'] = $rqd['remarks'] ?? '';
                 $this->db->where('tn_id', $rqd['id']);
                 $this->db->update(db_prefix() . 'pur_tender_detail', $dt_data);

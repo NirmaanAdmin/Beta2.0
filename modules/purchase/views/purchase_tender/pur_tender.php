@@ -277,6 +277,7 @@
                           <th align="left"><?php echo _l('area'); ?></th>
                           <th align="left"><?php echo _l('Image'); ?></th>
                           <th align="left" class="qty"><?php echo _l('purchase_quantity'); ?></th>
+                          <th align="left" class="qty"><?php echo _l('unit_price'); ?></th>
                           <th align="left"><?php echo _l('Remarks'); ?></th>
                         </tr>
                       </thead>

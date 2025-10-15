@@ -93,7 +93,7 @@
 
                   <div class="row">
                     <div class="col-md-12">
-                      <p class="bold col-md-4 p_style"><?php echo _l('information'); ?></p>
+                      <p class="bold col-md-4 p_style"><?php echo _l('Tender Information'); ?></p>
                       <div>
                         <?php if ($pur_tender->status == 2) { ?>
                           <!-- <a href="<?php echo admin_url('purchase/pur_order?pr=' . $pur_tender->id); ?>" class="btn btn-info save_detail pull-right" target="_blank"><?php echo _l('convert_to_po'); ?></a> -->
@@ -306,9 +306,9 @@
                             <th width="20%" align="right"><?php echo _l('area'); ?></th>
                             <th width="20%" align="right"><?php echo _l('Image'); ?></th>
                             <th width="10%" align="right" class="qty"><?php echo _l('purchase_quantity'); ?></th>
+                            <th width="10%" align="right"><?php echo _l('unit_price'); ?></th>
                             <th width="20%" align="right"><?php echo _l('Remarks'); ?></th>
-                            <!-- <th width="10%" align="right"><?php echo _l('unit_price'); ?></th>
-                            <th width="10%" align="right"><?php echo _l('subtotal_before_tax'); ?></th>
+                            <!-- <th width="10%" align="right"><?php echo _l('subtotal_before_tax'); ?></th>
                             <th width="15%" align="right"><?php echo _l('debit_note_table_tax_heading'); ?></th>
                             <th width="10%" align="right"><?php echo _l('tax_value'); ?></th>
                             <th width="10%" align="right"><?php echo _l('debit_note_total'); ?></th> -->
@@ -344,9 +344,10 @@
                                   ?>
                                 </td>
                                 <td align="right"><?php echo pur_html_entity_decode($es['quantity']) . ' ' . pur_get_unit_name($es['unit_id']); ?></td>
+                                <td align="right"><?php echo app_format_money($es['unit_price'], $base_currency->symbol); ?></td>
                                 <td align="right"><?php echo $es['remarks']; ?></td>
-                                <!-- <td align="right"><?php echo app_format_money($es['unit_price'], $base_currency->symbol); ?></td>
-                                <td align="right"><?php echo app_format_money($es['into_money'], $base_currency->symbol); ?></td>
+                                
+                                <!-- <td align="right"><?php echo app_format_money($es['into_money'], $base_currency->symbol); ?></td>
                                 <td align="right">
                                   <?php
                                   if ($es['tax_name'] != '') {
