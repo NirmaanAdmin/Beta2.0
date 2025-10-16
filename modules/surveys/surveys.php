@@ -106,7 +106,7 @@ function surveys_permissions()
         'delete' => _l('permission_delete'),
     ];
 
-    register_staff_capabilities('surveys', $capabilities, _l('surveys'));
+    // register_staff_capabilities('surveys', $capabilities, _l('surveys'));
 }
 
 function surveys_numbers_of_features_using_cron_job($number)

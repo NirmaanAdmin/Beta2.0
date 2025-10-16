@@ -89,7 +89,7 @@ function goals_permissions()
         'delete' => _l('permission_delete'),
     ];
 
-    register_staff_capabilities('goals', $capabilities, _l('goals'));
+    // register_staff_capabilities('goals', $capabilities, _l('goals'));
 }
 
 function goals_notification()

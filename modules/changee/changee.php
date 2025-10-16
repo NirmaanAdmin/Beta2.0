@@ -369,23 +369,23 @@ function changee_permissions() {
         'delete' => _l('permission_delete'),
     ];
 
-    register_staff_capabilities('changee_items', $capabilities, _l('changee_items'));
-    register_staff_capabilities('changee_vendors', $capabilities_own, _l('changee_vendors'));
-    register_staff_capabilities('changee_vendor_items', $capabilities_own, _l('changee_vendor_items'));
-    register_staff_capabilities('changee_request', $capabilities_own, _l('changee_request'));
-    register_staff_capabilities('changee_quotations', $capabilities_own, _l('changee_quotations'));
-    register_staff_capabilities('changee_orders', $capabilities_own, _l('changee_orders'));
-    register_staff_capabilities('changee_order_return', $capabilities_own, _l('changee_order_return'));
-    register_staff_capabilities('changee_contracts', $capabilities_own, _l('changee_contracts'));
-    register_staff_capabilities('changee_invoices', $capabilities_own, _l('changee_invoices'));
-    register_staff_capabilities('changee_debit_notes', $capabilities_own, _l('changee_debit_notes'));
-    register_staff_capabilities('changee_reports', $capabilities_rp, _l('changee_reports'));
-    register_staff_capabilities('changee_settings', $capabilities_setting, _l('changee_settings'));
+    // register_staff_capabilities('changee_items', $capabilities, _l('changee_items'));
+    // register_staff_capabilities('changee_vendors', $capabilities_own, _l('changee_vendors'));
+    // register_staff_capabilities('changee_vendor_items', $capabilities_own, _l('changee_vendor_items'));
+    // register_staff_capabilities('changee_request', $capabilities_own, _l('changee_request'));
+    // register_staff_capabilities('changee_quotations', $capabilities_own, _l('changee_quotations'));
+    register_staff_capabilities('changee_orders', $capabilities_own, 'Change Orders');
+    // register_staff_capabilities('changee_order_return', $capabilities_own, _l('changee_order_return'));
+    // register_staff_capabilities('changee_contracts', $capabilities_own, _l('changee_contracts'));
+    // register_staff_capabilities('changee_invoices', $capabilities_own, _l('changee_invoices'));
+    // register_staff_capabilities('changee_debit_notes', $capabilities_own, _l('changee_debit_notes'));
+    // register_staff_capabilities('changee_reports', $capabilities_rp, _l('changee_reports'));
+    // register_staff_capabilities('changee_settings', $capabilities_setting, _l('changee_settings'));
 
-    register_staff_capabilities('changee_order_change_approve_status', $capabilities_setting, _l('changee_order_change_approve_status'));
+    // register_staff_capabilities('changee_order_change_approve_status', $capabilities_setting, _l('changee_order_change_approve_status'));
     
-    register_staff_capabilities('changee_estimate_change_approve_status', $capabilities_setting, _l('changee_quotations_change_approve_status'));
-    register_staff_capabilities('changee_request_change_approve_status', $capabilities_setting, _l('changee_request_change_approve_status'));
+    // register_staff_capabilities('changee_estimate_change_approve_status', $capabilities_setting, _l('changee_quotations_change_approve_status'));
+    // register_staff_capabilities('changee_request_change_approve_status', $capabilities_setting, _l('changee_request_change_approve_status'));
 
 }
 

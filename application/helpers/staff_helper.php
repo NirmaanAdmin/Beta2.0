@@ -30,18 +30,18 @@ function get_available_staff_permissions($data = [])
     $withNotApplicableViewOwn = array_merge(['view_own' => ['not_applicable' => true, 'name' => _l('permission_view_own')]], $withoutViewOwnPermissionsArray);
 
     $corePermissions = [
-        'bulk_pdf_exporter' => [
-            'name'         => _l('bulk_pdf_exporter'),
-            'capabilities' => [
-                'view' => $viewGlobalName,
-            ],
-        ],
-        'contracts' => [
-            'name'         => _l('contracts'),
-            'capabilities' => array_merge($allPermissionsArray, [
-                'view_all_templates' => _l('permission_view_all_templates'),
-            ]),
-        ],
+        // 'bulk_pdf_exporter' => [
+        //     'name'         => _l('bulk_pdf_exporter'),
+        //     'capabilities' => [
+        //         'view' => $viewGlobalName,
+        //     ],
+        // ],
+        // 'contracts' => [
+        //     'name'         => _l('contracts'),
+        //     'capabilities' => array_merge($allPermissionsArray, [
+        //         'view_all_templates' => _l('permission_view_all_templates'),
+        //     ]),
+        // ],
         'credit_notes' => [
             'name'         => _l('credit_notes'),
             'capabilities' => $allPermissionsArray,
@@ -76,10 +76,10 @@ function get_available_staff_permissions($data = [])
             'name'         => _l('items'),
             'capabilities' => $withoutViewOwnPermissionsArray,
         ],
-        'knowledge_base' => [
-            'name'         => _l('knowledge_base'),
-            'capabilities' => $withoutViewOwnPermissionsArray,
-        ],
+        // 'knowledge_base' => [
+        //     'name'         => _l('knowledge_base'),
+        //     'capabilities' => $withoutViewOwnPermissionsArray,
+        // ],
         'payments' => [
             'name'         => _l('payments'),
             'capabilities' => $withNotApplicableViewOwn,
@@ -96,12 +96,12 @@ function get_available_staff_permissions($data = [])
                 'view_own' => _l('permission_projects_based_on_assignee'),
             ],
         ],
-        'proposals' => [
-            'name'         => _l('proposals'),
-            'capabilities' => array_merge($allPermissionsArray, [
-                'view_all_templates' => _l('permission_view_all_templates'),
-            ]),
-        ],
+        // 'proposals' => [
+        //     'name'         => _l('proposals'),
+        //     'capabilities' => array_merge($allPermissionsArray, [
+        //         'view_all_templates' => _l('permission_view_all_templates'),
+        //     ]),
+        // ],
         'reports' => [
             'name'         => _l('reports'),
             'capabilities' => [
@@ -124,10 +124,10 @@ function get_available_staff_permissions($data = [])
             'name'         => _l('staff'),
             'capabilities' => $withoutViewOwnPermissionsArray,
         ],
-        'subscriptions' => [
-            'name'         => _l('subscriptions'),
-            'capabilities' => $allPermissionsArray,
-        ],
+        // 'subscriptions' => [
+        //     'name'         => _l('subscriptions'),
+        //     'capabilities' => $allPermissionsArray,
+        // ],
         'tasks' => [
             'name'         => _l('tasks'),
             'capabilities' => array_merge($withNotApplicableViewOwn, [
@@ -141,17 +141,17 @@ function get_available_staff_permissions($data = [])
                 'view_own' => _l('permission_tasks_based_on_assignee'),
             ],
         ],
-        'checklist_templates' => [
-            'name'         => _l('checklist_templates'),
-            'capabilities' => [
-                'create' => _l('permission_create'),
-                'delete' => _l('permission_delete'),
-            ],
-        ],
-        'estimate_request' => [
-            'name'         => _l('estimate_request'),
-            'capabilities' => $allPermissionsArray,
-        ],
+        // 'checklist_templates' => [
+        //     'name'         => _l('checklist_templates'),
+        //     'capabilities' => [
+        //         'create' => _l('permission_create'),
+        //         'delete' => _l('permission_delete'),
+        //     ],
+        // ],
+        // 'estimate_request' => [
+        //     'name'         => _l('estimate_request'),
+        //     'capabilities' => $allPermissionsArray,
+        // ],
         'critical_agenda' => [
             'name'         => _l('Critical Agenda'),
             'capabilities' => [
@@ -183,7 +183,11 @@ function get_available_staff_permissions($data = [])
         ];
     }
 
-    return hooks()->apply_filters('staff_permissions', $corePermissions, $data);
+    $staff_permissions = hooks()->apply_filters('staff_permissions', $corePermissions, $data);
+    uasort($staff_permissions, function($a, $b) {
+        return strcasecmp($a['name'], $b['name']);
+    });
+    return $staff_permissions;
 }
 /**
  * Get staff by ID or current logged in staff

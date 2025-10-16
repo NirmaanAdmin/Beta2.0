@@ -79,7 +79,7 @@ function resource_workload_permissions() {
 		'view' => _l('permission_view') . '(' . _l('permission_global') . ')',
 	];
 
-	register_staff_capabilities('pw_rp_resource_workload', $capabilities, _l('resource_workload'));
+	// register_staff_capabilities('pw_rp_resource_workload', $capabilities, _l('resource_workload'));
 }
 
 /**
