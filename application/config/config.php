@@ -498,12 +498,6 @@ if ($config['csrf_protection'] == true
     $config['csrf_protection'] = false;
 }
 
-if ($config['csrf_protection'] == true
-    && isset($_SERVER['REQUEST_URI'])
-    && strpos($_SERVER['REQUEST_URI'], 'timesheets/') !== false) {
-    $config['csrf_protection'] = false;
-}
-
 /*
 |--------------------------------------------------------------------------
 | Output Compression
