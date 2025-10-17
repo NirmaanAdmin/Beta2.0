@@ -40,7 +40,7 @@ $module_name = 'payment_certificate'; ?>
                            <h4 class="no-margin font-bold"><i class="fa fa-clipboard" aria-hidden="true"></i> <?php echo _l('payment_certificate'); ?></h4>
                            <hr />
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-12">
                            <?php if (has_permission('payment_certificate', '', 'create') || is_admin()) { ?>
                               <a href="<?php echo admin_url('purchase/ot_payment_certificate'); ?>" class="btn btn-info pull-left mright10 display-block">
                               <?php echo _l('new_payment_certificate'); ?>
