@@ -316,6 +316,13 @@
             $('#timekeeping_value').val(time.toFixed(2));
           }
         }
+        if (time) {
+          if (time < 4.5) {
+            $('#comoff_value').val(0.5);
+          } else {
+            $('#comoff_value').val(1);
+          }
+        }
       }
     });
 
@@ -343,6 +350,13 @@
             $('#timekeeping_value').val(0);
           } else {
             $('#timekeeping_value').val(time.toFixed(2));
+          }
+        }
+        if (time) {
+          if (time < 4.5) {
+            $('#comoff_value').val(0.5);
+          } else {
+            $('#comoff_value').val(1);
           }
         }
       }
@@ -582,6 +596,7 @@
     "use strict";
     $('#additional_timesheets_modalss').modal();
   }
+
   function btn_missed_punch() {
     "use strict";
     $('#missed_punch_modalss').modal();
@@ -960,7 +975,8 @@
     }
     return result;
   }
-  function edit_leave(staff_id,start_time,end_time,leave_id) {
+
+  function edit_leave(staff_id, start_time, end_time, leave_id) {
     "use strict";
     $('#editLeaveModal').modal('show');
     $('#update_staff_id').val(staff_id);

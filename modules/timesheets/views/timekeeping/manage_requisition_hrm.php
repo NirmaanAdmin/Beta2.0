@@ -37,7 +37,7 @@ $valid_cur_date = $this->timesheets_model->get_next_shift_date(get_staff_user_id
                                                     echo 'active';
                                                   } ?>">
                     <a href="#additional_timesheets" aria-controls="additional_timesheets" role="tab" data-toggle="tab">
-                      <span class="glyphicon glyphicon-pencil"></span>&nbsp;<?php echo _l('additional_timesheets'); ?>
+                      <span class="glyphicon glyphicon-pencil"></span>&nbsp;<?php echo _l('Comp Off Approval'); ?>
                     </a>
                   </li>
                 </ul>
@@ -512,8 +512,8 @@ $valid_cur_date = $this->timesheets_model->get_next_shift_date(get_staff_user_id
           <?php echo render_date_input('additional_day', 'additional_day'); ?>
           <?php echo render_input('time_in', 'time_in', '', 'time'); ?>
           <?php echo render_input('time_out', 'time_out', '', 'time'); ?>
-          <?php echo render_input('timekeeping_value', 'timekeeping_value', ''); ?>
-          <?php echo render_input('comoff_value', 'comoff_value', ''); ?>
+          <?php echo render_input('timekeeping_value', 'timekeeping_value', '','',['readonly' => true]); ?>
+          <?php echo render_input('comoff_value', 'comoff_value', '','', ['readonly' => true]); ?>
           <?php echo render_textarea('reason', 'reason_'); ?>
         </div>
         <div class="clearfix"></div>
