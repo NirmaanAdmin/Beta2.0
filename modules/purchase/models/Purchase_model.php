@@ -18690,7 +18690,7 @@ class Purchase_model extends App_Model
         $logo = '';
         $company_logo = get_option('company_logo_dark');
         if (!empty($company_logo)) {
-            $logo = '<img src="' . base_url('uploads/company/' . $company_logo) . '" width="230" height="160">';
+            $logo = '<img src="' . base_url('uploads/company/' . $company_logo) . '" width="190" height="100">';
         }
 
         $html .= '<div class="payment_certificate_main_title" style="font-size:22px; font-weight: bold; text-align: center;">' . mb_strtoupper(_l('payment_certificate')) . '</div>';
