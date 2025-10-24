@@ -382,6 +382,8 @@ class Staff_model extends App_Model
         $permissions = $this->app_object_cache->get('staff-' . $id . '-permissions');
 
         if (!$permissions && !is_array($permissions)) {
+            $default_project = get_default_project();
+            $this->db->where('project_id', $default_project);
             $this->db->where('staff_id', $id);
             $permissions = $this->db->get('staff_permissions')->result_array();
 
@@ -517,6 +519,8 @@ class Staff_model extends App_Model
                 }
             }
             hooks()->do_action('staff_member_created', $staffid);
+
+            $this->update_default_project($staffid);
 
             return $staffid;
         }
@@ -678,6 +682,8 @@ class Staff_model extends App_Model
 
     public function update_permissions($permissions, $id)
     {
+        $default_project = get_default_project();
+        $this->db->where('project_id', $default_project);
         $this->db->where('staff_id', $id);
         $this->db->delete('staff_permissions');
 
@@ -691,7 +697,7 @@ class Staff_model extends App_Model
                     continue;
                 }
 
-                $this->db->insert('staff_permissions', ['staff_id' => $id, 'feature' => $feature, 'capability' => $capability]);
+                $this->db->insert('staff_permissions', ['staff_id' => $id, 'project_id' => $default_project, 'feature' => $feature, 'capability' => $capability]);
             }
         }
 
@@ -893,5 +899,37 @@ class Staff_model extends App_Model
         $this->db->order_by(db_prefix() . 'staff.staffid', 'desc');
         $project_members = $this->db->get(db_prefix() . 'project_members')->result_array();
         return $project_members;
+    }
+
+    public function update_default_project($staffid)
+    {
+        $default_project = get_default_project();
+        $this->db->insert(db_prefix() . 'default_projects', ['project' => $default_project, 'staff_id' => $staffid, 'created_at' => date('Y-m-d H:i:s')]);
+        return true;
+    }
+
+    public function update_project_wise_staff_permissions($permissions, $id)
+    {
+        $this->db->where('staff_id', $id);
+        $this->db->group_by(db_prefix() . 'staff_permissions.project_id');
+        $staff_permissions = $this->db->get(db_prefix() . 'staff_permissions')->result_array();
+        if(!empty($staff_permissions)) {
+            foreach ($staff_permissions as $stkey => $stvalue) {
+                $project_id = $stvalue['project_id'];
+                $this->db->where('project_id', $project_id);
+                $this->db->where('staff_id', $id);
+                $this->db->delete('staff_permissions');
+                $is_staff_member = is_staff_member($id);
+                foreach ($permissions as $feature => $capabilities) {
+                    foreach ($capabilities as $capability) {
+                        if ($feature == 'leads' && !$is_staff_member) {
+                            continue;
+                        }
+                        $this->db->insert('staff_permissions', ['staff_id' => $id, 'project_id' => $project_id, 'feature' => $feature, 'capability' => $capability]);
+                    }
+                }
+            }
+        }
+        return true;
     }
 }

@@ -336,14 +336,14 @@ $lang['reports_sales_dt_items_customers_amount']          = 'Amount';
 $lang['reports_sales_dt_items_customers_amount_with_tax'] = 'Amount with Tax';
 
 # Roles
-$lang['new_role']           = 'New Role';
-$lang['all_roles']          = 'All Role';
-$lang['roles']              = 'Staff Roles';
-$lang['role']               = 'Role';
-$lang['role_lowercase']     = 'role';
+$lang['new_role']           = 'New Global Permission';
+$lang['all_roles']          = 'All Global Permission';
+$lang['roles']              = 'Staff Global Permissions';
+$lang['role']               = 'Global Permission';
+$lang['role_lowercase']     = 'global permission';
 $lang['roles_total_users']  = 'Total Users: ';
-$lang['roles_dt_name']      = 'Role Name';
-$lang['role_add_edit_name'] = 'Role Name';
+$lang['roles_dt_name']      = 'Global Permission Name';
+$lang['role_add_edit_name'] = 'Global Permission Name';
 
 # Service
 $lang['new_service']           = 'New Service';
@@ -388,8 +388,8 @@ $lang['settings_general_company_main_domain']                      = 'Company Ma
 $lang['settings_general_use_knowledgebase']                        = 'Use Knowledge Base';
 $lang['settings_general_use_knowledgebase_tooltip']                = 'If you allow this options knowledge base will be shown also on clients side';
 $lang['settings_general_tables_limit']                             = 'Tables Pagination Limit';
-$lang['settings_general_default_staff_role']                       = 'Default Staff Role';
-$lang['settings_general_default_staff_role_tooltip']               = 'When you add new staff member this role will be selected by default';
+$lang['settings_general_default_staff_role']                       = 'Default Staff Global Permission';
+$lang['settings_general_default_staff_role_tooltip']               = 'When you add new staff member this global permission will be selected by default';
 $lang['settings_localization_date_format']                         = 'Date Format';
 $lang['settings_localization_default_timezone']                    = 'Default Timezone';
 $lang['settings_localization_default_language']                    = 'Default Language';
@@ -533,7 +533,7 @@ $lang['acs_sales_taxes_submenu']               = 'Tax Rates';
 $lang['acs_sales_currencies_submenu']          = 'Currencies';
 $lang['acs_sales_payment_modes_submenu']       = 'Payment Modes';
 $lang['acs_email_templates']                   = 'Email Templates';
-$lang['acs_roles']                             = 'Roles';
+$lang['acs_roles']                             = 'Global Permissions';
 $lang['acs_settings']                          = 'Settings';
 
 # RFI
@@ -612,7 +612,7 @@ $lang['staff_add_edit_facebook']                       = 'Facebook';
 $lang['staff_add_edit_linkedin']                       = 'LinkedIn';
 $lang['staff_add_edit_skype']                          = 'Skype';
 $lang['staff_add_edit_departments']                    = 'Member departments';
-$lang['staff_add_edit_role']                           = 'Role';
+$lang['staff_add_edit_role']                           = 'Global Permission';
 $lang['staff_add_edit_permissions']                    = 'Permissions';
 $lang['staff_add_edit_administrator']                  = 'Administrator';
 $lang['staff_add_edit_password']                       = 'Password';
@@ -2560,7 +2560,7 @@ $lang['expenses_report_total_tax']                = 'Total Tax';
 $lang['expenses_detailed_report']                 = 'Detailed Report';
 $lang['expense_not_billable']                     = 'Not Billable';
 $lang['notification_settings']                    = 'Notification settings';
-$lang['staff_with_roles']                         = 'Staff members with roles';
+$lang['staff_with_roles']                         = 'Staff members with global permissions';
 $lang['specific_staff_members']                   = 'Specific Staff Members';
 $lang['proposal_mark_as']                         = 'Mark as %s';
 $lang['kb_report_total_answers']                  = 'Total';
@@ -2697,7 +2697,7 @@ $lang['payment_method_info']                                  = 'Some payment ga
 # Version 1.2.7
 $lang['dropbox_app_key']                                    = 'Dropbox APP Key';
 $lang['project_invoice_select_all_expenses']                = 'Select all expenses';
-$lang['role_update_staff_permissions']                      = 'Update all staff members permissions that are using this role';
+$lang['role_update_staff_permissions']                      = 'Update all staff members permissions that are using this global permission';
 $lang['customer_active']                                    = 'Active';
 $lang['note_updated_successfully']                          = 'Note updated successfully';
 $lang['update_note']                                        = 'Update note';
@@ -3560,7 +3560,7 @@ $lang['module_upgrade_database']                 = 'Upgrade Database';
 $lang['module_settings']                         = 'Settings';
 $lang['module_version']                          = 'Version %s';
 $lang['module_by']                               = 'By %s';
-$lang['staff_which_are_using_role']              = 'Staff members using this role';
+$lang['staff_which_are_using_role']              = 'Staff members using this global permission';
 $lang['copy']                                    = 'Copy';
 $lang['read_more']                               = 'Read More';
 $lang['show_less']                               = 'Show Less';

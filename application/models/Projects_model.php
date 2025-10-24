@@ -852,6 +852,8 @@ class Projects_model extends App_Model
 
             log_activity('New Project Created [ID: ' . $insert_id . ']');
 
+            $this->update_staff_permissions($insert_id);
+
             return $insert_id;
         }
 
@@ -1065,6 +1067,8 @@ class Projects_model extends App_Model
                 }
             }
             hooks()->do_action('after_update_project', $id);
+
+            $this->update_staff_permissions($id);
 
             return true;
         }
@@ -2988,5 +2992,53 @@ class Projects_model extends App_Model
         }
 
         return false;
+    }
+
+    public function update_staff_permissions($project_id)
+    {
+        $sql = 'DELETE FROM ' . db_prefix() . 'staff_permissions
+        WHERE project_id = "' . $project_id . '"
+          AND staff_id NOT IN (
+            SELECT * FROM (
+                SELECT staff_id
+                FROM ' . db_prefix() . 'project_members
+                WHERE project_id = "' . $project_id . '"
+            ) AS temp
+          )';
+        $this->db->query($sql);
+
+        $sql = 'SELECT pm.staff_id, s.role
+        FROM ' . db_prefix() . 'project_members AS pm
+        LEFT JOIN ' . db_prefix() . 'staff AS s ON s.staffid = pm.staff_id
+        WHERE pm.project_id = "' . $project_id . '"
+          AND s.admin != 1
+          AND pm.staff_id NOT IN (
+            SELECT sp.staff_id
+            FROM (
+                SELECT staff_id
+                FROM ' . db_prefix() . 'staff_permissions
+                WHERE project_id = "' . $project_id . '"
+            ) AS sp
+          )';
+        $result = $this->db->query($sql)->result_array();
+
+        if (!empty($result)) {
+            foreach ($result as $member) {
+                $permissions = $this->roles_model->get($member['role'])->permissions;
+                foreach ($permissions as $feature => $capabilities) {
+                    foreach ($capabilities as $capability) {
+                        $data = [
+                            'staff_id'   => $member['staff_id'],
+                            'project_id' => $project_id,
+                            'feature'    => $feature,
+                            'capability' => $capability,
+                        ];
+                        $this->db->insert(db_prefix() . 'staff_permissions', $data);
+                    }
+                }
+            }
+        }
+
+        return true;
     }
 }

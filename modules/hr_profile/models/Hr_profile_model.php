@@ -4620,6 +4620,8 @@ class Hr_profile_model extends App_Model
 	 */
 	public function update_permissions($permissions, $id)
 	{
+		$default_project = get_default_project();
+        $this->db->where('project_id', $default_project);
 		$this->db->where('staff_id', $id);
 		$this->db->delete('staff_permissions');
 		$is_staff_member = is_staff_member($id);
@@ -4628,7 +4630,7 @@ class Hr_profile_model extends App_Model
 				if ($feature == 'leads' && !$is_staff_member) {
 					continue;
 				}
-				$this->db->insert('staff_permissions', ['staff_id' => $id, 'feature' => $feature, 'capability' => $capability]);
+				$this->db->insert('staff_permissions', ['staff_id' => $id, 'project_id' => $default_project, 'feature' => $feature, 'capability' => $capability]);
 			}
 		}
 		return true;

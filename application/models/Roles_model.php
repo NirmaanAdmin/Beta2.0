@@ -66,7 +66,7 @@ class Roles_model extends App_Model
             ]);
 
             foreach ($staff as $member) {
-                if ($this->staff_model->update_permissions($permissions, $member['staffid'])) {
+                if ($this->staff_model->update_project_wise_staff_permissions($permissions, $member['staffid'])) {
                     $affectedRows++;
                 }
             }
