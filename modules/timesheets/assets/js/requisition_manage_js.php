@@ -546,6 +546,10 @@
 
     $('input[name="number_of_leaving_day"]').change(function() {
       get_date(this);
+      setTimeout(() => {
+        calculateSundays();
+        calculateHolidays();
+      }, 3000);
     });
 
     $('input[name="number_of_leaving_day"]').focusin(function() {
@@ -573,21 +577,21 @@
     }
     $('input[name="userid"]').val(staff_id);
     var current_date = $('input[name="current_date"]').val();
-    $('input[name="number_of_leaving_day"]').val(0.5);
+    // $('input[name="number_of_leaving_day"]').val(0.5);
     $.post(admin_url + 'timesheets/get_remain_day_of/' + staff_id + '/' + type_of_leave).done(function(response) {
       response = JSON.parse(response);
-      // $('#number_days_off_2').html(response.html);
+      $('#number_days_off_2').html(response.html);
       $('input[name="start_time"]').val(response.valid_date);
       $('input[name="end_time"]').val(response.valid_date);
       $('#requisition-form .btn-submit').removeAttr('disabled');
       if (rel_type == '1') {
         var number_day_off = $('input[name="number_day_off"]').val();
         var number_of_leaving_day = $('input[name="number_of_leaving_day"]').val();
-        if (parseFloat(number_of_leaving_day) > parseFloat(number_day_off)) {
-          $('#requisition-form .btn-submit').attr('disabled', 'true');
-        } else {
-          $('#requisition-form .btn-submit').removeAttr('disabled');
-        }
+        // if (parseFloat(number_of_leaving_day) > parseFloat(number_day_off)) {
+        //   $('#requisition-form .btn-submit').attr('disabled', 'true');
+        // } else {
+        //   $('#requisition-form .btn-submit').removeAttr('disabled');
+        // }
       }
     });
   }
@@ -996,6 +1000,112 @@
 
       $('#missed_punch_modal').modal('show');
       $('select[name="approver_c"]').selectpicker('refresh');
+    });
+  }
+
+  function calculateSundays() {
+    // Get start_time and end_time values
+    const startTime = document.getElementById('start_time').value;
+    const endTime = $('input[name="end_time"]').val();
+    console.log(endTime);
+    // If either value is empty, return
+    if (!startTime || !endTime) {
+      return;
+    }
+
+    // Parse DD-MM-YYYY format
+    function parseDMMY(dateString) {
+      const parts = dateString.split('-');
+      if (parts.length === 3) {
+        const day = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1; // Months are 0-indexed in JavaScript
+        const year = parseInt(parts[2], 10);
+        return new Date(year, month, day);
+      }
+      return new Date(dateString); // Fallback to default parsing
+    }
+
+    // Convert to Date objects
+    const startDate = parseDMMY(startTime);
+    const endDate = parseDMMY(endTime);
+
+    // Validate dates
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      alert('Invalid date format');
+      return;
+    }
+
+    if (startDate > endDate) {
+      alert('Start date cannot be after end date');
+      return;
+    }
+
+    let sundayCount = 0;
+    const currentDate = new Date(startDate);
+
+    // Loop through each day from start to end date
+    while (currentDate <= endDate) {
+      // Check if current day is Sunday (0 = Sunday in JavaScript)
+      if (currentDate.getDay() === 0) {
+        sundayCount++;
+      }
+
+      // Move to next day
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    // Update the HTML element
+    const daysOffElement = document.getElementById('number_days_off_new');
+
+    // Update or create the display text
+    let displayText = daysOffElement.querySelector('.sunday-count');
+    if (!displayText) {
+      displayText = document.createElement('span');
+      displayText.className = 'sunday-count';
+      daysOffElement.appendChild(displayText);
+    }
+
+    displayText.textContent = sundayCount;
+
+    return sundayCount;
+  }
+
+  function calculateHolidays() {
+    let startDateVal = $('input[name="start_time"]').val();
+    let endDateVal = $('input[name="end_time"]').val();
+
+    if (!startDateVal || !endDateVal) {
+      console.log('Start date or end date is missing');
+      return;
+    }
+
+    // If your dates are already in YYYY-MM-DD format, use them directly
+    // If they're in another format, convert them here
+
+    // For example, if dates are in DD/MM/YYYY format:
+    // startDateVal = convertDateFormat(startDateVal);
+    // endDateVal = convertDateFormat(endDateVal);
+
+    $.ajax({
+      url: '<?php echo base_url("timesheets/get_holidays"); ?>',
+      type: 'POST',
+      dataType: 'json',
+      data: {
+        start_date: startDateVal, // Use directly if already in correct format
+        end_date: endDateVal
+      },
+      success: function(response) {
+        if (response.success) {
+          let holidayCount = response.holiday_count;
+          $('#holidayCount').text(holidayCount);
+          console.log('Number of holidays: ' + holidayCount);
+        } else {
+          console.log('Error fetching holidays');
+        }
+      },
+      error: function(xhr, status, error) {
+        console.log('AJAX error: ' + error);
+      }
     });
   }
 </script>

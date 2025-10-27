@@ -8250,4 +8250,17 @@ class timesheets extends AdminController
 
 		echo "Monthly leaves updated successfully.";
 	}
+	// In your controller
+	public function get_holidays()
+	{
+		$start_date = $this->input->post('start_date');
+		$end_date = $this->input->post('end_date');
+
+		$holiday_count = $this->timesheets_model->get_holidays_between_dates($start_date, $end_date);
+
+		echo json_encode([
+			'success' => true,
+			'holiday_count' => $holiday_count
+		]);
+	}
 }

@@ -9155,4 +9155,17 @@ class timesheets_model extends app_model
 		}
 		return false;
 	}
+	public function get_holidays_between_dates($start_date, $end_date)
+	{
+		// Ensure both dates are in proper Y-m-d format
+		$start_date = date('Y-m-d', strtotime($start_date));
+		$end_date   = date('Y-m-d', strtotime($end_date));
+
+		$this->db->from(db_prefix() . 'day_off');
+		$this->db->where('off_type', 'holiday');
+		$this->db->where('break_date >=', $start_date);
+		$this->db->where('break_date <=', $end_date);
+
+		return (int) $this->db->count_all_results();
+	}
 }

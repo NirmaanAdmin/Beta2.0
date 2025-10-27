@@ -381,13 +381,20 @@ $valid_cur_date = $this->timesheets_model->get_next_shift_date(get_staff_user_id
                                     <input type="number" id="number_of_leaving_day" name="number_of_leaving_day" class="form-control" step="0.5" value="<?php echo html_entity_decode($value_number_day); ?>" aria-invalid="false">
                                   </div>
                                 </div>
-                                <!-- <div class="col-md-12 mtop10" id="number_days_off_2">
-                                  <label class="control-label "><?php echo _l('number_of_days_off') . ': ' . $days_off; ?></label><br>
+                                <div  class="col-md-12 mtop10">
+                                  <lable class="control-label"> Number of Holidays: <span id="holidayCount">0</span></lable>
+                                </div>
+                                <div class="col-md-12 mtop10" id="number_days_off_new">
+                                  <label class="control-label "><?php echo _l('number_of_days_off') . ': <span class="sunday-count">0</span> '; ?></label><br>
+                                </div>
+                                <div class="col-md-12 mtop10" id="number_days_off_2">
+                                  <!-- <label class="control-label "><?php echo _l('number_of_days_off') . ': ' . $days_off; ?></label><br> -->
+
                                   <label class="control-label <?php if ($number_day_off == 0) {
                                                                 echo 'text-danger';
                                                               } ?>"><?php echo _l('number_of_leave_days_allowed') . ': ' . $number_day_off; ?></label>
-                                  <input type="hidden" name="number_day_off" value="<?php echo html_entity_decode($number_day_off); ?>">
-                                </div> -->
+                                  <!-- <input type="hidden" name="number_day_off" value="<?php echo html_entity_decode($number_day_off); ?>"> -->
+                                </div>
                               </div>
                               <br>
                               <div class="row mtop10 date_input">
@@ -512,8 +519,8 @@ $valid_cur_date = $this->timesheets_model->get_next_shift_date(get_staff_user_id
           <?php echo render_date_input('additional_day', 'additional_day'); ?>
           <?php echo render_input('time_in', 'time_in', '', 'time'); ?>
           <?php echo render_input('time_out', 'time_out', '', 'time'); ?>
-          <?php echo render_input('timekeeping_value', 'timekeeping_value', '','',['readonly' => true]); ?>
-          <?php echo render_input('comoff_value', 'comoff_value', '','', ['readonly' => true]); ?>
+          <?php echo render_input('timekeeping_value', 'timekeeping_value', '', '', ['readonly' => true]); ?>
+          <?php echo render_input('comoff_value', 'comoff_value', '', '', ['readonly' => true]); ?>
           <?php echo render_textarea('reason', 'reason_'); ?>
         </div>
         <div class="clearfix"></div>
