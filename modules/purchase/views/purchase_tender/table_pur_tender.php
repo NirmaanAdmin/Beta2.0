@@ -153,10 +153,13 @@ foreach ($rResult as $aRow) {
         if ($aColumns[$i] == 'request_date') {
             $_data = date('d M, Y H:i A', strtotime($aRow['request_date']));
         } elseif ($aColumns[$i] == 'requester') {
-            $_data = '<a href="' . admin_url('staff/profile/' . $aRow['requester']) . '">' . staff_profile_image($aRow['requester'], [
-                'staff-profile-image-small',
-            ]) . '</a>';
-            $_data .= ' <a href="' . admin_url('staff/profile/' . $aRow['requester']) . '">' . get_staff_full_name($aRow['requester']) . '</a>';
+            if ($aRow['requester'] > 0) {
+
+                $_data = '<a href="' . admin_url('staff/profile/' . $aRow['requester']) . '">' . staff_profile_image($aRow['requester'], [
+                    'staff-profile-image-small',
+                ]) . '</a>';
+                $_data .= ' <a href="' . admin_url('staff/profile/' . $aRow['requester']) . '">' . get_staff_full_name($aRow['requester']) . '</a>';
+            }
         } elseif ($aColumns[$i] == db_prefix() . 'departments.name as department_name') {
             $_data = $aRow['department_name'];
         } elseif ($aColumns[$i] == 'status') {
