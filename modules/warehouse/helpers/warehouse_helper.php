@@ -160,7 +160,7 @@ function get_pr_order($id = false)
         return $CI->db->get(db_prefix() . 'pur_orders')->row();
     }
     if ($id == false) {
-        return $CI->db->query('select * from tblpur_orders where approve_status = 2 AND status_goods = 0')->result_array();
+        return $CI->db->query('select * from tblpur_orders where approve_status = 2')->result_array();
     }
 }
 
