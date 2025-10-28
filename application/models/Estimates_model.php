@@ -2700,7 +2700,8 @@ class Estimates_model extends App_Model
             foreach ($unawarded_budget_itemable as $ubi) {
                 $unawarded_map[$ubi['id']] = [
                     'description' => $ubi['long_description'],
-                    'sub_head'    => $ubi['sub_head']
+                    'sub_head'    => $ubi['sub_head'],  
+                    'area'        => $ubi['area'],
                 ];
             }
         }
@@ -2824,9 +2825,10 @@ class Estimates_model extends App_Model
         if (!empty($items) && isset($tender_id)) {
             foreach ($items as $key => $value) {
                 // Only insert if quantity is greater than 0
-                if ($value['package_qty'] > 0) {
+                // if ($value['package_qty'] > 0) {
                     $desc = isset($unawarded_map[$value['item_id']]) ? $unawarded_map[$value['item_id']]['description'] : '';
                     $sub  = isset($unawarded_map[$value['item_id']]) ? $unawarded_map[$value['item_id']]['sub_head']    : '';
+                    $area = isset($unawarded_map[$value['item_id']]) ? $unawarded_map[$value['item_id']]['area']       : '';
                     $this->db->insert(db_prefix() . 'pur_tender_detail', [
                         'pur_tender' => $tender_id,
                         'item_code' => $value['item_id'],
@@ -2835,8 +2837,10 @@ class Estimates_model extends App_Model
                         'remarks' => $value['remarks'],
                         'description' => $desc,
                         'sub_head' => $sub,
+                        'area' => $area,
+                        'package_id' => $package_id,
                     ]);
-                }
+                // }
             }
         }
 
@@ -2864,7 +2868,7 @@ class Estimates_model extends App_Model
                 ]);
 
                 // Also insert into tender_detail if tender exists and quantity > 0
-                if (isset($tender_id) && $value['package_qty'] > 0) {
+                if (isset($tender_id)) {
                     $this->db->insert(db_prefix() . 'pur_tender_detail', [
                         'pur_tender' => $tender_id,
                         'item_code' => $itemable_id,
@@ -2872,7 +2876,8 @@ class Estimates_model extends App_Model
                         'unit_price' => $value['package_rate'],
                         'remarks' => $value['remarks'],
                         'description' => $value['long_description'],
-                        'sub_head' => $value['sub_head'] ?? '', // Assuming sub_head is
+                        'sub_head' => $value['sub_head'] ?? '', 
+                        'package_id' => $package_id,
                     ]);
                 }
             }
