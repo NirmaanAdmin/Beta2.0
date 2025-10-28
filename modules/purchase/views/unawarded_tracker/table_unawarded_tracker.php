@@ -107,7 +107,7 @@ foreach ($rResult as $aRow) {
          $package_info = '';
          $package_info .= '<p>'.$aRow['package_name'].'</p>';
          $package_info .= '<div class="row-options">';
-         // $package_info .= '<a href="' . admin_url('estimates/delete_package/' . $aRow['id']) . '" class="text-danger _delete">' . _l('delete') . '</a>';
+         $package_info .= '<a href="' . admin_url('estimates/delete_package/' . $aRow['id']) . '" class="text-danger _delete">' . _l('delete') . '</a>';
          $package_info .= '</div>';
          $_data = $package_info;
       } elseif ($column == 'budget_head_name') {

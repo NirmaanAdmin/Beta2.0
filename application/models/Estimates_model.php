@@ -2374,7 +2374,7 @@ class Estimates_model extends App_Model
                                 'area' => $get_desc->area,
                                 'sub_head' => $get_desc->sub_head,
                                 'package_id' => $avalue,
-                            ]; 
+                            ];
 
                             $this->db->insert(db_prefix() . 'pur_tender_detail', $tender_detail_arr);
                         }
@@ -2700,7 +2700,7 @@ class Estimates_model extends App_Model
             foreach ($unawarded_budget_itemable as $ubi) {
                 $unawarded_map[$ubi['id']] = [
                     'description' => $ubi['long_description'],
-                    'sub_head'    => $ubi['sub_head'],  
+                    'sub_head'    => $ubi['sub_head'],
                     'area'        => $ubi['area'],
                 ];
             }
@@ -2826,20 +2826,20 @@ class Estimates_model extends App_Model
             foreach ($items as $key => $value) {
                 // Only insert if quantity is greater than 0
                 // if ($value['package_qty'] > 0) {
-                    $desc = isset($unawarded_map[$value['item_id']]) ? $unawarded_map[$value['item_id']]['description'] : '';
-                    $sub  = isset($unawarded_map[$value['item_id']]) ? $unawarded_map[$value['item_id']]['sub_head']    : '';
-                    $area = isset($unawarded_map[$value['item_id']]) ? $unawarded_map[$value['item_id']]['area']       : '';
-                    $this->db->insert(db_prefix() . 'pur_tender_detail', [
-                        'pur_tender' => $tender_id,
-                        'item_code' => $value['item_id'],
-                        'quantity' => $value['package_qty'],
-                        'unit_price' => $value['package_rate'],
-                        'remarks' => $value['remarks'],
-                        'description' => $desc,
-                        'sub_head' => $sub,
-                        'area' => $area,
-                        'package_id' => $package_id,
-                    ]);
+                $desc = isset($unawarded_map[$value['item_id']]) ? $unawarded_map[$value['item_id']]['description'] : '';
+                $sub  = isset($unawarded_map[$value['item_id']]) ? $unawarded_map[$value['item_id']]['sub_head']    : '';
+                $area = isset($unawarded_map[$value['item_id']]) ? $unawarded_map[$value['item_id']]['area']       : '';
+                $this->db->insert(db_prefix() . 'pur_tender_detail', [
+                    'pur_tender' => $tender_id,
+                    'item_code' => $value['item_id'],
+                    'quantity' => $value['package_qty'],
+                    'unit_price' => $value['package_rate'],
+                    'remarks' => $value['remarks'],
+                    'description' => $desc,
+                    'sub_head' => $sub,
+                    'area' => $area,
+                    'package_id' => $package_id,
+                ]);
                 // }
             }
         }
@@ -2876,7 +2876,7 @@ class Estimates_model extends App_Model
                         'unit_price' => $value['package_rate'],
                         'remarks' => $value['remarks'],
                         'description' => $value['long_description'],
-                        'sub_head' => $value['sub_head'] ?? '', 
+                        'sub_head' => $value['sub_head'] ?? '',
                         'package_id' => $package_id,
                     ]);
                 }
@@ -2899,6 +2899,19 @@ class Estimates_model extends App_Model
         if ($this->db->affected_rows() > 0) {
             $affectedRows++;
         }
+
+        $this->db->where('package_id', $id);
+        $this->db->delete(db_prefix() . 'pur_tender');
+        if ($this->db->affected_rows() > 0) {
+            $affectedRows++;
+        }
+
+        $this->db->where('package_id', $id);
+        $this->db->delete(db_prefix() . 'pur_tender_detail');
+        if ($this->db->affected_rows() > 0) {
+            $affectedRows++;
+        }
+
 
         if ($affectedRows > 0) {
             return true;
@@ -3236,12 +3249,44 @@ class Estimates_model extends App_Model
         return $this->db->get(db_prefix() . 'unawarded_budget_info')->row();
     }
 
+    // public function add_bulk_package($data)
+    // {
+    //     $estimate_id = isset($data['bulk_estimate_id']) ? $data['bulk_estimate_id'] : 0;
+    //     $newbulkpackageitems = isset($data['newbulkpackageitems']) ? $data['newbulkpackageitems'] : array();
+    //     if (!empty($newbulkpackageitems)) {
+    //         foreach ($newbulkpackageitems as $key => $value) {
+    //             $this->db->insert(db_prefix() . 'estimate_package_info', [
+    //                 'estimate_id' => $estimate_id,
+    //                 'budget_head' => $value['bulk_budget_head'],
+    //                 'project_awarded_date' => date('Y-m-d', strtotime($value['bulk_project_awarded_date'])),
+    //                 'package_name' => $value['bulk_package_name'],
+    //                 'sdeposit_percent' => 0,
+    //                 'sdeposit_value' => 0.00,
+    //                 'total_package' => 0.00,
+    //                 'awarded_value' => 0.00,
+    //                 'kind' => $value['bulk_kind'],
+    //                 'rli_filter' => $value['bulk_rli_filter'],
+    //             ]);
+    //         }
+    //     }
+
+    //     return true;
+    // }
+
     public function add_bulk_package($data)
     {
         $estimate_id = isset($data['bulk_estimate_id']) ? $data['bulk_estimate_id'] : 0;
         $newbulkpackageitems = isset($data['newbulkpackageitems']) ? $data['newbulkpackageitems'] : array();
+
         if (!empty($newbulkpackageitems)) {
+            $get_est_data = get_estimate_data($estimate_id);
+
+            // Get tender prefix and next number outside the loop for efficiency
+            $prefix = get_purchase_option('pur_tender_prefix');
+            $next_number = get_purchase_option('next_tender_number');
+
             foreach ($newbulkpackageitems as $key => $value) {
+                // Insert package
                 $this->db->insert(db_prefix() . 'estimate_package_info', [
                     'estimate_id' => $estimate_id,
                     'budget_head' => $value['bulk_budget_head'],
@@ -3254,6 +3299,53 @@ class Estimates_model extends App_Model
                     'kind' => $value['bulk_kind'],
                     'rli_filter' => $value['bulk_rli_filter'],
                 ]);
+
+                $package_id = $this->db->insert_id();
+
+                // Generate tender code
+                $pur_tn_code = '';
+                if ($get_est_data->project_id != '' && $get_est_data->project_id > 0) {
+                    // Get project name
+                    $this->db->where('id', $get_est_data->project_id);
+                    $project = $this->db->get(db_prefix() . 'projects')->row();
+
+                    if ($project) {
+                        // Extract clean 3-letter project code
+                        $project_code = strtoupper(preg_replace('/[^a-zA-Z]/', '', substr($project->name, 0, 3)));
+
+                        // Reconstruct with project code inserted after sequential number
+                        $new_po_parts = [
+                            $prefix,  // #TN
+                            str_pad($next_number, 4, '0', STR_PAD_LEFT),  // 00080
+                            $project_code, // SUR
+                            date('Y'), // year
+                        ];
+
+                        $pur_tn_code = implode('-', $new_po_parts);
+
+                        // Increment for next package
+                        $next_number++;
+                    }
+                }
+
+                // Insert tender for this package
+                $this->db->insert(db_prefix() . 'pur_tender', [
+                    'pur_tn_code' => $pur_tn_code,
+                    'pur_tn_name' => $value['bulk_package_name'],
+                    'package_id' => $package_id,
+                    'estimate_id' => $estimate_id,
+                    'group_pur' => $value['bulk_budget_head'],
+                    'project' => $get_est_data->project_id,
+                    'request_date' => date('Y-m-d H:i:s'),
+                    'hash' => app_generate_hash(),
+                ]);
+                $tender_id = $this->db->insert_id();
+            }
+
+            // Update the next tender number in database after all packages are processed
+            if ($next_number > get_purchase_option('next_tender_number')) {
+                $this->db->where('option_name', 'next_tender_number');
+                $this->db->update(db_prefix() . 'purchase_option', ['option_val' => $next_number]);
             }
         }
 
