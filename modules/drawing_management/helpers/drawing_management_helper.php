@@ -743,14 +743,14 @@ function update_dms_activity_log($id, $data, $original_data)
 					$field_name = str_replace('_', ' ', ucfirst($change['field']));
 					$change_descriptions[] = "{$field_name} changed from '{$change['old']}' to '{$change['new']}'";
 				}
-
+				
 				// Build hierarchical path for the item
 				$path_names = [];
 				$current_item = $dms_item;
-
+				
 				// Start with current item name
 				$current_item_name = $current_item->name;
-
+				
 				// Traverse up the parent hierarchy
 				while (!empty($current_item->parent_id) && $current_item->parent_id != 0) {
 					$parent = $CI->db->where('id', $current_item->parent_id)->get(db_prefix() . 'dms_items')->row();
@@ -761,11 +761,11 @@ function update_dms_activity_log($id, $data, $original_data)
 						break;
 					}
 				}
-
+				
 				// Reverse the array to show from top-level parent to current item
 				$path_names = array_reverse($path_names);
 				$path_string = implode(' > ', $path_names);
-
+				
 				// Add current item to the path if it's not empty
 				if (!empty($path_string)) {
 					$full_path = $path_string . ' > ' . $current_item_name;
@@ -773,12 +773,12 @@ function update_dms_activity_log($id, $data, $original_data)
 					$full_path = $current_item_name;
 				}
 
-				if ($dms_item->filetype == 'folder') {
-					$description = "Folder <b>{$dms_item->name}</b> located at <b>{$full_path}</b> has been updated. Changes: <b>" . implode(', ', $change_descriptions) . "</b>";
-				} else {
-					$description = "Drawing <b>{$dms_item->name}</b> located at <b>{$full_path}</b> has been updated. Changes: <b>" . implode(', ', $change_descriptions) . "</b>";
+				if($dms_item->filetype == 'folder'){
+					$description = "Folder <b>{$dms_item->name}</b> located at <b>{$full_path}</b> has been updated. Changes: <b>" . implode(', ', $change_descriptions)."</b>";
+				}else{
+					$description = "Drawing <b>{$dms_item->name}</b> located at <b>{$full_path}</b> has been updated. Changes: <b>" . implode(', ', $change_descriptions)."</b>";
 				}
-
+				
 				$CI->load->model('projects_model');
 				$project_id = get_default_project();
 				$CI->db->insert(db_prefix() . 'module_activity_log', [
@@ -884,35 +884,9 @@ function create_folder_dms_activity_log($id, $by_module = '')
 
 function get_rfi_dms_items($id)
 {
-	$CI = &get_instance();
-	$CI->db->select('ticketid, subject');
-	$CI->db->where('FIND_IN_SET(' . $CI->db->escape($id) . ', dms_items) !=', 0, false);
-	$tickets = $CI->db->get(db_prefix() . 'tickets')->result_array();
-	return $tickets;
-}
-
-function get_dms_folder_path($parent_id)
-{
-	$CI = &get_instance();
-	$pathParts = [];
-	$currentId = $parent_id;
-
-	while ($currentId != 0) {
-		$CI->db->select('id, parent_id, name');
-		$CI->db->where('id', $currentId);
-		$row = $CI->db->get('tbldms_items')->row();
-
-		if (!$row) break;
-
-		// If this item's parent is root (0), use its id instead of name
-		if ($row->parent_id == 0) {
-			array_unshift($pathParts, $row->id);
-		} else {
-			array_unshift($pathParts, $row->name);
-		}
-
-		$currentId = $row->parent_id;
-	}
-
-	return implode('/', $pathParts);
+    $CI = &get_instance();
+    $CI->db->select('ticketid, subject');
+    $CI->db->where('FIND_IN_SET(' . $CI->db->escape($id) . ', dms_items) !=', 0, false);
+    $tickets = $CI->db->get(db_prefix() . 'tickets')->result_array();
+    return $tickets;
 }
