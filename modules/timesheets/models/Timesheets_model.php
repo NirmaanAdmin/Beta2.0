@@ -7843,6 +7843,24 @@ class timesheets_model extends app_model
 			}
 		}
 
+		if(isset($data['staff_list'])){
+			$staff_list = $data['staff_list'];
+			$where_staff = '';
+			foreach ($staff_list as $staff_id) {
+				if ($staff_list != '') {
+					if ($where_staff == '') {
+						$where_staff .= ' AND (staff_id = "' . $staff_id . '"';
+					} else {
+						$where_staff .= ' OR staff_id = "' . $staff_id . '"';
+					}
+				}
+			}
+			if ($where_staff != '') {
+				$where_staff .= ')';
+				$where .= $where_staff;
+			}
+		}
+
 		$total_query = 'select * from ' . db_prefix() . 'timesheets_requisition_leave where ((date(start_time) between "' . $from_date . '" and "' . $to_date . '") or (date(end_time) between "' . $from_date . '" and "' . $to_date . '"))' . $where;
 		return $this->db->query($total_query)->result_array();
 	}

@@ -6697,6 +6697,7 @@ class timesheets extends AdminController
 		$data['data_timekeeping_form'] = get_timesheets_option('timekeeping_form');
 		$data['departments'] = $this->departments_model->get();
 		$data['current_date'] = date('Y-m-d H:i:s');
+		$data['staff_list'] = $this->staff_model->get('', 'active = 1');
 
 
 		$data['pro'] = $this->staff_model->get('', 'active = 1');
@@ -6711,6 +6712,7 @@ class timesheets extends AdminController
 		$data['status_filter'] = (isset($dta['status_filter']) ? $dta['status_filter'] : []);
 		$data['rel_type_filter'] = (isset($dta['rel_type_filter']) ? $dta['rel_type_filter'] : []);
 		$data['department_filter'] = (isset($dta['department_filter']) ? $dta['department_filter'] : []);
+		$data['staff_filter'] = (isset($dta['staff_filter']) ? $dta['staff_filter'] : []);
 		$this->load->view('leave/calendar', $data);
 	}
 	/**

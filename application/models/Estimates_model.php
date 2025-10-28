@@ -2371,10 +2371,10 @@ class Estimates_model extends App_Model
                                 'description' => $get_desc->long_description,
                                 'unit_price' => 0.00,
                                 'quantity'   => 0.00,
-                                'area' => get_area_name_by_id($get_desc->area),
-                                'sub_head' => get_sub_head_name_by_id($get_desc->sub_head),
+                                'area' => $get_desc->area,
+                                'sub_head' => $get_desc->sub_head,
                                 'package_id' => $avalue,
-                            ];
+                            ]; 
 
                             $this->db->insert(db_prefix() . 'pur_tender_detail', $tender_detail_arr);
                         }
@@ -2835,7 +2835,6 @@ class Estimates_model extends App_Model
                         'remarks' => $value['remarks'],
                         'description' => $desc,
                         'sub_head' => $sub,
-
                     ]);
                 }
             }

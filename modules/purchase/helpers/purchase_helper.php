@@ -5733,3 +5733,21 @@ function update_order_comments_activity_log($id, $old_value, $new_value)
     }
     return true;
 }
+
+function get_tender_item_name_from_itemable($item_id)
+{
+    $CI = &get_instance();
+
+    $CI->db->select('i.commodity_code, i.description');
+    $CI->db->from(db_prefix() . 'itemable AS ia');
+    $CI->db->join(db_prefix() . 'items AS i', 'i.id = ia.item_code', 'left');
+    $CI->db->where('ia.id', $item_id);
+
+    $row = $CI->db->get()->row();
+
+    if ($row) {
+        return $row->commodity_code . ' - ' . $row->description;
+    } else {
+        return '';
+    }
+}

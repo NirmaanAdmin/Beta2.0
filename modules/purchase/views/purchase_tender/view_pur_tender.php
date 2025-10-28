@@ -326,9 +326,8 @@
                               <tr nobr="true" class="sortable">
                                 <td class="description" align="left"><strong>
                                     <?php
-                                    $item = get_item_hp($es['item_code']);
-                                    echo isset($item) && isset($item->commodity_code) && isset($item->description)
-                                      ? pur_html_entity_decode($item->commodity_code . ' - ' . $item->description)
+                                    $item = get_tender_item_name_from_itemable($es['item_code']);
+                                    echo isset($item) ? pur_html_entity_decode($item)
                                       : pur_html_entity_decode($es['item_text']);
                                     ?>
                                   </strong></td>

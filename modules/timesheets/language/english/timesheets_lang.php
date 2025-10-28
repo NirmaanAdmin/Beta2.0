@@ -892,3 +892,4 @@ $lang['ts_additional_work_hours_for_specific_employee'] = 'Timesheet - Additiona
 $lang['permission_timesheet_settings'] = 'Timesheet - Settings';
 $lang['missed_punch'] = 'Missed Punch';
 $lang['comoff_value'] = 'Compensatory Off Value';
+$lang['filter_by_staff'] = 'Filter by Staff';

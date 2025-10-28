@@ -240,9 +240,9 @@ foreach ($rResult as $aRow) {
                 $name .= ' | <a href="' . admin_url('purchase/pur_tender/' . $aRow['id']) . '" >' . _l('edit') . '</a>';
             }
 
-            if (has_permission('purchase_tender', '', 'delete') || is_admin()) {
-                $name .= ' | <a href="' . admin_url('purchase/delete_pur_tender/' . $aRow['id']) . '" class="text-danger _delete">' . _l('delete') . '</a>';
-            }
+            // if (has_permission('purchase_tender', '', 'delete') || is_admin()) {
+            //     $name .= ' | <a href="' . admin_url('purchase/delete_pur_tender/' . $aRow['id']) . '" class="text-danger _delete">' . _l('delete') . '</a>';
+            // }
 
             $name .= '</div>';
 

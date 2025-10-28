@@ -65,6 +65,7 @@
                     params['status'] = $('#status_filter select').val();
                     params['rel_type'] = $('#rel_type_filter select').val();
                     params['department'] = $('#department_filter select').val();
+                    params['staff_list'] = $('#staff_filter select').val();
                     if (!jQuery.isEmptyObject(params)) {
                         params['calendar_filters'] = true;
                     }
