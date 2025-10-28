@@ -621,7 +621,7 @@ class drawing_management_model extends app_model
 	private function handle_zip_upload($zipPath, $parent_id, $type, $version, $zipFolderName)
 	{
 		$totalUploaded = 0;
-		$basePath = DOCUMENT_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/' . $type . '/' . $parent_id . '/';
+		$basePath = DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/' . $type . '/' . $parent_id . '/';
 
 		_maybe_create_upload_path($basePath);
 
