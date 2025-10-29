@@ -5255,7 +5255,7 @@ function add_pc_status_activity_log($id)
             } else if($payment_certificate_details->approve == 2) {
                 $description = "Payment certificate <b>".$payment_certificate->pc_number."</b> has been approved by <b>".get_last_action_full_name($payment_certificate_details->staff_approve)."</b>.";
             } else if($payment_certificate_details->approve == 3) {
-                $description = "Payment certificate <b>".$payment_certificate->pc_number."</b> has been approved by <b>".get_last_action_full_name($payment_certificate_details->staff_approve)."</b>.";
+                $description = "Payment certificate <b>".$payment_certificate->pc_number."</b> has been rejected by <b>".get_last_action_full_name($payment_certificate_details->staff_approve)."</b>.";
             }
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'pc',
@@ -5716,6 +5716,58 @@ function update_order_comments_activity_log($id, $old_value, $new_value)
                 $CI->db->where('id', $pur_comments->rel_id);
                 $wo_orders = $CI->db->get(db_prefix() . 'wo_orders')->row();
                 $description = "Discuss field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in work order <b>".$wo_orders->wo_order_number." - ".$wo_orders->wo_order_name."</b>.";
+                $module_name = 'wo';
+                $rel_id = $wo_orders->id;
+            }
+            if(!empty($description)) {
+                $CI->db->insert(db_prefix() . 'module_activity_log', [
+                    'module_name' => $module_name,
+                    'rel_id' => $rel_id,
+                    'description' => $description,
+                    'date' => date('Y-m-d H:i:s'),
+                    'staffid' => get_staff_user_id(),
+                    'project_id' => $default_project
+                ]);
+            }
+        }
+    }
+    return true;
+}
+
+function add_order_status_activity_log($id)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $pur_approval_details = $CI->db->get(db_prefix() . 'pur_approval_details')->row();
+        if(!empty($pur_approval_details)) {
+            $module_name = '';
+            $rel_id = '';
+            $description = '';
+            if($pur_approval_details->rel_type == 'pur_order') {
+                $CI->db->where('id', $pur_approval_details->rel_id);
+                $pur_orders = $CI->db->get(db_prefix() . 'pur_orders')->row();
+                if(empty($pur_approval_details->approve)) {
+                    $description = "An approval request has been created for purchase order <b>".$pur_orders->pur_order_number." - ".$pur_orders->pur_order_name."</b> by <b>".get_last_action_full_name($pur_approval_details->sender)."</b>.";
+                } else if($pur_approval_details->approve == 2) {
+                    $description = "Purchase order <b>".$pur_orders->pur_order_number." - ".$pur_orders->pur_order_name."</b> has been approved by <b>".get_last_action_full_name($pur_approval_details->staff_approve)."</b>.";
+                } else if($pur_approval_details->approve == 3) {
+                    $description = "Purchase order <b>".$pur_orders->pur_order_number." - ".$pur_orders->pur_order_name."</b> has been rejected by <b>".get_last_action_full_name($pur_approval_details->staff_approve)."</b>.";
+                }
+                $module_name = 'po';
+                $rel_id = $pur_orders->id;
+            }
+            if($pur_approval_details->rel_type == 'wo_order') {
+                $CI->db->where('id', $pur_approval_details->rel_id);
+                $wo_orders = $CI->db->get(db_prefix() . 'wo_orders')->row();
+                if(empty($pur_approval_details->approve)) {
+                    $description = "An approval request has been created for work order <b>".$wo_orders->wo_order_number." - ".$wo_orders->wo_order_name."</b> by <b>".get_last_action_full_name($pur_approval_details->sender)."</b>.";
+                } else if($pur_approval_details->approve == 2) {
+                    $description = "Work order <b>".$wo_orders->wo_order_number." - ".$wo_orders->wo_order_name."</b> has been approved by <b>".get_last_action_full_name($pur_approval_details->staff_approve)."</b>.";
+                } else if($pur_approval_details->approve == 3) {
+                    $description = "Work order <b>".$wo_orders->wo_order_number." - ".$wo_orders->wo_order_name."</b> has been rejected by <b>".get_last_action_full_name($pur_approval_details->staff_approve)."</b>.";
+                }
                 $module_name = 'wo';
                 $rel_id = $wo_orders->id;
             }

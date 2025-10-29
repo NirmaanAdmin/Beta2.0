@@ -3670,6 +3670,8 @@ class Purchase_model extends App_Model
                 $row['rel_type'] = $data['rel_type'];
                 $row['sender'] = $sender;
                 $this->db->insert('tblpur_approval_details', $row);
+                $pur_approval_details_id = $this->db->insert_id();
+                add_order_status_activity_log($pur_approval_details_id);
             }
             $this->db->where('rel_type', $data['rel_type']);
             $this->db->where('rel_id', $module->id);
@@ -4240,6 +4242,7 @@ class Purchase_model extends App_Model
             if ($data['rel_type'] == "pur_order") {
                 $this->pur_order_approval_log($data);
             }
+            add_order_status_activity_log($id);
             return true;
         }
         return false;
