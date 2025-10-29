@@ -2733,3 +2733,25 @@ function add_stock_received_activity_log($id)
     }
     return true;
 }
+
+function remove_stock_received_activity_log($id)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $goods_receipt = $CI->db->get(db_prefix() . 'goods_receipt')->row();
+        if(!empty($goods_receipt)) {
+            $description = "Stock Received <b>".$goods_receipt->goods_receipt_code."</b> has been deleted.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'stckrec',
+                'rel_id' => $id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}

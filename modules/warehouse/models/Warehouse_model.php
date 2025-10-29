@@ -7785,7 +7785,7 @@ class Warehouse_model extends App_Model
 	 */
 	public function delete_goods_receipt($id)
 	{
-
+		remove_stock_received_activity_log($id);
 		hooks()->do_action('before_goods_receipt_deleted', $id);
 
 		$affected_rows = 0;
@@ -10033,7 +10033,7 @@ class Warehouse_model extends App_Model
 		//delete goods receipt (goods receipt, goods receipt detail)
 		$re_delete_goods_receipt =  $this->delete_goods_receipt($goods_receipt);
 		if ($re_delete_goods_receipt) {
-			$count_result++;
+			$count_result++;			
 		}
 		// die('asdasd');
 		if ($count_result > 0) {
