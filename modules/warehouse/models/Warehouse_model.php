@@ -1143,9 +1143,60 @@ class Warehouse_model extends App_Model
 				$data['file_name'] = $file['file_name'];
 				$data['filetype']  = $file['filetype'];
 				$this->db->insert(db_prefix() . 'invetory_files', $data);
+				$file_names[] = $file['file_name'];
+			}
+			// Log the file attachments to activity log
+			if (!empty($file_names)) {
+				$this->log_file_attachments($related, $id, $file_names);
 			}
 		}
 		return true;
+	}
+
+	private function log_file_attachments($related, $id, $file_names)
+	{
+		$CI = &get_instance();
+		$default_project = get_default_project();
+
+		// Determine the module and description based on the related type
+		$module_name = 'stckrec'; // Default for goods receipt
+		$description = '';
+
+		switch ($related) {
+			case 'goods_receipt':
+				$module_name = 'stckrec';
+				$goods_receipt_code = $this->get_goods_receipt_code($id);
+				$file_list = implode(', ', array_map(function ($file) {
+					return "<b>" . $file . "</b>";
+				}, $file_names));
+				$description = "Attachment {$file_list} have been attached to stock received <b>{$goods_receipt_code}</b>";
+				break;
+
+			case 'goods_delivery':
+				$module_name = 'stckiss';
+				$goods_delivery_code = $this->get_goods_delivery_code($id); // You'll need to implement this function
+				$file_list = implode(', ', array_map(function ($file) {
+					return "<b>" . $file . "</b>";
+				}, $file_names));
+				$description = "Attachment {$file_list} have been attached to stock issued <b>{$goods_delivery_code}</b>";
+				break;
+				break;
+
+			default:
+				// Don't log for other types
+				return;
+		}
+
+		if (!empty($description)) {
+			$CI->db->insert(db_prefix() . 'module_activity_log', [
+				'module_name' => $module_name,
+				'rel_id' => $id,
+				'description' => $description,
+				'date' => date('Y-m-d H:i:s'),
+				'staffid' => get_staff_user_id(),
+				'project_id' => $default_project
+			]);
+		}
 	}
 	/**
 	 * add goods
@@ -1567,7 +1618,7 @@ class Warehouse_model extends App_Model
 
 			hooks()->do_action('after_wh_goods_receipt_added', $insert_id);
 		}
-
+		add_stock_received_activity_log($insert_id);
 		return $insert_id > 0 ? $insert_id : false;
 	}
 
@@ -8191,6 +8242,13 @@ class Warehouse_model extends App_Model
 
 		$inventory_receipts =  $production_approval = $update_inventory_receipts = $remove_inventory_receipts = [];
 
+		$original_data = [];
+		if (isset($data['id'])) {
+			$goods_receipt_id = $data['id'];
+			$this->db->where('id', $goods_receipt_id);
+			$original_data = $this->db->get(db_prefix() . 'goods_receipt')->row_array();
+		}
+
 		if (isset($data['isedit'])) {
 			unset($data['isedit']);
 		}
@@ -8327,11 +8385,18 @@ class Warehouse_model extends App_Model
 
 		$results = 0;
 
+		// Compare and log changes
+		$changes = $this->compare_data_changes($original_data, $data);
+
 		$this->db->where('id', $goods_receipt_id);
 		$this->db->update(db_prefix() . 'goods_receipt', $data);
 
 		if ($this->db->affected_rows() > 0) {
 			$results++;
+			// Log changes if any were detected
+			if (!empty($changes)) {
+				$this->log_goods_receipt_changes($goods_receipt_id, $changes, $original_data);
+			}
 		}
 		$this->save_invetory_files('goods_receipt', $goods_receipt_id);
 		foreach ($production_approval as $value) {
@@ -8345,6 +8410,12 @@ class Warehouse_model extends App_Model
 		/*update save note*/
 		// update receipt note
 		foreach ($update_inventory_receipts as $inventory_receipt) {
+			// Store original item data for comparison
+			$original_item = [];
+			if (isset($inventory_receipt['id'])) {
+				$this->db->where('id', $inventory_receipt['id']);
+				$original_item = $this->db->get(db_prefix() . 'goods_receipt_detail')->row_array();
+			}
 			if ($inventory_receipt['date_manufacture'] != '') {
 				$inventory_receipt['date_manufacture'] = to_sql_date($inventory_receipt['date_manufacture']);
 			} else {
@@ -8411,6 +8482,13 @@ class Warehouse_model extends App_Model
 			$this->db->where('id', $inventory_receipt['id']);
 			if ($this->db->update(db_prefix() . 'goods_receipt_detail', $inventory_receipt)) {
 				$results++;
+				// Log item changes if any
+				if (!empty($original_item)) {
+					$item_changes = $this->compare_data_changes($original_item, $inventory_receipt);
+					if (!empty($item_changes)) {
+						$this->log_goods_receipt_item_changes($goods_receipt_id, $inventory_receipt['id'], $item_changes, $original_item);
+					}
+				}
 			}
 		}
 
@@ -8581,6 +8659,252 @@ class Warehouse_model extends App_Model
 
 
 		return $results > 0 ? $goods_receipt_id : false;
+	}
+	private function compare_data_changes($original, $new)
+	{
+		$changes = [];
+
+		foreach ($new as $key => $value) {
+			if (array_key_exists($key, $original)) {
+				$original_value = $original[$key];
+				$new_value = $value;
+
+				// Handle null comparisons
+				if ($original_value === null) $original_value = '';
+				if ($new_value === null) $new_value = '';
+
+				// Compare values
+				if ($original_value != $new_value) {
+					$changes[$key] = [
+						'from' => $original_value,
+						'to' => $new_value
+					];
+				}
+			}
+		}
+
+		return $changes;
+	}
+
+	/**
+	 * Get department name by ID
+	 */
+	private function get_department_name($department_id)
+	{
+		if (empty($department_id)) return 'None';
+
+		$this->db->select('name');
+		$this->db->where('departmentid', $department_id);
+		$result = $this->db->get(db_prefix() . 'departments')->row();
+		return $result ? $result->name : 'Unknown Department';
+	}
+
+	/**
+	 * Get supplier name by ID
+	 */
+	private function get_supplier_name($supplier_id)
+	{
+		if (empty($supplier_id)) return 'None';
+
+		$this->db->select('company');
+		$this->db->where('userid', $supplier_id);
+		$result = $this->db->get(db_prefix() . 'pur_vendor')->row();
+		return $result ? $result->company : 'Unknown Supplier';
+	}
+
+	/**
+	 * Get area names by IDs (comma-separated)
+	 */
+	private function get_area_names($area_ids)
+	{
+		if (empty($area_ids)) return 'None';
+
+		$area_ids_array = explode(',', $area_ids);
+		$area_names = [];
+
+		foreach ($area_ids_array as $area_id) {
+			$this->db->select('area_name');
+			$this->db->where('id', $area_id);
+			$result = $this->db->get(db_prefix() . 'area')->row();
+			if ($result) {
+				$area_names[] = $result->area_name;
+			}
+		}
+
+		return !empty($area_names) ? implode(', ', $area_names) : 'Unknown Areas';
+	}
+
+	/**
+	 * Format field value for display
+	 */
+	private function format_field_value($field, $value, $original_data = [])
+	{
+		switch ($field) {
+			case 'department':
+				return $this->get_department_name($value);
+
+			case 'supplier_code':
+				return $this->get_supplier_name($value);
+
+			case 'area':
+				return $this->get_area_names($value);
+
+			case 'date_c':
+			case 'date_add':
+			case 'expiry_date':
+				if (!empty($value) && $value != '0000-00-00') {
+					return _d($value);
+				}
+				return 'None';
+
+			case 'total_tax_money':
+			case 'total_goods_money':
+			case 'value_of_inventory':
+			case 'total_money':
+				return app_format_money($value, '');
+
+			case 'approval':
+				return $value == 1 ? 'Approved' : 'Pending';
+
+			default:
+				return $value;
+		}
+	}
+
+	/**
+	 * Log goods receipt main record changes
+	 */
+	private function log_goods_receipt_changes($goods_receipt_id, $changes, $original_data = [])
+	{
+		$CI = &get_instance();
+		$default_project = get_default_project();
+
+		$description = "Stock received <b>" . $this->get_goods_receipt_code($goods_receipt_id) . "</b> has been updated. Changes: ";
+
+		$change_details = [];
+		foreach ($changes as $field => $change) {
+			$from_value = $this->format_field_value($field, $change['from'], $original_data);
+			$to_value = $this->format_field_value($field, $change['to'], $original_data);
+
+			$field_name = ucfirst(str_replace('_', ' ', $field));
+			$change_details[] = "{$field_name} changed from '{$from_value}' to '{$to_value}'";
+		}
+
+		$description .= implode(', ', $change_details);
+
+		$CI->db->insert(db_prefix() . 'module_activity_log', [
+			'module_name' => 'stckrec',
+			'rel_id' => $goods_receipt_id,
+			'description' => $description,
+			'date' => date('Y-m-d H:i:s'),
+			'staffid' => get_staff_user_id(),
+			'project_id' => $default_project
+		]);
+	}
+
+	/**
+	 * Log goods receipt item changes
+	 */
+	private function log_goods_receipt_item_changes($goods_receipt_id, $item_id, $changes, $original_item = [])
+	{
+		$CI = &get_instance();
+		$default_project = get_default_project();
+
+		$item_name = $this->get_item_name($item_id);
+
+		$description = "Item <b>" . $item_name . "</b> in stock received <b>" .
+			$this->get_goods_receipt_code($goods_receipt_id) . "</b> has been updated. Changes: ";
+
+		$change_details = [];
+		foreach ($changes as $field => $change) {
+			// Skip technical fields
+			if (in_array($field, ['id', 'goods_receipt_id', 'order'])) continue;
+
+			$from_value = $this->format_field_value($field, $change['from'], $original_item);
+			$to_value = $this->format_field_value($field, $change['to'], $original_item);
+
+			$field_name = ucfirst(str_replace('_', ' ', $field));
+			$change_details[] = "{$field_name} changed from '{$from_value}' to '{$to_value}'";
+		}
+
+		$description .= implode(', ', $change_details);
+
+		$CI->db->insert(db_prefix() . 'module_activity_log', [
+			'module_name' => 'stckrec',
+			'rel_id' => $goods_receipt_id,
+			'description' => $description,
+			'date' => date('Y-m-d H:i:s'),
+			'staffid' => get_staff_user_id(),
+			'project_id' => $default_project
+		]);
+	}
+
+	/**
+	 * Log goods receipt item addition
+	 */
+	private function log_goods_receipt_item_addition($goods_receipt_id, $item_id, $item_data)
+	{
+		$CI = &get_instance();
+		$default_project = get_default_project();
+
+		$item_name = isset($item_data['commodity_name']) ? $item_data['commodity_name'] : 'New Item';
+
+		$description = "Item <b>" . $item_name . "</b> has been added to stock received <b>" .
+			$this->get_goods_receipt_code($goods_receipt_id) . "</b>";
+
+		$CI->db->insert(db_prefix() . 'module_activity_log', [
+			'module_name' => 'stckrec',
+			'rel_id' => $goods_receipt_id,
+			'description' => $description,
+			'date' => date('Y-m-d H:i:s'),
+			'staffid' => get_staff_user_id(),
+			'project_id' => $default_project
+		]);
+	}
+
+	/**
+	 * Log goods receipt item deletion
+	 */
+	private function log_goods_receipt_item_deletion($goods_receipt_id, $item_id)
+	{
+		$CI = &get_instance();
+		$default_project = get_default_project();
+
+		$item_name = $this->get_item_name($item_id);
+
+		$description = "Item <b>" . $item_name . "</b> has been removed from stock received <b>" .
+			$this->get_goods_receipt_code($goods_receipt_id) . "</b>";
+
+		$CI->db->insert(db_prefix() . 'module_activity_log', [
+			'module_name' => 'stckrec',
+			'rel_id' => $goods_receipt_id,
+			'description' => $description,
+			'date' => date('Y-m-d H:i:s'),
+			'staffid' => get_staff_user_id(),
+			'project_id' => $default_project
+		]);
+	}
+
+	/**
+	 * Get goods receipt code
+	 */
+	private function get_goods_receipt_code($goods_receipt_id)
+	{
+		$this->db->select('goods_receipt_code');
+		$this->db->where('id', $goods_receipt_id);
+		$result = $this->db->get(db_prefix() . 'goods_receipt')->row();
+		return $result ? $result->goods_receipt_code : 'Unknown';
+	}
+
+	/**
+	 * Get item name
+	 */
+	private function get_item_name($item_id)
+	{
+		$this->db->select('commodity_name');
+		$this->db->where('id', $item_id);
+		$result = $this->db->get(db_prefix() . 'goods_receipt_detail')->row();
+		return $result ? $result->commodity_name : 'Unknown Item';
 	}
 
 	/**
@@ -22952,8 +23276,12 @@ class Warehouse_model extends App_Model
 				'commodity_code' => $delivery_detail['commodity_code'],
 				'description' => $delivery_detail['description'],
 				'quantities_json' => $delivery_detail['quantities_json'],
-				'received_quantity' => get_stock_received_quantity($pur_order, $delivery_detail['description'], '', 
-				$delivery_detail['commodity_code']),
+				'received_quantity' => get_stock_received_quantity(
+					$pur_order,
+					$delivery_detail['description'],
+					'',
+					$delivery_detail['commodity_code']
+				),
 				'area' => $delivery_detail['area'],
 			];
 		}

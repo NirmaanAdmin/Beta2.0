@@ -60,6 +60,8 @@ $module_name = 'module_activity_log'; ?>
                               $module_name_filter_val = $_GET['module'];
                            }
                            $module_name_list = [
+                              ['id' => 'stckrec', 'name' => _l('Stock Received')],
+                              ['id' => 'stckiss', 'name' => _l('Stock Issued')],
                               ['id' => 'po', 'name' => _l('purchase_order')],
                               ['id' => 'wo', 'name' => _l('work_order')],
                               ['id' => 'vbt', 'name' => _l('vendor_billing_tracker')],

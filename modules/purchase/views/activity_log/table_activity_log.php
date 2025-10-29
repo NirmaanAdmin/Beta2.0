@@ -95,7 +95,7 @@ foreach ($rResult as $aRow) {
         if ($aColumns[$i] == 'description') {
             $_data = html_entity_decode($aRow['description']);
         } elseif ($aColumns[$i] == 'date') {
-            $_data = _dt($aRow['date']);
+            $_data = date('d M, Y h:i A',strtotime($aRow['date']));
         } elseif ($aColumns[$i] == 'staffid') {
             $_data = get_last_action_full_name($aRow['staffid']);
         } else {

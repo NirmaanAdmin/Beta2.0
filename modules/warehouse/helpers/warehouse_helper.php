@@ -2711,3 +2711,25 @@ function get_stock_received_quantity($po_id = null, $description = null, $wo_id 
     $rows = $CI->db->get()->result_array();
     return !empty($rows) ? array_sum(array_column($rows, 'quantities')) : 0.0;
 }
+
+function add_stock_received_activity_log($id)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $stock_received_date = $CI->db->get(db_prefix() . 'goods_receipt')->row();
+        if(!empty($stock_received_date)) {
+            $description = "Stock received <b>".$stock_received_date->goods_receipt_code."</b> has been created.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'stckrec',
+                'rel_id' => $id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
