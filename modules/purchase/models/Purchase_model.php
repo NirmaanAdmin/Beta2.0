@@ -7573,7 +7573,12 @@ class Purchase_model extends App_Model
         $this->db->delete(db_prefix() . 'pur_invoice_details');
 
         $this->db->where('vbt_id', $id);
+        $this->db->where('invoiceid IS NOT NULL', null, false);
         $this->db->delete(db_prefix() . 'expenses');
+
+        $this->db->where('invoiceid IS NULL', null, false);
+        $this->db->where('vbt_id', $id);
+        $this->db->update(db_prefix() . 'expenses', ['vbt_id' => NULL]);
 
         $ril_invoice_item = get_ril_invoice_item($id);
         if (!empty($ril_invoice_item)) {
