@@ -18501,6 +18501,7 @@ class Purchase_model extends App_Model
                 'rel_type' => isset($data['wo_id']) ? 'wo_payment_certificate' : 'po_payment_certificate',
             ]);
         }
+        $this->convert_pc_to_pur_bill($insert_id);
         add_pc_activity_log($insert_id);
         return true;
     }
@@ -19195,9 +19196,6 @@ class Purchase_model extends App_Model
             if ($all_approved[0]['all_approved'] == 1) {
                 $this->db->where('id', $rel_id);
                 $this->db->update(db_prefix() . 'payment_certificate', ['approve_status' => 2]);
-                if($rel_type == "po_payment_certificate" || $rel_type == "wo_payment_certificate") {
-                    $this->convert_pc_to_pur_bill($rel_id);
-                }
             }
         }
 
