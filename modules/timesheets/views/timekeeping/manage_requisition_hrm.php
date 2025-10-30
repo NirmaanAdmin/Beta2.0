@@ -396,7 +396,7 @@ $valid_cur_date = $this->timesheets_model->get_next_shift_date(get_staff_user_id
                                   <!-- <input type="hidden" name="number_day_off" value="<?php echo html_entity_decode($number_day_off); ?>"> -->
                                 </div>
                                 <div class="col-md-12 hide" id="comfoff">
-                                  <label class="control-label text-danger"><span style="color : red">This request can only be submitted if you have a comp off available</span></label>
+                                  <label class="control-label text-danger"><span style="color : red">This request can only be submitted if you have a comp off available.</span></label>
                                 </div>
                               </div>
                               <br>
