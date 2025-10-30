@@ -8933,9 +8933,9 @@ class timesheets_model extends app_model
 				$leaveBalance = $this->db->get('tbltimesheets_day_off')->row_array();
 
 				// Check if the leave balance exists and is sufficient
-				if (!$leaveBalance || $leaveBalance['remain'] < $daysRequested) {
-					return false;
-				}
+				// if (!$leaveBalance || $leaveBalance['remain'] < $daysRequested) {
+				// 	return false;
+				// }
 
 				// Deduct the requested days from the remaining leave balance
 				$newRemain = $leaveBalance['remain'] - $daysRequested;
