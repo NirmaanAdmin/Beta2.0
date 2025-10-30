@@ -576,6 +576,7 @@
       $('#requisition-form .btn-submit').attr('disabled', true);
     }
     $('input[name="userid"]').val(staff_id);
+    $('#comfoff').addClass('hide');
     var current_date = $('input[name="current_date"]').val();
     // $('input[name="number_of_leaving_day"]').val(0.5);
     $.post(admin_url + 'timesheets/get_remain_day_of/' + staff_id + '/' + type_of_leave).done(function(response) {
@@ -587,11 +588,14 @@
       if (rel_type == '1') {
         var number_day_off = $('input[name="number_day_off"]').val();
         var number_of_leaving_day = $('input[name="number_of_leaving_day"]').val();
-        // if (parseFloat(number_of_leaving_day) > parseFloat(number_day_off)) {
-        //   $('#requisition-form .btn-submit').attr('disabled', 'true');
-        // } else {
-        //   $('#requisition-form .btn-submit').removeAttr('disabled');
-        // }
+        if (type_of_leave == 'compensatory-off') {
+          if (parseFloat(number_of_leaving_day) > parseFloat(number_day_off)) {
+            $('#requisition-form .btn-submit').attr('disabled', 'true');
+            $('#comfoff').removeClass('hide');
+          } else {
+            $('#requisition-form .btn-submit').removeAttr('disabled');
+            $('#comfoff').addClass('hide');          }
+        }
       }
     });
   }
