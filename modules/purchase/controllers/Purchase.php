@@ -12934,6 +12934,8 @@ class purchase extends AdminController
                         unset($data['select_invoice']);
                         unset($data['applied_to_invoice']);
                     }
+                    $data['date'] = (!empty($data['date']) && $data['date'] != '0000-00-00')
+                    ? $data['date'] : date('Y-m-d');
                     if ($select_invoice == 'none') {
                         $this->purchase_model->update_bulk_pur_invoices($data);
                         set_alert('success', _l('updated_successfully', _l('vendor_bills')));

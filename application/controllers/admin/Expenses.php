@@ -559,7 +559,8 @@ class Expenses extends AdminController
         $category = !empty($expense_data['category']) ? $expense_data['category'] : $expense->category;
         $expense_name = !empty($expense_data['expense_name']) ? $expense_data['expense_name'] : $expense->expense_name;
         $amount = !empty($expense_data['amount']) ? $expense_data['amount'] : $expense->amount;
-        $expense_date = !empty($expense_data['date']) ? $expense_data['date'] : date('Y-m-d');
+        $expense_date = (!empty($expense_data['date']) && $expense_data['date'] != '0000-00-00')
+        ? $expense_data['date'] : date('Y-m-d');
         $project_id = !empty($expense_data['project_id']) ? $expense_data['project_id'] : $expense->project_id;
         $pur_order = NULL;
         $wo_order = NULL;
