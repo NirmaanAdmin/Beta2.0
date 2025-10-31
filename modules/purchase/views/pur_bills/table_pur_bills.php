@@ -16,7 +16,7 @@ $aColumns = [
         ELSE 3 
     END) as order_type',
     db_prefix() . 'pur_vendor' . '.company as company',
-    db_prefix() . 'pur_bills' . '.invoice_date as payment_certificate_date',
+    db_prefix() . 'pur_bills' . '.date_add as date_add',
     db_prefix() . 'pur_bills' . '.total as total',
     db_prefix() . 'pur_bills' . '.approve_status as approve_status',
     1,
@@ -147,8 +147,8 @@ foreach ($rResult as $aRow) {
             }
         } elseif ($aColumns[$i] == 'company') {
             $_data = '<a href="' . admin_url('purchase/vendor/' . $aRow['vendor']) . '" target="_blank">' . $aRow['company'] . '</a>';
-        } elseif ($aColumns[$i] == 'payment_certificate_date') {
-            $_data = _d($aRow['payment_certificate_date']);
+        } elseif ($aColumns[$i] == 'date_add') {
+            $_data = _d($aRow['date_add']);
         } elseif ($aColumns[$i] == 'total') {
             $_data = app_format_money($aRow['total'], $base_currency->symbol);
         } elseif ($aColumns[$i] == 'approve_status') {

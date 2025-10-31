@@ -118,7 +118,7 @@ $module_name = 'pur_bills'; ?>
                               <th><?php echo _l('Bill Code'); ?></th>
                               <th><?php echo _l('order_name'); ?></th>
                               <th><?php echo _l('vendor'); ?></th>
-                              <th><?php echo _l('payment_certificate_date'); ?></th>
+                              <th><?php echo _l('created'); ?></th>
                               <th><?php echo _l('Amount'); ?></th>
                               <th><?php echo _l('approval_status'); ?></th>
                               <th><?php echo _l('options'); ?></th>

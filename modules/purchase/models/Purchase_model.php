@@ -18504,7 +18504,6 @@ class Purchase_model extends App_Model
                 'rel_type' => isset($data['wo_id']) ? 'wo_payment_certificate' : 'po_payment_certificate',
             ]);
         }
-        $this->convert_pc_to_pur_bill($insert_id);
         add_pc_activity_log($insert_id);
         return true;
     }
@@ -21356,7 +21355,7 @@ class Purchase_model extends App_Model
         return true;
     }
 
-    public function create_purchase_bill_row_template($name = '', $item_name = '', $item_description = '', $item_code = '', $quantity = '', $billed_quantity = '', $unit_id = '', $unit_name = '', $unit_price = '', $bill_percentage = 0, $hold = 0, $total_money = 0, $item_key = '', $is_edit = false, $currency_rate = 1, $to_currency = '', $pur_bill_id = '')
+    public function create_purchase_bill_row_template($name = '', $item_name = '', $item_description = '', $item_code = '', $quantity = '', $unit_id = '', $unit_name = '', $unit_price = '', $total_money = 0, $item_key = '', $is_edit = false, $currency_rate = 1, $to_currency = '', $pur_bill_id = '', $payment_certificates = array())
     {
         $this->load->model('currencies_model');
         $base_currency = $this->currencies_model->get_base_currency();
@@ -21368,15 +21367,10 @@ class Purchase_model extends App_Model
         $name_unit_id = 'unit_id';
         $name_unit_name = 'unit_name';
         $name_quantity = 'quantity';
-        $name_billed_quantity = 'billed_quantity';
         $name_unit_price = 'unit_price';
-        $name_bill_percentage = 'bill_percentage';
-        $name_hold = 'hold';
         $name_total_money = 'total_money';
         $array_qty_attr = ['min' => '0.0', 'step' => 'any'];
-        $array_billed_quantity_attr = ['min' => '0.0', 'step' => 'any'];
         $array_rate_attr = ['min' => '0.0', 'step' => 'any'];
-        $array_hold_attr = ['min' => '0.0', 'max' => '100.0'];
         $text_right_class = 'text-right';
 
         if ($name == '') {
@@ -21390,16 +21384,11 @@ class Purchase_model extends App_Model
             $name_unit_id = $name . '[unit_id]';
             $name_unit_name = '[unit_name]';
             $name_quantity = $name . '[quantity]';
-            $name_billed_quantity = $name . '[billed_quantity]';
             $name_unit_price = $name . '[unit_price]';
-            $name_bill_percentage = $name . '[bill_percentage]';
-            $name_hold = $name . '[hold]';
             $name_total_money = $name . '[total_money]';
 
             $array_qty_attr = ['onblur' => 'pur_calculate_total();', 'onchange' => 'pur_calculate_total();', 'min' => '0.0', 'step' => 'any',  'data-quantity' => (float)$quantity, 'readonly' => true];
-            $array_billed_quantity_attr = ['onblur' => 'pur_calculate_total();', 'onchange' => 'pur_calculate_total();', 'min' => '0.0', 'step' => 'any'];
             $array_rate_attr = ['onblur' => 'pur_calculate_total();', 'onchange' => 'pur_calculate_total();', 'min' => '0.0', 'step' => 'any', 'data-amount' => 'invoice', 'placeholder' => _l('rate'), 'readonly' => true];
-            $array_hold_attr = ['onblur' => 'pur_calculate_total();', 'onchange' => 'pur_calculate_total();', 'min' => '0.0', 'max' => '100.0'];
         }
         $row .= '<td class="">' . render_textarea($name_item_name, '', $item_name, ['rows' => 2, 'placeholder' => _l('pur_item_name'), 'readonly' => true]) . '</td>';
 
@@ -21419,34 +21408,21 @@ class Purchase_model extends App_Model
                class="btn btn-success pull-right">'
                . _l('add_bill_bifurcation') .
             '</a>
-         </td>';
+        </td>';
 
-        $row .= '<td class="label_row_bill_percentage" align="right">' . number_format((float)$bill_percentage, 2, '.', '') . '%</td>';
-
-        $row .= '<td class="hold">' . render_input($name_hold, '', $hold, 'number', $array_hold_attr, [], 'no-margin', $text_right_class) . '</td>';
-
-        $row .= '<td class="hold_amount" align="right"></td>';
-
-        $po_bills_columns = $this->get_all_order_bills_columns($pur_bill_id);
-        if(!empty($po_bills_columns)) {
-           foreach ($po_bills_columns as $pkey => $pvalue) {
-                $old_po_bills_columns = $this->get_old_order_bills_columns($pvalue['id'], $item_code, $item_description);
-                $row .= '<td align="right">'.$old_po_bills_columns->billed_quantity.'</td>';
-                $row .= '<td align="right">'.app_format_money($old_po_bills_columns->total_money, $base_currency->symbol).'</td>';
-           }
+        if(!empty($payment_certificates)) {
+            foreach ($payment_certificates as $pkey => $pvalue) {
+                $row .= '<td class="pc_bill_bifurcation">
+                    <a class="btn btn-success pull-right">
+                        Add PC' . ($pkey + 1) . ' Bifurcation
+                    </a>
+                </td>';
+            }
         }
-
-        $row .= '<td class="billed_quantity">'.render_input($name_billed_quantity, '', $billed_quantity, 'number', $array_billed_quantity_attr, [], 'no-margin', $text_right_class).'</td>';
-
-        $row .= '<td class="label_row_total" align="right">' . app_format_money($total_money, $base_currency->symbol) . '</td>';
 
         $row .= '<td class="hide commodity_code">' . render_input($name_item_code, '', $item_code, 'text', ['placeholder' => _l('commodity_code')]) . '</td>';
 
         $row .= '<td class="hide unit_id">' . render_input($name_unit_id, '', $unit_id, 'text', ['placeholder' => _l('unit_id')]) . '</td>';
-
-        $row .= '<td class="hide row_bill_percentage">' . render_input($name_bill_percentage, '', $bill_percentage, 'number', []) . '</td>';
-
-        $row .= '<td class="hide row_total">' . render_input($name_total_money, '', $total_money, 'number', []) . '</td>';
 
         $row .= '</tr>';
         return $row;
@@ -21512,9 +21488,6 @@ class Purchase_model extends App_Model
         unset($data['total_money']);
         unset($data['additional_discount']);
         unset($data['tax_value']);
-        unset($data['billed_quantity']);
-        unset($data['final_percentage']);
-        unset($data['payment_certificate_total']);
 
         unset($data['isedit']);
 
@@ -21654,7 +21627,6 @@ class Purchase_model extends App_Model
                 $dt_data['discount_money'] = $rqd['discount_money'];
                 $dt_data['discount_percent'] = $rqd['discount'];
                 $dt_data['description'] = nl2br($rqd['item_description']);
-                $dt_data['billed_quantity'] = $rqd['billed_quantity'];
 
                 $tax_money = 0;
                 $tax_rate_value = 0;
@@ -21675,8 +21647,6 @@ class Purchase_model extends App_Model
                 $dt_data['tax_name'] = $tax_name;
 
                 $dt_data['quantity'] = ($rqd['quantity'] != '' && $rqd['quantity'] != null) ? $rqd['quantity'] : 0;
-                $dt_data['bill_percentage'] = !empty($rqd['bill_percentage']) ? $rqd['bill_percentage'] : 0;
-                $dt_data['hold'] = !empty($rqd['hold']) ? $rqd['hold'] : 0;
 
                 $this->db->where('id', $rqd['id']);
                 $this->db->update(db_prefix() . 'pur_bill_details', $dt_data);
@@ -21694,14 +21664,18 @@ class Purchase_model extends App_Model
                             $this->db->where('item_id', $bvalue['item_id']);
                             $this->db->update(db_prefix() . 'pur_bills_bifurcation', [
                                 'item_description' => $bvalue['item_description'],
-                                'bill_percent' => $bvalue['bill_percent'],
+                                'bill_percentage' => $bvalue['bill_percentage'],
+                                'hold' => $bvalue['hold'],
+                                'billed_quantity' => $bvalue['billed_quantity'],
                             ]);
                         } else {
                             $this->db->insert(db_prefix() . 'pur_bills_bifurcation', [
                                 'bill_item_id' => $rqd['id'],
                                 'item_id' => $bvalue['item_id'],
                                 'item_description' => $bvalue['item_description'],
-                                'bill_percent' => $bvalue['bill_percent'],
+                                'bill_percentage' => $bvalue['bill_percentage'],
+                                'hold' => $bvalue['hold'],
+                                'billed_quantity' => $bvalue['billed_quantity'],
                             ]);
                         }
                     }
@@ -24696,7 +24670,7 @@ class Purchase_model extends App_Model
     public function get_purchase_bill_row_model($item_key, $item_name, $description, $unit_price, $bill_item_id = '')
     {
         $html  = '<div class="modal fade all_bill_row_model" id="bill_modal_' . $item_key . '" tabindex="-1" role="dialog">';
-        $html .= '<div class="modal-dialog" role="document" style="width:70%;">';
+        $html .= '<div class="modal-dialog" role="document" style="width:98%;">';
         $html .= '<div class="modal-content">';
 
         // Header
@@ -24719,9 +24693,12 @@ class Purchase_model extends App_Model
         $html .= '<table class="table items table_bill_rows">';
         $html .= '<thead>';
         $html .= '<tr>';
-        $html .= '<th align="left" width="33%">' . _l('Bill Description') . '</th>';
-        $html .= '<th align="left" width="33%">' . _l('bill_percentage') . '</th>';
-        $html .= '<th align="left" width="33%">' . _l('Bill Unit Price') . '</th>';
+        $html .= '<th align="left" width="30%">' . _l('Bill Description') . '</th>';
+        $html .= '<th align="left" width="14%">' . _l('bill_percentage') . '</th>';
+        $html .= '<th align="left" width="14%">' . _l('Bill Unit Price') . '</th>';
+        $html .= '<th align="left" width="14%">' . _l('Hold %') . '</th>';
+        $html .= '<th align="left" width="14%">' . _l('Qty') . '</th>';
+        $html .= '<th align="left" width="14%">' . _l('Amount') . '</th>';
         $html .= '</tr>';
         $html .= '</thead>';
         $default_purchase_bill_rows = get_default_purchase_bill_rows();
@@ -24734,15 +24711,21 @@ class Purchase_model extends App_Model
             }
         }
         $html .= '<tbody style="border: 1px solid #ddd;">';
-        $html .= form_hidden('final_percentage', 0);
         foreach ($default_purchase_bill_rows as $key => $value) {
             $html .= '<tr class="bill_items">';
             $html .= '<td class="hide">'.form_hidden('newbillitems['.$item_key.']['.$value['item_id'].'][item_id]', $value['item_id']).'</td>';
             $html .= '<td align="left">' . render_textarea('newbillitems['.$item_key.']['.$value['item_id'].'][item_description]', '', $value['item_description'], ['rows' => 2]) . '</td>';
             $html .= '<td align="left" class="all_bill_percentage">' 
-              . render_input('newbillitems['.$item_key.']['.$value['item_id'].'][bill_percent]', '', $value['bill_percent'], 'number', ['min' => 0, 'max' => 100, 'onblur' => 'calculate_bill_bifurcation('.$item_key.', '.$unit_price.');', 'onchange' => 'calculate_bill_bifurcation('.$item_key.', '.$unit_price.');']) 
+              . render_input('newbillitems['.$item_key.']['.$value['item_id'].'][bill_percentage]', '', $value['bill_percentage'], 'number', ['min' => 0, 'max' => 100, 'onblur' => 'calculate_bill_bifurcation('.$item_key.', '.$unit_price.');', 'onchange' => 'calculate_bill_bifurcation('.$item_key.', '.$unit_price.');']) 
               . '</td>';
             $html .= '<td align="left" class="all_bill_unit_price"></td>';
+            $html .= '<td align="left" class="all_bill_hold">' 
+              . render_input('newbillitems['.$item_key.']['.$value['item_id'].'][hold]', '', $value['hold'], 'number', ['min' => 0, 'max' => 100, 'onblur' => 'calculate_bill_bifurcation('.$item_key.', '.$unit_price.');', 'onchange' => 'calculate_bill_bifurcation('.$item_key.', '.$unit_price.');']) 
+              . '</td>';
+            $html .= '<td align="left" class="all_bill_billed_quantity">' 
+              . render_input('newbillitems['.$item_key.']['.$value['item_id'].'][billed_quantity]', '', $value['billed_quantity'], 'number', ['min' => 0, 'max' => 100, 'onblur' => 'calculate_bill_bifurcation('.$item_key.', '.$unit_price.');', 'onchange' => 'calculate_bill_bifurcation('.$item_key.', '.$unit_price.');']) 
+              . '</td>';
+            $html .= '<td align="left" class="all_bill_billed_amount"></td>';
             $html .= '</tr>';
         }
         $html .= '</tbody>';
@@ -24760,6 +24743,14 @@ class Purchase_model extends App_Model
         $html .= '<tr>';
         $html .= '<td width="75%"><span class="bold tw-text-neutral-700">Total Bill Unit Price :</span></td>';
         $html .= '<td width="25%" class="total_bill_unit_price"></td>';
+        $html .= '</tr>';
+        $html .= '<tr>';
+        $html .= '<td width="75%"><span class="bold tw-text-neutral-700">Total Hold Percentage :</span></td>';
+        $html .= '<td width="25%" class="total_hold_percentage"></td>';
+        $html .= '</tr>';
+        $html .= '<tr>';
+        $html .= '<td width="75%"><span class="bold tw-text-neutral-700">Total Amount :</span></td>';
+        $html .= '<td width="25%" class="total_billed_amount"></td>';
         $html .= '</tr>';
         $html .= '</tbody>';
         $html .= '</table>';
@@ -24884,138 +24875,77 @@ class Purchase_model extends App_Model
         return true;
     }
 
-    public function convert_pc_to_pur_bill($pc_id)
+    public function convert_pc_to_pur_bill($id, $rel_type)
     {
         $prefix = get_purchase_option('pur_bill_prefix');
         $next_number = get_purchase_option('next_bill_number');
         $bill_number = $prefix.str_pad($next_number,5,'0',STR_PAD_LEFT);
-        $payment_certificate = $this->get_payment_certificate($pc_id);
-        if(!empty($payment_certificate)) {
-            if(!empty($payment_certificate->po_id)) {
-                $order = $this->get_pur_order($payment_certificate->po_id);
-                $this->db->where('pur_order', $order->id);
-                $this->db->order_by('id', 'ASC');
-                $order_details = $this->db->get(db_prefix() . 'pur_order_detail')->result_array();
-            } else if(!empty($payment_certificate->wo_id)) {
-                $order = $this->get_wo_order($payment_certificate->wo_id);
-                $this->db->where('wo_order', $order->id);
-                $this->db->order_by('id', 'ASC');
-                $order_details = $this->db->get(db_prefix() . 'wo_order_detail')->result_array();
-            } else {
-                $order = (object) array();
-                $order_details = array();
-            }
-            $pur_bills = array();
-            $pur_bills['number'] = $next_number;
-            $pur_bills['bill_number'] = $bill_number;
-            $pur_bills['invoice_date'] = date('Y-m-d');
-            $pur_bills['total'] = 0.00;
-            $pur_bills['approve_status'] = 1;
-            $pur_bills['contract'] = 0;
-            $pur_bills['vendor'] = $payment_certificate->vendor;
-            $pur_bills['payment_status'] = 0;
-            $pur_bills['add_from'] = get_staff_user_id();
-            $pur_bills['date_add'] = date('Y-m-d');
-            $pur_bills['pur_order'] = !empty($payment_certificate->po_id) ? $payment_certificate->po_id : NULL;
-            $pur_bills['wo_order'] = !empty($payment_certificate->wo_id) ? $payment_certificate->wo_id : NULL;
-            $pur_bills['recurring'] = 0;
-            $pur_bills['cycles'] = 0;
-            $pur_bills['total_cycles'] = 0;
-            $pur_bills['duedate'] = date('Y-m-d');
-            $pur_bills['currency'] = 3;
-            $pur_bills['currency_rate'] = 1.000000;
-            $pur_bills['from_currency'] = 3;
-            $pur_bills['to_currency'] = 3;
-            $pur_bills['bill_code'] = $bill_number;
-            $pur_bills['discount_type'] = 'after_tax';
-            $pur_bills['project_id'] = !empty($order) ? $order->project : get_default_project();
-            $pur_bills['expense_convert'] = 0;
-            $pur_bills['group_pur'] = 0;
-            $pur_bills['bil_total'] = 0.00;
-            $pur_bills['pc_id'] = $payment_certificate->id;
-            $this->db->insert(db_prefix() . 'pur_bills', $pur_bills);
-            $pur_bill_id = $this->db->insert_id();
+        if($rel_type == 'pur_order') {
+            $order = $this->get_pur_order($id);
+            $this->db->where('pur_order', $order->id);
+            $this->db->order_by('id', 'ASC');
+            $order_details = $this->db->get(db_prefix() . 'pur_order_detail')->result_array();
+        } else if($rel_type == 'wo_order') {
+            $order = $this->get_wo_order($id);
+            $this->db->where('wo_order', $order->id);
+            $this->db->order_by('id', 'ASC');
+            $order_details = $this->db->get(db_prefix() . 'wo_order_detail')->result_array();
+        } else {
+            $order = (object) array();
+            $order_details = array();
+        }
+        $pur_bills = array();
+        $pur_bills['number'] = $next_number;
+        $pur_bills['bill_number'] = $bill_number;
+        $pur_bills['invoice_date'] = date('Y-m-d');
+        $pur_bills['total'] = 0.00;
+        $pur_bills['approve_status'] = 1;
+        $pur_bills['contract'] = 0;
+        $pur_bills['vendor'] = !empty($order) ? $order->vendor : NULL;
+        $pur_bills['payment_status'] = 0;
+        $pur_bills['add_from'] = get_staff_user_id();
+        $pur_bills['date_add'] = !empty($order) ? date('Y-m-d', strtotime($order->datecreated)) : date('Y-m-d');
+        $pur_bills['pur_order'] = $rel_type == 'pur_order' ? $id : NULL;
+        $pur_bills['wo_order'] = $rel_type == 'wo_order' ? $id : NULL;
+        $pur_bills['recurring'] = 0;
+        $pur_bills['cycles'] = 0;
+        $pur_bills['total_cycles'] = 0;
+        $pur_bills['duedate'] = date('Y-m-d');
+        $pur_bills['currency'] = 3;
+        $pur_bills['currency_rate'] = 1.000000;
+        $pur_bills['from_currency'] = 3;
+        $pur_bills['to_currency'] = 3;
+        $pur_bills['bill_code'] = $bill_number;
+        $pur_bills['discount_type'] = 'after_tax';
+        $pur_bills['project_id'] = !empty($order) ? $order->project : get_default_project();
+        $pur_bills['expense_convert'] = 0;
+        $pur_bills['group_pur'] = 0;
+        $pur_bills['bil_total'] = 0.00;
+        $this->db->insert(db_prefix() . 'pur_bills', $pur_bills);
+        $pur_bill_id = $this->db->insert_id();
 
-            if(!empty($order_details)) {
-                foreach ($order_details as $pkey => $pvalue) {
-                    $pur_bill_details = array();
-                    $pur_bill_details['pur_bill'] = $pur_bill_id;
-                    $pur_bill_details['item_code'] = $pvalue['item_code'];
-                    $pur_bill_details['description'] = $pvalue['description'];
-                    $pur_bill_details['unit_id'] = $pvalue['unit_id'];
-                    $pur_bill_details['unit_price'] = $pvalue['unit_price'];
-                    $pur_bill_details['quantity'] = $pvalue['quantity'];
-                    $pur_bill_details['billed_quantity'] = 0.00;
-                    $pur_bill_details['total_money'] = 0.00;
-                    $pur_bill_details['item_name'] = pur_get_item_variatiom($pvalue['item_code']);
-                    $pur_bill_details['bill_percentage'] = 0.00;
-                    $pur_bill_details['hold'] = 0.00;
-                    $this->db->insert(db_prefix() . 'pur_bill_details', $pur_bill_details);
-                    $bill_item_id = $this->db->insert_id();
-
-                    if(!empty($bill_item_id)) {
-                        $default_purchase_bill_rows = get_default_purchase_bill_rows();
-                        foreach ($default_purchase_bill_rows as $pdkey => $pdvalue) {
-                            $pur_bills_bifurcation = array();
-                            $pur_bills_bifurcation['bill_item_id'] = $bill_item_id;
-                            $pur_bills_bifurcation['item_id'] = $pdvalue['item_id'];
-                            $pur_bills_bifurcation['item_description'] = $pdvalue['item_description'];
-                            $pur_bills_bifurcation['bill_percent'] = $pdvalue['bill_percent'];
-                            $this->db->insert(db_prefix() . 'pur_bills_bifurcation', $pur_bills_bifurcation);
-                        }
-                    }
-                }
+        if(!empty($order_details)) {
+            foreach ($order_details as $pkey => $pvalue) {
+                $pur_bill_details = array();
+                $pur_bill_details['pur_bill'] = $pur_bill_id;
+                $pur_bill_details['item_code'] = $pvalue['item_code'];
+                $pur_bill_details['description'] = $pvalue['description'];
+                $pur_bill_details['unit_id'] = $pvalue['unit_id'];
+                $pur_bill_details['unit_price'] = $pvalue['unit_price'];
+                $pur_bill_details['quantity'] = $pvalue['quantity'];
+                $pur_bill_details['total_money'] = 0.00;
+                $pur_bill_details['item_name'] = pur_get_item_variatiom($pvalue['item_code']);
+                $this->db->insert(db_prefix() . 'pur_bill_details', $pur_bill_details);
+                $bill_item_id = $this->db->insert_id();
             }
+        }
 
-            if ($pur_bill_id) {
-                $this->db->where('option_name', 'next_bill_number');
-                $this->db->update(db_prefix() . 'purchase_option', ['option_val' =>  $next_number + 1]);
-            }
+        if ($pur_bill_id) {
+            $this->db->where('option_name', 'next_bill_number');
+            $this->db->update(db_prefix() . 'purchase_option', ['option_val' =>  $next_number + 1]);
         }
 
         return true;
-    }
-
-    public function get_all_order_bills_columns($id)
-    {
-        $pur_bills = $this->get_pur_bill($id);
-        if(!empty($pur_bills->pur_order)) {
-            $this->db->select('id');
-            $this->db->from(db_prefix() . 'pur_bills');
-            $this->db->where('pur_order', $pur_bills->pur_order);
-            $this->db->where('id <', (int)$id);
-            $this->db->order_by('id', 'ASC');
-            return $this->db->get()->result_array();
-        } else if(!empty($pur_bills->wo_order)) {
-            $this->db->select('id');
-            $this->db->from(db_prefix() . 'pur_bills');
-            $this->db->where('wo_order', $pur_bills->wo_order);
-            $this->db->where('id <', (int)$id);
-            $this->db->order_by('id', 'ASC');
-            return $this->db->get()->result_array();
-        } else {
-            return array();
-        }
-    }
-
-    public function get_old_order_bills_columns($bill_id, $item_code, $item_description)
-    {
-        $non_break_description = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $item_description));
-        $this->db->select('*');
-        $this->db->select("
-            REPLACE(
-                REPLACE(
-                    REPLACE(
-                        REPLACE(description, '\r', ''),
-                    '\n', ''),
-                '<br />', ''),
-            '<br/>', '') AS non_break_description
-        ");
-        $this->db->where('pur_bill', $bill_id);
-        $this->db->where('item_code', $item_code);
-        $this->db->group_by('id');
-        $this->db->having('non_break_description', $non_break_description);
-        return $this->db->get(db_prefix() . 'pur_bill_details')->row();
     }
 
     public function get_debit_note_attachments($id)
@@ -25368,5 +25298,27 @@ class Purchase_model extends App_Model
     public function get_tender_document_detail($tender_id){
         $this->db->where('tender_id', $tender_id);
         return $this->db->get(db_prefix() . 'tender_documents')->result_array();
+    }
+
+    public function get_all_bill_payment_certificates($id)
+    {
+        $result = array();
+        $pur_bill = $this->get_pur_bill($id);
+        if(!empty($pur_bill)) {
+            if(!empty($pur_bill->pur_order)) {
+                $this->db->select('id');
+                $this->db->where('po_id', $pur_bill->pur_order);
+                $this->db->order_by('id', 'ASC');
+                $result = $this->db->get(db_prefix() . 'payment_certificate')->result_array();
+            } else if(!empty($pur_bill->wo_order)) {
+                $this->db->select('id');
+                $this->db->where('wo_id', $pur_bill->wo_order);
+                $this->db->order_by('id', 'ASC');
+                $result = $this->db->get(db_prefix() . 'payment_certificate')->result_array();
+            } else {
+                $result = array();
+            }
+        }
+        return $result;
     }
 }

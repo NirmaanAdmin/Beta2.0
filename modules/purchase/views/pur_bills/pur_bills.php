@@ -190,21 +190,12 @@
 				        						<th align="right"><?php echo _l('unit_price'); ?><span class="th_currency"><?php echo '('.$po_currency->name.')'; ?></span></th>
 				        						<th align="right" class="qty"><?php echo _l('Ordered Quantity'); ?></th>
 				        						<th align="right"><?php echo _l('bill_bifurcation'); ?></th>
-				        						<th align="right"><?php echo _l('bill_percentage'); ?></th>
-				        						<th align="right"><?php echo _l('Hold %'); ?></th>
-				        						<th align="right"><?php echo _l('Hold Amount'); ?></th>
 				        						<?php
-				        						if(!empty($order_bills_columns)) {
-				        							foreach ($order_bills_columns as $pkey => $pvalue) { ?>
-				        								<th align="right">Qty (PC-<?php echo $pkey+1; ?>)</th>
-				        								<th align="right">Amount (PC-<?php echo $pkey+1; ?>)</th>
+				        						if(!empty($payment_certificates)) {
+				        							foreach ($payment_certificates as $pkey => $pvalue) { ?>
+				        								<th align="right">PC<?php echo $pkey+1; ?> Bifurcation</th>
 				        							<?php }
 				        						} ?>
-				        						<?php
-				        						$count_bills_columns = count($order_bills_columns) + 1;
-				        						?>
-				        						<th align="right">Qty (PC-<?php echo $count_bills_columns; ?>)</th>
-				        						<th align="right">Amount (PC-<?php echo $count_bills_columns; ?>)</th>
 				        					</tr>
 				        				</thead>
 				        				<tbody>
@@ -221,14 +212,6 @@
 				        						<?php echo form_hidden('grand_total', ''); ?>
 				        					</td>
 				        					<td class="wh-total">
-				        					</td>
-				        				</tr>
-				        				<tr>
-				        					<td><span class="bold"><?php echo _l('Payment certificate total'); ?> :</span>
-				        						<?php echo form_hidden('payment_certificate_total', $payment_certificate_total); ?>
-				        					</td>
-				        					<td class="payment_certificate_total">
-				        						<?php echo app_format_money($payment_certificate_total, $base_currency->symbol); ?>
 				        					</td>
 				        				</tr>
 				        			</tbody>

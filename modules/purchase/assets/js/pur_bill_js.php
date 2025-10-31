@@ -534,10 +534,14 @@
   function calculate_bill_bifurcation(id, unit_price) {
     var total_bill_unit_price = 0;
     var total_bill_percentage = 0;
+    var total_hold_percentage = 0;
+    var total_billed_amount = 0;
     var rows = $('#bill_modal_' + id + ' table tbody .bill_items');
     $.each(rows, function () {
       var row = $(this);
       var bill_percentage = parseFloat(row.find(".all_bill_percentage input").val()) || 0;
+      var bill_hold = parseFloat(row.find(".all_bill_hold input").val()) || 0;
+      var bill_billed_quantity = parseFloat(row.find(".all_bill_billed_quantity input").val()) || 0;
       var bill_unit_price = 0;
       if (bill_percentage > 0) {
         bill_unit_price = (unit_price * bill_percentage) / 100;
@@ -545,26 +549,41 @@
       total_bill_unit_price += bill_unit_price;
       row.find(".all_bill_unit_price").html(format_money(bill_unit_price));
       total_bill_percentage += bill_percentage;
+      total_hold_percentage += bill_hold;
+      var bill_hold_percentage = bill_percentage - bill_hold;
+      var billed_amount = 0;
+      if (bill_hold_percentage > 0) {
+        billed_amount = bill_billed_quantity * ((unit_price * bill_hold_percentage) / 100);
+      }
+      row.find(".all_bill_billed_amount").html(format_money(billed_amount));
+      total_billed_amount += billed_amount; 
     });
     $('#bill_modal_' + id + ' .total_bill_unit_price').html(format_money(total_bill_unit_price));
     $('#bill_modal_' + id + ' .total_bill_percentage').html(total_bill_percentage.toFixed(2)+'%');
-    $('#bill_modal_' + id + ' input[name="final_percentage"]').val(total_bill_percentage.toFixed(2));
+    $('#bill_modal_' + id + ' .total_hold_percentage').html(total_hold_percentage.toFixed(2)+'%');
+    $('#bill_modal_' + id + ' .total_billed_amount').html(format_money(total_billed_amount));
   }
 
   function save_bill_row_model(id) {
-    var final_percentage = parseFloat($('#bill_modal_' + id + ' input[name="final_percentage"]').val()) || 0;
-    if (final_percentage > 100) {
+    var item_bill_hold_percentage = 0;
+    var rows = $('#bill_modal_' + id + ' table tbody .bill_items');
+    $.each(rows, function () {
+      var row = $(this);
+      var bill_percentage = parseFloat(row.find(".all_bill_percentage input").val()) || 0;
+      var bill_hold = parseFloat(row.find(".all_bill_hold input").val()) || 0;
+      var bill_hold_percentage = bill_percentage - bill_hold;
+      item_bill_hold_percentage += bill_hold_percentage;
+    });
+    if (item_bill_hold_percentage > 100) {
       alert_float('warning', "The percentages cannot exceed 100.");
       return false;
-    } else if (final_percentage < 0) {
+    } else if (item_bill_hold_percentage < 0) {
       alert_float('warning', "The percentages cannot be negative.");
       return false;
     } else {
-      $('.list_item_' + id + ' .label_row_bill_percentage').html(final_percentage.toFixed(2)+'%');
-      $('.list_item_' + id + ' .row_bill_percentage input').val(final_percentage.toFixed(2));
       $('#bill_modal_' + id).modal('hide');
     }
-    pur_calculate_total();
+    // pur_calculate_total();
   }
 
   function approve_bill_bifurcation_request(id) {
