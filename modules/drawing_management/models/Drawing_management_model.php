@@ -928,13 +928,13 @@ class drawing_management_model extends app_model
 				if (is_numeric($old_item_id) && $old_item_id > 0) {
 
 					$file_record = $this->db->select('name,orginal_filename')->where('id', (int)$insert_id)->get(db_prefix() . 'dms_items')->row();
-					if ($file_record && !empty($file_record->orginal_filename)) {
+					if ($file_record && !empty($file_record->name)) {
 						$upload_dir = rtrim(DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER, '/')
 							. '/files/' . (int)$new_parent_id . '/';
 
 						$old_filename = $file_record->name;
 						$old_filename_original_name = $file_record->orginal_filename;
-						$file_parts   = pathinfo($old_filename_original_name);
+						$file_parts   = pathinfo($old_filename); 
 						$basename     = $file_parts['filename'] ?? '';
 						$ext          = isset($file_parts['extension']) ? ('.' . $file_parts['extension']) : '';
 
