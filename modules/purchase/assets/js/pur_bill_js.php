@@ -83,57 +83,6 @@
         clickedButton = $(this).attr("name");
     });
 
-    $("body").on('submit', 'form._transaction_form', function (e) {
-      e.preventDefault();
-      var form = $(this);
-      var is_submit = true;
-      $('.all_bill_row_model').each(function () {
-        var modal = $(this);
-        var total_bill_percentage = 0;
-        modal.find("tbody .bill_items").each(function () {
-          var row = $(this);
-          var bill_percentage = parseFloat(row.find(".all_bill_percentage input").val()) || 0;
-          total_bill_percentage += bill_percentage;
-        });
-        if (total_bill_percentage > 100) {
-          is_submit = false;
-          alert_float(
-            'warning',
-            "The percentages cannot exceed 100 in modal"
-          );
-          form.find('button.transaction-submit:disabled').prop('disabled', false);
-          return false;
-        }
-        if (total_bill_percentage < 0) {
-          is_submit = false;
-          alert_float(
-            'warning',
-            "The percentages cannot be negative in modal"
-          );
-          form.find('button.transaction-submit:disabled').prop('disabled', false);
-          return false;
-        }
-      });
-      var grand_total = pur_calculate_total();
-      var payment_certificate_total = parseFloat($("input[name='payment_certificate_total']").val()) || 0;
-      if(grand_total > payment_certificate_total) {
-        is_submit = false;
-        alert_float(
-          'warning',
-          "The grand total should not be greater than the payment certificate total."
-        );
-        form.find('button.transaction-submit:disabled').prop('disabled', false);
-        return false;
-      }
-      if (is_submit) {
-        if (clickedButton) {
-          form.append('<input type="hidden" name="' + clickedButton + '" value="1">');
-        }
-        form.off('submit');
-        form[0].submit();
-      }
-    });
-
   })(jQuery);
 
   var lastAddedItemKey = null;
@@ -302,29 +251,6 @@
       return false;
     }
     var total = 0;
-    var rows = $('.table.has-calculations tbody tr.item');
-    $.each(rows, function() {
-      var row = $(this);
-      var bill_amount = 0;
-      var hold_amount = 0;
-      var final_amount = 0;
-      var bill_percentage = parseFloat(row.find("td.row_bill_percentage input").val()) || 0;
-      var hold_percentage = parseFloat(row.find('td.hold input').val()) || 0;
-      var billed_quantity = parseFloat(row.find('td.billed_quantity input[type="number"]').val()) || 0;
-      var rate = parseFloat(row.find('td.rate input').val()) || 0;
-      var amount = billed_quantity * rate;
-      if (bill_percentage > 0) {
-        bill_amount = (amount * bill_percentage) / 100;
-      }
-      if (hold_percentage > 0) {
-        hold_amount = (amount * hold_percentage) / 100;
-      }
-      final_amount = bill_amount - hold_amount;
-      row.find("td.hold_amount").html(format_money(hold_amount));
-      row.find("td.label_row_total").html(format_money(final_amount));
-      row.find("td.row_total input").val(final_amount);
-      total += final_amount;
-    });
     $('.wh-total').html(
       format_money(total) +
       hidden_input('grand_total', accounting.toFixed(total, app.options.decimal_places))
@@ -531,6 +457,11 @@
     $('#bill_modal_'+id).modal('show');
   }
 
+  function add_pc_bill_bifurcation(id, unit_price, pc_id) {
+    calculate_pc_bill_bifurcation(id, unit_price, pc_id);
+    $('#pc_bill_modal_'+id+'_'+pc_id).modal('show');
+  }
+
   function calculate_bill_bifurcation(id, unit_price) {
     var total_bill_unit_price = 0;
     var total_bill_percentage = 0;
@@ -564,6 +495,39 @@
     $('#bill_modal_' + id + ' .total_billed_amount').html(format_money(total_billed_amount));
   }
 
+  function calculate_pc_bill_bifurcation(id, unit_price, pc_id) {
+    var total_pc_bill_unit_price = 0;
+    var total_pc_bill_percentage = 0;
+    var total_pc_hold_percentage = 0;
+    var total_pc_billed_amount = 0;
+    var rows = $('#pc_bill_modal_' + id + '_' + pc_id + ' table tbody .pc_bill_items');
+    $.each(rows, function () {
+      var row = $(this);
+      var pc_bill_percentage = parseFloat(row.find(".all_pc_bill_percentage input").val()) || 0;
+      var pc_bill_hold = parseFloat(row.find(".all_pc_bill_hold input").val()) || 0;
+      var pc_bill_billed_quantity = parseFloat(row.find(".all_pc_bill_billed_quantity input").val()) || 0;
+      var pc_bill_unit_price = 0;
+      if (pc_bill_percentage > 0) {
+        pc_bill_unit_price = (unit_price * pc_bill_percentage) / 100;
+      }
+      total_pc_bill_unit_price += pc_bill_unit_price;
+      row.find(".all_pc_bill_unit_price").html(format_money(pc_bill_unit_price));
+      total_pc_bill_percentage += pc_bill_percentage;
+      total_pc_hold_percentage += pc_bill_hold;
+      var pc_bill_hold_percentage = pc_bill_percentage - pc_bill_hold;
+      var pc_billed_amount = 0;
+      if (pc_bill_hold_percentage > 0) {
+        pc_billed_amount = pc_bill_billed_quantity * ((unit_price * pc_bill_hold_percentage) / 100);
+      }
+      row.find(".all_pc_bill_billed_amount").html(format_money(pc_billed_amount));
+      total_pc_billed_amount += pc_billed_amount; 
+    });
+    $('#pc_bill_modal_' + id + '_' + pc_id + ' .total_pc_bill_unit_price').html(format_money(total_pc_bill_unit_price));
+    $('#pc_bill_modal_' + id + '_' + pc_id + ' .total_pc_bill_percentage').html(total_pc_bill_percentage.toFixed(2)+'%');
+    $('#pc_bill_modal_' + id + '_' + pc_id + ' .total_pc_hold_percentage').html(total_pc_hold_percentage.toFixed(2)+'%');
+    $('#pc_bill_modal_' + id + '_' + pc_id + ' .total_pc_billed_amount').html(format_money(total_pc_billed_amount));
+  }
+
   function save_bill_row_model(id) {
     var item_bill_hold_percentage = 0;
     var rows = $('#bill_modal_' + id + ' table tbody .bill_items');
@@ -583,7 +547,28 @@
     } else {
       $('#bill_modal_' + id).modal('hide');
     }
-    // pur_calculate_total();
+  }
+
+  function save_pc_bill_row_model(id, pc_id) {
+    var item_pc_bill_hold_percentage = 0;
+    var rows = $('#pc_bill_modal_' + id + '_' + pc_id + ' table tbody .pc_bill_items');
+    $.each(rows, function () {
+      var row = $(this);
+      var pc_bill_percentage = parseFloat(row.find(".all_pc_bill_percentage input").val()) || 0;
+      var pc_bill_hold = parseFloat(row.find(".all_pc_bill_hold input").val()) || 0;
+      var pc_bill_hold_percentage = pc_bill_percentage - pc_bill_hold;
+      item_pc_bill_hold_percentage += pc_bill_hold_percentage;
+    });
+    if (item_pc_bill_hold_percentage > 100) {
+      alert_float('warning', "The percentages cannot exceed 100.");
+      return false;
+    } else if (item_pc_bill_hold_percentage < 0) {
+      alert_float('warning', "The percentages cannot be negative.");
+      return false;
+    } else {
+      $('#pc_bill_modal_' + id + '_' + pc_id).modal('hide');
+    }
+    pur_calculate_total();
   }
 
   function approve_bill_bifurcation_request(id) {

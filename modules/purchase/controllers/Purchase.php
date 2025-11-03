@@ -15137,6 +15137,7 @@ class purchase extends AdminController
         $data['vendors'] = $this->purchase_model->get_vendor();
         $pur_bill_row_template = '';
         $pur_bill_row_model = '';
+        $pur_pc_bill_row_model = '';
 
         $data['base_currency'] = $this->currencies_model->get_base_currency();
 
@@ -15173,12 +15174,19 @@ class purchase extends AdminController
                 $pur_bill_row_template .= $this->purchase_model->create_purchase_bill_row_template('items[' . $index_order . ']', $item_name, $bill_detail['description'], $bill_detail['item_code'], $bill_detail['quantity'], $bill_detail['unit_id'], $unit_name, $bill_detail['unit_price'], $bill_detail['total_money'], $bill_detail['id'], true, $currency_rate, $to_currency, $data['pur_bill']->id, $data['payment_certificates']);
 
                 $pur_bill_row_model .= $this->purchase_model->get_purchase_bill_row_model($bill_detail, $item_name);
+
+                if(!empty($data['payment_certificates'])) {
+                    foreach ($data['payment_certificates'] as $pkey => $pvalue) {
+                        $pur_pc_bill_row_model .= $this->purchase_model->get_purchase_pc_bill_row_model($bill_detail, $item_name, $pkey, $pvalue);
+                    }
+                }
             }
         }
 
 
         $data['pur_bill_row_template'] = $pur_bill_row_template;
         $data['pur_bill_row_model'] = $pur_bill_row_model;
+        $data['pur_pc_bill_row_model'] = $pur_pc_bill_row_model;
         $data['list_approve_status'] = $this->purchase_model->get_list_pur_bills_approval_details($id);
         $data['check_approve_status'] = $this->purchase_model->check_pur_bills_approval_details($id);
         $data['get_staff_sign'] = $this->purchase_model->get_pur_bills_staff_sign($id);

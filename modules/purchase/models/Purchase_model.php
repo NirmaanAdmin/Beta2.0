@@ -21413,8 +21413,10 @@ class Purchase_model extends App_Model
         if(!empty($payment_certificates)) {
             foreach ($payment_certificates as $pkey => $pvalue) {
                 $row .= '<td class="pc_bill_bifurcation">
-                    <a class="btn btn-info pull-right">
-                        Add PC' . ($pkey + 1) . ' Bifurcation
+                    <a href="javascript:void(0)" 
+                       onclick="add_pc_bill_bifurcation(' . (int)$item_key . ', ' . $unit_price . ', ' . $pvalue['id'] . '); return false;" 
+                       class="btn btn-info pull-right">
+                    Add PC' . ($pkey + 1) . ' Bifurcation
                     </a>
                 </td>';
             }
@@ -21562,6 +21564,12 @@ class Purchase_model extends App_Model
             unset($data['newbillitems']);
         }
 
+        $newpcbillitems = [];
+        if (isset($data['newpcbillitems'])) {
+            $newpcbillitems = $data['newpcbillitems'];
+            unset($data['newpcbillitems']);
+        }
+
         if (isset($data['save_and_send'])) {
             $save_and_send = $data['save_and_send'];
             unset($data['save_and_send']);
@@ -21677,6 +21685,39 @@ class Purchase_model extends App_Model
                                 'hold' => $bvalue['hold'],
                                 'billed_quantity' => $bvalue['billed_quantity'],
                             ]);
+                        }
+                    }
+                }
+
+                if(isset($newpcbillitems[$rqd['id']])) {
+                    $billitem = $newpcbillitems[$rqd['id']];
+                    foreach ($billitem as $bkey => $bvalue) {
+                        foreach ($bvalue as $pcbkey => $pcbvalue) {
+                            $this->db->where('bill_item_id', $rqd['id']);
+                            $this->db->where('pc_id', $pcbvalue['pc_id']);
+                            $this->db->where('item_id', $pcbvalue['item_id']);
+                            $pur_pc_bills_bifurcation = $this->db->get(db_prefix() . 'pur_pc_bills_bifurcation')->row();
+                            if(!empty($pur_pc_bills_bifurcation)) {
+                                $this->db->where('bill_item_id', $rqd['id']);
+                                $this->db->where('pc_id', $pcbvalue['pc_id']);
+                                $this->db->where('item_id', $pcbvalue['item_id']);
+                                $this->db->update(db_prefix() . 'pur_pc_bills_bifurcation', [
+                                    'item_description' => $pcbvalue['item_description'],
+                                    'bill_percentage' => $pcbvalue['bill_percentage'],
+                                    'hold' => $pcbvalue['hold'],
+                                    'billed_quantity' => $pcbvalue['billed_quantity'],
+                                ]);
+                            } else {
+                                $this->db->insert(db_prefix() . 'pur_pc_bills_bifurcation', [
+                                    'bill_item_id' => $rqd['id'],
+                                    'item_id' => $pcbvalue['item_id'],
+                                    'pc_id' => $pcbvalue['pc_id'],
+                                    'item_description' => $pcbvalue['item_description'],
+                                    'bill_percentage' => $pcbvalue['bill_percentage'],
+                                    'hold' => $pcbvalue['hold'],
+                                    'billed_quantity' => $pcbvalue['billed_quantity'],
+                                ]);
+                            }
                         }
                     }
                 }
@@ -25329,5 +25370,125 @@ class Purchase_model extends App_Model
             }
         }
         return $result;
+    }
+
+    public function get_purchase_pc_bill_row_model($bill_detail, $item_name, $pc_key, $pc_detail)
+    {
+        $this->load->model('currencies_model');
+        $base_currency = $this->currencies_model->get_base_currency();
+        $item_key = $bill_detail['id'];
+        $description = $bill_detail['description'];
+        $quantity = $bill_detail['quantity'];
+        $unit_price = $bill_detail['unit_price'];
+        $bill_item_id = $bill_detail['id'];
+        $pc_key = $pc_key + 1;
+        $pc_id = $pc_detail['id'];
+        $html  = '<div class="modal fade all_pc_bill_row_model" id="pc_bill_modal_' . $item_key . '_' . $pc_id . '" tabindex="-1" role="dialog">';
+        $html .= '<div class="modal-dialog" role="document" style="width:98%;">';
+        $html .= '<div class="modal-content">';
+
+        // Header
+        $html .= '<div class="modal-header">';
+        $html .= '<h4 class="modal-title">PC'.$pc_key.' Bifurcation</h4>';
+        $html .= '<button type="button" class="close" data-dismiss="modal">&times;</button>';
+        $html .= '<div class="pc-bill-head">';
+        $html .= '<span style="font-size: 15px">' . _l('Uniclass Code') . ': ' . htmlspecialchars($item_name) . '</span><br>';
+        $html .= '<span style="font-size: 15px">' . _l('item_description') . ': '. pur_html_entity_decode($description).'</span><br>';
+        $html .= '<span style="font-size: 15px">' . _l('quantity') . ': '.$quantity.'</span><br>';
+        $html .= '<span style="font-size: 15px">' . _l('unit_price') . ': '.app_format_money($unit_price, $base_currency->symbol).'</span><br>';
+        $html .= '<span style="font-size: 15px">' . _l('payment_certificate') . ': '.$pc_detail['pc_number'].'</span>';
+        $html .= '</div>';
+        $html .= '</div>';
+
+        // Body
+        $html .= '<div class="modal-body">';
+        $html .= '<div class="row">';
+        $html .= '<div class="col-md-12">';
+
+        // Table
+        $html .= '<div class="table-responsive s_table">';
+        $html .= '<table class="table items table_pc_bill_rows">';
+        $html .= '<thead>';
+        $html .= '<tr>';
+        $html .= '<th align="left" width="30%">' . _l('PC'.$pc_key.' Description') . '</th>';
+        $html .= '<th align="left" width="14%">' . _l('PC'.$pc_key.' Percentage') . '</th>';
+        $html .= '<th align="left" width="14%">' . _l('PC'.$pc_key.' Unit Price') . '</th>';
+        $html .= '<th align="left" width="14%">' . _l('PC'.$pc_key.' Hold %') . '</th>';
+        $html .= '<th align="left" width="14%">' . _l('PC'.$pc_key.' Qty') . '</th>';
+        $html .= '<th align="left" width="14%">' . _l('PC'.$pc_key.' Amount') . '</th>';
+        $html .= '</tr>';
+        $html .= '</thead>';
+        $default_purchase_bill_rows = get_default_purchase_bill_rows();
+        $pur_pc_bills_bifurcation = array();
+        if(!empty($bill_item_id)) {
+            $this->db->where('bill_item_id', $bill_item_id);
+            $this->db->where('pc_id', $pc_id);
+            $pur_pc_bills_bifurcation = $this->db->get(db_prefix() . 'pur_pc_bills_bifurcation')->result_array();
+            if(!empty($pur_pc_bills_bifurcation)) {
+                $default_purchase_bill_rows = $pur_pc_bills_bifurcation;
+            }
+        }
+        $html .= '<tbody style="border: 1px solid #ddd;">';
+        foreach ($default_purchase_bill_rows as $key => $value) {
+            $html .= '<tr class="pc_bill_items">';
+            $html .= '<td class="hide">'.form_hidden('newpcbillitems['.$item_key.']['.$pc_id.']['.$value['item_id'].'][pc_id]', $pc_id).'</td>';
+            $html .= '<td class="hide">'.form_hidden('newpcbillitems['.$item_key.']['.$pc_id.']['.$value['item_id'].'][item_id]', $value['item_id']).'</td>';
+            $html .= '<td align="left">' . render_textarea('newpcbillitems['.$item_key.']['.$pc_id.']['.$value['item_id'].'][item_description]', '', $value['item_description'], ['rows' => 2]) . '</td>';
+            $html .= '<td align="left" class="all_pc_bill_percentage">' 
+              . render_input('newpcbillitems['.$item_key.']['.$pc_id.']['.$value['item_id'].'][bill_percentage]', '', $value['bill_percentage'], 'number', ['min' => 0, 'max' => 100, 'onblur' => 'calculate_pc_bill_bifurcation('.$item_key.', '.$unit_price.', '.$pc_id.');', 'onchange' => 'calculate_pc_bill_bifurcation('.$item_key.', '.$unit_price.', '.$pc_id.');']) 
+              . '</td>';
+            $html .= '<td align="left" class="all_pc_bill_unit_price"></td>';
+            $html .= '<td align="left" class="all_pc_bill_hold">' 
+              . render_input('newpcbillitems['.$item_key.']['.$pc_id.']['.$value['item_id'].'][hold]', '', $value['hold'], 'number', ['min' => 0, 'max' => 100, 'onblur' => 'calculate_pc_bill_bifurcation('.$item_key.', '.$unit_price.', '.$pc_id.');', 'onchange' => 'calculate_pc_bill_bifurcation('.$item_key.', '.$unit_price.', '.$pc_id.');']) 
+              . '</td>';
+            $html .= '<td align="left" class="all_pc_bill_billed_quantity">' 
+              . render_input('newpcbillitems['.$item_key.']['.$pc_id.']['.$value['item_id'].'][billed_quantity]', '', $value['billed_quantity'], 'number', ['min' => 0, 'max' => 100, 'onblur' => 'calculate_pc_bill_bifurcation('.$item_key.', '.$unit_price.', '.$pc_id.');', 'onchange' => 'calculate_pc_bill_bifurcation('.$item_key.', '.$unit_price.', '.$pc_id.');']) 
+              . '</td>';
+            $html .= '<td align="left" class="all_pc_bill_billed_amount"></td>';
+            $html .= '</tr>';
+        }
+        $html .= '</tbody>';
+        $html .= '</table>';
+        $html .= '</div>'; // table responsive
+
+        // Totals section
+        $html .= '<div class="col-md-8 col-md-offset-4">';
+        $html .= '<table class="table text-right">';
+        $html .= '<tbody>';
+        $html .= '<tr>';
+        $html .= '<td width="75%"><span class="bold tw-text-neutral-700">Total PC'.$pc_key.' Percentage :</span></td>';
+        $html .= '<td width="25%" class="total_pc_bill_percentage"></td>';
+        $html .= '</tr>';
+        $html .= '<tr>';
+        $html .= '<td width="75%"><span class="bold tw-text-neutral-700">Total PC'.$pc_key.' Unit Price :</span></td>';
+        $html .= '<td width="25%" class="total_pc_bill_unit_price"></td>';
+        $html .= '</tr>';
+        $html .= '<tr>';
+        $html .= '<td width="75%"><span class="bold tw-text-neutral-700">Total PC'.$pc_key.' Hold Percentage :</span></td>';
+        $html .= '<td width="25%" class="total_pc_hold_percentage"></td>';
+        $html .= '</tr>';
+        $html .= '<tr>';
+        $html .= '<td width="75%"><span class="bold tw-text-neutral-700">Total PC'.$pc_key.' Amount :</span></td>';
+        $html .= '<td width="25%" class="total_pc_billed_amount"></td>';
+        $html .= '</tr>';
+        $html .= '</tbody>';
+        $html .= '</table>';
+        $html .= '</div>'; // totals section
+
+        $html .= '</div>'; // col-md-12
+        $html .= '</div>'; // row
+        $html .= '</div>'; // modal-body
+
+        // Footer
+        $html .= '<div class="modal-footer">';
+        $html .= '<button type="button" class="btn btn-default" data-dismiss="modal">' . _l('close') . '</button>';
+        $html .= '<button type="button" onclick="save_pc_bill_row_model('.$item_key.', '.$pc_id.'); return false;" class="btn btn-info">' . _l('submit') . '</button>';
+        $html .= '</div>';
+
+        $html .= '</div>'; // modal-content
+        $html .= '</div>'; // modal-dialog
+        $html .= '</div>'; // modal
+
+        return $html;
     }
 }
