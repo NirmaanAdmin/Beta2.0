@@ -187,13 +187,13 @@
 				        						<th></th>
 				        						<th align="left"><?php echo _l('Uniclass Code'); ?></th>
 				        						<th align="left"><?php echo _l('item_description'); ?></th>
-				        						<th align="right"><?php echo _l('unit_price'); ?><span class="th_currency"><?php echo '('.$po_currency->name.')'; ?></span></th>
+				        						<th align="right"><?php echo _l('unit_price'); ?></th>
 				        						<th align="right" class="qty"><?php echo _l('Ordered Quantity'); ?></th>
 				        						<th align="right"><?php echo _l('bill_bifurcation'); ?></th>
 				        						<?php
 				        						if(!empty($payment_certificates)) {
 				        							foreach ($payment_certificates as $pkey => $pvalue) { ?>
-				        								<th align="right">PC<?php echo $pkey+1; ?> Bifurcation</th>
+				        								<th align="right">PC<?php echo $pkey+1; ?> Bifurcation <i class="fa fa-exclamation-circle" aria-hidden="true" data-toggle="tooltip" data-title="<?php echo $pvalue['pc_number']; ?>"></i></th>
 				        							<?php }
 				        						} ?>
 				        					</tr>

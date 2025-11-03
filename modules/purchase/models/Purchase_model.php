@@ -21413,7 +21413,7 @@ class Purchase_model extends App_Model
         if(!empty($payment_certificates)) {
             foreach ($payment_certificates as $pkey => $pvalue) {
                 $row .= '<td class="pc_bill_bifurcation">
-                    <a class="btn btn-success pull-right">
+                    <a class="btn btn-info pull-right">
                         Add PC' . ($pkey + 1) . ' Bifurcation
                     </a>
                 </td>';
@@ -24667,8 +24667,10 @@ class Purchase_model extends App_Model
         exit;
     }
 
-    public function get_purchase_bill_row_model($item_key, $item_name, $description, $unit_price, $bill_item_id = '')
+    public function get_purchase_bill_row_model($item_key, $item_name, $description, $quantity, $unit_price, $bill_item_id = '')
     {
+        $this->load->model('currencies_model');
+        $base_currency = $this->currencies_model->get_base_currency();
         $html  = '<div class="modal fade all_bill_row_model" id="bill_modal_' . $item_key . '" tabindex="-1" role="dialog">';
         $html .= '<div class="modal-dialog" role="document" style="width:98%;">';
         $html .= '<div class="modal-content">';
@@ -24679,7 +24681,9 @@ class Purchase_model extends App_Model
         $html .= '<button type="button" class="close" data-dismiss="modal">&times;</button>';
         $html .= '<div class="bill-head">';
         $html .= '<span style="font-size: 15px">' . _l('Uniclass Code') . ': ' . htmlspecialchars($item_name) . '</span><br>';
-        $html .= '<span style="font-size: 15px">' . _l('item_description') . ': '. pur_html_entity_decode($description).'</span>';
+        $html .= '<span style="font-size: 15px">' . _l('item_description') . ': '. pur_html_entity_decode($description).'</span><br>';
+        $html .= '<span style="font-size: 15px">' . _l('quantity') . ': '.$quantity.'</span><br>';
+        $html .= '<span style="font-size: 15px">' . _l('unit_price') . ': '.app_format_money($unit_price, $base_currency->symbol).'</span>';
         $html .= '</div>';
         $html .= '</div>';
 
@@ -25306,12 +25310,12 @@ class Purchase_model extends App_Model
         $pur_bill = $this->get_pur_bill($id);
         if(!empty($pur_bill)) {
             if(!empty($pur_bill->pur_order)) {
-                $this->db->select('id');
+                $this->db->select('id, pc_number');
                 $this->db->where('po_id', $pur_bill->pur_order);
                 $this->db->order_by('id', 'ASC');
                 $result = $this->db->get(db_prefix() . 'payment_certificate')->result_array();
             } else if(!empty($pur_bill->wo_order)) {
-                $this->db->select('id');
+                $this->db->select('id, pc_number');
                 $this->db->where('wo_id', $pur_bill->wo_order);
                 $this->db->order_by('id', 'ASC');
                 $result = $this->db->get(db_prefix() . 'payment_certificate')->result_array();

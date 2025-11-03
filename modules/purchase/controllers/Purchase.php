@@ -15172,7 +15172,7 @@ class purchase extends AdminController
 
                 $pur_bill_row_template .= $this->purchase_model->create_purchase_bill_row_template('items[' . $index_order . ']', $item_name, $bill_detail['description'], $bill_detail['item_code'], $bill_detail['quantity'], $bill_detail['unit_id'], $unit_name, $bill_detail['unit_price'], $bill_detail['total_money'], $bill_detail['id'], true, $currency_rate, $to_currency, $data['pur_bill']->id, $data['payment_certificates']);
 
-                $pur_bill_row_model .= $this->purchase_model->get_purchase_bill_row_model($bill_detail['id'], $item_name, $bill_detail['description'], $bill_detail['unit_price'], $bill_detail['id']);
+                $pur_bill_row_model .= $this->purchase_model->get_purchase_bill_row_model($bill_detail['id'], $item_name, $bill_detail['description'], $bill_detail['quantity'], $bill_detail['unit_price'], $bill_detail['id']);
             }
         }
 
