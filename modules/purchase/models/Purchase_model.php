@@ -24667,10 +24667,15 @@ class Purchase_model extends App_Model
         exit;
     }
 
-    public function get_purchase_bill_row_model($item_key, $item_name, $description, $quantity, $unit_price, $bill_item_id = '')
+    public function get_purchase_bill_row_model($bill_detail, $item_name)
     {
         $this->load->model('currencies_model');
         $base_currency = $this->currencies_model->get_base_currency();
+        $item_key = $bill_detail['id'];
+        $description = $bill_detail['description'];
+        $quantity = $bill_detail['quantity'];
+        $unit_price = $bill_detail['unit_price'];
+        $bill_item_id = $bill_detail['id'];
         $html  = '<div class="modal fade all_bill_row_model" id="bill_modal_' . $item_key . '" tabindex="-1" role="dialog">';
         $html .= '<div class="modal-dialog" role="document" style="width:98%;">';
         $html .= '<div class="modal-content">';
