@@ -25393,7 +25393,7 @@ class Purchase_model extends App_Model
         $bill_item_id = $bill_detail['id'];
         $pc_key = $pc_key + 1;
         $pc_id = $pc_detail['id'];
-        $html  = '<div class="modal fade all_pc_bill_row_model" id="pc_bill_modal_' . $item_key . '_' . $pc_id . '" tabindex="-1" role="dialog">';
+        $html  = '<div class="modal fade all_pc_bill_row_model" id="pc_bill_modal_' . $item_key . '_' . $pc_id . '" tabindex="-1" role="dialog" data-item_key="'.$item_key.'" data-unit_price="'.$unit_price.'" data-pc_id="'.$pc_id.'">';
         $html .= '<div class="modal-dialog" role="document" style="width:98%;">';
         $html .= '<div class="modal-content">';
 

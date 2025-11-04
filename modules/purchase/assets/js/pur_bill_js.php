@@ -251,6 +251,16 @@
       return false;
     }
     var total = 0;
+    var rows = $('.all_pc_bill_row_model');
+    if (rows.length > 0) {
+      $.each(rows, function () {
+        var row = $(this);
+        var item_key = parseFloat(row.data('item_key')) || 0;
+        var unit_price = parseFloat(row.data('unit_price')) || 0;
+        var pc_id = parseFloat(row.data('pc_id')) || 0;
+        total += calculate_pc_bill_bifurcation(item_key, unit_price, pc_id);
+      });
+    }
     $('.wh-total').html(
       format_money(total) +
       hidden_input('grand_total', accounting.toFixed(total, app.options.decimal_places))
@@ -526,6 +536,7 @@
     $('#pc_bill_modal_' + id + '_' + pc_id + ' .total_pc_bill_percentage').html(total_pc_bill_percentage.toFixed(2)+'%');
     $('#pc_bill_modal_' + id + '_' + pc_id + ' .total_pc_hold_percentage').html(total_pc_hold_percentage.toFixed(2)+'%');
     $('#pc_bill_modal_' + id + '_' + pc_id + ' .total_pc_billed_amount').html(format_money(total_pc_billed_amount));
+    return total_pc_billed_amount;
   }
 
   function save_bill_row_model(id) {
