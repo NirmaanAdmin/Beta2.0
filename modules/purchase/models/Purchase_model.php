@@ -24978,7 +24978,7 @@ class Purchase_model extends App_Model
         $pur_bills['vendor'] = !empty($order) ? $order->vendor : NULL;
         $pur_bills['payment_status'] = 0;
         $pur_bills['add_from'] = get_staff_user_id();
-        $pur_bills['date_add'] = !empty($order) ? date('Y-m-d', strtotime($order->datecreated)) : date('Y-m-d');
+        $pur_bills['date_add'] = date('Y-m-d');
         $pur_bills['pur_order'] = $rel_type == 'pur_order' ? $id : NULL;
         $pur_bills['wo_order'] = $rel_type == 'wo_order' ? $id : NULL;
         $pur_bills['recurring'] = 0;
