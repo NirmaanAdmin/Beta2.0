@@ -2547,6 +2547,10 @@ class Purchase_model extends App_Model
                 $this->db->insert(db_prefix() . 'cron_email', $cron_email);
             }
 
+            if($status == 2) {
+                $this->convert_pc_to_pur_bill($id, 'pur_order');
+            }
+
             $from_status = '';
             if ($original_po->approve_status == 1) {
                 $from_status = 'Draft';
@@ -4111,12 +4115,18 @@ class Purchase_model extends App_Model
                 return true;
                 break;
             case 'wo_order':
+                if($all_approved) {
+                    $this->convert_pc_to_pur_bill($rel_id, 'wo_order');
+                }
                 $data_update['approve_status'] = $status;
                 $this->db->where('id', $rel_id);
                 $this->db->update(db_prefix() . 'wo_orders', $data_update);
                 return true;
                 break;
             case 'pur_order':
+                if($all_approved) {
+                    $this->convert_pc_to_pur_bill($rel_id, 'pur_order');
+                }
                 $data_update['approve_status'] = $status;
                 $this->db->where('id', $rel_id);
                 $this->db->update(db_prefix() . 'pur_orders', $data_update);
@@ -16042,6 +16052,10 @@ class Purchase_model extends App_Model
                 $cron_email_options['sender'] = 'yes';
                 $cron_email['options'] = json_encode($cron_email_options, true);
                 $this->db->insert(db_prefix() . 'cron_email', $cron_email);
+            }
+
+            if($status == 2) {
+                $this->convert_pc_to_pur_bill($id, 'wo_order');
             }
 
             $from_status = '';
