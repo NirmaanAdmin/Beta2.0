@@ -24931,11 +24931,21 @@ class Purchase_model extends App_Model
         $next_number = get_purchase_option('next_bill_number');
         $bill_number = $prefix.str_pad($next_number,5,'0',STR_PAD_LEFT);
         if($rel_type == 'pur_order') {
+            $this->db->where('pur_order', $id);
+            $check_pur_bills = $this->db->get(db_prefix() . 'pur_bills')->result_array();
+            if(!empty($check_pur_bills)) {
+                return true;
+            }
             $order = $this->get_pur_order($id);
             $this->db->where('pur_order', $order->id);
             $this->db->order_by('id', 'ASC');
             $order_details = $this->db->get(db_prefix() . 'pur_order_detail')->result_array();
         } else if($rel_type == 'wo_order') {
+            $this->db->where('wo_order', $id);
+            $check_pur_bills = $this->db->get(db_prefix() . 'pur_bills')->result_array();
+            if(!empty($check_pur_bills)) {
+                return true;
+            }
             $order = $this->get_wo_order($id);
             $this->db->where('wo_order', $order->id);
             $this->db->order_by('id', 'ASC');
