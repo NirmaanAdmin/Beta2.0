@@ -25286,48 +25286,102 @@ class Purchase_model extends App_Model
         </table>
         <br>';
 
+        $default_purchase_bill_rows = get_default_purchase_bill_rows();
+        $payment_certificates = $this->get_all_bill_payment_certificates($id);
+
         $html .= '<table class="table" style="width: 100%" border="1" style="font-size:12px">
             <tbody>
                 <tr class="pay_cert_title">
-                  <td style="width:15%">' . _l('Uniclass Code') . '</td>
-                  <td style="width:20%">' . _l('item_description') . '</td>
-                  <td style="width:13%">' . _l('unit_price') . '</td>
-                  <td style="width:14%">' . _l('Ordered Quantity') . '</td>
-                  <td style="width:15%">' . _l('bill_percentage') . '</td>
-                  <td style="width:10%">' . _l('Qty') . '</td>
-                  <td style="width:13%">' . _l('Amount') . '</td>
+                  <td style="width:25%">' . _l('Uniclass Code') . '</td>
+                  <td style="width:39%" colspan="3">' . _l('item_description') . '</td>
+                  <td style="width:18%">' . _l('unit_price') . '</td>
+                  <td style="width:18%">' . _l('Ordered Quantity') . '</td>
                 </tr>';
 
         if(!empty($pur_bill_detail)) {
             foreach ($pur_bill_detail as $pkey => $pvalue) {
                 $item_name = pur_get_item_variatiom($pvalue['item_code']);
-                $html .= '<tr class="pay_cert_value">
+                $html .= '<tr class="pay_cert_title">
                   <td>'.$item_name.'</td>
-                  <td>'.pur_html_entity_decode($pvalue['description']).'</td>
+                  <td colspan="3">'.pur_html_entity_decode($pvalue['description']).'</td>
                   <td>'.app_format_money($pvalue['unit_price'], $base_currency->symbol).'</td>
                   <td>'.$pvalue['quantity'].'</td>
-                  <td>'.$pvalue['bill_percentage'].'%</td>
-                  <td>'.$pvalue['billed_quantity'].'</td>
-                  <td>'.app_format_money($pvalue['total_money'], $base_currency->symbol).'</td>
                 </tr>';
-
+                $html .= '<tr class="pay_cert_value">
+                  <td colspan="6"><b>General Bill Bifurcation</b></td>
+                </tr>';
+                $html .= '<tr class="pay_cert_value">
+                  <td><b>' . _l('Bill Description') . '</b></td>
+                  <td><b>' . _l('bill_percentage') . '</b></td>
+                  <td><b>' . _l('Bill Unit Price') . '</b></td>
+                  <td><b>' . _l('Hold %') . '</b></td>
+                  <td><b>' . _l('Qty') . '</b></td>
+                  <td><b>' . _l('Amount') . '</b></td>
+                </tr>';
                 $this->db->where('bill_item_id', $pvalue['id']);
-                $this->db->where('bill_percent >', 0, false);
                 $pur_bills_bifurcation = $this->db->get(db_prefix() . 'pur_bills_bifurcation')->result_array();
                 if(!empty($pur_bills_bifurcation)) {
-                    foreach ($pur_bills_bifurcation as $bkey => $bvalue) {
-                        $bill_unit_price = $pvalue['unit_price'] * ($bvalue['bill_percent'] / 100);
-                        $html .= '<tr class="pay_cert_subrow">
-                            <td colspan="7">
-                                <strong>Bill Bifurcation Details</strong><br>
-                                '._l('Bill Description').': ' . $bvalue['item_description'] . '<br>
-                                '._l('bill_percentage').': ' . $bvalue['bill_percent'] . '%<br>
-                                '._l('Bill Unit Price').': '.app_format_money($bill_unit_price, $base_currency->symbol).'
-                            </td>
+                    $default_purchase_bill_rows = $pur_bills_bifurcation;
+                }
+                foreach ($default_purchase_bill_rows as $gbbkey => $gbbvalue) {
+                    $bill_unit_price = 0;
+                    $bill_hold_percentage = $gbbvalue['bill_percentage'] - $gbbvalue['hold'];
+                    $billed_amount = 0;
+                    if($gbbvalue['bill_percentage'] > 0) {
+                        $bill_unit_price = ($pvalue['unit_price'] * $gbbvalue['bill_percentage']) / 100;
+                    }
+                    if ($bill_hold_percentage > 0) {
+                        $billed_amount = $gbbvalue['billed_quantity'] * (($pvalue['unit_price'] * $bill_hold_percentage) / 100);
+                    }
+                    $html .= '<tr class="pay_cert_value">
+                      <td>'.pur_html_entity_decode($gbbvalue['item_description']).'</td>
+                      <td>' . $gbbvalue['bill_percentage'] . '%</td>
+                      <td>'.app_format_money($bill_unit_price, $base_currency->symbol).'</td>
+                      <td>' . $gbbvalue['hold'] . '%</td>
+                      <td>' . $gbbvalue['billed_quantity'] . '</td>
+                      <td>'.app_format_money($billed_amount, $base_currency->symbol).'</td>
+                    </tr>';
+                }
+                if(!empty($payment_certificates)) {
+                    foreach ($payment_certificates as $pckey => $pcvalue) {
+                        $html .= '<tr class="pay_cert_value">
+                          <td colspan="6"><b>PC'.($pckey + 1).' Bifurcation ('.$pcvalue['pc_number'].')</b></td>
                         </tr>';
+                        $html .= '<tr class="pay_cert_value">
+                          <td><b>' . _l('PC'.($pckey + 1).' Description') . '</b></td>
+                          <td><b>' . _l('PC'.($pckey + 1).' Percentage') . '</b></td>
+                          <td><b>' . _l('PC'.($pckey + 1).' Unit Price') . '</b></td>
+                          <td><b>' . _l('PC'.($pckey + 1).' Hold %') . '</b></td>
+                          <td><b>' . _l('PC'.($pckey + 1).' Qty') . '</b></td>
+                          <td><b>' . _l('PC'.($pckey + 1).' Amount') . '</b></td>
+                        </tr>';
+                        $this->db->where('bill_item_id', $pvalue['id']);
+                        $this->db->where('pc_id', $pcvalue['id']);
+                        $pur_pc_bills_bifurcation = $this->db->get(db_prefix() . 'pur_pc_bills_bifurcation')->result_array();
+                        if(!empty($pur_pc_bills_bifurcation)) {
+                            $default_purchase_bill_rows = $pur_pc_bills_bifurcation;
+                        }
+                        foreach ($default_purchase_bill_rows as $gbbkey => $gbbvalue) {
+                            $bill_unit_price = 0;
+                            $bill_hold_percentage = $gbbvalue['bill_percentage'] - $gbbvalue['hold'];
+                            $billed_amount = 0;
+                            if($gbbvalue['bill_percentage'] > 0) {
+                                $bill_unit_price = ($pvalue['unit_price'] * $gbbvalue['bill_percentage']) / 100;
+                            }
+                            if ($bill_hold_percentage > 0) {
+                                $billed_amount = $gbbvalue['billed_quantity'] * (($pvalue['unit_price'] * $bill_hold_percentage) / 100);
+                            }
+                            $html .= '<tr class="pay_cert_value">
+                              <td>'.pur_html_entity_decode($gbbvalue['item_description']).'</td>
+                              <td>' . $gbbvalue['bill_percentage'] . '%</td>
+                              <td>'.app_format_money($bill_unit_price, $base_currency->symbol).'</td>
+                              <td>' . $gbbvalue['hold'] . '%</td>
+                              <td>' . $gbbvalue['billed_quantity'] . '</td>
+                              <td>'.app_format_money($billed_amount, $base_currency->symbol).'</td>
+                            </tr>';
+                        }
                     }
                 }
-
             }
         }
 
