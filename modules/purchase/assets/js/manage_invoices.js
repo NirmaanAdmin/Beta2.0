@@ -65,6 +65,7 @@ var expenseDropzone;
     filterArea.find('select').selectpicker("val", "");
     table_invoice.DataTable().ajax.reload();
     get_vbt_dashboard();
+    $('.download_all_attachments').closest('.form-group').hide();
   });
 
   $(document).on('click', '.download_all_attachments', function () {
@@ -776,3 +777,20 @@ function get_vbt_dashboard() {
 
   });
 }
+
+$(document).ready(function() {
+    // Hide the download button initially
+    $('.download_all_attachments').closest('.form-group').hide();
+    
+    // Show/hide button based on billing_invoices selection
+    $('select[name="billing_invoices[]"]').on('change', function() {
+        if ($(this).val() && $(this).val().length > 0) {
+            $('.download_all_attachments').closest('.form-group').show();
+        } else {
+            $('.download_all_attachments').closest('.form-group').hide();
+        }
+    });
+    
+    // Trigger change event on page load in case there's already a selection
+    $('select[name="billing_invoices[]"]').trigger('change');
+});
