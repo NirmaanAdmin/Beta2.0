@@ -2526,6 +2526,7 @@ class Purchase_model extends App_Model
      */
     public function change_status_pur_order($status, $id)
     {
+        update_order_approval_status_activity_log($id, $status, 'pur_order');
         $original_po = $this->get_pur_order($id);
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'pur_orders', ['approve_status' => $status]);
@@ -16033,6 +16034,7 @@ class Purchase_model extends App_Model
     }
     public function change_status_wo_order($status, $id)
     {
+        update_order_approval_status_activity_log($id, $status, 'wo_order');
         $original_po = $this->get_wo_order($id);
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'wo_orders', ['approve_status' => $status]);

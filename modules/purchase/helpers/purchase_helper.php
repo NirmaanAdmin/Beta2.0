@@ -5815,3 +5815,65 @@ function get_tender_item_name_from_itemable($item_id)
         return '';
     }
 }
+
+function update_order_approval_status_activity_log($id, $to_status, $rel_type)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        if($to_status == 1) {
+            $to_status_name = _l('purchase_draft');
+        } else if($to_status == 2) {
+            $to_status_name = _l('purchase_approved');
+        } else if($to_status == 3) {
+            $to_status_name = _l('pur_rejected');
+        } else {
+            $to_status_name = _l('purchase_draft');
+        }
+        if($rel_type == 'pur_order') {
+            $CI->db->where('id', $id);
+            $pur_orders = $CI->db->get(db_prefix() . 'pur_orders')->row();
+            $from_status = $pur_orders->approve_status;
+            if($from_status == 1) {
+                $from_status_name = _l('purchase_draft');
+            } else if($from_status == 2) {
+                $from_status_name = _l('purchase_approved');
+            } else if($from_status == 3) {
+                $from_status_name = _l('pur_rejected');
+            } else {
+                $from_status_name = _l('purchase_draft');
+            }
+            $description = "An approval status is updated from <b>".$from_status_name."</b> to <b>".$to_status_name."</b> in purchase order <b>".$pur_orders->pur_order_number." - ".$pur_orders->pur_order_name."</b>.";
+            $module_name = 'po';
+            $rel_id = $pur_orders->id;
+        }
+        if($rel_type == 'wo_order') {
+            $CI->db->where('id', $id);
+            $wo_orders = $CI->db->get(db_prefix() . 'wo_orders')->row();
+            $from_status = $wo_orders->approve_status;
+            if($from_status == 1) {
+                $from_status_name = _l('purchase_draft');
+            } else if($from_status == 2) {
+                $from_status_name = _l('purchase_approved');
+            } else if($from_status == 3) {
+                $from_status_name = _l('pur_rejected');
+            } else {
+                $from_status_name = _l('purchase_draft');
+            }
+            $description = "An approval status is updated from <b>".$from_status_name."</b> to <b>".$to_status_name."</b> in work order <b>".$wo_orders->wo_order_number." - ".$wo_orders->wo_order_name."</b>.";
+            $module_name = 'wo';
+            $rel_id = $wo_orders->id;
+        }
+        if(!empty($description)) {
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => $module_name,
+                'rel_id' => $rel_id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
