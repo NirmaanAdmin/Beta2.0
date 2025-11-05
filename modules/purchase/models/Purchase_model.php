@@ -24731,7 +24731,7 @@ class Purchase_model extends App_Model
         $quantity = $bill_detail['quantity'];
         $unit_price = $bill_detail['unit_price'];
         $bill_item_id = $bill_detail['id'];
-        $html  = '<div class="modal fade all_bill_row_model" id="bill_modal_' . $item_key . '" tabindex="-1" role="dialog">';
+        $html  = '<div class="modal fade all_bill_row_model" id="bill_modal_' . $item_key . '" tabindex="-1" role="dialog" data-item_key="'.$item_key.'" data-unit_price="'.$unit_price.'">';
         $html .= '<div class="modal-dialog" role="document" style="width:98%;">';
         $html .= '<div class="modal-content">';
 
