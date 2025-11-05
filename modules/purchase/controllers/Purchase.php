@@ -3534,7 +3534,7 @@ class purchase extends AdminController
                     update_pur_invoices_last_action($data['vbt_id']);
                 }
                 $ril_invoice_data = get_invoice_data($invoiceid);
-                update_vbt_activity_log($pur_invoice, _l('ril_invoice'), '', format_invoice_number($ril_invoice_data->id).' ('.$ril_invoice_data->title.')');
+                update_vbt_activity_log($pur_invoice, _l('ril_invoice'), '', format_invoice_number($ril_invoice_data->id) . ' (' . $ril_invoice_data->title . ')');
 
                 // set_alert('success', _l('converted', _l('expense')));
                 // echo json_encode([
@@ -4295,7 +4295,7 @@ class purchase extends AdminController
             redirect(admin_url('purchase/setting?group=commodity_group'));
         }
         $budget_head = $this->purchase_model->get_pur_invoice_budget_head($id);
-        if(!empty($budget_head)) {
+        if (!empty($budget_head)) {
             set_alert('warning', 'This budget head is already linked to a vendor billing tracker.');
             redirect(admin_url('purchase/setting?group=commodity_group'));
         }
@@ -12145,7 +12145,7 @@ class purchase extends AdminController
         $data['units_warehouse_name'] = $this->warehouse_model->get_warehouse_code_name();
 
         $data['goods_receipt_detail'] = $this->warehouse_model->get_goods_receipt_detail($id);
- 
+
         $data['goods_receipt'] = $this->warehouse_model->get_goods_receipt($id);
 
         $data['tax_data'] = $this->warehouse_model->get_html_tax_receip($id);
@@ -12935,7 +12935,7 @@ class purchase extends AdminController
                         unset($data['applied_to_invoice']);
                     }
                     $data['date'] = (!empty($data['date']) && $data['date'] != '0000-00-00')
-                    ? $data['date'] : date('Y-m-d');
+                        ? $data['date'] : date('Y-m-d');
                     if ($select_invoice == 'none') {
                         $this->purchase_model->update_bulk_pur_invoices($data);
                         set_alert('success', _l('updated_successfully', _l('vendor_bills')));
@@ -12958,7 +12958,7 @@ class purchase extends AdminController
                                 set_alert('success', _l('vendor_bills_converted_to_ril_invoices'));
                             }
                             $ril_invoice_data = get_invoice_data($invoiceid);
-                            update_vbt_activity_log($pur_invoice, _l('ril_invoice'), '', format_invoice_number($ril_invoice_data->id).' ('.$ril_invoice_data->title.')');
+                            update_vbt_activity_log($pur_invoice, _l('ril_invoice'), '', format_invoice_number($ril_invoice_data->id) . ' (' . $ril_invoice_data->title . ')');
                         }
                         if (isset($data['vbt_id'])) {
                             update_pur_invoices_last_action($data['vbt_id']);
@@ -13093,10 +13093,10 @@ class purchase extends AdminController
         $basePdfString = $baseTcpdf->Output('', 'S');
         $extraFiles = [];
         $attachments = $this->purchase_model->get_payment_certificate_attachments($id);
-        if(!empty($attachments)) {
+        if (!empty($attachments)) {
             foreach ($attachments as $key => $value) {
-                if($value['filetype'] == 'application/pdf') {
-                    $extraFiles[] = FCPATH . 'uploads/purchase/payment_certificate/'.$value['rel_id'].'/'.$value['file_name'].'';
+                if ($value['filetype'] == 'application/pdf') {
+                    $extraFiles[] = FCPATH . 'uploads/purchase/payment_certificate/' . $value['rel_id'] . '/' . $value['file_name'] . '';
                 }
             }
         }
@@ -13115,7 +13115,9 @@ class purchase extends AdminController
                     $pdf->useTemplate($tplId, 0, 0, $size['width'], $size['height'], true);
                 }
                 foreach ($extraFiles as $file) {
-                    if (!is_file($file)) { continue; }
+                    if (!is_file($file)) {
+                        continue;
+                    }
                     $pageCount = $pdf->setSourceFile($file);
                     for ($p = 1; $p <= $pageCount; $p++) {
                         $tplId = $pdf->importPage($p);
@@ -13142,17 +13144,19 @@ class purchase extends AdminController
                 $pageCount = $pdf->setSourceFile($tmpBase);
                 for ($p = 1; $p <= $pageCount; $p++) {
                     $tplId = $pdf->importPage($p);
-                    $size  = method_exists($pdf, 'getTemplateSize') ? $pdf->getTemplateSize($tplId) : ['width'=>210,'height'=>297];
+                    $size  = method_exists($pdf, 'getTemplateSize') ? $pdf->getTemplateSize($tplId) : ['width' => 210, 'height' => 297];
                     $orientation = ($size['width'] > $size['height']) ? 'L' : 'P';
                     $pdf->AddPage($orientation, [$size['width'], $size['height']]);
                     $pdf->useTemplate($tplId, 0, 0, $size['width'], $size['height'], true);
                 }
                 foreach ($extraFiles as $file) {
-                    if (!is_file($file)) { continue; }
+                    if (!is_file($file)) {
+                        continue;
+                    }
                     $pageCount = $pdf->setSourceFile($file);
                     for ($p = 1; $p <= $pageCount; $p++) {
                         $tplId = $pdf->importPage($p);
-                        $size  = method_exists($pdf, 'getTemplateSize') ? $pdf->getTemplateSize($tplId) : ['width'=>210,'height'=>297];
+                        $size  = method_exists($pdf, 'getTemplateSize') ? $pdf->getTemplateSize($tplId) : ['width' => 210, 'height' => 297];
                         $orientation = ($size['width'] > $size['height']) ? 'L' : 'P';
                         $pdf->AddPage($orientation, [$size['width'], $size['height']]);
                         $pdf->useTemplate($tplId, 0, 0, $size['width'], $size['height'], true);
@@ -13243,7 +13247,7 @@ class purchase extends AdminController
         $this->purchase_model->copy_pc_files_to_vbt($id, $insert_id);
         add_vbt_activity_log($insert_id, ' by payment certificate');
         add_converted_to_vendor_bill_pc_activity_log($id);
-        if($redirect) {
+        if ($redirect) {
             set_alert('success', _l('purchase_invoice') . ' ' . _l('added_successfully'));
             redirect(admin_url('purchase/pur_invoice/' . $insert_id));
         }
@@ -14055,13 +14059,13 @@ class purchase extends AdminController
             }
 
             $yield = '';
-            if($row['yield'] == 1) {
+            if ($row['yield'] == 1) {
                 $yield = 'None';
-            } else if($row['yield'] == 2) {
+            } else if ($row['yield'] == 2) {
                 $yield = 'Profit';
-            } else if($row['yield'] == 3) {
+            } else if ($row['yield'] == 3) {
                 $yield = 'Loss';
-            } else if($row['yield'] == 4) {
+            } else if ($row['yield'] == 4) {
                 $yield = 'Neutral';
             } else {
                 $yield = '';
@@ -15175,7 +15179,7 @@ class purchase extends AdminController
 
                 $pur_bill_row_model .= $this->purchase_model->get_purchase_bill_row_model($bill_detail, $item_name);
 
-                if(!empty($data['payment_certificates'])) {
+                if (!empty($data['payment_certificates'])) {
                     foreach ($data['payment_certificates'] as $pkey => $pvalue) {
                         $pur_pc_bill_row_model .= $this->purchase_model->get_purchase_pc_bill_row_model($bill_detail, $item_name, $pkey, $pvalue);
                     }
@@ -15482,7 +15486,7 @@ class purchase extends AdminController
         die();
     }
 
-    public function view_purchase_tracker_file($id,$view_type)
+    public function view_purchase_tracker_file($id, $view_type)
     {
         $data['discussion_user_profile_image_url'] = staff_profile_image_url(get_staff_user_id());
         $data['current_user_is_admin']             = is_admin();
@@ -15715,7 +15719,7 @@ class purchase extends AdminController
                         $item_text = pur_get_item_variatiom($tender_detail['item_code']);
                     }
 
-                    $purchase_request_row_template .= $this->purchase_model->create_purchase_tender_row_template('items[' . $index_request . ']', $tender_detail['item_code'], $tender_detail['description'], $tender_detail['area'], $tender_detail['image'], $tender_detail['quantity'], $tender_detail['tn_id'],  true, $tender_detail, $tender_detail['remarks'],$tender_detail['unit_price']);
+                    $purchase_request_row_template .= $this->purchase_model->create_purchase_tender_row_template('items[' . $index_request . ']', $tender_detail['item_code'], $tender_detail['description'], $tender_detail['area'], $tender_detail['image'], $tender_detail['quantity'], $tender_detail['tn_id'],  true, $tender_detail, $tender_detail['remarks'], $tender_detail['unit_price']);
                 }
             }
         }
@@ -16465,7 +16469,7 @@ class purchase extends AdminController
             $data = $this->input->post();
             $success = $this->purchase_model->edit_pc_note($data, $id);
             echo json_encode([
-                'description'=> process_text_content_for_display(nl2br($data['description'])),
+                'description' => process_text_content_for_display(nl2br($data['description'])),
                 'success' => $success,
                 'message' => _l('note_updated_successfully'),
             ]);
@@ -16526,7 +16530,7 @@ class purchase extends AdminController
     {
         $result = array();
         $data = $this->input->post();
-        if(!empty($data)) {
+        if (!empty($data)) {
             $result['po_pc_format'] = $this->purchase_model->get_po_pc_format($data);
         }
         echo json_encode($result);
@@ -16536,7 +16540,7 @@ class purchase extends AdminController
     {
         $result = array();
         $data = $this->input->post();
-        if(!empty($data)) {
+        if (!empty($data)) {
             $result['wo_pc_format'] = $this->purchase_model->get_wo_pc_format($data);
         }
         echo json_encode($result);
@@ -16546,7 +16550,7 @@ class purchase extends AdminController
     {
         $result = array();
         $data = $this->input->post();
-        if(!empty($data)) {
+        if (!empty($data)) {
             $result['ot_pc_format'] = $this->purchase_model->get_ot_pc_format($data);
         }
         echo json_encode($result);
@@ -16617,7 +16621,7 @@ class purchase extends AdminController
             $newitems = $input['newitems'];
             foreach ($newitems as $ikey => $data) {
                 $this->purchase_model->update_bulk_payment_certificate($data);
-                if(isset($input['save_convert_to_vendor_bill'])) {
+                if (isset($input['save_convert_to_vendor_bill'])) {
                     $pc_with_vbt = $this->purchase_model->get_pc_with_vbt($data['id']);
                     if (empty($pc_with_vbt)) {
                         $this->convert_pur_invoice_from_po($data['id'], false);
@@ -16791,23 +16795,25 @@ class purchase extends AdminController
         $data['title'] = _l('add_tender_document');
         $data['tender_id'] = $tender_id;
         $this->load->view('purchase_tender/add_tender_document', $data);
-
     }
 
-    public function view_latter_of_agreement($tender_id){
+    public function view_latter_of_agreement($tender_id)
+    {
         $data['title'] = _l('Latter of Agreement');
         $data['tender_id'] = $tender_id;
         $data['tender_data'] = $this->purchase_model->get_tender_document_detail($tender_id);
         $this->load->view('purchase_tender/latter_of_agreement', $data);
     }
-     public function view_appendix_to_contract($tender_id){
+    public function view_appendix_to_contract($tender_id)
+    {
         $data['title'] = _l('Appendix to Contract');
         $data['tender_id'] = $tender_id;
         $data['tender_data'] = $this->purchase_model->get_tender_document_detail($tender_id);
         $this->load->view('purchase_tender/appendix_to_contract', $data);
     }
 
-     public function view_particular_conditions_of_contract($tender_id){
+    public function view_particular_conditions_of_contract($tender_id)
+    {
         $data['title'] = _l('Particular Conditions of Contract');
         $data['tender_id'] = $tender_id;
         $data['tender_data'] = $this->purchase_model->get_tender_document_detail($tender_id);
@@ -16815,24 +16821,112 @@ class purchase extends AdminController
     }
 
 
-     public function view_contractor_general_obligations($tender_id){
+    public function view_contractor_general_obligations($tender_id)
+    {
         $data['title'] = _l('Contractor General Obligations');
         $data['tender_id'] = $tender_id;
         $data['tender_data'] = $this->purchase_model->get_tender_document_detail($tender_id);
         $this->load->view('purchase_tender/contractor_general_obligations', $data);
     }
 
-    public function view_fidic_condition_of_contract($tender_id){
+    public function view_fidic_condition_of_contract($tender_id)
+    {
         $data['title'] = _l('FIDIC Condition of Contract');
         $data['tender_id'] = $tender_id;
         $data['tender_data'] = $this->purchase_model->get_tender_document_detail($tender_id);
         $this->load->view('purchase_tender/fidic_condition_of_contract', $data);
     }
 
-    public function view_environmental_health_safety($tender_id){
+    public function view_environmental_health_safety($tender_id)
+    {
         $data['title'] = _l('Environmental Health & Safety');
         $data['tender_id'] = $tender_id;
         $data['tender_data'] = $this->purchase_model->get_tender_document_detail($tender_id);
         $this->load->view('purchase_tender/environmental_health_safety', $data);
+    }
+
+    public function download_multiple_invoice_attachments()
+    {
+        if (!$this->input->post('billing_invoices')) {
+            echo json_encode(['success' => false, 'message' => 'No invoices selected']);
+            return;
+        }
+
+        $billing_invoices = $this->input->post('billing_invoices');
+
+        // Load required models
+        $this->load->model('purchase/purchase_model');
+
+        // Get the actual pur_invoices IDs from your query logic
+        $pur_invoice_ids = $this->get_pur_invoice_ids_from_billing($billing_invoices);
+
+        if (empty($pur_invoice_ids)) {
+            echo json_encode(['success' => false, 'message' => 'No matching invoices found']);
+            return;
+        }
+
+        // Create ZIP file
+        $tempZipPath = tempnam(sys_get_temp_dir(), 'multiple_invoices_') . '.zip';
+        $zip = new ZipArchive();
+
+        if ($zip->open($tempZipPath, ZipArchive::CREATE) !== TRUE) {
+            echo json_encode(['success' => false, 'message' => 'Unable to create ZIP file']);
+            return;
+        }
+
+        $filesAdded = false;
+
+        foreach ($pur_invoice_ids as $pur_invoice_id) {
+            $attachments = $this->purchase_model->get_purchase_invoice_attachments($pur_invoice_id);
+
+            if (!empty($attachments)) {
+                foreach ($attachments as $attachment) {
+                    $file_path = PURCHASE_PATH . 'pur_invoice/' . $attachment['rel_id'] . '/' . $attachment['file_name'];
+
+                    if (file_exists($file_path)) {
+                        $zip_path = 'Invoice_' . $pur_invoice_id . '/' . $attachment['file_name'];
+                        $zip->addFile($file_path, $zip_path);
+                        $filesAdded = true;
+                    }
+                }
+            }
+        }
+
+        $zip->close();
+
+        if (!$filesAdded) {
+            unlink($tempZipPath);
+            echo json_encode(['success' => false, 'message' => 'No attachments found for selected invoices']);
+            return;
+        }
+
+        // Download the file
+        header('Content-Type: application/zip');
+        header('Content-Disposition: attachment; filename="invoices_attachments_' . date('Y-m-d_H-i') . '.zip"');
+        header('Content-Length: ' . filesize($tempZipPath));
+        header('Pragma: no-cache');
+        header('Expires: 0');
+
+        readfile($tempZipPath);
+        unlink($tempZipPath);
+        exit;
+    }
+
+    private function get_pur_invoice_ids_from_billing($billing_invoices)
+    {
+        $this->db->select(db_prefix() . 'pur_invoices.id');
+        $this->db->from(db_prefix() . 'pur_invoices');
+        $this->db->join(db_prefix() . 'itemable AS itm', 'itm.vbt_id = ' . db_prefix() . 'pur_invoices.id AND itm.rel_type = "invoice"', 'left');
+        $this->db->join(db_prefix() . 'invoices AS ril', 'ril.id = itm.rel_id', 'left');
+
+        if (in_array("None", $billing_invoices)) {
+            $this->db->where('ril.id IS NULL');
+        } else {
+            $billing_invoice_ids = array_map('intval', $billing_invoices);
+            $this->db->where_in('ril.id', $billing_invoice_ids);
+        }
+
+        $result = $this->db->get()->result_array();
+        return array_column($result, 'id');
     }
 }

@@ -306,6 +306,11 @@
                            <?php echo _l('reset_filter'); ?>
                         </a>
                      </div>
+                     <div class="col-md-1 form-group">
+                        <a href="javascript:void(0)" class="btn btn-info btn-icon download_all_attachments">
+                           <?php echo _l('Download Attachments'); ?>
+                        </a>
+                     </div>
                   </div>
 
                   <div class="row">

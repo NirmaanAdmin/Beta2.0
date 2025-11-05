@@ -67,7 +67,54 @@ var expenseDropzone;
     get_vbt_dashboard();
   });
 
-  $(document).on('change', 'select[name="vendor_ft[]"], select[name="budget_head"], select[name="is_expense"]', function() {
+  $(document).on('click', '.download_all_attachments', function () {
+    let get_ril_ids = $('select[name="billing_invoices[]"]').val();
+
+    if (!get_ril_ids || get_ril_ids.length === 0) {
+      alert_float('warning', 'Please select at least one invoice');
+      return;
+    }
+
+    console.log('Selected IDs:', get_ril_ids);
+
+    // Show loading indicator
+    $('.download_all_attachments').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Downloading...');
+
+    // Send AJAX request
+    $.ajax({
+      url: admin_url + 'purchase/download_multiple_invoice_attachments',
+      type: 'POST',
+      data: {
+        billing_invoices: get_ril_ids,
+      },
+      xhrFields: {
+        responseType: 'blob'
+      },
+      success: function (response) {
+        // Create download link
+        const blob = new Blob([response]);
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = 'invoices_attachments.zip';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(downloadUrl);
+        document.body.removeChild(a);
+
+        alert_float('success', 'Files downloaded successfully!');
+      },
+      error: function (xhr, status, error) {
+        console.error('Download error:', error);
+        alert_float('danger', 'Error downloading files: ' + error);
+      },
+      complete: function () {
+        // Reset button
+        $('.download_all_attachments').prop('disabled', false).html('Download All Attachments');
+      }
+    });
+  });
+  $(document).on('change', 'select[name="vendor_ft[]"], select[name="budget_head"], select[name="is_expense"]', function () {
     get_vbt_dashboard();
   });
 
@@ -208,7 +255,7 @@ var expenseDropzone;
   $('body').on('change', '#select_invoice', function (e) {
     e.preventDefault();
     var select_invoice = $(this).val();
-    if(select_invoice == 'applied_invoice') {
+    if (select_invoice == 'applied_invoice') {
       $('.applied-to-invoice').removeClass('hide');
     } else {
       $('.applied-to-invoice').addClass('hide');
@@ -220,7 +267,7 @@ var expenseDropzone;
     e.preventDefault();
     var select_invoice = $(this).val();
     var id = $(this).data('id');
-    if(select_invoice == 'applied_invoice') {
+    if (select_invoice == 'applied_invoice') {
       $('#bulk_applied_to_invoice[data-id="' + id + '"]').closest('.bulk-applied-to-invoice').removeClass('hide')
     } else {
       $('#bulk_applied_to_invoice[data-id="' + id + '"]').closest('.bulk-applied-to-invoice').addClass('hide');
@@ -231,7 +278,7 @@ var expenseDropzone;
   $('body').on('change', '#convert_select_invoice', function (e) {
     e.preventDefault();
     var select_invoice = $(this).val();
-    if(select_invoice == 'applied_invoice') {
+    if (select_invoice == 'applied_invoice') {
       $('#convert_applied_to_invoice').closest('.convert-applied-to-invoice').removeClass('hide')
     } else {
       $('#convert_applied_to_invoice').closest('.convert-applied-to-invoice').addClass('hide');
@@ -248,22 +295,22 @@ var expenseDropzone;
     var convert_applied_to_invoice = $('#convert_applied_to_invoice').val();
     var convert_responsible_person = $('#convert_responsible_person').val();
 
-    if(convert_expense_name) {
+    if (convert_expense_name) {
       $('.all_expense_name textarea').val(convert_expense_name);
     }
-    if(convert_category) {
+    if (convert_category) {
       $('.all_budget_head select').val(convert_category).trigger('change');
     }
-    if(convert_date) {
+    if (convert_date) {
       $('.all_invoice_date input').val(convert_date).trigger('change');
     }
-    if(convert_select_invoice == 'create_invoice') {
+    if (convert_select_invoice == 'create_invoice') {
       $('select#bulk_select_invoice').val(convert_select_invoice).trigger('change');
     } else {
       $('select#bulk_select_invoice').val(convert_select_invoice).trigger('change');
       $('select#bulk_applied_to_invoice').val(convert_applied_to_invoice).trigger('change');
     }
-    if(convert_responsible_person) {
+    if (convert_responsible_person) {
       $('select#bulk_responsible_person').val(convert_responsible_person).trigger('change');
     }
   });
@@ -352,7 +399,7 @@ var expenseDropzone;
     select_invoice: 'required',
     applied_to_invoice: {
       required: function () {
-          return $('#select_invoice').val() == 'applied_invoice';
+        return $('#select_invoice').val() == 'applied_invoice';
       }
     },
   }, projectExpenseSubmitHandler);
@@ -481,13 +528,13 @@ function bulk_convert_ril_bill() {
   "use strict";
   var print_id = '';
   var rows = $('.table-table_pur_invoices').find('tbody tr');
-  $.each(rows, function() {
+  $.each(rows, function () {
     var checkbox = $($(this).find('td').eq(0)).find('input');
     if (checkbox.prop('checked') === true) {
-        if (print_id !== '') {
-            print_id += ','; // Append a comma before adding the next value
-        }
-        print_id += checkbox.val();
+      if (print_id !== '') {
+        print_id += ','; // Append a comma before adding the next value
+      }
+      print_id += checkbox.val();
     }
   });
   if (print_id !== '') {
@@ -515,13 +562,13 @@ function bulk_assign_ril_bill() {
   "use strict";
   var print_id = '';
   var rows = $('.table-table_pur_invoices').find('tbody tr');
-  $.each(rows, function() {
+  $.each(rows, function () {
     var checkbox = $($(this).find('td').eq(0)).find('input');
     if (checkbox.prop('checked') === true) {
-        if (print_id !== '') {
-            print_id += ','; // Append a comma before adding the next value
-        }
-        print_id += checkbox.val();
+      if (print_id !== '') {
+        print_id += ','; // Append a comma before adding the next value
+      }
+      print_id += checkbox.val();
     }
   });
   if (print_id !== '') {
@@ -549,13 +596,13 @@ function bulk_transfer_invoices() {
   "use strict";
   var print_id = '';
   var rows = $('.table-table_pur_invoices').find('tbody tr');
-  $.each(rows, function() {
+  $.each(rows, function () {
     var checkbox = $($(this).find('td').eq(0)).find('input');
     if (checkbox.prop('checked') === true) {
-        if (print_id !== '') {
-            print_id += ','; // Append a comma before adding the next value
-        }
-        print_id += checkbox.val();
+      if (print_id !== '') {
+        print_id += ','; // Append a comma before adding the next value
+      }
+      print_id += checkbox.val();
     }
   });
   if (print_id !== '') {
@@ -587,7 +634,7 @@ function get_vbt_dashboard() {
     is_expense: $('select[name="is_expense"]').val()
   }
 
-  $.post(admin_url + 'purchase/get_vbt_dashboard', data).done(function(response){
+  $.post(admin_url + 'purchase/get_vbt_dashboard', data).done(function (response) {
     response = JSON.parse(response);
 
     // Update value summaries
@@ -678,7 +725,7 @@ function get_vbt_dashboard() {
             },
             tooltip: {
               callbacks: {
-                label: function(context) {
+                label: function (context) {
                   return context.label + ': ' + context.formattedValue;
                 }
               }
@@ -717,7 +764,7 @@ function get_vbt_dashboard() {
             },
             tooltip: {
               callbacks: {
-                label: function(context) {
+                label: function (context) {
                   return context.label + ': ' + context.formattedValue;
                 }
               }
