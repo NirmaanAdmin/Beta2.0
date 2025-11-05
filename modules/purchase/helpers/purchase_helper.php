@@ -6043,3 +6043,160 @@ function update_po_activity_log($id, $field, $old_value, $new_value)
     }
     return true;
 }
+
+function update_all_wo_fields_activity_log($id, $new_data)
+{
+    $CI = &get_instance();
+    $CI->load->model('currencies_model');
+    $CI->load->model('purchase_model');
+    $CI->load->model('staff_model');
+    $CI->load->model('departments_model');
+    $CI->load->model('invoices_model');
+    $base_currency = $CI->currencies_model->get_base_currency();
+    if (empty($id)) {
+        return false;
+    }
+    $wo_orders = $CI->db->where('id', $id)
+        ->get(db_prefix() . 'wo_orders')
+        ->row();
+    if (!$wo_orders) {
+        return false;
+    }
+    $old_data = (array)$wo_orders;
+    $normalize = function ($value) {
+        $value = trim((string)$value);
+        if (in_array(strtolower($value), ['null', 'none', 'nil', 'n/a', '-', '--'])) {
+            return '';
+        }
+        if ($value === '0000-00-00') {
+            return '';
+        }
+        if (is_numeric($value)) {
+            $num = (float)$value;
+            return ($num == 0.0) ? '' : $num;
+        }
+        return strtolower($value);
+    };
+    $norm_old = array_map($normalize, $old_data);
+    $norm_new = array_map($normalize, $new_data);
+    $changes = array_diff_assoc($norm_new, $norm_old);
+    if (empty($changes)) {
+        return true;
+    }
+    $field_map = [
+        'wo_order_name' => _l('wo_order_description'),
+        'order_date' => _l('order_date'),
+        'vendor' => _l('vendor'),
+        'pur_request' => _l('pur_request'),
+        'buyer' => _l('buyer'),
+        'discount_type' => _l('discount_type'),
+        'department' => _l('department'),
+        'group_pur' => _l('Budget Head'),
+        'budget' => _l('budget_ro_projection'),
+        'type' => _l('type'),
+        'hsn_sac' => _l('hsn_sac'),
+        'shipping_address' => _l('pur_company_address'),
+        'shipping_zip' => _l('pur_company_zipcode'),
+        'shipping_city' => _l('pur_company_city'),
+        'shipping_state' => _l('pur_company_state'),
+        'shipping_country_text' => _l('pur_company_country_text'),
+        'shipping_country' => _l('pur_company_country_code'),
+    ];
+    foreach ($changes as $field => $dummy) {
+        if (!isset($field_map[$field])) {
+            continue;
+        }
+        $old_value = $old_data[$field] ?? '';
+        $new_value = $new_data[$field] ?? '';
+        if ($field === 'vendor') {
+            $vendor_list = $CI->purchase_model->get_vendor();
+            $opts = array_column($vendor_list, 'company', 'userid');
+            $old_value = $opts[$old_value] ?? '';
+            $new_value = $opts[$new_value] ?? '';
+        }
+        if ($field === 'pur_request') {
+            $pur_request = $CI->purchase_model->get_pur_request_by_status(2);
+            $opts = array_combine(
+                array_column($pur_request, 'id'),
+                array_map(fn($a) => $a['pur_rq_code'] . ' - ' . $a['pur_rq_name'], $pur_request)
+            );
+            $old_value = $opts[$old_value] ?? '';
+            $new_value = $opts[$new_value] ?? '';
+        }
+        if ($field === 'buyer') {
+            $staff_list = $CI->staff_model->get('', ['active' => 1]);
+            $opts = array_combine(
+                array_column($staff_list, 'staffid'),
+                array_map(fn($a) => $a['firstname'] . ' ' . $a['lastname'], $staff_list)
+            );
+            $old_value = $opts[$old_value] ?? '';
+            $new_value = $opts[$new_value] ?? '';
+        }
+        if ($field === 'discount_type') {
+            $opts = [
+                'before_tax' => _l('discount_type_before_tax'),
+                'after_tax' => _l('discount_type_after_tax'),
+            ];
+            $old_value = $opts[$old_value] ?? '';
+            $new_value = $opts[$new_value] ?? '';
+        }
+        if ($field === 'department') {
+            $departments_list = $CI->departments_model->get();
+            $opts = array_column($departments_list, 'name', 'departmentid');
+            $old_value = $opts[$old_value] ?? '';
+            $new_value = $opts[$new_value] ?? '';
+        }
+        if ($field === 'group_pur') {
+            $commodity_groups_pur = get_budget_head_project_wise();
+            $opts = array_column($commodity_groups_pur, 'name', 'id');
+            $old_value = $opts[$old_value] ?? '';
+            $new_value = $opts[$new_value] ?? '';
+        }
+        if ($field === 'type') {
+            $opts = [
+                'capex' => _l('capex'),
+                'opex' => _l('opex'),
+            ];
+            $old_value = $opts[$old_value] ?? '';
+            $new_value = $opts[$new_value] ?? '';
+        }
+        if ($field === 'hsn_sac') {
+            $hsn_sac_code = $CI->invoices_model->get_hsn_sac_code();
+            $opts = array_column($hsn_sac_code, 'name', 'id');
+            $old_value = $opts[$old_value] ?? '';
+            $new_value = $opts[$new_value] ?? '';
+        }
+        if ($field === 'shipping_country') {
+            $countries = get_all_countries();
+            $opts = array_column($countries, 'short_name', 'country_id');
+            $old_value = $opts[$old_value] ?? '';
+            $new_value = $opts[$new_value] ?? '';
+        }
+        update_wo_activity_log($id, $field_map[$field], $old_value, $new_value);
+    }
+    return true;
+}
+
+function update_wo_activity_log($id, $field, $old_value, $new_value)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $wo_orders = $CI->db->get(db_prefix() . 'wo_orders')->row();
+        if(!empty($wo_orders)) {
+            $old_value = !empty($old_value) ? $old_value : 'None';
+            $new_value = !empty($new_value) ? $new_value : 'None';
+            $description = "".$field." field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in work order <b>".$wo_orders->wo_order_number." - ".$wo_orders->wo_order_name."</b>.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'wo',
+                'rel_id' => $wo_orders->id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}

@@ -16807,6 +16807,7 @@ class Purchase_model extends App_Model
             unset($data['non_budget_item']);
         }
 
+        update_all_wo_fields_activity_log($id, $data);
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'wo_orders', $data);
 
