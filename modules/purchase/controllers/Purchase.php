@@ -17006,7 +17006,7 @@ class purchase extends AdminController
 
     private function get_pur_invoice_data_from_billing($billing_invoices)
     {
-        $this->db->select(db_prefix() . 'pur_invoices.id, ' . db_prefix() . 'pur_vendor.company as vendor_name');
+        $this->db->select(db_prefix() . 'pur_invoices.id, ' . db_prefix() . 'pur_vendor.vendor_code as vendor_name');
         $this->db->from(db_prefix() . 'pur_invoices');
         $this->db->join(db_prefix() . 'pur_vendor', db_prefix() . 'pur_vendor.userid = ' . db_prefix() . 'pur_invoices.vendor', 'left');
         $this->db->join(db_prefix() . 'itemable AS itm', 'itm.vbt_id = ' . db_prefix() . 'pur_invoices.id AND itm.rel_type = "invoice"', 'left');
