@@ -16845,6 +16845,91 @@ class purchase extends AdminController
         $this->load->view('purchase_tender/environmental_health_safety', $data);
     }
 
+    // public function download_multiple_invoice_attachments()
+    // {
+    //     if (!$this->input->post('billing_invoices')) {
+    //         echo json_encode(['success' => false, 'message' => 'No invoices selected']);
+    //         return;
+    //     }
+
+    //     $billing_invoices = $this->input->post('billing_invoices');
+
+    //     // Load required models
+    //     $this->load->model('purchase/purchase_model');
+
+    //     // Get the actual pur_invoices IDs from your query logic
+    //     $pur_invoice_ids = $this->get_pur_invoice_ids_from_billing($billing_invoices);
+
+    //     if (empty($pur_invoice_ids)) {
+    //         echo json_encode(['success' => false, 'message' => 'No matching invoices found']);
+    //         return;
+    //     }
+
+    //     // Create ZIP file
+    //     $tempZipPath = tempnam(sys_get_temp_dir(), 'multiple_invoices_') . '.zip';
+    //     $zip = new ZipArchive();
+
+    //     if ($zip->open($tempZipPath, ZipArchive::CREATE) !== TRUE) {
+    //         echo json_encode(['success' => false, 'message' => 'Unable to create ZIP file']);
+    //         return;
+    //     }
+
+    //     $filesAdded = false;
+
+    //     foreach ($pur_invoice_ids as $pur_invoice_id) {
+    //         $attachments = $this->purchase_model->get_purchase_invoice_attachments($pur_invoice_id);
+
+    //         if (!empty($attachments)) {
+    //             foreach ($attachments as $attachment) {
+    //                 $file_path = PURCHASE_PATH . 'pur_invoice/' . $attachment['rel_id'] . '/' . $attachment['file_name'];
+
+    //                 if (file_exists($file_path)) {
+    //                     $zip_path = 'Invoice_' . $pur_invoice_id . '/' . $attachment['file_name'];
+    //                     $zip->addFile($file_path, $zip_path);
+    //                     $filesAdded = true;
+    //                 }
+    //             }
+    //         }
+    //     }
+
+    //     $zip->close();
+
+    //     if (!$filesAdded) {
+    //         unlink($tempZipPath);
+    //         echo json_encode(['success' => false, 'message' => 'No attachments found for selected invoices']);
+    //         return;
+    //     }
+
+    //     // Download the file
+    //     header('Content-Type: application/zip');
+    //     header('Content-Disposition: attachment; filename="invoices_attachments_' . date('Y-m-d_H-i') . '.zip"');
+    //     header('Content-Length: ' . filesize($tempZipPath));
+    //     header('Pragma: no-cache');
+    //     header('Expires: 0');
+
+    //     readfile($tempZipPath);
+    //     unlink($tempZipPath);
+    //     exit;
+    // }
+
+    // private function get_pur_invoice_ids_from_billing($billing_invoices)
+    // {
+    //     $this->db->select(db_prefix() . 'pur_invoices.id', db_prefix() . 'pur_vendor.company as vendor_name');
+    //     $this->db->from(db_prefix() . 'pur_invoices');
+    //     $this->db->join(db_prefix() . 'pur_vendor ON ' . db_prefix() . 'pur_vendor.userid = ' . db_prefix() . 'pur_invoices.vendor','left');
+    //     $this->db->join(db_prefix() . 'itemable AS itm', 'itm.vbt_id = ' . db_prefix() . 'pur_invoices.id AND itm.rel_type = "invoice"', 'left');
+    //     $this->db->join(db_prefix() . 'invoices AS ril', 'ril.id = itm.rel_id', 'left');
+
+    //     if (in_array("None", $billing_invoices)) {
+    //         $this->db->where('ril.id IS NULL');
+    //     } else {
+    //         $billing_invoice_ids = array_map('intval', $billing_invoices);
+    //         $this->db->where_in('ril.id', $billing_invoice_ids);
+    //     }
+
+    //     $result = $this->db->get()->result_array();
+    //     return array_column($result, 'id');
+    // }
     public function download_multiple_invoice_attachments()
     {
         if (!$this->input->post('billing_invoices')) {
@@ -16857,10 +16942,10 @@ class purchase extends AdminController
         // Load required models
         $this->load->model('purchase/purchase_model');
 
-        // Get the actual pur_invoices IDs from your query logic
-        $pur_invoice_ids = $this->get_pur_invoice_ids_from_billing($billing_invoices);
+        // Get the actual pur_invoices data from your query logic
+        $pur_invoices_data = $this->get_pur_invoice_data_from_billing($billing_invoices);
 
-        if (empty($pur_invoice_ids)) {
+        if (empty($pur_invoices_data)) {
             echo json_encode(['success' => false, 'message' => 'No matching invoices found']);
             return;
         }
@@ -16876,7 +16961,13 @@ class purchase extends AdminController
 
         $filesAdded = false;
 
-        foreach ($pur_invoice_ids as $pur_invoice_id) {
+        foreach ($pur_invoices_data as $invoice) {
+            $pur_invoice_id = $invoice['id'];
+            $vendor_name = $invoice['vendor_name'];
+
+            // Clean vendor name for use in folder names (remove special characters)
+            $clean_vendor_name = $this->clean_filename($vendor_name);
+
             $attachments = $this->purchase_model->get_purchase_invoice_attachments($pur_invoice_id);
 
             if (!empty($attachments)) {
@@ -16884,7 +16975,8 @@ class purchase extends AdminController
                     $file_path = PURCHASE_PATH . 'pur_invoice/' . $attachment['rel_id'] . '/' . $attachment['file_name'];
 
                     if (file_exists($file_path)) {
-                        $zip_path = 'Invoice_' . $pur_invoice_id . '/' . $attachment['file_name'];
+                        // Updated path with vendor name: Invoice_{vendor_name}_{id}/filename
+                        $zip_path = 'Invoice_' . $clean_vendor_name . '_' . $pur_invoice_id . '/' . $attachment['file_name'];
                         $zip->addFile($file_path, $zip_path);
                         $filesAdded = true;
                     }
@@ -16912,10 +17004,11 @@ class purchase extends AdminController
         exit;
     }
 
-    private function get_pur_invoice_ids_from_billing($billing_invoices)
+    private function get_pur_invoice_data_from_billing($billing_invoices)
     {
-        $this->db->select(db_prefix() . 'pur_invoices.id');
+        $this->db->select(db_prefix() . 'pur_invoices.id, ' . db_prefix() . 'pur_vendor.company as vendor_name');
         $this->db->from(db_prefix() . 'pur_invoices');
+        $this->db->join(db_prefix() . 'pur_vendor', db_prefix() . 'pur_vendor.userid = ' . db_prefix() . 'pur_invoices.vendor', 'left');
         $this->db->join(db_prefix() . 'itemable AS itm', 'itm.vbt_id = ' . db_prefix() . 'pur_invoices.id AND itm.rel_type = "invoice"', 'left');
         $this->db->join(db_prefix() . 'invoices AS ril', 'ril.id = itm.rel_id', 'left');
 
@@ -16926,7 +17019,20 @@ class purchase extends AdminController
             $this->db->where_in('ril.id', $billing_invoice_ids);
         }
 
-        $result = $this->db->get()->result_array();
-        return array_column($result, 'id');
+        return $this->db->get()->result_array();
+    }
+
+    private function clean_filename($filename)
+    {
+        // Remove or replace special characters that are not allowed in folder names
+        $clean = preg_replace('/[^a-zA-Z0-9_\-\s]/', '', $filename);
+        // Replace multiple spaces with single space
+        $clean = preg_replace('/\s+/', ' ', $clean);
+        // Trim and replace spaces with underscores
+        $clean = str_replace(' ', '_', trim($clean));
+        // Limit length to avoid path issues
+        $clean = substr($clean, 0, 50);
+
+        return $clean;
     }
 }
