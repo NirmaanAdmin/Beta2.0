@@ -3139,6 +3139,7 @@ class Purchase_model extends App_Model
                 $dt_data['reorder'] = isset($rqd['order']) ? $rqd['order'] : null;
                 $this->db->insert(db_prefix() . 'pur_order_detail', $dt_data);
                 $new_quote_insert_id = $this->db->insert_id();
+                add_order_item_activity_log($new_quote_insert_id, 'pur_order', true);
                 if ($new_quote_insert_id) {
                     $affectedRows++;
                 }
@@ -3214,6 +3215,7 @@ class Purchase_model extends App_Model
 
         if (count($remove_order) > 0) {
             foreach ($remove_order as $remove_id) {
+                add_order_item_activity_log($remove_id, 'pur_order', false);
                 $this->db->where('id', $remove_id);
                 $pur_order_id = $this->db->get(db_prefix() . 'pur_order_detail')->row();
                 $item_detail = $this->get_items_by_id($pur_order_id->item_code);
@@ -16870,6 +16872,7 @@ class Purchase_model extends App_Model
 
                 $this->db->insert(db_prefix() . 'wo_order_detail', $dt_data);
                 $new_quote_insert_id = $this->db->insert_id();
+                add_order_item_activity_log($new_quote_insert_id, 'wo_order', true);
                 if ($new_quote_insert_id) {
                     $affectedRows++;
                 }
@@ -16943,6 +16946,7 @@ class Purchase_model extends App_Model
 
         if (count($remove_order) > 0) {
             foreach ($remove_order as $remove_id) {
+                add_order_item_activity_log($remove_id, 'wo_order', false);
                 $this->db->where('id', $remove_id);
                 $pur_order_id = $this->db->get(db_prefix() . 'wo_order_detail')->row();
                 $item_detail = $this->get_items_by_id($pur_order_id->item_code);

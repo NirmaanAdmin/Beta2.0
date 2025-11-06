@@ -6200,3 +6200,56 @@ function update_wo_activity_log($id, $field, $old_value, $new_value)
     }
     return true;
 }
+
+function add_order_item_activity_log($id, $rel_type, $is_create = true)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $module_name = '';
+        $rel_id = '';
+        $description = '';
+        $is_create_value = $is_create ? 'added' : 'removed';
+        if($rel_type == 'pur_order') {
+            $CI->db->where('id', $id);
+            $pur_order_detail = $CI->db->get(db_prefix() . 'pur_order_detail')->row();
+            if(!empty($pur_order_detail)) {
+                $CI->db->where('id', $pur_order_detail->pur_order);
+                $pur_orders = $CI->db->get(db_prefix() . 'pur_orders')->row();
+                $CI->db->where('id', $pur_order_detail->item_code);
+                $items = $CI->db->get(db_prefix() . 'items')->row();
+                if(!empty($items)) {
+                    $description = "Item <b>".$items->commodity_code." - ".$items->description."</b> has been ".$is_create_value." for purchase order <b>".$pur_orders->pur_order_number." - ".$pur_orders->pur_order_name."</b>.";
+                    $module_name = 'po';
+                    $rel_id = $pur_orders->id;
+                }
+            }
+        }
+        if($rel_type == 'wo_order') {
+            $CI->db->where('id', $id);
+            $wo_order_detail = $CI->db->get(db_prefix() . 'wo_order_detail')->row();
+            if(!empty($wo_order_detail)) {
+                $CI->db->where('id', $wo_order_detail->wo_order);
+                $wo_orders = $CI->db->get(db_prefix() . 'wo_orders')->row();
+                $CI->db->where('id', $wo_order_detail->item_code);
+                $items = $CI->db->get(db_prefix() . 'items')->row();
+                if(!empty($items)) {
+                    $description = "Item <b>".$items->commodity_code." - ".$items->description."</b> has been ".$is_create_value." for work order <b>".$wo_orders->wo_order_number." - ".$wo_orders->wo_order_name."</b>.";
+                    $module_name = 'wo';
+                    $rel_id = $wo_orders->id;
+                }
+            }
+        }
+        if(!empty($description)) {
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => $module_name,
+                'rel_id' => $rel_id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
