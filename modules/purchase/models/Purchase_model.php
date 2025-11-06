@@ -3157,6 +3157,7 @@ class Purchase_model extends App_Model
 
         if (count($update_order) > 0) {
             foreach ($update_order as $_key => $rqd) {
+                update_order_item_activity_log($rqd, 'pur_order');
                 $dt_data = [];
                 $dt_data['pur_order'] = $id;
                 $dt_data['item_code'] = $rqd['item_name'];
@@ -16890,6 +16891,7 @@ class Purchase_model extends App_Model
 
         if (count($update_order) > 0) {
             foreach ($update_order as $_key => $rqd) {
+                update_order_item_activity_log($rqd, 'wo_order');
                 $dt_data = [];
                 $dt_data['wo_order'] = $id;
                 $dt_data['item_code'] = $rqd['item_name'];
