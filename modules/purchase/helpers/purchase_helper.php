@@ -6219,7 +6219,7 @@ function add_order_item_activity_log($id, $rel_type, $is_create = true)
                 $CI->db->where('id', $pur_order_detail->item_code);
                 $items = $CI->db->get(db_prefix() . 'items')->row();
                 if(!empty($items)) {
-                    $description = "Item <b>".$items->commodity_code." - ".$items->description."</b> has been ".$is_create_value." for purchase order <b>".$pur_orders->pur_order_number." - ".$pur_orders->pur_order_name."</b>.";
+                    $description = "Item <b>".$items->commodity_code." ".$items->description."</b> has been ".$is_create_value." for purchase order <b>".$pur_orders->pur_order_number." - ".$pur_orders->pur_order_name."</b>.";
                     $module_name = 'po';
                     $rel_id = $pur_orders->id;
                 }
@@ -6234,7 +6234,7 @@ function add_order_item_activity_log($id, $rel_type, $is_create = true)
                 $CI->db->where('id', $wo_order_detail->item_code);
                 $items = $CI->db->get(db_prefix() . 'items')->row();
                 if(!empty($items)) {
-                    $description = "Item <b>".$items->commodity_code." - ".$items->description."</b> has been ".$is_create_value." for work order <b>".$wo_orders->wo_order_number." - ".$wo_orders->wo_order_name."</b>.";
+                    $description = "Item <b>".$items->commodity_code." ".$items->description."</b> has been ".$is_create_value." for work order <b>".$wo_orders->wo_order_number." - ".$wo_orders->wo_order_name."</b>.";
                     $module_name = 'wo';
                     $rel_id = $wo_orders->id;
                 }
