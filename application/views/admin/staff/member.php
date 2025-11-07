@@ -310,6 +310,7 @@
                         }
                         ?>
                                 <?php echo render_select('role', $roles, ['roleid', 'name'], 'staff_add_edit_role', $selected); ?>
+                                <p style="font-style: italic; font-weight: bold;">Note: By default, users are assigned global permissions; however, you can modify these permissions for any specific project as needed.</p>
                                 <hr />
                                 <h4 class="font-medium mbot15 bold"><?php echo _l('staff_add_edit_permissions'); ?></h4>
                                 <?php
