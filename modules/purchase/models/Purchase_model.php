@@ -25579,4 +25579,57 @@ class Purchase_model extends App_Model
 
         return $html;
     }
+
+    /**
+     * Get activity_log dashboard
+     *
+     * @param  array  $data  Dashboard filter data
+     * @return array
+     */
+    public function get_activity_log_charts($data = array())
+    {
+        $response = array();
+        $module_name = isset($data['module_name']) ? $data['module_name'] : '';
+        $default_project = get_default_project();
+        $staff = isset($data['staff']) ? $data['staff'] : '';
+
+        $response['total_activities_logged'] = $response['active_staff_count'] = $response['activities_today'] = 0;
+        $response['most_active_person'] = 'None';
+        $response['last_updated'] = 'None';
+
+        $this->db->select('*');
+        $this->db->from(db_prefix() . 'module_activity_log');
+        if (!empty($module_name) && is_array($module_name)) {
+            $this->db->where_in(db_prefix() . 'module_activity_log.module_name', $module_name);
+        }
+        if (!empty($staff) && is_array($staff)) {
+            $this->db->where_in(db_prefix() . 'module_activity_log.staffid', $staff);
+        }
+        if (!empty($default_project)) {
+            $this->db->where(db_prefix() . 'module_activity_log.project_id', $default_project);
+        }
+        $this->db->order_by(db_prefix() . 'module_activity_log.date', 'asc');
+        $module_activity_log = $this->db->get()->result_array();
+
+        if (!empty($module_activity_log)) {
+            $response['total_activities_logged'] = count($module_activity_log);
+            $response['active_staff_count'] = count(
+                array_unique(
+                    array_column(
+                        array_filter($module_activity_log, fn($r) => strpos($r['date'], date('Y-m-d', strtotime('-1 day'))) === 0), 'staffid'
+                    )
+                )
+            );
+            $most_active_person_id = ($c = array_count_values(array_column(array_filter($module_activity_log, fn($r)=>strpos($r['date'], date('Y-m-d')) === 0), 'staffid'))) ? array_search(max($c), $c) : null;
+            if(!empty($most_active_person_id)) {
+                $response['most_active_person'] = get_staff_full_name($most_active_person_id);
+            }
+            $response['activities_today'] = count(
+                array_filter($module_activity_log, fn($r) => strpos($r['date'], date('Y-m-d')) === 0)
+            );
+            $response['last_updated'] = ($dates = array_column($module_activity_log, 'date')) ? date('d M, Y h:i A', strtotime(max($dates))) : 'None';
+        }
+
+        return $response;
+    }
 }

@@ -17035,4 +17035,12 @@ class purchase extends AdminController
 
         return $clean;
     }
+
+    public function get_activity_log_charts()
+    {
+        $data = $this->input->post();
+        $result = $this->purchase_model->get_activity_log_charts($data);
+        echo json_encode($result);
+        die;
+    }
 }
