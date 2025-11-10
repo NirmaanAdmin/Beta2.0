@@ -10251,4 +10251,10 @@ class warehouse extends AdminController
         }
         $this->load->view('stock_reconciliation/_file_new', $data);
     }
+
+	public function delete_stock_reconciliation($id){
+
+		$this->warehouse_model->delete_stock_reconciliation($id);
+		redirect(admin_url('warehouse/stock_reconciliation'));
+	}
 }

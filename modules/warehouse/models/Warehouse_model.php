@@ -10033,7 +10033,7 @@ class Warehouse_model extends App_Model
 		//delete goods receipt (goods receipt, goods receipt detail)
 		$re_delete_goods_receipt =  $this->delete_goods_receipt($goods_receipt);
 		if ($re_delete_goods_receipt) {
-			$count_result++;			
+			$count_result++;
 		}
 		// die('asdasd');
 		if ($count_result > 0) {
@@ -24602,5 +24602,33 @@ class Warehouse_model extends App_Model
 		$this->db->order_by('dateadded', 'desc');
 		$attachments = $this->db->get(db_prefix() . 'invetory_files')->row();
 		return $attachments;
+	}
+	public function delete_stock_reconciliation($id)
+	{
+		$this->db->where('id', $id);
+		$this->db->delete(db_prefix() . 'stock_reconciliation');
+
+
+
+		$affected_rows = 0;
+
+		$this->db->where('goods_delivery_id', $id);
+		$this->db->delete(db_prefix() . 'stock_reconciliation_detail');
+		if ($this->db->affected_rows() > 0) {
+
+			$affected_rows++;
+		}
+
+		$this->db->where('id', $id);
+		$this->db->delete(db_prefix() . 'stock_reconciliation');
+		if ($this->db->affected_rows() > 0) {
+
+			$affected_rows++;
+		}
+
+		if ($affected_rows > 0) {
+			return true;
+		}
+		return false;
 	}
 }

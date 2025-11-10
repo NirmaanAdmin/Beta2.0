@@ -174,7 +174,7 @@ foreach ($rResult as $aRow) {
                     $name .= ' | <a href="' . admin_url('warehouse/add_stock_reconciliation/' . $aRow['id']) . '/true">' . _l('edit') . '</a>';
                 }
                 if ((has_permission('warehouse', '', 'delete') || is_admin()) && ($aRow['approval'] == 0)) {
-                    $name .= ' | <a href="' . admin_url('warehouse/delete_goods_delivery/' . $aRow['id']) . '" class="text-danger _delete">' . _l('delete') . '</a>';
+                    $name .= ' | <a href="' . admin_url('warehouse/delete_stock_reconciliation/' . $aRow['id']) . '" class="text-danger _delete">' . _l('delete') . '</a>';
                 }
                 if (get_warehouse_option('revert_goods_receipt_goods_delivery') == 1) {
                     if ((has_permission('warehouse', '', 'delete') || is_admin()) && ($aRow['approval'] == 1)) {
