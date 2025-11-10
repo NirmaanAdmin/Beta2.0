@@ -25596,6 +25596,8 @@ class Purchase_model extends App_Model
         $response['total_activities_logged'] = $response['active_staff_count'] = $response['activities_today'] = 0;
         $response['most_active_person'] = 'None';
         $response['last_updated'] = 'None';
+        $response['bar_top_staff_name'] = $response['bar_top_staff_value'] = array();
+        $response['line_order_date'] = $response['line_order_total'] = array();
 
         $this->db->select('*');
         $this->db->from(db_prefix() . 'module_activity_log');
@@ -25608,6 +25610,7 @@ class Purchase_model extends App_Model
         if (!empty($default_project)) {
             $this->db->where(db_prefix() . 'module_activity_log.project_id', $default_project);
         }
+        $this->db->where(db_prefix() . 'module_activity_log.staffid !=', 1);
         $this->db->order_by(db_prefix() . 'module_activity_log.date', 'asc');
         $module_activity_log = $this->db->get()->result_array();
 
@@ -25628,6 +25631,34 @@ class Purchase_model extends App_Model
                 array_filter($module_activity_log, fn($r) => strpos($r['date'], date('Y-m-d')) === 0)
             );
             $response['last_updated'] = ($dates = array_column($module_activity_log, 'date')) ? date('d M, Y h:i A', strtotime(max($dates))) : 'None';
+            $bar_top_staffs = array();
+            $line_order_total = array();
+            foreach ($module_activity_log as $key => $value) {
+                $staff_id = $value['staffid'];
+                if (!isset($bar_top_staffs[$staff_id])) {
+                    $bar_top_staffs[$staff_id]['name'] = get_staff_full_name($staff_id);
+                    $bar_top_staffs[$staff_id]['value'] = 0;
+                }
+                $bar_top_staffs[$staff_id]['value'] += 1;
+                $timestamp = strtotime($value['date']);
+                $week = date('d M', strtotime('monday this week', $timestamp)) . ' - ' . date('d M', strtotime('sunday this week', $timestamp));
+                if (!isset($line_order_total[$week])) {
+                    $line_order_total[$week] = 0;
+                }
+                $line_order_total[$week] += 1;
+            }
+            if (!empty($bar_top_staffs)) {
+                usort($bar_top_staffs, function ($a, $b) {
+                    return $b['value'] <=> $a['value'];
+                });
+                $bar_top_staffs = array_slice($bar_top_staffs, 0, 10);
+                $response['bar_top_staff_name'] = array_column($bar_top_staffs, 'name');
+                $response['bar_top_staff_value'] = array_column($bar_top_staffs, 'value');
+            }
+            if (!empty($line_order_total)) {
+                $response['line_order_date'] = array_keys($line_order_total);
+                $response['line_order_total'] = array_values($line_order_total);
+            }
         }
 
         return $response;

@@ -26,6 +26,8 @@ if (isset($get_project_id)) {
     array_push($where, ' AND '.db_prefix().'module_activity_log.project_id = '.$get_project_id);
 }
 
+array_push($where, ' AND '.db_prefix().'module_activity_log.staffid != 1');
+
 if ($this->ci->input->post('module_name') && count($this->ci->input->post('module_name')) > 0) {
     $modules = array_map(function ($m) {
         return "'" . $m . "'";

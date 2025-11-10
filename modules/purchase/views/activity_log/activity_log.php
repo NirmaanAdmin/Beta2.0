@@ -131,6 +131,20 @@ $module_name = 'module_activity_log'; ?>
                               </div>
                            </div>
                         </div>
+                        <div class="row mtop20">
+                           <div class="col-md-6">
+                              <p class="mbot15 dashboard_stat_title">Staff Contribution</p>
+                              <div style="width: 100%; height: 400px;">
+                                <canvas id="barChartTopStaffs"></canvas>
+                              </div>
+                           </div>
+                           <div class="col-md-6">
+                              <p class="mbot15 dashboard_stat_title">Activity Type Breakdown</p>
+                              <div style="width: 100%; height: 400px;">
+                                <canvas id="lineChartOverTime"></canvas>
+                              </div>
+                           </div>
+                        </div>
                      </div>
 
                      <div class="row all_filters mtop20">
@@ -228,6 +242,8 @@ $module_name = 'module_activity_log'; ?>
                         </div>
                      </div>
                      <br>
+
+                     <p style="font-style: italic; font-weight: bold;">Note: Activity logs will be deleted if they are older than 90 days.</p>
 
                      <div class="btn-group show_hide_columns" id="show_hide_columns">
                         <!-- Settings Icon -->
@@ -394,6 +410,8 @@ $module_name = 'module_activity_log'; ?>
         get_activity_log_dashboard();
       });
 
+      var lineChartOverTime;
+
       function get_activity_log_dashboard() {
         "use strict";
 
@@ -412,10 +430,117 @@ $module_name = 'module_activity_log'; ?>
           $('.activities_today').text(response.activities_today);
           $('.last_updated').text(response.last_updated);
 
+          // Staff Contribution
+          var staffBarCtx = document.getElementById('barChartTopStaffs').getContext('2d');
+          var staffLabels = response.bar_top_staff_name;
+          var staffData = response.bar_top_staff_value;
+
+          if (window.barTopStaffsChart) {
+            barTopStaffsChart.data.labels = staffLabels;
+            barTopStaffsChart.data.datasets[0].data = staffData;
+            barTopStaffsChart.update();
+          } else {
+            window.barTopStaffsChart = new Chart(staffBarCtx, {
+              type: 'bar',
+              data: {
+                labels: staffLabels,
+                datasets: [{
+                  label: 'Total Count',
+                  data: staffData,
+                  backgroundColor: '#1E90FF',
+                  borderColor: '#1E90FF',
+                  borderWidth: 1
+                }]
+              },
+              options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    display: false
+                  }
+                },
+                scales: {
+                  x: {
+                    beginAtZero: true,
+                    title: {
+                      display: true,
+                      text: 'Total Count'
+                    }
+                  },
+                  y: {
+                    ticks: {
+                      autoSkip: false
+                    },
+                    title: {
+                      display: true,
+                      text: 'Staffs'
+                    }
+                  }
+                }
+              }
+            });
+          }
+
+          // Activity Type Breakdown
+          var lineCtx = document.getElementById('lineChartOverTime').getContext('2d');
+
+          if (lineChartOverTime) {
+            lineChartOverTime.data.labels = response.line_order_date;
+            lineChartOverTime.data.datasets[0].data = response.line_order_total;
+            lineChartOverTime.update();
+          } else {
+            lineChartOverTime = new Chart(lineCtx, {
+              type: 'line',
+              data: {
+                labels: response.line_order_date,
+                datasets: [{
+                  label: 'Total Count',
+                  data: response.line_order_total,
+                  fill: false,
+                  borderColor: 'rgba(54, 162, 235, 1)',
+                  backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                  tension: 0.3
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    display: true,
+                    position: 'bottom'
+                  },
+                  tooltip: {
+                    mode: 'index',
+                    intersect: false
+                  }
+                },
+                scales: {
+                  x: {
+                    title: {
+                      display: true,
+                      text: 'Weekly'
+                    }
+                  },
+                  y: {
+                    beginAtZero: true,
+                    title: {
+                      display: true,
+                      text: 'Total Count'
+                    }
+                  }
+                }
+              }
+            });
+          }
+
         });
       }
    });
 </script>
+<script src="<?php echo module_dir_url(PURCHASE_MODULE_NAME, 'assets/plugins/charts/chart.js'); ?>?v=<?php echo PURCHASE_REVISION; ?>"></script>
 </body>
 
 </html>
