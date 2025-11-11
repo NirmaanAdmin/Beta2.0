@@ -46,9 +46,9 @@
 										<?php foreach($vendors as $ven){ ?>
 											<option value="<?php echo pur_html_entity_decode($ven['userid']); ?>" <?php if(isset($vendor_id) && $vendor_id == $ven['userid']){ echo 'selected'; } ?>><?php echo pur_html_entity_decode($ven['vendor_code'].' '.$ven['company']); ?></option>
 										<?php } 
-										echo form_hidden('vendor',$vendor_id);
 										?>
 									</select>
+									<?php echo form_hidden('vendor',$vendor_id); ?>
 								</div>
 								<?php
 								if(!empty($pur_bill->pur_order)) { ?>
@@ -355,3 +355,44 @@
 </body>
 </html>
 <?php require 'modules/purchase/assets/js/pur_bill_js.php';?>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+function export_bill_excel(item_key) {
+    var modal = $('#bill_modal_' + item_key);
+    if (modal.length === 0) {
+        alert('Bill modal not found for item ' + item_key);
+        return;
+    }
+    var table = modal.find('.table_bill_rows').clone()[0];
+    $(table).find('th.hide, td.hide, tr.hide, [style*="display: none"]').remove();
+    $(table).find('input, textarea').each(function() {
+        var value = $(this).val();
+        var td = $(this).closest('td');
+        if (td.length) {
+            td.text(value);
+        }
+    });
+    var wb = XLSX.utils.table_to_book(table, { sheet: "Bill Data" });
+    var fileName = "bill_data.xlsx";
+    XLSX.writeFile(wb, fileName);
+}
+function export_pc_bill_excel(item_key, pc_id) {
+    var modal = $('#pc_bill_modal_' + item_key + '_' + pc_id);
+    if (modal.length === 0) {
+        alert('PC Bill modal not found for item ' + item_key + ', PC ID ' + pc_id);
+        return;
+    }
+    var table = modal.find('.table_pc_bill_rows').clone()[0];
+    $(table).find('th.hide, td.hide, tr.hide, [style*="display: none"]').remove();
+    $(table).find('input, textarea').each(function() {
+        var value = $(this).val();
+        var td = $(this).closest('td');
+        if (td.length) {
+            td.text(value);
+        }
+    });
+    var wb = XLSX.utils.table_to_book(table, { sheet: "PC Bill Data" });
+    var fileName = "pc_bill_data.xlsx";
+    XLSX.writeFile(wb, fileName);
+}
+</script>
