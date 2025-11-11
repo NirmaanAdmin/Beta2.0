@@ -24760,6 +24760,7 @@ class Purchase_model extends App_Model
         $html .= '<div class="row">';
         $html .= '<div class="col-md-12">';
 
+        $html .= '<button type="button" onclick="export_bill_excel(' . $item_key . '); return false;" class="btn btn-info">Export Excel</button>';
         // Table
         $html .= '<div class="table-responsive s_table">';
         $html .= '<table class="table items table_bill_rows">';
@@ -25498,6 +25499,7 @@ class Purchase_model extends App_Model
         $html .= '<div class="row">';
         $html .= '<div class="col-md-12">';
 
+        $html .= '<button type="button" onclick="export_pc_bill_excel('.$item_key.', '.$pc_id.'); return false;" class="btn btn-info">Export Excel</button>';
         // Table
         $html .= '<div class="table-responsive s_table">';
         $html .= '<table class="table items table_pc_bill_rows">';
@@ -25534,7 +25536,7 @@ class Purchase_model extends App_Model
             $html .= '<td class="hide">'.form_hidden('newpcbillitems['.$item_key.']['.$pc_id.']['.$value['item_id'].'][pc_id]', $pc_id).'</td>';
             $html .= '<td class="hide">'.form_hidden('newpcbillitems['.$item_key.']['.$pc_id.']['.$value['item_id'].'][item_id]', $value['item_id']).'</td>';
             $html .= '<td align="left">' . render_textarea('newpcbillitems['.$item_key.']['.$pc_id.']['.$value['item_id'].'][item_description]', '', $value['item_description'], ['rows' => 2]) . '</td>';
-            $html .= '<td align="left">'.$bill_percentage.'%</td>';
+            $html .= '<td align="left">'.$bill_percentage.'</td>';
             $html .= '<td align="left" class="hide all_pc_bill_percentage">'.form_hidden('newpcbillitems['.$item_key.']['.$pc_id.']['.$value['item_id'].'][bill_percentage]', $bill_percentage).'</td>';
             $html .= '<td align="left" class="all_pc_bill_unit_price"></td>';
             $html .= '<td align="left" class="all_pc_bill_hold">' 
