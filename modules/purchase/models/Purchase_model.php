@@ -21727,7 +21727,6 @@ class Purchase_model extends App_Model
                                 $this->db->where('item_id', $pcbvalue['item_id']);
                                 $this->db->update(db_prefix() . 'pur_pc_bills_bifurcation', [
                                     'item_description' => $pcbvalue['item_description'],
-                                    'bill_percentage' => $pcbvalue['bill_percentage'],
                                     'hold' => $pcbvalue['hold'],
                                     'billed_quantity' => $pcbvalue['billed_quantity'],
                                 ]);
@@ -21737,7 +21736,6 @@ class Purchase_model extends App_Model
                                     'item_id' => $pcbvalue['item_id'],
                                     'pc_id' => $pcbvalue['pc_id'],
                                     'item_description' => $pcbvalue['item_description'],
-                                    'bill_percentage' => $pcbvalue['bill_percentage'],
                                     'hold' => $pcbvalue['hold'],
                                     'billed_quantity' => $pcbvalue['billed_quantity'],
                                 ]);
@@ -25359,8 +25357,8 @@ class Purchase_model extends App_Model
                         </tr>';
                         $html .= '<tr class="pay_cert_value">
                           <td><b>' . _l('PC'.($pckey + 1).' Description') . '</b></td>
-                          <td><b>' . _l('PC'.($pckey + 1).' Percentage') . '</b></td>
-                          <td><b>' . _l('PC'.($pckey + 1).' Unit Price') . '</b></td>
+                          <td><b>' . _l('bill_percentage') . '</b></td>
+                          <td><b>' . _l('Bill Unit Price') . '</b></td>
                           <td><b>' . _l('PC'.($pckey + 1).' Hold %') . '</b></td>
                           <td><b>' . _l('PC'.($pckey + 1).' Qty') . '</b></td>
                           <td><b>' . _l('PC'.($pckey + 1).' Amount') . '</b></td>
@@ -25372,18 +25370,25 @@ class Purchase_model extends App_Model
                             $default_purchase_bill_rows = $pur_pc_bills_bifurcation;
                         }
                         foreach ($default_purchase_bill_rows as $gbbkey => $gbbvalue) {
+                            $bill_percentage = 0;
                             $bill_unit_price = 0;
-                            $bill_hold_percentage = $gbbvalue['bill_percentage'] - $gbbvalue['hold'];
+                            $this->db->where('bill_item_id', $pvalue['id']);
+                            $this->db->where('item_id', $gbbvalue['item_id']);
+                            $pur_bills_bifurcation = $this->db->get(db_prefix() . 'pur_bills_bifurcation')->row();
+                            if(!empty($pur_bills_bifurcation)) {
+                                $bill_percentage = $pur_bills_bifurcation->bill_percentage;
+                            }
+                            $bill_hold_percentage = $bill_percentage - $gbbvalue['hold'];
                             $billed_amount = 0;
-                            if($gbbvalue['bill_percentage'] > 0) {
-                                $bill_unit_price = ($pvalue['unit_price'] * $gbbvalue['bill_percentage']) / 100;
+                            if($bill_percentage > 0) {
+                                $bill_unit_price = ($pvalue['unit_price'] * $bill_percentage) / 100;
                             }
                             if ($bill_hold_percentage > 0) {
                                 $billed_amount = $gbbvalue['billed_quantity'] * (($pvalue['unit_price'] * $bill_hold_percentage) / 100);
                             }
                             $html .= '<tr class="pay_cert_value">
                               <td>'.pur_html_entity_decode($gbbvalue['item_description']).'</td>
-                              <td>' . $gbbvalue['bill_percentage'] . '%</td>
+                              <td>' . $bill_percentage . '%</td>
                               <td>'.app_format_money($bill_unit_price, $base_currency->symbol).'</td>
                               <td>' . $gbbvalue['hold'] . '%</td>
                               <td>' . $gbbvalue['billed_quantity'] . '</td>
@@ -25499,8 +25504,8 @@ class Purchase_model extends App_Model
         $html .= '<thead>';
         $html .= '<tr>';
         $html .= '<th align="left" width="30%">' . _l('PC'.$pc_key.' Description') . '</th>';
-        $html .= '<th align="left" width="14%">' . _l('PC'.$pc_key.' Percentage') . '</th>';
-        $html .= '<th align="left" width="14%">' . _l('PC'.$pc_key.' Unit Price') . '</th>';
+        $html .= '<th align="left" width="14%">' . _l('bill_percentage') . '</th>';
+        $html .= '<th align="left" width="14%">' . _l('Bill Unit Price') . '</th>';
         $html .= '<th align="left" width="14%">' . _l('PC'.$pc_key.' Hold %') . '</th>';
         $html .= '<th align="left" width="14%">' . _l('PC'.$pc_key.' Qty') . '</th>';
         $html .= '<th align="left" width="14%">' . _l('PC'.$pc_key.' Amount') . '</th>';
@@ -25518,13 +25523,19 @@ class Purchase_model extends App_Model
         }
         $html .= '<tbody style="border: 1px solid #ddd;">';
         foreach ($default_purchase_bill_rows as $key => $value) {
+            $bill_percentage = 0;
+            $this->db->where('bill_item_id', $bill_item_id);
+            $this->db->where('item_id', $value['item_id']);
+            $pur_bills_bifurcation = $this->db->get(db_prefix() . 'pur_bills_bifurcation')->row();
+            if(!empty($pur_bills_bifurcation)) {
+                $bill_percentage = $pur_bills_bifurcation->bill_percentage;
+            }
             $html .= '<tr class="pc_bill_items">';
             $html .= '<td class="hide">'.form_hidden('newpcbillitems['.$item_key.']['.$pc_id.']['.$value['item_id'].'][pc_id]', $pc_id).'</td>';
             $html .= '<td class="hide">'.form_hidden('newpcbillitems['.$item_key.']['.$pc_id.']['.$value['item_id'].'][item_id]', $value['item_id']).'</td>';
             $html .= '<td align="left">' . render_textarea('newpcbillitems['.$item_key.']['.$pc_id.']['.$value['item_id'].'][item_description]', '', $value['item_description'], ['rows' => 2]) . '</td>';
-            $html .= '<td align="left" class="all_pc_bill_percentage">' 
-              . render_input('newpcbillitems['.$item_key.']['.$pc_id.']['.$value['item_id'].'][bill_percentage]', '', $value['bill_percentage'], 'number', ['min' => 0, 'max' => 100, 'onblur' => 'calculate_pc_bill_bifurcation('.$item_key.', '.$unit_price.', '.$pc_id.');', 'onchange' => 'calculate_pc_bill_bifurcation('.$item_key.', '.$unit_price.', '.$pc_id.');']) 
-              . '</td>';
+            $html .= '<td align="left">'.$bill_percentage.'%</td>';
+            $html .= '<td align="left" class="hide all_pc_bill_percentage">'.form_hidden('newpcbillitems['.$item_key.']['.$pc_id.']['.$value['item_id'].'][bill_percentage]', $bill_percentage).'</td>';
             $html .= '<td align="left" class="all_pc_bill_unit_price"></td>';
             $html .= '<td align="left" class="all_pc_bill_hold">' 
               . render_input('newpcbillitems['.$item_key.']['.$pc_id.']['.$value['item_id'].'][hold]', '', $value['hold'], 'number', ['min' => 0, 'max' => 100, 'onblur' => 'calculate_pc_bill_bifurcation('.$item_key.', '.$unit_price.', '.$pc_id.');', 'onchange' => 'calculate_pc_bill_bifurcation('.$item_key.', '.$unit_price.', '.$pc_id.');']) 
