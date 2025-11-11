@@ -24761,6 +24761,14 @@ class Purchase_model extends App_Model
         $html .= '<div class="col-md-12">';
 
         $html .= '<button type="button" onclick="export_bill_excel(' . $item_key . '); return false;" class="btn btn-info">Export Excel</button>';
+        $html .= '<div class="col-md-3 pull-right">';
+        $html .= render_input('file_csv', 'choose_excel_file', '', 'file');
+        $html .= '<div class="form-group">';
+        $html .= '<button id="uploadfile" type="button" class="btn btn-info import" onclick="return upload_bulk_pur_bill(' . $item_key . ');">'
+              . _l('import') . '</button>';
+        $html .= '<a href="' . site_url('modules/purchase/uploads/file_sample/Sample_pur_bills_en.xlsx') . '" class="btn btn-primary mleft10">Template</a>';
+        $html .= '</div>';
+        $html .= '</div>';
         // Table
         $html .= '<div class="table-responsive s_table">';
         $html .= '<table class="table items table_bill_rows">';
@@ -25500,6 +25508,14 @@ class Purchase_model extends App_Model
         $html .= '<div class="col-md-12">';
 
         $html .= '<button type="button" onclick="export_pc_bill_excel('.$item_key.', '.$pc_id.'); return false;" class="btn btn-info">Export Excel</button>';
+        $html .= '<div class="col-md-3 pull-right">';
+        $html .= render_input('file_csv', 'choose_excel_file', '', 'file');
+        $html .= '<div class="form-group">';
+        $html .= '<button id="uploadfile" type="button" class="btn btn-info import" onclick="return upload_bulk_pur_pc_bill('.$item_key.', '.$pc_id.');">'
+              . _l('import') . '</button>';
+        $html .= '<a href="' . site_url('modules/purchase/uploads/file_sample/Sample_pur_bills_en.xlsx') . '" class="btn btn-primary mleft10">Template</a>';
+        $html .= '</div>';
+        $html .= '</div>';
         // Table
         $html .= '<div class="table-responsive s_table">';
         $html .= '<table class="table items table_pc_bill_rows">';

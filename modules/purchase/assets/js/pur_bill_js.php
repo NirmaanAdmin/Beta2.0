@@ -657,4 +657,95 @@
     var fileName = "pc_bill_data.xlsx";
     XLSX.writeFile(wb, fileName);
   }
+
+  function upload_bulk_pur_bill(item_key) {
+    "use strict";
+    var $modal = $('#bill_modal_' + item_key);
+    var unit_price = parseFloat($modal.attr('data-unit_price') || 0) || 0;
+    var fileInput = $modal.find('#file_csv')[0];
+    var file = fileInput?.files[0];
+    if (!file) {
+      alert("Please select a file.");
+      return;
+    }
+    var fileExtension = file.name.split('.').pop().toLowerCase();
+    if (fileExtension !== 'xlsx') {
+      alert("Please upload a valid .xlsx file.");
+      return;
+    }
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      var data = new Uint8Array(e.target.result);
+      var workbook = XLSX.read(data, { type: 'array' });
+      var firstSheetName = workbook.SheetNames[0];
+      var worksheet = workbook.Sheets[firstSheetName];
+      var jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+      if (jsonData.length === 0) {
+        alert("No data found in Excel file.");
+        return;
+      }
+      jsonData.forEach(function (row) {
+        var billId = parseInt(row["Bill Id"]);
+        if (!billId || isNaN(billId)) return;
+        var $tr = $modal.find('.table_bill_rows tbody tr').eq(billId - 1);
+        if (!$tr.length) return;
+        var $bill_percentage_input = $tr.find('input[name*="[bill_percentage]"]');
+        var $hold_input = $tr.find('input[name*="[hold]"]');
+        var $qty_input = $tr.find('input[name*="[billed_quantity]"]');
+        var bill_percentage = row["Bill Percentage"] ? parseFloat(row["Bill Percentage"]) : 0.00;
+        var hold = row["Hold %"] ? parseFloat(row["Hold %"]) : 0.00;
+        var qty = row["Qty"] ? parseFloat(row["Qty"]) : 0.00;
+        $bill_percentage_input.val(bill_percentage.toFixed(2));
+        $hold_input.val(hold.toFixed(2));
+        $qty_input.val(qty.toFixed(2));
+      });
+      calculate_bill_bifurcation(item_key, unit_price);
+      alert_float('success', "Bill data updated successfully from Excel!");
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function upload_bulk_pur_pc_bill(item_key, pc_id) {
+    "use strict";
+    var $modal = $('#pc_bill_modal_' + item_key + '_' + pc_id);
+    var unit_price = parseFloat($modal.attr('data-unit_price') || 0) || 0;
+    var fileInput = $modal.find('#file_csv')[0];
+    var file = fileInput?.files[0];
+    if (!file) {
+      alert("Please select a file.");
+      return;
+    }
+    var fileExtension = file.name.split('.').pop().toLowerCase();
+    if (fileExtension !== 'xlsx') {
+      alert("Please upload a valid .xlsx file.");
+      return;
+    }
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      var data = new Uint8Array(e.target.result);
+      var workbook = XLSX.read(data, { type: 'array' });
+      var firstSheetName = workbook.SheetNames[0];
+      var worksheet = workbook.Sheets[firstSheetName];
+      var jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+      if (jsonData.length === 0) {
+        alert("No data found in Excel file.");
+        return;
+      }
+      jsonData.forEach(function (row) {
+        var billId = parseInt(row["Bill Id"]);
+        if (!billId || isNaN(billId)) return;
+        var $tr = $modal.find('.table_pc_bill_rows tbody tr').eq(billId - 1);
+        if (!$tr.length) return;
+        var $hold_input = $tr.find('input[name*="[hold]"]');
+        var $qty_input = $tr.find('input[name*="[billed_quantity]"]');
+        var hold = row["Hold %"] ? parseFloat(row["Hold %"]) : 0.00;
+        var qty = row["Qty"] ? parseFloat(row["Qty"]) : 0.00;
+        $hold_input.val(hold.toFixed(2));
+        $qty_input.val(qty.toFixed(2));
+      });
+      calculate_pc_bill_bifurcation(item_key, unit_price, pc_id);
+      alert_float('success', "PC Bill data updated successfully from Excel!");
+    };
+    reader.readAsArrayBuffer(file);
+  }
 </script>
