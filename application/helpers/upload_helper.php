@@ -1274,6 +1274,7 @@ function handle_expense_attachments($id)
                     ];
 
                     $CI->misc_model->add_attachment_to_database($id, 'expense', $attachment);
+                    $CI->expenses_model->add_expense_receipt_activity_log($id, $filename, true);
                 }
             }
         }
@@ -1301,6 +1302,7 @@ function handle_expense_attachments($id)
                 ];
 
                 $CI->misc_model->add_attachment_to_database($id, 'expense', $attachment);
+                $CI->expenses_model->add_expense_receipt_activity_log($id, $filename, true);
             }
         }
     }

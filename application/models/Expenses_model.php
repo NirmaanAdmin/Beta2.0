@@ -167,6 +167,8 @@ class Expenses_model extends App_Model
 
             log_activity('New Expense Added [' . $insert_id . ']');
 
+            $this->add_expense_activity_log($insert_id, true);
+
             return $insert_id;
         }
 
@@ -441,6 +443,7 @@ class Expenses_model extends App_Model
      */
     public function delete($id, $simpleDelete = false)
     {
+        $this->add_expense_activity_log($id, false);
         $_expense = $this->get($id);
 
         if ($_expense->invoiceid !== null && $simpleDelete == false) {
@@ -706,6 +709,8 @@ class Expenses_model extends App_Model
             }
             log_activity('Expense Copied [ExpenseID' . $id . ', NewExpenseID: ' . $insert_id . ']');
 
+            $this->add_expense_activity_log($insert_id, true);
+
             return $insert_id;
         }
 
@@ -735,6 +740,7 @@ class Expenses_model extends App_Model
                     ->where('rel_type', 'expense')
                     ->delete(db_prefix() . 'files');
                 log_activity('Expense Receipt Deleted [ExpenseID: ' . $rel_id . ']');
+                $this->add_expense_receipt_activity_log($rel_id, $file->file_name, false);
                 if (is_dir($path) && count(scandir($path)) <= 2) {
                     rmdir($path);
                 }
@@ -1265,5 +1271,75 @@ class Expenses_model extends App_Model
         $this->db->where('rel_type', 'expense');
         $file = $this->db->get(db_prefix() . 'files')->result_array();
         return $file;
+    }
+
+    public function add_expense_activity_log($id, $is_create = true)
+    {
+        $CI = &get_instance();
+        $default_project = get_default_project();
+        if(!empty($id)) {
+            $CI->db->where('id', $id);
+            $expenses = $CI->db->get(db_prefix() . 'expenses')->row();
+            if(!empty($expenses)) {
+                $is_create_value = $is_create ? 'created' : 'deleted';
+                $description = "Expense <b>".$expenses->expense_name."</b> has been ".$is_create_value.".";
+                $CI->db->insert(db_prefix() . 'module_activity_log', [
+                    'module_name' => 'ex',
+                    'rel_id' => $id,
+                    'description' => $description,
+                    'date' => date('Y-m-d H:i:s'),
+                    'staffid' => get_staff_user_id(),
+                    'project_id' => $default_project
+                ]);
+            }
+        }
+        return true;
+    }
+
+    public function add_expense_receipt_activity_log($id, $file_name, $is_create = true)
+    {
+        $CI = &get_instance();
+        $default_project = get_default_project();
+        if(!empty($id)) {
+            $CI->db->where('id', $id);
+            $expenses = $CI->db->get(db_prefix() . 'expenses')->row();
+            if(!empty($expenses)) {
+                $is_create_value = $is_create ? 'added' : 'removed';
+                $description = "Expense Receipt <b>".$file_name."</b> has been ".$is_create_value." for expense <b>".$expenses->expense_name."</b>.";
+                $CI->db->insert(db_prefix() . 'module_activity_log', [
+                    'module_name' => 'ex',
+                    'rel_id' => $id,
+                    'description' => $description,
+                    'date' => date('Y-m-d H:i:s'),
+                    'staffid' => get_staff_user_id(),
+                    'project_id' => $default_project
+                ]);
+            }
+        }
+        return true;
+    }
+
+    public function add_expense_to_vbt_activity_log($id)
+    {
+        $CI = &get_instance();
+        $default_project = get_default_project();
+        if(!empty($id)) {
+            $CI->db->where('id', $id);
+            $expenses = $CI->db->get(db_prefix() . 'expenses')->row();
+            $CI->db->where('id', $expenses->vbt_id);
+            $pur_invoices = $CI->db->get(db_prefix() . 'pur_invoices')->row();
+            if(!empty($expenses) && !empty($pur_invoices)) {
+                $description = "Expense <b>".$expenses->expense_name."</b> has been converted to vendor bill <b>".$pur_invoices->invoice_number."</b>.";
+                $CI->db->insert(db_prefix() . 'module_activity_log', [
+                    'module_name' => 'ex',
+                    'rel_id' => $id,
+                    'description' => $description,
+                    'date' => date('Y-m-d H:i:s'),
+                    'staffid' => get_staff_user_id(),
+                    'project_id' => $default_project
+                ]);
+            }
+        }
+        return true;
     }
 }

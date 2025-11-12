@@ -615,6 +615,7 @@ class Expenses extends AdminController
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'expenses', ['vbt_id' => $insert_id]);
         $this->expenses_model->copy_expense_files_to_vbt($id, $insert_id);
+        $this->expenses_model->add_expense_to_vbt_activity_log($id);
         add_vbt_activity_log($insert_id, ' by expense');
 
         if ($rtype == 0) {
