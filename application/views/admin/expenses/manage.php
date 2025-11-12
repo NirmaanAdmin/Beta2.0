@@ -21,6 +21,7 @@
                 <?php echo _l('import_expenses'); ?>
               </a>
             <?php } ?>
+            <a href="<?php echo admin_url('purchase/activity_log?module=ex'); ?>" class="btn btn-primary mleft5" target="_blank"><?php echo _l('activity_log'); ?></a>
             <button class="btn btn-primary mleft5" type="button" data-toggle="collapse" data-target="#ex-charts-section" aria-expanded="true" aria-controls="ex-charts-section">
               <?php echo _l('Expenses Charts'); ?> <i class="fa fa-chevron-down toggle-icon"></i>
             </button>
