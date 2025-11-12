@@ -1275,15 +1275,14 @@ class Expenses_model extends App_Model
 
     public function add_expense_activity_log($id, $is_create = true)
     {
-        $CI = &get_instance();
         $default_project = get_default_project();
         if(!empty($id)) {
-            $CI->db->where('id', $id);
-            $expenses = $CI->db->get(db_prefix() . 'expenses')->row();
+            $this->db->where('id', $id);
+            $expenses = $this->db->get(db_prefix() . 'expenses')->row();
             if(!empty($expenses)) {
                 $is_create_value = $is_create ? 'created' : 'deleted';
                 $description = "Expense <b>".$expenses->expense_name."</b> has been ".$is_create_value.".";
-                $CI->db->insert(db_prefix() . 'module_activity_log', [
+                $this->db->insert(db_prefix() . 'module_activity_log', [
                     'module_name' => 'ex',
                     'rel_id' => $id,
                     'description' => $description,
@@ -1298,15 +1297,14 @@ class Expenses_model extends App_Model
 
     public function add_expense_receipt_activity_log($id, $file_name, $is_create = true)
     {
-        $CI = &get_instance();
         $default_project = get_default_project();
         if(!empty($id)) {
-            $CI->db->where('id', $id);
-            $expenses = $CI->db->get(db_prefix() . 'expenses')->row();
+            $this->db->where('id', $id);
+            $expenses = $this->db->get(db_prefix() . 'expenses')->row();
             if(!empty($expenses)) {
                 $is_create_value = $is_create ? 'added' : 'removed';
                 $description = "Expense Receipt <b>".$file_name."</b> has been ".$is_create_value." for expense <b>".$expenses->expense_name."</b>.";
-                $CI->db->insert(db_prefix() . 'module_activity_log', [
+                $this->db->insert(db_prefix() . 'module_activity_log', [
                     'module_name' => 'ex',
                     'rel_id' => $id,
                     'description' => $description,
@@ -1321,16 +1319,15 @@ class Expenses_model extends App_Model
 
     public function add_expense_to_vbt_activity_log($id)
     {
-        $CI = &get_instance();
         $default_project = get_default_project();
         if(!empty($id)) {
-            $CI->db->where('id', $id);
-            $expenses = $CI->db->get(db_prefix() . 'expenses')->row();
-            $CI->db->where('id', $expenses->vbt_id);
-            $pur_invoices = $CI->db->get(db_prefix() . 'pur_invoices')->row();
+            $this->db->where('id', $id);
+            $expenses = $this->db->get(db_prefix() . 'expenses')->row();
+            $this->db->where('id', $expenses->vbt_id);
+            $pur_invoices = $this->db->get(db_prefix() . 'pur_invoices')->row();
             if(!empty($expenses) && !empty($pur_invoices)) {
                 $description = "Expense <b>".$expenses->expense_name."</b> has been converted to vendor bill <b>".$pur_invoices->invoice_number."</b>.";
-                $CI->db->insert(db_prefix() . 'module_activity_log', [
+                $this->db->insert(db_prefix() . 'module_activity_log', [
                     'module_name' => 'ex',
                     'rel_id' => $id,
                     'description' => $description,
