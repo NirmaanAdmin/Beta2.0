@@ -413,6 +413,7 @@ class Expenses_model extends App_Model
             $updated = true;
         }
 
+        $this->update_all_expense_fields_activity_log($data, $id);
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'expenses', $data);
 
@@ -1327,6 +1328,118 @@ class Expenses_model extends App_Model
             $pur_invoices = $this->db->get(db_prefix() . 'pur_invoices')->row();
             if(!empty($expenses) && !empty($pur_invoices)) {
                 $description = "Expense <b>".$expenses->expense_name."</b> has been converted to vendor bill <b>".$pur_invoices->invoice_number."</b>.";
+                $this->db->insert(db_prefix() . 'module_activity_log', [
+                    'module_name' => 'ex',
+                    'rel_id' => $id,
+                    'description' => $description,
+                    'date' => date('Y-m-d H:i:s'),
+                    'staffid' => get_staff_user_id(),
+                    'project_id' => $default_project
+                ]);
+            }
+        }
+        return true;
+    }
+
+    public function update_all_expense_fields_activity_log($new_data, $id)
+    {
+        $this->load->model('taxes_model');
+        $this->load->model('payment_modes_model');
+        $this->load->model('currencies_model');
+        $base_currency = $this->currencies_model->get_base_currency();
+        $old_data = array();
+        $expenses = $this->db->where('id', $id)
+            ->get(db_prefix() . 'expenses')
+            ->row();
+        if (!$expenses) {
+            return false;
+        }
+        $old_data = (array) $expenses;
+        $normalize = function ($value) {
+            $value = trim((string)$value);
+            if (in_array(strtolower($value), ['null', 'none', 'nil', 'n/a', '-', '--'])) {
+                return '';
+            }
+            if ($value === '0000-00-00') {
+                return '';
+            }
+            if (is_numeric($value)) {
+                $num = (float)$value;
+                return ($num == 0.0) ? '' : $num;
+            }
+            return strtolower($value);
+        };
+        $norm_old = array_map($normalize, $old_data);
+        $norm_new = array_map($normalize, $new_data);
+        $changes = array_diff_assoc($norm_new, $norm_old);
+        if (empty($changes)) {
+            return true;
+        }
+        $field_map = [
+            'vendor' => _l('Vendors'),
+            'expense_name' => _l('dt_expense_description'),
+            'note' => _l('reason_for_expense'),
+            'category' => _l('expense_category'),
+            'date' => _l('expense_add_edit_date'),
+            'amount' => _l('expense_add_edit_amount'),
+            'clientid' => _l('expense_add_edit_customer'),
+            'tax' => _l('tax_1'),
+            'tax2' => _l('tax_2'),
+            'paymentmode' => _l('payment_mode'),
+            'reference_no' => _l('expense_add_edit_reference_no'),
+        ];
+        foreach ($changes as $field => $dummy) {
+            if (!isset($field_map[$field])) {
+                continue;
+            }
+            $old_value = $old_data[$field] ?? '';
+            $new_value = $new_data[$field] ?? '';
+            if ($field === 'vendor') {
+                $old_value = !empty($old_value) ? get_vendor_company_name($old_value) : '';
+                $new_value = !empty($new_value) ? get_vendor_company_name($new_value) : '';
+            }
+            if ($field === 'category') {
+                $category_list = $this->get_category();
+                $opts = array_column($category_list, 'name', 'id');
+                $old_value = $opts[$old_value] ?? '';
+                $new_value = $opts[$new_value] ?? '';
+            }
+            if ($field === 'amount') {
+                $old_value = app_format_money($old_value, $base_currency->symbol);
+                $new_value = app_format_money($new_value, $base_currency->symbol);
+            }
+            if ($field === 'clientid') {
+                $old_value = !empty($old_value) ? get_company_name($old_value) : '';
+                $new_value = !empty($new_value) ? get_company_name($new_value) : '';
+            }
+            if ($field === 'tax' || $field === 'tax2') {
+                $taxes = $this->taxes_model->get();
+                $opts = array_column($taxes, 'name', 'id');
+                $old_value = $opts[$old_value] ?? '';
+                $new_value = $opts[$new_value] ?? '';
+            }
+            if ($field === 'paymentmode') {
+                $payment_modes = $this->payment_modes_model->get('', [
+                    'invoices_only !=' => 1,
+                ]);
+                $opts = array_column($payment_modes, 'name', 'id');
+                $old_value = $opts[$old_value] ?? '';
+                $new_value = $opts[$new_value] ?? '';
+            }
+            $this->update_expense_activity_log($id, $field_map[$field], $old_value, $new_value);
+        }
+    }
+
+    public function update_expense_activity_log($id, $field, $old_value, $new_value)
+    {
+        $default_project = get_default_project();
+        if(!empty($id)) {
+            $this->db->where('id', $id);
+            $expenses = $this->db->get(db_prefix() . 'expenses')->row();
+            if(!empty($expenses)) {
+                $old_value = !empty($old_value) ? $old_value : 'None';
+                $new_value = !empty($new_value) ? $new_value : 'None';
+                $description = "".$field." field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in expense <b>".$expenses->expense_name."</b>.";
                 $this->db->insert(db_prefix() . 'module_activity_log', [
                     'module_name' => 'ex',
                     'rel_id' => $id,
