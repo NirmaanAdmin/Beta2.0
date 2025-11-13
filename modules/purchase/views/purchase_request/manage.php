@@ -27,12 +27,15 @@ $module_name = 'purchase_request';
               </div>
             </div>
             <div class="row">
-              <div class="_buttons col-md-2">
+              <div class="_buttons col-md-12">
                 <?php if (has_permission('purchase_request', '', 'create') || is_admin()) { ?>
                   <a href="<?php echo admin_url('purchase/pur_request'); ?>" class="btn btn-info pull-left mright10 display-block">
                     <?php echo _l('new_pur_request'); ?>
                   </a>
                 <?php } ?>
+                <a href="<?php echo admin_url('purchase/activity_log?module=pr'); ?>" class="btn btn-info pull-left display-block" target="_blank">
+                <?php echo _l('activity_log'); ?>
+                </a>
                 <button class="btn btn-info pull-left mleft10 display-block" type="button" data-toggle="collapse" data-target="#pr-charts-section" aria-expanded="true"aria-controls="pr-charts-section">
                 <?php echo _l('PR Charts'); ?> <i class="fa fa-chevron-down toggle-icon"></i>
                 </button>

@@ -5783,6 +5783,19 @@ function add_order_status_activity_log($id)
                 $module_name = 'wo';
                 $rel_id = $wo_orders->id;
             }
+            if($pur_approval_details->rel_type == 'pur_request') {
+                $CI->db->where('id', $pur_approval_details->rel_id);
+                $pur_request = $CI->db->get(db_prefix() . 'pur_request')->row();
+                if(empty($pur_approval_details->approve)) {
+                    $description = "An approval request has been created for purchase request <b>".$pur_request->pur_rq_code."</b> by <b>".get_last_action_full_name($pur_approval_details->sender)."</b>.";
+                } else if($pur_approval_details->approve == 2) {
+                    $description = "Purchase request <b>".$pur_request->pur_rq_code."</b> has been approved by <b>".get_last_action_full_name($pur_approval_details->staff_approve)."</b>.";
+                } else if($pur_approval_details->approve == 3) {
+                    $description = "Purchase request <b>".$pur_request->pur_rq_code."</b> has been rejected by <b>".get_last_action_full_name($pur_approval_details->staff_approve)."</b>.";
+                }
+                $module_name = 'pr';
+                $rel_id = $pur_request->id;
+            }
             if(!empty($description)) {
                 $CI->db->insert(db_prefix() . 'module_activity_log', [
                     'module_name' => $module_name,
@@ -6390,6 +6403,52 @@ function update_order_item_activity_log($new_data, $rel_type)
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => $module_name,
                 'rel_id' => $rel_id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
+
+function add_pr_activity_log($id, $is_create = true)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $pur_request = $CI->db->get(db_prefix() . 'pur_request')->row();
+        if(!empty($pur_request)) {
+            $is_create_value = $is_create ? 'created' : 'deleted';
+            $description = "Purchase request <b>".$pur_request->pur_rq_code."</b> has been ".$is_create_value.".";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'pr',
+                'rel_id' => $id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
+
+function add_pr_attachment_activity_log($id, $file_name, $is_create = true)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $pur_request = $CI->db->get(db_prefix() . 'pur_request')->row();
+        if(!empty($pur_request)) {
+            $is_create_value = $is_create ? 'added' : 'removed';
+            $description = "Attachment <b>".$file_name."</b> has been ".$is_create_value." for purchase request <b>".$pur_request->pur_rq_code."</b>.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'pr',
+                'rel_id' => $id,
                 'description' => $description,
                 'date' => date('Y-m-d H:i:s'),
                 'staffid' => get_staff_user_id(),

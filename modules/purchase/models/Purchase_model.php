@@ -1452,6 +1452,7 @@ class Purchase_model extends App_Model
                 }
             }
             $this->log_pr_activity($insert_id, 'pr_activity_created');
+            add_pr_activity_log($insert_id, true);
             return $insert_id;
         }
         return false;
@@ -1699,6 +1700,7 @@ class Purchase_model extends App_Model
      */
     public function delete_pur_request($id)
     {
+        add_pr_activity_log($id, false);
         $affectedRows = 0;
         $this->db->where('id', $id);
         $this->db->delete(db_prefix() . 'pur_request');
@@ -1796,8 +1798,11 @@ class Purchase_model extends App_Model
                 $row['date_send'] = date('Y-m-d H:i:s');
                 $row['rel_id'] = $id;
                 $row['rel_type'] = 'pur_request';
+                $row['staff_approve'] = get_staff_user_id();
                 $row['approve_by_admin'] = 1;
                 $this->db->insert('tblpur_approval_details', $row);
+                $pur_approval_details_id = $this->db->insert_id();
+                add_order_status_activity_log($pur_approval_details_id);
             }
             return true;
         }
@@ -15804,6 +15809,9 @@ class Purchase_model extends App_Model
                 if($related == 'wo_order') {
                     add_wo_attachment_activity_log($id, $file['file_name'], true);
                 }
+                if($related == 'pur_request') {
+                    add_pr_attachment_activity_log($id, $file['file_name'], true);
+                }
             }
         }
         return true;
@@ -15844,6 +15852,9 @@ class Purchase_model extends App_Model
             }
             if($attachment->rel_type == 'wo_order') {
                 add_wo_attachment_activity_log($attachment->rel_id, $attachment->file_name, false);
+            }
+            if($attachment->rel_type == 'pur_request') {
+                add_pr_attachment_activity_log($attachment->rel_id, $attachment->file_name, false);
             }
         }
 
