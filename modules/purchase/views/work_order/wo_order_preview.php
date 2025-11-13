@@ -551,11 +551,7 @@ if ($estimate->currency != 0) {
                                     foreach ($estimate_detail as $es) { ?>
                                        <tr nobr="true" class="sortable">
                                           <td align="center">
-                                             <?php if (!empty($es['serial_no'])) {
-                                                echo $es['serial_no'];
-                                             } else {
-                                                echo pur_html_entity_decode($count);
-                                             } ?>
+                                             <?php echo pur_html_entity_decode($count); ?>
                                           </td>
                                           <td class="description" align="left">
                                              <div style="width: 250px">
