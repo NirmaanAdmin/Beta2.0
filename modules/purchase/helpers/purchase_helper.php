@@ -6307,6 +6307,15 @@ function update_order_item_activity_log($new_data, $rel_type)
         }
         $old_data = (array) $wo_order_detail;
     }
+    if($rel_type == 'pur_request') {
+        $pur_request_detail = $CI->db->where('prd_id', $new_data['id'])
+            ->get(db_prefix() . 'pur_request_detail')
+            ->row();
+        if (!$pur_request_detail) {
+            return false;
+        }
+        $old_data = (array) $pur_request_detail;
+    }
     if (isset($old_data['area'])) {
         $areaArray = is_array($old_data['area']) ? $old_data['area'] : explode(',', $old_data['area']);
         $areaArray = array_map('trim', $areaArray);
@@ -6367,13 +6376,27 @@ function update_order_item_activity_log($new_data, $rel_type)
         'total' => _l('pur_subtotal_after_tax'),
         'total_money' => _l('total'),
     ];
+    if($rel_type == 'pur_request') {
+        $field_map = [
+            'item_code' => _l('Uniclass Code'),
+            'description' => _l('description'),
+            'area' => _l('area'),
+            'quantity' => _l('purchase_quantity'),
+            'unit_name' => _l('pur_unit'),
+            'unit_price' => _l('unit_price'),
+            'into_money' => _l('subtotal'),
+            'tax_select' => _l('debit_note_table_tax_heading'),
+            'tax_value' => _l('tax_value'),
+            'total' => _l('debit_note_total'),
+        ];
+    }
     foreach ($changes as $field => $dummy) {
         if (!isset($field_map[$field])) {
             continue;
         }
         $old_value = $old_data[$field] ?? '';
         $new_value = $new_data[$field] ?? '';
-        if ($field === 'item_name') {
+        if ($field === 'item_name' || $field === 'item_code') {
             $old_value = !empty($old_value) ? pur_get_item_variatiom($old_value) : '';
             $new_value = !empty($new_value) ? pur_get_item_variatiom($new_value) : '';
         }
@@ -6389,7 +6412,7 @@ function update_order_item_activity_log($new_data, $rel_type)
             $old_value = !empty($old_value) ? pur_get_unit_name($old_value) : '';
             $new_value = !empty($new_value) ? pur_get_unit_name($new_value) : '';
         }
-        if ($field === 'unit_price' || $field === 'total' || $field === 'total_money') {
+        if ($field === 'unit_price' || $field === 'total' || $field === 'total_money' || $field === 'tax_value' || $field === 'into_money') {
             $old_value = app_format_money($old_value, $base_currency->symbol);
             $new_value = app_format_money($new_value, $base_currency->symbol);
         }
@@ -6413,6 +6436,15 @@ function update_order_item_activity_log($new_data, $rel_type)
             $description = "".$field_map[$field]." field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> for item <b>".$items->commodity_code." ".$items->description."</b> in work order <b>".$wo_orders->wo_order_number." - ".$wo_orders->wo_order_name."</b>.";
             $module_name = 'wo';
             $rel_id = $wo_orders->id;
+        }
+        if($rel_type == 'pur_request') {
+            $CI->db->where('id', $old_data['pur_request']);
+            $pur_request = $CI->db->get(db_prefix() . 'pur_request')->row();
+            $CI->db->where('id', $new_data['item_code']);
+            $items = $CI->db->get(db_prefix() . 'items')->row();
+            $description = "".$field_map[$field]." field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> for item <b>".$items->commodity_code." ".$items->description."</b> in purchase request <b>".$pur_request->pur_rq_code."</b>.";
+            $module_name = 'pr';
+            $rel_id = $pur_request->id;
         }
         if(!empty($description)) {
             $CI->db->insert(db_prefix() . 'module_activity_log', [

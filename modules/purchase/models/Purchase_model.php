@@ -1607,6 +1607,7 @@ class Purchase_model extends App_Model
         }
         if (count($update_purchase_request) > 0) {
             foreach ($update_purchase_request as $_key => $rqd) {
+                update_order_item_activity_log($rqd, 'pur_request');
                 $dt_data = [];
                 $dt_data['pur_request'] = $id;
                 $dt_data['item_code'] = $rqd['item_text'];
