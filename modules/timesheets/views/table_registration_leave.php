@@ -246,7 +246,12 @@ foreach ($rResult as $aRow) {
 	} else {
 		$row[] = '<span class="label label-danger  mr-1 mb-1 mt-1">' . _l('Reject') . '</span>';
 	}
-	$row[] = get_staff_all_leaves($aRow[db_prefix() . 'timesheets_requisition_leave.staff_id']);
+	$staff_id = $aRow[db_prefix() . 'timesheets_requisition_leave.staff_id'];
+	$row[] = '
+    <button type="button" class="btn btn-default btn-icon" onclick="openStaffLeavesModal(' . $staff_id . ')" data-toggle="tooltip" data-title="' . _l('view_leaves') . '">
+        <i class="fa fa-eye"></i>
+    </button>
+';
 	$row[] = _d(date('Y-m-d', strtotime($aRow[db_prefix() . 'timesheets_requisition_leave.datecreated'])));
 	$flag = 0;
 	$action_option = '<div class="row">';

@@ -381,7 +381,7 @@ $valid_cur_date = $this->timesheets_model->get_next_shift_date(get_staff_user_id
                                     <input type="number" id="number_of_leaving_day" name="number_of_leaving_day" class="form-control" step="0.5" value="<?php echo html_entity_decode($value_number_day); ?>" aria-invalid="false">
                                   </div>
                                 </div>
-                                <div  class="col-md-12 mtop10">
+                                <div class="col-md-12 mtop10">
                                   <lable class="control-label"> Number of Holidays: <span id="holidayCount">0</span></lable>
                                 </div>
                                 <div class="col-md-12 mtop10" id="number_days_off_new">
@@ -604,6 +604,28 @@ $valid_cur_date = $this->timesheets_model->get_next_shift_date(get_staff_user_id
         <button type="submit" class="btn btn-primary" id="saveEditLeave">Update</button>
       </div>
       <?php echo form_close(); ?>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="staffLeavesModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title"><?php echo _l('staff_leaves_balance'); ?></h4>
+      </div>
+      <div class="modal-body">
+        <div class="text-center">
+          <i class="fa fa-spinner fa-spin fa-2x"></i>
+          <br>
+          <!-- <span>' . _l('please_wait') . '</span> -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo _l('close'); ?></button>
+      </div>
     </div>
   </div>
 </div>

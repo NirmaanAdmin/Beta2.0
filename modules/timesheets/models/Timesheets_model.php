@@ -9186,4 +9186,44 @@ class timesheets_model extends app_model
 
 		return (int) $this->db->count_all_results();
 	}
+
+	public function get_staff_leave_balance($staff_id, $year = null) {
+    if ($year === null) {
+        $year = date('Y');
+    }
+    
+    $this->db->where('staffid', $staff_id);
+    $this->db->where('year', $year);
+    $this->db->order_by('type_of_leave', 'ASC');
+    $leaves = $this->db->get(db_prefix() . 'timesheets_day_off')->result_array();
+    
+    // Map leave type slugs to human-readable names
+    $leave_types = [
+        '1' => 'Sick Leave',
+        '8' => 'Annual Leave',
+        'casual-leave-cl' => 'Casual Leave',
+        'joining-shifting-leave' => 'Joining/Shifting Leave',
+        'marriage-leave' => 'Marriage Leave',
+        'maternity-leave' => 'Maternity Leave',
+        'menstrual-leave' => 'Menstrual Leave',
+        'paternity-leave' => 'Paternity Leave'
+    ];
+    
+    $formatted_leaves = [];
+    foreach ($leaves as $leave) {
+        $type_name = isset($leave_types[$leave['type_of_leave']]) ? 
+                    $leave_types[$leave['type_of_leave']] : 
+                    ucfirst(str_replace('-', ' ', $leave['type_of_leave']));
+        
+        $formatted_leaves[] = [
+            'type_name' => $type_name,
+            'total' => $leave['total'],
+            'remain' => $leave['remain'],
+            'accumulated' => $leave['accumulated'],
+            'days_off' => $leave['days_off']
+        ];
+    }
+    
+    return $formatted_leaves;
+}
 }

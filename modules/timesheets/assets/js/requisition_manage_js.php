@@ -594,7 +594,8 @@
             $('#comfoff').removeClass('hide');
           } else {
             $('#requisition-form .btn-submit').removeAttr('disabled');
-            $('#comfoff').addClass('hide');          }
+            $('#comfoff').addClass('hide');
+          }
         }
       }
     });
@@ -1109,6 +1110,20 @@
       },
       error: function(xhr, status, error) {
         console.log('AJAX error: ' + error);
+      }
+    });
+  }
+
+  function openStaffLeavesModal(staffId) {
+    $.ajax({
+      url: admin_url + 'timesheets/get_staff_leaves_balance/' + staffId,
+      type: 'GET',
+      success: function(response) {
+        $('#staffLeavesModal .modal-body').html(response);
+        $('#staffLeavesModal').modal('show');
+      },
+      error: function(error) {
+        alert_float('danger', 'Failed to load leaves data');
       }
     });
   }

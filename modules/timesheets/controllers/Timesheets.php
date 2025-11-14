@@ -8265,4 +8265,18 @@ class timesheets extends AdminController
 			'holiday_count' => $holiday_count
 		]);
 	}
+
+	public function get_staff_leaves_balance($staff_id)
+	{
+		$this->load->model('timesheets_model');
+
+		// Get all leave types for the staff member
+		$data['staff_leaves'] = $this->timesheets_model->get_staff_leave_balance($staff_id);
+		$data['staff_name'] = get_staff_full_name($staff_id);
+		$data['staff_id'] = $staff_id;
+
+		// $this->load->view('admin/timesheets/staff_leaves_balance_modal', $data);
+
+		$this->load->view('timesheets/staff_leaves_balance_modal', $data);
+	}
 }
