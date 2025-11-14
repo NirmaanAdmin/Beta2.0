@@ -6253,6 +6253,21 @@ function add_order_item_activity_log($id, $rel_type, $is_create = true)
                 }
             }
         }
+        if($rel_type == 'pur_request') {
+            $CI->db->where('prd_id', $id);
+            $pur_request_detail = $CI->db->get(db_prefix() . 'pur_request_detail')->row();
+            if(!empty($pur_request_detail)) {
+                $CI->db->where('id', $pur_request_detail->pur_request);
+                $pur_request = $CI->db->get(db_prefix() . 'pur_request')->row();
+                $CI->db->where('id', $pur_request_detail->item_code);
+                $items = $CI->db->get(db_prefix() . 'items')->row();
+                if(!empty($items)) {
+                    $description = "Item <b>".$items->commodity_code." ".$items->description."</b> has been ".$is_create_value." for purchase request <b>".$pur_request->pur_rq_code."</b>.";
+                    $module_name = 'pr';
+                    $rel_id = $pur_request->id;
+                }
+            }
+        }
         if(!empty($description)) {
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => $module_name,
@@ -6449,6 +6464,122 @@ function add_pr_attachment_activity_log($id, $file_name, $is_create = true)
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'pr',
                 'rel_id' => $id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
+
+function update_all_pr_fields_activity_log($id, $new_data)
+{
+    $CI = &get_instance();
+    $CI->load->model('staff_model');
+    $CI->load->model('departments_model');
+    $base_currency = $CI->currencies_model->get_base_currency();
+    if (empty($id)) {
+        return false;
+    }
+    $pur_request = $CI->db->where('id', $id)
+        ->get(db_prefix() . 'pur_request')
+        ->row();
+    if (!$pur_request) {
+        return false;
+    }
+    $old_data = (array)$pur_request;
+    $normalize = function ($value) {
+        $value = trim((string)$value);
+        if (in_array(strtolower($value), ['null', 'none', 'nil', 'n/a', '-', '--'])) {
+            return '';
+        }
+        if ($value === '0000-00-00') {
+            return '';
+        }
+        if (is_numeric($value)) {
+            $num = (float)$value;
+            return ($num == 0.0) ? '' : $num;
+        }
+        return strtolower($value);
+    };
+    $norm_old = array_map($normalize, $old_data);
+    $norm_new = array_map($normalize, $new_data);
+    $changes = array_diff_assoc($norm_new, $norm_old);
+    if (empty($changes)) {
+        return true;
+    }
+    $field_map = [
+        'pur_rq_name' => _l('pur_rq_name'),
+        'type' => _l('type'),
+        'department' => _l('department'),
+        'requester' => _l('requester'),
+        'send_to_vendors' => _l('pur_send_to_vendors'),
+        'group_pur' => _l('Budget Head'),
+        'sub_groups_pur' => _l('Budget Sub Head'),
+        'rq_description' => _l('rq_description'),
+    ];
+    foreach ($changes as $field => $dummy) {
+        if (!isset($field_map[$field])) {
+            continue;
+        }
+        $old_value = $old_data[$field] ?? '';
+        $new_value = $new_data[$field] ?? '';
+        if ($field === 'type') {
+            $opts = [
+                'capex' => _l('capex'),
+                'opex' => _l('opex'),
+            ];
+            $old_value = $opts[$old_value] ?? '';
+            $new_value = $opts[$new_value] ?? '';
+        }
+        if ($field === 'department') {
+            $departments_list = $CI->departments_model->get();
+            $opts = array_column($departments_list, 'name', 'departmentid');
+            $old_value = $opts[$old_value] ?? '';
+            $new_value = $opts[$new_value] ?? '';
+        }
+        if ($field === 'requester') {
+            $staff_list = $CI->staff_model->get('', ['active' => 1]);
+            $opts = array_combine(
+                array_column($staff_list, 'staffid'),
+                array_map(fn($a) => $a['lastname'] . ' ' . $a['firstname'], $staff_list)
+            );
+            $old_value = $opts[$old_value] ?? '';
+            $new_value = $opts[$new_value] ?? '';
+        }
+        if ($field === 'send_to_vendors') {
+            $old_value = !empty($old_value) ? get_pur_send_to_vendors_list($old_value) : '';
+            $new_value = !empty($new_value) ? get_pur_send_to_vendors_list($new_value) : '';
+        }
+        if ($field === 'group_pur') {
+            $old_value = !empty($old_value) ? get_group_name_by_id($old_value) : '';
+            $new_value = !empty($new_value) ? get_group_name_by_id($new_value) : '';
+        }
+        if ($field === 'sub_groups_pur') {
+            $old_value = !empty($old_value) ? get_sub_head_name_by_id($old_value) : '';
+            $new_value = !empty($new_value) ? get_sub_head_name_by_id($new_value) : '';
+        }
+        update_pr_activity_log($id, $field_map[$field], $old_value, $new_value);
+    }
+    return true;
+}
+
+function update_pr_activity_log($id, $field, $old_value, $new_value)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $pur_request = $CI->db->get(db_prefix() . 'pur_request')->row();
+        if(!empty($pur_request)) {
+            $old_value = !empty($old_value) ? $old_value : 'None';
+            $new_value = !empty($new_value) ? $new_value : 'None';
+            $description = "".$field." field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in purchase request <b>".$pur_request->pur_rq_code."</b>.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'pr',
+                'rel_id' => $pur_request->id,
                 'description' => $description,
                 'date' => date('Y-m-d H:i:s'),
                 'staffid' => get_staff_user_id(),

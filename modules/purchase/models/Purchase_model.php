@@ -1528,7 +1528,7 @@ class Purchase_model extends App_Model
         }
 
 
-
+        update_all_pr_fields_activity_log($id, $data);
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'pur_request', $data);
         $this->save_purchase_files('pur_request', $id);
@@ -1584,7 +1584,9 @@ class Purchase_model extends App_Model
                     }
                 }
 
-                $_new_detail_id = $this->db->insert(db_prefix() . 'pur_request_detail', $dt_data);
+                $this->db->insert(db_prefix() . 'pur_request_detail', $dt_data);
+                $_new_detail_id = $this->db->insert_id();
+                add_order_item_activity_log($_new_detail_id, 'pur_request', true);
                 if ($_new_detail_id) {
                     $affectedRows++;
                     $this->log_pr_activity($id, 'purchase_request_activity_added_item', false, serialize([
@@ -1670,6 +1672,7 @@ class Purchase_model extends App_Model
 
         if (count($remove_purchase_request) > 0) {
             foreach ($remove_purchase_request as $remove_id) {
+                add_order_item_activity_log($remove_id, 'pur_request', false);
                 $this->db->where('prd_id', $remove_id);
                 $pur_request_id = $this->db->get(db_prefix() . 'pur_request_detail')->row();
                 $item_detail = $this->get_items_by_id($pur_request_id->item_code);
