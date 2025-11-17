@@ -1772,7 +1772,16 @@ class Tickets_model extends App_Model
         $this->db->where('parent_id', 0);
         $dms_items = $this->db->get(db_prefix() . 'dms_items')->row();
         if(!empty($dms_items)) {
-            $this->db->select('id, name');
+            $this->db->select("
+                id,
+                CASE 
+                    WHEN document_number IS NOT NULL 
+                        AND document_number != '' 
+                        AND (orginal_filename IS NULL OR orginal_filename = '') 
+                    THEN CONCAT(document_number, '-', name)
+                    ELSE name
+                END AS name
+            ");
             $this->db->where('master_id', $dms_items->id);
             $this->db->where('filetype !=', 'folder');
             $this->db->order_by('id', 'asc');
