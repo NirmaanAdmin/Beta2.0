@@ -160,6 +160,10 @@ function get_available_staff_permissions($data = [])
                 'edit' => _l('permission_edit'),
             ],
         ],
+        'rfi_tracker' => [
+            'name'         => _l('RFI Tracker'),
+            'capabilities' => $withoutViewOwnPermissionsArray,
+        ],
     ];
 
     $addLeadsPermission = true;

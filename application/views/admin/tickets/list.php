@@ -6,11 +6,14 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="_buttons tw-mb-2 sm:tw-mb-4">
-                    <a href="<?php echo admin_url('tickets/add'); ?>"
-                        class="btn btn-primary pull-left display-block mright5">
-                        <i class="fa-regular fa-plus tw-mr-1"></i>
-                        <?php echo _l('new_ticket'); ?>
-                    </a>
+                    <?php
+                    if (staff_can('create',  'rfi_tracker')) { ?>
+                        <a href="<?php echo admin_url('tickets/add'); ?>"
+                            class="btn btn-primary pull-left display-block mright5">
+                            <i class="fa-regular fa-plus tw-mr-1"></i>
+                            <?php echo _l('new_ticket'); ?>
+                        </a>
+                    <?php } ?>
 
                     <a href="#" class="btn btn-default btn-with-tooltip" data-toggle="tooltip" data-placement="bottom"
                         data-title="<?php echo _l('tickets_chart_weekly_opening_stats'); ?>"

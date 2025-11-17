@@ -193,10 +193,12 @@ return App_table::find('tickets')
                     $url   = admin_url('tickets/ticket/' . $aRow['ticketid']);
                     $_data = '<a href="' . $url . '?tab=settings" class="valign">' . $_data . '</a>';
                     $_data .= '<div class="row-options">';
-                    $_data .= '<a href="' . $url . '?tab=settings">' . _l('view') . '</a>';
-                    $_data .= ' | <a href="' . $url . '">' . _l('edit') . '</a>';
+                    if (staff_can('edit',  'rfi_tracker')) {
+                        $_data .= '<a href="' . $url . '?tab=settings">' . _l('view') . '</a>';
+                        $_data .= ' | <a href="' . $url . '">' . _l('edit') . '</a>';
+                    }
                     $_data .= ' | <a href="' . get_ticket_public_url($aRow) . '" target="_blank">' . _l('view_public_form') . '</a>';
-                    if (can_staff_delete_ticket() || get_staff_user_id() == 11) {
+                    if (staff_can('delete',  'rfi_tracker')) {
                         $_data .= ' | <a href="' . admin_url('tickets/delete/' . $aRow['ticketid']) . '" class="text-danger _delete">' . _l('delete') . '</a>';
                     }
                     $_data .= '</div>';

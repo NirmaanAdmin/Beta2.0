@@ -183,7 +183,7 @@ function app_init_admin_sidebar_menu_items()
         'badge'    => [],
     ]);
 
-    if ((!is_staff_member() && get_option('access_tickets_to_none_staff_members') == 1) || is_staff_member()) {
+    if (staff_can('view',  'rfi_tracker')) {
         $enable_badge = get_option('enable_support_menu_badges');
         $CI->app_menu->add_sidebar_menu_item('support', [
             'collapse' => $enable_badge ? true : null,
