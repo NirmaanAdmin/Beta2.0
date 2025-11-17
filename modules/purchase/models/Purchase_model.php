@@ -21614,6 +21614,10 @@ class Purchase_model extends App_Model
             unset($data['save_and_send']);
         }
 
+        if(isset($data['status'])) {
+            unset($data['status']);
+        }
+
         if (count($new_order) > 0) {
             foreach ($new_order as $key => $rqd) {
 
@@ -25706,5 +25710,57 @@ class Purchase_model extends App_Model
         }
 
         return $response;
+    }
+
+    public function change_status_pur_bill($status, $id)
+    {
+        $pur_bill = $this->get_pur_bill($id);
+        if($status == 1 || $status == 4) {
+            $this->db->where('id', $id);
+            $this->db->update(db_prefix() . 'pur_bills', ['approve_status' => 1]);
+            $this->db->where('rel_id', $id);
+            $this->db->delete(db_prefix() . 'pur_bills_approval_details');
+            return true;
+        }
+        $this->db->where('id', $id);
+        $this->db->update(db_prefix() . 'pur_bills', ['approve_status' => $status]);
+        if (!empty($pur_bill->pur_order)) {
+            $pur_bill_type = 'po_bill_bifurcation';
+        } elseif (!empty($pur_bill->wo_order)) {
+            $pur_bill_type = 'wo_bill_bifurcation';
+        } else {
+            $pur_bill_type = '';
+        }
+        $this->db->where('rel_id', $id);
+        $this->db->where('rel_type', $pur_bill_type);
+        $this->db->where('staffid', get_staff_user_id());
+        $this->db->order_by('id', 'asc');
+        $this->db->limit(1);
+        $pur_bills_approval = $this->db->get(db_prefix() . 'pur_bills_approval_details')->row();
+        if ($pur_bills_approval) {
+            $pur_bills_approval_details = [
+                'approve'       => $status,
+                'note'          => null,
+                'date'          => date('Y-m-d H:i:s'),
+                'staff_approve' => get_staff_user_id(),
+            ];
+            $this->db->where('id', $pur_bills_approval->id);
+            $this->db->update(db_prefix() . 'pur_bills_approval_details', $pur_bills_approval_details);
+        } else {
+            $row = [
+                'approve'       => $status,
+                'action'        => ($status == 2 ? 'approve' : 'pending'),
+                'staffid'       => get_staff_user_id(),
+                'date'          => date('Y-m-d H:i:s'),
+                'date_send'     => date('Y-m-d H:i:s'),
+                'rel_id'        => $id,
+                'rel_type'      => $pur_bill_type,
+            ];
+            if ($status == 2) {
+                $row['approve_by_admin'] = 1;
+            }
+            $this->db->insert(db_prefix() . 'pur_bills_approval_details', $row);
+        }
+        return true;
     }
 }

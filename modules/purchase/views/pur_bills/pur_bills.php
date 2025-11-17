@@ -84,6 +84,18 @@
 									<?php $duedate = ( isset($pur_bill) ? _d($pur_bill->duedate) : _d(date('Y-m-d')) );
 									echo render_date_input('duedate','',$duedate); ?>
 								</div>
+								<?php if (is_admin()) { ?>
+			                      <div class="col-md-6 form-group">
+			                        <label for="pur_change_status_to"><?php echo _l('pur_change_status_to'); ?></label>
+			                        <select name="status" id="status" class="selectpicker" onchange="change_status_pur_bill(this,<?php echo ($pur_bill->id); ?>); return false;" data-width="100%" data-live-search="true" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
+			                          <option value=""></option>
+			                          <option value="1"><?php echo _l('purchase_draft'); ?></option>
+			                          <option value="4"><?php echo _l('approval_request_sent'); ?></option>
+			                          <option value="2"><?php echo _l('purchase_approved'); ?></option>
+			                          <option value="3"><?php echo _l('pur_rejected'); ?></option>
+			                        </select>
+			                      </div>
+			                    <?php } ?>
 							</div>
 							<div class="col-md-6">
 								<div class="col-md-12 pad_left_0 pad_right_0 form-group">

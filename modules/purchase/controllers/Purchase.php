@@ -17043,4 +17043,20 @@ class purchase extends AdminController
         echo json_encode($result);
         die;
     }
+
+    public function change_status_pur_bill($status, $id)
+    {
+        $change = $this->purchase_model->change_status_pur_bill($status, $id);
+        if ($change == true) {
+            $message = _l('bill_bifurcation') . ' ' . _l('successfully');
+            echo json_encode([
+                'result' => $message,
+            ]);
+        } else {
+            $message = _l('bill_bifurcation') . ' ' . _l('fail');
+            echo json_encode([
+                'result' => $message,
+            ]);
+        }
+    }
 }

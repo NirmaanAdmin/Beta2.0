@@ -748,4 +748,33 @@
     };
     reader.readAsArrayBuffer(file);
   }
+
+  function change_status_pur_bill(invoker, id) {
+    "use strict";
+    if (!invoker.value) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Warning',
+        text: 'Please select a status before proceeding.'
+      });
+      return;
+    }
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'Do you want to change the status?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, change it',
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        $.post(admin_url + 'purchase/change_status_pur_bill/' + invoker.value + '/' + id)
+        .done(function(response) {
+            response = JSON.parse(response);
+            alert_float('success', response.result);
+            window.location.reload();
+        });
+      }
+    });
+  }
 </script>
