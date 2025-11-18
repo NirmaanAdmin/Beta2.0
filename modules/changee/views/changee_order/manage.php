@@ -24,12 +24,15 @@ $module_name = 'changee_order'; ?>
          <div class="panel_s mbot10">
             <div class="panel-body">
                <div class="row">
-                  <div class="_buttons col-md-3">
+                  <div class="_buttons col-md-6">
                      <?php if (has_permission('changee_orders', '', 'create') || is_admin()) { ?>
                         <a href="<?php echo admin_url('changee/pur_order'); ?>" class="btn btn-info pull-left mright10 display-block">
                            <?php echo _l('new_pur_order'); ?>
                         </a>
                      <?php } ?>
+                     <a href="<?php echo admin_url('purchase/activity_log?module=co'); ?>" class="btn btn-info pull-left mright10 display-block" target="_blank">
+                     <?php echo _l('activity_log'); ?>
+                     </a>
                      <div class="btn-group pull-left">
                         <a href="#" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><?php echo _l('co_voucher'); ?>&nbsp;<span class="caret"></span></a>
                         <ul class="dropdown-menu dropdown-menu-right">

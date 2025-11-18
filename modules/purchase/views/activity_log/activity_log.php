@@ -173,6 +173,9 @@ $module_name = 'module_activity_log'; ?>
                            if (isset($_GET['module']) && $_GET['module'] == 'ex') {
                               $module_name_filter_val = $_GET['module'];
                            }
+                           if (isset($_GET['module']) && $_GET['module'] == 'co') {
+                              $module_name_filter_val = $_GET['module'];
+                           }
                            $module_name_list = [
                               ['id' => 'stckrec', 'name' => _l('Stock Received')],
                               ['id' => 'stckiss', 'name' => _l('Stock Issued')],
@@ -182,6 +185,7 @@ $module_name = 'module_activity_log'; ?>
                               ['id' => 'vbt', 'name' => _l('vendor_billing_tracker')],
                               ['id' => 'ot', 'name' => _l('order_tracker')],
                               ['id' => 'pc', 'name' => _l('payment_certificate')],
+                              ['id' => 'co', 'name' => _l('change_order')],
                               ['id' => 'ex', 'name' => _l('Expense')],
                               ['id' => 'dms', 'name' => _l('Drawing Management')],
                               ['id' => 'dmg', 'name' => _l('Document Management')],
