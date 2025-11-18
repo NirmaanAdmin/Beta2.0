@@ -3407,3 +3407,223 @@ function get_area_list_changee($name_area, $area)
     }
     return render_select($name_area, $get_area, array('id', 'area_name'), '', $selected, array('multiple' => true), array('id' => 'project_area'), '', '', false);
 }
+
+function add_co_activity_log($id)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $co_orders = $CI->db->get(db_prefix() . 'co_orders')->row();
+        if(!empty($co_orders)) {
+            $description = "Change order <b>".$co_orders->pur_order_number."</b> has been created.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'co',
+                'rel_id' => $id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
+
+function remove_co_activity_log($id)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $co_orders = $CI->db->get(db_prefix() . 'co_orders')->row();
+        if(!empty($co_orders)) {
+            $description = "Change order <b>".$co_orders->pur_order_number."</b> has been deleted.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'co',
+                'rel_id' => $id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
+
+function add_co_attachment_activity_log($id, $file_name, $is_create = true)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $co_orders = $CI->db->get(db_prefix() . 'co_orders')->row();
+        if(!empty($co_orders)) {
+            $is_create_value = $is_create ? 'added' : 'removed';
+            $description = "Attachment <b>".$file_name."</b> has been ".$is_create_value." for change order <b>".$co_orders->pur_order_number."</b>.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'co',
+                'rel_id' => $id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
+
+function add_co_comments_activity_log($id, $is_create = true)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $co_comments = $CI->db->get(db_prefix() . 'co_comments')->row();
+        if(!empty($co_comments)) {
+            $module_name = '';
+            $rel_id = '';
+            $description = '';
+            $is_create_value = $is_create ? 'added' : 'removed';
+            if($co_comments->rel_type == 'pur_order') {
+                $CI->db->where('id', $co_comments->rel_id);
+                $co_orders = $CI->db->get(db_prefix() . 'co_orders')->row();
+                $description = "Discuss <b>".$co_comments->content."</b> has been ".$is_create_value." for change order <b>".$co_orders->pur_order_number."</b>.";
+                $module_name = 'co';
+                $rel_id = $co_orders->id;
+            }
+            if(!empty($description)) {
+                $CI->db->insert(db_prefix() . 'module_activity_log', [
+                    'module_name' => $module_name,
+                    'rel_id' => $rel_id,
+                    'description' => $description,
+                    'date' => date('Y-m-d H:i:s'),
+                    'staffid' => get_staff_user_id(),
+                    'project_id' => $default_project
+                ]);
+            }
+        }
+    }
+    return true;
+}
+
+function update_co_comments_activity_log($id, $old_value, $new_value)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $co_comments = $CI->db->get(db_prefix() . 'co_comments')->row();
+        if(!empty($co_comments)) {
+            $module_name = '';
+            $rel_id = '';
+            $description = '';
+            $old_value = !empty($old_value) ? $old_value : 'None';
+            $new_value = !empty($new_value) ? $new_value : 'None';
+            if($co_comments->rel_type == 'pur_order') {
+                $CI->db->where('id', $co_comments->rel_id);
+                $co_orders = $CI->db->get(db_prefix() . 'co_orders')->row();
+                $description = "Discuss field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in change order <b>".$co_orders->pur_order_number."</b>.";
+                $module_name = 'co';
+                $rel_id = $co_orders->id;
+            }
+            if(!empty($description)) {
+                $CI->db->insert(db_prefix() . 'module_activity_log', [
+                    'module_name' => $module_name,
+                    'rel_id' => $rel_id,
+                    'description' => $description,
+                    'date' => date('Y-m-d H:i:s'),
+                    'staffid' => get_staff_user_id(),
+                    'project_id' => $default_project
+                ]);
+            }
+        }
+    }
+    return true;
+}
+
+function add_co_status_activity_log($id)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $co_approval_details = $CI->db->get(db_prefix() . 'co_approval_details')->row();
+        if(!empty($co_approval_details)) {
+            $module_name = '';
+            $rel_id = '';
+            $description = '';
+            if($co_approval_details->rel_type == 'pur_order') {
+                $CI->db->where('id', $co_approval_details->rel_id);
+                $co_orders = $CI->db->get(db_prefix() . 'co_orders')->row();
+                if(empty($co_approval_details->approve)) {
+                    $description = "An approval request has been created for change order <b>".$co_orders->pur_order_number."</b> by <b>".get_last_action_full_name($co_approval_details->sender)."</b>.";
+                } else if($co_approval_details->approve == 2) {
+                    $description = "Change order <b>".$co_orders->pur_order_number."</b> has been approved by <b>".get_last_action_full_name($co_approval_details->staff_approve)."</b>.";
+                } else if($co_approval_details->approve == 3) {
+                    $description = "Change order <b>".$co_orders->pur_order_number."</b> has been rejected by <b>".get_last_action_full_name($co_approval_details->staff_approve)."</b>.";
+                }
+                $module_name = 'co';
+                $rel_id = $co_orders->id;
+            }
+            if(!empty($description)) {
+                $CI->db->insert(db_prefix() . 'module_activity_log', [
+                    'module_name' => $module_name,
+                    'rel_id' => $rel_id,
+                    'description' => $description,
+                    'date' => date('Y-m-d H:i:s'),
+                    'staffid' => get_staff_user_id(),
+                    'project_id' => $default_project
+                ]);
+            }
+        }
+    }
+    return true;
+}
+
+function update_co_approval_status_activity_log($id, $to_status, $rel_type)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        if($to_status == 1) {
+            $to_status_name = _l('purchase_draft');
+        } else if($to_status == 2) {
+            $to_status_name = _l('purchase_approved');
+        } else if($to_status == 3) {
+            $to_status_name = _l('pur_rejected');
+        } else {
+            $to_status_name = _l('purchase_draft');
+        }
+        if($rel_type == 'pur_order') {
+            $CI->db->where('id', $id);
+            $co_orders = $CI->db->get(db_prefix() . 'co_orders')->row();
+            $from_status = $co_orders->approve_status;
+            if($from_status == 1) {
+                $from_status_name = _l('purchase_draft');
+            } else if($from_status == 2) {
+                $from_status_name = _l('purchase_approved');
+            } else if($from_status == 3) {
+                $from_status_name = _l('pur_rejected');
+            } else {
+                $from_status_name = _l('purchase_draft');
+            }
+            $description = "An approval status is updated from <b>".$from_status_name."</b> to <b>".$to_status_name."</b> in change order <b>".$co_orders->pur_order_number."</b>.";
+            $module_name = 'co';
+            $rel_id = $co_orders->id;
+        }
+        if(!empty($description)) {
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => $module_name,
+                'rel_id' => $rel_id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}

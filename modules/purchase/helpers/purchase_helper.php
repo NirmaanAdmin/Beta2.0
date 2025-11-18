@@ -5606,6 +5606,13 @@ function add_order_notes_activity_log($id, $is_create = true)
                 $module_name = 'wo';
                 $rel_id = $wo_orders->id;
             }
+            if($notes->rel_type == 'changee_order') {
+                $CI->db->where('id', $notes->rel_id);
+                $co_orders = $CI->db->get(db_prefix() . 'co_orders')->row();
+                $description = "Notes <b>".$notes->description."</b> has been ".$is_create_value." for change order <b>".$co_orders->pur_order_number."</b>.";
+                $module_name = 'co';
+                $rel_id = $co_orders->id;
+            }
             if(!empty($description)) {
                 $CI->db->insert(db_prefix() . 'module_activity_log', [
                     'module_name' => $module_name,
@@ -5647,6 +5654,13 @@ function update_order_notes_activity_log($id, $old_value, $new_value)
                 $description = "Notes field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in work order <b>".$wo_orders->wo_order_number." - ".$wo_orders->wo_order_name."</b>.";
                 $module_name = 'wo';
                 $rel_id = $wo_orders->id;
+            }
+            if($notes->rel_type == 'changee_order') {
+                $CI->db->where('id', $notes->rel_id);
+                $co_orders = $CI->db->get(db_prefix() . 'co_orders')->row();
+                $description = "Notes field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in change order <b>".$co_orders->pur_order_number."</b>.";
+                $module_name = 'co';
+                $rel_id = $co_orders->id;
             }
             if(!empty($description)) {
                 $CI->db->insert(db_prefix() . 'module_activity_log', [

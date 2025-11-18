@@ -2280,6 +2280,7 @@ class Changee_model extends App_Model
      */
     public function change_status_pur_order($status, $id)
     {
+        update_co_approval_status_activity_log($id, $status, 'pur_order');
         $original_po = $this->get_pur_order($id);
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'co_orders', ['approve_status' => $status]);
@@ -2591,7 +2592,7 @@ class Changee_model extends App_Model
             $this->db->where('id', $insert_id);
             $this->db->update(db_prefix() . 'co_orders', $total);
 
-            $this->log_po_activity($insert_id, 'po_activity_created');
+            add_co_activity_log($insert_id);
             // warehouse module hook after changee order add
             hooks()->do_action('after_changee_order_add', $insert_id);
 
@@ -2879,7 +2880,7 @@ class Changee_model extends App_Model
      */
     public function delete_pur_order($id)
     {
-
+        remove_co_activity_log($id);
         hooks()->do_action('before_pur_order_deleted', $id);
 
         $affectedRows = 0;
@@ -3263,6 +3264,8 @@ class Changee_model extends App_Model
                 $row['rel_type'] = $data['rel_type'];
                 $row['sender'] = $sender;
                 $this->db->insert('tblco_approval_details', $row);
+                $co_approval_details_id = $this->db->insert_id();
+                add_co_status_activity_log($co_approval_details_id);
             }
             $this->db->where('rel_type', $data['rel_type']);
             $this->db->where('rel_id', $module->id);
@@ -3765,6 +3768,7 @@ class Changee_model extends App_Model
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'co_approval_details', $data);
         if ($this->db->affected_rows() > 0) {
+            add_co_status_activity_log($id);
             return true;
         }
         return false;
@@ -7982,6 +7986,7 @@ class Changee_model extends App_Model
         $data['content'] = nl2br($data['content']);
         $this->db->insert(db_prefix() . 'co_comments', $data);
         $insert_id = $this->db->insert_id();
+        add_co_comments_activity_log($insert_id, true);
 
         if ($insert_id) {
 
@@ -8001,6 +8006,10 @@ class Changee_model extends App_Model
      */
     public function edit_comment($data, $id)
     {
+        $this->db->where('id', $id);
+        $co_comments = $this->db->get(db_prefix() . 'co_comments')->row();
+        update_co_comments_activity_log($id, $co_comments->content, $data['content']);
+
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'co_comments', [
             'content' => nl2br($data['content']),
@@ -14718,8 +14727,6 @@ class Changee_model extends App_Model
 
     public function save_changee_files($related, $id)
     {
-        // echo $related;
-        // die;
         $uploadedFiles = handle_changee_attachments_array($related, $id);
 
         if ($uploadedFiles && is_array($uploadedFiles)) {
@@ -14733,6 +14740,9 @@ class Changee_model extends App_Model
                 $data['file_name'] = $file['file_name'];
                 $data['filetype']  = $file['filetype'];
                 $this->db->insert(db_prefix() . 'changee_files', $data);
+                if($related == 'pur_order') {
+                    add_co_attachment_activity_log($id, $file['file_name'], true);
+                }
             }
         }
         return true;
@@ -14767,6 +14777,9 @@ class Changee_model extends App_Model
             $other_attachments = list_files(get_upload_path_by_type('changee') . $attachment->rel_type . '/' . $attachment->rel_id);
             if (count($other_attachments) == 0) {
                 delete_dir(get_upload_path_by_type('changee') . $attachment->rel_type . '/' . $attachment->rel_id);
+            }
+            if($attachment->rel_type == 'pur_order') {
+                add_co_attachment_activity_log($attachment->rel_id, $attachment->file_name, false);
             }
         }
 
