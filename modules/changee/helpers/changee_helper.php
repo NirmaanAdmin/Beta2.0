@@ -3855,3 +3855,129 @@ function add_co_item_activity_log($id, $rel_type, $is_create = true)
     }
     return true;
 }
+
+function update_co_item_activity_log($new_data, $rel_type)
+{
+    $CI = &get_instance();
+    $CI->load->model('currencies_model');
+    $base_currency = $CI->currencies_model->get_base_currency();
+    $default_project = get_default_project();
+    $old_data = array();
+    if($rel_type == 'pur_order') {
+        $co_order_detail = $CI->db->where('id', $new_data['id'])
+            ->get(db_prefix() . 'co_order_detail')
+            ->row();
+        if (!$co_order_detail) {
+            return false;
+        }
+        $old_data = (array) $co_order_detail;
+    }
+    if (isset($old_data['area'])) {
+        $areaArray = is_array($old_data['area']) ? $old_data['area'] : explode(',', $old_data['area']);
+        $areaArray = array_map('trim', $areaArray);
+        $areaArray = array_filter($areaArray, fn($v) => $v !== '');
+        sort($areaArray, SORT_NUMERIC);
+        $old_data['area'] = implode(',', $areaArray);
+    }
+    if (isset($old_data['tax_name'])) {
+        $names = is_array($old_data['tax_name']) ? $old_data['tax_name'] : explode('|', $old_data['tax_name']);
+        $old_data['tax_select'] = implode(',', $names);
+    }
+    if (isset($old_data['unit_id'])) {
+        $old_data['unit_name'] = $old_data['unit_id'];
+    }
+    if (isset($new_data['area']) && is_array($new_data['area'])) {
+        $areaArray = array_map('trim', $new_data['area']);
+        $areaArray = array_filter($areaArray, fn($v) => $v !== '');
+        sort($areaArray, SORT_NUMERIC);
+        $new_data['area'] = implode(',', $areaArray);
+    }
+    if (isset($new_data['tax_select']) && is_array($new_data['tax_select'])) {
+        $new_data['tax_select'] = implode(',', array_map(fn($v) => strtok($v, '|'), $new_data['tax_select']));
+    }
+    if (isset($new_data['item_description'])) {
+        $new_data['description'] = $new_data['item_description'];
+        unset($new_data['item_description']);
+    }
+    $normalize = function ($value) {
+        $value = trim((string)$value);
+        if (in_array(strtolower($value), ['null', 'none', 'nil', 'n/a', '-', '--'])) {
+            return '';
+        }
+        if ($value === '0000-00-00') {
+            return '';
+        }
+        if (is_numeric($value)) {
+            $num = (float)$value;
+            return ($num == 0.0) ? '' : $num;
+        }
+        return strtolower($value);
+    };
+    $norm_old = array_map($normalize, $old_data);
+    $norm_new = array_map($normalize, $new_data);
+    $changes = array_diff_assoc($norm_new, $norm_old);
+    if (empty($changes)) {
+        return true;
+    }
+    $field_map = [
+        'serial_no' => _l('serial_no'),
+        'item_code' => _l('Uniclass Code'),
+        'area' => _l('area'),
+        'original_unit_price' => _l('awarded_rate'),
+        'unit_price' => _l('rate_after_incl_co'),
+        'original_quantity' => _l('awarded_qty'),
+        'quantity' => _l('qty_after_incl_co'),
+        'unit_name' => _l('pur_unit'),
+        'into_money' => _l('contract_value'),
+        'into_money_updated' => _l('updated_subtotal_before_tax'),
+        'tax_select' => _l('debit_note_table_tax_heading'),
+        'total' => _l('debit_note_total'),
+        'variation' => _l('variation'),
+    ];
+    foreach ($changes as $field => $dummy) {
+        if (!isset($field_map[$field])) {
+            continue;
+        }
+        $old_value = $old_data[$field] ?? '';
+        $new_value = $new_data[$field] ?? '';
+        if ($field === 'item_code') {
+            $old_value = !empty($old_value) ? pur_get_item_variatiom($old_value) : '';
+            $new_value = !empty($new_value) ? pur_get_item_variatiom($new_value) : '';
+        }
+        if ($field === 'area') {
+            $old_value = !empty($old_value) ? get_area_name_by_id($old_value) : '';
+            $new_value = !empty($new_value) ? get_area_name_by_id($new_value) : '';
+        }
+        if ($field === 'unit_name') {
+            $old_value = !empty($old_value) ? pur_get_unit_name($old_value) : '';
+            $new_value = !empty($new_value) ? pur_get_unit_name($new_value) : '';
+        }
+        if ($field === 'original_unit_price' || $field === 'unit_price' || $field === 'into_money' || $field === 'into_money_updated' || $field === 'total' || $field === 'variation') {
+            $old_value = app_format_money($old_value, $base_currency->symbol);
+            $new_value = app_format_money($new_value, $base_currency->symbol);
+        }
+        $module_name = '';
+        $rel_id = '';
+        $description = '';
+        if($rel_type == 'pur_order') {
+            $CI->db->where('id', $old_data['pur_order']);
+            $co_orders = $CI->db->get(db_prefix() . 'co_orders')->row();
+            $CI->db->where('id', $new_data['item_code']);
+            $items = $CI->db->get(db_prefix() . 'items')->row();
+            $description = "".$field_map[$field]." field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> for item <b>".$items->commodity_code." ".$items->description."</b> in change order <b>".$co_orders->pur_order_number."</b>.";
+            $module_name = 'co';
+            $rel_id = $co_orders->id;
+        }
+        if(!empty($description)) {
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => $module_name,
+                'rel_id' => $rel_id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}

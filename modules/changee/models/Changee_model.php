@@ -2788,6 +2788,7 @@ class Changee_model extends App_Model
 
         if (count($update_order) > 0) {
             foreach ($update_order as $_key => $rqd) {
+                update_co_item_activity_log($rqd, 'pur_order');
                 $dt_data = [];
                 $dt_data['pur_order'] = $id;
                 $dt_data['item_code'] = $rqd['item_code'];
