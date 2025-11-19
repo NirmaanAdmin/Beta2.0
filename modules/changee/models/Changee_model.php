@@ -2713,6 +2713,7 @@ class Changee_model extends App_Model
             unset($data['custom_fields']);
         }
 
+        update_all_co_fields_activity_log($id, $data);
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'co_orders', $data);
         $this->save_changee_files('pur_order', $id);

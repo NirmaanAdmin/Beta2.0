@@ -3628,6 +3628,196 @@ function update_co_approval_status_activity_log($id, $to_status, $rel_type)
     return true;
 }
 
+function update_all_co_fields_activity_log($id, $new_data)
+{
+    $CI = &get_instance();
+    $CI->load->model('currencies_model');
+    $CI->load->model('staff_model');
+    $CI->load->model('departments_model');
+    $base_currency = $CI->currencies_model->get_base_currency();
+    if (empty($id)) {
+        return false;
+    }
+    $co_orders = $CI->db->where('id', $id)
+        ->get(db_prefix() . 'co_orders')
+        ->row();
+    if (!$co_orders) {
+        return false;
+    }
+    $old_data = (array)$co_orders;
+    $normalize = function ($value) {
+        $value = trim((string)$value);
+        if (in_array(strtolower($value), ['null', 'none', 'nil', 'n/a', '-', '--'])) {
+            return '';
+        }
+        if ($value === '0000-00-00') {
+            return '';
+        }
+        if (is_numeric($value)) {
+            $num = (float)$value;
+            return ($num == 0.0) ? '' : $num;
+        }
+        return strtolower($value);
+    };
+    $norm_old = array_map($normalize, $old_data);
+    $norm_new = array_map($normalize, $new_data);
+    $changes = array_diff_assoc($norm_new, $norm_old);
+    if (empty($changes)) {
+        return true;
+    }
+    $field_map = [
+        'po_order_id' => _l('purchase_order'),
+        'wo_order_id' => _l('wo_order'),
+        'order_date' => _l('order_date'),
+        'pur_order_name' => _l('co_order_description'),
+        'buyer' => _l('buyer'),
+        'discount_type' => _l('discount_type'),
+        'vendor' => _l('vendor'),
+        'group_pur' => _l('Budget Head'),
+        'sub_groups_pur' => _l('Budget Sub Head'),
+        'estimate' => _l('budget'),
+        'department' => _l('department'),
+        'kind' => _l('kind'),
+        'type' => _l('type'),
+        'shipping_address' => _l('pur_company_address'),
+        'shipping_zip' => _l('pur_company_zipcode'),
+        'shipping_city' => _l('pur_company_city'),
+        'shipping_state' => _l('pur_company_state'),
+        'shipping_country_text' => _l('pur_company_country_text'),
+        'shipping_country' => _l('pur_company_country_code'),
+    ];
+    foreach ($changes as $field => $dummy) {
+        if (!isset($field_map[$field])) {
+            continue;
+        }
+        $old_value = $old_data[$field] ?? '';
+        $new_value = $new_data[$field] ?? '';
+        if ($field === 'po_order_id') {
+            if(!empty($old_value)) {
+                $old_value_query = $CI->db->select('concat(pur_order_number, " - ", pur_order_name) as name')
+                ->where('id', $old_value)
+                ->from(db_prefix() . 'pur_orders')
+                ->get()
+                ->row();
+                $old_value = !empty($old_value_query) ? $old_value_query->name : '';
+            }
+            if(!empty($new_value)) {
+                $new_value_query = $CI->db->select('concat(pur_order_number, " - ", pur_order_name) as name')
+                ->where('id', $new_value)
+                ->from(db_prefix() . 'pur_orders')
+                ->get()
+                ->row();
+                $new_value = !empty($new_value_query) ? $new_value_query->name : '';
+            }
+        }
+        if ($field === 'wo_order_id') {
+            if(!empty($old_value)) {
+                $old_value_query = $CI->db->select('concat(wo_order_number, " - ", wo_order_name) as name')
+                ->where('id', $old_value)
+                ->from(db_prefix() . 'wo_orders')
+                ->get()
+                ->row();
+                $old_value = !empty($old_value_query) ? $old_value_query->name : '';
+            }
+            if(!empty($new_value)) {
+                $new_value_query = $CI->db->select('concat(wo_order_number, " - ", wo_order_name) as name')
+                ->where('id', $new_value)
+                ->from(db_prefix() . 'wo_orders')
+                ->get()
+                ->row();
+                $new_value = !empty($new_value_query) ? $new_value_query->name : '';
+            }
+        }
+        if ($field === 'buyer') {
+            $staff_list = $CI->staff_model->get('', ['active' => 1]);
+            $opts = array_combine(
+                array_column($staff_list, 'staffid'),
+                array_map(fn($a) => $a['firstname'] . ' ' . $a['lastname'], $staff_list)
+            );
+            $old_value = $opts[$old_value] ?? '';
+            $new_value = $opts[$new_value] ?? '';
+        }
+        if ($field === 'discount_type') {
+            $opts = [
+                'before_tax' => _l('discount_type_before_tax'),
+                'after_tax' => _l('discount_type_after_tax'),
+            ];
+            $old_value = $opts[$old_value] ?? '';
+            $new_value = $opts[$new_value] ?? '';
+        }
+        if ($field === 'vendor') {
+            $old_value = !empty($old_value) ? get_vendor_company_name($old_value) : '';
+            $new_value = !empty($new_value) ? get_vendor_company_name($new_value) : '';
+        }
+        if ($field === 'group_pur') {
+            $old_value = !empty($old_value) ? get_group_name_by_id($old_value) : '';
+            $new_value = !empty($new_value) ? get_group_name_by_id($new_value) : '';
+        }
+        if ($field === 'sub_groups_pur') {
+            $old_value = !empty($old_value) ? get_sub_head_name_by_id($old_value) : '';
+            $new_value = !empty($new_value) ? get_sub_head_name_by_id($new_value) : '';
+        }
+        if ($field === 'estimate') {
+            $old_value = !empty($old_value) ? format_estimate_number($old_value) : '';
+            $new_value = !empty($new_value) ? format_estimate_number($new_value) : '';
+        }
+        if ($field === 'department') {
+            $departments_list = $CI->departments_model->get();
+            $opts = array_column($departments_list, 'name', 'departmentid');
+            $old_value = $opts[$old_value] ?? '';
+            $new_value = $opts[$new_value] ?? '';
+        }
+        if ($field === 'kind') {
+            $opts = [
+                'Client Supply' => _l('client_supply'),
+                'Bought out items' => _l('bought_out_items'),
+            ];
+            $old_value = $opts[$old_value] ?? '';
+            $new_value = $opts[$new_value] ?? '';
+        }
+        if ($field === 'type') {
+            $opts = [
+                'capex' => _l('capex'),
+                'opex' => _l('opex'),
+            ];
+            $old_value = $opts[$old_value] ?? '';
+            $new_value = $opts[$new_value] ?? '';
+        }
+        if ($field === 'shipping_country') {
+            $countries = get_all_countries();
+            $opts = array_column($countries, 'short_name', 'country_id');
+            $old_value = $opts[$old_value] ?? '';
+            $new_value = $opts[$new_value] ?? '';
+        }
+        update_co_activity_log($id, $field_map[$field], $old_value, $new_value);
+    }
+    return true;
+}
+
+function update_co_activity_log($id, $field, $old_value, $new_value)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $co_orders = $CI->db->get(db_prefix() . 'co_orders')->row();
+        if(!empty($co_orders)) {
+            $old_value = !empty($old_value) ? $old_value : 'None';
+            $new_value = !empty($new_value) ? $new_value : 'None';
+            $description = "".$field." field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in change order <b>".$co_orders->pur_order_number."</b>.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'co',
+                'rel_id' => $co_orders->id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
+
 function add_co_item_activity_log($id, $rel_type, $is_create = true)
 {
     $CI = &get_instance();
