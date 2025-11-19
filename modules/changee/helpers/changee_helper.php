@@ -3627,3 +3627,41 @@ function update_co_approval_status_activity_log($id, $to_status, $rel_type)
     }
     return true;
 }
+
+function add_co_item_activity_log($id, $rel_type, $is_create = true)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $module_name = '';
+        $rel_id = '';
+        $description = '';
+        $is_create_value = $is_create ? 'added' : 'removed';
+        if($rel_type == 'pur_order') {
+            $CI->db->where('id', $id);
+            $co_order_detail = $CI->db->get(db_prefix() . 'co_order_detail')->row();
+            if(!empty($co_order_detail)) {
+                $CI->db->where('id', $co_order_detail->pur_order);
+                $co_orders = $CI->db->get(db_prefix() . 'co_orders')->row();
+                $CI->db->where('id', $co_order_detail->item_code);
+                $items = $CI->db->get(db_prefix() . 'items')->row();
+                if(!empty($items)) {
+                    $description = "Item <b>".$items->commodity_code." ".$items->description."</b> has been ".$is_create_value." for change order <b>".$co_orders->pur_order_number."</b>.";
+                    $module_name = 'co';
+                    $rel_id = $co_orders->id;
+                }
+            }
+        }
+        if(!empty($description)) {
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => $module_name,
+                'rel_id' => $rel_id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
