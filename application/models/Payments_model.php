@@ -398,6 +398,7 @@ class Payments_model extends App_Model
 
         $data = hooks()->apply_filters('before_payment_updated', $data, $id);
 
+        update_all_ril_payment_fields_activity_log($id, $data);
         $this->db->where('id', $id);
         $this->db->update('invoicepaymentrecords', $data);
 

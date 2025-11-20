@@ -913,3 +913,107 @@ function add_ril_payment_activity_log($id, $is_create = true)
     }
     return true;
 }
+
+function update_all_ril_payment_fields_activity_log($id, $new_data)
+{
+    $CI = &get_instance();
+    $CI->load->model('currencies_model');
+    $base_currency = $CI->currencies_model->get_base_currency();
+    if (empty($id)) {
+        return false;
+    }
+    $invoicepaymentrecords = $CI->db->where('id', $id)
+        ->get(db_prefix() . 'invoicepaymentrecords')
+        ->row();
+    if (!$invoicepaymentrecords) {
+        return false;
+    }
+    $old_data = (array)$invoicepaymentrecords;
+    $normalize = function ($value) {
+        $value = trim((string)$value);
+        if (in_array(strtolower($value), ['null', 'none', 'nil', 'n/a', '-', '--'])) {
+            return '';
+        }
+        if ($value === '0000-00-00') {
+            return '';
+        }
+        if (is_numeric($value)) {
+            $num = (float)$value;
+            return ($num == 0.0) ? '' : $num;
+        }
+        return strtolower($value);
+    };
+    $norm_old = array_map($normalize, $old_data);
+    $norm_new = array_map($normalize, $new_data);
+    $changes = array_diff_assoc($norm_new, $norm_old);
+    if (empty($changes)) {
+        return true;
+    }
+    $field_map = [
+        'amount' => _l('payment_edit_amount_received'),
+        'date' => _l('payment_edit_date'),
+        'paymentmode' => _l('payment_mode'),
+        'paymentmethod' => _l('payment_method'),
+        'transactionid' => _l('payment_transaction_id'),
+        'note' => _l('note'),
+    ];
+    foreach ($changes as $field => $dummy) {
+        if (!isset($field_map[$field])) {
+            continue;
+        }
+        $old_value = $old_data[$field] ?? '';
+        $new_value = $new_data[$field] ?? '';
+        if ($field === 'amount') {
+            $old_value = app_format_money($old_value, $base_currency->symbol);
+            $new_value = app_format_money($new_value, $base_currency->symbol);
+        }
+        if ($field === 'paymentmode') {
+            if(!empty($old_value)) {
+                $old_value_query = $CI->db->select('name')
+                ->where('id', $old_value)
+                ->from(db_prefix() . 'payment_modes')
+                ->get()
+                ->row();
+                $old_value = !empty($old_value_query) ? $old_value_query->name : '';
+            }
+            if(!empty($new_value)) {
+                $new_value_query = $CI->db->select('name')
+                ->where('id', $new_value)
+                ->from(db_prefix() . 'payment_modes')
+                ->get()
+                ->row();
+                $new_value = !empty($new_value_query) ? $new_value_query->name : '';
+            }
+        }
+        update_ril_payment_activity_log($id, $field_map[$field], $old_value, $new_value);
+    }
+    return true;
+}
+
+function update_ril_payment_activity_log($id, $field, $old_value, $new_value)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $invoicepaymentrecords = $CI->db->get(db_prefix() . 'invoicepaymentrecords')->row();
+        if(!empty($invoicepaymentrecords)) {
+            $CI->db->where('id', $invoicepaymentrecords->invoiceid);
+            $invoices = $CI->db->get(db_prefix() . 'invoices')->row();
+            $old_value = !empty($old_value) ? $old_value : 'None';
+            $new_value = !empty($new_value) ? $new_value : 'None';
+            if(!empty($invoices)) {
+                $description = "".$field." field has been updated from <b>".$old_value."</b> to <b>".$new_value."</b> for the payment of client invoice <b>".format_invoice_number($invoices->id) . ' (' . $invoices->title . ')'."</b>.";
+                $CI->db->insert(db_prefix() . 'module_activity_log', [
+                    'module_name' => 'cli',
+                    'rel_id' => $invoices->id,
+                    'description' => $description,
+                    'date' => date('Y-m-d H:i:s'),
+                    'staffid' => get_staff_user_id(),
+                    'project_id' => $default_project
+                ]);
+            }
+        }
+    }
+    return true;
+}
