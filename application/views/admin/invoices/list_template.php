@@ -27,7 +27,8 @@
                     <?php echo _l('invoices_list_recurring'); ?>
                 </a>
             <?php } ?>
-            <button class="btn btn-info pull-left mleft10 display-block" type="button" data-toggle="collapse" data-target="#ci-charts-section" aria-expanded="true"aria-controls="ci-charts-section">
+            <a href="<?php echo admin_url('purchase/activity_log?module=cli'); ?>" class="btn btn-primary pull-left mleft5" target="_blank"><?php echo _l('activity_log'); ?></a>
+            <button class="btn btn-info pull-left mleft5 display-block" type="button" data-toggle="collapse" data-target="#ci-charts-section" aria-expanded="true"aria-controls="ci-charts-section">
             <?php echo _l('Client Invoices Charts'); ?> <i class="fa fa-chevron-down toggle-icon"></i>
             </button>
             <div class="display-block pull-right tw-space-x-0 sm:tw-space-x-1.5">
