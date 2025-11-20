@@ -828,7 +828,7 @@ function update_all_ril_item_fields_activity_log($new_data)
             $num = (float)$value;
             return ($num == 0.0) ? '' : $num;
         }
-        return $value;
+        return strtolower($value);
     };
     $norm_old = array_map($normalize, $old_data);
     $norm_new = array_map($normalize, $new_data);
@@ -873,6 +873,33 @@ function update_ril_item_activity_log($id, $field, $old_value, $new_value)
             $new_value = !empty($new_value) ? $new_value : 'None';
             if(!empty($invoices) && !empty($pur_invoices)) {
                 $description = "".$field." field has been updated from <b>".$old_value."</b> to <b>".$new_value."</b> for vendor bill <b>".$pur_invoices->invoice_number."</b> in client invoice <b>".format_invoice_number($invoices->id) . ' (' . $invoices->title . ')'."</b>.";
+                $CI->db->insert(db_prefix() . 'module_activity_log', [
+                    'module_name' => 'cli',
+                    'rel_id' => $invoices->id,
+                    'description' => $description,
+                    'date' => date('Y-m-d H:i:s'),
+                    'staffid' => get_staff_user_id(),
+                    'project_id' => $default_project
+                ]);
+            }
+        }
+    }
+    return true;
+}
+
+function add_ril_payment_activity_log($id, $is_create = true)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $invoicepaymentrecords = $CI->db->get(db_prefix() . 'invoicepaymentrecords')->row();
+        if(!empty($invoicepaymentrecords)) {
+            $CI->db->where('id', $invoicepaymentrecords->invoiceid);
+            $invoices = $CI->db->get(db_prefix() . 'invoices')->row();
+            $is_create_value = $is_create ? 'added' : 'removed';
+            if(!empty($invoices)) {
+                $description = "Payment has been ".$is_create_value." for client invoice <b>".format_invoice_number($invoices->id) . ' (' . $invoices->title . ')'."</b>.";
                 $CI->db->insert(db_prefix() . 'module_activity_log', [
                     'module_name' => 'cli',
                     'rel_id' => $invoices->id,
