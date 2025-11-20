@@ -3535,6 +3535,7 @@ class purchase extends AdminController
                 }
                 $ril_invoice_data = get_invoice_data($invoiceid);
                 update_vbt_activity_log($pur_invoice, _l('ril_invoice'), '', format_invoice_number($ril_invoice_data->id) . ' (' . $ril_invoice_data->title . ')');
+                convert_ril_invoices_activity_log($pur_invoice, format_invoice_number($ril_invoice_data->id) . ' (' . $ril_invoice_data->title . ')', $select_invoice, $ril_invoice_data->id);
 
                 // set_alert('success', _l('converted', _l('expense')));
                 // echo json_encode([
@@ -12959,6 +12960,7 @@ class purchase extends AdminController
                             }
                             $ril_invoice_data = get_invoice_data($invoiceid);
                             update_vbt_activity_log($pur_invoice, _l('ril_invoice'), '', format_invoice_number($ril_invoice_data->id) . ' (' . $ril_invoice_data->title . ')');
+                            convert_ril_invoices_activity_log($pur_invoice, format_invoice_number($ril_invoice_data->id) . ' (' . $ril_invoice_data->title . ')', $select_invoice, $ril_invoice_data->id);
                         }
                         if (isset($data['vbt_id'])) {
                             update_pur_invoices_last_action($data['vbt_id']);

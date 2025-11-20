@@ -943,6 +943,7 @@ class Invoices_model extends App_Model
     {
         $updated = false;
         foreach ($items as $itemId) {
+            delete_ril_item_activity_log($itemId);
             $original_item = $this->get_invoice_item($itemId);
 
             if (handle_removed_sales_item_post($itemId, 'invoice')) {
@@ -2140,6 +2141,7 @@ class Invoices_model extends App_Model
         $updated = false;
         if(!empty($items)) {
             foreach ($items as $key => $value) {
+                update_all_ril_item_fields_activity_log($value);
                 $this->db->where('id', $value['itemid']);
                 $this->db->update(db_prefix() . 'itemable', [
                     'remarks' => $value['remarks'],

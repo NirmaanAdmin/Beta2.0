@@ -747,3 +747,142 @@ function get_hsn_sac_full_name_by_id($id){
     $row = $CI->db->get()->row();
     return $row;
 }
+
+function convert_ril_invoices_activity_log($id, $ril_invoice, $select_invoice, $ril_invoice_id)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $pur_invoices = $CI->db->get(db_prefix() . 'pur_invoices')->row();
+        if(!empty($pur_invoices)) {
+            if ($select_invoice == "create_invoice") {
+                $description = "Client Invoice <b>".$ril_invoice."</b> has been generated from vendor bill <b>".$pur_invoices->invoice_number."</b>.";
+            } elseif ($select_invoice == "applied_invoice") {
+                $description = "A new vendor bill <b>".$pur_invoices->invoice_number."</b> has been applied to client invoice <b>".$ril_invoice."</b>.";
+            } else {
+                $description = '';
+            }
+            if(!empty($description)) {
+                $CI->db->insert(db_prefix() . 'module_activity_log', [
+                    'module_name' => 'cli',
+                    'rel_id' => $ril_invoice_id,
+                    'description' => $description,
+                    'date' => date('Y-m-d H:i:s'),
+                    'staffid' => get_staff_user_id(),
+                    'project_id' => $default_project
+                ]);
+            }
+        }
+    }
+    return true;
+}
+
+function delete_ril_item_activity_log($id)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $itemable = $CI->db->get(db_prefix() . 'itemable')->row();
+        if(!empty($itemable)) {
+            $CI->db->where('id', $itemable->rel_id);
+            $invoices = $CI->db->get(db_prefix() . 'invoices')->row();
+            $CI->db->where('id', $itemable->vbt_id);
+            $pur_invoices = $CI->db->get(db_prefix() . 'pur_invoices')->row();
+            if(!empty($invoices) && !empty($pur_invoices)) {
+                $description = "A vendor bill <b>".$pur_invoices->invoice_number."</b> has been removed from client invoice <b>".format_invoice_number($invoices->id) . ' (' . $invoices->title . ')'."</b>.";
+                $CI->db->insert(db_prefix() . 'module_activity_log', [
+                    'module_name' => 'cli',
+                    'rel_id' => $invoices->id,
+                    'description' => $description,
+                    'date' => date('Y-m-d H:i:s'),
+                    'staffid' => get_staff_user_id(),
+                    'project_id' => $default_project
+                ]);
+            }
+        }
+    }
+    return true;
+}
+
+function update_all_ril_item_fields_activity_log($new_data)
+{
+    $CI = &get_instance();
+    $itemable = $CI->db->where('id', $new_data['itemid'])
+        ->get(db_prefix() . 'itemable')
+        ->row();
+    if (!$itemable) {
+        return false;
+    }
+    $old_data = (array)$itemable;
+    $normalize = function ($value) {
+        $value = trim((string)$value);
+        if (in_array(strtolower($value), ['null', 'none', 'nil', 'n/a', '-', '--'])) {
+            return '';
+        }
+        if ($value === '0000-00-00') {
+            return '';
+        }
+        if (is_numeric($value)) {
+            $num = (float)$value;
+            return ($num == 0.0) ? '' : $num;
+        }
+        return $value;
+    };
+    $norm_old = array_map($normalize, $old_data);
+    $norm_new = array_map($normalize, $new_data);
+    $changes = array_diff_assoc($norm_new, $norm_old);
+    if(isset($changes['itemid'])) {
+        unset($changes['itemid']);
+    }
+    if(isset($changes['order'])) {
+        unset($changes['order']);
+    }
+    if (empty($changes)) {
+        return true;
+    }
+    $field_map = [
+        'long_description' => _l('description_of_services'),
+        'remarks' => _l('remarks'),
+    ];
+    foreach ($changes as $field => $dummy) {
+        if (!isset($field_map[$field])) {
+            continue;
+        }
+        $old_value = $old_data[$field] ?? '';
+        $new_value = $new_data[$field] ?? '';
+        update_ril_item_activity_log($new_data['itemid'], $field_map[$field], $old_value, $new_value);
+    }
+    return true;
+}
+
+function update_ril_item_activity_log($id, $field, $old_value, $new_value)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $itemable = $CI->db->get(db_prefix() . 'itemable')->row();
+        if(!empty($itemable)) {
+            $CI->db->where('id', $itemable->rel_id);
+            $invoices = $CI->db->get(db_prefix() . 'invoices')->row();
+            $CI->db->where('id', $itemable->vbt_id);
+            $pur_invoices = $CI->db->get(db_prefix() . 'pur_invoices')->row();
+            $old_value = !empty($old_value) ? $old_value : 'None';
+            $new_value = !empty($new_value) ? $new_value : 'None';
+            if(!empty($invoices) && !empty($pur_invoices)) {
+                $description = "".$field." field has been updated from <b>".$old_value."</b> to <b>".$new_value."</b> for vendor bill <b>".$pur_invoices->invoice_number."</b> in client invoice <b>".format_invoice_number($invoices->id) . ' (' . $invoices->title . ')'."</b>.";
+                $CI->db->insert(db_prefix() . 'module_activity_log', [
+                    'module_name' => 'cli',
+                    'rel_id' => $invoices->id,
+                    'description' => $description,
+                    'date' => date('Y-m-d H:i:s'),
+                    'staffid' => get_staff_user_id(),
+                    'project_id' => $default_project
+                ]);
+            }
+        }
+    }
+    return true;
+}
