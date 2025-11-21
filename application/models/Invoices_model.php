@@ -886,6 +886,7 @@ class Invoices_model extends App_Model
 
         unset($data['removed_items']);
 
+        update_all_client_invoice_fields_activity_log($id, $data);
         $this->db->where('id', $id)->update('invoices', $data);
 
         if ($this->db->affected_rows() > 0) {

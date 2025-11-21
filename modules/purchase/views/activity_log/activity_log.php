@@ -190,7 +190,7 @@ $module_name = 'module_activity_log'; ?>
                               ['id' => 'pc', 'name' => _l('payment_certificate')],
                               ['id' => 'co', 'name' => _l('change_order')],
                               ['id' => 'ex', 'name' => _l('Expense')],
-                              ['id' => 'cli', 'name' => _l('Client Invoices')],
+                              ['id' => 'cli', 'name' => _l('Client Invoices / Client Payments')],
                               ['id' => 'dms', 'name' => _l('Drawing Management')],
                               ['id' => 'dmg', 'name' => _l('Document Management')],
                            ];
