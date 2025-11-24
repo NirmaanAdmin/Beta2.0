@@ -8876,7 +8876,7 @@ class changee extends AdminController
                     if (strlen($item_name) == 0) {
                         $item_name = pur_get_item_variatiom($item['item_code']);
                     }
-                    $list_item .= $this->changee_model->create_changee_order_row_template('newitems[' . $index_quote . ']', $item['item_code'], $item_name, $item['description'], $item['unit_price'], $item['unit_price'], $item['quantity'], $item['quantity'], $item['unit_id'], $item['unit_id'], $item['into_money'], $item['into_money_updated'], $item['prd_id'], $item['tax_value'], $item['total'], $item['tax_name'], $item['tax_rate'], $item['tax'], true, $currency_rate, $to_currency, $item['remarks'], 0,'', $item['area']);
+                    $list_item .= $this->changee_model->create_changee_order_row_template('newitems[' . $index_quote . ']', $item['item_code'], $item_name, $item['description'], $item['unit_price'], $item['unit_price'], $item['quantity'], $item['quantity'], $item['unit_id'], $item['unit_id'], $item['into_money'], $item['into_money_updated'], $item['prd_id'], $item['tax_value'], $item['total'], $item['tax_name'], $item['tax_rate'], $item['tax'], true, $currency_rate, $to_currency, $item['remarks'], $item['tender_item'],'', $item['area']);
                 }
             }
 
@@ -9088,6 +9088,7 @@ class changee extends AdminController
             'order_dateed' => $order_date,
             'original_amount' => $subtotal,
             'po_project_id' => $purchase_order->project,
+            'discount_total' => $purchase_order->discount_total,
         ]);
     }
     public function coppy_wo_order_for_po($wo_order)
