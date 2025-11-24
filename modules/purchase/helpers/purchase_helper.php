@@ -6635,3 +6635,57 @@ function update_pr_activity_log($id, $field, $old_value, $new_value)
     }
     return true;
 }
+
+function add_vendor_activity_log($id, $is_create = true)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('userid', $id);
+        $pur_vendor = $CI->db->get(db_prefix() . 'pur_vendor')->row();
+        if(!empty($pur_vendor)) {
+            $is_create_value = $is_create ? 'created' : 'deleted';
+            $description = "Vendor <b>".$pur_vendor->company."</b> has been ".$is_create_value.".";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'ven',
+                'rel_id' => $id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
+
+function add_vendor_contact_activity_log($id, $is_create = true)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->select(
+            db_prefix() . 'pur_contacts.firstname,' .
+            db_prefix() . 'pur_contacts.lastname,' .
+            db_prefix() . 'pur_vendor.company'
+        );
+        $CI->db->from(db_prefix() . 'pur_contacts');
+        $CI->db->join(db_prefix() . 'pur_vendor', db_prefix() . 'pur_vendor.userid = ' . db_prefix() . 'pur_contacts.userid', 'left');
+        $CI->db->where(db_prefix() . 'pur_contacts.id', $id);
+        $CI->db->group_by(db_prefix() . 'pur_contacts.id');
+        $pur_contacts = $CI->db->get()->row();
+        if(!empty($pur_contacts)) {
+            $is_create_value = $is_create ? 'created' : 'deleted';
+            $description = "Vendor contact <b>".$pur_contacts->firstname." ".$pur_contacts->lastname." (".$pur_contacts->company.")</b> has been ".$is_create_value.".";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'ven',
+                'rel_id' => $id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}

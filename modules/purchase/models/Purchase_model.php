@@ -270,6 +270,7 @@ class Purchase_model extends App_Model
                 'id'            => $userid,
                 'data'          => $data,
             ]);
+            add_vendor_activity_log($userid, true);
         }
 
         if ($userid) {
@@ -543,6 +544,7 @@ class Purchase_model extends App_Model
      */
     public function delete_vendor($id)
     {
+        add_vendor_activity_log($id, false);
         $affectedRows = 0;
 
         hooks()->do_action('before_client_deleted', $id);
@@ -659,6 +661,8 @@ class Purchase_model extends App_Model
                 $this->send_contact_welcome_mail($data, $password_before_hash, $contact_id);
             }
 
+            add_vendor_contact_activity_log($contact_id, true);
+
             return $contact_id;
         }
 
@@ -761,6 +765,7 @@ class Purchase_model extends App_Model
      */
     public function delete_contact($id)
     {
+        add_vendor_contact_activity_log($id, false);
         hooks()->do_action('before_delete_contact', $id);
 
         $this->db->where('id', $id);

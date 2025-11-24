@@ -59,6 +59,9 @@
 
 
                            <?php } ?>
+                           <a href="<?php echo admin_url('purchase/activity_log?module=ven'); ?>" class="btn btn-info pull-left display-block mright5" target="_blank">
+                           <?php echo _l('activity_log'); ?>
+                           </a>
                            <a href="javascript:void(0);" class="btn btn-info pull-left mright5"
                               data-toggle="collapse"
                               data-target="#vendors-charts-section"
