@@ -6377,6 +6377,7 @@ class Purchase_model extends App_Model
                     // okey only index.html so we can delete the folder also
                     delete_dir(PURCHASE_MODULE_UPLOAD_FOLDER . '/pur_vendor/' . $attachment->rel_id);
                 }
+                add_vendor_attachment_activity_log($attachment->rel_id, $attachment->file_name, false);
             }
         }
 

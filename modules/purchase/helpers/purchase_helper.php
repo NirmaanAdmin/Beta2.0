@@ -806,6 +806,7 @@ function handle_pur_vendor_attachments_upload($id, $customer_upload = false)
                     }
 
                     $CI->misc_model->add_attachment_to_database($id, 'pur_vendor', $attachment);
+                    add_vendor_attachment_activity_log($id, $filename, true);
                     $totalUploaded++;
                 }
             }
@@ -5613,6 +5614,13 @@ function add_order_notes_activity_log($id, $is_create = true)
                 $module_name = 'co';
                 $rel_id = $co_orders->id;
             }
+            if($notes->rel_type == 'pur_vendor') {
+                $CI->db->where('userid', $notes->rel_id);
+                $pur_vendor = $CI->db->get(db_prefix() . 'pur_vendor')->row();
+                $description = "Notes <b>".$notes->description."</b> has been ".$is_create_value." for vendor <b>".$pur_vendor->company."</b>.";
+                $module_name = 'ven';
+                $rel_id = $pur_vendor->userid;
+            }
             if(!empty($description)) {
                 $CI->db->insert(db_prefix() . 'module_activity_log', [
                     'module_name' => $module_name,
@@ -5661,6 +5669,13 @@ function update_order_notes_activity_log($id, $old_value, $new_value)
                 $description = "Notes field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in change order <b>".$co_orders->pur_order_number."</b>.";
                 $module_name = 'co';
                 $rel_id = $co_orders->id;
+            }
+            if($notes->rel_type == 'pur_vendor') {
+                $CI->db->where('userid', $notes->rel_id);
+                $pur_vendor = $CI->db->get(db_prefix() . 'pur_vendor')->row();
+                $description = "Notes field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in vendor <b>".$pur_vendor->company."</b>.";
+                $module_name = 'ven';
+                $rel_id = $pur_vendor->userid;
             }
             if(!empty($description)) {
                 $CI->db->insert(db_prefix() . 'module_activity_log', [
@@ -6677,6 +6692,29 @@ function add_vendor_contact_activity_log($id, $is_create = true)
         if(!empty($pur_contacts)) {
             $is_create_value = $is_create ? 'created' : 'deleted';
             $description = "Vendor contact <b>".$pur_contacts->firstname." ".$pur_contacts->lastname." (".$pur_contacts->company.")</b> has been ".$is_create_value.".";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'ven',
+                'rel_id' => $id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
+
+function add_vendor_attachment_activity_log($id, $file_name, $is_create = true)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('userid', $id);
+        $pur_vendor = $CI->db->get(db_prefix() . 'pur_vendor')->row();
+        if(!empty($pur_vendor)) {
+            $is_create_value = $is_create ? 'added' : 'removed';
+            $description = "Attachment <b>".$file_name."</b> has been ".$is_create_value." for vendor <b>".$pur_vendor->company."</b>.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'ven',
                 'rel_id' => $id,
