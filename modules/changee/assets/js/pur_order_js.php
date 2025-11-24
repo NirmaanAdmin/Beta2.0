@@ -1091,6 +1091,7 @@ The original amount of INR <strong>${originalAmount}</strong> is hereby revised 
           $('.invoice-item table.invoice-items-table.items tbody').append(response.list_item);
           $('select[name="project"]').val(response.wo_project_id);
           $('select[name="project"]').selectpicker('refresh');
+          $('input[name="order_discount"]').val(response.discount_total);
 
           setTimeout(function() {
             pur_calculate_total();

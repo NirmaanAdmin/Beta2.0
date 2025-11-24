@@ -9342,6 +9342,7 @@ class changee extends AdminController
             'order_summary' => $get_order_summary,
             'terms' => $get_terms,
             'wo_project_id' => $work_order->project,
+            'discount_total' => $work_order->discount_total,
         ]);
     }
 
