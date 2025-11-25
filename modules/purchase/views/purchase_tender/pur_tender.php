@@ -46,16 +46,16 @@
         <div class="panel_s">
           <div class="panel-body">
             <h4 class=""><?php if (isset($pur_tender)) {
-                                                          echo pur_html_entity_decode($pur_tender->pur_tn_code);
-                                                        } else {
-                                                          echo _l($title) . ' ' . _l('purchase_tender');
-                                                        } ?></h4>
+                            echo pur_html_entity_decode($pur_tender->pur_tn_code);
+                          } else {
+                            echo _l($title) . ' ' . _l('purchase_tender');
+                          } ?></h4>
             <?php
-          
+
             if (isset($pur_tender)) {
               echo form_hidden('isedit');
             } ?>
-              <hr />
+            <hr />
             <div class="row accounting-template">
               <div class="row ">
                 <div class="col-md-12">
@@ -68,88 +68,88 @@
 
                     <?php $pur_tender_code = (isset($pur_tender) ? $pur_tender->pur_tn_code : $prefix . '-' . str_pad($next_number, 5, '0', STR_PAD_LEFT) . '-' . date('Y'));
                     echo render_input('pur_tn_code', 'Tender Code', $pur_tender_code, 'text', array('readonly' => '')); ?>
-                    </div>
-                    <div class="col-md-6">
-                      <?php $pur_tender_name = (isset($pur_tender) ? $pur_tender->pur_tn_name : '');
-                      echo render_input('pur_tn_name', 'Tender Name', $pur_tender_name, '', ['readonly' => true]); ?>
-                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <?php $pur_tender_name = (isset($pur_tender) ? $pur_tender->pur_tn_name : '');
+                    echo render_input('pur_tn_name', 'Tender Name', $pur_tender_name, ''); ?>
+                  </div>
 
-                    <?php
-                    $project_id = '';
-                    if ($this->input->get('project')) {
-                      $project_id = $this->input->get('project');
-                    }
-                    ?>
-                    <div class="row ">
-                      <div class="col-md-12">
-                        <div class="col-md-3 form-group">
-                          <label for="project"><?php echo _l('project'); ?></label>
-                          <select name="project" id="project" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>" disabled="true">
-                            <option value=""></option>
-                            <?php foreach ($projects as $s) { ?>
-                              <option value="<?php echo pur_html_entity_decode($s['id']); ?>" <?php if (isset($pur_tender) && $s['id'] == $pur_tender->project) {
-                                                                                                echo 'selected';
-                                                                                              } else if (!isset($pur_tender) && $s['id'] == $project_id) {
-                                                                                                echo 'selected';
-                                                                                              } ?>><?php echo pur_html_entity_decode($s['name']); ?></option>
-                            <?php } ?>
-                          </select>
-                          <br><br>
-                        </div>
-                        <div class="col-md-3 form-group">
-                          <label for="requester"><?php echo _l('requester'); ?></label>
-                          <select name="requester" id="requester" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>" disabled="true">
-                            <option value=""></option>
-                            <?php foreach ($staffs as $s) { ?>
-                              <option value="<?php echo pur_html_entity_decode($s['staffid']); ?>" <?php if (isset($pur_tender) && $s['staffid'] == $pur_tender->requester) {
-                                                                                                      echo 'selected';
-                                                                                                    } elseif ($s['staffid'] == get_staff_user_id()) {
-                                                                                                      echo 'selected';
-                                                                                                    } ?>><?php echo pur_html_entity_decode($s['lastname'] . ' ' . $s['firstname']); ?></option>
-                            <?php } ?>
-                          </select>
-                          <br><br>
-                        </div>
-                        <div class="col-md-3 form-group">
-                          <?php
-                          $selected = '';
-                          foreach ($commodity_groups_pur_tender as $group) {
-                            if (isset($pur_tender)) {
-                              if ($pur_tender->group_pur == $group['id']) {
-                                $selected = $group['id'];
-                              }
+                  <?php
+                  $project_id = '';
+                  if ($this->input->get('project')) {
+                    $project_id = $this->input->get('project');
+                  }
+                  ?>
+                  <div class="row ">
+                    <div class="col-md-12">
+                      <div class="col-md-3 form-group">
+                        <label for="project"><?php echo _l('project'); ?></label>
+                        <select name="project" id="project" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>" disabled="true">
+                          <option value=""></option>
+                          <?php foreach ($projects as $s) { ?>
+                            <option value="<?php echo pur_html_entity_decode($s['id']); ?>" <?php if (isset($pur_tender) && $s['id'] == $pur_tender->project) {
+                                                                                              echo 'selected';
+                                                                                            } else if (!isset($pur_tender) && $s['id'] == $project_id) {
+                                                                                              echo 'selected';
+                                                                                            } ?>><?php echo pur_html_entity_decode($s['name']); ?></option>
+                          <?php } ?>
+                        </select>
+                        <br><br>
+                      </div>
+                      <div class="col-md-3 form-group">
+                        <label for="requester"><?php echo _l('requester'); ?></label>
+                        <select name="requester" id="requester" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>" disabled="true">
+                          <option value=""></option>
+                          <?php foreach ($staffs as $s) { ?>
+                            <option value="<?php echo pur_html_entity_decode($s['staffid']); ?>" <?php if (isset($pur_tender) && $s['staffid'] == $pur_tender->requester) {
+                                                                                                    echo 'selected';
+                                                                                                  } elseif ($s['staffid'] == get_staff_user_id()) {
+                                                                                                    echo 'selected';
+                                                                                                  } ?>><?php echo pur_html_entity_decode($s['lastname'] . ' ' . $s['firstname']); ?></option>
+                          <?php } ?>
+                        </select>
+                        <br><br>
+                      </div>
+                      <div class="col-md-3 form-group">
+                        <?php
+                        $selected = '';
+                        foreach ($commodity_groups_pur_tender as $group) {
+                          if (isset($pur_tender)) {
+                            if ($pur_tender->group_pur == $group['id']) {
+                              $selected = $group['id'];
                             }
                           }
-                          echo render_select('group_pur', $commodity_groups_pur_tender, array('id', 'name'), 'Budget Head', $selected, ['disabled' => true]);
-                          ?>
-                        </div>
-                        <div class="col-md-3 form-group">
-                          <label for="send_to_vendors"><?php echo _l('pur_send_to_vendors'); ?></label>
-                          <select name="send_to_vendors[]" id="send_to_vendors" class="selectpicker" multiple="true" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
-                            <?php
-                            if (isset($pur_tender)) {
-                              $vendors_arr = explode(',', $pur_tender->send_to_vendors ?? '');
-                            }
-                            ?>
-
-                            <?php foreach ($vendors as $s) { ?>
-                              <option value="<?php echo pur_html_entity_decode($s['userid']); ?>" <?php if (isset($pur_tender) && in_array($s['userid'], $vendors_arr)) {
-                                                                                                    echo 'selected';
-                                                                                                  } ?>><?php echo pur_html_entity_decode($s['company']); ?></option>
-                            <?php } ?>
-                          </select>
-                        </div>
-
-
+                        }
+                        echo render_select('group_pur', $commodity_groups_pur_tender, array('id', 'name'), 'Budget Head', $selected);
+                        ?>
                       </div>
-                    </div>
+                      <div class="col-md-3 form-group">
+                        <label for="send_to_vendors"><?php echo _l('pur_send_to_vendors'); ?></label>
+                        <select name="send_to_vendors[]" id="send_to_vendors" class="selectpicker" multiple="true" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
+                          <?php
+                          if (isset($pur_tender)) {
+                            $vendors_arr = explode(',', $pur_tender->send_to_vendors ?? '');
+                          }
+                          ?>
 
-                    <div class="col-md-12">
-                      <?php $tn_description = (isset($pur_tender) ? $pur_tender->tn_description : '');
-                      echo render_textarea('tn_description', 'rq_description', $tn_description); ?>
+                          <?php foreach ($vendors as $s) { ?>
+                            <option value="<?php echo pur_html_entity_decode($s['userid']); ?>" <?php if (isset($pur_tender) && in_array($s['userid'], $vendors_arr)) {
+                                                                                                  echo 'selected';
+                                                                                                } ?>><?php echo pur_html_entity_decode($s['company']); ?></option>
+                          <?php } ?>
+                        </select>
+                      </div>
+
+
                     </div>
+                  </div>
+
+                  <div class="col-md-12">
+                    <?php $tn_description = (isset($pur_tender) ? $pur_tender->tn_description : '');
+                    echo render_textarea('tn_description', 'rq_description', $tn_description); ?>
+                  </div>
                 </div>
-                                                                                                  
+
               </div>
             </div>
           </div>
@@ -279,6 +279,7 @@
                           <th align="left" class="qty"><?php echo _l('purchase_quantity'); ?></th>
                           <th align="left" class="qty"><?php echo _l('unit_price'); ?></th>
                           <th align="left"><?php echo _l('Remarks'); ?></th>
+                          <th align="center"><i class="fa fa-cog"></i></th>
                         </tr>
                       </thead>
                       <tbody>
@@ -321,10 +322,127 @@
 </body>
 
 </html>
-<?php require 'modules/purchase/assets/js/import_excel_items_pur_tender_js.php'; ?>
-<?php require 'modules/purchase/assets/js/pur_tender_js.php'; ?>
+
 
 <script>
+  function pur_add_item_to_table(data, itemid) {
+    "use strict";
+
+    data = typeof(data) == 'undefined' || data == 'undefined' ? pur_get_item_preview_values() : data;
+
+    // if (data.warehouse_id == "" || data.quantities == "" || data.commodity_code == "" ) {
+    //   if(data.warehouse_id == ""){
+    //     alert_float('warning', '<?php echo _l('please_select_a_warehouse') ?>');
+    //   }
+    //   return;
+    // }
+    if (data.item_name == "" || data.item_code == "") {
+      alert_float('warning', "Please select item");
+      return;
+    }
+    var currency_rate = $('input[name="currency_rate"]').val();
+    var to_currency = $('select[name="currency"]').val();
+    var table_row = '';
+    var item_key = lastAddedItemKey ? lastAddedItemKey += 1 : $("body").find('.invoice-items-table tbody .item').length + 1;
+    lastAddedItemKey = item_key;
+    $("body").append('<div class="dt-loader"></div>');
+    pur_get_item_row_template('newitems[' + item_key + ']', data.item_code, data.item_text, data.description, data.area, data.image, data.quantity, data.unit_price, data.remarks, item_key).done(function(output) {
+      table_row += output;
+
+      $('.invoice-item table.invoice-items-table.items tbody').append(table_row);
+      var sourceInput = $("input[name='image']")[0];
+      var targetInput = $("input[name='newitems[" + lastAddedItemKey + "][image]']")[0];
+      if (sourceInput.files.length > 0) {
+        var dataTransfer = new DataTransfer();
+        for (var i = 0; i < sourceInput.files.length; i++) {
+          dataTransfer.items.add(sourceInput.files[i]);
+        }
+        targetInput.files = dataTransfer.files;
+      }
+      init_selectpicker();
+      init_datepicker();
+      pur_reorder_items('.invoice-item');
+      pur_clear_item_preview_values('.invoice-item');
+      $('body').find('#items-warning').remove();
+      $("body").find('.dt-loader').remove();
+      $('#item_select').selectpicker('val', '');
+      return true;
+    });
+    return false;
+  }
+
+  function pur_clear_item_preview_values(parent) {
+    "use strict";
+
+    var previewArea = $(parent + ' .main');
+    previewArea.find('input').val('');
+    previewArea.find('textarea').val('');
+    previewArea.find('select').val('').selectpicker('refresh');
+  }
+
+  function pur_get_item_row_template(name, item_code, item_text, description, area, image, quantity, unit_price, remarks, item_key) {
+    "use strict";
+
+    jQuery.ajaxSetup({
+      async: false
+    });
+
+    var d = $.post(admin_url + 'purchase/get_purchase_tender_row_template', {
+      name: name,
+      item_text: item_text,
+      item_description: description,
+      area: area,
+      image: image,
+      quantity: quantity,
+      unit_price: unit_price,
+      remarks: remarks,
+      item_key: item_key
+    });
+    jQuery.ajaxSetup({
+      async: true
+    });
+    return d;
+  }
+
+  function pur_get_item_preview_values() {
+    "use strict";
+
+    var response = {};
+    response.item_text = $('.invoice-item .main textarea[name="item_text"]').val();
+    response.item_code = $('.invoice-item .main input[name="item_code"]').val();
+    response.description = $('.invoice-item .main textarea[name="description"]').val();
+    response.area = $('.invoice-item .main select[name="area"]').val();
+    response.quantity = $('.invoice-item .main input[name="quantity"]').val();
+    response.unit_price = $('.invoice-item .main input[name="unit_price"]').val();
+    response.remarks = $('.invoice-item .main input[name="remarks"]').val();
+
+    return response;
+  }
+
+  function pur_reorder_items(parent) {
+    "use strict";
+
+    var rows = $(parent + ' .table.has-calculations tbody tr.item');
+    var i = 1;
+    $.each(rows, function() {
+      $(this).find('input.order').val(i);
+      i++;
+    });
+  }
+
+  function pur_delete_item(row, itemid, parent) {
+    "use strict";
+
+    $(row).parents('tr').addClass('animated fadeOut', function() {
+      setTimeout(function() {
+        $(row).parents('tr').remove();
+        pur_calculate_total();
+      }, 50);
+    });
+    if (itemid && $('input[name="isedit"]').length > 0) {
+      $(parent + ' #removed-items').append(hidden_input('removed_items[]', itemid));
+    }
+  }
   $(document).ready(function() {
     "use strict";
 

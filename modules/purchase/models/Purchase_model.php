@@ -23056,6 +23056,12 @@ class Purchase_model extends App_Model
         // Fixed typo: render_textare -> render_textarea
         $row .= '<td>' . render_textarea($name_remarks, '', $remarks, ['rows' => 2, 'placeholder' => _l('remarks')]) . '</td>';
 
+        if ($name == '') {
+            $row .= '<td><button type="button" onclick="pur_add_item_to_table(\'undefined\',\'undefined\'); return false;" class="btn pull-right btn-info"><i class="fa fa-check"></i></button></td>';
+        } else {
+            $row .= '<td><a href="#" class="btn btn-danger pull-right" onclick="pur_delete_item(this,' . $item_key . ',\'.invoice-item\'); return false;"><i class="fa fa-trash"></i></a></td>';
+        }
+
         $row .= '</tr>';
 
         return $row;
@@ -25768,5 +25774,22 @@ class Purchase_model extends App_Model
             $this->db->insert(db_prefix() . 'pur_bills_approval_details', $row);
         }
         return true;
+    }
+
+    public function add_pur_tender($data){
+        echo '<pre>'; print_r($data);die;
+        unset(
+            $data['number'],
+            $data['pur_tn_code'],
+            $data['pur_tn_name'],
+            $data['group_pur'],
+            $data['tn_description'],
+            $data['leads_import'],
+            $data['from_currency'],
+            $data['currency_rate'],
+            $data['item_text'],
+            $data['quantity'],
+            $data['unit_price'],
+        );
     }
 }

@@ -10953,7 +10953,7 @@ class purchase extends AdminController
     {
 
 
-        // Load the database library
+        // Load the database library 
         $this->load->database();
 
         // Query to fetch data from tblitems
@@ -15661,17 +15661,17 @@ class purchase extends AdminController
         $this->load->model('currencies_model');
         if ($id == '') {
 
-            // if ($this->input->post()) {
-            //     $add_data = $this->input->post();
-            //     $id = $this->purchase_model->add_pur_request($add_data);
-            //     if ($id) {
-            //         set_alert('success', _l('added_pur_request'));
-            //     }
-            //     redirect(admin_url('purchase/purchase_request'));
-            // }
+            if ($this->input->post()) {
+                $add_data = $this->input->post();
+                $id = $this->purchase_model->add_pur_tender($add_data);
+                if ($id) {
+                    set_alert('success', _l('added_pur_request'));
+                }
+                redirect(admin_url('purchase/view_pur_tender/' . $id));
+            }
 
-            // $data['title'] = _l('add_new');
-            // $is_edit = false;
+            $data['title'] = _l('add_new');
+            $is_edit = false;
         } else {
             if ($this->input->post()) {
                 $edit_data = $this->input->post();
@@ -15695,7 +15695,7 @@ class purchase extends AdminController
         $data['area_pur_request'] = $this->purchase_model->get_area();
         $data['base_currency'] = $this->currencies_model->get_base_currency();
 
-        $purchase_request_row_template = '';
+        $purchase_request_row_template = $this->purchase_model->create_purchase_tender_row_template();
 
         if ($id != '') {
             $data['pur_tender_detail'] = $this->purchase_model->get_pur_tender_detail($id);
@@ -17060,5 +17060,19 @@ class purchase extends AdminController
                 'result' => $message,
             ]);
         }
+    }
+    public function get_purchase_tender_row_template()
+    {
+        $name = $this->input->post('name');
+        $item_text = $this->input->post('item_text');
+        $item_description = $this->input->post('item_description');
+        $area = $this->input->post('area');
+        $image = $this->input->post('image');
+        $quantity = $this->input->post('quantity');
+        $unit_price = $this->input->post('unit_price');
+        $remarks = $this->input->post('remarks');
+        $item_key = $this->input->post('item_key');
+
+        echo $this->purchase_model->create_purchase_tender_row_template($name, $item_text, $item_description, $area, $image, $quantity, $item_key, '', $unit_price, $remarks);
     }
 }

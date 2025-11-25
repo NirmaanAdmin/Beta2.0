@@ -20,18 +20,17 @@ $module_name = 'purchase_tender';
                 <hr />
               </div>
             </div>
-            <!-- <div class="row">
+            <div class="row">
               <div class="_buttons col-md-2">
-                <?php if (has_permission('purchase_tender', '', 'create') || is_admin()) { ?>
-                  <a href="<?php echo admin_url('purchase/pur_request'); ?>" class="btn btn-info pull-left mright10 display-block">
+                
+                  <a href="<?php echo admin_url('purchase/pur_tender'); ?>" class="btn btn-info pull-left mright10 display-block">
                     <?php echo _l('new_pur_request'); ?>
                   </a>
-                <?php } ?>
                 <button class="btn btn-info pull-left mleft10 display-block" type="button" data-toggle="collapse" data-target="#pr-charts-section" aria-expanded="true"aria-controls="pr-charts-section">
                 <?php echo _l('Tender Charts'); ?> <i class="fa fa-chevron-down toggle-icon"></i>
                 </button>
               </div>
-            </div> -->
+            </div>
 
             <!-- <div id="pr-charts-section" class="collapse in">
               <div class="row">
