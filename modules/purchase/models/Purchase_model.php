@@ -413,6 +413,7 @@ class Purchase_model extends App_Model
             unset($data['rworkprogressitems']);
         }
 
+        update_all_vendor_fields_activity_log($id, $data);
         $this->db->where('userid', $id);
         $this->db->update(db_prefix() . 'pur_vendor', $data);
 

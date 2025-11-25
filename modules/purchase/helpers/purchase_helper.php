@@ -6799,3 +6799,112 @@ function get_package_rate_values($package_id)
         'total_sum' => $total_sum
     ];
 }
+
+function update_all_vendor_fields_activity_log($id, $new_data)
+{
+    $CI = &get_instance();
+    if (empty($id)) {
+        return false;
+    }
+    $pur_vendor = $CI->db->where('userid', $id)
+        ->get(db_prefix() . 'pur_vendor')
+        ->row();
+    if (!$pur_vendor) {
+        return false;
+    }
+    $old_data = (array)$pur_vendor;
+    $normalize = function ($value) {
+        $value = trim((string)$value);
+        if (in_array(strtolower($value), ['null', 'none', 'nil', 'n/a', '-', '--'])) {
+            return '';
+        }
+        if ($value === '0000-00-00') {
+            return '';
+        }
+        if (is_numeric($value)) {
+            $num = (float)$value;
+            return ($num == 0.0) ? '' : $num;
+        }
+        return strtolower($value);
+    };
+    $norm_old = array_map($normalize, $old_data);
+    $norm_new = array_map($normalize, $new_data);
+    $changes = array_diff_assoc($norm_new, $norm_old);
+    if (empty($changes)) {
+        return true;
+    }
+    $field_map = [
+        'vendor_code' => _l('vendor_code'),
+        'company' => _l('client_company'),
+        'com_email' => _l('Company Email'),
+        'pan_number' => _l('Pan Number'),
+        'vat' => _l('vendor_vat'),
+        'phonenumber' => _l('client_phonenumber'),
+        'website' => _l('client_website'),
+        'category' => _l('vendor_category'),
+        'address' => _l('client_address'),
+        'city' => _l('client_city'),
+        'state' => _l('client_state'),
+        'zip' => _l('client_postal_code'),
+        'country' => _l('clients_country'),
+        'bank_detail' => _l('bank_detail'),
+        'preferred_location' => _l('Preferred Location'),
+    ];
+    foreach ($changes as $field => $dummy) {
+        if (!isset($field_map[$field])) {
+            continue;
+        }
+        $old_value = $old_data[$field] ?? '';
+        $new_value = $new_data[$field] ?? '';
+        if ($field === 'category') {
+            if(!empty($old_value)) {
+                $old_value_query = $CI->db->select('category_name')
+                ->where_in('id', explode(",", $old_value))
+                ->from(db_prefix() . 'pur_vendor_cate')
+                ->get()
+                ->result_array();
+                $old_value = !empty($old_value_query) ? implode(', ', array_column($old_value_query, 'category_name')) : '';
+            }
+            if(!empty($new_value)) {
+                $new_value_query = $CI->db->select('category_name')
+                ->where_in('id', explode(",", $new_value))
+                ->from(db_prefix() . 'pur_vendor_cate')
+                ->get()
+                ->result_array();
+                $new_value = !empty($new_value_query) ? implode(', ', array_column($new_value_query, 'category_name')) : '';
+            }
+        }
+        if ($field === 'country') {
+            $countries = get_all_countries();
+            $opts = array_column($countries, 'short_name', 'country_id');
+            $old_value = $opts[$old_value] ?? '';
+            $new_value = $opts[$new_value] ?? '';
+        }
+        update_vendor_activity_log($id, $field_map[$field], $old_value, $new_value);
+    }
+    return true;
+}
+
+function update_vendor_activity_log($id, $field, $old_value, $new_value)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('userid', $id);
+        $pur_vendor = $CI->db->get(db_prefix() . 'pur_vendor')->row();
+        if(!empty($pur_vendor)) {
+            $old_value = !empty($old_value) ? $old_value : 'None';
+            $new_value = !empty($new_value) ? $new_value : 'None';
+            $description = "".$field." field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in vendor <b>".$pur_vendor->company."</b>.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'ven',
+                'rel_id' => $id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
