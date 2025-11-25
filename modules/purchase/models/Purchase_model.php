@@ -735,6 +735,7 @@ class Purchase_model extends App_Model
             unset($data['is_primary']);
         }
 
+        update_all_vendor_contact_fields_activity_log($id, $data);
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'pur_contacts', $data);
 
