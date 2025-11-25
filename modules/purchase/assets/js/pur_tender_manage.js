@@ -14,7 +14,7 @@ var Params = {
 (function ($) {
   "use strict";
 
-  initDataTable('.table-table_pur_tender', admin_url + 'purchase/table_pur_tender', [0], [0], Params, [6, 'desc']);
+  initDataTable('.table-table_pur_tender', admin_url + 'purchase/table_pur_tender', [0], [0], Params, [7, 'desc']);
 
   $.each(Params, function (i, obj) {
     $('select' + obj).on('change', function () {

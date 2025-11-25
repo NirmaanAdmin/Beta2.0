@@ -6727,3 +6727,75 @@ function add_vendor_attachment_activity_log($id, $file_name, $is_create = true)
     }
     return true;
 }
+
+
+
+function get_package_items_amount_sum($package_id)
+{
+    $CI = &get_instance();
+    
+    $CI->db->select(
+        db_prefix() . 'itemable.qty,' .
+        db_prefix() . 'itemable.rate,' .
+        db_prefix() . 'itemable.unit_id,' .
+        db_prefix() . 'itemable.item_code,' .
+        db_prefix() . 'itemable.long_description,' .
+        db_prefix() . 'itemable.sub_head,' .
+        db_prefix() . 'itemable.area,' .
+        db_prefix() . 'estimate_package_items_info.*'
+    );
+    $CI->db->from(db_prefix() . 'estimate_package_items_info');
+    $CI->db->join(db_prefix() . 'itemable', db_prefix() . 'itemable.id = ' . db_prefix() . 'estimate_package_items_info.item_id', 'left');
+    $CI->db->where('package_id', $package_id);
+    $CI->db->group_by(db_prefix() . 'estimate_package_items_info.id');
+    $package_items = $CI->db->get()->result_array();
+    
+    $total_amount = 0;
+    
+    foreach ($package_items as $key => $item) {
+        $item_qty = !empty($item['qty']) ? number_format($item['qty'], 2, '.', '') : 0.00;
+        $item_rate = !empty($item['rate']) ? number_format($item['rate'], 2, '.', '') : 0.00;
+        $item_amount = number_format($item_qty * $item_rate, 2, '.', '');
+        
+        // Add to total amount
+        $total_amount += (float)$item_amount;
+    }
+    
+    return $total_amount;
+}
+
+function get_package_rate_values($package_id)
+{
+    $CI = &get_instance();
+    
+    $CI->db->select(
+        db_prefix() . 'itemable.qty,' .
+        db_prefix() . 'itemable.rate,' .
+        db_prefix() . 'itemable.unit_id,' .
+        db_prefix() . 'itemable.item_code,' .
+        db_prefix() . 'itemable.long_description,' .
+        db_prefix() . 'itemable.sub_head,' .
+        db_prefix() . 'itemable.area,' .
+        db_prefix() . 'estimate_package_items_info.*'
+    );
+    $CI->db->from(db_prefix() . 'estimate_package_items_info');
+    $CI->db->join(db_prefix() . 'itemable', db_prefix() . 'itemable.id = ' . db_prefix() . 'estimate_package_items_info.item_id', 'left');
+    $CI->db->where('package_id', $package_id);
+    $CI->db->group_by(db_prefix() . 'estimate_package_items_info.id');
+    $package_items = $CI->db->get()->result_array();
+    
+    $package_rates = [];
+    $total_sum = 0;
+    
+    foreach ($package_items as $key => $item) {
+        $package_rate_name_attr = "items[$key][package_rate]";
+        $package_rate_value = !empty($item['package_rate']) ? (float)$item['package_rate'] : 0;
+        
+        $package_rates[] = $package_rate_name_attr;
+        $total_sum += $package_rate_value;
+    }
+    
+    return [
+        'total_sum' => $total_sum
+    ];
+}

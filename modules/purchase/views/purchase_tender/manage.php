@@ -227,6 +227,8 @@ $module_name = 'purchase_tender';
               // _l('sub_groups_pur'),
               // _l('area_pur'),
               _l('requester'),
+              'Budgeted Amount',
+              'Package Amount',
               // _l('department'),
               _l('request_date'),
               _l('project'),

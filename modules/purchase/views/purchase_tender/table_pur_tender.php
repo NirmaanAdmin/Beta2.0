@@ -19,6 +19,8 @@ $aColumns = [
     // 'sub_group_name',
     // 'area_name',
     'requester',
+    '1',
+    '2',
     // 'department', 
     'request_date',
     'project',
@@ -139,6 +141,7 @@ $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [
     'tbldepartments.name',
     'pur_tn_code',
     '(SELECT GROUP_CONCAT(' . db_prefix() . 'project_members.staff_id SEPARATOR ",") FROM ' . db_prefix() . 'project_members WHERE ' . db_prefix() . 'project_members.project_id=' . db_prefix() . 'pur_tender.project) as member_list',
+    'package_id',
 ], '', [], $having);
 
 $output  = $result['output'];
@@ -160,6 +163,12 @@ foreach ($rResult as $aRow) {
                 ]) . '</a>';
                 $_data .= ' <a href="' . admin_url('staff/profile/' . $aRow['requester']) . '">' . get_staff_full_name($aRow['requester']) . '</a>';
             }
+        } elseif($aColumns[$i] == '1'){
+            $budget_amount = get_package_items_amount_sum($aRow['package_id']);
+            $_data = app_format_money($budget_amount, '₹');
+        }elseif($aColumns[$i] == '2'){
+            $package_amount = get_package_rate_values($aRow['package_id']);
+            $_data = app_format_money($package_amount->total_sum, '₹');
         } elseif ($aColumns[$i] == db_prefix() . 'departments.name as department_name') {
             $_data = $aRow['department_name'];
         } elseif ($aColumns[$i] == 'status') {
