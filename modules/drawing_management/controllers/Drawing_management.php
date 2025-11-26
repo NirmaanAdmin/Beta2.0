@@ -1368,4 +1368,21 @@ class drawing_management extends AdminController
 		
 		redirect($_SERVER['HTTP_REFERER']);
 	}
+
+	public function download_all_rfi_pdf($file_id)
+	{
+	    $rfi_dms_items = get_rfi_dms_items($file_id);
+	    $urls = [];
+	    if (!empty($rfi_dms_items)) {
+	        foreach ($rfi_dms_items as $row) {
+	            $ticket_id = $row['ticketid'];
+	            $urls[] = admin_url('tickets/pdf/' . $ticket_id);
+	        }
+	    }
+	    echo json_encode([
+	        'status' => !empty($urls) ? true : false,
+	        'download_urls' => $urls
+	    ]);
+	    return;
+	}
 }

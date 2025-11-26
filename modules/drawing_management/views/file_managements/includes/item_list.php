@@ -84,7 +84,7 @@
 								if (!drawing_check_file_locked($value['id'])) {
 									echo '<li class="no-padding"><a href="' . admin_url('drawing_management?id=' . $value['id'] . '&edit=1&pid=' . $value['parent_id']) . '" data-name="' . drawing_htmldecode($value['name']) . '">' . _l('dmg_edit_metadata') . '</a></li>';
 								}
-								$download = '<a href="' . site_url('modules/drawing_management/uploads/files/' . $parent_id . '/' . $value['name']) . '" download>' . _l('dmg_dowload') . '</a>';
+								$download = '<a href="' . site_url('modules/drawing_management/uploads/files/' . $parent_id . '/' . $value['name']) . '" download onclick="download_all_rfi_pdf('.$value['id'].')">' . _l('dmg_dowload') . '</a>';
 							}
 							?>
 							<li class="no-padding"><a href="#" data-type="<?php echo drawing_htmldecode($value['filetype']); ?>" onclick="share_document(this, '<?php echo drawing_htmldecode($value['id']); ?>')"><?php echo _l('dmg_share') ?></a></li>
@@ -146,4 +146,32 @@
 			}
 		});
 	});
+
+	function download_all_rfi_pdf(file_id) {
+	    $.ajax({
+	        url: admin_url + 'drawing_management/download_all_rfi_pdf/' + file_id,
+	        type: 'GET',
+	        dataType: 'json',   
+	        success: function(res) {
+	            console.log(res);
+	            if (res.status === true) {
+	                triggerMultipleDownloads(res.download_urls);
+	            }
+	        }
+	    });
+	}
+
+	function triggerMultipleDownloads(urls) {
+	    let delay = 500;
+	    urls.forEach((url, index) => {
+	        setTimeout(() => {
+	            let a = document.createElement('a');
+	            a.href = url;
+	            a.download = "";
+	            document.body.appendChild(a);
+	            a.click();
+	            a.remove();
+	        }, index * delay);
+	    });
+	}
 </script>
