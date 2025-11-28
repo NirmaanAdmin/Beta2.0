@@ -1783,7 +1783,7 @@ class Tickets_model extends App_Model
                 END AS name
             ");
             $this->db->where('master_id', $dms_items->id);
-            // $this->db->where('filetype !=', 'folder');
+            $this->db->where('filetype !=', 'folder');
             $this->db->order_by('id', 'asc');
             $result = $this->db->get(db_prefix() . 'dms_items')->result_array();
         }
