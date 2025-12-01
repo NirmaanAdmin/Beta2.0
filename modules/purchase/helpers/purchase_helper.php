@@ -6706,31 +6706,6 @@ function add_vendor_contact_activity_log($id, $is_create = true)
     return true;
 }
 
-function add_vendor_attachment_activity_log($id, $file_name, $is_create = true)
-{
-    $CI = &get_instance();
-    $default_project = get_default_project();
-    if(!empty($id)) {
-        $CI->db->where('userid', $id);
-        $pur_vendor = $CI->db->get(db_prefix() . 'pur_vendor')->row();
-        if(!empty($pur_vendor)) {
-            $is_create_value = $is_create ? 'added' : 'removed';
-            $description = "Attachment <b>".$file_name."</b> has been ".$is_create_value." for vendor <b>".$pur_vendor->company."</b>.";
-            $CI->db->insert(db_prefix() . 'module_activity_log', [
-                'module_name' => 'ven',
-                'rel_id' => $id,
-                'description' => $description,
-                'date' => date('Y-m-d H:i:s'),
-                'staffid' => get_staff_user_id(),
-                'project_id' => $default_project
-            ]);
-        }
-    }
-    return true;
-}
-
-
-
 function get_package_items_amount_sum($package_id)
 {
     $CI = &get_instance();
@@ -6993,6 +6968,29 @@ function update_vendor_contact_activity_log($id, $field, $old_value, $new_value)
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'ven',
                 'rel_id' => $pur_contacts->userid,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
+
+function add_vendor_attachment_activity_log($id, $file_name, $is_create = true)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('userid', $id);
+        $pur_vendor = $CI->db->get(db_prefix() . 'pur_vendor')->row();
+        if(!empty($pur_vendor)) {
+            $is_create_value = $is_create ? 'added' : 'removed';
+            $description = "Attachment <b>".$file_name."</b> has been ".$is_create_value." for vendor <b>".$pur_vendor->company."</b>.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'ven',
+                'rel_id' => $id,
                 'description' => $description,
                 'date' => date('Y-m-d H:i:s'),
                 'staffid' => get_staff_user_id(),
