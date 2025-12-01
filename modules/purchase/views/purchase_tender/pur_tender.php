@@ -62,11 +62,11 @@
           <div class="panel-body">
             <div class="row">
               <div class="col-md-3">
-              <h4 class=""><?php if (isset($pur_tender)) {
-                              echo pur_html_entity_decode($pur_tender->pur_tn_code);
-                            } else {
-                              echo _l($title) . ' ' . _l('purchase_tender');
-                            } ?></h4>
+                <h4 class=""><?php if (isset($pur_tender)) {
+                                echo pur_html_entity_decode($pur_tender->pur_tn_code);
+                              } else {
+                                echo _l($title) . ' ' . _l('purchase_tender');
+                              } ?></h4>
               </div>
               <div class="col-md-3 form-group">
                 <!-- <label for="send_to_vendors"><?php echo _l('pur_send_to_vendors'); ?></label> -->
@@ -339,15 +339,101 @@
     </div>
     <?php echo form_close(); ?>
   </div>
+  <div class="modal fade" id="vendorWarningModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" style="width: 450px;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Select Vendors</h4>
+        </div>
+
+        <div class="modal-body">
+          <p>Please select at least one vendor to continue:</p>
+
+          <select id="modalVendorSelect"
+            class="selectpicker"
+            multiple
+            data-live-search="true"
+            data-width="100%">
+          </select>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="saveVendorSelection" class="btn btn-primary">
+            Save Vendors
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
 </div>
 
 <?php init_tail(); ?>
 </body>
 
 </html>
+<?php
+$is_edit_mode = isset($pur_tender);
+$vendors_arr = $is_edit_mode ? explode(',', ($pur_tender->send_to_vendors ?? '')) : [];
+$vendors_arr = array_filter($vendors_arr); // removes empty values
 
+$show_vendor_modal = $is_edit_mode && empty($vendors_arr);
+
+$vendor_list = [];
+foreach ($vendors as $v) {
+  $vendor_list[] = [
+    'id' => $v['userid'],
+    'name' => $v['company']
+  ];
+}
+?>
+<script>
+  var SHOW_VENDOR_MODAL = <?php echo $show_vendor_modal ? 'true' : 'false'; ?>;
+  var VENDOR_LIST = <?php echo json_encode($vendor_list); ?>;
+</script>
 
 <script>
+  $(document).ready(function() {
+
+    if (SHOW_VENDOR_MODAL) {
+
+      // Build modal vendor list
+      let html = '';
+      VENDOR_LIST.forEach(v => {
+        html += `<option value="${v.id}">${v.name}</option>`;
+      });
+
+      $("#modalVendorSelect").html(html);
+      $("#modalVendorSelect").selectpicker('refresh');
+
+      // Show modal
+      $('#vendorWarningModal').modal({
+        backdrop: 'static',
+        keyboard: false
+      });
+    }
+
+  });
+
+  $(document).on('click', '#saveVendorSelection', function() {
+
+    let selectedVendors = $("#modalVendorSelect").val();
+
+    if (!selectedVendors || selectedVendors.length === 0) {
+      alert_float('warning', 'Please select at least one vendor.');
+      return;
+    }
+
+    // Apply selected vendors to the main multi-select
+    $("#send_to_vendors").selectpicker('val', selectedVendors);
+    $("#send_to_vendors").selectpicker('refresh');
+
+    // Close modal
+    $('#vendorWarningModal').modal('hide');
+  });
+
+
   $(document).ready(function() {
     "use strict";
 
