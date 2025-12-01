@@ -479,8 +479,3 @@ $(function() {
 <?php
 }
 
-function convert_pdf_for_fpdi($input, $output)
-{
-    $cmd = "gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/prepress -dNOPAUSE -dQUIET -dBATCH -sOutputFile='$output' '$input'";   
-    shell_exec($cmd);
-}
