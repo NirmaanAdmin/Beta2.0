@@ -10,6 +10,7 @@
             <?php echo 'Create New Budget'; ?>
         </a>
     <?php } ?>
+    <a href="<?php echo admin_url('purchase/activity_log?module=bud'); ?>" class="btn btn-primary pull-left mleft5" target="_blank"><?php echo _l('activity_log'); ?></a>
     <a href="<?php echo admin_url('estimates/pipeline/' . $switch_pipeline); ?>"
         class="btn btn-default mleft5 pull-left switch-pipeline hidden-xs" data-toggle="tooltip" data-placement="top"
         data-title="<?php echo _l('switch_to_pipeline'); ?>">

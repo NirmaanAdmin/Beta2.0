@@ -598,3 +598,164 @@ function get_package_rli_filter_dropdown($name, $value)
     $select .= '</select>';
     return $select;
 }
+
+function add_budget_activity_log($id, $is_create = true)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $estimates = $CI->db->get(db_prefix() . 'estimates')->row();
+        if(!empty($estimates)) {
+            $is_create_value = $is_create ? 'created' : 'deleted';
+            $description = "Budget <b>".format_estimate_number($id)."</b> has been ".$is_create_value.".";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'bud',
+                'rel_id' => $id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
+
+function update_all_budget_fields_activity_log($id, $new_data)
+{
+    $CI = &get_instance();
+    $CI->load->model('staff_model');
+    $CI->load->model('invoices_model');
+    if (empty($id)) {
+        return false;
+    }
+    $estimates = $CI->db->where('id', $id)
+        ->get(db_prefix() . 'estimates')
+        ->row();
+    if (!$estimates) {
+        return false;
+    }
+    $old_data = (array)$estimates;
+    $normalize = function ($value) {
+        $value = trim((string)$value);
+        if (in_array(strtolower($value), ['null', 'none', 'nil', 'n/a', '-', '--'])) {
+            return '';
+        }
+        if ($value === '0000-00-00') {
+            return '';
+        }
+        if (is_numeric($value)) {
+            $num = (float)$value;
+            return ($num == 0.0) ? '' : $num;
+        }
+        return strtolower($value);
+    };
+    $norm_old = array_map($normalize, $old_data);
+    $norm_new = array_map($normalize, $new_data);
+    $changes = array_diff_assoc($norm_new, $norm_old);
+    if (empty($changes)) {
+        return true;
+    }
+    $field_map = [
+        'budget_description' => _l('budget_description'),
+        'clientid' => _l('estimate_select_customer'),
+        'project_id' => _l('project'),
+        'status' => _l('estimate_status'),
+        'billing_street' => _l('billing_street'),
+        'billing_city' => _l('billing_city'),
+        'billing_state' => _l('billing_state'),
+        'billing_zip' => _l('billing_zip'),
+        'billing_country' => _l('billing_country'),
+        'shipping_street' => _l('shipping_street'),
+        'shipping_city' => _l('shipping_city'),
+        'shipping_state' => _l('shipping_state'),
+        'shipping_zip' => _l('shipping_zip'),
+        'shipping_country' => _l('shipping_country'),
+        'reference_no' => _l('reference_no'),
+        'sale_agent' => _l('sale_agent_string'),
+        'discount_type' => _l('discount_type'),
+        'number' => _l('Budget Number'),
+        'adminnote' => _l('estimate_add_edit_admin_note'),
+        'date' => _l('Budget Date'),
+        'expirydate' => _l('estimate_add_edit_expirydate'),
+        'hsn_sac' => _l('hsn_sac'),
+        'project_brief' => _l('project_brief'),
+        'project_timelines' => _l('project_timelines'),
+    ];
+    foreach ($changes as $field => $dummy) {
+        if (!isset($field_map[$field])) {
+            continue;
+        }
+        $old_value = $old_data[$field] ?? '';
+        $new_value = $new_data[$field] ?? '';
+        if ($field === 'clientid') {
+            $old_value = !empty($old_value) ? get_company_name($old_value) : '';
+            $new_value = !empty($new_value) ? get_company_name($new_value) : '';
+        }
+        if ($field === 'project_id') {
+            $old_value = !empty($old_value) ? get_project_name_by_id($old_value) : '';
+            $new_value = !empty($new_value) ? get_project_name_by_id($new_value) : '';
+        }
+        if ($field === 'status') {
+            $old_value = !empty($old_value) ? estimate_status_by_id($old_value) : '';
+            $new_value = !empty($new_value) ? estimate_status_by_id($new_value) : '';
+        }
+        if ($field === 'billing_country' || $field === 'shipping_country') {
+            $countries = get_all_countries();
+            $opts = array_column($countries, 'short_name', 'country_id');
+            $old_value = $opts[$old_value] ?? '';
+            $new_value = $opts[$new_value] ?? '';
+        }
+        if ($field === 'sale_agent') {
+            $staff_list = $CI->staff_model->get('', ['active' => 1]);
+            $opts = array_combine(
+                array_column($staff_list, 'staffid'),
+                array_map(fn($a) => $a['firstname'] . ' ' . $a['lastname'], $staff_list)
+            );
+            $old_value = $opts[$old_value] ?? '';
+            $new_value = $opts[$new_value] ?? '';
+        }
+        if ($field === 'discount_type') {
+            $opts = [
+                '' => _l('no_discount'),
+                'before_tax' => _l('discount_type_before_tax'),
+                'after_tax' => _l('discount_type_after_tax'),
+            ];
+            $old_value = $opts[$old_value] ?? '';
+            $new_value = $opts[$new_value] ?? '';
+        }
+        if ($field === 'hsn_sac') {
+            $hsn_sac_code = $CI->invoices_model->get_hsn_sac_code();
+            $opts = array_column($hsn_sac_code, 'name', 'id');
+            $old_value = $opts[$old_value] ?? '';
+            $new_value = $opts[$new_value] ?? '';
+        }
+        update_budget_activity_log($id, $field_map[$field], $old_value, $new_value);
+    }
+    return true;
+}
+
+function update_budget_activity_log($id, $field, $old_value, $new_value)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $estimates = $CI->db->get(db_prefix() . 'estimates')->row();
+        if(!empty($estimates)) {
+            $old_value = !empty($old_value) ? $old_value : 'None';
+            $new_value = !empty($new_value) ? $new_value : 'None';
+            $description = "".$field." field has been updated from <b>".$old_value."</b> to <b>".$new_value."</b> in budget <b>".format_estimate_number($id)."</b>.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'bud',
+                'rel_id' => $id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}

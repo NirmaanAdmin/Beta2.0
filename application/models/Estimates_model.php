@@ -626,6 +626,8 @@ class Estimates_model extends App_Model
                 $this->send_estimate_to_client($insert_id, '', true, '', true);
             }
 
+            add_budget_activity_log($insert_id, true);
+
             return $insert_id;
         }
 
@@ -820,6 +822,7 @@ class Estimates_model extends App_Model
             unset($data['next_revision']);
         }
 
+        update_all_budget_fields_activity_log($id, $data);
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'estimates', $data);
 

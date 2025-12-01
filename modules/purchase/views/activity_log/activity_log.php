@@ -182,6 +182,9 @@ $module_name = 'module_activity_log'; ?>
                            if (isset($_GET['module']) && $_GET['module'] == 'ven') {
                               $module_name_filter_val = $_GET['module'];
                            }
+                           if (isset($_GET['module']) && $_GET['module'] == 'bud') {
+                              $module_name_filter_val = $_GET['module'];
+                           }
                            $module_name_list = [
                               ['id' => 'timesheets', 'name' => _l('Leaves')],
                               ['id' => 'stckrec', 'name' => _l('Stock Received')],
@@ -195,6 +198,7 @@ $module_name = 'module_activity_log'; ?>
                               ['id' => 'co', 'name' => _l('change_order')],
                               ['id' => 'ex', 'name' => _l('Expense')],
                               ['id' => 'ven', 'name' => _l('vendor')],
+                              ['id' => 'bud', 'name' => _l('Budget')],
                               ['id' => 'cli', 'name' => _l('Client Invoices / Client Payments')],
                               ['id' => 'dms', 'name' => _l('Drawing Management')],
                               ['id' => 'dmg', 'name' => _l('Document Management')],
