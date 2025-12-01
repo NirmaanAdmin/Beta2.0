@@ -861,176 +861,356 @@ class Tickets extends AdminController
     //     }
     //     $pdf->Output(mb_strtoupper(slug_it($ticket->subject)) . '.pdf', $type);
     // }
+    // public function pdf($id)
+    // {
+    //     if (!$id) {
+    //         redirect(admin_url('tickets'));
+    //     }
+
+    //     $ticket = $this->tickets_model->get_ticket_by_id($id);
+
+    //     // Load FPDI library (same as reference code)
+    //     $fpdiBase = APPPATH . 'third_party/fpdi/';
+    //     if (file_exists($fpdiBase . 'src/autoload.php')) {
+    //         require_once $fpdiBase . 'src/autoload.php';
+    //     } elseif (file_exists($fpdiBase . 'autoload.php')) {
+    //         require_once $fpdiBase . 'autoload.php';
+    //     } else {
+    //         if (file_exists($fpdiBase . 'fpdi.php')) {
+    //             require_once $fpdiBase . 'fpdi.php';
+    //         }
+    //         if (file_exists($fpdiBase . 'tcpdf_fpdi.php')) {
+    //             require_once $fpdiBase . 'tcpdf_fpdi.php';
+    //         }
+    //         if (file_exists($fpdiBase . 'fpdi_tcpdf.php')) {
+    //             require_once $fpdiBase . 'fpdi_tcpdf.php';
+    //         }
+    //     }
+
+    //     try {
+    //         $pdf = ticket_pdf($ticket);
+
+    //         // Generate ticket PDF as string (base PDF)
+    //         $basePdfString = $pdf->Output('', 'S');
+
+    //         $dms_items = explode(',', $ticket->dms_items);
+    //         $extraFiles = [];
+
+    //         if (!empty($dms_items)) {
+    //             $this->load->model('drawing_management/drawing_management_model');
+
+    //             foreach ($dms_items as $key => $dms_id) {
+    //                 try {
+    //                     $item = $this->drawing_management_model->get_item($dms_id);
+
+    //                     if ($item) {
+    //                         // Check if file is PDF
+    //                         $extension = pathinfo($item->name, PATHINFO_EXTENSION);
+
+    //                         if (strtolower($extension) === 'pdf') {
+    //                             // Convert URL to server path
+    //                             $file_path = FCPATH . str_replace(
+    //                                 base_url(),
+    //                                 '',
+    //                                 DRAWING_MANAGEMENT_PATH . 'files/' . $item->parent_id . '/' . $item->name
+    //                             );
+    //                             if (file_exists($file_path)) {
+    //                                 $extraFiles[] = $file_path;
+    //                             } else {
+    //                                 log_message('warning', "PDF file not found: {$file_path}");
+    //                             }
+    //                         }
+    //                     } else {
+    //                         log_message('warning', "Item with ID {$dms_id} not found");
+    //                     }
+    //                 } catch (Exception $e) {
+    //                     log_message('error', "Error fetching item {$dms_id}: " . $e->getMessage());
+    //                 }
+    //             }
+    //         }
+
+    //         // Merge PDFs if there are extra files
+    //         if (!empty($extraFiles)) {
+    //             if (class_exists('\setasign\Fpdi\Tcpdf\Fpdi')) {
+    //                 $pdf = new \setasign\Fpdi\Tcpdf\Fpdi('P', 'mm', 'A4', true, 'UTF-8', false);
+    //                 $pdf->setPrintHeader(false);
+    //                 $pdf->setPrintFooter(false);
+
+    //                 // Add base PDF (ticket)
+    //                 $src = \setasign\Fpdi\PdfParser\StreamReader::createByString($basePdfString);
+    //                 $pageCount = $pdf->setSourceFile($src);
+    //                 for ($p = 1; $p <= $pageCount; $p++) {
+    //                     $tplId = $pdf->importPage($p);
+    //                     $size  = $pdf->getTemplateSize($tplId);
+    //                     $orientation = ($size['width'] > $size['height']) ? 'L' : 'P';
+    //                     $pdf->AddPage($orientation, [$size['width'], $size['height']]);
+    //                     $pdf->useTemplate($tplId, 0, 0, $size['width'], $size['height'], true);
+    //                 }
+
+    //                 // Add extra PDF files from DMS
+    //                 foreach ($extraFiles as $file) {
+    //                     if (!is_file($file)) {
+    //                         continue;
+    //                     }
+    //                     $pageCount = $pdf->setSourceFile($file);
+    //                     for ($p = 1; $p <= $pageCount; $p++) {
+    //                         $tplId = $pdf->importPage($p);
+    //                         $size  = $pdf->getTemplateSize($tplId);
+    //                         $orientation = ($size['width'] > $size['height']) ? 'L' : 'P';
+    //                         $pdf->AddPage($orientation, [$size['width'], $size['height']]);
+    //                         $pdf->useTemplate($tplId, 0, 0, $size['width'], $size['height'], true);
+    //                     }
+    //                 }
+    //             } else {
+    //                 // Fallback for older FPDI versions
+    //                 $tmpDir = sys_get_temp_dir();
+    //                 $tmpBase = tempnam($tmpDir, 'ticket_') . '.pdf';
+    //                 file_put_contents($tmpBase, $basePdfString);
+
+    //                 if (class_exists('TCPDF_FPDI')) {
+    //                     $pdf = new \TCPDF_FPDI('P', 'mm', 'A4', true, 'UTF-8', false);
+    //                 } elseif (class_exists('FPDI')) {
+    //                     $pdf = new \FPDI('P', 'mm', 'A4', true, 'UTF-8', false);
+    //                 } else {
+    //                     throw new Exception('FPDI library not found/loaded from application/third_party/fpdi.');
+    //                 }
+
+    //                 $pdf->setPrintHeader(false);
+    //                 $pdf->setPrintFooter(false);
+
+    //                 // Add base PDF
+    //                 $pageCount = $pdf->setSourceFile($tmpBase);
+    //                 for ($p = 1; $p <= $pageCount; $p++) {
+    //                     $tplId = $pdf->importPage($p);
+    //                     $size  = method_exists($pdf, 'getTemplateSize') ? $pdf->getTemplateSize($tplId) : '';
+    //                     $orientation = ($size['width'] > $size['height']) ? 'L' : 'P';
+    //                     $pdf->AddPage($orientation, [$size['width'], $size['height']]);
+    //                     $pdf->useTemplate($tplId, 0, 0, $size['width'], $size['height'], true);
+    //                 }
+
+    //                 // Add extra PDF files
+    //                 foreach ($extraFiles as $file) {
+    //                     if (!is_file($file)) {
+    //                         continue;
+    //                     }
+    //                     $pageCount = $pdf->setSourceFile($file);
+    //                     for ($p = 1; $p <= $pageCount; $p++) {
+    //                         $tplId = $pdf->importPage($p);
+    //                         $size  = method_exists($pdf, 'getTemplateSize') ? $pdf->getTemplateSize($tplId) : '';
+    //                         $orientation = ($size['width'] > $size['height']) ? 'L' : 'P';
+    //                         $pdf->AddPage($orientation, [$size['width'], $size['height']]);
+    //                         $pdf->useTemplate($tplId, 0, 0, $size['width'], $size['height'], true);
+    //                     }
+    //                 }
+
+    //                 @unlink($tmpBase);
+    //             }
+    //         } else {
+    //             // No extra files, use the original ticket PDF
+    //             $pdf = ticket_pdf($ticket);
+    //         }
+    //     } catch (Exception $e) {
+    //         $message = $e->getMessage();
+    //         echo $message;
+    //         if (strpos($message, 'Unable to get the size of the image') !== false) {
+    //             show_pdf_unable_to_get_image_size_error();
+    //         }
+    //         die;
+    //     }
+
+    //     $type = 'D';
+
+    //     if ($this->input->get('output_type')) {
+    //         $type = $this->input->get('output_type');
+    //     }
+
+    //     if ($this->input->get('print')) {
+    //         $type = 'I';
+    //     }
+
+    //     $pdf->SetTitle(mb_strtoupper(slug_it($ticket->subject)));
+    //     $pdf_name = mb_strtoupper(slug_it($ticket->subject)) . '.pdf';
+    //     $pdf->Output($pdf_name, $type);
+    // }
+
     public function pdf($id)
-    {
-        if (!$id) {
-            redirect(admin_url('tickets'));
+{
+    if (!$id) {
+        redirect(admin_url('tickets'));
+    }
+
+    $ticket = $this->tickets_model->get_ticket_by_id($id);
+
+    try {
+        $pdf = ticket_pdf($ticket);
+        
+        // Generate ticket PDF as string (base PDF)
+        $basePdfString = $pdf->Output('', 'S');
+        
+        $dms_items = explode(',', $ticket->dms_items);
+        $extraFiles = [];
+
+        if (!empty($dms_items)) {
+            $this->load->model('drawing_management/drawing_management_model');
+            
+            foreach ($dms_items as $key => $dms_id) {
+                try {
+                    $item = $this->drawing_management_model->get_item($dms_id);
+
+                    if ($item) {
+                        $extension = pathinfo($item->name, PATHINFO_EXTENSION);
+                        
+                        if (strtolower($extension) === 'pdf') {
+                            $file_path = FCPATH . str_replace(base_url(), '', 
+                                DRAWING_MANAGEMENT_PATH . 'files/' . $item->parent_id . '/' . $item->name);
+                            
+                            if (file_exists($file_path)) {
+                                $extraFiles[] = $file_path;
+                            }
+                        }
+                    }
+                } catch (Exception $e) {
+                    log_message('error', "Error fetching item {$dms_id}: " . $e->getMessage());
+                }
+            }
         }
 
-        $ticket = $this->tickets_model->get_ticket_by_id($id);
+        // Use Ghostscript for merging if available
+        if (!empty($extraFiles) && $this->hasGhostscript()) {
+            $mergedFile = $this->mergePdfsWithGhostscript($pdf, $extraFiles);
+            
+            if ($mergedFile) {
+                // Output the merged file
+                header('Content-Type: application/pdf');
+                header('Content-Disposition: attachment; filename="' . mb_strtoupper(slug_it($ticket->subject)) . '.pdf"');
+                readfile($mergedFile);
+                @unlink($mergedFile);
+                return;
+            }
+        }
+        
+        // Fallback: Try FPDI with error handling
+        if (!empty($extraFiles)) {
+            $merged = $this->mergePdfsWithFpdi($pdf, $extraFiles);
+            if ($merged) {
+                $pdf = $merged;
+            }
+        }
+        
+    } catch (Exception $e) {
+        $message = $e->getMessage();
+        echo $message;
+        if (strpos($message, 'Unable to get the size of the image') !== false) {
+            show_pdf_unable_to_get_image_size_error();
+        }
+        die;
+    }
 
-        // Load FPDI library (same as reference code)
+    $type = 'D';
+
+    if ($this->input->get('output_type')) {
+        $type = $this->input->get('output_type');
+    }
+
+    if ($this->input->get('print')) {
+        $type = 'I';
+    }
+    
+    $pdf->SetTitle(mb_strtoupper(slug_it($ticket->subject)));
+    $pdf_name = mb_strtoupper(slug_it($ticket->subject)) . '.pdf';
+    $pdf->Output($pdf_name, $type);
+}
+
+private function hasGhostscript()
+{
+    exec('gs --version 2>&1', $output, $return);
+    return $return === 0;
+}
+
+private function mergePdfsWithGhostscript($ticketPdf, $extraFiles)
+{
+    // Save ticket PDF to temp file
+    $ticketPdfString = $ticketPdf->Output('', 'S');
+    $tempDir = sys_get_temp_dir();
+    $tempTicket = tempnam($tempDir, 'ticket_') . '.pdf';
+    file_put_contents($tempTicket, $ticketPdfString);
+    
+    // Prepare all files for merging
+    $allFiles = array_merge([$tempTicket], $extraFiles);
+    $mergedFile = tempnam($tempDir, 'merged_') . '.pdf';
+    
+    // Build Ghostscript command
+    $cmd = 'gs -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -sOutputFile="' . $mergedFile . '" ';
+    
+    foreach ($allFiles as $file) {
+        $cmd .= escapeshellarg($file) . ' ';
+    }
+    
+    exec($cmd, $output, $return);
+    
+    // Clean up temp ticket file
+    @unlink($tempTicket);
+    
+    if ($return === 0 && file_exists($mergedFile) && filesize($mergedFile) > 0) {
+        return $mergedFile;
+    }
+    
+    @unlink($mergedFile);
+    return false;
+}
+
+private function mergePdfsWithFpdi($ticketPdf, $extraFiles)
+{
+    try {
         $fpdiBase = APPPATH . 'third_party/fpdi/';
         if (file_exists($fpdiBase . 'src/autoload.php')) {
             require_once $fpdiBase . 'src/autoload.php';
-        } elseif (file_exists($fpdiBase . 'autoload.php')) {
-            require_once $fpdiBase . 'autoload.php';
-        } else {
-            if (file_exists($fpdiBase . 'fpdi.php')) {
-                require_once $fpdiBase . 'fpdi.php';
-            }
-            if (file_exists($fpdiBase . 'tcpdf_fpdi.php')) {
-                require_once $fpdiBase . 'tcpdf_fpdi.php';
-            }
-            if (file_exists($fpdiBase . 'fpdi_tcpdf.php')) {
-                require_once $fpdiBase . 'fpdi_tcpdf.php';
-            }
         }
-
-        try {
-            $pdf = ticket_pdf($ticket);
-
-            // Generate ticket PDF as string (base PDF)
-            $basePdfString = $pdf->Output('', 'S');
-
-            $dms_items = explode(',', $ticket->dms_items);
-            $extraFiles = [];
-
-            if (!empty($dms_items)) {
-                $this->load->model('drawing_management/drawing_management_model');
-
-                foreach ($dms_items as $key => $dms_id) {
-                    try {
-                        $item = $this->drawing_management_model->get_item($dms_id);
-
-                        if ($item) {
-                            // Check if file is PDF
-                            $extension = pathinfo($item->name, PATHINFO_EXTENSION);
-
-                            if (strtolower($extension) === 'pdf') {
-                                // Convert URL to server path
-                                $file_path = FCPATH . str_replace(
-                                    base_url(),
-                                    '',
-                                    DRAWING_MANAGEMENT_PATH . 'files/' . $item->parent_id . '/' . $item->name
-                                );
-                                if (file_exists($file_path)) {
-                                    $extraFiles[] = $file_path;
-                                } else {
-                                    log_message('warning', "PDF file not found: {$file_path}");
-                                }
-                            }
-                        } else {
-                            log_message('warning', "Item with ID {$dms_id} not found");
-                        }
-                    } catch (Exception $e) {
-                        log_message('error', "Error fetching item {$dms_id}: " . $e->getMessage());
-                    }
+        
+        if (!class_exists('\setasign\Fpdi\Tcpdf\Fpdi')) {
+            return false;
+        }
+        
+        $ticketPdfString = $ticketPdf->Output('', 'S');
+        $mergedPdf = new \setasign\Fpdi\Tcpdf\Fpdi('P', 'mm', 'A4', true, 'UTF-8', false);
+        $mergedPdf->setPrintHeader(false);
+        $mergedPdf->setPrintFooter(false);
+        
+        // Add ticket PDF
+        $src = \setasign\Fpdi\PdfParser\StreamReader::createByString($ticketPdfString);
+        $pageCount = $mergedPdf->setSourceFile($src);
+        for ($p = 1; $p <= $pageCount; $p++) {
+            $tplId = $mergedPdf->importPage($p);
+            $size  = $mergedPdf->getTemplateSize($tplId);
+            $orientation = ($size['width'] > $size['height']) ? 'L' : 'P';
+            $mergedPdf->AddPage($orientation, [$size['width'], $size['height']]);
+            $mergedPdf->useTemplate($tplId, 0, 0, $size['width'], $size['height'], true);
+        }
+        
+        // Try to add each extra file, skip if fails
+        foreach ($extraFiles as $file) {
+            if (!is_file($file)) continue;
+            
+            try {
+                $pageCount = $mergedPdf->setSourceFile($file);
+                for ($p = 1; $p <= $pageCount; $p++) {
+                    $tplId = $mergedPdf->importPage($p);
+                    $size  = $mergedPdf->getTemplateSize($tplId);
+                    $orientation = ($size['width'] > $size['height']) ? 'L' : 'P';
+                    $mergedPdf->AddPage($orientation, [$size['width'], $size['height']]);
+                    $mergedPdf->useTemplate($tplId, 0, 0, $size['width'], $size['height'], true);
                 }
+            } catch (Exception $e) {
+                continue; // Skip incompatible PDFs
             }
-
-            // Merge PDFs if there are extra files
-            if (!empty($extraFiles)) {
-                if (class_exists('\setasign\Fpdi\Tcpdf\Fpdi')) {
-                    $pdf = new \setasign\Fpdi\Tcpdf\Fpdi('P', 'mm', 'A4', true, 'UTF-8', false);
-                    $pdf->setPrintHeader(false);
-                    $pdf->setPrintFooter(false);
-
-                    // Add base PDF (ticket)
-                    $src = \setasign\Fpdi\PdfParser\StreamReader::createByString($basePdfString);
-                    $pageCount = $pdf->setSourceFile($src);
-                    for ($p = 1; $p <= $pageCount; $p++) {
-                        $tplId = $pdf->importPage($p);
-                        $size  = $pdf->getTemplateSize($tplId);
-                        $orientation = ($size['width'] > $size['height']) ? 'L' : 'P';
-                        $pdf->AddPage($orientation, [$size['width'], $size['height']]);
-                        $pdf->useTemplate($tplId, 0, 0, $size['width'], $size['height'], true);
-                    }
-
-                    // Add extra PDF files from DMS
-                    foreach ($extraFiles as $file) {
-                        if (!is_file($file)) {
-                            continue;
-                        }
-                        $pageCount = $pdf->setSourceFile($file);
-                        for ($p = 1; $p <= $pageCount; $p++) {
-                            $tplId = $pdf->importPage($p);
-                            $size  = $pdf->getTemplateSize($tplId);
-                            $orientation = ($size['width'] > $size['height']) ? 'L' : 'P';
-                            $pdf->AddPage($orientation, [$size['width'], $size['height']]);
-                            $pdf->useTemplate($tplId, 0, 0, $size['width'], $size['height'], true);
-                        }
-                    }
-                } else {
-                    // Fallback for older FPDI versions
-                    $tmpDir = sys_get_temp_dir();
-                    $tmpBase = tempnam($tmpDir, 'ticket_') . '.pdf';
-                    file_put_contents($tmpBase, $basePdfString);
-
-                    if (class_exists('TCPDF_FPDI')) {
-                        $pdf = new \TCPDF_FPDI('P', 'mm', 'A4', true, 'UTF-8', false);
-                    } elseif (class_exists('FPDI')) {
-                        $pdf = new \FPDI('P', 'mm', 'A4', true, 'UTF-8', false);
-                    } else {
-                        throw new Exception('FPDI library not found/loaded from application/third_party/fpdi.');
-                    }
-
-                    $pdf->setPrintHeader(false);
-                    $pdf->setPrintFooter(false);
-
-                    // Add base PDF
-                    $pageCount = $pdf->setSourceFile($tmpBase);
-                    for ($p = 1; $p <= $pageCount; $p++) {
-                        $tplId = $pdf->importPage($p);
-                        $size  = method_exists($pdf, 'getTemplateSize') ? $pdf->getTemplateSize($tplId) : '';
-                        $orientation = ($size['width'] > $size['height']) ? 'L' : 'P';
-                        $pdf->AddPage($orientation, [$size['width'], $size['height']]);
-                        $pdf->useTemplate($tplId, 0, 0, $size['width'], $size['height'], true);
-                    }
-
-                    // Add extra PDF files
-                    foreach ($extraFiles as $file) {
-                        if (!is_file($file)) {
-                            continue;
-                        }
-                        $pageCount = $pdf->setSourceFile($file);
-                        for ($p = 1; $p <= $pageCount; $p++) {
-                            $tplId = $pdf->importPage($p);
-                            $size  = method_exists($pdf, 'getTemplateSize') ? $pdf->getTemplateSize($tplId) : '';
-                            $orientation = ($size['width'] > $size['height']) ? 'L' : 'P';
-                            $pdf->AddPage($orientation, [$size['width'], $size['height']]);
-                            $pdf->useTemplate($tplId, 0, 0, $size['width'], $size['height'], true);
-                        }
-                    }
-
-                    @unlink($tmpBase);
-                }
-            } else {
-                // No extra files, use the original ticket PDF
-                $pdf = ticket_pdf($ticket);
-            }
-        } catch (Exception $e) {
-            $message = $e->getMessage();
-            echo $message;
-            if (strpos($message, 'Unable to get the size of the image') !== false) {
-                show_pdf_unable_to_get_image_size_error();
-            }
-            die;
         }
-
-        $type = 'D';
-
-        if ($this->input->get('output_type')) {
-            $type = $this->input->get('output_type');
-        }
-
-        if ($this->input->get('print')) {
-            $type = 'I';
-        }
-
-        $pdf->SetTitle(mb_strtoupper(slug_it($ticket->subject)));
-        $pdf_name = mb_strtoupper(slug_it($ticket->subject)) . '.pdf';
-        $pdf->Output($pdf_name, $type);
+        
+        return $mergedPdf;
+        
+    } catch (Exception $e) {
+        log_message('error', 'FPDI merging failed: ' . $e->getMessage());
+        return false;
     }
+}
 
 }
