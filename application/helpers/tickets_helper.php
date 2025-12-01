@@ -478,11 +478,5 @@ $(function() {
 </script>
 <?php
 }
-function fix_pdf_for_fpdi($file)
-{
-    $tmp = sys_get_temp_dir() . '/' . uniqid('fpdi_', true) . '.pdf';
-    $cmd = "gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/screen -dNOPAUSE -dQUIET -dBATCH -sOutputFile='$tmp' '$file'";
-    shell_exec($cmd);
-    return $tmp;
-}
+
 

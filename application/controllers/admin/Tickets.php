@@ -915,8 +915,7 @@ class Tickets extends AdminController
                                     DRAWING_MANAGEMENT_PATH . 'files/' . $item->parent_id . '/' . $item->name
                                 );
                                 if (file_exists($file_path)) {
-                                    $extraFiles[] = fix_pdf_for_fpdi($file_path);
-
+                                    $extraFiles[] = $file_path;
                                 } else {
                                     log_message('warning', "PDF file not found: {$file_path}");
                                 }
