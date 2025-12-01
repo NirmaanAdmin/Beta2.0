@@ -982,7 +982,7 @@ class Tickets extends AdminController
                     $pageCount = $pdf->setSourceFile($tmpBase);
                     for ($p = 1; $p <= $pageCount; $p++) {
                         $tplId = $pdf->importPage($p);
-                        $size  = method_exists($pdf, 'getTemplateSize') ? $pdf->getTemplateSize($tplId) : ['width' => 210, 'height' => 297];
+                        $size  = method_exists($pdf, 'getTemplateSize') ? $pdf->getTemplateSize($tplId) : '';
                         $orientation = ($size['width'] > $size['height']) ? 'L' : 'P';
                         $pdf->AddPage($orientation, [$size['width'], $size['height']]);
                         $pdf->useTemplate($tplId, 0, 0, $size['width'], $size['height'], true);
@@ -996,7 +996,7 @@ class Tickets extends AdminController
                         $pageCount = $pdf->setSourceFile($file);
                         for ($p = 1; $p <= $pageCount; $p++) {
                             $tplId = $pdf->importPage($p);
-                            $size  = method_exists($pdf, 'getTemplateSize') ? $pdf->getTemplateSize($tplId) : ['width' => 210, 'height' => 297];
+                            $size  = method_exists($pdf, 'getTemplateSize') ? $pdf->getTemplateSize($tplId) : '';
                             $orientation = ($size['width'] > $size['height']) ? 'L' : 'P';
                             $pdf->AddPage($orientation, [$size['width'], $size['height']]);
                             $pdf->useTemplate($tplId, 0, 0, $size['width'], $size['height'], true);
