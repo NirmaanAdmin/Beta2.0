@@ -34,6 +34,21 @@
     /* Adjust the size as needed */
     height: 100px;
   }
+
+  .error-border {
+    border: 1px solid red !important;
+    border-radius: 4px;
+  }
+
+  .bootstrap-select.error-border .dropdown-toggle {
+    border-color: red !important;
+  }
+
+  .error-message {
+    display: block;
+    margin-top: 5px;
+    font-size: 12px;
+  }
 </style>
 <div id="wrapper">
   <div class="content">
@@ -45,11 +60,33 @@
       <div class="col-md-12">
         <div class="panel_s">
           <div class="panel-body">
-            <h4 class=""><?php if (isset($pur_tender)) {
-                            echo pur_html_entity_decode($pur_tender->pur_tn_code);
-                          } else {
-                            echo _l($title) . ' ' . _l('purchase_tender');
-                          } ?></h4>
+            <div class="row">
+              <div class="col-md-3">
+              <h4 class=""><?php if (isset($pur_tender)) {
+                              echo pur_html_entity_decode($pur_tender->pur_tn_code);
+                            } else {
+                              echo _l($title) . ' ' . _l('purchase_tender');
+                            } ?></h4>
+              </div>
+              <div class="col-md-3 form-group">
+                <!-- <label for="send_to_vendors"><?php echo _l('pur_send_to_vendors'); ?></label> -->
+                <select name="send_to_vendors[]" id="send_to_vendors" class="selectpicker" multiple="true" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>" required>
+                  <?php
+                  if (isset($pur_tender)) {
+                    $vendors_arr = explode(',', $pur_tender->send_to_vendors ?? '');
+                  }
+                  ?>
+
+                  <?php foreach ($vendors as $s) { ?>
+                    <option value="<?php echo pur_html_entity_decode($s['userid']); ?>" <?php if (isset($pur_tender) && in_array($s['userid'], $vendors_arr)) {
+                                                                                          echo 'selected';
+                                                                                        } ?>><?php echo pur_html_entity_decode($s['company']); ?></option>
+                  <?php } ?>
+                </select>
+              </div>
+            </div>
+
+
             <?php
 
             if (isset($pur_tender)) {
@@ -123,22 +160,7 @@
                         echo render_select('group_pur', $commodity_groups_pur_tender, array('id', 'name'), 'Budget Head', $selected);
                         ?>
                       </div>
-                      <div class="col-md-3 form-group">
-                        <label for="send_to_vendors"><?php echo _l('pur_send_to_vendors'); ?></label>
-                        <select name="send_to_vendors[]" id="send_to_vendors" class="selectpicker" multiple="true" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
-                          <?php
-                          if (isset($pur_tender)) {
-                            $vendors_arr = explode(',', $pur_tender->send_to_vendors ?? '');
-                          }
-                          ?>
 
-                          <?php foreach ($vendors as $s) { ?>
-                            <option value="<?php echo pur_html_entity_decode($s['userid']); ?>" <?php if (isset($pur_tender) && in_array($s['userid'], $vendors_arr)) {
-                                                                                                  echo 'selected';
-                                                                                                } ?>><?php echo pur_html_entity_decode($s['company']); ?></option>
-                          <?php } ?>
-                        </select>
-                      </div>
 
 
                     </div>
@@ -209,7 +231,7 @@
                     <div class="col-md-4">
                       <!-- <?php $this->load->view('purchase/item_include/main_item_select'); ?> -->
                     </div>
-                    <?php if (!$is_edit) { ?>
+                    <!-- <?php if (!$is_edit) { ?>
                       <div class="col-md-8">
                         <div class="col-md-2 pull-right">
                           <div id="dowload_file_sample" style="margin-top: 22px;">
@@ -238,7 +260,7 @@
                       <div id="box-loading" class="pull-right">
 
                       </div>
-                    <?php } ?>
+                    <?php } ?> -->
                     <?php
                     $pur_tender_currency = $base_currency;
                     if (isset($pur_tender) && $pur_tender->currency != 0) {
@@ -279,6 +301,7 @@
                           <th align="left" class="qty"><?php echo _l('purchase_quantity'); ?></th>
                           <th align="left" class="qty"><?php echo _l('unit_price'); ?></th>
                           <th align="left"><?php echo _l('Remarks'); ?></th>
+                          <th><?php echo _l('Quotated Price'); ?></th>
                           <th align="center"><i class="fa fa-cog"></i></th>
                         </tr>
                       </thead>
@@ -325,124 +348,6 @@
 
 
 <script>
-  function pur_add_item_to_table(data, itemid) {
-    "use strict";
-
-    data = typeof(data) == 'undefined' || data == 'undefined' ? pur_get_item_preview_values() : data;
-
-    // if (data.warehouse_id == "" || data.quantities == "" || data.commodity_code == "" ) {
-    //   if(data.warehouse_id == ""){
-    //     alert_float('warning', '<?php echo _l('please_select_a_warehouse') ?>');
-    //   }
-    //   return;
-    // }
-    if (data.item_name == "" || data.item_code == "") {
-      alert_float('warning', "Please select item");
-      return;
-    }
-    var currency_rate = $('input[name="currency_rate"]').val();
-    var to_currency = $('select[name="currency"]').val();
-    var table_row = '';
-    var item_key = lastAddedItemKey ? lastAddedItemKey += 1 : $("body").find('.invoice-items-table tbody .item').length + 1;
-    lastAddedItemKey = item_key;
-    $("body").append('<div class="dt-loader"></div>');
-    pur_get_item_row_template('newitems[' + item_key + ']', data.item_code, data.item_text, data.description, data.area, data.image, data.quantity, data.unit_price, data.remarks, item_key).done(function(output) {
-      table_row += output;
-
-      $('.invoice-item table.invoice-items-table.items tbody').append(table_row);
-      var sourceInput = $("input[name='image']")[0];
-      var targetInput = $("input[name='newitems[" + lastAddedItemKey + "][image]']")[0];
-      if (sourceInput.files.length > 0) {
-        var dataTransfer = new DataTransfer();
-        for (var i = 0; i < sourceInput.files.length; i++) {
-          dataTransfer.items.add(sourceInput.files[i]);
-        }
-        targetInput.files = dataTransfer.files;
-      }
-      init_selectpicker();
-      init_datepicker();
-      pur_reorder_items('.invoice-item');
-      pur_clear_item_preview_values('.invoice-item');
-      $('body').find('#items-warning').remove();
-      $("body").find('.dt-loader').remove();
-      $('#item_select').selectpicker('val', '');
-      return true;
-    });
-    return false;
-  }
-
-  function pur_clear_item_preview_values(parent) {
-    "use strict";
-
-    var previewArea = $(parent + ' .main');
-    previewArea.find('input').val('');
-    previewArea.find('textarea').val('');
-    previewArea.find('select').val('').selectpicker('refresh');
-  }
-
-  function pur_get_item_row_template(name, item_code, item_text, description, area, image, quantity, unit_price, remarks, item_key) {
-    "use strict";
-
-    jQuery.ajaxSetup({
-      async: false
-    });
-
-    var d = $.post(admin_url + 'purchase/get_purchase_tender_row_template', {
-      name: name,
-      item_text: item_text,
-      item_description: description,
-      area: area,
-      image: image,
-      quantity: quantity,
-      unit_price: unit_price,
-      remarks: remarks,
-      item_key: item_key
-    });
-    jQuery.ajaxSetup({
-      async: true
-    });
-    return d;
-  }
-
-  function pur_get_item_preview_values() {
-    "use strict";
-
-    var response = {};
-    response.item_text = $('.invoice-item .main textarea[name="item_text"]').val();
-    response.item_code = $('.invoice-item .main input[name="item_code"]').val();
-    response.description = $('.invoice-item .main textarea[name="description"]').val();
-    response.area = $('.invoice-item .main select[name="area"]').val();
-    response.quantity = $('.invoice-item .main input[name="quantity"]').val();
-    response.unit_price = $('.invoice-item .main input[name="unit_price"]').val();
-    response.remarks = $('.invoice-item .main input[name="remarks"]').val();
-
-    return response;
-  }
-
-  function pur_reorder_items(parent) {
-    "use strict";
-
-    var rows = $(parent + ' .table.has-calculations tbody tr.item');
-    var i = 1;
-    $.each(rows, function() {
-      $(this).find('input.order').val(i);
-      i++;
-    });
-  }
-
-  function pur_delete_item(row, itemid, parent) {
-    "use strict";
-
-    $(row).parents('tr').addClass('animated fadeOut', function() {
-      setTimeout(function() {
-        $(row).parents('tr').remove();
-        pur_calculate_total();
-      }, 50);
-    });
-    if (itemid && $('input[name="isedit"]').length > 0) {
-      $(parent + ' #removed-items').append(hidden_input('removed_items[]', itemid));
-    }
-  }
   $(document).ready(function() {
     "use strict";
 
@@ -548,6 +453,26 @@
     $('.save_detail').on('click', function(e) {
       let isValid = true; // Track overall validation state
 
+      // Validate send_to_vendors select
+      let $vendorsSelect = $('#send_to_vendors');
+      let vendorsValue = $vendorsSelect.val();
+
+      if (!vendorsValue || vendorsValue.length === 0) {
+        isValid = false;
+
+        // Add error message and class if not already added
+        if (!$vendorsSelect.next('.error-message').length) {
+          $vendorsSelect.after('<span class="error-message" style="color: red;">Please select at least one vendor.</span>');
+        }
+        $vendorsSelect.addClass('error-border');
+        $vendorsSelect.closest('.bootstrap-select').addClass('error-border');
+      } else {
+        // If valid, remove any error messages or classes
+        $vendorsSelect.siblings('.error-message').remove();
+        $vendorsSelect.removeClass('error-border');
+        $vendorsSelect.closest('.bootstrap-select').removeClass('error-border');
+      }
+
       // Target only `select` elements with the `item-select` class
       $('select.item-select').each(function(index) {
         if (index === 0) return; // Skip the first element
@@ -565,7 +490,7 @@
             $this.after('<span class="error-message" style="color: red;">This field is required.</span>');
           }
           $this.addClass('error-border'); // Highlight the invalid field
-          $this.addClass('error-border'); // Highlight the Bootstrap select wrapper
+          $this.closest('.bootstrap-select').addClass('error-border'); // Highlight the Bootstrap select wrapper
         } else {
           // If valid, remove any error messages or classes
           $this.siblings('.error-message').remove();
@@ -577,14 +502,132 @@
       // Prevent form submission if validation fails
       if (!isValid) {
         // console.log('Form validation failed.'); // Debugging
-        // e.preventDefault(); // Explicitly prevent form submission
+        e.preventDefault(); // Explicitly prevent form submission
         return false;
       }
 
       // If all validations pass
       // console.log('Form validation passed.');
     });
-
-
   });
+
+  function pur_add_item_to_table(data, itemid) {
+    "use strict";
+
+    data = typeof(data) == 'undefined' || data == 'undefined' ? pur_get_item_preview_values() : data;
+    // if (data.warehouse_id == "" || data.quantities == "" || data.commodity_code == "" ) {
+    //   if(data.warehouse_id == ""){
+    //     alert_float('warning', '<?php echo _l('please_select_a_warehouse') ?>');
+    //   }
+    //   return;
+    // }
+    if (data.item_name == "" || data.item_code == "") {
+      alert_float('warning', "Please select item");
+      return;
+    }
+    var currency_rate = $('input[name="currency_rate"]').val();
+    var to_currency = $('select[name="currency"]').val();
+    var table_row = '';
+    var item_key = lastAddedItemKey ? lastAddedItemKey += 1 : $("body").find('.invoice-items-table tbody .item').length + 1;
+    lastAddedItemKey = item_key;
+    $("body").append('<div class="dt-loader"></div>');
+    console.log(data);
+    pur_get_item_row_template('newitems[' + item_key + ']', data.item_code, data.item_text, data.description, data.area, data.image, data.quantity, data.unit_price, data.remarks, item_key).done(function(output) {
+      table_row += output;
+
+      $('.invoice-item table.invoice-items-table.items tbody').append(table_row);
+      var sourceInput = $("input[name='image']")[0];
+      var targetInput = $("input[name='newitems[" + lastAddedItemKey + "][image]']")[0];
+      if (sourceInput.files.length > 0) {
+        var dataTransfer = new DataTransfer();
+        for (var i = 0; i < sourceInput.files.length; i++) {
+          dataTransfer.items.add(sourceInput.files[i]);
+        }
+        targetInput.files = dataTransfer.files;
+      }
+      init_selectpicker();
+      init_datepicker();
+      pur_reorder_items('.invoice-item');
+      pur_clear_item_preview_values('.invoice-item');
+      $('body').find('#items-warning').remove();
+      $("body").find('.dt-loader').remove();
+      $('#item_select').selectpicker('val', '');
+      return true;
+    });
+    return false;
+  }
+
+  function pur_clear_item_preview_values(parent) {
+    "use strict";
+
+    var previewArea = $(parent + ' .main');
+    previewArea.find('input').val('');
+    previewArea.find('textarea').val('');
+    previewArea.find('select').val('').selectpicker('refresh');
+  }
+
+  function pur_get_item_row_template(name, item_code, item_text, description, area, image, quantity, unit_price, remarks, item_key) {
+    "use strict";
+
+    jQuery.ajaxSetup({
+      async: false
+    });
+
+    var d = $.post(admin_url + 'purchase/get_purchase_tender_row_template', {
+      name: name,
+      item_code: item_text,
+      item_text: item_text,
+      item_description: description,
+      area: area,
+      image: image,
+      quantity: quantity,
+      unit_price: unit_price,
+      remarks: remarks,
+      item_key: item_key
+    });
+    jQuery.ajaxSetup({
+      async: true
+    });
+    return d;
+  }
+
+  function pur_get_item_preview_values() {
+    "use strict";
+
+    var response = {};
+    response.item_text = $('.invoice-item .main select[name="item_text"]').val();
+    response.item_code = $('.invoice-item .main input[name="item_code"]').val();
+    response.description = $('.invoice-item .main textarea[name="description"]').val();
+    response.area = $('.invoice-item .main select[name="area"]').val();
+    response.quantity = $('.invoice-item .main input[name="quantity"]').val();
+    response.unit_price = $('.invoice-item .main input[name="unit_price"]').val();
+    response.remarks = $('.invoice-item .main textarea[name="remarks"]').val();
+
+    return response;
+  }
+
+  function pur_reorder_items(parent) {
+    "use strict";
+
+    var rows = $(parent + ' .table.has-calculations tbody tr.item');
+    var i = 1;
+    $.each(rows, function() {
+      $(this).find('input.order').val(i);
+      i++;
+    });
+  }
+
+  function pur_delete_item(row, itemid, parent) {
+    "use strict";
+
+    $(row).parents('tr').addClass('animated fadeOut', function() {
+      setTimeout(function() {
+        $(row).parents('tr').remove();
+        pur_calculate_total();
+      }, 50);
+    });
+    if (itemid && $('input[name="isedit"]').length > 0) {
+      $(parent + ' #removed-items').append(hidden_input('removed_items[]', itemid));
+    }
+  }
 </script>

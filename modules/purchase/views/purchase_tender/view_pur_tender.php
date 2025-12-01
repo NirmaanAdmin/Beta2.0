@@ -30,8 +30,44 @@
             <?php } elseif ($pur_tender->status == 3) { ?>
               <div class="ribbon danger"><span><?php echo _l('purchase_reject'); ?></span></div>
             <?php } ?>
-            <h4 class=""><?php echo _l($title); ?>
-            </h4>
+            <div class="row">
+              <div class="col-md-3">
+                <h4 class=""><?php echo _l($title); ?></h4>
+              </div>
+              <div class="col-md-6">
+                <!-- <label for="send_to_vendors"><?php echo _l('Select Vendor'); ?></label> -->
+                <select name="send_to_vendors" id="send_to_vendors" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>" required>
+                  <option value=""><?php echo _l('dropdown_non_selected_tex'); ?></option>
+                  <?php
+                  if (isset($pur_tender)) {
+                    $vendors_arr = explode(',', $pur_tender->send_to_vendors ?? '');
+
+                    // Only show vendors that are in the vendors_arr
+                    foreach ($vendors as $s) {
+                      if (in_array($s['userid'], $vendors_arr)) {
+                  ?>
+                        <option value="<?php echo pur_html_entity_decode($s['userid']); ?>" selected>
+                          <?php echo pur_html_entity_decode($s['company']); ?>
+                        </option>
+                      <?php
+                      }
+                    }
+                  } else {
+                    // If no tender is set, show all vendors (or you can leave it empty)
+                    foreach ($vendors as $s) {
+                      ?>
+                      <option value="<?php echo pur_html_entity_decode($s['userid']); ?>">
+                        <?php echo pur_html_entity_decode($s['company']); ?>
+                      </option>
+                  <?php
+                    }
+                  }
+                  ?>
+                </select>
+              </div>
+            </div>
+
+
             <div class="row">
               <div class="horizontal-scrollable-tabs preview-tabs-top">
                 <div class="scroller arrow-left"><i class="fa fa-angle-left"></i></div>
@@ -249,12 +285,12 @@
                         <tr class="project-overview">
 
                         </tr>
-                        <tr class="project-overview">
+                        <!-- <tr class="project-overview">
                           <td width="50%">
                             <span class="bold"><?php echo _l('pur_send_to_vendors'); ?> :</span>
                             <span><?php echo get_pur_send_to_vendors_list($pur_tender->send_to_vendors); ?></span>
                           </td>
-                        </tr>
+                        </tr> -->
 
                         <tr class="project-overview">
                           <td class="bold"><?php echo _l('rq_description'); ?></td>
@@ -307,6 +343,7 @@
                             <th width="20%" align="right"><?php echo _l('Image'); ?></th>
                             <th width="10%" align="right" class="qty"><?php echo _l('purchase_quantity'); ?></th>
                             <th width="10%" align="right"><?php echo _l('unit_price'); ?></th>
+                            <th><?php echo _l('Quotated Price'); ?></th>
                             <th width="20%" align="right"><?php echo _l('Remarks'); ?></th>
                             <!-- <th width="10%" align="right"><?php echo _l('subtotal_before_tax'); ?></th>
                             <th width="15%" align="right"><?php echo _l('debit_note_table_tax_heading'); ?></th>
@@ -344,8 +381,9 @@
                                 </td>
                                 <td align="right"><?php echo pur_html_entity_decode($es['quantity']) . ' ' . pur_get_unit_name($es['unit_id']); ?></td>
                                 <td align="right"><?php echo app_format_money($es['unit_price'], $base_currency->symbol); ?></td>
+                                <td align="right">0</td>
                                 <td align="right"><?php echo $es['remarks']; ?></td>
-                                
+
                                 <!-- <td align="right"><?php echo app_format_money($es['into_money'], $base_currency->symbol); ?></td>
                                 <td align="right">
                                   <?php
@@ -605,7 +643,7 @@
                             </td>
                             <td style="padding: 8px;">
                               <div class="btn-group">
-                                <a href="<?php echo admin_url('purchase/' . $view_function . '/'.$pur_tender->id); ?>" class="btn btn-default btn-icon" style="padding: 10px !important">
+                                <a href="<?php echo admin_url('purchase/' . $view_function . '/' . $pur_tender->id); ?>" class="btn btn-default btn-icon" style="padding: 10px !important">
                                   <i class="fa fa-pencil-square"></i>
                                 </a>
                                 <a href="javascript:void(0)" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding: 7px !important">

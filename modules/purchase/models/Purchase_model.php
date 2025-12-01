@@ -23000,6 +23000,7 @@ class Purchase_model extends App_Model
         $name_quantity = 'quantity';
         $name_remarks = 'remarks';
         $name_unit_price = 'unit_price';
+        $name_quotated_price = 'quotated_price';
 
         $text_right_class = 'text-right';
         $array_qty_attr = []; // Added missing variable initialization
@@ -23018,6 +23019,7 @@ class Purchase_model extends App_Model
             $name_quantity = $name . '[quantity]';
             $name_remarks = $name . '[remarks]';
             $name_unit_price = $name . '[unit_price]';
+            $name_quotated_price = $name.'[quotated_price]';
         }
 
         $full_item_image = '';
@@ -23043,7 +23045,7 @@ class Purchase_model extends App_Model
             $style_description = 'width: 290px; height: 150px';
         }
 
-        $row .= '<td>' . render_textarea($name_item_description, '', $item_description, ['rows' => 2, 'placeholder' => _l('item_description'), 'style' => $style_description, 'disabled' => true]) . '</td>';
+        $row .= '<td>' . render_textarea($name_item_description, '', $item_description, ['rows' => 2, 'placeholder' => _l('item_description'), 'style' => $style_description]) . '</td>';
         $row .= '<td class="area">' . get_area_list($name_area, $area) . '</td>';
         $row .= '<td><input type="file" extension="' . str_replace(['.', ' '], '', '.png,.jpg,.jpeg') . '" filesize="' . file_upload_max_size() . '" class="form-control" name="' . $name_image . '" accept="' . get_item_form_accepted_mimes() . '">' . $full_item_image . '</td>';
 
@@ -23057,11 +23059,16 @@ class Purchase_model extends App_Model
 
         // Fixed typo: render_textare -> render_textarea
         $row .= '<td>' . render_textarea($name_remarks, '', $remarks, ['rows' => 2, 'placeholder' => _l('remarks')]) . '</td>';
+        $row .= '<td class="qutation">' .
+            render_input($name_quotated_price, '', '', 'number', ['disabled' => true], [], 'no-margin', $text_right_class) .
+            '</td>';
+        if($tender_detail['created'] == 1 || $name == ''){
 
-        if ($name == '') {
-            $row .= '<td><button type="button" onclick="pur_add_item_to_table(\'undefined\',\'undefined\'); return false;" class="btn pull-right btn-info"><i class="fa fa-check"></i></button></td>';
-        } else {
-            $row .= '<td><a href="#" class="btn btn-danger pull-right" onclick="pur_delete_item(this,' . $item_key . ',\'.invoice-item\'); return false;"><i class="fa fa-trash"></i></a></td>';
+            if ($name == '') {
+                $row .= '<td><button type="button" onclick="pur_add_item_to_table(\'undefined\',\'undefined\'); return false;" class="btn pull-right btn-info"><i class="fa fa-check"></i></button></td>';
+            } else {
+                $row .= '<td><a href="#" class="btn btn-danger pull-right" onclick="pur_delete_item(this,' . $item_key . ',\'.invoice-item\'); return false;"><i class="fa fa-trash"></i></a></td>';
+            }
         }
 
         $row .= '</tr>';
@@ -23072,7 +23079,7 @@ class Purchase_model extends App_Model
     public function update_pur_tender($data, $id)
     {
         $affectedRows = 0;
-
+        
         $update_purchase_request = [];
         if (isset($data['items'])) {
             $update_purchase_request = $data['items'];
@@ -25779,19 +25786,68 @@ class Purchase_model extends App_Model
     }
 
     public function add_pur_tender($data){
-        echo '<pre>'; print_r($data);die;
         unset(
             $data['number'],
-            $data['pur_tn_code'],
-            $data['pur_tn_name'],
-            $data['group_pur'],
-            $data['tn_description'],
             $data['leads_import'],
             $data['from_currency'],
             $data['currency_rate'],
+            $data['tn_description'],
             $data['item_text'],
             $data['quantity'],
             $data['unit_price'],
+            $data['remarks'],
+            $data['description'],
         );
+
+        $order_detail = [];
+        if (isset($data['newitems'])) {
+            $order_detail = $data['newitems'];
+            unset($data['newitems']);
+        }
+
+        $this->load->model('projects_model');
+		$project_id = get_default_project();
+
+        $data['project'] = $project_id;
+
+        if (isset($data['send_to_vendors']) && count($data['send_to_vendors']) > 0) {
+            $data['send_to_vendors'] = implode(',', $data['send_to_vendors']);
+        }
+        $this->db->insert(db_prefix() . 'pur_tender', $data);
+        $insert_id = $this->db->insert_id();
+
+        if ($insert_id) {
+            if (count($order_detail) > 0) {
+                foreach ($order_detail as $key => $rqd) {
+                    $dt_data = [];
+                    $dt_data['pur_tender'] = $insert_id;
+                    $dt_data['item_code'] = $rqd['item_text'];
+                    $dt_data['unit_price'] = $rqd['unit_price'];
+                    $dt_data['area'] = !empty($rqd['area']) ? implode(',', $rqd['area']) : NULL;
+                    $dt_data['description'] = nl2br($rqd['item_description']);
+                    $dt_data['remarks'] = $rqd['remarks'];
+                    $dt_data['created'] = '1';
+ 
+                    $dt_data['quantity'] = ($rqd['quantity'] != '' && $rqd['quantity'] != null) ? $rqd['quantity'] : 0;
+                    // $dt_data['reorder'] = isset($rqd['order']) ? $rqd['order'] : null;
+
+                    $this->db->insert(db_prefix() . 'pur_tender_detail', $dt_data);
+                    $last_insert_id = $this->db->insert_id();
+                    $iuploadedFiles = handle_purchase_item_attachment_array('pur_tender', $insert_id, $last_insert_id, 'newitems', $key);
+                    if ($iuploadedFiles && is_array($iuploadedFiles)) {
+                        foreach ($iuploadedFiles as $ifile) {
+                            $idata = array();
+                            $idata['image'] = $ifile['file_name'];
+                            $this->db->where('id', $ifile['item_id']);
+                            $this->db->update(db_prefix() . 'pur_order_detail', $idata);
+                        }
+                    }
+                }
+            }
+            return $insert_id;
+        }
+
+        return false;
+
     }
 }

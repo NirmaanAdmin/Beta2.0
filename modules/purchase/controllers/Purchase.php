@@ -17064,6 +17064,7 @@ class purchase extends AdminController
     public function get_purchase_tender_row_template()
     {
         $name = $this->input->post('name');
+        $item_code = $this->input->post('item_code');
         $item_text = $this->input->post('item_text');
         $item_description = $this->input->post('item_description');
         $area = $this->input->post('area');
@@ -17073,6 +17074,6 @@ class purchase extends AdminController
         $remarks = $this->input->post('remarks');
         $item_key = $this->input->post('item_key');
 
-        echo $this->purchase_model->create_purchase_tender_row_template($name, $item_text, $item_description, $area, $image, $quantity, $item_key, '', $unit_price, $remarks);
+        echo $this->purchase_model->create_purchase_tender_row_template($name, $item_code, $item_description, $area, $image, $quantity, $item_key, '','', $remarks,$unit_price, $item_text);
     }
 }
