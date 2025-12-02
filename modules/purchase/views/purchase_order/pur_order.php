@@ -344,23 +344,23 @@
                       <div class="col-md-6 ">
                         <div class="form-group select-placeholder">
                           <label for="discount_type"
-                            class="control-label"><?php echo _l('discount_type'); ?></label>
+                          class="control-label"><?php echo _l('discount_type'); ?></label>
                           <select name="discount_type" class="selectpicker" data-width="100%"
-                            data-none-selected-text="<?php echo _l('dropdown_non_selected_tex'); ?>">
+                          data-none-selected-text="<?php echo _l('dropdown_non_selected_tex'); ?>">
 
-                            <option value="before_tax" <?php
-                                                        if (isset($pur_order)) {
-                                                          if ($pur_order->discount_type == 'before_tax') {
-                                                            echo 'selected';
-                                                          }
-                                                        } ?>><?php echo _l('discount_type_before_tax'); ?></option>
-                            <option value="after_tax" <?php if (isset($pur_order)) {
-                                                        if ($pur_order->discount_type == 'after_tax' || $pur_order->discount_type == null) {
-                                                          echo 'selected';
-                                                        }
-                                                      } else {
-                                                        echo 'selected';
-                                                      } ?>><?php echo _l('discount_type_after_tax'); ?></option>
+                          <option value="before_tax" <?php
+                          if (isset($pur_order)) {
+                            if ($pur_order->discount_type == 'before_tax' || $pur_order->discount_type == null) {
+                              echo 'selected';
+                            }
+                          } else {
+                            echo 'selected';
+                          } ?>><?php echo _l('discount_type_before_tax'); ?></option>
+                          <option value="after_tax" <?php if (isset($pur_order)) {
+                            if ($pur_order->discount_type == 'after_tax') {
+                              echo 'selected';
+                            }
+                          } ?>><?php echo _l('discount_type_after_tax'); ?></option>
                           </select>
                         </div>
                       </div>

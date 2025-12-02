@@ -324,16 +324,16 @@
 
                           <option value="before_tax" <?php
                           if (isset($wo_order)) {
-                            if ($wo_order->discount_type == 'before_tax') {
-                              echo 'selected';
-                            }
-                          } ?>><?php echo _l('discount_type_before_tax'); ?></option>
-                          <option value="after_tax" <?php if (isset($wo_order)) {
-                            if ($wo_order->discount_type == 'after_tax' || $wo_order->discount_type == null) {
+                            if ($wo_order->discount_type == 'before_tax' || $wo_order->discount_type == null) {
                               echo 'selected';
                             }
                           } else {
                             echo 'selected';
+                          } ?>><?php echo _l('discount_type_before_tax'); ?></option>
+                          <option value="after_tax" <?php if (isset($wo_order)) {
+                            if ($wo_order->discount_type == 'after_tax') {
+                              echo 'selected';
+                            }
                           } ?>><?php echo _l('discount_type_after_tax'); ?></option>
                         </select>
                         </div>
