@@ -1708,6 +1708,8 @@ class Estimates_model extends App_Model
     {
         $data['estimate_id'] = $id;
         $this->db->insert(db_prefix() . 'costarea_working', $data);
+        $insert_id = $this->db->insert_id();
+        add_area_statement_activity_log($insert_id, true);
         return true;
     }
 
@@ -1726,6 +1728,7 @@ class Estimates_model extends App_Model
 
     public function delete_area_working_item($id)
     {
+        add_area_statement_activity_log($id, false);
         $this->db->where('id', $id);
         $this->db->delete(db_prefix() . 'costarea_working');
         return true;
@@ -1750,7 +1753,9 @@ class Estimates_model extends App_Model
         if (!empty($data)) {
             if (!empty($data['name']) && !empty($data['estimate_id'])) {
                 $this->db->insert(db_prefix() . 'area_statement_tabs', $data);
-                return $this->db->insert_id();
+                $insert_id = $this->db->insert_id();
+                add_area_statement_tabs_activity_log($insert_id, true);
+                return $insert_id;
             }
         }
         return null;
@@ -1760,6 +1765,7 @@ class Estimates_model extends App_Model
     {
         if (!empty($data)) {
             if (!empty($data['id'])) {
+                add_area_statement_tabs_activity_log($data['id'], false);
                 $this->db->where('id', $data['id']);
                 $this->db->delete(db_prefix() . 'area_statement_tabs');
                 $this->db->where('area_id', $data['id']);
@@ -1780,6 +1786,8 @@ class Estimates_model extends App_Model
     {
         $data['estimate_id'] = $id;
         $this->db->insert(db_prefix() . 'costarea_summary', $data);
+        $insert_id = $this->db->insert_id();
+        add_area_summary_activity_log($insert_id, true);
         return true;
     }
 
@@ -1792,6 +1800,7 @@ class Estimates_model extends App_Model
 
     public function delete_area_summary_item($id)
     {
+        add_area_summary_activity_log($id, false);
         $this->db->where('id', $id);
         $this->db->delete(db_prefix() . 'costarea_summary');
         return true;
@@ -2029,6 +2038,8 @@ class Estimates_model extends App_Model
             $this->db->where('id', $new_estimate_id);
             $this->db->update(db_prefix() . 'estimates', ['parent_id' => $id]);
         }
+
+        add_budget_revision_activity_log($new_estimate_id);
 
         return $new_estimate_id;
     }
@@ -2963,6 +2974,7 @@ class Estimates_model extends App_Model
     {
         $id = $data['id'];
         $lock_budget = $data['lock_budget'];
+        add_lock_budget_activity_log($id, $lock_budget);
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'estimates', [
             'lock_budget' => $lock_budget,

@@ -681,6 +681,7 @@ function update_all_budget_fields_activity_log($id, $new_data)
         'expirydate' => _l('estimate_add_edit_expirydate'),
         'hsn_sac' => _l('hsn_sac'),
         'project_brief' => _l('project_brief'),
+        'cost_plan_summary' => _l('Cost Plan Summary'),
         'project_timelines' => _l('project_timelines'),
     ];
     foreach ($changes as $field => $dummy) {
@@ -747,6 +748,138 @@ function update_budget_activity_log($id, $field, $old_value, $new_value)
             $old_value = !empty($old_value) ? $old_value : 'None';
             $new_value = !empty($new_value) ? $new_value : 'None';
             $description = "".$field." field has been updated from <b>".$old_value."</b> to <b>".$new_value."</b> in budget <b>".format_estimate_number($id)."</b>.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'bud',
+                'rel_id' => $id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
+
+function add_area_summary_activity_log($id, $is_create = true)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $costarea_summary = $CI->db->get(db_prefix() . 'costarea_summary')->row();
+        if(!empty($costarea_summary)) {
+            $is_create_value = $is_create ? 'added' : 'deleted';
+            $category_name = '';
+            $area_type = '';
+            $CI->db->where('id', $costarea_summary->area_id);
+            $area_summary_tabs = $CI->db->get(db_prefix() . 'area_summary_tabs')->row();
+            if($costarea_summary->area_id == 1 || $costarea_summary->area_id == 2 || $costarea_summary->area_id == 4) {
+                $CI->db->where('id', $costarea_summary->master_area);
+                $master_area = $CI->db->get(db_prefix() . 'master_area')->row();
+                $category_name = $master_area->category_name;
+                $area_type = 'master area';
+            }
+            if($costarea_summary->area_id == 3) {
+                $CI->db->where('id', $costarea_summary->master_area);
+                $functionality_area = $CI->db->get(db_prefix() . 'functionality_area')->row();
+                $category_name = $functionality_area->category_name;
+                $area_type = 'functionality area';
+            }
+            $description = "The ".$area_type." <b>".$category_name."</b> has been ".$is_create_value." under the <b>".$area_summary_tabs->name."</b> section within the Area Summary tab in budget <b>".format_estimate_number($costarea_summary->estimate_id)."</b>.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'bud',
+                'rel_id' => $costarea_summary->estimate_id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
+
+function add_area_statement_tabs_activity_log($id, $is_create = true)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $area_statement_tabs = $CI->db->get(db_prefix() . 'area_statement_tabs')->row();
+        if(!empty($area_statement_tabs)) {
+            $is_create_value = $is_create ? 'created' : 'deleted';
+            $description = "The area statement tab <b>".$area_statement_tabs->name."</b> has been ".$is_create_value." in budget <b>".format_estimate_number($area_statement_tabs->estimate_id)."</b>.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'bud',
+                'rel_id' => $area_statement_tabs->estimate_id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
+
+function add_area_statement_activity_log($id, $is_create = true)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $costarea_working = $CI->db->get(db_prefix() . 'costarea_working')->row();
+        if(!empty($costarea_working)) {
+            $is_create_value = $is_create ? 'added' : 'deleted';
+            $CI->db->where('id', $costarea_working->area_id);
+            $area_statement_tabs = $CI->db->get(db_prefix() . 'area_statement_tabs')->row();
+            $description = "The Room/Spaces <b>".$costarea_working->area_description."</b> has been ".$is_create_value." under the <b>".$area_statement_tabs->name."</b> section within the Area Statement tab in budget <b>".format_estimate_number($costarea_working->estimate_id)."</b>.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'bud',
+                'rel_id' => $costarea_working->estimate_id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
+
+function add_lock_budget_activity_log($id, $lock_budget)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $estimates = $CI->db->get(db_prefix() . 'estimates')->row();
+        if(!empty($estimates)) {
+            $lock_budget_value = $lock_budget == 1 ? 'Lock' : 'Unlock';
+            $description = "Budget <b>".format_estimate_number($id)."</b> has been <b>".$lock_budget_value."</b>.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'bud',
+                'rel_id' => $id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
+
+function add_budget_revision_activity_log($id)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $estimates = $CI->db->get(db_prefix() . 'estimates')->row();
+        if(!empty($estimates)) {
+            $description = "A new revision has been created for budget <b>".format_estimate_number($id)."</b>.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'bud',
                 'rel_id' => $id,
