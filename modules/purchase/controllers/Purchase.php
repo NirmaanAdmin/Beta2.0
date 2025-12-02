@@ -1773,8 +1773,29 @@ class purchase extends AdminController
             }
         }
 
-        $data['title'] = $title;
+        $data['book_order_tender'] = false;
+        $pur_tender = $this->input->get('pur_tender', TRUE);
+        if (!empty($pur_tender)) {
+            $pur_tender_data = $this->purchase_model->get_pur_tender($pur_tender);
+            if (!empty($pur_tender_data)) {
+                $data['book_order_tender'] = true;
+                $data['pur_tender_data'] = $pur_tender_data;
+                $tender_items_info = $this->purchase_model->get_pur_tender_detail($pur_tender);
+                if (!empty($tender_items_info)) {
+                    $index_order = 0;
+                    $pur_order_row_template = '';
+                    $pur_order_row_template .= $this->purchase_model->create_purchase_order_row_template();
+                    foreach ($tender_items_info as $order_detail) {
+                        $index_order++;
+                        $package_item_total = $order_detail['quantity'] * $order_detail['unit_price'];
+                        $pur_order_row_template .= $this->purchase_model->create_purchase_order_row_template('items[' . $index_order . ']',  $order_detail['item_code'], $order_detail['description'], $order_detail['area'], '', $order_detail['quantity'], $order_detail['unit_id'], $order_detail['unit_price'], '', $order_detail['item_code'], $order_detail['unit_id'], '',  $package_item_total, '', '', $package_item_total, $package_item_total, '', '', '', false, 1, $data['base_currency']->name, array(), false, $order_detail['sub_head'], '', 0);
+                    }
+                    $data['pur_order_row_template'] = $pur_order_row_template;
+                }
+            }
+        }
 
+        $data['title'] = $title;
         $this->load->view('purchase_order/pur_order', $data);
     }
 
@@ -10109,6 +10130,28 @@ class purchase extends AdminController
                         $index_order++;
                         $package_item_total = $order_detail['package_qty'] * $order_detail['package_rate'];
                         $wo_order_row_template .= $this->purchase_model->create_wo_order_row_template('items[' . $index_order . ']',  $order_detail['item_code'], $order_detail['long_description'], '', '', $order_detail['package_qty'], $order_detail['unit_id'], $order_detail['package_rate'], '', $order_detail['item_code'], $order_detail['unit_id'], '',  $package_item_total, '', '', $package_item_total, $package_item_total, '', '', '', false, 1, $data['base_currency']->name, array(), false, $order_detail['sub_head'], '', 0);
+                    }
+                    $data['wo_order_row_template'] = $wo_order_row_template;
+                }
+            }
+        }
+
+        $data['book_order_tender'] = false;
+        $pur_tender = $this->input->get('pur_tender', TRUE);
+        if (!empty($pur_tender)) {
+            $pur_tender_data = $this->purchase_model->get_pur_tender($pur_tender);
+            if (!empty($pur_tender_data)) {
+                $data['book_order_tender'] = true;
+                $data['pur_tender_data'] = $pur_tender_data;
+                $tender_items_info = $this->purchase_model->get_pur_tender_detail($pur_tender);
+                if (!empty($tender_items_info)) {
+                    $index_order = 0;
+                    $wo_order_row_template = '';
+                    $wo_order_row_template .= $this->purchase_model->create_wo_order_row_template();
+                    foreach ($tender_items_info as $order_detail) {
+                        $index_order++;
+                        $package_item_total = $order_detail['quantity'] * $order_detail['unit_price'];
+                        $wo_order_row_template .= $this->purchase_model->create_wo_order_row_template('items[' . $index_order . ']',  $order_detail['item_code'], $order_detail['description'],  $order_detail['area'], '', $order_detail['quantity'], $order_detail['unit_id'], $order_detail['unit_price'], '', $order_detail['item_code'], $order_detail['unit_id'], '',  $package_item_total, '', '', $package_item_total, $package_item_total, '', '', '', false, 1, $data['base_currency']->name, array(), false, $order_detail['sub_head'], '', 0);
                     }
                     $data['wo_order_row_template'] = $wo_order_row_template;
                 }

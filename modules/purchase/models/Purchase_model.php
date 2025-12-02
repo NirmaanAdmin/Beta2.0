@@ -22081,7 +22081,7 @@ class Purchase_model extends App_Model
 
     public function get_cost_package_detail($id)
     {
-        $this->db->select(
+        $this->db->select( 
             db_prefix() . 'estimate_package_info.*,' .
                 db_prefix() . 'estimates.project_id'
         );
@@ -25848,6 +25848,12 @@ class Purchase_model extends App_Model
         }
 
         return false;
+
+    }
+
+    public function get_pur_tender($tender_id){
+        $this->db->where('id', $tender_id);
+        return $this->db->get(db_prefix() . 'pur_tender')->row();
 
     }
 }

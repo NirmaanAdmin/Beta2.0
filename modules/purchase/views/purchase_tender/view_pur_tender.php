@@ -65,6 +65,23 @@
                   ?>
                 </select>
               </div>
+              <div class="col-md-3">
+                <div class="btn-group mright5">
+                  <a href="#" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Resend
+                  </a>
+                  
+                </div>
+                <div class="btn-group mright5">
+                  <a href="#" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Book Order <span class="caret"></span>
+                  </a>
+                  <ul class="dropdown-menu dropdown-menu-right">
+                    <li class="hidden-xs"><a href="<?php echo admin_url('purchase/pur_order?pur_tender='.$pur_tender->id.''); ?>" target="_blank">Purchase Order</a></li>
+                    <li class="hidden-xs"><a href="<?php echo admin_url('purchase/wo_order?pur_tender='.$pur_tender->id.''); ?>" target="_blank">Work Order</a></li>
+                  </ul>
+                </div>
+              </div>
             </div>
 
 

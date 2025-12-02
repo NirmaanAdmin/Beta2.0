@@ -57,6 +57,24 @@
         $wo_order = (object) $wo_order;
         echo form_hidden('package_id', $cost_package_detail->id);
       }
+      if ($book_order_tender) {
+        $prefix = get_purchase_option('wo_order_prefix');
+        $next_number = get_purchase_option('next_wo_number');
+        $wo_order_number = $prefix . '-' . str_pad($next_number, 5, '0', STR_PAD_LEFT) . '-' . date('M-Y');
+        if (get_option('po_only_prefix_and_number') == 1) {
+          $wo_order_number = $prefix . '-' . str_pad($next_number, 5, '0', STR_PAD_LEFT);
+        }
+        $wo_order['wo_order_name'] = $pur_tender_data->pur_tn_name;
+        $wo_order['wo_order_number'] = $wo_order_number;
+        $wo_order['number'] = $next_number;
+        $wo_order['estimate'] = $pur_tender_data->estimate_id;
+        $wo_order['group_pur'] = $pur_tender_data->group_pur;
+        $wo_order['project'] = $pur_tender_data->project;
+        $wo_order['order_date'] = _d(date('Y-m-d'));
+        $wo_order['buyer'] = get_staff_user_id();
+        $wo_order = (object) $wo_order;
+        echo form_hidden('tender_id', $pur_tender_data->id);
+      }
       ?>
       <div class="col-md-12">
         <div class="panel_s accounting-template estimate">
@@ -767,7 +785,13 @@
           <?php
           if ($book_order) {
             unset($wo_order);
-          } ?>
+          }
+
+          if ($book_order_tender) {
+            unset($wo_order);
+          }
+          
+          ?>
           <div class="row">
             <div class="col-md-12 mtop15">
               <div class="panel-body bottom-transaction">
