@@ -917,3 +917,26 @@ function add_budget_attachment_activity_log($id, $file_name, $is_create = true)
     }
     return true;
 }
+
+function add_budget_package_activity_log($id, $is_create = true)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $estimate_package_info = $CI->db->get(db_prefix() . 'estimate_package_info')->row();
+        if(!empty($estimate_package_info)) {
+            $is_create_value = $is_create ? 'added' : 'removed';
+            $description = "Package <b>".$estimate_package_info->package_name."</b> has been ".$is_create_value." for budget <b>".format_estimate_number($estimate_package_info->estimate_id)."</b>.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'bud',
+                'rel_id' => $estimate_package_info->estimate_id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}

@@ -2040,7 +2040,7 @@ class Estimates_model extends App_Model
             $this->db->update(db_prefix() . 'estimates', ['parent_id' => $id]);
         }
 
-        add_budget_revision_activity_log($new_estimate_id);
+        add_budget_revision_activity_log($id);
 
         return $new_estimate_id;
     }
@@ -2804,6 +2804,7 @@ class Estimates_model extends App_Model
                 'rli_filter' => $rli_filter,
             ]);
             $package_id = $this->db->insert_id();
+            add_budget_package_activity_log($package_id, true);
 
             if (!empty($items)) {
                 foreach ($items as $key => $value) {
@@ -2902,6 +2903,7 @@ class Estimates_model extends App_Model
     }
     public function delete_package($id)
     {
+        add_budget_package_activity_log($id, false);
         $affectedRows = 0;
         $this->db->where('id', $id);
         $this->db->delete(db_prefix() . 'estimate_package_info');
@@ -3317,6 +3319,7 @@ class Estimates_model extends App_Model
                 ]);
 
                 $package_id = $this->db->insert_id();
+                add_budget_package_activity_log($package_id, true);
 
                 // Generate tender code
                 $pur_tn_code = '';
