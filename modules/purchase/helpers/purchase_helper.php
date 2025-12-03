@@ -5599,27 +5599,32 @@ function add_order_notes_activity_log($id, $is_create = true)
                 $description = "Notes <b>".$notes->description."</b> has been ".$is_create_value." for purchase order <b>".$pur_orders->pur_order_number." - ".$pur_orders->pur_order_name."</b>.";
                 $module_name = 'po';
                 $rel_id = $pur_orders->id;
-            }
-            if($notes->rel_type == 'wo_order') {
+            } else if($notes->rel_type == 'wo_order') {
                 $CI->db->where('id', $notes->rel_id);
                 $wo_orders = $CI->db->get(db_prefix() . 'wo_orders')->row();
                 $description = "Notes <b>".$notes->description."</b> has been ".$is_create_value." for work order <b>".$wo_orders->wo_order_number." - ".$wo_orders->wo_order_name."</b>.";
                 $module_name = 'wo';
                 $rel_id = $wo_orders->id;
-            }
-            if($notes->rel_type == 'changee_order') {
+            } else if($notes->rel_type == 'changee_order') {
                 $CI->db->where('id', $notes->rel_id);
                 $co_orders = $CI->db->get(db_prefix() . 'co_orders')->row();
                 $description = "Notes <b>".$notes->description."</b> has been ".$is_create_value." for change order <b>".$co_orders->pur_order_number."</b>.";
                 $module_name = 'co';
                 $rel_id = $co_orders->id;
-            }
-            if($notes->rel_type == 'pur_vendor') {
+            } else if($notes->rel_type == 'pur_vendor') {
                 $CI->db->where('userid', $notes->rel_id);
                 $pur_vendor = $CI->db->get(db_prefix() . 'pur_vendor')->row();
                 $description = "Notes <b>".$notes->description."</b> has been ".$is_create_value." for vendor <b>".$pur_vendor->company."</b>.";
                 $module_name = 'ven';
                 $rel_id = $pur_vendor->userid;
+            } else if($notes->rel_type == 'estimate') {
+                $description = "Notes <b>".$notes->description."</b> has been ".$is_create_value." for budget <b>".format_estimate_number($notes->rel_id)."</b>.";
+                $module_name = 'bud';
+                $rel_id = $notes->rel_id;
+            } else {
+                $module_name = '';
+                $rel_id = '';
+                $description = '';
             }
             if(!empty($description)) {
                 $CI->db->insert(db_prefix() . 'module_activity_log', [
@@ -5655,27 +5660,32 @@ function update_order_notes_activity_log($id, $old_value, $new_value)
                 $description = "Notes field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in purchase order <b>".$pur_orders->pur_order_number." - ".$pur_orders->pur_order_name."</b>.";
                 $module_name = 'po';
                 $rel_id = $pur_orders->id;
-            }
-            if($notes->rel_type == 'wo_order') {
+            } else if($notes->rel_type == 'wo_order') {
                 $CI->db->where('id', $notes->rel_id);
                 $wo_orders = $CI->db->get(db_prefix() . 'wo_orders')->row();
                 $description = "Notes field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in work order <b>".$wo_orders->wo_order_number." - ".$wo_orders->wo_order_name."</b>.";
                 $module_name = 'wo';
                 $rel_id = $wo_orders->id;
-            }
-            if($notes->rel_type == 'changee_order') {
+            } else if($notes->rel_type == 'changee_order') {
                 $CI->db->where('id', $notes->rel_id);
                 $co_orders = $CI->db->get(db_prefix() . 'co_orders')->row();
                 $description = "Notes field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in change order <b>".$co_orders->pur_order_number."</b>.";
                 $module_name = 'co';
                 $rel_id = $co_orders->id;
-            }
-            if($notes->rel_type == 'pur_vendor') {
+            } else if($notes->rel_type == 'pur_vendor') {
                 $CI->db->where('userid', $notes->rel_id);
                 $pur_vendor = $CI->db->get(db_prefix() . 'pur_vendor')->row();
                 $description = "Notes field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in vendor <b>".$pur_vendor->company."</b>.";
                 $module_name = 'ven';
                 $rel_id = $pur_vendor->userid;
+            } else if($notes->rel_type == 'estimate') {
+                $description = "Notes field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in budget <b>".format_estimate_number($notes->rel_id)."</b>.";
+                $module_name = 'bud';
+                $rel_id = $notes->rel_id;
+            } else {
+                $module_name = '';
+                $rel_id = '';
+                $description = '';
             }
             if(!empty($description)) {
                 $CI->db->insert(db_prefix() . 'module_activity_log', [
