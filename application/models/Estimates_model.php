@@ -1820,10 +1820,15 @@ class Estimates_model extends App_Model
                         'budget_id' => $ckey,
                         $type => $cvalue,
                     ]);
+                    $estimate_budget_info_id = $this->db->insert_id();
+                    update_estimate_budget_info_activity_log($estimate_budget_info_id, $type);
                 } else {
                     $this->db->where('estimate_id', $id);
                     $this->db->where('budget_id', $ckey);
                     $this->db->update(db_prefix() . 'estimate_budget_info', [$type => $cvalue]);
+                    if ($this->db->affected_rows() > 0) {
+                        update_estimate_budget_info_activity_log($estimate_budget_info->id, $type);
+                    }
                 }
             }
         }

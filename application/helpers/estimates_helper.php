@@ -979,3 +979,35 @@ function add_assign_unawarded_capex_activity_log($id)
     }
     return true;
 }
+
+function update_estimate_budget_info_activity_log($id, $type)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $estimate_budget_info = $CI->db->get(db_prefix() . 'estimate_budget_info')->row();
+        if(!empty($estimate_budget_info)) {
+            if($type == 'detailed_costing') {
+                $description = "The detailed costing summary has been updated to <b>".$estimate_budget_info->detailed_costing."</b>, under budget head <b>".get_group_name_by_id($estimate_budget_info->budget_id)."</b> and budget <b>".format_estimate_number($estimate_budget_info->estimate_id)."</b>.";
+            } else if($type == 'budget_summary_remarks') {
+                $description = "The remarks has been updated to <b>".$estimate_budget_info->budget_summary_remarks."</b>, under budget head <b>".get_group_name_by_id($estimate_budget_info->budget_id)."</b> and budget <b>".format_estimate_number($estimate_budget_info->estimate_id)."</b>.";
+            } else if($type == 'overall_budget_area') {
+                $description = "The overall area has been updated to <b>".$estimate_budget_info->overall_budget_area."</b>, under budget head <b>".get_group_name_by_id($estimate_budget_info->budget_id)."</b> and budget <b>".format_estimate_number($estimate_budget_info->estimate_id)."</b>.";
+            } else {
+                $description = '';
+            }
+            if(!empty($description)) {
+                $CI->db->insert(db_prefix() . 'module_activity_log', [
+                    'module_name' => 'bud',
+                    'rel_id' => $unawarded_budget_info->estimate_id,
+                    'description' => $description,
+                    'date' => date('Y-m-d H:i:s'),
+                    'staffid' => get_staff_user_id(),
+                    'project_id' => $default_project
+                ]);
+            }
+        }
+    }
+    return true;
+}
