@@ -2355,6 +2355,9 @@ class Estimates_model extends App_Model
                         'unawarded_rate' => 0.00,
                         'packages' => !empty($value['packages']) ? implode(',', $value['packages']) : NULL,
                     ]);
+                    if ($this->db->affected_rows() > 0) {
+                        add_assign_unawarded_capex_activity_log($unawarded_budget_info->id);
+                    }
                 } else {
                     $this->db->insert(db_prefix() . 'unawarded_budget_info', [
                         'estimate_id' => $estimate_id,
@@ -2364,6 +2367,8 @@ class Estimates_model extends App_Model
                         'unawarded_rate' => 0.00,
                         'packages' => !empty($value['packages']) ? implode(',', $value['packages']) : NULL,
                     ]);
+                    $unawarded_budget_info_id = $this->db->insert_id();
+                    add_assign_unawarded_capex_activity_log($unawarded_budget_info_id);
                 }
                 if (!empty($added)) {
                     foreach ($added as $akey => $avalue) {

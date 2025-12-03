@@ -940,3 +940,42 @@ function add_budget_package_activity_log($id, $is_create = true)
     }
     return true;
 }
+
+function add_assign_unawarded_capex_activity_log($id)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $unawarded_budget_info = $CI->db->get(db_prefix() . 'unawarded_budget_info')->row();
+        if(!empty($unawarded_budget_info)) {
+            $CI->db->select(
+                db_prefix() . 'items.commodity_code,' .
+                db_prefix() . 'items.description'
+            );
+            $CI->db->from(db_prefix() . 'itemable');
+            $CI->db->join(db_prefix() . 'items', db_prefix() . 'items.id = ' . db_prefix() . 'itemable.item_code', 'left');
+            $CI->db->where(db_prefix() . 'itemable.id', $unawarded_budget_info->item_id);
+            $CI->db->group_by(db_prefix() . 'itemable.id');
+            $items = $CI->db->get()->row();
+            if(!empty($unawarded_budget_info->packages)) {
+                $packages = $CI->db->select('package_name')
+                ->where_in('id', explode(",", $unawarded_budget_info->packages))
+                ->from(db_prefix() . 'estimate_package_info')
+                ->get()
+                ->result_array();
+                $all_packages = !empty($packages) ? implode(', ', array_column($packages, 'package_name')) : '';
+                $description = "Packages <b>".$all_packages."</b> have been assigned to item <b>".$items->commodity_code." ".$items->description."</b>, under budget head <b>".get_group_name_by_id($unawarded_budget_info->budget_head)."</b> and budget <b>".format_estimate_number($unawarded_budget_info->estimate_id)."</b>.";
+                $CI->db->insert(db_prefix() . 'module_activity_log', [
+                    'module_name' => 'bud',
+                    'rel_id' => $unawarded_budget_info->estimate_id,
+                    'description' => $description,
+                    'date' => date('Y-m-d H:i:s'),
+                    'staffid' => get_staff_user_id(),
+                    'project_id' => $default_project
+                ]);
+            }
+        }
+    }
+    return true;
+}
