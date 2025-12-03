@@ -1135,6 +1135,7 @@ function handle_sales_attachments($rel_id, $rel_type)
                 'file_name'     => $filename,
                 'key'           => $key,
             ]);
+            add_budget_attachment_activity_log($insert_id, $filename, true);
         } else {
             echo json_encode([
                 'success'   => false,

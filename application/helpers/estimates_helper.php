@@ -892,3 +892,28 @@ function add_budget_revision_activity_log($id)
     }
     return true;
 }
+
+function add_budget_attachment_activity_log($id, $file_name, $is_create = true)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $files = $CI->db->get(db_prefix() . 'files')->row();
+        if(!empty($files)) {
+            if($files->rel_type == 'estimate') {
+                $is_create_value = $is_create ? 'added' : 'removed';
+                $description = "Attachment <b>".$file_name."</b> has been ".$is_create_value." for budget <b>".format_estimate_number($files->rel_id)."</b>.";
+                $CI->db->insert(db_prefix() . 'module_activity_log', [
+                    'module_name' => 'bud',
+                    'rel_id' => $files->rel_id,
+                    'description' => $description,
+                    'date' => date('Y-m-d H:i:s'),
+                    'staffid' => get_staff_user_id(),
+                    'project_id' => $default_project
+                ]);
+            }
+        }
+    }
+    return true;
+}

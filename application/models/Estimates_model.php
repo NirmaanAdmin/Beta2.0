@@ -1153,6 +1153,7 @@ class Estimates_model extends App_Model
         $attachment = $this->get_attachments('', $id);
         $deleted    = false;
         if ($attachment) {
+            add_budget_attachment_activity_log($attachment->id, $attachment->file_name, false);
             if (empty($attachment->external)) {
                 unlink(get_upload_path_by_type('estimate') . $attachment->rel_id . '/' . $attachment->file_name);
             }
