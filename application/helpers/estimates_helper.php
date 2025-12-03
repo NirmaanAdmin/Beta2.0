@@ -965,7 +965,7 @@ function add_assign_unawarded_capex_activity_log($id)
                 ->get()
                 ->result_array();
                 $all_packages = !empty($packages) ? implode(', ', array_column($packages, 'package_name')) : '';
-                $description = "Packages <b>".$all_packages."</b> have been assigned to item <b>".$items->commodity_code." ".$items->description."</b>, under budget head <b>".get_group_name_by_id($unawarded_budget_info->budget_head)."</b> and budget <b>".format_estimate_number($unawarded_budget_info->estimate_id)."</b>.";
+                $description = "Packages <b>".$all_packages."</b> have been assigned to item <b>".$items->commodity_code." ".$items->description."</b> under budget head <b>".get_group_name_by_id($unawarded_budget_info->budget_head)."</b> and budget <b>".format_estimate_number($unawarded_budget_info->estimate_id)."</b>.";
                 $CI->db->insert(db_prefix() . 'module_activity_log', [
                     'module_name' => 'bud',
                     'rel_id' => $unawarded_budget_info->estimate_id,
@@ -989,18 +989,53 @@ function update_estimate_budget_info_activity_log($id, $type)
         $estimate_budget_info = $CI->db->get(db_prefix() . 'estimate_budget_info')->row();
         if(!empty($estimate_budget_info)) {
             if($type == 'detailed_costing') {
-                $description = "The detailed costing summary has been updated to <b>".$estimate_budget_info->detailed_costing."</b>, under budget head <b>".get_group_name_by_id($estimate_budget_info->budget_id)."</b> and budget <b>".format_estimate_number($estimate_budget_info->estimate_id)."</b>.";
+                $description = "The detailed costing summary has been updated to <b>".$estimate_budget_info->detailed_costing."</b> under budget head <b>".get_group_name_by_id($estimate_budget_info->budget_id)."</b> and budget <b>".format_estimate_number($estimate_budget_info->estimate_id)."</b>.";
             } else if($type == 'budget_summary_remarks') {
-                $description = "The remarks has been updated to <b>".$estimate_budget_info->budget_summary_remarks."</b>, under budget head <b>".get_group_name_by_id($estimate_budget_info->budget_id)."</b> and budget <b>".format_estimate_number($estimate_budget_info->estimate_id)."</b>.";
+                $description = "The remarks has been updated to <b>".$estimate_budget_info->budget_summary_remarks."</b> under budget head <b>".get_group_name_by_id($estimate_budget_info->budget_id)."</b> and budget <b>".format_estimate_number($estimate_budget_info->estimate_id)."</b>.";
             } else if($type == 'overall_budget_area') {
-                $description = "The overall area has been updated to <b>".$estimate_budget_info->overall_budget_area."</b>, under budget head <b>".get_group_name_by_id($estimate_budget_info->budget_id)."</b> and budget <b>".format_estimate_number($estimate_budget_info->estimate_id)."</b>.";
+                $description = "The overall area has been updated to <b>".$estimate_budget_info->overall_budget_area."</b> under budget head <b>".get_group_name_by_id($estimate_budget_info->budget_id)."</b> and budget <b>".format_estimate_number($estimate_budget_info->estimate_id)."</b>.";
             } else {
                 $description = '';
             }
             if(!empty($description)) {
                 $CI->db->insert(db_prefix() . 'module_activity_log', [
                     'module_name' => 'bud',
-                    'rel_id' => $unawarded_budget_info->estimate_id,
+                    'rel_id' => $estimate_budget_info->estimate_id,
+                    'description' => $description,
+                    'date' => date('Y-m-d H:i:s'),
+                    'staffid' => get_staff_user_id(),
+                    'project_id' => $default_project
+                ]);
+            }
+        }
+    }
+    return true;
+}
+
+function add_budget_item_activity_log($id, $is_create = true)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $is_create_value = $is_create ? 'added' : 'removed';
+        $CI->db->select(
+            db_prefix() . 'itemable.rel_id,' .
+            db_prefix() . 'itemable.rel_type,' .
+            db_prefix() . 'itemable.annexure,' .
+            db_prefix() . 'items.commodity_code,' .
+            db_prefix() . 'items.description'
+        );
+        $CI->db->from(db_prefix() . 'itemable');
+        $CI->db->join(db_prefix() . 'items', db_prefix() . 'items.id = ' . db_prefix() . 'itemable.item_code', 'left');
+        $CI->db->where(db_prefix() . 'itemable.id', $id);
+        $CI->db->group_by(db_prefix() . 'itemable.id');
+        $items = $CI->db->get()->row();
+        if(!empty($items)) {
+            if($items->rel_type == 'estimate') {
+                $description = "Item <b>".$items->commodity_code." ".$items->description."</b> has been ".$is_create_value." under budget head <b>".get_group_name_by_id($items->annexure)."</b> and budget <b>".format_estimate_number($items->rel_id)."</b>.";
+                $CI->db->insert(db_prefix() . 'module_activity_log', [
+                    'module_name' => 'bud',
+                    'rel_id' => $items->rel_id,
                     'description' => $description,
                     'date' => date('Y-m-d H:i:s'),
                     'staffid' => get_staff_user_id(),

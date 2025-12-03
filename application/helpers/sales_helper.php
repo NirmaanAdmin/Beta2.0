@@ -770,6 +770,8 @@ function add_new_sales_item_post($item, $rel_id, $rel_type)
         handle_custom_fields_post($id, $custom_fields);
     }
 
+    add_budget_item_activity_log($id, true);
+
     return $id;
 }
 
@@ -829,6 +831,8 @@ function update_sales_item_post($item_id, $data, $field = '')
 function handle_removed_sales_item_post($id, $rel_type)
 {
     $CI = &get_instance();
+    
+    add_budget_item_activity_log($id, false);
 
     $CI->db->where('id', $id);
     $CI->db->delete(db_prefix() . 'itemable');
