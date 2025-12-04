@@ -1046,3 +1046,117 @@ function add_budget_item_activity_log($id, $is_create = true)
     }
     return true;
 }
+
+function update_budget_item_activity_log($new_data)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if (empty($new_data['itemid'])) {
+        return false;
+    }
+    $itemable = $CI->db->where('id', $new_data['itemid'])
+        ->get(db_prefix() . 'itemable')
+        ->row();
+    if (!$itemable) {
+        return false;
+    }
+    $old_data = (array)$itemable;
+    if (isset($old_data['item_code'])) {
+        $old_data['item_name'] = $old_data['item_code'];
+    }
+    if (isset($old_data['area'])) {
+        $areaArray = is_array($old_data['area']) ? $old_data['area'] : explode(',', $old_data['area']);
+        $areaArray = array_map('trim', $areaArray);
+        $areaArray = array_filter($areaArray, fn($v) => $v !== '');
+        sort($areaArray, SORT_NUMERIC);
+        $old_data['area'] = implode(',', $areaArray);
+    }
+    if (isset($new_data['area']) && is_array($new_data['area'])) {
+        $areaArray = array_map('trim', $new_data['area']);
+        $areaArray = array_filter($areaArray, fn($v) => $v !== '');
+        sort($areaArray, SORT_NUMERIC);
+        $new_data['area'] = implode(',', $areaArray);
+    }
+    $normalize = function ($value) {
+        $value = trim((string)$value);
+        if (in_array(strtolower($value), ['null', 'none', 'nil', 'n/a', '-', '--'])) {
+            return '';
+        }
+        if ($value === '0000-00-00') {
+            return '';
+        }
+        if (is_numeric($value)) {
+            $num = (float)$value;
+            return ($num == 0.0) ? '' : $num;
+        }
+        return strtolower($value);
+    };
+    $norm_old = array_map($normalize, $old_data);
+    $norm_new = array_map($normalize, $new_data);
+    $changes = array_diff_assoc($norm_new, $norm_old);
+    if (empty($changes)) {
+        return true;
+    }
+    $field_map = [
+        'item_name' => _l('estimate_table_item_heading'),
+        'long_description' => _l('estimate_table_item_description'),
+        'sub_head' => _l('sub_head'),
+        'area' => _l('area'),
+        'qty' => _l('estimate_table_quantity_heading'),
+        'unit_id' => _l('Unit'),
+        'rate' => _l('estimate_table_rate_heading'),
+        'remarks' => _l('remarks'),
+    ];
+    foreach ($changes as $field => $dummy) {
+        if (!isset($field_map[$field])) {
+            continue;
+        }
+        $old_value = $old_data[$field] ?? '';
+        $new_value = $new_data[$field] ?? '';
+        if ($field === 'item_name') {
+            $old_value = !empty($old_value) ? pur_get_item_variatiom($old_value) : '';
+            $new_value = !empty($new_value) ? pur_get_item_variatiom($new_value) : '';
+        }
+        if ($field === 'sub_head') {
+            $old_value = !empty($old_value) ? get_sub_head_name_by_id($old_value) : '';
+            $new_value = !empty($new_value) ? get_sub_head_name_by_id($new_value) : '';
+        }
+        if ($field === 'area') {
+            $old_value = !empty($old_value) ? get_area_name_by_id($old_value) : '';
+            $new_value = !empty($new_value) ? get_area_name_by_id($new_value) : '';
+        }
+        if ($field === 'unit_id') {
+            $old_value = !empty($old_value) ? pur_get_unit_name($old_value) : '';
+            $new_value = !empty($new_value) ? pur_get_unit_name($new_value) : '';
+        }
+
+        $CI->db->select(
+            db_prefix() . 'itemable.rel_id,' .
+            db_prefix() . 'itemable.rel_type,' .
+            db_prefix() . 'itemable.annexure,' .
+            db_prefix() . 'items.commodity_code,' .
+            db_prefix() . 'items.description'
+        );
+        $CI->db->from(db_prefix() . 'itemable');
+        $CI->db->join(db_prefix() . 'items', db_prefix() . 'items.id = ' . db_prefix() . 'itemable.item_code', 'left');
+        $CI->db->where(db_prefix() . 'itemable.id', $new_data['itemid']);
+        $CI->db->group_by(db_prefix() . 'itemable.id');
+        $items = $CI->db->get()->row();
+        $old_value = !empty($old_value) ? $old_value : 'None';
+        $new_value = !empty($new_value) ? $new_value : 'None';
+        $description = "".$field_map[$field]." field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> for item <b>".$items->commodity_code." ".$items->description."</b> under budget head <b>".get_group_name_by_id($items->annexure)."</b> and budget <b>".format_estimate_number($items->rel_id)."</b>.";
+        $module_name = 'bud';
+        $rel_id = $old_data['rel_id'];
+        if(!empty($description)) {
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => $module_name,
+                'rel_id' => $rel_id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
