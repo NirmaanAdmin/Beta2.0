@@ -33,7 +33,22 @@ class document_management_model extends app_model
 			$this->db->where('id', $id);
 			return $this->db->get(db_prefix() . 'dmg_items')->row();
 		} else {
-			$this->db->order_by('dateadded', 'DESC');
+			$sort_by = $this->input->get('sort_by') ?? '';
+			if($sort_by == 'name_asc') {
+				$this->db->order_by('name', 'ASC');
+			} else if($sort_by == 'name_desc') {
+				$this->db->order_by('name', 'DESC');
+			} else if($sort_by == 'date_created_asc') {
+				$this->db->order_by('dateadded', 'ASC');
+			} else if($sort_by == 'date_created_desc') {
+				$this->db->order_by('dateadded', 'DESC');
+			} else if($sort_by == 'date_modified_asc') {
+				$this->db->order_by('dateadded', 'ASC');
+			} else if($sort_by == 'date_modified_desc') {
+				$this->db->order_by('dateadded', 'DESC');
+			} else {
+				$this->db->order_by('dateadded', 'DESC');
+			}
 			if ($where != '') {
 				$this->db->where($where);
 			}

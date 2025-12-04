@@ -69,6 +69,23 @@
 													<?php echo _l('dmg_new_folder'); ?>
 												</span>
 											</button>
+											<div class="form-group pull-right mright10 default-tool">
+											    <select name="sort_dmg" id="sort_dmg" class="selectpicker" data-live-search="true" data-width="200px" data-none-selected-text="<?php echo _l('Sort By'); ?>">
+											        <option value=""></option>
+											        <optgroup label="Name">
+											            <option value="name_asc">Name ▲</option>
+											            <option value="name_desc">Name ▼</option>
+											        </optgroup>
+											        <optgroup label="Date Created">
+											            <option value="date_created_asc">Date Created ▲</option>
+											            <option value="date_created_desc">Date Created ▼</option>
+											        </optgroup>
+											        <optgroup label="Date Modified">
+											            <option value="date_modified_asc">Date Modified ▲</option>
+											            <option value="date_modified_desc">Date Modified ▼</option>
+											        </optgroup>
+											    </select>
+											</div>
 											<div class="input-group">
 												<!-- <input type="text" class="form-control" id="searchBox" placeholder="Type to search files or folders" autocomplete="off"> -->
 											 	<?php echo render_input('searchBox', '', '', 'text', ['placeholder' => 'Type to search files or folders', 'style' => 'width: 700px;'], [], 'pull-right default-tool'); ?>
@@ -654,5 +671,24 @@ if (isset($item) && $item->filetype != 'folder' && $edit != 1) {
 				$('#dropdown').hide();
 			}
 		});
+
+		var url = new URL(window.location.href);
+		var currentId = url.searchParams.get('id');
+	    var sortBy = url.searchParams.get('sort_by');
+	    if (sortBy) {
+	        $('#sort_dmg').val(sortBy).selectpicker('refresh');
+	    } else {
+	    	$('#sort_dmg').val('').selectpicker('refresh');
+	    }
+
+		$('#sort_dmg').on('change', function() {
+	        var sortValue = $(this).val();
+	        if(sortValue) {
+		        var redirectUrl = "<?php echo admin_url('document_management?id='); ?>" + currentId + "&sort_by=" + sortValue;
+	      	} else {
+	      		var redirectUrl = "<?php echo admin_url('document_management?id='); ?>" + currentId;
+	      	}
+	      	window.location.href = redirectUrl;
+	    });
 	});
 </script>
