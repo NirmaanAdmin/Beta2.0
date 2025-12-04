@@ -1160,3 +1160,94 @@ function update_budget_item_activity_log($new_data)
     }
     return true;
 }
+
+function update_budget_package_activity_log($id, $new_data)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if (empty($id)) {
+        return false;
+    }
+    $estimate_package_info = $CI->db->where('id', $id)
+        ->get(db_prefix() . 'estimate_package_info')
+        ->row();
+    if (!$estimate_package_info) {
+        return false;
+    }
+    $old_data = (array)$estimate_package_info;
+    $normalize = function ($value) {
+        $value = trim((string)$value);
+        if (in_array(strtolower($value), ['null', 'none', 'nil', 'n/a', '-', '--'])) {
+            return '';
+        }
+        if ($value === '0000-00-00') {
+            return '';
+        }
+        if (is_numeric($value)) {
+            $num = (float)$value;
+            return ($num == 0.0) ? '' : $num;
+        }
+        return strtolower($value);
+    };
+    $norm_old = array_map($normalize, $old_data);
+    $norm_new = array_map($normalize, $new_data);
+    $changes = array_diff_assoc($norm_new, $norm_old);
+    if (empty($changes)) {
+        return true;
+    }
+    $field_map = [
+        'project_awarded_date' => _l('Project Awarded Date'),
+        'package_name' => _l('Package Name'),
+        'kind' => _l('cat'),
+        'rli_filter' => _l('rli_filter'),
+        'sdeposit_percent' => _l('Secured Deposit'),
+    ];
+    foreach ($changes as $field => $dummy) {
+        if (!isset($field_map[$field])) {
+            continue;
+        }
+        $old_value = $old_data[$field] ?? '';
+        $new_value = $new_data[$field] ?? '';
+        if ($field === 'kind') {
+            $opts = [
+                'Client Supply' => _l('client_supply'),
+                'Bought out items' => _l('bought_out_items'),
+            ];
+            $old_value = $opts[$old_value] ?? '';
+            $new_value = $opts[$new_value] ?? '';
+        }
+        if ($field === 'rli_filter') {
+            $opts = [
+                0 => _l('provided_by_ril'),
+                1 => _l('new_item_service_been_addded_as_per_instruction'),
+                2 => _l('due_to_spec_change_then_original_cost'),
+                3 => _l('deal_slip'),
+                4 => _l('to_be_provided_by_ril_but_managed_by_bil'),
+                5 => _l('due_to_additional_item_as_per_apex_instrution'),
+                6 => _l('event_expense'),
+                7 => _l('pending_procurements'),
+                8 => _l('common_services_in_ghj_scope'),
+                9 => _l('common_services_in_ril_scope'),
+                10 => _l('due_to_site_specfic_constraint'),
+            ];
+            $old_value = $opts[$old_value] ?? '';
+            $new_value = $opts[$new_value] ?? '';
+        }
+        $old_value = !empty($old_value) ? $old_value : 'None';
+        $new_value = !empty($new_value) ? $new_value : 'None';
+        $description = "".$field_map[$field]." field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> for package <b>".$estimate_package_info->package_name."</b> under budget head <b>".get_group_name_by_id($estimate_package_info->budget_head)."</b> and budget <b>".format_estimate_number($estimate_package_info->estimate_id)."</b>.";
+        $module_name = 'bud';
+        $rel_id = $estimate_package_info->estimate_id;
+        if(!empty($description)) {
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => $module_name,
+                'rel_id' => $rel_id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}

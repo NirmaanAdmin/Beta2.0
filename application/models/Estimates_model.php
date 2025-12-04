@@ -2733,6 +2733,17 @@ class Estimates_model extends App_Model
         }
         if (!empty($package_id)) {
             // Update existing package
+            update_budget_package_activity_log($package_id, [
+                'estimate_id' => $estimate_id,
+                'budget_head' => $budget_head,
+                'project_awarded_date' => date('Y-m-d', strtotime($project_awarded_date)),
+                'package_name' => $package_name,
+                'sdeposit_percent' => $sdeposit_percent,
+                'sdeposit_value' => $sdeposit_value,
+                'total_package' => $total_package,
+                'kind' => $kind,
+                'rli_filter' => $rli_filter,
+            ]);
             $this->db->where('id', $package_id);
             $this->db->update(db_prefix() . 'estimate_package_info', [
                 'estimate_id' => $estimate_id,
