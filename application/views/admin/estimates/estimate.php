@@ -25,6 +25,40 @@
     </div>
 </div>
 </div>
+<!-- Miles Stones -->
+<div class="modal fade" id="milestone" data-backdrop="static"  tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <?php echo form_open(admin_url('estimates/milestone'), ['id' => 'milestone_form']); ?>
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">
+                    <span class="edit-title"><?php echo _l('edit_milestone'); ?></span>
+                    <span class="add-title"><?php echo _l('new_milestone'); ?></span>
+                </h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <?php echo form_hidden('estimate_id', $estimate->id); ?>
+                        <div id="additional_milestone"></div>
+                        <?php echo render_input('name', 'milestone_name'); ?>
+                        <?php echo render_date_input('start_date', 'milestone_start_date', _d(date('Y-m-d'))); ?>
+                        <?php echo render_date_input('due_date', 'milestone_due_date', ''); ?>
+                        <?php echo render_textarea('description', 'milestone_description'); ?>
+                        <?php echo render_input('milestone_order', 'project_milestone_order', total_rows(db_prefix() . 'project_timelines', ['estimate_id' => $estimate->id]) + 1, 'number'); ?>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo _l('close'); ?></button>
+                <button type="submit" class="btn btn-primary"><?php echo _l('submit'); ?></button>
+            </div>
+        </div><!-- /.modal-content -->
+        <?php echo form_close(); ?>
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!-- Mile stones end -->
 <?php init_tail(); ?>
 <script>
 $(function() {
@@ -134,6 +168,129 @@ $(function() {
         }
     }
 });
+</script>
+<script>
+$(function() {
+    appValidateForm($("#milestone_form"), {
+        name: "required",
+        start_date: "required",
+        due_date: "required",
+    });
+    var milestone_form = $("#milestone_form");
+    var milestone_start_date = milestone_form.find("#start_date");
+    milestone_start_date.on("changed.bs.select", function (e) {
+        milestone_form
+        .find("#due_date")
+        .data("data-date-min-date", milestone_start_date.val());
+    });
+});
+<?php if(isset($estimate)) { ?>
+var estimate_id = <?php echo e($estimate->id); ?>;
+function new_milestone() {
+  $("#milestone").modal("show");
+  $("#milestone .edit-title").addClass("hide");
+}
+milestones_kanban();
+function milestones_kanban() {
+  init_kanban(
+    "estimates/milestones_kanban",
+    milestones_kanban_update,
+    ".project-milestone",
+    445,
+    360,
+    after_milestones_kanban
+  );
+}
+function milestones_kanban_update(ui, object) {
+  if (object === ui.item.parent()[0]) {
+    data = {};
+    data.order = [];
+    data.milestone_id = $(ui.item.parent()[0])
+      .parents(".milestone-column")
+      .data("col-status-id");
+    data.task_id = $(ui.item).data("task-id");
+    var tasks = $(ui.item.parent()[0])
+      .parents(".milestone-column")
+      .find(".task");
+
+    var i = 0;
+    $.each(tasks, function () {
+      data.order.push([$(this).data("task-id"), i]);
+      i++;
+    });
+    check_kanban_empty_col("[data-task-id]");
+
+    setTimeout(function () {
+      $.post(admin_url + "estimates/update_task_milestone", data);
+    }, 50);
+  }
+}
+function after_milestones_kanban() {
+  $("#kan-ban").sortable({
+    helper: "clone",
+    item: ".kan-ban-col",
+    cancel: ".milestone-not-sortable",
+    update: function (event, ui) {
+      var uncategorized_is_after = $(ui.item).next(
+        'ul.kan-ban-col[data-col-status-id="0"]'
+      );
+
+      if (uncategorized_is_after.length) {
+        $(this).sortable("cancel");
+        return false;
+      }
+
+      var data = {};
+      data.order = [];
+      var status = $(".kan-ban-col");
+      var i = 0;
+
+      $.each(status, function () {
+        data.order.push([$(this).data("col-status-id"), i]);
+        i++;
+      });
+
+      $.post(admin_url + "estimates/update_milestones_order", data);
+    },
+  });
+
+  for (
+    var i = -10;
+    i < $(".task-phase").not(".color-not-auto-adjusted").length / 2;
+    i++
+  ) {
+    var r = 120;
+    var g = 169;
+    var b = 56;
+    $(".task-phase:eq(" + (i + 10) + ")")
+      .not(".color-not-auto-adjusted")
+      .css("background", color(r - i * 13, g - i * 13, b - i * 13))
+      .css("border", "1px solid " + color(r - i * 12, g - i * 12, b - i * 12));
+  }
+}
+function milestones_switch_view() {
+  $("#milestones-table").toggleClass("hide");
+  $(".project-milestones-kanban").toggleClass("hide");
+  if (!$.fn.DataTable.isDataTable(".table-milestones")) {
+    initDataTable(
+      ".table-milestones",
+      admin_url + "estimates/project_timelines/" + estimate_id
+    );
+  }
+}
+function edit_milestone(invoker, id) {
+  $("#additional_milestone").append(hidden_input("id", id));
+  $('#milestone input[name="name"]').val($(invoker).data("name"));
+  $('#milestone input[name="start_date"]').val($(invoker).data("start_date"));
+  $('#milestone input[name="due_date"]').val($(invoker).data("due_date"));
+  $('#milestone input[name="milestone_order"]').val($(invoker).data("order"));
+  $('#milestone textarea[name="description"]').val(
+    $(invoker).data("description")
+  );
+  $("#milestone").modal("show");
+  $("#milestone .add-title").addClass("hide");
+}
+<?php } ?>
 </script>
 </body>
 

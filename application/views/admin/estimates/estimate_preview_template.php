@@ -503,7 +503,19 @@
 
                                 <div role="tabpanel" class="tab-pane" id="project_timelines">
                                     <div class="col-md-12">
-                                        <?php echo $cost_planning_details['estimate_detail']['project_timelines']; ?>
+                                        <?php
+                                        if(!empty($project_timelines)) {
+                                            foreach ($project_timelines as $ptkey => $ptvalue) { ?>
+                                                <p>
+                                                    <span style="font-weight: bold;">
+                                                        <i class="fa fa-angle-right" aria-hidden="true"></i> 
+                                                        <?php echo $ptvalue['name'].' | '.date('d-m-Y', strtotime($ptvalue['start_date'])).' - '.date('d-m-Y', strtotime($ptvalue['due_date'])); ?>
+                                                    </span>
+                                                <br>
+                                                <?php echo $ptvalue['description']; ?>
+                                                </p>
+                                            <?php }
+                                        } ?>
                                     </div>
                                 </div>
 

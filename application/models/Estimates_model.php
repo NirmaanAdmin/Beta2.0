@@ -3666,4 +3666,190 @@ class Estimates_model extends App_Model
             return $output;
         }
     }
+
+    public function get_project_timelines($id)
+    {
+        $this->db->where('estimate_id', $id);
+        $this->db->order_by('milestone_order', 'asc');
+        return $this->db->get(db_prefix() . 'project_timelines')->result_array();
+    }
+
+    public function add_milestone($data)
+    {
+        $data['due_date'] = to_sql_date($data['due_date']);
+        $data['start_date'] = to_sql_date($data['start_date']);
+        $data['datecreated'] = date('Y-m-d');
+        $data['description'] = nl2br($data['description']);
+        $this->db->insert(db_prefix() . 'project_timelines', $data);
+        $insert_id = $this->db->insert_id();
+        if ($insert_id) {
+            return $insert_id;
+        }
+        return false;
+    }
+
+    public function update_milestone($data, $id)
+    {
+        $this->db->where('id', $id);
+        $project_timelines = $this->db->get(db_prefix() . 'project_timelines')->row();
+        $data['due_date'] = to_sql_date($data['due_date']);
+        $data['start_date'] = to_sql_date($data['start_date']);
+        $data['description'] = nl2br($data['description']);
+        $this->db->where('id', $id);
+        $this->db->update(db_prefix() . 'project_timelines', $data);
+        if ($this->db->affected_rows() > 0) {
+            return true;
+        }
+        return false;
+    }
+
+    public function delete_milestone($id)
+    {
+        $this->db->where('id', $id);
+        $project_timelines = $this->db->get(db_prefix() . 'project_timelines')->row();
+        $this->db->where('id', $id);
+        $this->db->delete(db_prefix() . 'project_timelines');
+        if ($this->db->affected_rows() > 0) {
+            $this->db->where('milestone', $id);
+            $this->db->where('rel_id', $project_timelines->estimate_id);
+            $this->db->where('rel_type', 'estimate');
+            $this->db->update(db_prefix() . 'tasks', [
+                'milestone' => 0,
+            ]);
+            return true;
+        }
+        return false;
+    }
+
+    public function calc_milestone_logged_time($estimate_id, $id)
+    {
+        $total = [];
+        $tasks = $this->get_project_timelines_tasks($estimate_id, [
+            'milestone' => $id,
+        ]);
+        foreach ($tasks as $task) {
+            $total[] = $task['total_logged_time'];
+        }
+        return array_sum($total);
+    }
+
+    public function get_project_timelines_tasks($id, $where = [], $apply_restrictions = false, $count = false, $callback = null)
+    {
+        $has_permission = staff_can('view',  'tasks');
+        $show_all_tasks_for_project_member = get_option('show_all_tasks_for_project_member');
+
+        $select = implode(', ', prefixed_table_fields_array(db_prefix() . 'tasks')) . ',' . db_prefix() . 'project_timelines.name as milestone_name,
+        (SELECT SUM(CASE
+            WHEN end_time is NULL THEN ' . time() . '-start_time
+            ELSE end_time-start_time
+            END) FROM ' . db_prefix() . 'taskstimers WHERE task_id=' . db_prefix() . 'tasks.id) as total_logged_time,
+           ' . get_sql_select_task_assignees_ids() . ' as assignees_ids
+        ';
+
+        if (!is_client_logged_in() && is_staff_logged_in()) {
+            $select .= ',(SELECT staffid FROM ' . db_prefix() . 'task_assigned WHERE taskid=' . db_prefix() . 'tasks.id AND staffid=' . get_staff_user_id() . ') as current_user_is_assigned';
+        }
+
+        if (is_client_logged_in()) {
+            $this->db->where('visible_to_client', 1);
+        }
+
+        $this->db->select($select);
+
+        $this->db->join(db_prefix() . 'project_timelines', db_prefix() . 'project_timelines.id = ' . db_prefix() . 'tasks.milestone', 'left');
+        $this->db->where('rel_id', $id);
+        $this->db->where('rel_type', 'estimate');
+        if ($apply_restrictions == true) {
+            if (!is_client_logged_in() && !$has_permission && $show_all_tasks_for_project_member == 0) {
+                $this->db->where('(
+                    ' . db_prefix() . 'tasks.id IN (SELECT taskid FROM ' . db_prefix() . 'task_assigned WHERE staffid=' . get_staff_user_id() . ')
+                    OR ' . db_prefix() . 'tasks.id IN(SELECT taskid FROM ' . db_prefix() . 'task_followers WHERE staffid=' . get_staff_user_id() . ')
+                    OR is_public = 1
+                    OR (addedfrom =' . get_staff_user_id() . ' AND is_added_from_contact = 0)
+                    )');
+            }
+        }
+
+        $this->db->where($where);
+
+        // Milestones kanban order
+        // Request is admin/projects/milestones_kanban
+        if ($this->uri->segment(3) == 'milestones_kanban' | $this->uri->segment(3) == 'milestones_kanban_load_more') {
+            $this->db->order_by('milestone_order', 'asc');
+        } else {
+            $orderByString = hooks()->apply_filters('project_tasks_array_default_order', 'FIELD(status, 5), duedate IS NULL ASC, duedate');
+            $this->db->order_by($orderByString, '', false);
+        }
+
+        if ($callback) {
+            $callback();
+        }
+
+        if ($count == false) {
+            $tasks = $this->db->get(db_prefix() . 'tasks')->result_array();
+        } else {
+            $tasks = $this->db->count_all_results(db_prefix() . 'tasks');
+        }
+
+        return $tasks;
+    }
+
+    public function get_milestones($estimate_id, $where = [])
+    {
+        $this->db->select('*, (SELECT COUNT(id) FROM ' . db_prefix() . 'tasks WHERE rel_type="estimate" AND rel_id=' . $this->db->escape_str($estimate_id) . ' and milestone=' . db_prefix() . 'project_timelines.id) as total_tasks, (SELECT COUNT(id) FROM ' . db_prefix() . 'tasks WHERE rel_type="estimate" AND rel_id=' . $this->db->escape_str($estimate_id) . ' and milestone=' . db_prefix() . 'project_timelines.id AND status=5) as total_finished_tasks');
+        $this->db->where('estimate_id', $estimate_id);
+        $this->db->order_by('milestone_order', 'ASC');
+        $this->db->where($where);
+        $project_timelines = $this->db->get(db_prefix() . 'project_timelines')->result_array();
+        $i = 0;
+        foreach ($project_timelines as $milestone) {
+            $project_timelines[$i]['total_logged_time'] = $this->calc_milestone_logged_time($estimate_id, $milestone['id']);
+            $i++;
+        }
+
+        return $project_timelines;
+    }
+
+    public function do_milestones_kanban_query($milestone_id, $estimate_id, $page = 1, $where = [], $count = false)
+    {
+        $where['milestone'] = $milestone_id;
+        $limit = get_option('tasks_kanban_limit');
+        $tasks = $this->get_project_timelines_tasks($estimate_id, $where, true, $count, function () use ($count, $page, $limit) {
+            if ($count == false) {
+                if ($page > 1) {
+                    $position = (($page - 1) * $limit);
+                    $this->db->limit($limit, $position);
+                } else {
+                    $this->db->limit($limit);
+                }
+            }
+        });
+
+        return $tasks;
+    }
+
+    public function update_milestones_order($data)
+    {
+        foreach ($data['order'] as $status) {
+            $this->db->where('id', $status[0]);
+            $this->db->update(db_prefix() . 'project_timelines', [
+                'milestone_order' => $status[1],
+            ]);
+        }
+    }
+
+    public function update_task_milestone($data)
+    {
+        $this->db->where('id', $data['task_id']);
+        $this->db->update(db_prefix() . 'tasks', [
+            'milestone' => $data['milestone_id'],
+        ]);
+
+        foreach ($data['order'] as $order) {
+            $this->db->where('id', $order[0]);
+            $this->db->update(db_prefix() . 'tasks', [
+                'milestone_order' => $order[1],
+            ]);
+        }
+    }
 }

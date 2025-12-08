@@ -382,13 +382,24 @@ $pdf->writeHTML($detailedcosting, true, false, false, false, '');
 
 $projecttimelines = '';
 $projecttimelines .= '<p style="font-weight:bold;">6. '.strtoupper(_l('project_timelines')).'</p>';
-$projecttimelines .= '<table width="100%" cellspacing="0" cellpadding="3" border="0">';
-$projecttimelines .= '<tbody>
-    <tr style="font-size:13px;">
-        <td>'.$cost_planning_details['estimate_detail']['project_timelines'].'</td>
-    </tr>
-</tbody>';
-$projecttimelines .= '</table>';
+$projecttimelines .= '<table width="100%" cellspacing="0" cellpadding="3" border="0"><tbody>';
+if (!empty($project_timelines)) {
+    $projecttimelines .= '<tr><td style="font-size:13px;">';
+    foreach ($project_timelines as $pt) {
+        $projecttimelines .= '
+            <p>
+                <span style="font-weight:bold;">'
+                    . $pt['name'] . ' | ' 
+                    . date('d-m-Y', strtotime($pt['start_date'])) . ' - '
+                    . date('d-m-Y', strtotime($pt['due_date'])) .
+                '</span><br>'
+                . $pt['description'] . '
+            </p>
+        ';
+    }
+    $projecttimelines .= '</td></tr>';
+}
+$projecttimelines .= '</tbody></table>';
 
 $pdf->AddPage();
 $pdf->writeHTML($projecttimelines, true, false, false, false, '');

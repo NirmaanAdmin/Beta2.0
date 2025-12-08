@@ -138,6 +138,9 @@ class Estimates extends AdminController
             $data['all_area_summary'] = $this->estimates_model->get_area_summary($id);
             $data['last_revision'] = get_estimate_revision_no($id, 0, 1);
             $data['next_revision'] = !empty($data['last_revision']) ? $data['last_revision'] + 1 : 1;
+            $data['milestones_exclude_completed_tasks'] = $this->input->get('exclude_completed') && $this->input->get('exclude_completed') == 'yes' || !$this->input->get('exclude_completed');
+            $data['total_milestones'] = total_rows(db_prefix() . 'project_timelines', ['estimate_id' => $id]);
+            $data['milestones_found'] = $data['total_milestones'] > 0 || (!$data['total_milestones'] && total_rows(db_prefix() . 'tasks', ['rel_id' => $id, 'rel_type' => 'budget', 'milestone' => 0]) > 0);
             $title            = _l('edit', _l('estimate_lowercase'));
         }
 
@@ -302,6 +305,7 @@ class Estimates extends AdminController
         $this->load->model('purchase/purchase_model');
         $data['sub_groups_pur'] = $this->purchase_model->get_sub_group();
         $data['estimate_budget_listing'] = $this->estimates_model->get_estimate_budget_listing($id);
+        $data['project_timelines'] = $this->estimates_model->get_project_timelines($id);
 
         if ($to_return == false) {
             $this->load->view('admin/estimates/estimate_preview_template', $data);
@@ -831,5 +835,71 @@ class Estimates extends AdminController
         $output = $this->estimates_model->table_unawarded_capex_items($estimate_id);
         echo json_encode($output);
         die();
+    }
+
+    public function milestone($id = '')
+    {
+        if ($this->input->post()) {
+            $message = '';
+            $success = false;
+            if (!$this->input->post('id')) {
+                $id = $this->estimates_model->add_milestone($this->input->post());
+                if ($id) {
+                    set_alert('success', _l('added_successfully', _l('project_milestone')));
+                }
+            } else {
+                $data = $this->input->post();
+                $id   = $data['id'];
+                unset($data['id']);
+                $success = $this->estimates_model->update_milestone($data, $id);
+                if ($success) {
+                    set_alert('success', _l('updated_successfully', _l('project_milestone')));
+                }
+            }
+        }
+        redirect(admin_url('estimates/estimate/' . $this->input->post('estimate_id')));
+    }
+
+    public function delete_milestone($estimate_id, $id)
+    {
+        if ($this->estimates_model->delete_milestone($id)) {
+            set_alert('deleted', 'project_milestone');
+        }
+        redirect(admin_url('estimates/estimate/' . $estimate_id));
+    }
+
+    public function milestones_kanban()
+    {
+        $data['milestones_exclude_completed_tasks'] = $this->input->get('exclude_completed_tasks') && $this->input->get('exclude_completed_tasks') == 'yes';
+        $data['estimate_id'] = $this->input->get('estimate_id');
+        $data['milestones'] = [];
+        $_milestones = $this->estimates_model->get_milestones($data['estimate_id']);
+        foreach ($_milestones as $m) {
+            $data['milestones'][] = $m;
+        }
+        echo $this->load->view('admin/estimates/milestones_kan_ban', $data, true);
+    }
+
+    public function update_milestones_order()
+    {
+        if ($post_data = $this->input->post()) {
+            $this->estimates_model->update_milestones_order($post_data);
+        }
+    }
+
+    public function update_task_milestone()
+    {
+        if ($this->input->post()) {
+            $this->estimates_model->update_task_milestone($this->input->post());
+        }
+    }
+
+    public function project_timelines($estimate_id)
+    {
+        if ($this->input->is_ajax_request()) {
+            $this->app->get_table_data('project_timelines', [
+                'estimate_id' => $estimate_id,
+            ]);
+        }
     }
 }
