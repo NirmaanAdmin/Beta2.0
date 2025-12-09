@@ -926,4 +926,21 @@ class Estimates extends AdminController
             ]);
         }
     }
+
+    public function milestones_kanban_load_more()
+    {
+        $milestones_exclude_completed_tasks = $this->input->get('exclude_completed_tasks') && $this->input->get('exclude_completed_tasks') == 'yes';
+
+        $status     = $this->input->get('status');
+        $page       = $this->input->get('page');
+        $estimate_id = $this->input->get('estimate_id');
+        $where      = [];
+        if ($milestones_exclude_completed_tasks) {
+            $where['status !='] = Tasks_model::STATUS_COMPLETE;
+        }
+        $tasks = $this->estimates_model->do_milestones_kanban_query($status, $estimate_id, $page, $where);
+        foreach ($tasks as $task) {
+            $this->load->view('admin/estimates/_milestone_kanban_card', ['task' => $task, 'milestone' => $status]);
+        }
+    }
 }

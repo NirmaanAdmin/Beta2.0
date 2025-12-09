@@ -103,7 +103,7 @@ foreach ($milestones as $milestone) {
                             data-load-status="<?php echo e($milestone['id']); ?>">
                             <a href="#" class="btn btn-default btn-block<?php if ($total_pages <= 1) {
         echo ' disabled';
-    } ?>" data-page="1" onclick="kanban_load_more(<?php echo e($milestone['id']); ?>,this,'projects/milestones_kanban_load_more',320,360); return false;"
+    } ?>" data-page="1" onclick="kanban_load_more(<?php echo e($milestone['id']); ?>,this,'estimates/milestones_kanban_load_more',320,360); return false;"
                                 ;>
                                 <?php echo _l('load_more'); ?>
                             </a>
