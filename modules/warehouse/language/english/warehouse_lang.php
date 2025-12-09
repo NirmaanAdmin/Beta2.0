@@ -765,3 +765,6 @@ $lang['goods_receipt_register']  = 'Goods Receipt Register';
 $lang['material_issue_report']  = 'Material Issue Report';
 $lang['stock_movement_ledger']  = 'Stock Movement Ledger';
 $lang['returnable_material_alert']  = 'Returnable Material Alert Sheet';
+$lang['stock_reconciliation_tracker'] = 'Reconciliation Tracker';
+$lang['ready_for_packing'] = 'Ready for Packing';
+$lang['ready_to_deliver'] = 'Ready to Deliver';

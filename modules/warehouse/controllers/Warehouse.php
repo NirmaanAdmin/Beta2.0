@@ -10257,4 +10257,22 @@ class warehouse extends AdminController
 		$this->warehouse_model->delete_stock_reconciliation($id);
 		redirect(admin_url('warehouse/stock_reconciliation'));
 	}
+
+	public function stock_reconciliation_tracker($id = '')
+	{
+		$data['purchase_id'] = $id;
+		$data['title'] = _l('stock_reconciliation_tracker');
+		$this->load->view('stock_reconciliation/stock_reconciliation_tracker', $data);
+	}
+
+
+	public function table_manage_stock_reconciliation_list()
+    {
+        $this->app->get_table_data(module_views_path('warehouse', 'stock_reconciliation/table_manage_stock_reconciliation_list'));
+    }
+
+	public function table_manage_actual_stock_reconciliation()
+    {
+        $this->app->get_table_data(module_views_path('warehouse', 'stock_reconciliation/table_manage_actual_stock_reconciliation'));
+    }
 }
