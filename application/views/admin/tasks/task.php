@@ -163,7 +163,7 @@
                             echo render_select('category', $commodity_groups_pur, array('id', 'name'), 'Category', $selected);
                             ?>
                         </div>
-                        <div class="project-details<?php if ($rel_type != 'project') {
+                        <div class="project-details<?php if ($rel_type != 'project' && $rel_type != 'estimate') {
                                                         echo ' hide';
                                                     } ?>">
                             <div class="form-group">
@@ -647,6 +647,18 @@
                                 init_project_details(_rel_type.val(), project.allow_to_view_tasks);
                             }, 'json');
 
+
+
+                    } else if (_rel_type.val() == 'estimate') {
+                        $.get(admin_url + 'estimates/get_rel_estimate_data/' + $(this).val() + '/' + taskid,
+                            function(estimate) {
+                                $("select[name='milestone']").html(estimate.milestones);
+                                if (typeof(_milestone_selected_data) != 'undefined') {
+                                    $("select[name='milestone']").val(_milestone_selected_data.id);
+                                    $('input[name="duedate"]').val(_milestone_selected_data.due_date)
+                                }
+                                $("select[name='milestone']").selectpicker('refresh');
+                            }, 'json');
 
 
                     } else {

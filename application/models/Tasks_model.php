@@ -509,7 +509,7 @@ class Tasks_model extends App_Model
         if ((!isset($data['milestone']) || $data['milestone'] == '') || (isset($data['milestone']) && $data['milestone'] == '')) {
             $data['milestone'] = 0;
         } else {
-            if ($data['rel_type'] != 'project') {
+            if ($data['rel_type'] != 'project' && $data['rel_type'] != 'estimate') {
                 $data['milestone'] = 0;
             }
         }

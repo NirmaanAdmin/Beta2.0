@@ -909,4 +909,21 @@ class Estimates extends AdminController
             $this->estimates_model->update_milestone_color($this->input->post());
         }
     }
+
+    public function get_rel_estimate_data($id, $task_id = '')
+    {
+        if ($this->input->is_ajax_request()) {
+            $selected_milestone = '';
+            if ($task_id != '' && $task_id != 'undefined') {
+                $task               = $this->tasks_model->get($task_id);
+                $selected_milestone = $task->milestone;
+            }
+            echo json_encode([
+                'milestones'          => render_select('milestone', $this->estimates_model->get_milestones($id), [
+                    'id',
+                    'name',
+                ], 'task_milestone', $selected_milestone),
+            ]);
+        }
+    }
 }

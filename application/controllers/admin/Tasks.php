@@ -311,6 +311,16 @@ class Tasks extends AdminController
                 ];
             }
         }
+        if ($this->input->get('project_timeline_id')) {
+            $this->db->where('id', $this->input->get('project_timeline_id'));
+            $project_timeline = $this->db->get(db_prefix() . 'project_timelines')->row();
+            if ($project_timeline) {
+                $data['_milestone_selected_data'] = [
+                    'id'       => $project_timeline->id,
+                    'due_date' => _d($project_timeline->due_date),
+                ];
+            }
+        }
         if ($this->input->get('start_date')) {
             $data['start_date'] = $this->input->get('start_date');
         }
@@ -377,6 +387,9 @@ class Tasks extends AdminController
             $data['task'] = $this->tasks_model->get($id);
             if ($data['task']->rel_type == 'project') {
                 $data['milestones'] = $this->projects_model->get_milestones($data['task']->rel_id);
+            }
+            if ($data['task']->rel_type == 'estimate') {
+                $data['milestones'] = $this->estimates_model->get_milestones($data['task']->rel_id);
             }
             $title = _l('edit', _l('task_lowercase')) . ' ' . $data['task']->name;
         }

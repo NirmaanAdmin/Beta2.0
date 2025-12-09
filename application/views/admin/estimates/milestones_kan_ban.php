@@ -66,7 +66,7 @@ foreach ($milestones as $milestone) {
                 <a href="#" onclick="return false;" class="pull-right text-dark" data-placement="bottom"
                     data-toggle="popover" data-content="
       <div class='text-center'><?php if (staff_can('create', 'tasks')) {
-        ?><button type='button' return false;' class='btn btn-success btn-block mtop10 new-task-to-milestone'>
+        ?><button type='button' return false;' class='btn btn-success btn-block mtop10 new-task-to-project-timelines'>
          <?php echo _l('new_task'); ?>
        </button>
      <?php

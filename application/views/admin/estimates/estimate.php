@@ -226,6 +226,20 @@ $(function() {
         });
       }
     );
+    $("body").on("click", ".new-task-to-project-timelines", function (e) {
+      e.preventDefault();
+      var project_timeline_id = $(this)
+        .parents(".milestone-column")
+        .data("col-status-id");
+      new_task(
+        admin_url +
+        "tasks/task?rel_type=estimate&rel_id=" +
+        estimate_id +
+        "&project_timeline_id=" +
+        project_timeline_id
+      );
+      $('body [data-toggle="popover"]').popover("hide");
+    });
 });
 <?php if(isset($estimate)) { ?>
 var estimate_id = <?php echo e($estimate->id); ?>;
