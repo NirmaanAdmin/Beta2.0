@@ -822,6 +822,13 @@ class Estimates_model extends App_Model
             unset($data['next_revision']);
         }
 
+        if (isset($data['exclude_completed_tasks'])) {
+            unset($data['exclude_completed_tasks']);
+        }
+        if (isset($data['estimate_id'])) {
+            unset($data['estimate_id']);
+        }
+
         update_all_budget_fields_activity_log($id, $data);
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'estimates', $data);
@@ -3851,5 +3858,13 @@ class Estimates_model extends App_Model
                 'milestone_order' => $order[1],
             ]);
         }
+    }
+
+    public function update_milestone_color($data)
+    {
+        $this->db->where('id', $data['milestone_id']);
+        $this->db->update(db_prefix() . 'project_timelines', [
+            'color' => $data['color'],
+        ]);
     }
 }

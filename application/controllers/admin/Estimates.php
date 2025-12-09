@@ -902,4 +902,11 @@ class Estimates extends AdminController
             ]);
         }
     }
+
+    public function change_milestone_color()
+    {
+        if ($this->input->post()) {
+            $this->estimates_model->update_milestone_color($this->input->post());
+        }
+    }
 }

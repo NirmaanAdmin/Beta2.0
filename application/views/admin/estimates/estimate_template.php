@@ -654,7 +654,7 @@
                         <div class="checkbox">
                             <input type="checkbox" value="yes" id="exclude_completed_tasks" name="exclude_completed_tasks" <?php if ($milestones_exclude_completed_tasks) {
                         echo ' checked';
-                    } ?> onclick="window.location.href = '<?php echo admin_url('projects/view/' . $project->id . '?group=project_milestones&exclude_completed='); ?>'+(this.checked ? 'yes' : 'no')">
+                    } ?> onclick="window.location.href = '<?php echo admin_url('estimates/estimate/' . $estimate->id . '?exclude_completed='); ?>'+(this.checked ? 'yes' : 'no')">
                             <label for="exclude_completed_tasks"><?php echo _l('exclude_completed_tasks') ?></label>
                         </div>
                         <div class="clearfix"></div>

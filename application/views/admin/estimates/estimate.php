@@ -183,6 +183,49 @@ $(function() {
         .find("#due_date")
         .data("data-date-min-date", milestone_start_date.val());
     });
+    $("body").on("shown.bs.modal", "#milestone", function () {
+      $("#milestone").find('input[name="name"]').focus();
+    });
+    $("#milestone").on("hidden.bs.modal", function (event) {
+      $("#additional_milestone").html("");
+      $('#milestone input[name="due_date"]').val("");
+      $('#milestone input[name="name"]').val("");
+      $('#milestone input[name="milestone_order"]').val(
+        $(".table-milestones tbody tr").length + 1
+      );
+      $('#milestone textarea[name="description"]').val("");
+      $("#milestone .add-title").removeClass("hide");
+      $("#milestone .edit-title").removeClass("hide");
+    });
+    $("body").on(
+      "click",
+      ".milestone-column .cpicker,.milestone-column .reset_milestone_color",
+      function (e) {
+        e.preventDefault();
+        var color = $(this).data("color");
+        var invoker = $(this);
+        var milestone_id = invoker
+          .parents(".milestone-column")
+          .data("col-status-id");
+        $.post(admin_url + "estimates/change_milestone_color", {
+          color: color,
+          milestone_id: milestone_id,
+        }).done(function () {
+          // Reset color needs reload
+          if (color == "") {
+            window.location.reload();
+          } else {
+            var $parent = invoker.parents(".milestone-column");
+            $parent.find(".reset_milestone_color").removeClass("hide");
+            $parent
+              .find(".panel-heading")
+              .addClass("color-white")
+              .removeClass("task-phase");
+            $parent.find(".edit-milestone-phase").addClass("color-white");
+          }
+        });
+      }
+    );
 });
 <?php if(isset($estimate)) { ?>
 var estimate_id = <?php echo e($estimate->id); ?>;
@@ -289,6 +332,17 @@ function edit_milestone(invoker, id) {
   );
   $("#milestone").modal("show");
   $("#milestone .add-title").addClass("hide");
+}
+// When marking task as complete if the staff in on project milestones area, remove this task from milestone in case exists
+function _maybe_remove_task_from_project_milestone(task_id) {
+  var $milestonesTasksWrappers = $(".milestone-column");
+  if ($("body").hasClass("project") && $milestonesTasksWrappers.length > 0) {
+    if ($("#exclude_completed_tasks").prop("checked") == true) {
+      $milestonesTasksWrappers
+        .find('[data-task-id="' + task_id + '"]')
+        .remove();
+    }
+  }
 }
 <?php } ?>
 </script>
