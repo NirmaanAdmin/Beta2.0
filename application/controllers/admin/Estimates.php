@@ -1,6 +1,7 @@
 <?php
 
 use app\services\estimates\EstimatesPipeline;
+use app\services\estimates\AllProjectTimelinesGantt;
 
 defined('BASEPATH') or exit('No direct script access allowed');
 
@@ -21,6 +22,8 @@ class Estimates extends AdminController
     /* List all estimates datatables */
     public function list_estimates($id = '')
     {
+        $this->app_scripts->add('frappe-gantt-js', 'assets/plugins/frappe/frappe-gantt-es2015.js', 'admin', ['vendor-js']);
+        $this->app_css->add('frappe-gantt-js', 'assets/plugins//frappe/frappe-gantt.css', 'admin', ['vendor-css']);
         if (staff_cant('view', 'estimates') && staff_cant('view_own', 'estimates') && get_option('allow_staff_view_estimates_assigned') == '0') {
             access_denied('estimates');
         }
@@ -305,7 +308,9 @@ class Estimates extends AdminController
         $this->load->model('purchase/purchase_model');
         $data['sub_groups_pur'] = $this->purchase_model->get_sub_group();
         $data['estimate_budget_listing'] = $this->estimates_model->get_estimate_budget_listing($id);
-        $data['project_timelines'] = $this->estimates_model->get_project_timelines($id);
+        $data['gantt_data'] = (new AllProjectTimelinesGantt([
+            'estimate_id' => $id,
+        ]))->get();
 
         if ($to_return == false) {
             $this->load->view('admin/estimates/estimate_preview_template', $data);

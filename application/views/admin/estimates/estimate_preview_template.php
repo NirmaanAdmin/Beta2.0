@@ -503,19 +503,19 @@
 
                                 <div role="tabpanel" class="tab-pane" id="project_timelines">
                                     <div class="col-md-12">
-                                        <?php
-                                        if(!empty($project_timelines)) {
-                                            foreach ($project_timelines as $ptkey => $ptvalue) { ?>
-                                                <p>
-                                                    <span style="font-weight: bold;">
-                                                        <i class="fa fa-angle-right" aria-hidden="true"></i> 
-                                                        <?php echo $ptvalue['name'].' | '.date('d-m-Y', strtotime($ptvalue['start_date'])).' - '.date('d-m-Y', strtotime($ptvalue['due_date'])); ?>
-                                                    </span>
-                                                <br>
-                                                <?php echo $ptvalue['description']; ?>
-                                                </p>
-                                            <?php }
-                                        } ?>
+                                        <?php if (count($gantt_data) > 0) { ?>
+                                        <div class="form-group">
+                                            <select class="selectpicker" name="gantt_view">
+                                                <option value="Day"><?php echo _l('gantt_view_day'); ?></option>
+                                                <option value="Week"><?php echo _l('gantt_view_week'); ?></option>
+                                                <option value="Month" selected><?php echo _l('gantt_view_month'); ?></option>
+                                                <option value="Year"><?php echo _l('gantt_view_year'); ?></option>
+                                            </select>
+                                        </div>
+                                        <div id="gantt"></div>
+                                        <?php } else { ?>
+                                        <p><?php echo _l('This project budget has no any milestones'); ?></p>
+                                        <?php } ?>
                                     </div>
                                 </div>
 
@@ -1713,6 +1713,38 @@ $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
     $(EstimateParams.area).selectpicker('refresh');
 });
 
+var gantt_data = <?php echo json_encode($gantt_data); ?>;
+
+if (gantt_data.length > 0) {
+    var gantt = new Gantt("#gantt", gantt_data, {
+        view_modes: ['Day', 'Week', 'Month', 'Year'],
+        view_mode: 'Month',
+        date_format: 'YYYY-MM-DD',
+        popup_trigger: 'click mouseover',
+        on_date_change: function(data, start, end) {
+            if (typeof(data.task_id) != 'undefined') {
+                $.post(admin_url + 'tasks/gantt_date_update/' + data.task_id, {
+                    startdate: moment(start).format('YYYY-MM-DD'),
+                    duedate: moment(end).format('YYYY-MM-DD'),
+                });
+            }
+        },
+        on_click: function(data) {
+            if (typeof(data.task_id) != 'undefined') {
+                init_task_modal(data.task_id);
+            }
+        }
+    });
+
+    $('body').on('mouseleave', '.grid-row', function() {
+        gantt.hide_popup();
+    })
+
+    $('select[name$="gantt_view"').change(function(el) {
+        let view = $(el.target).val();
+        gantt.change_view_mode(view);
+    })
+}
 
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
