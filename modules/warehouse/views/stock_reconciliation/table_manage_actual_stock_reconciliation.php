@@ -4,6 +4,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 $aColumns = [
     db_prefix() . 'stock_reconciliation.goods_delivery_code',   // Voucher Code
+    3,
     db_prefix() . 'stock_reconciliation_detail.commodity_name',
     db_prefix() . 'stock_reconciliation_detail.description',
     db_prefix() . 'stock_reconciliation_detail.area',
@@ -33,7 +34,7 @@ if (get_default_project()) {
 
 
 
-$result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [db_prefix() . 'stock_reconciliation.id']);
+$result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [db_prefix() . 'stock_reconciliation.id',db_prefix() . 'stock_reconciliation.pr_order_id', db_prefix() . 'stock_reconciliation.wo_order_id']);
 
 $output  = $result['output'];
 $rResult = $result['rResult'];
@@ -48,17 +49,109 @@ foreach ($rResult as $aRow) {
         } else {
             $_data = $aRow[$aColumns[$i]];
         }
+        if($aColumns[$i] ==3){
+            $get_order_name = '';
+            if (get_status_modules_wh('purchase')) {
+                if (($aRow['pr_order_id'] != '') && ($aRow['pr_order_id'] != 0)) {
+                    $get_order_name .= '<a href="' . admin_url('purchase/purchase_order/' . $aRow['pr_order_id']) . '" >' . get_pur_order_name($aRow['pr_order_id']) . '</a>';
+                }
+            }
+            if (get_status_modules_wh('purchase')) {
+                if (($aRow['wo_order_id'] != '') && ($aRow['wo_order_id'] != 0)) {
+                    $get_order_name .= '<a href="' . admin_url('purchase/work_order/' . $aRow['wo_order_id']) . '" >' . get_wo_order_name($aRow['wo_order_id']) . '</a>';
+                }
+            }
 
-         if($aColumns[$i] == db_prefix() . 'stock_reconciliation_detail.area'){
+            $_data = $get_order_name;
+        }
+        if ($aColumns[$i] == db_prefix() . 'stock_reconciliation_detail.area') {
             $name = get_area_name_by_id($aRow[db_prefix() . 'stock_reconciliation_detail.area']);
 
             $_data = $name;
-         }
+        }
 
-         if($aColumns[$i] == db_prefix() . 'stock_reconciliation_detail.warehouse_id'){
+        if ($aColumns[$i] == db_prefix() . 'stock_reconciliation_detail.warehouse_id') {
             $name = get_warehouse_name($aRow[db_prefix() . 'stock_reconciliation_detail.warehouse_id']);
             $_data = $name->warehouse_name;
-         }
+        }
+
+        if ($aColumns[$i] == db_prefix() . 'stock_reconciliation_detail.issued_quantities') {
+            $all_issued_quantities = '';
+            if (!empty($aRow[db_prefix() . 'stock_reconciliation_detail.issued_quantities'])) {
+                $issued_quantities_json = json_decode($aRow[db_prefix() . 'stock_reconciliation_detail.issued_quantities'], true);
+
+                foreach ($issued_quantities_json as $key => $value) {
+                    $all_issued_quantities .= get_vendor_name($key) . ": <strong style='font-weight: 700'>" . $value . "<strong>,</br>";
+                }
+                $all_issued_quantities = rtrim($all_issued_quantities, ',</br>');
+            }
+            $_data = $all_issued_quantities;
+        }
+
+        if ($aColumns[$i] == db_prefix() . 'stock_reconciliation_detail.reconciliation_date') {
+            $all_reconciliation_date = '';
+            if (!empty($aRow[db_prefix() . 'stock_reconciliation_detail.reconciliation_date'])) {
+                $reconciliation_date_json = json_decode($aRow[db_prefix() . 'stock_reconciliation_detail.reconciliation_date'], true);
+
+                foreach ($reconciliation_date_json as $key => $value) {
+                    $all_reconciliation_date .= get_vendor_name($key) . ": <strong style='font-weight: 700'>" . $value . "<strong>,</br>";
+                }
+                $all_reconciliation_date = rtrim($all_reconciliation_date, ',</br>');
+                $_data = $all_reconciliation_date;
+            }
+        }
+
+        if ($aColumns[$i] == db_prefix() . 'stock_reconciliation_detail.return_quantity') {
+            $all_return_quantity = '';
+            if (!empty($aRow[db_prefix() . 'stock_reconciliation_detail.return_quantity'])) {
+                $return_quantity_json = json_decode($aRow[db_prefix() . 'stock_reconciliation_detail.return_quantity'], true);
+
+                foreach ($return_quantity_json as $key => $value) {
+                    $all_return_quantity .= get_vendor_name($key) . ": <strong style='font-weight: 700'>" . $value . "<strong>,</br>";
+                }
+                $all_return_quantity = rtrim($all_return_quantity, ',</br>');
+                $_data = $all_return_quantity;
+            }
+        }
+
+        if ($aColumns[$i] == db_prefix() . 'stock_reconciliation_detail.used_quantity') {
+            $all_used_quantity = '';
+            if (!empty($aRow[db_prefix() . 'stock_reconciliation_detail.used_quantity'])) {
+                $used_quantity_json = json_decode($aRow[db_prefix() . 'stock_reconciliation_detail.used_quantity'], true);
+
+                foreach ($used_quantity_json as $key => $value) {
+                    $all_used_quantity .= get_vendor_name($key) . ": <strong style='font-weight: 700'>" . $value . "<strong>,</br>";
+                }
+                $all_used_quantity = rtrim($all_used_quantity, ',</br>');
+                $_data = $all_used_quantity;
+            }
+        }
+
+        if ($aColumns[$i] == db_prefix() . 'stock_reconciliation_detail.location') {
+            $all_location = '';
+            if (!empty($aRow[db_prefix() . 'stock_reconciliation_detail.location'])) {
+                $location_json = json_decode($aRow[db_prefix() . 'stock_reconciliation_detail.location'], true);
+
+                foreach ($location_json as $key => $value) {
+                    $all_location .= get_vendor_name($key) . ": <strong style='font-weight: 700'>" . $value . "<strong>,</br>";
+                }
+                $all_location = rtrim($all_location, ',</br>');
+                $_data = $all_location;
+            }
+        }
+
+        if ($aColumns[$i] == db_prefix() . 'stock_reconciliation_detail.returnable_date') {
+            $all_returnable_date = '';
+            if (!empty($aRow[db_prefix() . 'stock_reconciliation_detail.returnable_date'])) {
+                $returnable_date_json = json_decode($aRow[db_prefix() . 'stock_reconciliation_detail.returnable_date'], true);
+
+                foreach ($returnable_date_json as $key => $value) {
+                    $all_returnable_date .= get_vendor_name($key) . ": <strong style='font-weight: 700'>" . $value . "<strong>,</br>";
+                }
+                $all_returnable_date = rtrim($all_returnable_date, ',</br>');
+                $_data = $all_returnable_date;
+            }
+        }
 
         $row[] = $_data;
     }

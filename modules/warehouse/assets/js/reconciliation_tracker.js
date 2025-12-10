@@ -19,7 +19,7 @@ initDataTable(table_manage_stock_reconciliation_list, admin_url + 'warehouse/tab
 
 var table_manage_actual_stock_reconciliation = $('.table-table_manage_actual_stock_reconciliation');
 
-initDataTable(table_manage_actual_stock_reconciliation, admin_url + 'warehouse/table_manage_actual_stock_reconciliation', [], [], GoodsreceiptParams, [10, 'desc']);
+initDataTable(table_manage_actual_stock_reconciliation, admin_url + 'warehouse/table_manage_actual_stock_reconciliation', [], [], GoodsreceiptParams, [9, 'desc']);
 $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
     var activeTabId = $('.tracker-pane.active').attr('id');
     if (activeTabId === 'tracker_2') {
