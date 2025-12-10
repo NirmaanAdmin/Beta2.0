@@ -23,10 +23,8 @@ initDataTable(table_manage_actual_stock_reconciliation, admin_url + 'warehouse/t
 $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
     var activeTabId = $('.tracker-pane.active').attr('id');
     if (activeTabId === 'tracker_2') {
-        $('.purchase_sm').DataTable().columns([0]).visible(false, false);
         table_manage_stock_reconciliation_list.DataTable().ajax.reload();
     } else {
-        $('.purchase_sm').DataTable().columns([0]).visible(true, true);
         table_manage_actual_stock_reconciliation.DataTable().ajax.reload();
     }
 });
