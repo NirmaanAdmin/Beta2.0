@@ -68,9 +68,7 @@
             <?php echo form_close(); ?>
         </div>
         <footer class="login-footer" style="display: flex; justify-content: center; color: black; font-size: 15px;">
-          <?php if(base_url() != 'https://demo.bizsutraerp.com/') { ?>
             <p><a href="https://www.nirmaan360.com/" target="_blank"><img src="<?php echo base_url('assets/images/nirmaan_360.png'); ?>" alt="nirmaan360 logo" width="50" height="50" class="footer-logo"></a> Powered by <a href="https://www.nirmaan360.com/" target="_blank" style="color: black;">Nirmaan360</a></p>
-          <?php } ?>
         </footer>
     </div>
 
