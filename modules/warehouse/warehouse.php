@@ -238,14 +238,6 @@ function warehouse_module_init_menu_items()
         ]);
 
         $CI->app_menu->add_sidebar_children_item('warehouse', [
-            'slug'     => 'stock-reconciliation-tracker',
-            'name'     => _l('stock_reconciliation_tracker'),
-            'icon'     => 'fa fa-ship menu-icon',
-            'href'     => admin_url('warehouse/stock_reconciliation_tracker'),
-            'position' => 3,
-        ]);
-
-        $CI->app_menu->add_sidebar_children_item('warehouse', [
             'slug'     => 'wa_manage_packing_list',
             'name'     => _l('wh_packing_lists'),
             'icon'     => 'fa fa-inbox',
@@ -370,7 +362,7 @@ function warehouse_load_js()
         echo '<script src="' . module_dir_url(WAREHOUSE_MODULE_NAME, 'assets/js/manage_purchase.js') . '?v=' . REVISION . '"></script>';
     }
 
-     if (!(strpos($viewuri, '/admin/warehouse/stock_reconciliation_tracker') === false)) {
+     if (!(strpos($viewuri, '/admin/warehouse/stock_reconciliation') === false)) {
         echo '<script src="' . module_dir_url(WAREHOUSE_MODULE_NAME, 'assets/js/reconciliation_tracker.js') . '?v=' . REVISION . '"></script>';
     }
 

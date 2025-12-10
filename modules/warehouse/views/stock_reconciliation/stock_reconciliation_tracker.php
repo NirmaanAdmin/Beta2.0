@@ -149,7 +149,7 @@
                   </div>
                   <?php render_datatable(array(
                     _l('Voucher Code'),
-                    // _l('Choose From Order'),
+                    _l('Choose From Order'),
                     _l('commodity_code'),
                     _l('description'),
                     _l('area'),

@@ -1,6 +1,31 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
 <?php init_head();
 $module_name = 'warehouse_stock_reconciliation'; ?>
+<style>
+  .onoffswitch-label:before {
+
+    height: 20px !important;
+  }
+
+  .show_hide_columns {
+    position: absolute;
+    z-index: 99999;
+    left: 190px
+  }
+
+  .n_width {
+    width: 20% !important;
+  }
+
+  .dashboard_stat_title {
+    font-size: 19px;
+    font-weight: bold;
+  }
+
+  .dashboard_stat_value {
+    font-size: 19px;
+  }
+</style>
 <div id="wrapper">
   <div class="content">
     <div class="row">
@@ -110,18 +135,132 @@ $module_name = 'warehouse_stock_reconciliation'; ?>
             </div>
 
             <br />
-            <?php render_datatable(array(
-              _l('id'),
-              _l('Reconciliation Voucher Code'),
-              _l('Choose From Order'),
-              _l('Reconciliation Date'),
-              // _l('invoices'),
-              // _l('staff_id'),
-              // _l('status_label'),
-              _l('Reconciliation Status'),
-              _l('options'),
-            ), 'table_manage_delivery', ['delivery_sm' => 'delivery_sm']); ?>
 
+
+
+            <div class="row">
+              <div class="col-md-12">
+                <div class="horizontal-tabs">
+                  <ul class="nav nav-tabs nav-tabs-horizontal mbot15" role="tablist">
+                    <li role="presentation" >
+                      <a href="#tracker_1" aria-controls="tracker_1" role="tab" id="tab_tracker_1" data-toggle="tab">
+                        Listing
+                      </a>
+                    </li>
+                    <li role="presentation" class="active">
+                      <a href="#tracker_2" aria-controls="tracker_2" role="tab" id="tab_tracker_2" data-toggle="tab">
+                        General Information
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="tab-content">
+                <div role="tabpanel" class="col-md-12 tab-pane tracker-pane " id="tracker_1">
+                  <div class="btn-group show_hide_columns" id="show_hide_columns">
+                    <!-- Settings Icon -->
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding: 4px 7px;">
+                      <i class="fa fa-cog"></i> <?php  ?> <span class="caret"></span>
+                    </button>
+                    <!-- Dropdown Menu with Checkboxes -->
+                    <div class="dropdown-menu" style="padding: 10px; min-width: 250px;">
+                      <!-- Select All / Deselect All -->
+                      <div>
+                        <input type="checkbox" id="select-all-columns"> <strong><?php echo _l('select_all'); ?></strong>
+                      </div>
+                      <hr>
+                      <!-- Column Checkboxes -->
+                      <?php
+                      $columns = [
+                        _l('Voucher Code'),
+                        _l('Choose From Order'),
+                        _l('Reconciliation Date'),
+                        _l('Reconciliation Status'),
+                      ];
+                      ?>
+                      <div>
+                        <?php foreach ($columns as $key => $label): ?>
+                          <input type="checkbox" class="toggle-column" value="<?php echo $key; ?>" checked>
+                          <?php echo $label; ?><br>
+                        <?php endforeach; ?>
+                      </div>
+
+                    </div>
+                  </div>
+                  <?php render_datatable(array(
+                    _l('id'),
+                    _l('Reconciliation Voucher Code'),
+                    _l('Choose From Order'),
+                    _l('Reconciliation Date'),
+                    // _l('invoices'),
+                    // _l('staff_id'),
+                    // _l('status_label'),
+                    _l('Reconciliation Status'),
+                    _l('options'),
+                  ), 'table_manage_delivery', ['delivery_sm' => 'delivery_sm']); ?>
+                </div>
+                <div role="tabpanel" class="col-md-12 tab-pane tracker-pane active" id="tracker_2">
+                  <div class="btn-group show_hide_columns" id="show_hide_columns">
+                    <!-- Settings Icon -->
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding: 4px 7px;">
+                      <i class="fa fa-cog"></i> <?php  ?> <span class="caret"></span>
+                    </button>
+                    <!-- Dropdown Menu with Checkboxes -->
+                    <div class="dropdown-menu" style="padding: 10px; min-width: 250px;">
+                      <!-- Select All / Deselect All -->
+                      <div>
+                        <input type="checkbox" id="select-all-goods-receipt-columns"> <strong><?php echo _l('select_all'); ?></strong>
+                      </div>
+                      <hr>
+                      <!-- Column Checkboxes -->
+                      <?php
+                      $columns = [
+                        _l('Voucher Code'),
+                        _l('commodity_code'),
+                        _l('description'),
+                        _l('area'),
+                        _l('Stock At Store'),
+                        _l('Ordered quantity'),
+                        _l('Received quantity'),
+                        _l('Issued Quantity'),
+                        _l('Expected Return Date'),
+                        _l('Return Date'),
+                        _l('Reconciliation Date'),
+                        _l('Return Quantity'),
+                        _l('Used Quantity'),
+                        _l('Remarks'),
+                      ];
+                      ?>
+                      <div>
+                        <?php foreach ($columns as $key => $label): ?>
+                          <input type="checkbox" class="toggle-goods-receipt-column" value="<?php echo $key; ?>" checked>
+                          <?php echo $label; ?><br>
+                        <?php endforeach; ?>
+                      </div>
+
+                    </div>
+                  </div>
+                  <?php render_datatable(array(
+                    _l('Voucher Code'),
+                    _l('Choose From Order'),
+                    _l('commodity_code'),
+                    _l('description'),
+                    _l('area'),
+                    _l('Stock At Store'),
+                    _l('Ordered quantity'),
+                    _l('Received quantity'),
+                    _l('Issued Quantity'),
+                    _l('Expected Return Date'),
+                    _l('Return Date'),
+                    _l('Reconciliation Date'),
+                    _l('Return Quantity'),
+                    _l('Used Quantity'),
+                    _l('Remarks'),
+                  ), 'table_manage_actual_stock_reconciliation', ['purchase_sm' => 'purchase_sm']); ?>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
