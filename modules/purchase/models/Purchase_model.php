@@ -18467,7 +18467,7 @@ class Purchase_model extends App_Model
         }
 
         if ($recent_co) {
-            $result['po_contract_amount'] = $recent_co->subtotal;
+            $result['po_contract_amount'] = $recent_co->subtotal - max(0, (float)$pur_order->discount_total);
         } else {
             // 4) Final contract amount = PO net subtotal + this change order + its non‑tender subtotal
             $result['po_contract_amount'] = $po_subtotal
@@ -19376,7 +19376,7 @@ class Purchase_model extends App_Model
         }
 
         if ($recent_co) {
-            $result['wo_contract_amount'] = $recent_co->subtotal;
+            $result['wo_contract_amount'] = $recent_co->subtotal - max(0, (float)$wo_orders->discount_total);
         } else {
             // 4) Final contract amount = WO net subtotal + this change order + its non‑tender subtotal
             $result['wo_contract_amount'] = $wo_subtotal
