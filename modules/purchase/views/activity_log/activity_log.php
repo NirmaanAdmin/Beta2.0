@@ -158,6 +158,9 @@ $module_name = 'module_activity_log'; ?>
                            if (isset($_GET['module']) && $_GET['module'] == 'ot') {
                               $module_name_filter_val = $_GET['module'];
                            }
+                           if (isset($_GET['module']) && $_GET['module'] == 'pt') {
+                              $module_name_filter_val = $_GET['module'];
+                           }
                            if (isset($_GET['module']) && $_GET['module'] == 'pc') {
                               $module_name_filter_val = $_GET['module'];
                            }
@@ -194,6 +197,7 @@ $module_name = 'module_activity_log'; ?>
                               ['id' => 'pr', 'name' => _l('purchase_request')],
                               ['id' => 'vbt', 'name' => _l('vendor_billing_tracker')],
                               ['id' => 'ot', 'name' => _l('order_tracker')],
+                              ['id' => 'pt', 'name' => _l('purchase_tracker')],
                               ['id' => 'pc', 'name' => _l('payment_certificate')],
                               ['id' => 'co', 'name' => _l('change_order')],
                               ['id' => 'ex', 'name' => _l('Expense')],

@@ -39,7 +39,8 @@
                   <hr />
                 </div>
               </div>
-              <div class="col-md-3">
+              <div class="col-md-12">
+                <a href="<?php echo admin_url('purchase/activity_log?module=pt'); ?>" class="btn btn-info pull-left mright10 display-block" target="_blank"><?php echo _l('activity_log'); ?></a>
                 <button class="btn btn-info display-block" type="button" data-toggle="collapse" data-target="#pt-charts-section" aria-expanded="true" aria-controls="pt-charts-section">
                   <?php echo _l('Purchase Tracker Charts'); ?> <i class="fa fa-chevron-down toggle-icon"></i>
                 </button>
