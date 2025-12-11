@@ -24825,4 +24825,22 @@ class Warehouse_model extends App_Model
 		}
 		return false;
 	}
+
+	public function get_pur_order_detail_row($id)
+	{
+		$this->db->where('id', $id);
+		return $this->db->get(db_prefix() . 'pur_order_detail')->row();
+	}
+
+	public function get_wo_order_detail_row($id)
+	{
+		$this->db->where('id', $id);
+		return $this->db->get(db_prefix() . 'wo_order_detail')->row();
+	}
+
+	public function get_goods_receipt_detail_row($id)
+	{
+		$this->db->where('id', $id);
+		return $this->db->get(db_prefix() . 'goods_receipt_detail')->row();
+	}
 }

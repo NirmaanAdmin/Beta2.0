@@ -2755,3 +2755,54 @@ function remove_stock_received_activity_log($id)
     }
     return true;
 }
+
+function update_pt_activity_log($id, $purchase_tracker, $type, $field, $old_value, $new_value)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $description = "";
+        $old_value = !empty($old_value) ? $old_value : 'None';
+        $new_value = !empty($new_value) ? $new_value : 'None';
+        if ($purchase_tracker == "false" && $type == "pur_orders") {
+            $CI->db->where('id', $id);
+            $pur_order_detail = $CI->db->get(db_prefix() . 'pur_order_detail')->row();
+            $description = "".$field." field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in order <b>".get_pur_order_name($pur_order_detail->pur_order)."</b>.";
+        } else if ($purchase_tracker == "false" && $type == "wo_orders") {
+            $CI->db->where('id', $id);
+            $wo_order_detail = $CI->db->get(db_prefix() . 'wo_order_detail')->row();
+            $description = "".$field." field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in order <b>".get_work_order_name($wo_order_detail->wo_order)."</b>.";
+        } else {
+            $CI->db->select(
+                db_prefix() . 'goods_receipt.goods_receipt_code,' .
+                db_prefix() . 'goods_receipt.pr_order_id,' .
+                db_prefix() . 'goods_receipt.wo_order_id'
+            );
+            $CI->db->from(db_prefix() . 'goods_receipt_detail');
+            $CI->db->join(db_prefix() . 'goods_receipt', db_prefix() . 'goods_receipt.id = ' . db_prefix() . 'goods_receipt_detail.goods_receipt_id', 'left');
+            $CI->db->where(db_prefix() . 'goods_receipt_detail.id', $id);
+            $CI->db->group_by(db_prefix() . 'goods_receipt_detail.id');
+            $goods_receipt_detail = $CI->db->get()->row();
+            if(!empty($goods_receipt_detail)) {
+                if(!empty($goods_receipt_detail->pr_order_id)) {
+                    $description = "".$field." field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in order <b>".get_pur_order_name($goods_receipt_detail->pr_order_id)."</b> and docket code <b>".$goods_receipt_detail->goods_receipt_code."</b>.";
+                } else if(!empty($goods_receipt_detail->wo_order_id)) {
+                    $description = "".$field." field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in order <b>".get_work_order_name($goods_receipt_detail->wo_order_id)."</b> and docket code <b>".$goods_receipt_detail->goods_receipt_code."</b>.";
+                } else {
+                    $description = "";
+                }
+            }
+        }
+        if(!empty($description)) {
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'pt',
+                'rel_id' => NULL,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
