@@ -18431,6 +18431,8 @@ class Purchase_model extends App_Model
         $result['po_previous'] = 0;
         $result['po_this_bill'] = 0;
         $result['po_comulative'] = 0;
+        $result['po_with_co_tax'] = 0;
+        $result['po_with_co_total'] = 0;
 
         // $result = [];
 
@@ -18488,6 +18490,25 @@ class Purchase_model extends App_Model
                 $result['po_previous'] = $res['total_previous'];
             }
         }
+
+        $all_co_orders = $this->db->select('id, subtotal, co_value, total_tax')
+        ->where('po_order_id', $po_id)
+        ->get(db_prefix() . 'co_orders')
+        ->result_array();
+        if(!empty($all_co_orders)) {
+            $total_co_tax = 0;
+            foreach ($all_co_orders as $ckey => $cvalue) {
+                $taxRate = (($cvalue['total_tax'] - $cvalue['subtotal']) / $cvalue['subtotal']) * 100;
+                $taxRate = round($taxRate);
+                $taxRate = (100 + (float)$taxRate) / 100;
+                $total_co_tax = $total_co_tax + ($cvalue['co_value'] * $taxRate);
+            }
+            $result['po_with_co_tax'] = $pur_order->total_tax + $total_co_tax;
+        } else {
+            $result['po_with_co_tax'] = $pur_order->total_tax;
+        }
+
+        $result['po_with_co_total'] = $result['po_contract_amount'] + $result['po_with_co_tax'];
 
         return $result;
     }

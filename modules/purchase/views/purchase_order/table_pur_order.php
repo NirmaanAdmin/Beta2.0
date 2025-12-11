@@ -216,6 +216,8 @@ $sr = 1;
 foreach ($rResult as $aRow) {
     $row = [];
 
+    $po_contract_data = $this->ci->purchase_model->get_po_contract_data($aRow['id']);
+
    for ($i = 0; $i < count($aColumns); $i++) {
         if (strpos($aColumns[$i], 'as') !== false && !isset($aRow[$aColumns[$i]])) {
             $_data = $aRow[strafter($aColumns[$i], 'as ')];
@@ -230,13 +232,7 @@ foreach ($rResult as $aRow) {
 
         if($aColumns[$i] == 'total'){
             // $_data = app_format_money($aRow['total'], $base_currency->symbol);
-            $_data = 0;
-            $po_total = $aRow['total'];
-            $po_co_sum_values = get_po_co_sum_values($aRow['id']);
-            if(!empty($po_co_sum_values)) {
-                $po_total = $po_total + $po_co_sum_values->co_value;
-            }
-            $_data = app_format_money($po_total, $base_currency->symbol);
+            $_data = app_format_money($po_contract_data['po_with_co_total'], $base_currency->symbol);
         }elseif($aColumns[$i] == 'pur_order_number'){
 
             $numberOutput = '';
@@ -264,13 +260,7 @@ foreach ($rResult as $aRow) {
         }elseif($aColumns[$i] == 'approve_status'){
             $_data = get_status_approve($aRow['approve_status']);
         }elseif($aColumns[$i] == 'total_tax'){
-          $tax = $this->ci->purchase_model->get_html_tax_pur_order($aRow['id']);
-          $total_tax = 0;
-          foreach($tax['taxes_val'] as $tax_val){
-            $total_tax += $tax_val;
-          }
-
-          $_data = app_format_money($total_tax, $base_currency->symbol);
+          $_data = app_format_money($po_contract_data['po_with_co_tax'], $base_currency->symbol);
         }elseif($aColumns[$i] == 'expense_convert'){
             if($aRow['expense_convert'] == 0){
              $_data = '<a href="javascript:void(0)" onclick="convert_expense('.$aRow['id'].','.$aRow['total'].'); return false;" class="btn btn-warning btn-icon">'._l('convert').'</a>';
@@ -290,13 +280,7 @@ foreach ($rResult as $aRow) {
             $_data = _l($aRow['type']);
         }elseif($aColumns[$i] == 'subtotal'){
             // $_data = app_format_money($aRow['subtotal'],$base_currency->symbol);
-            $_data = 0;
-            $po_subtotal = $aRow['subtotal'];
-            $po_co_sum_values = get_po_co_sum_values($aRow['id']);
-            if(!empty($po_co_sum_values)) {
-                $po_subtotal = $po_subtotal + $po_co_sum_values->co_value;
-            }
-            $_data = app_format_money($po_subtotal, $base_currency->symbol);
+            $_data = app_format_money($po_contract_data['po_contract_amount'], $base_currency->symbol);
         }elseif($aColumns[$i] == 'project'){
             $_data = $aRow['project_name'];
         }elseif($aColumns[$i] == 'department'){
@@ -431,9 +415,9 @@ foreach ($rResult as $aRow) {
         $row[] = $_data;
     }
 
-    $footer_data['total_po_value'] += $aRow['subtotal'];
-    $footer_data['total_tax_value'] += $total_tax;
-    $footer_data['total_po_value_included_tax'] += $aRow['total'];
+    $footer_data['total_po_value'] += $po_contract_data['po_contract_amount'];
+    $footer_data['total_tax_value'] += $po_contract_data['po_with_co_tax'];
+    $footer_data['total_po_value_included_tax'] += $po_contract_data['po_with_co_total'];
     $output['aaData'][] = $row;
     $sr++;
 }
