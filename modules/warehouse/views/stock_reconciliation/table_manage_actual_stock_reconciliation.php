@@ -3,17 +3,17 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 
 $aColumns = [
-    db_prefix() . 'stock_reconciliation.goods_delivery_code',   // Voucher Code
+    db_prefix() . 'stock_reconciliation.goods_delivery_code',  
     3,
     db_prefix() . 'stock_reconciliation_detail.commodity_name',
     db_prefix() . 'stock_reconciliation_detail.description',
     db_prefix() . 'stock_reconciliation_detail.area',
     db_prefix() . 'stock_reconciliation_detail.warehouse_id',
-    1,                                         // TEMP placeholder
+    1,                                         
     db_prefix() . 'stock_reconciliation_detail.received_quantity',
     db_prefix() . 'stock_reconciliation_detail.issued_quantities',
     db_prefix() . 'stock_reconciliation_detail.returnable_date',
-    2,                                              // TEMP placeholder
+    db_prefix() . 'stock_reconciliation_detail.return_date',                                          
     db_prefix() . 'stock_reconciliation_detail.reconciliation_date',
     db_prefix() . 'stock_reconciliation_detail.return_quantity',
     db_prefix() . 'stock_reconciliation_detail.used_quantity',
@@ -34,11 +34,10 @@ if (get_default_project()) {
 
 
 
-$result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [db_prefix() . 'stock_reconciliation.id',db_prefix() . 'stock_reconciliation.pr_order_id', db_prefix() . 'stock_reconciliation.wo_order_id']);
+$result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [db_prefix() . 'stock_reconciliation.id', db_prefix() . 'stock_reconciliation.pr_order_id', db_prefix() . 'stock_reconciliation.wo_order_id', db_prefix() . 'stock_reconciliation_detail.id as detail_id',db_prefix() . 'stock_reconciliation_detail.commodity_code']);
 
 $output  = $result['output'];
 $rResult = $result['rResult'];
-// echo '<pre>'; print_r($rResult); exit;
 foreach ($rResult as $aRow) {
 
     $row = [];
@@ -49,7 +48,7 @@ foreach ($rResult as $aRow) {
         } else {
             $_data = $aRow[$aColumns[$i]];
         }
-        if($aColumns[$i] ==3){
+        if ($aColumns[$i] == 3) {
             $get_order_name = '';
             if (get_status_modules_wh('purchase')) {
                 if (($aRow['pr_order_id'] != '') && ($aRow['pr_order_id'] != 0)) {
@@ -89,30 +88,121 @@ foreach ($rResult as $aRow) {
         }
 
         if ($aColumns[$i] == db_prefix() . 'stock_reconciliation_detail.reconciliation_date') {
-            $all_reconciliation_date = '';
-            if (!empty($aRow[db_prefix() . 'stock_reconciliation_detail.reconciliation_date'])) {
-                $reconciliation_date_json = json_decode($aRow[db_prefix() . 'stock_reconciliation_detail.reconciliation_date'], true);
 
-                foreach ($reconciliation_date_json as $key => $value) {
-                    $all_reconciliation_date .= get_vendor_name($key) . ": <strong style='font-weight: 700'>" . $value . "<strong>,</br>";
+            $raw = $aRow[db_prefix() . 'stock_reconciliation_detail.reconciliation_date'];
+            $_data = '';
+
+            // If no value, show nothing
+            if (!empty($raw) && $raw != '""' && $raw != '[]' && $raw != '{}') {
+
+                $decoded = json_decode($raw, true);
+
+                // If somehow decoding fails, avoid breaking
+                if (is_array($decoded)) {
+
+                    foreach ($decoded as $vendorId => $value) {
+
+                        $vendorName = get_vendor_name($vendorId);
+
+                        // If value is empty OR missing: show blank editable field
+                        $val = (!empty($value)) ? $value : '';
+
+                        $_data .= '
+                    <div style="margin-bottom:6px;">
+                        <label >' . $vendorName . '</label>
+
+                        <input type="date"
+                            class="form-control reconciliation_input"
+                            name="reconciliation[' . $aRow['detail_id'] . '][' . $vendorId . ']"
+                            value="' . $val . '"
+                            data-vendor="' . $vendorId . '"
+                            data-rowid="' . $aRow['detail_id'] . '"
+                            placeholder="dd-mm-yyyy">
+
+                    </div>
+                ';
+                    }
                 }
-                $all_reconciliation_date = rtrim($all_reconciliation_date, ',</br>');
-                $_data = $all_reconciliation_date;
             }
         }
+
+        if ($aColumns[$i] == db_prefix() . 'stock_reconciliation_detail.return_date') {
+
+            $raw = $aRow[db_prefix() . 'stock_reconciliation_detail.return_date'];
+            $_data = '';
+
+            // If no value, show nothing
+            if (!empty($raw) && $raw != '""' && $raw != '[]' && $raw != '{}') {
+
+                $decoded = json_decode($raw, true);
+
+                // If somehow decoding fails, avoid breaking
+                if (is_array($decoded)) {
+
+                    foreach ($decoded as $vendorId => $value) {
+
+                        $vendorName = get_vendor_name($vendorId);
+
+                        // If value is empty OR missing: show blank editable field
+                        $val = (!empty($value)) ? $value : '';
+
+                        $_data .= '
+                    <div style="margin-bottom:6px;">
+                        <label >' . $vendorName . '</label>
+
+                        <input type="date"
+                            class="form-control return_date_input"
+                            name="returndate[' . $aRow['detail_id'] . '][' . $vendorId . ']"
+                            value="' . $val . '"
+                            data-vendor="' . $vendorId . '"
+                            data-rowid="' . $aRow['detail_id'] . '"
+                            placeholder="dd-mm-yyyy">
+
+                    </div>
+                ';
+                    }
+                }
+            }
+        }
+
+
+
 
         if ($aColumns[$i] == db_prefix() . 'stock_reconciliation_detail.return_quantity') {
-            $all_return_quantity = '';
-            if (!empty($aRow[db_prefix() . 'stock_reconciliation_detail.return_quantity'])) {
-                $return_quantity_json = json_decode($aRow[db_prefix() . 'stock_reconciliation_detail.return_quantity'], true);
 
-                foreach ($return_quantity_json as $key => $value) {
-                    $all_return_quantity .= get_vendor_name($key) . ": <strong style='font-weight: 700'>" . $value . "<strong>,</br>";
+            $raw = $aRow[db_prefix() . 'stock_reconciliation_detail.return_quantity'];
+            $_data = '';
+
+            if (!empty($raw) && $raw != '""' && $raw != '[]' && $raw != '{}') {
+
+                $decoded = json_decode($raw, true);
+
+                if (is_array($decoded)) {
+                    foreach ($decoded as $vendorId => $value) {
+
+                        $vendorName = get_vendor_name($vendorId);
+                        $val = (!empty($value)) ? $value : '';
+
+                        $_data .= '
+                    <div style="margin-bottom:6px;">
+                        <label>' . $vendorName . '</label>
+
+                        <input type="number"
+                               class="form-control return_qty_input"
+                               name="return_qty[' . $aRow['detail_id'] . '][' . $vendorId . ']"
+                               value="' . $val . '"
+                               data-vendor="' . $vendorId . '"
+                               data-rowid="' . $aRow['detail_id'] . '"
+                               placeholder="Qty"
+                               min="0"
+                               style="margin-top:3px;">
+                    </div>
+                ';
+                    }
                 }
-                $all_return_quantity = rtrim($all_return_quantity, ',</br>');
-                $_data = $all_return_quantity;
             }
         }
+
 
         if ($aColumns[$i] == db_prefix() . 'stock_reconciliation_detail.used_quantity') {
             $all_used_quantity = '';
@@ -128,17 +218,39 @@ foreach ($rResult as $aRow) {
         }
 
         if ($aColumns[$i] == db_prefix() . 'stock_reconciliation_detail.location') {
-            $all_location = '';
-            if (!empty($aRow[db_prefix() . 'stock_reconciliation_detail.location'])) {
-                $location_json = json_decode($aRow[db_prefix() . 'stock_reconciliation_detail.location'], true);
 
-                foreach ($location_json as $key => $value) {
-                    $all_location .= get_vendor_name($key) . ": <strong style='font-weight: 700'>" . $value . "<strong>,</br>";
+            $raw = $aRow[db_prefix() . 'stock_reconciliation_detail.location'];
+            $_data = '';
+
+            if (!empty($raw) && $raw != '""' && $raw != '[]' && $raw != '{}') {
+
+                $decoded = json_decode($raw, true);
+
+                if (is_array($decoded)) {
+                    foreach ($decoded as $vendorId => $value) {
+
+                        $vendorName = get_vendor_name($vendorId);
+                        $val = (!empty($value)) ? $value : '';
+
+                        $_data .= '
+                    <div style="margin-bottom:6px;">
+                        <label>' . $vendorName . '</label>
+
+                        <input type="text"
+                               class="form-control location_input"
+                               name="location[' . $aRow['detail_id'] . '][' . $vendorId . ']"
+                               value="' . $val . '"
+                               data-vendor="' . $vendorId . '"
+                               data-rowid="' . $aRow['detail_id'] . '"
+                               placeholder="Remarks"
+                               style="margin-top:3px;">
+                    </div>
+                ';
+                    }
                 }
-                $all_location = rtrim($all_location, ',</br>');
-                $_data = $all_location;
             }
         }
+
 
         if ($aColumns[$i] == db_prefix() . 'stock_reconciliation_detail.returnable_date') {
             $all_returnable_date = '';
@@ -151,6 +263,10 @@ foreach ($rResult as $aRow) {
                 $all_returnable_date = rtrim($all_returnable_date, ',</br>');
                 $_data = $all_returnable_date;
             }
+        }
+
+        if($aColumns[$i] == 1){
+           $_data = get_ordered_quantity($aRow['pr_order_id'],$aRow['wo_order_id'],$aRow[db_prefix() . 'stock_reconciliation_detail.description'],$aRow[db_prefix() . 'stock_reconciliation_detail.commodity_code']);
         }
 
         $row[] = $_data;

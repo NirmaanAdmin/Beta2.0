@@ -10347,4 +10347,127 @@ class warehouse extends AdminController
     {
         $this->app->get_table_data(module_views_path('warehouse', 'stock_reconciliation/table_manage_actual_stock_reconciliation'));
     }
+	public function update_reconciliation_date()
+	{
+		$rowId    = $this->input->post('row_id');
+		$vendorId = $this->input->post('vendor_id');
+		$value    = $this->input->post('value');
+
+		// Get existing JSON
+		$this->db->select('reconciliation_date');
+		$this->db->where('id', $rowId);
+		$row = $this->db->get(db_prefix() . 'stock_reconciliation_detail')->row();
+
+		$json = json_decode($row->reconciliation_date, true);
+		if (!is_array($json)) {
+			$json = [];
+		}
+
+		// Update only the vendor key
+		$json[$vendorId] = $value;
+
+		// Save back
+		$this->db->where('id', $rowId);
+		$this->db->update(db_prefix() . 'stock_reconciliation_detail', [
+			'reconciliation_date' => json_encode($json)
+		]);
+
+		echo json_encode(['status' => true]);
+	}
+
+	public function update_return_quantity()
+	{
+		$rowId    = $this->input->post('row_id');
+		$vendorId = $this->input->post('vendor_id');
+		$value    = (float)$this->input->post('value'); // numeric
+
+		// Fetch existing JSONs
+		$this->db->where('id', $rowId);
+		$row = $this->db->get(db_prefix() . 'stock_reconciliation_detail')->row();
+
+		$returnJson = json_decode($row->return_quantity, true);
+		if (!is_array($returnJson)) {
+			$returnJson = [];
+		}
+
+		$usedJson = json_decode($row->used_quantity, true);
+		if (!is_array($usedJson)) {
+			$usedJson = [];
+		}
+
+		$issuedJson = json_decode($row->issued_quantities, true);
+		if (!is_array($issuedJson)) {
+			$issuedJson = [];
+		}
+
+		// Update RETURN qty
+		$returnJson[$vendorId] = $value;
+
+		// Calculate USED qty (issued - return)
+		$issuedValue = isset($issuedJson[$vendorId]) ? (float)$issuedJson[$vendorId] : 0;
+		$usedJson[$vendorId]   = max(0, $issuedValue - $value);
+
+		// Save back
+		$this->db->where('id', $rowId);
+		$this->db->update(db_prefix() . 'stock_reconciliation_detail', [
+			'return_quantity' => json_encode($returnJson),
+			'used_quantity'   => json_encode($usedJson)
+		]);
+
+		echo json_encode(['status' => true]);
+	}
+
+	public function update_location()
+	{
+		$rowId    = $this->input->post('row_id');
+		$vendorId = $this->input->post('vendor_id');
+		$value    = $this->input->post('value');
+
+		// Fetch existing location JSON
+		$this->db->where('id', $rowId);
+		$row = $this->db->get(db_prefix() . 'stock_reconciliation_detail')->row();
+
+		$locationJson = json_decode($row->location, true);
+		if (!is_array($locationJson)) {
+			$locationJson = [];
+		}
+
+		// Update location for that vendor
+		$locationJson[$vendorId] = $value;
+
+		// Save back
+		$this->db->where('id', $rowId);
+		$this->db->update(db_prefix() . 'stock_reconciliation_detail', [
+			'location' => json_encode($locationJson)
+		]);
+
+		echo json_encode(['status' => true]);
+	}
+
+	public function update_return_date()
+	{
+		$rowId    = $this->input->post('row_id');
+		$vendorId = $this->input->post('vendor_id');
+		$value    = $this->input->post('value'); // already yyyy-mm-dd from HTML date input
+
+		// Fetch existing JSON
+		$this->db->where('detail_id', $rowId);
+		$row = $this->db->get(db_prefix() . 'stock_reconciliation_detail')->row();
+
+		$returnDateJson = json_decode($row->return_date, true);
+		if (!is_array($returnDateJson)) {
+			$returnDateJson = [];
+		}
+
+		// Update only that vendor’s date
+		$returnDateJson[$vendorId] = $value;
+
+		// Save back
+		$this->db->where('detail_id', $rowId);
+		$this->db->update(db_prefix() . 'stock_reconciliation_detail', [
+			'return_date' => json_encode($returnDateJson)
+		]);
+
+		echo json_encode(['status' => true]);
+	}
 }

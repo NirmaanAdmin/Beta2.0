@@ -1807,27 +1807,6 @@ function reconcilliation_list_status($status = '')
             'order'          => 4,
             'filter_default' => true,
         ],
-        [
-            'id'             => 'received',
-            'color'          => '#84c529',
-            'name'           => _l('wh_received'),
-            'order'          => 5,
-            'filter_default' => false,
-        ],
-        [
-            'id'             => 'returned',
-            'color'          => '#d71a1a',
-            'name'           => _l('wh_returned'),
-            'order'          => 6,
-            'filter_default' => false,
-        ],
-        [
-            'id'             => 'not_delivered',
-            'color'          => '#ffa500',
-            'name'           => _l('wh_not_delivered_new'),
-            'order'          => 7,
-            'filter_default' => false,
-        ],
     ];
 
     usort($statuses, function ($a, $b) {
@@ -2716,11 +2695,11 @@ function add_stock_received_activity_log($id)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $stock_received_date = $CI->db->get(db_prefix() . 'goods_receipt')->row();
-        if(!empty($stock_received_date)) {
-            $description = "Stock received <b>".$stock_received_date->goods_receipt_code."</b> has been created.";
+        if (!empty($stock_received_date)) {
+            $description = "Stock received <b>" . $stock_received_date->goods_receipt_code . "</b> has been created.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'stckrec',
                 'rel_id' => $id,
@@ -2738,11 +2717,11 @@ function remove_stock_received_activity_log($id)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $goods_receipt = $CI->db->get(db_prefix() . 'goods_receipt')->row();
-        if(!empty($goods_receipt)) {
-            $description = "Stock Received <b>".$goods_receipt->goods_receipt_code."</b> has been deleted.";
+        if (!empty($goods_receipt)) {
+            $description = "Stock Received <b>" . $goods_receipt->goods_receipt_code . "</b> has been deleted.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'stckrec',
                 'rel_id' => $id,
@@ -2760,40 +2739,40 @@ function update_pt_activity_log($id, $purchase_tracker, $type, $field, $old_valu
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $description = "";
         $old_value = !empty($old_value) ? $old_value : 'None';
         $new_value = !empty($new_value) ? $new_value : 'None';
         if ($purchase_tracker == "false" && $type == "pur_orders") {
             $CI->db->where('id', $id);
             $pur_order_detail = $CI->db->get(db_prefix() . 'pur_order_detail')->row();
-            $description = "".$field." field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in order <b>".get_pur_order_name($pur_order_detail->pur_order)."</b>.";
+            $description = "" . $field . " field is updated from <b>" . $old_value . "</b> to <b>" . $new_value . "</b> in order <b>" . get_pur_order_name($pur_order_detail->pur_order) . "</b>.";
         } else if ($purchase_tracker == "false" && $type == "wo_orders") {
             $CI->db->where('id', $id);
             $wo_order_detail = $CI->db->get(db_prefix() . 'wo_order_detail')->row();
-            $description = "".$field." field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in order <b>".get_work_order_name($wo_order_detail->wo_order)."</b>.";
+            $description = "" . $field . " field is updated from <b>" . $old_value . "</b> to <b>" . $new_value . "</b> in order <b>" . get_work_order_name($wo_order_detail->wo_order) . "</b>.";
         } else {
             $CI->db->select(
                 db_prefix() . 'goods_receipt.goods_receipt_code,' .
-                db_prefix() . 'goods_receipt.pr_order_id,' .
-                db_prefix() . 'goods_receipt.wo_order_id'
+                    db_prefix() . 'goods_receipt.pr_order_id,' .
+                    db_prefix() . 'goods_receipt.wo_order_id'
             );
             $CI->db->from(db_prefix() . 'goods_receipt_detail');
             $CI->db->join(db_prefix() . 'goods_receipt', db_prefix() . 'goods_receipt.id = ' . db_prefix() . 'goods_receipt_detail.goods_receipt_id', 'left');
             $CI->db->where(db_prefix() . 'goods_receipt_detail.id', $id);
             $CI->db->group_by(db_prefix() . 'goods_receipt_detail.id');
             $goods_receipt_detail = $CI->db->get()->row();
-            if(!empty($goods_receipt_detail)) {
-                if(!empty($goods_receipt_detail->pr_order_id)) {
-                    $description = "".$field." field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in order <b>".get_pur_order_name($goods_receipt_detail->pr_order_id)."</b> and docket code <b>".$goods_receipt_detail->goods_receipt_code."</b>.";
-                } else if(!empty($goods_receipt_detail->wo_order_id)) {
-                    $description = "".$field." field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in order <b>".get_work_order_name($goods_receipt_detail->wo_order_id)."</b> and docket code <b>".$goods_receipt_detail->goods_receipt_code."</b>.";
+            if (!empty($goods_receipt_detail)) {
+                if (!empty($goods_receipt_detail->pr_order_id)) {
+                    $description = "" . $field . " field is updated from <b>" . $old_value . "</b> to <b>" . $new_value . "</b> in order <b>" . get_pur_order_name($goods_receipt_detail->pr_order_id) . "</b> and docket code <b>" . $goods_receipt_detail->goods_receipt_code . "</b>.";
+                } else if (!empty($goods_receipt_detail->wo_order_id)) {
+                    $description = "" . $field . " field is updated from <b>" . $old_value . "</b> to <b>" . $new_value . "</b> in order <b>" . get_work_order_name($goods_receipt_detail->wo_order_id) . "</b> and docket code <b>" . $goods_receipt_detail->goods_receipt_code . "</b>.";
                 } else {
                     $description = "";
                 }
             }
         }
-        if(!empty($description)) {
+        if (!empty($description)) {
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'pt',
                 'rel_id' => NULL,
@@ -2805,4 +2784,95 @@ function update_pt_activity_log($id, $purchase_tracker, $type, $field, $old_valu
         }
     }
     return true;
+}
+
+function get_ordered_quantity($pur_order = null, $wo_order = null, $description = null, $commodity_code = null)
+{
+    $CI = &get_instance();
+
+    // Exactly one of PO or WO must be provided
+    $has_pur_order = !empty($pur_order);
+    $has_wo_order = !empty($wo_order);
+    if ($has_pur_order === $has_wo_order) {
+        return 0.0;
+    }
+
+    // Normalize the incoming description (if needed)
+    $normalized_desc = null;
+    if ($description !== null) {
+        $normalized_desc = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $description));
+    }
+
+    $CI->db->reset_query();
+
+    $CI->db->select('quantity');
+
+    // Purchase order query
+    if ($has_pur_order) {
+        $CI->db->from(db_prefix() . 'pur_order_detail pod');
+        $CI->db->join(db_prefix() . 'pur_orders po', 'po.id = pod.pur_order', 'inner');
+        $CI->db->where('po.id', (int)$pur_order);
+
+        // Add description column for filtering (if needed)
+        if ($description !== null) {
+            $CI->db->select("
+                REPLACE(
+                    REPLACE(
+                        REPLACE(
+                            REPLACE(pod.description, '\\r', ''),
+                        '\\n', ''),
+                    '<br />', ''),
+                '<br/>', '') AS non_break_description
+            ", false);
+        }
+    }
+    // Work order query
+    else {
+        $CI->db->from(db_prefix() . 'wo_order_detail wod');
+        $CI->db->join(db_prefix() . 'wo_orders wo', 'wo.id = wod.wo_order', 'inner');
+        $CI->db->where('wo.id', (int)$wo_order);
+
+        // Add description column for filtering (if needed)
+        if ($description !== null) {
+            $CI->db->select("
+                REPLACE(
+                    REPLACE(
+                        REPLACE(
+                            REPLACE(wod.description, '\\r', ''),
+                        '\\n', ''),
+                    '<br />', ''),
+                '<br/>', '') AS non_break_description
+            ", false);
+        }
+    }
+
+    // Commodity code filter (if tables have this column)
+    if ($commodity_code !== null && $commodity_code !== '') {
+        if (is_array($commodity_code) && !empty($commodity_code)) {
+            $CI->db->where_in(($has_pur_order ? 'pod.' : 'wod.') . 'commodity_code', $commodity_code);
+        } elseif (is_string($commodity_code)) {
+            $CI->db->where(($has_pur_order ? 'pod.' : 'wod.') . 'commodity_code', $commodity_code);
+        }
+    }
+
+    // Description filter (use HAVING since it's on the alias)
+    if ($normalized_desc !== null && $normalized_desc !== '') {
+        $CI->db->having('non_break_description', $normalized_desc);
+    }
+
+    $result = $CI->db->get()->row();
+    return !empty($result) && $result->quantity !== null ? (float)$result->quantity : 0.0;
+}
+
+function formatDateForInput($date_string)
+{
+    if (empty($date_string)) return '';
+
+    // Convert dd-mm-yyyy to yyyy-mm-dd for date input
+    $date_parts = explode('-', $date_string);
+    if (count($date_parts) === 3) {
+        return $date_parts[2] . '-' . $date_parts[1] . '-' . $date_parts[0];
+    }
+
+    return $date_string;
 }

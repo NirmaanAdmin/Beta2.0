@@ -142,7 +142,7 @@ $module_name = 'warehouse_stock_reconciliation'; ?>
               <div class="col-md-12">
                 <div class="horizontal-tabs">
                   <ul class="nav nav-tabs nav-tabs-horizontal mbot15" role="tablist">
-                    <li role="presentation" >
+                    <li role="presentation">
                       <a href="#tracker_1" aria-controls="tracker_1" role="tab" id="tab_tracker_1" data-toggle="tab">
                         Listing
                       </a>
@@ -336,3 +336,153 @@ $module_name = 'warehouse_stock_reconciliation'; ?>
 </body>
 
 </html>
+<script>
+  $(document).ready(function() {
+    var table = $('.table-table_manage_delivery').DataTable();
+    var actual_table = $('.table-table_manage_actual_stock_reconciliation').DataTable();
+
+    // Handle "Select All" checkbox
+    $('#select-all-goods-receipt-columns').on('change', function() {
+      var isChecked = $(this).is(':checked');
+      $('.toggle-goods-receipt-column').prop('checked', isChecked).trigger('change');
+    });
+
+    // Handle "Select All" checkbox
+    $('#select-all-columns').on('change', function() {
+      var isChecked = $(this).is(':checked');
+      $('.toggle-column').prop('checked', isChecked).trigger('change');
+    });
+
+    // Handle individual column visibility toggling
+    $('.toggle-goods-receipt-column').on('change', function() {
+      var column = table.column($(this).val());
+      column.visible($(this).is(':checked'));
+
+      // Sync "Select All" checkbox state
+      var allChecked = $('.toggle-goods-receipt-column').length === $('.toggle-goods-receipt-column:checked').length;
+      $('#select-all-goods-receipt-columns').prop('checked', allChecked);
+    });
+
+    // Handle individual column visibility toggling
+    $('.toggle-column').on('change', function() {
+      var column = actual_table.column($(this).val());
+      column.visible($(this).is(':checked'));
+
+      // Sync "Select All" checkbox state
+      var allChecked = $('.toggle-column').length === $('.toggle-column:checked').length;
+      $('#select-all-columns').prop('checked', allChecked);
+    });
+
+    // Sync checkboxes with column visibility on page load
+    table.columns().every(function(index) {
+      var column = this;
+      $('.toggle-goods-receipt-column[value="' + index + '"]').prop('checked', column.visible());
+    });
+
+    // Sync checkboxes with column visibility on page load
+    actual_table.columns().every(function(index) {
+      var column = this;
+      $('.toggle-column[value="' + index + '"]').prop('checked', column.visible());
+    });
+
+    // Prevent dropdown from closing when clicking inside
+    $('.dropdown-menu').on('click', function(e) {
+      e.stopPropagation();
+    });
+
+    $('#pt-charts-section').on('shown.bs.collapse', function() {
+      $('.toggle-icon').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+    });
+
+    $('#pt-charts-section').on('hidden.bs.collapse', function() {
+      $('.toggle-icon').removeClass('fa-chevron-down').addClass('fa-chevron-up');
+    });
+  });
+</script>
+<script>
+  var table_manage_actual_stock_reconciliation = $('.table-table_manage_actual_stock_reconciliation');
+  $(document).on('change', '.reconciliation_input', function() {
+    let $el = $(this);
+
+    let rowId = $el.data('rowid');
+    let vendorId = $el.data('vendor');
+    let newValue = $el.val().trim();
+
+    $.post(admin_url + 'warehouse/update_reconciliation_date', {
+        row_id: rowId,
+        vendor_id: vendorId,
+        value: newValue,
+      })
+      .done(function(response) {
+        alert_float('success', 'Updated');
+      })
+      .fail(function() {
+        alert_float('danger', 'Update failed');
+      });
+  });
+
+  $(document).on('change', '.return_qty_input', function() {
+
+    let $el = $(this);
+
+    let rowId = $el.data('rowid');
+    let vendorId = $el.data('vendor');
+    let newValue = $el.val().trim();
+
+    $.post(admin_url + 'warehouse/update_return_quantity', {
+        row_id: rowId,
+        vendor_id: vendorId,
+        value: newValue,
+      })
+      .done(function(response) {
+        alert_float('success', 'Updated');
+        table_manage_actual_stock_reconciliation.DataTable().ajax.reload();
+      })
+      .fail(function() {
+        alert_float('danger', 'Update failed');
+      });
+
+  });
+
+  $(document).on('change', '.location_input', function() {
+
+    let $el = $(this);
+    let rowId = $el.data('rowid');
+    let vendorId = $el.data('vendor');
+    let value = $el.val().trim();
+
+    $.post(admin_url + 'warehouse/update_location', {
+        row_id: rowId,
+        vendor_id: vendorId,
+        value: value,
+      })
+      .done(function(response) {
+        alert_float('success', 'Location updated');
+      })
+      .fail(function() {
+        alert_float('danger', 'Update failed');
+      });
+
+  });
+
+  $(document).on('change', '.return_date_input', function() {
+
+    let $el = $(this);
+    let rowId = $el.data('rowid');
+    let vendorId = $el.data('vendor');
+    let value = $el.val(); // date value (YYYY-MM-DD)
+
+    $.post(admin_url + 'warehouse/update_return_date', {
+        row_id: rowId,
+        vendor_id: vendorId,
+        value: value,
+      })
+      .done(function(response) {
+        alert_float('success', 'Return date updated');
+      })
+      .fail(function() {
+        alert_float('danger', 'Update failed');
+      });
+
+  });
+</script>
