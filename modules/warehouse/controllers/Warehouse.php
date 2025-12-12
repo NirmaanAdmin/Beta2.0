@@ -9186,16 +9186,24 @@ class warehouse extends AdminController
 			return;
 		}
 		// Perform the update
-		$this->db->where('id', $id);
 		if ($purchase_tracker == "false") {
 			if ($purOrder == "true") {
+				$pur_order_detail = $this->warehouse_model->get_pur_order_detail_row($id);
+				update_pt_activity_log($id, $purchase_tracker, 'pur_orders', _l('management_remarks'), $pur_order_detail->remarks, $remarks);
+				$this->db->where('id', $id);
 				$success = $this->db->update('tblpur_order_detail', ['remarks' => $remarks]);
 				update_pur_orders_tracker_details_last_action($id);
 			} elseif ($purOrder == "false") {
+				$wo_order_detail = $this->warehouse_model->get_wo_order_detail_row($id);
+				update_pt_activity_log($id, $purchase_tracker, 'wo_orders', _l('management_remarks'), $wo_order_detail->remarks, $remarks);
+				$this->db->where('id', $id);
 				$success = $this->db->update('tblwo_order_detail', ['remarks' => $remarks]);
 				update_wo_orders_tracker_details_last_action($id);
 			}
 		} else {
+			$goods_receipt_detail = $this->warehouse_model->get_goods_receipt_detail_row($id);
+			update_pt_activity_log($id, $purchase_tracker, 'goods_receipt', _l('management_remarks'), $goods_receipt_detail->remarks, $remarks);
+			$this->db->where('id', $id);
 			$success = $this->db->update('tblgoods_receipt_detail', ['remarks' => $remarks]);
 			update_goods_orders_tracker_details_last_action($id);
 		}
@@ -9577,16 +9585,24 @@ class warehouse extends AdminController
 			return;
 		}
 		// Perform the update
-		$this->db->where('id', $id);
 		if ($purchase_tracker == "false") {
 			if ($purOrder == "true") {
+				$pur_order_detail = $this->warehouse_model->get_pur_order_detail_row($id);
+				update_pt_activity_log($id, $purchase_tracker, 'pur_orders', _l('advance_payment'), $pur_order_detail->advance_payment, $advance_payment);
+				$this->db->where('id', $id);
 				$success = $this->db->update('tblpur_order_detail', ['advance_payment' => $advance_payment]);
 				update_pur_orders_tracker_details_last_action($id);
 			} elseif ($purOrder == "false") {
+				$wo_order_detail = $this->warehouse_model->get_wo_order_detail_row($id);
+				update_pt_activity_log($id, $purchase_tracker, 'wo_orders', _l('advance_payment'), $wo_order_detail->advance_payment, $advance_payment);
+				$this->db->where('id', $id);
 				$success = $this->db->update('tblwo_order_detail', ['advance_payment' => $advance_payment]);
 				update_wo_orders_tracker_details_last_action($id);
 			}
 		} else {
+			$goods_receipt_detail = $this->warehouse_model->get_goods_receipt_detail_row($id);
+			update_pt_activity_log($id, $purchase_tracker, 'goods_receipt', _l('advance_payment'), $goods_receipt_detail->advance_payment, $advance_payment);
+			$this->db->where('id', $id);
 			$success = $this->db->update('tblgoods_receipt_detail', ['advance_payment' => $advance_payment]);
 			update_goods_orders_tracker_details_last_action($id);
 		}
@@ -9610,16 +9626,24 @@ class warehouse extends AdminController
 			return;
 		}
 		// Perform the update
-		$this->db->where('id', $id);
 		if ($purchase_tracker == "false") {
 			if ($purOrder == "true") {
+				$pur_order_detail = $this->warehouse_model->get_pur_order_detail_row($id);
+				update_pt_activity_log($id, $purchase_tracker, 'pur_orders', _l('shop_drawings_submission'), _d($pur_order_detail->shop_submission), _d($shop_submission));
+				$this->db->where('id', $id);
 				$success = $this->db->update('tblpur_order_detail', ['shop_submission' => $shop_submission]);
 				update_pur_orders_tracker_details_last_action($id);
 			} elseif ($purOrder == "false") {
+				$wo_order_detail = $this->warehouse_model->get_wo_order_detail_row($id);
+				update_pt_activity_log($id, $purchase_tracker, 'wo_orders', _l('shop_drawings_submission'), _d($wo_order_detail->shop_submission), _d($shop_submission));
+				$this->db->where('id', $id);
 				$success = $this->db->update('tblwo_order_detail', ['shop_submission' => $shop_submission]);
 				update_wo_orders_tracker_details_last_action($id);
 			}
 		} else {
+			$goods_receipt_detail = $this->warehouse_model->get_goods_receipt_detail_row($id);
+			update_pt_activity_log($id, $purchase_tracker, 'goods_receipt', _l('shop_drawings_submission'), _d($goods_receipt_detail->shop_submission), _d($shop_submission));
+			$this->db->where('id', $id);
 			$success = $this->db->update('tblgoods_receipt_detail', ['shop_submission' => $shop_submission]);
 			update_goods_orders_tracker_details_last_action($id);
 		}
@@ -9694,16 +9718,24 @@ class warehouse extends AdminController
 			return;
 		}
 		// Perform the update
-		$this->db->where('id', $id);
 		if ($purchase_tracker == "false") {
 			if ($purOrder == "true") {
+				$pur_order_detail = $this->warehouse_model->get_pur_order_detail_row($id);
+				update_pt_activity_log($id, $purchase_tracker, 'pur_orders', _l('shop_drawings_approval'), _d($pur_order_detail->shop_approval), _d($shop_approval));
+				$this->db->where('id', $id);
 				$success = $this->db->update('tblpur_order_detail', ['shop_approval' => $shop_approval]);
 				update_pur_orders_tracker_details_last_action($id);
 			} elseif ($purOrder == "false") {
+				$wo_order_detail = $this->warehouse_model->get_wo_order_detail_row($id);
+				update_pt_activity_log($id, $purchase_tracker, 'wo_orders', _l('shop_drawings_approval'), _d($wo_order_detail->shop_approval), _d($shop_approval));
+				$this->db->where('id', $id);
 				$success = $this->db->update('tblwo_order_detail', ['shop_approval' => $shop_approval]);
 				update_wo_orders_tracker_details_last_action($id);
 			}
 		} else {
+			$goods_receipt_detail = $this->warehouse_model->get_goods_receipt_detail_row($id);
+			update_pt_activity_log($id, $purchase_tracker, 'goods_receipt', _l('shop_drawings_approval'), _d($goods_receipt_detail->shop_approval), _d($shop_approval));
+			$this->db->where('id', $id);
 			$success = $this->db->update('tblgoods_receipt_detail', ['shop_approval' => $shop_approval]);
 			update_goods_orders_tracker_details_last_action($id);
 		}
@@ -9727,16 +9759,24 @@ class warehouse extends AdminController
 			return;
 		}
 		// Perform the update
-		$this->db->where('id', $id);
 		if ($purchase_tracker == "false") {
 			if ($purOrder == "true") {
+				$pur_order_detail = $this->warehouse_model->get_pur_order_detail_row($id);
+				update_pt_activity_log($id, $purchase_tracker, 'pur_orders', _l('procurement_remarks'), $pur_order_detail->actual_remarks, $actual_remarks);
+				$this->db->where('id', $id);
 				$success = $this->db->update('tblpur_order_detail', ['actual_remarks' => $actual_remarks]);
 				update_pur_orders_tracker_details_last_action($id);
 			} elseif ($purOrder == "false") {
+				$wo_order_detail = $this->warehouse_model->get_wo_order_detail_row($id);
+				update_pt_activity_log($id, $purchase_tracker, 'wo_orders', _l('procurement_remarks'), $wo_order_detail->actual_remarks, $actual_remarks);
+				$this->db->where('id', $id);
 				$success = $this->db->update('tblwo_order_detail', ['actual_remarks' => $actual_remarks]);
 				update_wo_orders_tracker_details_last_action($id);
 			}
 		} else {
+			$goods_receipt_detail = $this->warehouse_model->get_goods_receipt_detail_row($id);
+			update_pt_activity_log($id, $purchase_tracker, 'goods_receipt', _l('procurement_remarks'), $goods_receipt_detail->actual_remarks, $actual_remarks);
+			$this->db->where('id', $id);
 			$success = $this->db->update('tblgoods_receipt_detail', ['actual_remarks' => $actual_remarks]);
 			update_goods_orders_tracker_details_last_action($id);
 		}
