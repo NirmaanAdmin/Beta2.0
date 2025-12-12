@@ -188,6 +188,9 @@ $module_name = 'module_activity_log'; ?>
                            if (isset($_GET['module']) && $_GET['module'] == 'bud') {
                               $module_name_filter_val = $_GET['module'];
                            }
+                           if (isset($_GET['module']) && $_GET['module'] == 'rfi') {
+                              $module_name_filter_val = $_GET['module'];
+                           }
                            $module_name_list = [
                               ['id' => 'timesheets', 'name' => _l('Leaves')],
                               ['id' => 'stckrec', 'name' => _l('Stock Received')],
@@ -204,6 +207,7 @@ $module_name = 'module_activity_log'; ?>
                               ['id' => 'ven', 'name' => _l('vendor')],
                               ['id' => 'bud', 'name' => _l('Budget')],
                               ['id' => 'cli', 'name' => _l('Client Invoices / Client Payments')],
+                              ['id' => 'rfi', 'name' => _l('RFI Tracker')],
                               ['id' => 'dms', 'name' => _l('Drawing Management')],
                               ['id' => 'dmg', 'name' => _l('Document Management')],
                            ];

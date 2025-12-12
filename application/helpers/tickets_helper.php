@@ -479,4 +479,27 @@ $(function() {
 <?php
 }
 
+function add_rfi_activity_log($id, $is_create = true)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('ticketid', $id);
+        $tickets = $CI->db->get(db_prefix() . 'tickets')->row();
+        if(!empty($tickets)) {
+            $is_create_value = $is_create ? 'created' : 'deleted';
+            $description = "RFI <b>".$tickets->subject."</b> has been ".$is_create_value.".";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'rfi',
+                'rel_id' => $id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
+
 

@@ -946,6 +946,7 @@ class Tickets_model extends App_Model
 
             hooks()->do_action('ticket_created', $ticketid);
             log_activity('New Ticket Created [ID: ' . $ticketid . ']');
+            add_rfi_activity_log($ticketid, true);
 
             return $ticketid;
         }
@@ -984,6 +985,7 @@ class Tickets_model extends App_Model
     {
         $affectedRows = 0;
         hooks()->do_action('before_ticket_deleted', $ticketid);
+        add_rfi_activity_log($ticketid, false);
         // final delete ticket
         $this->db->where('ticketid', $ticketid);
         $this->db->delete(db_prefix() . 'tickets');

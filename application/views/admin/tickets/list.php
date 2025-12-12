@@ -14,6 +14,7 @@
                             <?php echo _l('new_ticket'); ?>
                         </a>
                     <?php } ?>
+                    <a href="<?php echo admin_url('purchase/activity_log?module=rfi'); ?>" class="btn btn-primary pull-left display-block mright5" target="_blank"><?php echo _l('activity_log'); ?></a>
 
                     <a href="#" class="btn btn-default btn-with-tooltip" data-toggle="tooltip" data-placement="bottom"
                         data-title="<?php echo _l('tickets_chart_weekly_opening_stats'); ?>"
