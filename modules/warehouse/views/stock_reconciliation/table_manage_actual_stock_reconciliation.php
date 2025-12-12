@@ -9,6 +9,7 @@ $aColumns = [
     db_prefix() . 'stock_reconciliation_detail.description',
     db_prefix() . 'stock_reconciliation_detail.area',
     db_prefix() . 'stock_reconciliation_detail.warehouse_id',
+    2,
     1,                                         
     db_prefix() . 'stock_reconciliation_detail.received_quantity',
     db_prefix() . 'stock_reconciliation_detail.issued_quantities',
@@ -34,7 +35,7 @@ if (get_default_project()) {
 
 
 
-$result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [db_prefix() . 'stock_reconciliation.id', db_prefix() . 'stock_reconciliation.pr_order_id', db_prefix() . 'stock_reconciliation.wo_order_id', db_prefix() . 'stock_reconciliation_detail.id as detail_id',db_prefix() . 'stock_reconciliation_detail.commodity_code']);
+$result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [db_prefix() . 'stock_reconciliation.id', db_prefix() . 'stock_reconciliation.pr_order_id', db_prefix() . 'stock_reconciliation.wo_order_id', db_prefix() . 'stock_reconciliation_detail.id as detail_id',db_prefix() . 'stock_reconciliation_detail.commodity_code',db_prefix() . 'stock_reconciliation.delivery_status as delivery_status']);
 
 $output  = $result['output'];
 $rResult = $result['rResult'];
@@ -267,6 +268,10 @@ foreach ($rResult as $aRow) {
 
         if($aColumns[$i] == 1){
            $_data = get_ordered_quantity($aRow['pr_order_id'],$aRow['wo_order_id'],$aRow[db_prefix() . 'stock_reconciliation_detail.description'],$aRow[db_prefix() . 'stock_reconciliation_detail.commodity_code']);
+        }
+
+        if($aColumns[$i] == 2){
+            $_data = _l($aRow['delivery_status']);
         }
 
         $row[] = $_data;
