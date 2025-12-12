@@ -9055,7 +9055,7 @@ class warehouse extends AdminController
 			4 => ['label' => 'warning', 'table' => 'delivered', 'text' => _l('Delivered')],
 
 		];
-		$success = $this->warehouse_model->change_production_status($status, $id, $purchase_tracker, $purOrder);
+		$success = $this->warehouse_model->change_production_status($status, $id, $purchase_tracker, $purOrder, $production_labels);
 		$message = $success ? _l('change_production_status_successfully') : _l('change_production_status_fail');
 
 		$html = '';
@@ -9460,7 +9460,7 @@ class warehouse extends AdminController
 			2 => ['label' => 'success', 'table' => 'imported', 'text' => _l('imported')],
 			3 => ['label' => 'info', 'table' => 'local', 'text' => _l('local')],
 		];
-		$success = $this->warehouse_model->change_imp_local_status($status, $id, $purchase_tracker, $purOrder);
+		$success = $this->warehouse_model->change_imp_local_status($status, $id, $purchase_tracker, $purOrder, $imp_local_labels);
 		$message = $success ? _l('change_status_successfully') : _l('change_status_fail');
 		$html = '';
 		$status_str = $imp_local_labels[$status]['text'] ?? '';
@@ -9502,7 +9502,7 @@ class warehouse extends AdminController
 			5 => ['label' => 'info', 'table' => 'POI', 'text' => 'POI'],
 			6 => ['label' => 'info', 'table' => 'PIR', 'text' => 'PIR'],
 		];
-		$success = $this->warehouse_model->change_tracker_status($status, $id, $purchase_tracker, $purOrder);
+		$success = $this->warehouse_model->change_tracker_status($status, $id, $purchase_tracker, $purOrder, $tracker_status_labels);
 		$message = $success ? _l('change_status_successfully') : _l('change_status_fail');
 		$html = '';
 		$status_str = $tracker_status_labels[$status]['text'] ?? '';

@@ -20870,17 +20870,25 @@ class Warehouse_model extends App_Model
 		return $arr_inventory_number;
 	}
 
-	function change_production_status($status, $id, $purchase_tracker, $purOrder)
+	function change_production_status($status, $id, $purchase_tracker, $purOrder, $production_labels)
 	{
 
-		$this->db->where('id', $id);
 		if ($purchase_tracker == "false") {
 			if ($purOrder == "true") {
+				$pur_order_detail = $this->get_pur_order_detail_row($id);
+				update_pt_activity_log($id, $purchase_tracker, 'pur_orders', _l('production_status'), $production_labels[$pur_order_detail->production_status]['text'] ?? '', $production_labels[$status]['text'] ?? '');
+				$this->db->where('id', $id);
 				$this->db->update(db_prefix() . 'pur_order_detail', ['production_status' => $status]);
 			} elseif ($purOrder == "false") {
+				$wo_order_detail = $this->get_wo_order_detail_row($id);
+				update_pt_activity_log($id, $purchase_tracker, 'wo_orders', _l('production_status'), $production_labels[$wo_order_detail->production_status]['text'] ?? '', $production_labels[$status]['text'] ?? '');
+				$this->db->where('id', $id);
 				$this->db->update(db_prefix() . 'wo_order_detail', ['production_status' => $status]);
 			}
 		} else {
+			$goods_receipt_detail = $this->warehouse_model->get_goods_receipt_detail_row($id);
+			update_pt_activity_log($id, $purchase_tracker, 'goods_receipt', _l('production_status'), $production_labels[$goods_receipt_detail->production_status]['text'] ?? '', $production_labels[$status]['text'] ?? '');
+			$this->db->where('id', $id);
 			$this->db->update(db_prefix() . 'goods_receipt_detail', ['production_status' => $status]);
 		}
 		return true;
@@ -21728,36 +21736,52 @@ class Warehouse_model extends App_Model
 		return $url;
 	}
 
-	function change_imp_local_status($status, $id, $purchase_tracker, $purOrder)
+	function change_imp_local_status($status, $id, $purchase_tracker, $purOrder, $imp_local_labels)
 	{
-		$this->db->where('id', $id);
 		if ($purchase_tracker == "false") {
 			if ($purOrder == "true") {
+				$pur_order_detail = $this->get_pur_order_detail_row($id);
+				update_pt_activity_log($id, $purchase_tracker, 'pur_orders', _l('imported_local'), $imp_local_labels[$pur_order_detail->imp_local_status]['text'] ?? '', $imp_local_labels[$status]['text'] ?? '');
+				$this->db->where('id', $id);
 				$this->db->update(db_prefix() . 'pur_order_detail', ['imp_local_status' => $status]);
 				update_pur_orders_tracker_details_last_action($id);
 			} elseif ($purOrder == "false") {
+				$wo_order_detail = $this->get_wo_order_detail_row($id);
+				update_pt_activity_log($id, $purchase_tracker, 'wo_orders', _l('imported_local'), $imp_local_labels[$wo_order_detail->imp_local_status]['text'] ?? '', $imp_local_labels[$status]['text'] ?? '');
+				$this->db->where('id', $id);
 				$this->db->update(db_prefix() . 'wo_order_detail', ['imp_local_status' => $status]);
 				update_wo_orders_tracker_details_last_action($id);
 			}
 		} else {
+			$goods_receipt_detail = $this->warehouse_model->get_goods_receipt_detail_row($id);
+			update_pt_activity_log($id, $purchase_tracker, 'goods_receipt', _l('imported_local'), $imp_local_labels[$goods_receipt_detail->imp_local_status]['text'] ?? '', $imp_local_labels[$status]['text'] ?? '');
+			$this->db->where('id', $id);
 			$this->db->update(db_prefix() . 'goods_receipt_detail', ['imp_local_status' => $status]);
 			update_goods_orders_tracker_details_last_action($id);
 		}
 		return true;
 	}
 
-	function change_tracker_status($status, $id, $purchase_tracker, $purOrder)
+	function change_tracker_status($status, $id, $purchase_tracker, $purOrder, $tracker_status_labels)
 	{
-		$this->db->where('id', $id);
 		if ($purchase_tracker == "false") {
 			if ($purOrder == "true") {
+				$pur_order_detail = $this->get_pur_order_detail_row($id);
+				update_pt_activity_log($id, $purchase_tracker, 'pur_orders', _l('status'), $tracker_status_labels[$pur_order_detail->tracker_status]['text'] ?? '', $tracker_status_labels[$status]['text'] ?? '');
+				$this->db->where('id', $id);
 				$this->db->update(db_prefix() . 'pur_order_detail', ['tracker_status' => $status]);
 				update_pur_orders_tracker_details_last_action($id);
 			} elseif ($purOrder == "false") {
+				$wo_order_detail = $this->get_wo_order_detail_row($id);
+				update_pt_activity_log($id, $purchase_tracker, 'wo_orders', _l('status'), $tracker_status_labels[$wo_order_detail->tracker_status]['text'] ?? '', $tracker_status_labels[$status]['text'] ?? '');
+				$this->db->where('id', $id);
 				$this->db->update(db_prefix() . 'wo_order_detail', ['tracker_status' => $status]);
 				update_wo_orders_tracker_details_last_action($id);
 			}
 		} else {
+			$goods_receipt_detail = $this->warehouse_model->get_goods_receipt_detail_row($id);
+			update_pt_activity_log($id, $purchase_tracker, 'goods_receipt', _l('status'), $tracker_status_labels[$goods_receipt_detail->tracker_status]['text'] ?? '', $tracker_status_labels[$status]['text'] ?? '');
+			$this->db->where('id', $id);
 			$this->db->update(db_prefix() . 'goods_receipt_detail', ['tracker_status' => $status]);
 			update_goods_orders_tracker_details_last_action($id);
 		}
