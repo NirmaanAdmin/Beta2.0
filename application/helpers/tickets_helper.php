@@ -662,3 +662,51 @@ function update_rfi_activity_log($id, $field, $old_value, $new_value)
     }
     return true;
 }
+
+function add_rfi_reply_activity_log($id, $is_create = true)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('id', $id);
+        $ticket_replies = $CI->db->get(db_prefix() . 'ticket_replies')->row();
+        if(!empty($ticket_replies)) {
+            $CI->db->where('ticketid', $ticket_replies->ticketid);
+            $tickets = $CI->db->get(db_prefix() . 'tickets')->row();
+            $is_create_value = $is_create ? 'added' : 'removed';
+            $description = "Reply <b>".$ticket_replies->message."</b> has been ".$is_create_value." for RFI <b>".$tickets->subject."</b>.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'rfi',
+                'rel_id' => $tickets->ticketid,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
+
+function add_rfi_attachment_activity_log($id, $file_name, $is_create = true)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('ticketid', $id);
+        $tickets = $CI->db->get(db_prefix() . 'tickets')->row();
+        if(!empty($tickets)) {
+            $is_create_value = $is_create ? 'added' : 'removed';
+            $description = "Attachment <b>".$file_name."</b> has been ".$is_create_value." for RFI <b>".$tickets->subject."</b>.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'rfi',
+                'rel_id' => $id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}

@@ -385,6 +385,8 @@ class Tickets_model extends App_Model
                 $attachment['replyid'] = $replyid;
             }
             $this->db->insert(db_prefix() . 'ticket_attachments', $attachment);
+            $ticket_attachment_id = $this->db->insert_id();
+            add_rfi_attachment_activity_log($attachment['ticketid'], $attachment['file_name'], true);
         }
     }
 
@@ -616,6 +618,8 @@ class Tickets_model extends App_Model
                 'replyid' => $insert_id,
             ]);
 
+            add_rfi_reply_activity_log($insert_id, true);
+
             return $insert_id;
         }
 
@@ -630,6 +634,7 @@ class Tickets_model extends App_Model
      */
     public function delete_ticket_reply($ticket_id, $reply_id)
     {
+        add_rfi_reply_activity_log($reply_id, false);
         hooks()->do_action('before_delete_ticket_reply', ['ticket_id' => $ticket_id, 'reply_id' => $reply_id]);
 
         $this->db->where('id', $reply_id);
@@ -671,6 +676,7 @@ class Tickets_model extends App_Model
             if (count($other_attachments) == 0) {
                 delete_dir(get_upload_path_by_type('ticket') . $attachment->ticketid);
             }
+            add_rfi_attachment_activity_log($attachment->ticketid, $attachment->file_name, false);
         }
 
         return $deleted;

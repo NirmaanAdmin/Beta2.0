@@ -271,10 +271,16 @@ class Tickets extends AdminController
 
             if ($data['type'] == 'reply') {
                 $this->db->where('id', $data['id']);
+                $ticket_replies = $this->db->get(db_prefix() . 'ticket_replies')->row();
+                update_rfi_activity_log($ticket_replies->ticketid, 'Ticket reply', $ticket_replies->message, $data['data']);
+                $this->db->where('id', $data['id']);
                 $this->db->update(db_prefix() . 'ticket_replies', [
                     'message' => $data['data'],
                 ]);
             } elseif ($data['type'] == 'ticket') {
+                $this->db->where('ticketid', $data['id']);
+                $tickets = $this->db->get(db_prefix() . 'tickets')->row();
+                update_rfi_activity_log($tickets->ticketid, 'Ticket message', $tickets->message, $data['data']);
                 $this->db->where('ticketid', $data['id']);
                 $this->db->update(db_prefix() . 'tickets', [
                     'message' => $data['data'],
