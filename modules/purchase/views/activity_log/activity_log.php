@@ -192,6 +192,7 @@ $module_name = 'module_activity_log'; ?>
                               $module_name_filter_val = $_GET['module'];
                            }
                            $module_name_list = [
+                              ['id' => 'mom_log', 'name' => _l('Minutes of Meetings')],
                               ['id' => 'timesheets', 'name' => _l('Leaves')],
                               ['id' => 'stckrec', 'name' => _l('Stock Received')],
                               ['id' => 'stckiss', 'name' => _l('Stock Issued')],

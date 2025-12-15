@@ -149,7 +149,7 @@ class MinutesController extends AdminController
                 // Existing agenda: update minutes.
                 $this->Meeting_model->save_minutes($agenda_id, $minutes_data);
             }
-
+ 
             set_alert('success', _l('meeting_minutes_created_success'));
             redirect(admin_url('meeting_management/minutesController/index/' . $agenda_id));
         }
