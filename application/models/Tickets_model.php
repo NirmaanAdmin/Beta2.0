@@ -1206,6 +1206,13 @@ class Tickets_model extends App_Model
     public function change_ticket_status($id, $status)
     {
         $this->db->where('ticketid', $id);
+        $tickets = $this->db->get(db_prefix() . 'tickets')->row();
+        $old_status = $this->get_ticket_status($tickets->status);
+        $old_status_name = $old_status->name ?? '';
+        $new_status = $this->get_ticket_status($status);
+        $new_status_name = $new_status->name ?? '';
+        update_rfi_activity_log($id, 'RFI Status', $old_status_name, $new_status_name);
+        $this->db->where('ticketid', $id);
         $this->db->update(db_prefix() . 'tickets', [
             'status' => $status,
         ]);
