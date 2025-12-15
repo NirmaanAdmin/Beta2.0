@@ -1124,6 +1124,7 @@ class Tickets_model extends App_Model
             $data['dms_items']  = implode(',', $data['dms_items']);
         }
 
+        update_all_rfi_fields_activity_log($data['ticketid'], $data);
         $this->db->where('ticketid', $data['ticketid']);
         $this->db->update(db_prefix() . 'tickets', $data);
         if ($this->db->affected_rows() > 0) {

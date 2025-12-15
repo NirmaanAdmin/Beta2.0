@@ -502,4 +502,163 @@ function add_rfi_activity_log($id, $is_create = true)
     return true;
 }
 
+function update_all_rfi_fields_activity_log($id, $new_data)
+{
+    $CI = &get_instance();
+    $CI->load->model('staff_model');
+    $CI->load->model('departments_model');
+    if (empty($id)) {
+        return false;
+    }
+    $tickets = $CI->db->where('ticketid', $id)
+        ->get(db_prefix() . 'tickets')
+        ->row();
+    if (!$tickets) {
+        return false;
+    }
+    $old_data = (array)$tickets;
+    if (isset($old_data['area'])) {
+        $areaArray = is_array($old_data['area']) ? $old_data['area'] : explode(',', $old_data['area']);
+        $areaArray = array_map('trim', $areaArray);
+        $areaArray = array_filter($areaArray, fn($v) => $v !== '');
+        sort($areaArray, SORT_NUMERIC);
+        $old_data['area'] = implode(',', $areaArray);
+    }
+    if (isset($new_data['area']) && is_array($new_data['area'])) {
+        $areaArray = array_map('trim', $new_data['area']);
+        $areaArray = array_filter($areaArray, fn($v) => $v !== '');
+        sort($areaArray, SORT_NUMERIC);
+        $new_data['area'] = implode(',', $areaArray);
+    }
+    $normalize = function ($value) {
+        $value = trim((string)$value);
+        if (in_array(strtolower($value), ['null', 'none', 'nil', 'n/a', '-', '--'])) {
+            return '';
+        }
+        if ($value === '0000-00-00') {
+            return '';
+        }
+        if (is_numeric($value)) {
+            $num = (float)$value;
+            return ($num == 0.0) ? '' : $num;
+        }
+        return strtolower($value);
+    };
+    $norm_old = array_map($normalize, $old_data);
+    $norm_new = array_map($normalize, $new_data);
+    $changes = array_diff_assoc($norm_new, $norm_old);
+    if (empty($changes)) {
+        return true;
+    }
+    $field_map = [
+        'subject' => _l('ticket_settings_subject'),
+        'assigned' => _l('ticket_settings_assign_to'),
+        'name' => _l('ticket_settings_to'),
+        'email' => _l('ticket_settings_email'),
+        'created_by' => _l('created_by'),
+        'rfi_to' => _l('rfi_to'),
+        'department' => _l('ticket_settings_departments'),
+        'area' => _l('area'),
+        'discipline' => _l('discipline'),
+        'priority' => _l('ticket_settings_priority'),
+        'duedate' => _l('task_add_edit_due_date'),
+        'ref_drawing' => _l('reference_drawings'),
+        'dms_items' => _l('Drawings'),
+    ];
+    foreach ($changes as $field => $dummy) {
+        if (!isset($field_map[$field])) {
+            continue;
+        }
+        $old_value = $old_data[$field] ?? '';
+        $new_value = $new_data[$field] ?? '';
+        if ($field === 'assigned' || $field === 'created_by') {
+            $staff_list = $CI->staff_model->get('', ['active' => 1]);
+            $opts = array_combine(
+                array_column($staff_list, 'staffid'),
+                array_map(fn($a) => $a['firstname'] . ' ' . $a['lastname'], $staff_list)
+            );
+            $old_value = $opts[$old_value] ?? '';
+            $new_value = $opts[$new_value] ?? '';
+        }
+        if ($field === 'department') {
+            $departments_list = $CI->departments_model->get();
+            $opts = array_column($departments_list, 'name', 'departmentid');
+            $old_value = $opts[$old_value] ?? '';
+            $new_value = $opts[$new_value] ?? '';
+        }
+        if ($field === 'area') {
+            $old_value = !empty($old_value) ? get_area_name_by_id($old_value) : '';
+            $new_value = !empty($new_value) ? get_area_name_by_id($new_value) : '';
+        }
+        if ($field === 'discipline') {
+            $old_value = !empty($old_value) ? get_all_discipline($old_value) : '';
+            $new_value = !empty($new_value) ? get_all_discipline($new_value) : '';
+        }
+        if ($field === 'priority') {
+            $old_value = !empty($old_value) ? ticket_priority_translate($old_value) : '';
+            $new_value = !empty($new_value) ? ticket_priority_translate($new_value) : '';
+        }
+        if ($field === 'dms_items') {
+            if(!empty($old_value)) {
+                $old_value_query = $CI->db->select("
+                    id,
+                    CASE 
+                        WHEN document_number IS NOT NULL 
+                            AND document_number != '' 
+                            AND (orginal_filename IS NULL OR orginal_filename = '') 
+                        THEN CONCAT(document_number, '-', name)
+                        ELSE name
+                    END AS name
+                ")
+                ->where_in('id', explode(",", $old_value))
+                ->from(db_prefix() . 'dms_items')
+                ->get()
+                ->result_array();
+                $old_value = !empty($old_value_query) ? implode(', ', array_column($old_value_query, 'name')) : '';
+            }
+            if(!empty($new_value)) {
+                $new_value_query = $CI->db->select("
+                    id,
+                    CASE 
+                        WHEN document_number IS NOT NULL 
+                            AND document_number != '' 
+                            AND (orginal_filename IS NULL OR orginal_filename = '') 
+                        THEN CONCAT(document_number, '-', name)
+                        ELSE name
+                    END AS name
+                ")
+                ->where_in('id', explode(",", $new_value))
+                ->from(db_prefix() . 'dms_items')
+                ->get()
+                ->result_array();
+                $new_value = !empty($new_value_query) ? implode(', ', array_column($new_value_query, 'name')) : '';
+            }
+        }
+        update_rfi_activity_log($id, $field_map[$field], $old_value, $new_value);
+    }
+    return true;
+}
 
+function update_rfi_activity_log($id, $field, $old_value, $new_value)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if(!empty($id)) {
+        $CI->db->where('ticketid', $id);
+        $tickets = $CI->db->get(db_prefix() . 'tickets')->row();
+        if(!empty($tickets)) {
+            $old_value = !empty($old_value) ? $old_value : 'None';
+            $new_value = !empty($new_value) ? $new_value : 'None';
+            $description = "".$field." field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in RFI <b>".$tickets->subject."</b>.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'rfi',
+                'rel_id' => $id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}

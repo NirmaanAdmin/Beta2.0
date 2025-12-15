@@ -5621,6 +5621,12 @@ function add_order_notes_activity_log($id, $is_create = true)
                 $description = "Notes <b>".$notes->description."</b> has been ".$is_create_value." for budget <b>".format_estimate_number($notes->rel_id)."</b>.";
                 $module_name = 'bud';
                 $rel_id = $notes->rel_id;
+            } else if($notes->rel_type == 'ticket') {
+                $CI->db->where('ticketid', $notes->rel_id);
+                $tickets = $CI->db->get(db_prefix() . 'tickets')->row();
+                $description = "Notes <b>".$notes->description."</b> has been ".$is_create_value." for RFI <b>".$tickets->subject."</b>.";
+                $module_name = 'rfi';
+                $rel_id = $tickets->ticketid;
             } else {
                 $module_name = '';
                 $rel_id = '';
@@ -5682,6 +5688,12 @@ function update_order_notes_activity_log($id, $old_value, $new_value)
                 $description = "Notes field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in budget <b>".format_estimate_number($notes->rel_id)."</b>.";
                 $module_name = 'bud';
                 $rel_id = $notes->rel_id;
+            } else if($notes->rel_type == 'ticket') {
+                $CI->db->where('ticketid', $notes->rel_id);
+                $tickets = $CI->db->get(db_prefix() . 'tickets')->row();
+                $description = "Notes field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in RFI <b>".$tickets->subject."</b>.";
+                $module_name = 'rfi';
+                $rel_id = $tickets->ticketid;
             } else {
                 $module_name = '';
                 $rel_id = '';
