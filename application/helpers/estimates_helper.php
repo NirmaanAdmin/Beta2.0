@@ -1251,3 +1251,21 @@ function update_budget_package_activity_log($id, $new_data)
     }
     return true;
 }
+
+function get_total_budgeted_amount($estimate_id, $budget_head = null)
+{
+    if (empty($estimate_id)) {
+        return 0;
+    }
+    $CI = &get_instance();
+    $CI->db->select('SUM(qty * rate) AS total');
+    $CI->db->from(db_prefix() . 'itemable');
+    $CI->db->where('rel_id', $estimate_id);
+    $CI->db->where('rel_type', 'estimate');
+    if (!empty($budget_head)) {
+        $CI->db->where('annexure', $budget_head);
+    }
+    $row = $CI->db->get()->row();
+    return ($row && $row->total !== null) ? $row->total : 0;
+}
+

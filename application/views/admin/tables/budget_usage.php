@@ -47,12 +47,18 @@ $result = data_tables_budget_usage_init($aColumns, $join, $where, [
 $output  = $result['output'];
 $rResult = $result['rResult'];
 
+$footer_data = [
+   'usage_budgeted_amount' => 0,
+   'usage_order_amount' => 0,
+   'usage_remaining_amount' => 0,
+];
+$base_currency = get_base_currency_pur();
+
 $sr = 1;
 foreach ($rResult as $aRow) {
    $row = [];
    foreach ($aColumns as $column) {
       $_data = isset($aRow[$column]) ? $aRow[$column] : '';
-      $base_currency = get_base_currency_pur();
       // Process specific columns
       if ($column == 'order_number') {
          if($aRow['type'] == 'po') {
@@ -78,8 +84,19 @@ foreach ($rResult as $aRow) {
 
       $row[] = $_data;
    }
+
+   $footer_data['usage_order_amount'] += $aRow['amount'];
+
    $output['aaData'][] = $row;
    $sr++;
 }
+
+$footer_data['usage_budgeted_amount'] = get_total_budgeted_amount($estimate_id, $budget_head);
+$footer_data['usage_remaining_amount'] = $footer_data['usage_budgeted_amount'] - $footer_data['usage_order_amount'];
+
+foreach ($footer_data as $key => $total) {
+   $footer_data[$key] = app_format_money($total, $base_currency->symbol);
+}
+$output['sums'] = $footer_data;
 
 ?>

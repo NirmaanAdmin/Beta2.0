@@ -971,6 +971,27 @@
                                </tbody>
                             </table>
                         </div>
+                        <div class="col-md-8 col-md-offset-4">
+                            <table class="table text-right">
+                                <tbody>
+                                    <tr>
+                                        <td><span class="bold tw-text-neutral-700"><?php echo _l('Total budgeted amount'); ?> :</span>
+                                        </td>
+                                        <td class="usage_budgeted_amount"></td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="bold tw-text-neutral-700"><?php echo _l('Total order amount'); ?> :</span>
+                                        </td>
+                                        <td class="usage_order_amount"></td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="bold tw-text-neutral-700"><?php echo _l('Total remaining amount'); ?> :</span>
+                                        </td>
+                                        <td class="usage_remaining_amount"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
@@ -1485,6 +1506,13 @@ initDataTable('.table-table_budget_usage', admin_url + 'estimates/table_budget_u
 $(document).on('change', 'select[name="dashboard_budget_head"]', function () {
     $('select[name="dashboard_budget_head"]').selectpicker('refresh');
     table_budget_usage.DataTable().ajax.reload();
+});
+$('.table-table_budget_usage').on('draw.dt', function () {
+    var reportsTable = $(this).DataTable();
+    var sums = reportsTable.ajax.json().sums;
+    $('tbody td.usage_budgeted_amount').html(sums.usage_budgeted_amount);
+    $('tbody td.usage_order_amount').html(sums.usage_order_amount);
+    $('tbody td.usage_remaining_amount').html(sums.usage_remaining_amount);
 });
 
 $('#unawarded_package_form').on('submit', function (e) {
