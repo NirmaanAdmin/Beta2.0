@@ -21,6 +21,11 @@
                             </a>
                         </li>
                         <li role="presentation">
+                            <a href="#budget_dashboard" aria-controls="budget_dashboard" role="tab" data-toggle="tab">
+                                Budget Dashboard
+                            </a>
+                        </li>
+                        <li role="presentation">
                             <a href="#tender_strategy" aria-controls="tender_strategy" role="tab" data-toggle="tab">
                                 Tender Strategy
                             </a>
@@ -940,6 +945,35 @@
                     </div>
                 </div>
 
+                <div role="tabpanel" class="tab-pane" id="budget_dashboard">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="col-md-2 form-group" style="padding-left: 0px;">
+                               <select name="dashboard_budget_head" class="selectpicker" data-width="100%" data-none-selected-text="<?php echo _l('group_pur'); ?>" data-actions-box="true">
+                                  <option value=""></option>
+                                  <?php foreach ($estimate_budget_listing as $head) { ?>
+                                     <option value="<?php echo $head['annexure']; ?>"><?php echo $head['budget_head']; ?></option>
+                                  <?php } ?>
+                               </select>
+                            </div>
+
+                            <table class="dt-table-loading table table-table_budget_usage">
+                               <thead>
+                                  <tr>
+                                     <th><?php echo _l('Order Id'); ?></th>
+                                     <th><?php echo _l('Description'); ?></th>
+                                     <th><?php echo _l('Budget Head'); ?></th>
+                                     <th><?php echo _l('Vendor Name'); ?></th>
+                                     <th><?php echo _l('Amount'); ?></th>
+                                  </tr>
+                               </thead>
+                               <tbody>
+                               </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
                 <div role="tabpanel" class="tab-pane" id="attachment">
                     <?php if (count($estimate->attachments) > 0) { ?>
                     <div class="col-md-12">
@@ -1440,6 +1474,17 @@ initDataTable('.table-table_unawarded_tracker', admin_url + 'purchase/table_unaw
 $(document).on('change', 'select[name="package_budget_head"]', function () {
     $('select[name="package_budget_head"]').selectpicker('refresh');
     table_unawarded_tracker.DataTable().ajax.reload();
+});
+
+var table_budget_usage;
+table_budget_usage = $('.table-table_budget_usage');
+var dashboardParams = {
+    "budget_head": "[name='dashboard_budget_head']"
+};
+initDataTable('.table-table_budget_usage', admin_url + 'estimates/table_budget_usage/' + estimate_id, [], [], dashboardParams, [0, 'desc']);
+$(document).on('change', 'select[name="dashboard_budget_head"]', function () {
+    $('select[name="dashboard_budget_head"]').selectpicker('refresh');
+    table_budget_usage.DataTable().ajax.reload();
 });
 
 $('#unawarded_package_form').on('submit', function (e) {

@@ -948,4 +948,11 @@ class Estimates extends AdminController
             $this->load->view('admin/estimates/_milestone_kanban_card', ['task' => $task, 'milestone' => $status]);
         }
     }
+
+    public function table_budget_usage($estimate_id = 0)
+    {
+        if ($this->input->is_ajax_request()) {
+            $this->app->get_table_data('budget_usage', ['estimate_id' => $estimate_id]);
+        }
+    }
 }
