@@ -655,24 +655,24 @@ class Misc_model extends App_Model
             $result[] = $estimate_items_search;
         }
 
-        $cost_commodity_groups_search = $this->_search_cost_commodity_groups($q, $limit);
-        if (count($cost_commodity_groups_search['result']) > 0) {
-            $result[] = $cost_commodity_groups_search;
+        $estimate_commodity_groups_search = $this->_search_estimate_commodity_groups($q, $limit);
+        if (count($estimate_commodity_groups_search['result']) > 0) {
+            $result[] = $estimate_commodity_groups_search;
         }
 
-        $cost_sub_groups_search = $this->_search_cost_sub_groups($q, $limit);
-        if (count($cost_sub_groups_search['result']) > 0) {
-            $result[] = $cost_sub_groups_search;
+        $estimate_sub_groups_search = $this->_search_estimate_sub_groups($q, $limit);
+        if (count($estimate_sub_groups_search['result']) > 0) {
+            $result[] = $estimate_sub_groups_search;
         }
 
-        $cost_master_areas_search = $this->_search_cost_master_areas($q, $limit);
-        if (count($cost_master_areas_search['result']) > 0) {
-            $result[] = $cost_master_areas_search;
+        $estimate_master_areas_search = $this->_search_estimate_master_areas($q, $limit);
+        if (count($estimate_master_areas_search['result']) > 0) {
+            $result[] = $estimate_master_areas_search;
         }
 
-        $cost_functionality_areas_search = $this->_search_cost_functionality_areas($q, $limit);
-        if (count($cost_functionality_areas_search['result']) > 0) {
-            $result[] = $cost_functionality_areas_search;
+        $estimate_functionality_areas_search = $this->_search_estimate_functionality_areas($q, $limit);
+        if (count($estimate_functionality_areas_search['result']) > 0) {
+            $result[] = $estimate_functionality_areas_search;
         }
 
         $result = hooks()->apply_filters('global_search_result_query', $result, $q, $limit);
@@ -1904,11 +1904,11 @@ class Misc_model extends App_Model
         return $result;
     }
 
-    public function _search_cost_commodity_groups($q, $limit = 0)
+    public function _search_estimate_commodity_groups($q, $limit = 0)
     {
         $result = [
             'result'         => [],
-            'type'           => 'cost_commodity_groups',
+            'type'           => 'estimate_commodity_groups',
             'search_heading' => _l('cost_planning').' > '._l('Budget head'),
         ];
 
@@ -1921,11 +1921,11 @@ class Misc_model extends App_Model
         return $result;
     }
 
-    public function _search_cost_sub_groups($q, $limit = 0)
+    public function _search_estimate_sub_groups($q, $limit = 0)
     {
         $result = [
             'result'         => [],
-            'type'           => 'cost_sub_groups',
+            'type'           => 'estimate_sub_groups',
             'search_heading' => _l('cost_planning').' > '._l('Budget sub head'),
         ];
 
@@ -1938,11 +1938,11 @@ class Misc_model extends App_Model
         return $result;
     }
 
-    public function _search_cost_master_areas($q, $limit = 0)
+    public function _search_estimate_master_areas($q, $limit = 0)
     {
         $result = [
             'result'         => [],
-            'type'           => 'cost_master_areas',
+            'type'           => 'estimate_master_areas',
             'search_heading' => _l('cost_planning').' > '._l('Master area'),
         ];
 
@@ -1956,11 +1956,11 @@ class Misc_model extends App_Model
         return $result;
     }
 
-    public function _search_cost_functionality_areas($q, $limit = 0)
+    public function _search_estimate_functionality_areas($q, $limit = 0)
     {
         $result = [
             'result'         => [],
-            'type'           => 'cost_functionality_areas',
+            'type'           => 'estimate_functionality_areas',
             'search_heading' => _l('cost_planning').' > '._l('Functionality area'),
         ];
 
