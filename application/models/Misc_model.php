@@ -1232,7 +1232,7 @@ class Misc_model extends App_Model
         $result = [
             'result'         => [],
             'type'           => 'estimates',
-            'search_heading' => _l('estimates'),
+            'search_heading' => _l('project_budget'),
         ];
 
         $has_permission_view_estimates     = staff_can('view',  'estimates');
@@ -1251,6 +1251,7 @@ class Misc_model extends App_Model
             $estimates_fields  = prefixed_table_fields_array(db_prefix() . 'estimates');
             $clients_fields    = prefixed_table_fields_array(db_prefix() . 'clients');
             $noPermissionQuery = get_estimates_where_sql_for_staff(get_staff_user_id());
+            $default_project = get_default_project();
 
             $this->db->select(implode(',', $estimates_fields) . ',' . implode(',', $clients_fields) . ',' . db_prefix() . 'estimates.id as estimateid,' . get_sql_select_client_company());
             $this->db->from(db_prefix() . 'estimates');
@@ -1262,12 +1263,17 @@ class Misc_model extends App_Model
                 $this->db->where($noPermissionQuery);
             }
 
+            $this->db->where(db_prefix() . 'estimates.active', 1);
+            $this->db->where(db_prefix() . 'estimates.project_id', $default_project);
+
             $this->db->where('(
                 ' . db_prefix() . 'estimates.number LIKE "' . $this->db->escape_like_str($q) . '"
                 OR
                 ' . db_prefix() . 'clients.company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR
                 ' . db_prefix() . 'estimates.clientnote LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                OR
+                ' . db_prefix() . 'estimates.total LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR
                 ' . db_prefix() . 'clients.vat LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR
@@ -1909,7 +1915,7 @@ class Misc_model extends App_Model
         $result = [
             'result'         => [],
             'type'           => 'estimate_commodity_groups',
-            'search_heading' => _l('cost_planning').' > '._l('Budget head'),
+            'search_heading' => _l('project_budget').' > '._l('Budget head'),
         ];
 
         $this->db->select()->from(db_prefix() . 'items_groups')->like('name', $q);
@@ -1926,7 +1932,7 @@ class Misc_model extends App_Model
         $result = [
             'result'         => [],
             'type'           => 'estimate_sub_groups',
-            'search_heading' => _l('cost_planning').' > '._l('Budget sub head'),
+            'search_heading' => _l('project_budget').' > '._l('Budget sub head'),
         ];
 
         $this->db->select()->from(db_prefix() . 'wh_sub_group')->like('sub_group_name', $q);
@@ -1943,7 +1949,7 @@ class Misc_model extends App_Model
         $result = [
             'result'         => [],
             'type'           => 'estimate_master_areas',
-            'search_heading' => _l('cost_planning').' > '._l('Master area'),
+            'search_heading' => _l('project_budget').' > '._l('Master area'),
         ];
 
         $this->db->select()->from(db_prefix() . 'master_area')->like('category_name', $q)->or_like('description', $q);
@@ -1961,7 +1967,7 @@ class Misc_model extends App_Model
         $result = [
             'result'         => [],
             'type'           => 'estimate_functionality_areas',
-            'search_heading' => _l('cost_planning').' > '._l('Functionality area'),
+            'search_heading' => _l('project_budget').' > '._l('Functionality area'),
         ];
 
         $this->db->select()->from(db_prefix() . 'functionality_area')->like('category_name', $q)->or_like('description', $q);
