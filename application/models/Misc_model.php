@@ -655,6 +655,26 @@ class Misc_model extends App_Model
             $result[] = $estimate_items_search;
         }
 
+        $cost_commodity_groups_search = $this->_search_cost_commodity_groups($q, $limit);
+        if (count($cost_commodity_groups_search['result']) > 0) {
+            $result[] = $cost_commodity_groups_search;
+        }
+
+        $cost_sub_groups_search = $this->_search_cost_sub_groups($q, $limit);
+        if (count($cost_sub_groups_search['result']) > 0) {
+            $result[] = $cost_sub_groups_search;
+        }
+
+        $cost_master_areas_search = $this->_search_cost_master_areas($q, $limit);
+        if (count($cost_master_areas_search['result']) > 0) {
+            $result[] = $cost_master_areas_search;
+        }
+
+        $cost_functionality_areas_search = $this->_search_cost_functionality_areas($q, $limit);
+        if (count($cost_functionality_areas_search['result']) > 0) {
+            $result[] = $cost_functionality_areas_search;
+        }
+
         $result = hooks()->apply_filters('global_search_result_query', $result, $q, $limit);
 
         return $result;
@@ -1880,6 +1900,76 @@ class Misc_model extends App_Model
             $this->db->order_by('description', 'ASC');
             $result['result'] = $this->db->get()->result_array();
         }
+
+        return $result;
+    }
+
+    public function _search_cost_commodity_groups($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'cost_commodity_groups',
+            'search_heading' => _l('cost_planning').' > '._l('Budget head'),
+        ];
+
+        $this->db->select()->from(db_prefix() . 'items_groups')->like('name', $q);
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $result['result'] = $this->db->get()->result_array();
+
+        return $result;
+    }
+
+    public function _search_cost_sub_groups($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'cost_sub_groups',
+            'search_heading' => _l('cost_planning').' > '._l('Budget sub head'),
+        ];
+
+        $this->db->select()->from(db_prefix() . 'wh_sub_group')->like('sub_group_name', $q);
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $result['result'] = $this->db->get()->result_array();
+
+        return $result;
+    }
+
+    public function _search_cost_master_areas($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'cost_master_areas',
+            'search_heading' => _l('cost_planning').' > '._l('Master area'),
+        ];
+
+        $this->db->select()->from(db_prefix() . 'master_area')->like('category_name', $q)->or_like('description', $q);
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $this->db->order_by('category_name', 'ASC');
+        $result['result'] = $this->db->get()->result_array();
+
+        return $result;
+    }
+
+    public function _search_cost_functionality_areas($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'cost_functionality_areas',
+            'search_heading' => _l('cost_planning').' > '._l('Functionality area'),
+        ];
+
+        $this->db->select()->from(db_prefix() . 'functionality_area')->like('category_name', $q)->or_like('description', $q);
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $this->db->order_by('category_name', 'ASC');
+        $result['result'] = $this->db->get()->result_array();
 
         return $result;
     }

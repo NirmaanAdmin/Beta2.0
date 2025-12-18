@@ -79,6 +79,18 @@
             case 'projects':
             $output = '<a href="'.admin_url('projects/view/'.$_result['id']).'">'.e($_result['name']).'</a>';
             break;
+            case 'cost_commodity_groups':
+            $output = '<a href="'.admin_url('costplanning/setting?group=commodity_group').'">'.e($_result['name']).'</a>';
+            break;
+            case 'cost_sub_groups':
+            $output = '<a href="'.admin_url('costplanning/setting?group=sub_group').'">'.e($_result['sub_group_name']).'</a>';
+            break;
+            case 'cost_master_areas':
+            $output = '<a href="'.admin_url('costplanning/setting?group=master_area').'">'.e($_result['category_name']).'</a>';
+            break;
+            case 'cost_functionality_areas':
+            $output = '<a href="'.admin_url('costplanning/setting?group=functionality_area').'">'.e($_result['category_name']).'</a>';
+            break;
         }
         ?>
         <li><?php echo hooks()->apply_filters('global_search_result_output', $output, ['result'=>$_result, 'type'=>$data['type']]); ?></li>
