@@ -10,7 +10,10 @@
     <?php echo render_input('settings[invoice_company_country_code]', 'settings_sales_country_code', get_option('invoice_company_country_code')); ?>
     <?php echo render_input('settings[invoice_company_postal_code]', 'settings_sales_postal_code', get_option('invoice_company_postal_code')); ?>
     <?php echo render_input('settings[invoice_company_phonenumber]', 'settings_sales_phonenumber', get_option('invoice_company_phonenumber')); ?>
-    <?php echo render_input('settings[company_vat]', 'company_vat_number', get_option('company_vat')); ?>
+    <?php 
+    // echo render_input('settings[company_vat]', 'company_vat_number', get_option('company_vat')); 
+    ?>
+    <a href="<?php echo admin_url('companygst'); ?>" class="btn btn-primary mbot10" target="_blank"> Add/Edit Company GST</a>
     <?php echo render_input('settings[company_pan]', 'pan', get_option('company_pan')); ?>
     <?php echo render_custom_fields('company', 0); ?>
     <hr />

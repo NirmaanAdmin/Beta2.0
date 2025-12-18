@@ -254,6 +254,28 @@
                         <?php $deal_slip_no = (isset($invoice) && $invoice->deal_slip_no != '' ? $invoice->deal_slip_no : ''); ?>
                         <?php echo render_input('deal_slip_no', 'deal_slip_no', $deal_slip_no) ?>
                     </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="suppliers_gst" class="control-label"><?php echo _l('suppliers_gst') ?></label>
+                            <select name="suppliers_gst" id="suppliers_gst" class="selectpicker" data-live-search="true" data-width="100%">
+                                <?php 
+                                $company_gst_details = get_all_company_gst_details();
+                                foreach ($company_gst_details as $item): ?>
+                                    <?php
+                                    $selected = '';
+                                    if (isset($invoice)) {
+                                        if ($invoice->suppliers_gst == $item['id']) {
+                                            $selected = 'selected';
+                                        }
+                                    }
+                                    ?>
+                                    <option value="<?= $item['id'] ?>" <?= $selected ?>>
+                                        <?= $item['name'] ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
                 <?php if (is_invoices_overdue_reminders_enabled()) { ?>

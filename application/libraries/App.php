@@ -272,6 +272,12 @@ class App
         $val  = '';
         $name = trim($name);
         $default_project = get_default_project();
+        if($name == 'company_vat') {
+            $this->ci->db->select('name');
+            $this->ci->db->where('isdefault', 1);
+            $row = $this->ci->db->get(db_prefix() . 'company_gst_details')->row();
+            return !empty($row) ? $row->name : '';
+        }
         if($project) {
             $this->ci->db->select('value');
             $this->ci->db->where('name', $name);

@@ -1188,3 +1188,10 @@ function check_emp_leave_balance($staff_id)
     // Return leave balance details or null if no record exists
     return $query->row_array();
 }
+
+function get_all_company_gst_details()
+{
+    $CI = &get_instance();
+    $CI->db->order_by('isdefault', 'desc');
+    return $CI->db->get(db_prefix() . 'company_gst_details')->result_array();
+}

@@ -556,6 +556,13 @@ function app_init_admin_sidebar_menu_items()
             'position' => 20,
             'badge'    => [],
         ]);
+        $CI->app_menu->add_setup_children_item('finance', [
+            'slug'     => 'company-gst',
+            'name'     => _l('company_gst'),
+            'href'     => admin_url('companygst'),
+            'position' => 25,
+            'badge'    => [],
+        ]);
 
         $CI->app_menu->add_setup_menu_item('contracts', [
             'collapse' => true,

@@ -1163,3 +1163,43 @@ function update_client_invoice_activity_log($id, $field, $old_value, $new_value)
     }
     return true;
 }
+
+function get_company_gst_name($id)
+{
+    if (!empty($id)) {
+        $CI = &get_instance();
+        $CI->db->select('name');
+        $CI->db->from(db_prefix() . 'company_gst_details');
+        $CI->db->where('id', $id);
+        $query = $CI->db->get();
+        $result = $query->row();
+        if (!empty($result)) {
+            return $result->name;
+        }
+    } else {
+        $CI = &get_instance();
+        $CI->db->select('name');
+        $CI->db->from(db_prefix() . 'company_gst_details');
+        $CI->db->where('isdefault', 1);
+        $query = $CI->db->get();
+        $result = $query->row();
+        if (!empty($result)) {
+            return $result->name;
+        }
+    }
+    return '';
+}
+
+function get_default_company_gst_id()
+{
+    $CI = &get_instance();
+    $CI->db->select('id');
+    $CI->db->from(db_prefix() . 'company_gst_details');
+    $CI->db->where('isdefault', 1);
+    $query = $CI->db->get();
+    $result = $query->row();
+    if (!empty($result)) {
+        return $result->id;
+    }
+    return NULL;
+}

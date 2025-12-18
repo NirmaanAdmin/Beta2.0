@@ -79,8 +79,8 @@ $tblinvoicehtml .= '
 
 $tblinvoicehtml .= '
 <tr style="font-size:13px">
-    <td>'._l('suppliers_vendors_gst').' :</td>
-    <td>'.get_option('company_vat').'</td>
+    <td>'._l('suppliers_gst').' :</td>
+    <td>'.get_company_gst_name($invoice->suppliers_gst).'</td>
 </tr>';
  
 $tblinvoicehtml .= '
