@@ -560,14 +560,14 @@ class Misc_model extends App_Model
         $have_assigned_customers        = have_assigned_customers();
         $have_permission_customers_view = staff_can('view',  'customers');
 
-        $clients_search = $this->_search_clients($q, $limit);
-        if (count($clients_search['result']) > 0) {
-            $result[] = $clients_search;
-        }
-
         $staff_search = $this->_search_staff($q, $limit);
         if (count($staff_search['result']) > 0) {
             $result[] = $staff_search;
+        }
+
+        $clients_search = $this->_search_clients($q, $limit);
+        if (count($clients_search['result']) > 0) {
+            $result[] = $clients_search;
         }
 
         $where_contacts = '';
@@ -580,74 +580,14 @@ class Misc_model extends App_Model
             $result[] = $contacts_search;
         }
 
-        $tickets_search = $this->_search_tickets($q, $limit);
-        if (count($tickets_search['result']) > 0) {
-            $result[] = $tickets_search;
-        }
-
-        $leads_search = $this->_search_leads($q, $limit);
-        if (count($leads_search['result']) > 0) {
-            $result[] = $leads_search;
-        }
-
-        $proposals_search = $this->_search_proposals($q, $limit);
-        if (count($proposals_search['result']) > 0) {
-            $result[] = $proposals_search;
-        }
-
-        $invoices_search = $this->_search_invoices($q, $limit);
-        if (count($invoices_search['result']) > 0) {
-            $result[] = $invoices_search;
-        }
-
-        $credit_notes_search = $this->_search_credit_notes($q, $limit);
-        if (count($credit_notes_search['result']) > 0) {
-            $result[] = $credit_notes_search;
-        }
-
-        $estimates_search = $this->_search_estimates($q, $limit);
-        if (count($estimates_search['result']) > 0) {
-            $result[] = $estimates_search;
-        }
-
-        $expenses_search = $this->_search_expenses($q, $limit);
-        if (count($expenses_search['result']) > 0) {
-            $result[] = $expenses_search;
-        }
-
         $projects_search = $this->_search_projects($q, $limit);
         if (count($projects_search['result']) > 0) {
             $result[] = $projects_search;
         }
 
-        $contracts_search = $this->_search_contracts($q, $limit);
-        if (count($contracts_search['result']) > 0) {
-            $result[] = $contracts_search;
-        }
-
-        $knowledge_base_search = $this->_search_knowledge_base($q, $limit);
-        if (count($knowledge_base_search['result']) > 0) {
-            $result[] = $knowledge_base_search;
-        }
-
-        $tasks_search = $this->_search_tasks($q, $limit);
-        if (count($tasks_search['result']) > 0) {
-            $result[] = $tasks_search;
-        }
-
-        $payments_search = $this->_search_payments($q, $limit);
-        if (count($payments_search['result']) > 0) {
-            $result[] = $payments_search;
-        }
-
-        $custom_fields_search = $this->_search_custom_fields($q, $limit);
-        if (count($custom_fields_search['result']) > 0) {
-            $result[] = $custom_fields_search;
-        }
-
-        $invoice_items_search = $this->_search_invoice_items($q, $limit);
-        if (count($invoice_items_search['result']) > 0) {
-            $result[] = $invoice_items_search;
+        $estimates_search = $this->_search_estimates($q, $limit);
+        if (count($estimates_search['result']) > 0) {
+            $result[] = $estimates_search;
         }
 
         $estimate_items_search = $this->_search_estimate_items($q, $limit);
@@ -673,6 +613,66 @@ class Misc_model extends App_Model
         $estimate_functionality_areas_search = $this->_search_estimate_functionality_areas($q, $limit);
         if (count($estimate_functionality_areas_search['result']) > 0) {
             $result[] = $estimate_functionality_areas_search;
+        }
+
+        $invoices_search = $this->_search_invoices($q, $limit);
+        if (count($invoices_search['result']) > 0) {
+            $result[] = $invoices_search;
+        }
+
+        $invoice_items_search = $this->_search_invoice_items($q, $limit);
+        if (count($invoice_items_search['result']) > 0) {
+            $result[] = $invoice_items_search;
+        }
+
+        $payments_search = $this->_search_payments($q, $limit);
+        if (count($payments_search['result']) > 0) {
+            $result[] = $payments_search;
+        }
+
+        $credit_notes_search = $this->_search_credit_notes($q, $limit);
+        if (count($credit_notes_search['result']) > 0) {
+            $result[] = $credit_notes_search;
+        }
+
+        $expenses_search = $this->_search_expenses($q, $limit);
+        if (count($expenses_search['result']) > 0) {
+            $result[] = $expenses_search;
+        }
+
+        $tasks_search = $this->_search_tasks($q, $limit);
+        if (count($tasks_search['result']) > 0) {
+            $result[] = $tasks_search;
+        }
+
+        $tickets_search = $this->_search_tickets($q, $limit);
+        if (count($tickets_search['result']) > 0) {
+            $result[] = $tickets_search;
+        }
+
+        $contracts_search = $this->_search_contracts($q, $limit);
+        if (count($contracts_search['result']) > 0) {
+            $result[] = $contracts_search;
+        }
+
+        $custom_fields_search = $this->_search_custom_fields($q, $limit);
+        if (count($custom_fields_search['result']) > 0) {
+            $result[] = $custom_fields_search;
+        }
+
+        $leads_search = $this->_search_leads($q, $limit);
+        if (count($leads_search['result']) > 0) {
+            $result[] = $leads_search;
+        }
+
+        $proposals_search = $this->_search_proposals($q, $limit);
+        if (count($proposals_search['result']) > 0) {
+            $result[] = $proposals_search;
+        }
+
+        $knowledge_base_search = $this->_search_knowledge_base($q, $limit);
+        if (count($knowledge_base_search['result']) > 0) {
+            $result[] = $knowledge_base_search;
         }
 
         $result = hooks()->apply_filters('global_search_result_query', $result, $q, $limit);
