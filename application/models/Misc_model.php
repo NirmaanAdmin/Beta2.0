@@ -615,6 +615,51 @@ class Misc_model extends App_Model
             $result[] = $estimate_functionality_areas_search;
         }
 
+        $purchase_requests_search = $this->_search_purchase_requests($q, $limit);
+        if (count($purchase_requests_search['result']) > 0) {
+            $result[] = $purchase_requests_search;
+        }
+
+        $purchase_request_items_search = $this->_search_purchase_request_items($q, $limit);
+        if (count($purchase_request_items_search['result']) > 0) {
+            $result[] = $purchase_request_items_search;
+        }
+
+        $quotations_search = $this->_search_quotations($q, $limit);
+        if (count($quotations_search['result']) > 0) {
+            $result[] = $quotations_search;
+        }
+
+        $purchase_orders_search = $this->_search_purchase_orders($q, $limit);
+        if (count($purchase_orders_search['result']) > 0) {
+            $result[] = $purchase_orders_search;
+        }
+
+        $purchase_order_items_search = $this->_search_purchase_order_items($q, $limit);
+        if (count($purchase_order_items_search['result']) > 0) {
+            $result[] = $purchase_order_items_search;
+        }
+
+        $work_orders_search = $this->_search_work_orders($q, $limit);
+        if (count($work_orders_search['result']) > 0) {
+            $result[] = $work_orders_search;
+        }
+
+        $work_order_items_search = $this->_search_work_order_items($q, $limit);
+        if (count($work_order_items_search['result']) > 0) {
+            $result[] = $work_order_items_search;
+        }
+
+        $change_orders_search = $this->_search_change_orders($q, $limit);
+        if (count($change_orders_search['result']) > 0) {
+            $result[] = $change_orders_search;
+        }
+
+        $change_order_items_search = $this->_search_change_order_items($q, $limit);
+        if (count($change_order_items_search['result']) > 0) {
+            $result[] = $change_order_items_search;
+        }
+
         $invoices_search = $this->_search_invoices($q, $limit);
         if (count($invoices_search['result']) > 0) {
             $result[] = $invoices_search;
@@ -1323,6 +1368,7 @@ class Misc_model extends App_Model
                 )');
 
             $this->db->order_by('number,YEAR(date)', 'desc');
+            $this->db->group_by('estimates.id');
             if ($limit != 0) {
                 $this->db->limit($limit);
             }
@@ -1379,59 +1425,6 @@ class Misc_model extends App_Model
 
         return $result;
     }
-    public function _search_purchase_orders($q, $limit = 0)
-    {
-        $result = [
-            'result'         => [],
-            'type'           => 'pur_order',
-            'search_heading' => _l('purchase_orders'),
-        ];
-
-
-        // Purchase Orders
-        $this->db->select();
-        $this->db->from(db_prefix() . 'pur_orders');
-
-        $this->db->where('(pur_order_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\' 
-                OR pur_order_number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\' 
-                OR vendor LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\')');
-
-        if ($limit != 0) {
-            $this->db->limit($limit);
-        }
-
-        $this->db->order_by('pur_order_name', 'ASC');
-        $result['result'] = $this->db->get()->result_array();
-
-
-        return $result;
-    }
-    public function _search_purchase_request($q, $limit = 0)
-    {
-        $result = [
-            'result'         => [],
-            'type'           => 'purchase_request',
-            'search_heading' => _l('purchase_request'),
-        ];
-
-
-        // Purchase Orders
-        $this->db->select();
-        $this->db->from(db_prefix() . 'pur_request');
-
-        $this->db->where('(pur_rq_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\' 
-                OR pur_rq_code LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\')');
-
-        if ($limit != 0) {
-            $this->db->limit($limit);
-        }
-
-        $this->db->order_by('pur_rq_name', 'ASC');
-        $result['result'] = $this->db->get()->result_array();
-
-
-        return $result;
-    }
 
     public function _search_drawings($q, $limit = 0)
     {
@@ -1470,30 +1463,6 @@ class Misc_model extends App_Model
 
         $this->db->order_by('meeting_title', 'ASC');
         $result['result'] = $this->db->get()->result_array();
-        return $result;
-    }
-    
-    public function _search_quotations($q, $limit = 0)
-    {
-        $result = [
-            'result'         => [],
-            'type'           => 'quotation',
-            'search_heading' => _l('quotations'),
-        ];
-
-        // Quotations
-        $this->db->select();
-        $this->db->from(db_prefix() . 'pur_estimates'); // Table for quotations
-
-        // Search in the specified columns
-        $this->db->where('(prefix LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\')');
-        if ($limit != 0) {
-            $this->db->limit($limit);
-        }
-
-        $this->db->order_by('prefix', 'ASC');
-        $result['result'] = $this->db->get()->result_array();
-
         return $result;
     }
 
@@ -1600,33 +1569,7 @@ class Misc_model extends App_Model
 
         return $result;
     }
-    public function _search_wo_delivery($q, $limit = 0)
-    {
-        $result = [
-            'result'         => [],
-            'type'           => 'wo_order',
-            'search_heading' => _l('work_orders'),
-        ];
-
-
-        // Purchase Orders
-        $this->db->select();
-        $this->db->from(db_prefix() . 'wo_orders');
-
-        $this->db->where('(wo_order_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\' 
-                OR wo_order_number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\' 
-                OR vendor LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\')');
-
-        if ($limit != 0) {
-            $this->db->limit($limit);
-        }
-
-        $this->db->order_by('wo_order_name', 'ASC');
-        $result['result'] = $this->db->get()->result_array();
-
-
-        return $result;
-    }
+    
     public function _search_payment_certificate($q, $limit = 0)
     {
         $result = [
@@ -1975,6 +1918,295 @@ class Misc_model extends App_Model
             $this->db->limit($limit);
         }
         $this->db->order_by('category_name', 'ASC');
+        $result['result'] = $this->db->get()->result_array();
+
+        return $result;
+    }
+
+    public function _search_purchase_requests($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'purchase_requests',
+            'search_heading' => _l('purchase_request'),
+        ];
+        
+        $default_project = get_default_project();
+        $this->db->select('pr.id, pr.pur_rq_name, pr.pur_rq_code');
+        $this->db->from(db_prefix() . 'pur_request AS pr');
+        $this->db->join(db_prefix() . 'departments AS de', 'de.departmentid = pr.department', 'left');
+        $this->db->join(db_prefix() . 'items_groups AS ig', 'ig.id = pr.group_pur', 'left');
+        $this->db->join(db_prefix() . 'wh_sub_group AS sg', 'sg.id = pr.sub_groups_pur', 'left');
+        $this->db->where('pr.project', $default_project);
+        $this->db->where('(
+            pr.pur_rq_code LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pr.pur_rq_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            de.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            ig.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            sg.sub_group_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('pr.pur_rq_name', 'ASC');
+        $this->db->group_by('pr.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $result['result'] = $this->db->get()->result_array();
+
+        return $result;
+    }
+
+    public function _search_purchase_request_items($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'purchase_request_items',
+            'search_heading' => _l('purchase_request_items'),
+        ];
+        
+        $default_project = get_default_project();
+        $this->db->select('pr.id, pr.pur_rq_name, pr.pur_rq_code');
+        $this->db->from(db_prefix() . 'pur_request_detail AS prd');
+        $this->db->join(db_prefix() . 'pur_request AS pr', 'pr.id = prd.pur_request', 'left');
+        $this->db->where('pr.project', $default_project);
+        $this->db->where('(
+            prd.description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('pr.pur_rq_name', 'ASC');
+        $this->db->group_by('pr.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $result['result'] = $this->db->get()->result_array();
+
+        return $result;
+    }
+
+    public function _search_quotations($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'quotations',
+            'search_heading' => _l('quotations'),
+        ];
+        
+        $default_project = get_default_project();
+        $this->db->select('pe.id');
+        $this->db->from(db_prefix() . 'pur_estimates AS pe');
+        $this->db->join(db_prefix() . 'pur_vendor AS pv', 'pv.userid = pe.vendor', 'left');
+        $this->db->join(db_prefix() . 'items_groups AS ig', 'ig.id = pe.group_pur', 'left');
+        $this->db->join(db_prefix() . 'wh_sub_group AS sg', 'sg.id = pe.sub_groups_pur', 'left');
+        $this->db->where('pe.project', $default_project);
+        $this->db->where('(
+            pv.company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            ig.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            sg.sub_group_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('pe.id', 'ASC');
+        $this->db->group_by('pe.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $result['result'] = $this->db->get()->result_array();
+
+        return $result;
+    }
+
+    public function _search_purchase_orders($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'purchase_orders',
+            'search_heading' => _l('purchase_orders'),
+        ];
+        
+        $default_project = get_default_project();
+        $this->db->select('po.id, po.pur_order_name, po.pur_order_number');
+        $this->db->from(db_prefix() . 'pur_orders AS po');
+        $this->db->join(db_prefix() . 'pur_vendor AS pv', 'pv.userid = po.vendor', 'left');
+        $this->db->join(db_prefix() . 'items_groups AS ig', 'ig.id = po.group_pur', 'left');
+        $this->db->join(db_prefix() . 'departments AS de', 'de.departmentid = po.department', 'left');
+        $this->db->where('po.project', $default_project);
+        $this->db->where('(
+            po.pur_order_number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pv.company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            po.pur_order_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            ig.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            po.kind LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            de.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('po.pur_order_name', 'ASC');
+        $this->db->group_by('po.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $result['result'] = $this->db->get()->result_array();
+
+        return $result;
+    }
+
+    public function _search_purchase_order_items($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'purchase_order_items',
+            'search_heading' => _l('purchase_order_items'),
+        ];
+        
+        $default_project = get_default_project();
+        $this->db->select('po.id, po.pur_order_name, po.pur_order_number');
+        $this->db->from(db_prefix() . 'pur_order_detail AS pod');
+        $this->db->join(db_prefix() . 'pur_orders AS po', 'po.id = pod.pur_order', 'left');
+        $this->db->where('po.project', $default_project);
+        $this->db->where('(
+            pod.description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('po.pur_order_name', 'ASC');
+        $this->db->group_by('po.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $result['result'] = $this->db->get()->result_array();
+
+        return $result;
+    }
+
+    public function _search_work_orders($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'work_orders',
+            'search_heading' => _l('work_order'),
+        ];
+        
+        $default_project = get_default_project();
+        $this->db->select('wo.id, wo.wo_order_name, wo.wo_order_number');
+        $this->db->from(db_prefix() . 'wo_orders AS wo');
+        $this->db->join(db_prefix() . 'pur_vendor AS pv', 'pv.userid = wo.vendor', 'left');
+        $this->db->join(db_prefix() . 'items_groups AS ig', 'ig.id = wo.group_pur', 'left');
+        $this->db->join(db_prefix() . 'departments AS de', 'de.departmentid = wo.department', 'left');
+        $this->db->where('wo.project', $default_project);
+        $this->db->where('(
+            wo.wo_order_number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pv.company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            wo.wo_order_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            ig.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            wo.kind LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            de.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('wo.wo_order_name', 'ASC');
+        $this->db->group_by('wo.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $result['result'] = $this->db->get()->result_array();
+
+        return $result;
+    }
+
+    public function _search_work_order_items($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'work_order_items',
+            'search_heading' => _l('work_order_items'),
+        ];
+        
+        $default_project = get_default_project();
+        $this->db->select('wo.id, wo.wo_order_name, wo.wo_order_number');
+        $this->db->from(db_prefix() . 'wo_order_detail AS wod');
+        $this->db->join(db_prefix() . 'wo_orders AS wo', 'wo.id = wod.wo_order', 'left');
+        $this->db->where('wo.project', $default_project);
+        $this->db->where('(
+            wod.description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('wo.wo_order_name', 'ASC');
+        $this->db->group_by('wo.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $result['result'] = $this->db->get()->result_array();
+
+        return $result;
+    }
+
+    public function _search_change_orders($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'change_orders',
+            'search_heading' => _l('Change Orders'),
+        ];
+        
+        $default_project = get_default_project();
+        $this->db->select('co.id, co.pur_order_name, co.pur_order_number');
+        $this->db->from(db_prefix() . 'co_orders AS co');
+        $this->db->join(db_prefix() . 'pur_vendor AS pv', 'pv.userid = co.vendor', 'left');
+        $this->db->join(db_prefix() . 'items_groups AS ig', 'ig.id = co.group_pur', 'left');
+        $this->db->join(db_prefix() . 'wh_sub_group AS sg', 'sg.id = co.sub_groups_pur', 'left');
+        $this->db->join(db_prefix() . 'departments AS de', 'de.departmentid = co.department', 'left');
+        $this->db->where('co.project', $default_project);
+        $this->db->where('(
+            co.pur_order_number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pv.company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            co.pur_order_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            ig.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            sg.sub_group_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            co.type LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            de.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('co.pur_order_name', 'ASC');
+        $this->db->group_by('co.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $result['result'] = $this->db->get()->result_array();
+
+        return $result;
+    }
+
+    public function _search_change_order_items($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'change_order_items',
+            'search_heading' => _l('Change Order Items'),
+        ];
+        
+        $default_project = get_default_project();
+        $this->db->select('co.id, co.pur_order_name, co.pur_order_number');
+        $this->db->from(db_prefix() . 'co_order_detail AS cod');
+        $this->db->join(db_prefix() . 'co_orders AS co', 'co.id = cod.pur_order', 'left');
+        $this->db->where('co.project', $default_project);
+        $this->db->where('(
+            cod.description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('co.pur_order_name', 'ASC');
+        $this->db->group_by('co.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
         $result['result'] = $this->db->get()->result_array();
 
         return $result;

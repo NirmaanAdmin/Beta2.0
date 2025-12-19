@@ -91,6 +91,33 @@
             case 'estimate_functionality_areas':
             $output = '<a href="'.admin_url('costplanning/setting?group=functionality_area').'">'.e($_result['category_name']).'</a>';
             break;
+            case 'purchase_requests':
+            $output = '<a href="'.admin_url('purchase/view_pur_request/'.$_result['id']).'">'.e($_result['pur_rq_code']).'</a>';
+            break;
+            case 'purchase_request_items':
+            $output = '<a href="'.admin_url('purchase/view_pur_request/'.$_result['id']).'">'.e($_result['pur_rq_code']).'</a>';
+            break;
+            case 'quotations':
+            $output = '<a href="'.admin_url('purchase/quotations/'.$_result['id']).'">'.e(format_pur_estimate_number($_result['id'])).'</a>';
+            break;
+            case 'purchase_orders':
+            $output = '<a href="'.admin_url('purchase/purchase_order/'.$_result['id']).'">'.e($_result['pur_order_number']).'</a>';
+            break;
+            case 'purchase_order_items':
+            $output = '<a href="'.admin_url('purchase/purchase_order/'.$_result['id']).'">'.e($_result['pur_order_number']).'</a>';
+            break;
+            case 'work_orders':
+            $output = '<a href="'.admin_url('purchase/work_order/'.$_result['id']).'">'.e($_result['wo_order_number']).'</a>';
+            break;
+            case 'work_order_items':
+            $output = '<a href="'.admin_url('purchase/work_order/'.$_result['id']).'">'.e($_result['wo_order_number']).'</a>';
+            break;
+            case 'change_orders':
+            $output = '<a href="'.admin_url('changee/changee_order/'.$_result['id']).'">'.e($_result['pur_order_number']).'</a>';
+            break;
+            case 'change_order_items':
+            $output = '<a href="'.admin_url('changee/changee_order/'.$_result['id']).'">'.e($_result['pur_order_number']).'</a>';
+            break;
         }
         ?>
         <li><?php echo hooks()->apply_filters('global_search_result_output', $output, ['result'=>$_result, 'type'=>$data['type']]); ?></li>

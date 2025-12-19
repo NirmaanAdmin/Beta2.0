@@ -991,3 +991,6 @@ $lang['change_order_value'] = 'Change Order Value';
 $lang['updated_subtotal_before_tax'] = 'Contract Value Incl CO(before tax)';
 $lang['non_tender_items_in_change_order'] = 'Non tender items in CO';
 $lang['tender_document'] = 'Documents';
+$lang['purchase_order_items'] = 'Purchase Order Items';
+$lang['work_order_items'] = 'Work Order Items';
+$lang['purchase_request_items'] = 'Purchase Request Items';
