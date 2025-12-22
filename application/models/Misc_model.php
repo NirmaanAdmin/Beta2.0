@@ -1836,17 +1836,20 @@ class Misc_model extends App_Model
         $has_permission_view_estimates       = staff_can('view',  'estimates');
         $has_permission_view_estimates_own   = staff_can('view_own',  'estimates');
         $allow_staff_view_estimates_assigned = get_option('allow_staff_view_estimates_assigned');
+        $default_project = get_default_project();
         if ($has_permission_view_estimates || $has_permission_view_estimates_own || $allow_staff_view_estimates_assigned) {
             $noPermissionQuery = get_estimates_where_sql_for_staff(get_staff_user_id());
-
-            $this->db->select()->from(db_prefix() . 'itemable');
-            $this->db->where('rel_type', 'estimate');
-
+            $this->db->select(db_prefix() . 'itemable.rel_id', db_prefix() . 'itemable.description');
+            $this->db->from(db_prefix() . 'itemable');
+            $this->db->join(db_prefix() . 'estimates', db_prefix() . 'estimates.id = ' . db_prefix() . 'itemable.rel_id', 'left');
+            $this->db->where(db_prefix() . 'itemable.rel_type', 'estimate');
             if (!$has_permission_view_estimates) {
-                $this->db->where('rel_id IN (select id from ' . db_prefix() . 'estimates where ' . $noPermissionQuery . ')');
+                $this->db->where(db_prefix() . 'itemable.rel_id IN (select id from ' . db_prefix() . 'estimates where ' . $noPermissionQuery . ')');
             }
-            $this->db->where('(description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\' OR long_description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\')');
-            $this->db->order_by('description', 'ASC');
+            $this->db->where(db_prefix() . 'estimates.project_id', $default_project);
+            $this->db->where('(' . db_prefix() . 'itemable.description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\' OR ' . db_prefix() . 'itemable.long_description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\')');
+            $this->db->order_by(db_prefix() . 'itemable.description', 'ASC');
+            $this->db->group_by(db_prefix() . 'estimates.id');
             $result['result'] = $this->db->get()->result_array();
         }
 
