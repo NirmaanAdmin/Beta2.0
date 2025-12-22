@@ -1738,7 +1738,6 @@ class Misc_model extends App_Model
         // Payments search
         $has_permission_view_payments     = staff_can('view',  'payments');
         $has_permission_view_invoices_own = staff_can('view_own',  'invoices');
-
         if (staff_can('view',  'payments') || $has_permission_view_invoices_own || get_option('allow_staff_view_invoices_assigned') == '1') {
             if (is_numeric($q)) {
                 $q = trim($q);
@@ -1758,10 +1757,8 @@ class Misc_model extends App_Model
                 $this->db->where('invoiceid IN (select id from ' . db_prefix() . 'invoices where ' . $noPermissionQuery . ')');
             }
             $this->db->where('(' . db_prefix() . 'invoicepaymentrecords.id LIKE "' . $this->db->escape_like_str($q) . '"
-                OR paymentmode LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR ' . db_prefix() . 'payment_modes.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR ' . db_prefix() . 'invoicepaymentrecords.note LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR number LIKE "' . $this->db->escape_like_str($q) . ' ESCAPE \'!\'"
                 OR ' . db_prefix() . 'invoicepaymentrecords.transactionid LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
             )');
             $this->db->order_by(db_prefix() . 'invoicepaymentrecords.date', 'ASC');
