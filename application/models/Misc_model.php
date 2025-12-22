@@ -1361,6 +1361,7 @@ class Misc_model extends App_Model
             $invoice_fields    = prefixed_table_fields_array(db_prefix() . 'invoices');
             $clients_fields    = prefixed_table_fields_array(db_prefix() . 'clients');
             $noPermissionQuery = get_invoices_where_sql_for_staff(get_staff_user_id());
+            $default_project = get_default_project();
             $this->db->select(implode(',', $invoice_fields) . ',' . implode(',', $clients_fields) . ',' . db_prefix() . 'invoices.id as invoiceid,' . get_sql_select_client_company());
             $this->db->from(db_prefix() . 'invoices');
             $this->db->join(db_prefix() . 'clients', db_prefix() . 'clients.userid = ' . db_prefix() . 'invoices.clientid', 'left');
@@ -1369,9 +1370,12 @@ class Misc_model extends App_Model
             if (!$has_permission_view_invoices) {
                 $this->db->where($noPermissionQuery);
             }
+            $this->db->where(db_prefix() . 'invoices.project_id', $default_project);
             if (!startsWith($q, '#')) {
                 $this->db->where('(
                     ' . db_prefix() . 'invoices.number LIKE "' . $this->db->escape_like_str($q) . '"
+                    OR
+                    ' . db_prefix() . 'invoices.title LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                     OR
                     ' . db_prefix() . 'clients.company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                     OR
@@ -1454,15 +1458,20 @@ class Misc_model extends App_Model
         $has_permission_view_invoices       = staff_can('view',  'invoices');
         $has_permission_view_invoices_own   = staff_can('view_own',  'invoices');
         $allow_staff_view_invoices_assigned = get_option('allow_staff_view_invoices_assigned');
+        $default_project = get_default_project();
         if ($has_permission_view_invoices || $has_permission_view_invoices_own || $allow_staff_view_invoices_assigned == '1') {
             $noPermissionQuery = get_invoices_where_sql_for_staff(get_staff_user_id());
-            $this->db->select()->from(db_prefix() . 'itemable');
-            $this->db->where('rel_type', 'invoice');
-            $this->db->where('(description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\' OR long_description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\')');
+            $this->db->select(db_prefix() . 'itemable.rel_id', db_prefix() . 'itemable.description');
+            $this->db->from(db_prefix() . 'itemable');
+            $this->db->join(db_prefix() . 'invoices', db_prefix() . 'invoices.id = ' . db_prefix() . 'itemable.rel_id', 'left');
+            $this->db->where(db_prefix() . 'itemable.rel_type', 'invoice');
+            $this->db->where(db_prefix() . 'invoices.project_id', $default_project);
+            $this->db->where('(' . db_prefix() . 'itemable.description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\' OR ' . db_prefix() . 'itemable.long_description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\')');
             if (!$has_permission_view_invoices) {
-                $this->db->where('rel_id IN (select id from ' . db_prefix() . 'invoices where ' . $noPermissionQuery . ')');
+                $this->db->where(db_prefix() . 'itemable.rel_id IN (select id from ' . db_prefix() . 'invoices where ' . $noPermissionQuery . ')');
             }
-            $this->db->order_by('description', 'ASC');
+            $this->db->order_by(db_prefix() . 'itemable.description', 'ASC');
+            $this->db->group_by(db_prefix() . 'invoices.id');
             $result['result'] = $this->db->get()->result_array();
         }
         return $result;
