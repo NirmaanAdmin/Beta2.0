@@ -675,6 +675,16 @@ class Misc_model extends App_Model
             $result[] = $payments_search;
         }
 
+        $debit_notes_search = $this->_search_debit_notes($q, $limit);
+        if (count($debit_notes_search['result']) > 0) {
+            $result[] = $debit_notes_search;
+        }
+
+        $debit_note_items_search = $this->_search_debit_note_items($q, $limit);
+        if (count($debit_note_items_search['result']) > 0) {
+            $result[] = $debit_note_items_search;
+        }
+
         $credit_notes_search = $this->_search_credit_notes($q, $limit);
         if (count($credit_notes_search['result']) > 0) {
             $result[] = $credit_notes_search;
@@ -1517,6 +1527,50 @@ class Misc_model extends App_Model
             $this->db->group_by(db_prefix() . 'invoicepaymentrecords.id');
             $result['result'] = $this->db->get()->result_array();
         }
+        return $result;
+    }
+
+    public function _search_debit_notes($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'debit_note',
+            'search_heading' => _l('pur_debit_note'),
+        ];
+        $this->db->select('pdn.id, pdn.date');
+        $this->db->from(db_prefix() . 'pur_debit_notes AS pdn');
+        $this->db->join(db_prefix() . 'pur_vendor AS pv', 'pv.userid = pdn.vendorid', 'left');
+        $this->db->where('(
+            pdn.number LIKE "' . $this->db->escape_like_str($q) . '"
+            OR
+            pv.company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pdn.reference_no LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('pdn.id', 'ASC');
+        $this->db->group_by('pdn.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $result['result'] = $this->db->get()->result_array();
+        return $result;
+    }
+
+    public function _search_debit_note_items($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'debit_note_items',
+            'search_heading' => _l('Debit Notes Tracker Items'),
+        ];
+        $this->db->select(db_prefix() . 'itemable.rel_id', db_prefix() . 'itemable.description');
+        $this->db->from(db_prefix() . 'itemable');
+        $this->db->join(db_prefix() . 'pur_debit_notes', db_prefix() . 'pur_debit_notes.id = ' . db_prefix() . 'itemable.rel_id', 'left');
+        $this->db->where(db_prefix() . 'itemable.rel_type', 'debit_note');
+        $this->db->where('(' . db_prefix() . 'itemable.description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\' OR ' . db_prefix() . 'itemable.long_description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\')');
+        $this->db->order_by(db_prefix() . 'itemable.description', 'ASC');
+        $this->db->group_by(db_prefix() . 'pur_debit_notes.id');
+        $result['result'] = $this->db->get()->result_array();
         return $result;
     }
 
