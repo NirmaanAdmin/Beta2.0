@@ -87,6 +87,12 @@
             case 'credit_note':
             $output = '<a href="'.admin_url('credit_notes/list_credit_notes/'.$_result['credit_note_id']).'">'.e(format_credit_note_number($_result['credit_note_id'])).'<span class="pull-right">'.e(date('Y',strtotime($_result['date']))).'</span></a>';
             break;
+            case 'credit_note_items':
+            $output = '<a href="'.admin_url('credit_notes/list_credit_notes/'.$_result['rel_id']).'">'.e(format_credit_note_number($_result['rel_id']));
+            $output .= '<br />';
+            $output .= '<small>'.e($_result['description']).'</small>';
+            $output .= '</a>';
+            break;
             case 'expenses':
             $output = '<a href="'.admin_url('expenses/list_expenses/'.$_result['expenseid']).'">'.e($_result['category_name']). ' - ' .e(app_format_money($_result['amount'], $_result['currency_name'])).'</a>';
             break;

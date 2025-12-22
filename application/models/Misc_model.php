@@ -680,6 +680,11 @@ class Misc_model extends App_Model
             $result[] = $credit_notes_search;
         }
 
+        $credit_note_items_search = $this->_search_credit_note_items($q, $limit);
+        if (count($credit_note_items_search['result']) > 0) {
+            $result[] = $credit_note_items_search;
+        }
+
         $expenses_search = $this->_search_expenses($q, $limit);
         if (count($expenses_search['result']) > 0) {
             $result[] = $expenses_search;
@@ -1535,6 +1540,7 @@ class Misc_model extends App_Model
             }
             $credit_note_fields = prefixed_table_fields_array(db_prefix() . 'creditnotes');
             $clients_fields     = prefixed_table_fields_array(db_prefix() . 'clients');
+            $default_project = get_default_project();
             $this->db->select(implode(',', $credit_note_fields) . ',' . implode(',', $clients_fields) . ',' . db_prefix() . 'creditnotes.id as credit_note_id,' . get_sql_select_client_company());
             $this->db->from(db_prefix() . 'creditnotes');
             $this->db->join(db_prefix() . 'clients', db_prefix() . 'clients.userid = ' . db_prefix() . 'creditnotes.clientid', 'left');
@@ -1543,8 +1549,11 @@ class Misc_model extends App_Model
             if (!$has_permission_view_credit_notes) {
                 $this->db->where(db_prefix() . 'creditnotes.addedfrom', get_staff_user_id());
             }
+            $this->db->where(db_prefix() . 'creditnotes.project_id', $default_project);
             $this->db->where('(
                 ' . db_prefix() . 'creditnotes.number LIKE "' . $this->db->escape_like_str($q) . '"
+                OR
+                ' . db_prefix() . 'creditnotes.reference_no LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR
                 ' . db_prefix() . 'clients.company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR
@@ -1607,6 +1616,26 @@ class Misc_model extends App_Model
             $this->db->group_by(db_prefix() . 'creditnotes.id');
             $result['result'] = $this->db->get()->result_array();
         }
+        return $result;
+    }
+
+    public function _search_credit_note_items($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'credit_note_items',
+            'search_heading' => _l('Credit Notes Tracker Items'),
+        ];
+        $default_project = get_default_project();
+        $this->db->select(db_prefix() . 'itemable.rel_id', db_prefix() . 'itemable.description');
+        $this->db->from(db_prefix() . 'itemable');
+        $this->db->join(db_prefix() . 'creditnotes', db_prefix() . 'creditnotes.id = ' . db_prefix() . 'itemable.rel_id', 'left');
+        $this->db->where(db_prefix() . 'itemable.rel_type', 'credit_note');
+        $this->db->where(db_prefix() . 'creditnotes.project_id', $default_project);
+        $this->db->where('(' . db_prefix() . 'itemable.description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\' OR ' . db_prefix() . 'itemable.long_description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\')');
+        $this->db->order_by(db_prefix() . 'itemable.description', 'ASC');
+        $this->db->group_by(db_prefix() . 'creditnotes.id');
+        $result['result'] = $this->db->get()->result_array();
         return $result;
     }
 
