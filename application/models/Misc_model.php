@@ -725,230 +725,6 @@ class Misc_model extends App_Model
         return $result;
     }
 
-    public function _search_proposals($q, $limit = 0)
-    {
-        $result = [
-            'result'         => [],
-            'type'           => 'proposals',
-            'search_heading' => _l('proposals'),
-        ];
-
-        $has_permission_view_proposals     = staff_can('view',  'proposals');
-        $has_permission_view_proposals_own = staff_can('view_own',  'proposals');
-
-        if ($has_permission_view_proposals || $has_permission_view_proposals_own || get_option('allow_staff_view_proposals_assigned') == '1') {
-            if (is_numeric($q)) {
-                $q = trim($q);
-                $q = ltrim($q, '0');
-            } elseif (startsWith($q, get_option('proposal_number_prefix'))) {
-                $q = strafter($q, get_option('proposal_number_prefix'));
-                $q = trim($q);
-                $q = ltrim($q, '0');
-            }
-
-            $noPermissionQuery = get_proposals_sql_where_staff(get_staff_user_id());
-
-            // Proposals
-            $this->db->select('*,' . db_prefix() . 'proposals.id as id');
-            $this->db->from(db_prefix() . 'proposals');
-            $this->db->join(db_prefix() . 'currencies', db_prefix() . 'currencies.id = ' . db_prefix() . 'proposals.currency');
-
-            if (!$has_permission_view_proposals) {
-                $this->db->where($noPermissionQuery);
-            }
-
-            $this->db->where('(
-                ' . db_prefix() . 'proposals.id LIKE "' . $q . '%"
-                OR ' . db_prefix() . 'proposals.subject LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR ' . db_prefix() . 'proposals.content LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR ' . db_prefix() . 'proposals.proposal_to LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR ' . db_prefix() . 'proposals.zip LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR ' . db_prefix() . 'proposals.state LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR ' . db_prefix() . 'proposals.city LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR ' . db_prefix() . 'proposals.address LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR ' . db_prefix() . 'proposals.email LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR ' . db_prefix() . 'proposals.phone LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                )');
-
-            $this->db->order_by(db_prefix() . 'proposals.id', 'desc');
-            if ($limit != 0) {
-                $this->db->limit($limit);
-            }
-            $result['result'] = $this->db->get()->result_array();
-        }
-
-        return $result;
-    }
-
-    public function _search_leads($q, $limit = 0, $where = [])
-    {
-        $result = [
-            'result'         => [],
-            'type'           => 'leads',
-            'search_heading' => _l('leads'),
-        ];
-
-        $has_permission_view = staff_can('view',  'leads');
-
-        if (is_staff_member()) {
-            // Leads
-            $this->db->select();
-            $this->db->from(db_prefix() . 'leads');
-
-            if (!$has_permission_view) {
-                $this->db->where('(assigned = ' . get_staff_user_id() . ' OR addedfrom = ' . get_staff_user_id() . ' OR is_public=1)');
-            }
-
-            if (!startsWith($q, '#')) {
-                $this->db->where('(name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                    OR title LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                    OR company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                    OR zip LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                    OR city LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                    OR state LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                    OR address LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                    OR email LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                    OR phonenumber LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                    )');
-            } else {
-                $this->db->where('id IN
-                    (SELECT rel_id FROM ' . db_prefix() . 'taggables WHERE tag_id IN
-                    (SELECT id FROM ' . db_prefix() . 'tags WHERE name="' . $this->db->escape_str(strafter($q, '#')) . '")
-                    AND ' . db_prefix() . 'taggables.rel_type=\'lead\' GROUP BY rel_id HAVING COUNT(tag_id) = 1)
-                    ');
-            }
-
-
-            $this->db->where($where);
-
-            if ($limit != 0) {
-                $this->db->limit($limit);
-            }
-            $this->db->order_by('name', 'ASC');
-            $result['result'] = $this->db->get()->result_array();
-        }
-
-        return $result;
-    }
-
-    public function _search_tickets($q, $limit = 0)
-    {
-        $result = [
-            'result'         => [],
-            'type'           => 'tickets',
-            'search_heading' => _l('support_tickets'),
-        ];
-
-        if (is_staff_member() || (!is_staff_member() && get_option('access_tickets_to_none_staff_members') == 1)) {
-            $is_admin = is_admin();
-
-            $where = '';
-            if (!$is_admin && get_option('staff_access_only_assigned_departments') == 1) {
-                $this->load->model('departments_model');
-                $staff_deparments_ids = $this->departments_model->get_staff_departments(get_staff_user_id(), true);
-                $departments_ids      = [];
-                if (count($staff_deparments_ids) == 0) {
-                    $departments = $this->departments_model->get();
-                    foreach ($departments as $department) {
-                        array_push($departments_ids, $department['departmentid']);
-                    }
-                } else {
-                    $departments_ids = $staff_deparments_ids;
-                }
-                if (count($departments_ids) > 0) {
-                    $where = 'department IN (SELECT departmentid FROM ' . db_prefix() . 'staff_departments WHERE departmentid IN (' . implode(',', $departments_ids) . ') AND staffid="' . get_staff_user_id() . '")';
-                }
-            }
-
-            $this->db->select();
-            $this->db->from(db_prefix() . 'tickets');
-            $this->db->join(db_prefix() . 'departments', db_prefix() . 'departments.departmentid = ' . db_prefix() . 'tickets.department');
-            $this->db->join(db_prefix() . 'clients', db_prefix() . 'clients.userid = ' . db_prefix() . 'tickets.userid', 'left');
-            $this->db->join(db_prefix() . 'contacts', db_prefix() . 'contacts.id = ' . db_prefix() . 'tickets.contactid', 'left');
-
-
-            if (!startsWith($q, '#')) {
-                $this->db->where('(
-                    ticketid LIKE "' . $q . '%"
-                    OR subject LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                    OR message LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                    OR ' . db_prefix() . 'contacts.email LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                    OR CONCAT(firstname, \' \', lastname) LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                    OR CONCAT(lastname, \' \', firstname) LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                    OR company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                    OR vat LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                    OR ' . db_prefix() . 'contacts.phonenumber LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                    OR ' . db_prefix() . 'clients.phonenumber LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                    OR city LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                    OR state LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                    OR address LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                    OR ' . db_prefix() . 'departments.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                    )');
-
-                if ($where != '') {
-                    $this->db->where($where);
-                }
-            } else {
-                $this->db->where('ticketid IN
-                    (SELECT rel_id FROM ' . db_prefix() . 'taggables WHERE tag_id IN
-                    (SELECT id FROM ' . db_prefix() . 'tags WHERE name="' . $this->db->escape_str(strafter($q, '#')) . '")
-                    AND ' . db_prefix() . 'taggables.rel_type=\'ticket\' GROUP BY rel_id HAVING COUNT(tag_id) = 1)
-                    ');
-            }
-
-            if ($limit != 0) {
-                $this->db->limit($limit);
-            }
-            $this->db->order_by('ticketid', 'DESC');
-            $result['result'] = $this->db->get()->result_array();
-        }
-
-        return $result;
-    }
-
-    public function _search_contacts($q, $limit = 0, $where = '')
-    {
-        $result = [
-            'result'         => [],
-            'type'           => 'contacts',
-            'search_heading' => _l('customer_contacts'),
-        ];
-
-        $have_assigned_customers        = have_assigned_customers();
-        $have_permission_customers_view = staff_can('view',  'customers');
-        $tickets_contacts = $this->input->post('tickets_contacts') && get_option('staff_members_open_tickets_to_all_contacts') == 1;
-
-        if ($have_assigned_customers || $have_permission_customers_view || $tickets_contacts) {
-            // Contacts
-            $this->db->select(implode(',', prefixed_table_fields_array(db_prefix() . 'contacts')) . ',company');
-            $this->db->from(db_prefix() . 'contacts');
-
-            $this->db->join(db_prefix() . 'clients', '' . db_prefix() . 'clients.userid=' . db_prefix() . 'contacts.userid', 'left');
-            $this->db->where('(firstname LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR lastname LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR email LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR CONCAT(firstname, \' \', lastname) LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR CONCAT(lastname, \' \', firstname) LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR ' . db_prefix() . 'contacts.phonenumber LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR ' . db_prefix() . 'contacts.title LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                )');
-
-            if ($where != '') {
-                $this->db->where($where);
-            }
-
-            if ($limit != 0) {
-                $this->db->limit($limit);
-            }
-
-            $this->db->order_by('firstname', 'ASC');
-            $result['result'] = $this->db->get()->result_array();
-        }
-
-        return $result;
-    }
-
     public function _search_staff($q, $limit = 0)
     {
         $result = [
@@ -956,9 +732,7 @@ class Misc_model extends App_Model
             'type'           => 'staff',
             'search_heading' => _l('staff_members'),
         ];
-
         if (staff_can('view',  'staff')) {
-            // Staff
             $this->db->select();
             $this->db->from(db_prefix() . 'staff');
             $this->db->like('firstname', $q);
@@ -970,43 +744,91 @@ class Misc_model extends App_Model
             $this->db->or_like('phonenumber', $q);
             $this->db->or_like('email', $q);
             $this->db->or_like('skype', $q);
-
             if ($limit != 0) {
                 $this->db->limit($limit);
             }
             $this->db->order_by('firstname', 'ASC');
+            $this->db->group_by('staffid');
             $result['result'] = $this->db->get()->result_array();
         }
-
         return $result;
     }
 
-    public function _search_contracts($q, $limit = 0)
+    public function _search_clients($q, $limit = 0)
     {
         $result = [
             'result'         => [],
-            'type'           => 'contracts',
-            'search_heading' => _l('contracts'),
+            'type'           => 'clients',
+            'search_heading' => _l('clients'),
         ];
-
-        $has_permission_view_contracts = staff_can('view',  'contracts');
-        if ($has_permission_view_contracts || staff_can('view_own',  'contracts')) {
-            // Contracts
-            $this->db->select();
-            $this->db->from(db_prefix() . 'contracts');
-            if (!$has_permission_view_contracts) {
-                $this->db->where(db_prefix() . 'contracts.addedfrom', get_staff_user_id());
+        $have_assigned_customers        = have_assigned_customers();
+        $have_permission_customers_view = staff_can('view',  'customers');
+        if ($have_assigned_customers || $have_permission_customers_view) {
+            $this->db->select(implode(',', prefixed_table_fields_array(db_prefix() . 'clients')) . ',' . get_sql_select_client_company());
+            $this->db->join(db_prefix() . 'countries', db_prefix() . 'countries.country_id = ' . db_prefix() . 'clients.country', 'left');
+            $this->db->join(db_prefix() . 'contacts', db_prefix() . 'contacts.userid = ' . db_prefix() . 'clients.userid AND is_primary = 1', 'left');
+            $this->db->from(db_prefix() . 'clients');
+            if ($have_assigned_customers && !$have_permission_customers_view) {
+                $this->db->where(db_prefix() . 'clients.userid IN (SELECT customer_id FROM ' . db_prefix() . 'customer_admins WHERE staff_id=' . get_staff_user_id() . ')');
             }
-
-            $this->db->where('(description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\' OR subject LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\')');
-
+            $this->db->where('(company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                OR vat LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                OR ' . db_prefix() . 'clients.phonenumber LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                OR ' . db_prefix() . 'contacts.phonenumber LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                OR city LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                OR zip LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                OR state LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                OR zip LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                OR address LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                OR email LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                OR CONCAT(firstname, \' \', lastname) LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                OR CONCAT(lastname, \' \', firstname) LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                OR ' . db_prefix() . 'countries.short_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                OR ' . db_prefix() . 'countries.long_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                OR ' . db_prefix() . 'countries.numcode LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            )');
             if ($limit != 0) {
                 $this->db->limit($limit);
             }
-            $this->db->order_by('subject', 'ASC');
+            $this->db->group_by(db_prefix() . 'clients.userid');
             $result['result'] = $this->db->get()->result_array();
         }
+        return $result;
+    }
 
+    public function _search_contacts($q, $limit = 0, $where = '')
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'contacts',
+            'search_heading' => _l('customer_contacts'),
+        ];
+        $have_assigned_customers        = have_assigned_customers();
+        $have_permission_customers_view = staff_can('view',  'customers');
+        $tickets_contacts = $this->input->post('tickets_contacts') && get_option('staff_members_open_tickets_to_all_contacts') == 1;
+        if ($have_assigned_customers || $have_permission_customers_view || $tickets_contacts) {
+            $this->db->select(implode(',', prefixed_table_fields_array(db_prefix() . 'contacts')) . ',company');
+            $this->db->from(db_prefix() . 'contacts');
+            $this->db->join(db_prefix() . 'clients', '' . db_prefix() . 'clients.userid=' . db_prefix() . 'contacts.userid', 'left');
+            $this->db->where('(firstname LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                OR lastname LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                OR email LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                OR CONCAT(firstname, \' \', lastname) LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                OR CONCAT(lastname, \' \', firstname) LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                OR ' . db_prefix() . 'contacts.phonenumber LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                OR ' . db_prefix() . 'contacts.title LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                OR company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            )');
+            if ($where != '') {
+                $this->db->where($where);
+            }
+            if ($limit != 0) {
+                $this->db->limit($limit);
+            }
+            $this->db->order_by('firstname', 'ASC');
+            $this->db->group_by(db_prefix() . 'contacts.id');
+            $result['result'] = $this->db->get()->result_array();
+        }
         return $result;
     }
 
@@ -1017,9 +839,7 @@ class Misc_model extends App_Model
             'type'           => 'projects',
             'search_heading' => _l('projects'),
         ];
-
         $projects = staff_can('view',  'projects');
-        // Projects
         $this->db->select();
         $this->db->from(db_prefix() . 'projects');
         $this->db->join(db_prefix() . 'clients', db_prefix() . 'clients.userid = ' . db_prefix() . 'projects.clientid');
@@ -1040,64 +860,63 @@ class Misc_model extends App_Model
                 OR state LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR zip LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR address LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                )');
+            )');
         } else {
             $this->db->where('id IN
                 (SELECT rel_id FROM ' . db_prefix() . 'taggables WHERE tag_id IN
                 (SELECT id FROM ' . db_prefix() . 'tags WHERE name="' . $this->db->escape_str(strafter($q, '#')) . '")
                 AND ' . db_prefix() . 'taggables.rel_type=\'project\' GROUP BY rel_id HAVING COUNT(tag_id) = 1)
-                ');
+            ');
         }
-
         if ($limit != 0) {
             $this->db->limit($limit);
         }
-
         $this->db->order_by('name', 'ASC');
+        $this->db->group_by(db_prefix() . 'projects.id');
         $result['result'] = $this->db->get()->result_array();
-
         return $result;
     }
 
-    public function _search_invoices($q, $limit = 0)
+    public function _search_estimates($q, $limit = 0)
     {
         $result = [
             'result'         => [],
-            'type'           => 'invoices',
-            'search_heading' => _l('invoices'),
+            'type'           => 'estimates',
+            'search_heading' => _l('project_budget'),
         ];
-        $has_permission_view_invoices     = staff_can('view',  'invoices');
-        $has_permission_view_invoices_own = staff_can('view_own',  'invoices');
-
-        if ($has_permission_view_invoices || $has_permission_view_invoices_own || get_option('allow_staff_view_invoices_assigned') == '1') {
+        $has_permission_view_estimates     = staff_can('view',  'estimates');
+        $has_permission_view_estimates_own = staff_can('view_own',  'estimates');
+        if ($has_permission_view_estimates || $has_permission_view_estimates_own || get_option('allow_staff_view_estimates_assigned') == '1') {
             if (is_numeric($q)) {
                 $q = trim($q);
                 $q = ltrim($q, '0');
-            } elseif (startsWith($q, get_option('invoice_prefix'))) {
-                $q = strafter($q, get_option('invoice_prefix'));
+            } elseif (startsWith($q, get_option('estimate_prefix'))) {
+                $q = strafter($q, get_option('estimate_prefix'));
                 $q = trim($q);
                 $q = ltrim($q, '0');
             }
-            $invoice_fields    = prefixed_table_fields_array(db_prefix() . 'invoices');
+            $estimates_fields  = prefixed_table_fields_array(db_prefix() . 'estimates');
             $clients_fields    = prefixed_table_fields_array(db_prefix() . 'clients');
-            $noPermissionQuery = get_invoices_where_sql_for_staff(get_staff_user_id());
-            // Invoices
-            $this->db->select(implode(',', $invoice_fields) . ',' . implode(',', $clients_fields) . ',' . db_prefix() . 'invoices.id as invoiceid,' . get_sql_select_client_company());
-            $this->db->from(db_prefix() . 'invoices');
-            $this->db->join(db_prefix() . 'clients', db_prefix() . 'clients.userid = ' . db_prefix() . 'invoices.clientid', 'left');
-            $this->db->join(db_prefix() . 'currencies', db_prefix() . 'currencies.id = ' . db_prefix() . 'invoices.currency');
+            $noPermissionQuery = get_estimates_where_sql_for_staff(get_staff_user_id());
+            $default_project = get_default_project();
+            $this->db->select(implode(',', $estimates_fields) . ',' . implode(',', $clients_fields) . ',' . db_prefix() . 'estimates.id as estimateid,' . get_sql_select_client_company());
+            $this->db->from(db_prefix() . 'estimates');
+            $this->db->join(db_prefix() . 'clients', db_prefix() . 'clients.userid = ' . db_prefix() . 'estimates.clientid', 'left');
+            $this->db->join(db_prefix() . 'currencies', db_prefix() . 'currencies.id = ' . db_prefix() . 'estimates.currency');
             $this->db->join(db_prefix() . 'contacts', db_prefix() . 'contacts.userid = ' . db_prefix() . 'clients.userid AND is_primary = 1', 'left');
-
-            if (!$has_permission_view_invoices) {
+            if (!$has_permission_view_estimates) {
                 $this->db->where($noPermissionQuery);
             }
-            if (!startsWith($q, '#')) {
-                $this->db->where('(
-                ' . db_prefix() . 'invoices.number LIKE "' . $this->db->escape_like_str($q) . '"
+            $this->db->where(db_prefix() . 'estimates.active', 1);
+            $this->db->where(db_prefix() . 'estimates.project_id', $default_project);
+            $this->db->where('(
+                ' . db_prefix() . 'estimates.number LIKE "' . $this->db->escape_like_str($q) . '"
                 OR
                 ' . db_prefix() . 'clients.company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR
-                ' . db_prefix() . 'invoices.clientnote LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                ' . db_prefix() . 'estimates.clientnote LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                OR
+                ' . db_prefix() . 'estimates.total LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR
                 ' . db_prefix() . 'clients.vat LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR
@@ -1109,29 +928,25 @@ class Misc_model extends App_Model
                 OR
                 ' . db_prefix() . 'clients.zip LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR
-                ' . db_prefix() . 'clients.address LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                address LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR
-                ' . db_prefix() . 'invoices.adminnote LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                ' . db_prefix() . 'estimates.adminnote LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR
-                CONCAT(firstname,\' \',lastname) LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                ' . db_prefix() . 'estimates.billing_street LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR
-                CONCAT(lastname,\' \',firstname) LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                ' . db_prefix() . 'estimates.billing_city LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR
-                ' . db_prefix() . 'invoices.billing_street LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                ' . db_prefix() . 'estimates.billing_state LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR
-                ' . db_prefix() . 'invoices.billing_city LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                ' . db_prefix() . 'estimates.billing_zip LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR
-                ' . db_prefix() . 'invoices.billing_state LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                ' . db_prefix() . 'estimates.shipping_street LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR
-                ' . db_prefix() . 'invoices.billing_zip LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                ' . db_prefix() . 'estimates.shipping_city LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR
-                ' . db_prefix() . 'invoices.shipping_street LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                ' . db_prefix() . 'estimates.shipping_state LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR
-                ' . db_prefix() . 'invoices.shipping_city LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR
-                ' . db_prefix() . 'invoices.shipping_state LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR
-                ' . db_prefix() . 'invoices.shipping_zip LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                ' . db_prefix() . 'estimates.shipping_zip LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR
                 ' . db_prefix() . 'clients.billing_street LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR
@@ -1148,6 +963,469 @@ class Misc_model extends App_Model
                 ' . db_prefix() . 'clients.shipping_state LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR
                 ' . db_prefix() . 'clients.shipping_zip LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            )');
+            $this->db->order_by('number,YEAR(date)', 'desc');
+            $this->db->group_by('estimates.id');
+            if ($limit != 0) {
+                $this->db->limit($limit);
+            }
+            $result['result'] = $this->db->get()->result_array();
+        }
+        return $result;
+    }
+
+    public function _search_estimate_items($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'estimate_items',
+            'search_heading' => _l('estimate_items'),
+        ];
+        $has_permission_view_estimates       = staff_can('view',  'estimates');
+        $has_permission_view_estimates_own   = staff_can('view_own',  'estimates');
+        $allow_staff_view_estimates_assigned = get_option('allow_staff_view_estimates_assigned');
+        $default_project = get_default_project();
+        if ($has_permission_view_estimates || $has_permission_view_estimates_own || $allow_staff_view_estimates_assigned) {
+            $noPermissionQuery = get_estimates_where_sql_for_staff(get_staff_user_id());
+            $this->db->select(db_prefix() . 'itemable.rel_id', db_prefix() . 'itemable.description');
+            $this->db->from(db_prefix() . 'itemable');
+            $this->db->join(db_prefix() . 'estimates', db_prefix() . 'estimates.id = ' . db_prefix() . 'itemable.rel_id', 'left');
+            $this->db->where(db_prefix() . 'itemable.rel_type', 'estimate');
+            if (!$has_permission_view_estimates) {
+                $this->db->where(db_prefix() . 'itemable.rel_id IN (select id from ' . db_prefix() . 'estimates where ' . $noPermissionQuery . ')');
+            }
+            $this->db->where(db_prefix() . 'estimates.project_id', $default_project);
+            $this->db->where('(' . db_prefix() . 'itemable.description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\' OR ' . db_prefix() . 'itemable.long_description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\')');
+            $this->db->order_by(db_prefix() . 'itemable.description', 'ASC');
+            $this->db->group_by(db_prefix() . 'estimates.id');
+            $result['result'] = $this->db->get()->result_array();
+        }
+        return $result;
+    }
+
+    public function _search_estimate_commodity_groups($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'estimate_commodity_groups',
+            'search_heading' => _l('project_budget').' > '._l('Budget head'),
+        ];
+        $this->db->select('name')->from(db_prefix() . 'items_groups')->like('name', $q);
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $this->db->group_by(db_prefix() . 'items_groups.id');
+        $result['result'] = $this->db->get()->result_array();
+        return $result;
+    }
+
+    public function _search_estimate_sub_groups($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'estimate_sub_groups',
+            'search_heading' => _l('project_budget').' > '._l('Budget sub head'),
+        ];
+        $this->db->select('sub_group_name')->from(db_prefix() . 'wh_sub_group')->like('sub_group_name', $q);
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $this->db->group_by(db_prefix() . 'wh_sub_group.id');
+        $result['result'] = $this->db->get()->result_array();
+        return $result;
+    }
+
+    public function _search_estimate_master_areas($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'estimate_master_areas',
+            'search_heading' => _l('project_budget').' > '._l('Master area'),
+        ];
+        $this->db->select('category_name')->from(db_prefix() . 'master_area')->like('category_name', $q)->or_like('description', $q);
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $this->db->order_by('category_name', 'ASC');
+        $this->db->group_by(db_prefix() . 'master_area.id');
+        $result['result'] = $this->db->get()->result_array();
+        return $result;
+    }
+
+    public function _search_estimate_functionality_areas($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'estimate_functionality_areas',
+            'search_heading' => _l('project_budget').' > '._l('Functionality area'),
+        ];
+        $this->db->select('category_name')->from(db_prefix() . 'functionality_area')->like('category_name', $q)->or_like('description', $q);
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $this->db->order_by('category_name', 'ASC');
+        $this->db->group_by(db_prefix() . 'functionality_area.id');
+        $result['result'] = $this->db->get()->result_array();
+        return $result;
+    }
+
+    public function _search_purchase_requests($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'purchase_requests',
+            'search_heading' => _l('purchase_request'),
+        ];
+        $default_project = get_default_project();
+        $this->db->select('pr.id, pr.pur_rq_name, pr.pur_rq_code');
+        $this->db->from(db_prefix() . 'pur_request AS pr');
+        $this->db->join(db_prefix() . 'departments AS de', 'de.departmentid = pr.department', 'left');
+        $this->db->join(db_prefix() . 'items_groups AS ig', 'ig.id = pr.group_pur', 'left');
+        $this->db->join(db_prefix() . 'wh_sub_group AS sg', 'sg.id = pr.sub_groups_pur', 'left');
+        $this->db->where('pr.project', $default_project);
+        $this->db->where('(
+            pr.pur_rq_code LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pr.pur_rq_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            de.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            ig.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            sg.sub_group_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('pr.pur_rq_name', 'ASC');
+        $this->db->group_by('pr.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $result['result'] = $this->db->get()->result_array();
+        return $result;
+    }
+
+    public function _search_purchase_request_items($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'purchase_request_items',
+            'search_heading' => _l('purchase_request_items'),
+        ];
+        $default_project = get_default_project();
+        $this->db->select('pr.id, pr.pur_rq_name, pr.pur_rq_code');
+        $this->db->from(db_prefix() . 'pur_request_detail AS prd');
+        $this->db->join(db_prefix() . 'pur_request AS pr', 'pr.id = prd.pur_request', 'left');
+        $this->db->where('pr.project', $default_project);
+        $this->db->where('(
+            prd.description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('pr.pur_rq_name', 'ASC');
+        $this->db->group_by('pr.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $result['result'] = $this->db->get()->result_array();
+        return $result;
+    }
+
+    public function _search_quotations($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'quotations',
+            'search_heading' => _l('quotations'),
+        ];
+        $default_project = get_default_project();
+        $this->db->select('pe.id');
+        $this->db->from(db_prefix() . 'pur_estimates AS pe');
+        $this->db->join(db_prefix() . 'pur_vendor AS pv', 'pv.userid = pe.vendor', 'left');
+        $this->db->join(db_prefix() . 'items_groups AS ig', 'ig.id = pe.group_pur', 'left');
+        $this->db->join(db_prefix() . 'wh_sub_group AS sg', 'sg.id = pe.sub_groups_pur', 'left');
+        $this->db->where('pe.project', $default_project);
+        $this->db->where('(
+            pv.company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            ig.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            sg.sub_group_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('pe.id', 'ASC');
+        $this->db->group_by('pe.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $result['result'] = $this->db->get()->result_array();
+        return $result;
+    }
+
+    public function _search_purchase_orders($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'purchase_orders',
+            'search_heading' => _l('purchase_orders'),
+        ];
+        $default_project = get_default_project();
+        $this->db->select('po.id, po.pur_order_name, po.pur_order_number');
+        $this->db->from(db_prefix() . 'pur_orders AS po');
+        $this->db->join(db_prefix() . 'pur_vendor AS pv', 'pv.userid = po.vendor', 'left');
+        $this->db->join(db_prefix() . 'items_groups AS ig', 'ig.id = po.group_pur', 'left');
+        $this->db->join(db_prefix() . 'departments AS de', 'de.departmentid = po.department', 'left');
+        $this->db->where('po.project', $default_project);
+        $this->db->where('(
+            po.pur_order_number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pv.company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            po.pur_order_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            ig.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            po.kind LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            de.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('po.pur_order_name', 'ASC');
+        $this->db->group_by('po.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $result['result'] = $this->db->get()->result_array();
+        return $result;
+    }
+
+    public function _search_purchase_order_items($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'purchase_order_items',
+            'search_heading' => _l('purchase_order_items'),
+        ];
+        $default_project = get_default_project();
+        $this->db->select('po.id, po.pur_order_name, po.pur_order_number');
+        $this->db->from(db_prefix() . 'pur_order_detail AS pod');
+        $this->db->join(db_prefix() . 'pur_orders AS po', 'po.id = pod.pur_order', 'left');
+        $this->db->where('po.project', $default_project);
+        $this->db->where('(
+            pod.description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('po.pur_order_name', 'ASC');
+        $this->db->group_by('po.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $result['result'] = $this->db->get()->result_array();
+        return $result;
+    }
+
+    public function _search_work_orders($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'work_orders',
+            'search_heading' => _l('work_order'),
+        ];
+        $default_project = get_default_project();
+        $this->db->select('wo.id, wo.wo_order_name, wo.wo_order_number');
+        $this->db->from(db_prefix() . 'wo_orders AS wo');
+        $this->db->join(db_prefix() . 'pur_vendor AS pv', 'pv.userid = wo.vendor', 'left');
+        $this->db->join(db_prefix() . 'items_groups AS ig', 'ig.id = wo.group_pur', 'left');
+        $this->db->join(db_prefix() . 'departments AS de', 'de.departmentid = wo.department', 'left');
+        $this->db->where('wo.project', $default_project);
+        $this->db->where('(
+            wo.wo_order_number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pv.company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            wo.wo_order_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            ig.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            wo.kind LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            de.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('wo.wo_order_name', 'ASC');
+        $this->db->group_by('wo.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $result['result'] = $this->db->get()->result_array();
+        return $result;
+    }
+
+    public function _search_work_order_items($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'work_order_items',
+            'search_heading' => _l('work_order_items'),
+        ];
+        $default_project = get_default_project();
+        $this->db->select('wo.id, wo.wo_order_name, wo.wo_order_number');
+        $this->db->from(db_prefix() . 'wo_order_detail AS wod');
+        $this->db->join(db_prefix() . 'wo_orders AS wo', 'wo.id = wod.wo_order', 'left');
+        $this->db->where('wo.project', $default_project);
+        $this->db->where('(
+            wod.description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('wo.wo_order_name', 'ASC');
+        $this->db->group_by('wo.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $result['result'] = $this->db->get()->result_array();
+        return $result;
+    }
+
+    public function _search_change_orders($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'change_orders',
+            'search_heading' => _l('Change Orders'),
+        ];
+        $default_project = get_default_project();
+        $this->db->select('co.id, co.pur_order_name, co.pur_order_number');
+        $this->db->from(db_prefix() . 'co_orders AS co');
+        $this->db->join(db_prefix() . 'pur_vendor AS pv', 'pv.userid = co.vendor', 'left');
+        $this->db->join(db_prefix() . 'items_groups AS ig', 'ig.id = co.group_pur', 'left');
+        $this->db->join(db_prefix() . 'wh_sub_group AS sg', 'sg.id = co.sub_groups_pur', 'left');
+        $this->db->join(db_prefix() . 'departments AS de', 'de.departmentid = co.department', 'left');
+        $this->db->where('co.project', $default_project);
+        $this->db->where('(
+            co.pur_order_number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pv.company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            co.pur_order_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            ig.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            sg.sub_group_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            co.type LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            de.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('co.pur_order_name', 'ASC');
+        $this->db->group_by('co.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $result['result'] = $this->db->get()->result_array();
+        return $result;
+    }
+
+    public function _search_change_order_items($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'change_order_items',
+            'search_heading' => _l('Change Order Items'),
+        ];
+        $default_project = get_default_project();
+        $this->db->select('co.id, co.pur_order_name, co.pur_order_number');
+        $this->db->from(db_prefix() . 'co_order_detail AS cod');
+        $this->db->join(db_prefix() . 'co_orders AS co', 'co.id = cod.pur_order', 'left');
+        $this->db->where('co.project', $default_project);
+        $this->db->where('(
+            cod.description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('co.pur_order_name', 'ASC');
+        $this->db->group_by('co.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $result['result'] = $this->db->get()->result_array();
+        return $result;
+    }
+
+    public function _search_invoices($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'invoices',
+            'search_heading' => _l('invoices'),
+        ];
+        $has_permission_view_invoices     = staff_can('view',  'invoices');
+        $has_permission_view_invoices_own = staff_can('view_own',  'invoices');
+        if ($has_permission_view_invoices || $has_permission_view_invoices_own || get_option('allow_staff_view_invoices_assigned') == '1') {
+            if (is_numeric($q)) {
+                $q = trim($q);
+                $q = ltrim($q, '0');
+            } elseif (startsWith($q, get_option('invoice_prefix'))) {
+                $q = strafter($q, get_option('invoice_prefix'));
+                $q = trim($q);
+                $q = ltrim($q, '0');
+            }
+            $invoice_fields    = prefixed_table_fields_array(db_prefix() . 'invoices');
+            $clients_fields    = prefixed_table_fields_array(db_prefix() . 'clients');
+            $noPermissionQuery = get_invoices_where_sql_for_staff(get_staff_user_id());
+            $this->db->select(implode(',', $invoice_fields) . ',' . implode(',', $clients_fields) . ',' . db_prefix() . 'invoices.id as invoiceid,' . get_sql_select_client_company());
+            $this->db->from(db_prefix() . 'invoices');
+            $this->db->join(db_prefix() . 'clients', db_prefix() . 'clients.userid = ' . db_prefix() . 'invoices.clientid', 'left');
+            $this->db->join(db_prefix() . 'currencies', db_prefix() . 'currencies.id = ' . db_prefix() . 'invoices.currency');
+            $this->db->join(db_prefix() . 'contacts', db_prefix() . 'contacts.userid = ' . db_prefix() . 'clients.userid AND is_primary = 1', 'left');
+            if (!$has_permission_view_invoices) {
+                $this->db->where($noPermissionQuery);
+            }
+            if (!startsWith($q, '#')) {
+                $this->db->where('(
+                    ' . db_prefix() . 'invoices.number LIKE "' . $this->db->escape_like_str($q) . '"
+                    OR
+                    ' . db_prefix() . 'clients.company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR
+                    ' . db_prefix() . 'invoices.clientnote LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR
+                    ' . db_prefix() . 'clients.vat LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR
+                    ' . db_prefix() . 'clients.phonenumber LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR
+                    ' . db_prefix() . 'clients.city LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR
+                    ' . db_prefix() . 'clients.state LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR
+                    ' . db_prefix() . 'clients.zip LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR
+                    ' . db_prefix() . 'clients.address LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR
+                    ' . db_prefix() . 'invoices.adminnote LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR
+                    CONCAT(firstname,\' \',lastname) LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR
+                    CONCAT(lastname,\' \',firstname) LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR
+                    ' . db_prefix() . 'invoices.billing_street LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR
+                    ' . db_prefix() . 'invoices.billing_city LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR
+                    ' . db_prefix() . 'invoices.billing_state LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR
+                    ' . db_prefix() . 'invoices.billing_zip LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR
+                    ' . db_prefix() . 'invoices.shipping_street LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR
+                    ' . db_prefix() . 'invoices.shipping_city LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR
+                    ' . db_prefix() . 'invoices.shipping_state LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR
+                    ' . db_prefix() . 'invoices.shipping_zip LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR
+                    ' . db_prefix() . 'clients.billing_street LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR
+                    ' . db_prefix() . 'clients.billing_city LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR
+                    ' . db_prefix() . 'clients.billing_state LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR
+                    ' . db_prefix() . 'clients.billing_zip LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR
+                    ' . db_prefix() . 'clients.shipping_street LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR
+                    ' . db_prefix() . 'clients.shipping_city LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR
+                    ' . db_prefix() . 'clients.shipping_state LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR
+                    ' . db_prefix() . 'clients.shipping_zip LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 )');
             } else {
                 $this->db->where(db_prefix() . 'invoices.id IN
@@ -1156,16 +1434,75 @@ class Misc_model extends App_Model
                 AND ' . db_prefix() . 'taggables.rel_type=\'invoice\' GROUP BY rel_id HAVING COUNT(tag_id) = 1)
                 ');
             }
-
-
             $this->db->order_by('number,YEAR(date)', 'desc');
             if ($limit != 0) {
                 $this->db->limit($limit);
             }
-
+            $this->db->group_by('invoices.id');
             $result['result'] = $this->db->get()->result_array();
         }
+        return $result;
+    }
 
+    public function _search_invoice_items($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'invoice_items',
+            'search_heading' => _l('invoice_items'),
+        ];
+        $has_permission_view_invoices       = staff_can('view',  'invoices');
+        $has_permission_view_invoices_own   = staff_can('view_own',  'invoices');
+        $allow_staff_view_invoices_assigned = get_option('allow_staff_view_invoices_assigned');
+        if ($has_permission_view_invoices || $has_permission_view_invoices_own || $allow_staff_view_invoices_assigned == '1') {
+            $noPermissionQuery = get_invoices_where_sql_for_staff(get_staff_user_id());
+            $this->db->select()->from(db_prefix() . 'itemable');
+            $this->db->where('rel_type', 'invoice');
+            $this->db->where('(description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\' OR long_description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\')');
+            if (!$has_permission_view_invoices) {
+                $this->db->where('rel_id IN (select id from ' . db_prefix() . 'invoices where ' . $noPermissionQuery . ')');
+            }
+            $this->db->order_by('description', 'ASC');
+            $result['result'] = $this->db->get()->result_array();
+        }
+        return $result;
+    }
+
+    public function _search_payments($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'invoice_payment_records',
+            'search_heading' => _l('payments'),
+        ];
+        $has_permission_view_payments     = staff_can('view',  'payments');
+        $has_permission_view_invoices_own = staff_can('view_own',  'invoices');
+        if (staff_can('view',  'payments') || $has_permission_view_invoices_own || get_option('allow_staff_view_invoices_assigned') == '1') {
+            if (is_numeric($q)) {
+                $q = trim($q);
+                $q = ltrim($q, '0');
+            } elseif (startsWith($q, get_option('invoice_prefix'))) {
+                $q = strafter($q, get_option('invoice_prefix'));
+                $q = trim($q);
+                $q = ltrim($q, '0');
+            }
+            $noPermissionQuery = get_invoices_where_sql_for_staff(get_staff_user_id());
+            $this->db->select(db_prefix() . 'invoicepaymentrecords.date,' . db_prefix() . 'invoicepaymentrecords.id as paymentid');
+            $this->db->from(db_prefix() . 'invoicepaymentrecords');
+            $this->db->join(db_prefix() . 'payment_modes', '' . db_prefix() . 'invoicepaymentrecords.paymentmode = ' . db_prefix() . 'payment_modes.id', 'LEFT');
+            $this->db->join(db_prefix() . 'invoices', '' . db_prefix() . 'invoices.id = ' . db_prefix() . 'invoicepaymentrecords.invoiceid');
+            if (!$has_permission_view_payments) {
+                $this->db->where('invoiceid IN (select id from ' . db_prefix() . 'invoices where ' . $noPermissionQuery . ')');
+            }
+            $this->db->where('(' . db_prefix() . 'invoicepaymentrecords.id LIKE "' . $this->db->escape_like_str($q) . '"
+                OR ' . db_prefix() . 'payment_modes.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                OR ' . db_prefix() . 'invoicepaymentrecords.note LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                OR ' . db_prefix() . 'invoicepaymentrecords.transactionid LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            )');
+            $this->db->order_by(db_prefix() . 'invoicepaymentrecords.date', 'ASC');
+            $this->db->group_by(db_prefix() . 'invoicepaymentrecords.id');
+            $result['result'] = $this->db->get()->result_array();
+        }
         return $result;
     }
 
@@ -1176,10 +1513,8 @@ class Misc_model extends App_Model
             'type'           => 'credit_note',
             'search_heading' => _l('credit_notes'),
         ];
-
         $has_permission_view_credit_notes     = staff_can('view',  'credit_notes');
         $has_permission_view_credit_notes_own = staff_can('view_own',  'credit_notes');
-
         if ($has_permission_view_credit_notes || $has_permission_view_credit_notes_own) {
             if (is_numeric($q)) {
                 $q = trim($q);
@@ -1191,17 +1526,14 @@ class Misc_model extends App_Model
             }
             $credit_note_fields = prefixed_table_fields_array(db_prefix() . 'creditnotes');
             $clients_fields     = prefixed_table_fields_array(db_prefix() . 'clients');
-            // Invoices
             $this->db->select(implode(',', $credit_note_fields) . ',' . implode(',', $clients_fields) . ',' . db_prefix() . 'creditnotes.id as credit_note_id,' . get_sql_select_client_company());
             $this->db->from(db_prefix() . 'creditnotes');
             $this->db->join(db_prefix() . 'clients', db_prefix() . 'clients.userid = ' . db_prefix() . 'creditnotes.clientid', 'left');
             $this->db->join(db_prefix() . 'currencies', db_prefix() . 'currencies.id = ' . db_prefix() . 'creditnotes.currency');
             $this->db->join(db_prefix() . 'contacts', db_prefix() . 'contacts.userid = ' . db_prefix() . 'clients.userid AND is_primary = 1', 'left');
-
             if (!$has_permission_view_credit_notes) {
                 $this->db->where(db_prefix() . 'creditnotes.addedfrom', get_staff_user_id());
             }
-
             $this->db->where('(
                 ' . db_prefix() . 'creditnotes.number LIKE "' . $this->db->escape_like_str($q) . '"
                 OR
@@ -1258,123 +1590,14 @@ class Misc_model extends App_Model
                 ' . db_prefix() . 'clients.shipping_state LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR
                 ' . db_prefix() . 'clients.shipping_zip LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                )');
-
-
+            )');
             $this->db->order_by('number', 'desc');
             if ($limit != 0) {
                 $this->db->limit($limit);
             }
-
+            $this->db->group_by(db_prefix() . 'creditnotes.id');
             $result['result'] = $this->db->get()->result_array();
         }
-
-        return $result;
-    }
-
-    public function _search_estimates($q, $limit = 0)
-    {
-        $result = [
-            'result'         => [],
-            'type'           => 'estimates',
-            'search_heading' => _l('project_budget'),
-        ];
-
-        $has_permission_view_estimates     = staff_can('view',  'estimates');
-        $has_permission_view_estimates_own = staff_can('view_own',  'estimates');
-
-        if ($has_permission_view_estimates || $has_permission_view_estimates_own || get_option('allow_staff_view_estimates_assigned') == '1') {
-            if (is_numeric($q)) {
-                $q = trim($q);
-                $q = ltrim($q, '0');
-            } elseif (startsWith($q, get_option('estimate_prefix'))) {
-                $q = strafter($q, get_option('estimate_prefix'));
-                $q = trim($q);
-                $q = ltrim($q, '0');
-            }
-            // Estimates
-            $estimates_fields  = prefixed_table_fields_array(db_prefix() . 'estimates');
-            $clients_fields    = prefixed_table_fields_array(db_prefix() . 'clients');
-            $noPermissionQuery = get_estimates_where_sql_for_staff(get_staff_user_id());
-            $default_project = get_default_project();
-
-            $this->db->select(implode(',', $estimates_fields) . ',' . implode(',', $clients_fields) . ',' . db_prefix() . 'estimates.id as estimateid,' . get_sql_select_client_company());
-            $this->db->from(db_prefix() . 'estimates');
-            $this->db->join(db_prefix() . 'clients', db_prefix() . 'clients.userid = ' . db_prefix() . 'estimates.clientid', 'left');
-            $this->db->join(db_prefix() . 'currencies', db_prefix() . 'currencies.id = ' . db_prefix() . 'estimates.currency');
-            $this->db->join(db_prefix() . 'contacts', db_prefix() . 'contacts.userid = ' . db_prefix() . 'clients.userid AND is_primary = 1', 'left');
-
-            if (!$has_permission_view_estimates) {
-                $this->db->where($noPermissionQuery);
-            }
-
-            $this->db->where(db_prefix() . 'estimates.active', 1);
-            $this->db->where(db_prefix() . 'estimates.project_id', $default_project);
-
-            $this->db->where('(
-                ' . db_prefix() . 'estimates.number LIKE "' . $this->db->escape_like_str($q) . '"
-                OR
-                ' . db_prefix() . 'clients.company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR
-                ' . db_prefix() . 'estimates.clientnote LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR
-                ' . db_prefix() . 'estimates.total LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR
-                ' . db_prefix() . 'clients.vat LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR
-                ' . db_prefix() . 'clients.phonenumber LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR
-                ' . db_prefix() . 'clients.city LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR
-                ' . db_prefix() . 'clients.state LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR
-                ' . db_prefix() . 'clients.zip LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR
-                address LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR
-                ' . db_prefix() . 'estimates.adminnote LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR
-                ' . db_prefix() . 'estimates.billing_street LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR
-                ' . db_prefix() . 'estimates.billing_city LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR
-                ' . db_prefix() . 'estimates.billing_state LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR
-                ' . db_prefix() . 'estimates.billing_zip LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR
-                ' . db_prefix() . 'estimates.shipping_street LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR
-                ' . db_prefix() . 'estimates.shipping_city LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR
-                ' . db_prefix() . 'estimates.shipping_state LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR
-                ' . db_prefix() . 'estimates.shipping_zip LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR
-                ' . db_prefix() . 'clients.billing_street LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR
-                ' . db_prefix() . 'clients.billing_city LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR
-                ' . db_prefix() . 'clients.billing_state LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR
-                ' . db_prefix() . 'clients.billing_zip LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR
-                ' . db_prefix() . 'clients.shipping_street LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR
-                ' . db_prefix() . 'clients.shipping_city LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR
-                ' . db_prefix() . 'clients.shipping_state LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR
-                ' . db_prefix() . 'clients.shipping_zip LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                )');
-
-            $this->db->order_by('number,YEAR(date)', 'desc');
-            $this->db->group_by('estimates.id');
-            if ($limit != 0) {
-                $this->db->limit($limit);
-            }
-            $result['result'] = $this->db->get()->result_array();
-        }
-
         return $result;
     }
 
@@ -1385,12 +1608,9 @@ class Misc_model extends App_Model
             'type'           => 'expenses',
             'search_heading' => _l('expenses'),
         ];
-
         $has_permission_expenses_view     = staff_can('view',  'expenses');
         $has_permission_expenses_view_own = staff_can('view_own',  'expenses');
-
         if ($has_permission_expenses_view || $has_permission_expenses_view_own) {
-            // Expenses
             $this->db->select('*,' . db_prefix() . 'expenses.amount as amount,' . db_prefix() . 'expenses_categories.name as category_name,' . db_prefix() . 'payment_modes.name as payment_mode_name,' . db_prefix() . 'taxes.name as tax_name, ' . db_prefix() . 'expenses.id as expenseid,' . db_prefix() . 'currencies.name as currency_name');
             $this->db->from(db_prefix() . 'expenses');
             $this->db->join(db_prefix() . 'clients', db_prefix() . 'clients.userid = ' . db_prefix() . 'expenses.clientid', 'left');
@@ -1401,7 +1621,6 @@ class Misc_model extends App_Model
             if (!$has_permission_expenses_view) {
                 $this->db->where(db_prefix() . 'expenses.addedfrom', get_staff_user_id());
             }
-
             $this->db->where('(company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR paymentmode LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR ' . db_prefix() . 'payment_modes.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
@@ -1414,15 +1633,274 @@ class Misc_model extends App_Model
                 OR ' . db_prefix() . 'expenses_categories.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR ' . db_prefix() . 'expenses.note LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR ' . db_prefix() . 'expenses.expense_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                )');
-
+            )');
             if ($limit != 0) {
                 $this->db->limit($limit);
             }
             $this->db->order_by('date', 'DESC');
+            $this->db->group_by(db_prefix() . 'expenses.id');
             $result['result'] = $this->db->get()->result_array();
         }
+        return $result;
+    }
 
+    public function _search_tasks($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'tasks',
+            'search_heading' => _l('tasks'),
+        ];
+        $is_admin = is_admin();
+        $tasks = staff_can('view',  'tasks');
+        $this->db->select('id, name');
+        $this->db->from(db_prefix() . 'tasks');
+        if (!$is_admin) {
+            if (!$tasks) {
+                $where = '(id IN (SELECT taskid FROM ' . db_prefix() . 'task_assigned WHERE staffid = ' . get_staff_user_id() . ') OR id IN (SELECT taskid FROM ' . db_prefix() . 'task_followers WHERE staffid = ' . get_staff_user_id() . ') OR (addedfrom=' . get_staff_user_id() . ' AND is_added_from_contact=0) ';
+                if (get_option('show_all_tasks_for_project_member') == 1) {
+                    $where .= ' OR (rel_type="project" AND rel_id IN (SELECT project_id FROM ' . db_prefix() . 'project_members WHERE staff_id=' . get_staff_user_id() . '))';
+                }
+                $where .= ' OR is_public = 1)';
+                $this->db->where($where);
+            }
+        }
+        if (!startsWith($q, '#')) {
+            $this->db->where('(name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\' OR description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\')');
+        } else {
+            $this->db->where('id IN
+                (SELECT rel_id FROM ' . db_prefix() . 'taggables WHERE tag_id IN
+                (SELECT id FROM ' . db_prefix() . 'tags WHERE name="' . $this->db->escape_str(strafter($q, '#')) . '")
+                AND ' . db_prefix() . 'taggables.rel_type=\'task\' GROUP BY rel_id HAVING COUNT(tag_id) = 1)
+            ');
+        }
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $this->db->order_by('name', 'ASC');
+        $this->db->group_by(db_prefix() . 'tasks.id');
+        $result['result'] = $this->db->get()->result_array();
+        return $result;
+    }
+
+    public function _search_tickets($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'tickets',
+            'search_heading' => _l('support_tickets'),
+        ];
+        if (is_staff_member() || (!is_staff_member() && get_option('access_tickets_to_none_staff_members') == 1)) {
+            $is_admin = is_admin();
+            $where = '';
+            if (!$is_admin && get_option('staff_access_only_assigned_departments') == 1) {
+                $this->load->model('departments_model');
+                $staff_deparments_ids = $this->departments_model->get_staff_departments(get_staff_user_id(), true);
+                $departments_ids      = [];
+                if (count($staff_deparments_ids) == 0) {
+                    $departments = $this->departments_model->get();
+                    foreach ($departments as $department) {
+                        array_push($departments_ids, $department['departmentid']);
+                    }
+                } else {
+                    $departments_ids = $staff_deparments_ids;
+                }
+                if (count($departments_ids) > 0) {
+                    $where = 'department IN (SELECT departmentid FROM ' . db_prefix() . 'staff_departments WHERE departmentid IN (' . implode(',', $departments_ids) . ') AND staffid="' . get_staff_user_id() . '")';
+                }
+            }
+            $this->db->select();
+            $this->db->from(db_prefix() . 'tickets');
+            $this->db->join(db_prefix() . 'departments', db_prefix() . 'departments.departmentid = ' . db_prefix() . 'tickets.department');
+            $this->db->join(db_prefix() . 'clients', db_prefix() . 'clients.userid = ' . db_prefix() . 'tickets.userid', 'left');
+            $this->db->join(db_prefix() . 'contacts', db_prefix() . 'contacts.id = ' . db_prefix() . 'tickets.contactid', 'left');
+            if (!startsWith($q, '#')) {
+                $this->db->where('(
+                    ticketid LIKE "' . $q . '%"
+                    OR subject LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR message LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR ' . db_prefix() . 'contacts.email LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR CONCAT(firstname, \' \', lastname) LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR CONCAT(lastname, \' \', firstname) LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR vat LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR ' . db_prefix() . 'contacts.phonenumber LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR ' . db_prefix() . 'clients.phonenumber LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR city LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR state LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR address LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR ' . db_prefix() . 'departments.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                )');
+                if ($where != '') {
+                    $this->db->where($where);
+                }
+            } else {
+                $this->db->where('ticketid IN
+                    (SELECT rel_id FROM ' . db_prefix() . 'taggables WHERE tag_id IN
+                    (SELECT id FROM ' . db_prefix() . 'tags WHERE name="' . $this->db->escape_str(strafter($q, '#')) . '")
+                    AND ' . db_prefix() . 'taggables.rel_type=\'ticket\' GROUP BY rel_id HAVING COUNT(tag_id) = 1)
+                ');
+            }
+            if ($limit != 0) {
+                $this->db->limit($limit);
+            }
+            $this->db->order_by('ticketid', 'DESC');
+            $this->db->group_by(db_prefix() . 'tickets.ticketid');
+            $result['result'] = $this->db->get()->result_array();
+        }
+        return $result;
+    }
+
+    public function _search_contracts($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'contracts',
+            'search_heading' => _l('contracts'),
+        ];
+        $has_permission_view_contracts = staff_can('view',  'contracts');
+        if ($has_permission_view_contracts || staff_can('view_own',  'contracts')) {
+            $this->db->select();
+            $this->db->from(db_prefix() . 'contracts');
+            if (!$has_permission_view_contracts) {
+                $this->db->where(db_prefix() . 'contracts.addedfrom', get_staff_user_id());
+            }
+            $this->db->where('(description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\' OR subject LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\')');
+            if ($limit != 0) {
+                $this->db->limit($limit);
+            }
+            $this->db->order_by('subject', 'ASC');
+            $this->db->group_by(db_prefix() . 'contracts.id');
+            $result['result'] = $this->db->get()->result_array();
+        }
+        return $result;
+    }
+
+    public function _search_custom_fields($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'custom_fields',
+            'search_heading' => _l('custom_fields'),
+        ];
+        $is_admin = is_admin();
+        if ($is_admin) {
+            $this->db->select()->from(db_prefix() . 'customfieldsvalues')->like('value', $q);
+            if ($limit != 0) {
+                $this->db->limit($limit);
+            }
+            $this->db->group_by(db_prefix() . 'customfieldsvalues.id');
+            $result['result'] = $this->db->get()->result_array();
+        }
+        return $result;
+    }
+
+    public function _search_leads($q, $limit = 0, $where = [])
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'leads',
+            'search_heading' => _l('leads'),
+        ];
+        $has_permission_view = staff_can('view',  'leads');
+        if (is_staff_member()) {
+            $this->db->select();
+            $this->db->from(db_prefix() . 'leads');
+            if (!$has_permission_view) {
+                $this->db->where('(assigned = ' . get_staff_user_id() . ' OR addedfrom = ' . get_staff_user_id() . ' OR is_public=1)');
+            }
+            if (!startsWith($q, '#')) {
+                $this->db->where('(name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR title LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR zip LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR city LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR state LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR address LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR email LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                    OR phonenumber LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                )');
+            } else {
+                $this->db->where('id IN
+                    (SELECT rel_id FROM ' . db_prefix() . 'taggables WHERE tag_id IN
+                    (SELECT id FROM ' . db_prefix() . 'tags WHERE name="' . $this->db->escape_str(strafter($q, '#')) . '")
+                    AND ' . db_prefix() . 'taggables.rel_type=\'lead\' GROUP BY rel_id HAVING COUNT(tag_id) = 1)
+                ');
+            }
+            $this->db->where($where);
+            if ($limit != 0) {
+                $this->db->limit($limit);
+            }
+            $this->db->order_by('name', 'ASC');
+            $this->db->group_by(db_prefix() . 'leads.id');
+            $result['result'] = $this->db->get()->result_array();
+        }
+        return $result;
+    }
+
+    public function _search_proposals($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'proposals',
+            'search_heading' => _l('proposals'),
+        ];
+        $has_permission_view_proposals     = staff_can('view',  'proposals');
+        $has_permission_view_proposals_own = staff_can('view_own',  'proposals');
+        if ($has_permission_view_proposals || $has_permission_view_proposals_own || get_option('allow_staff_view_proposals_assigned') == '1') {
+            if (is_numeric($q)) {
+                $q = trim($q);
+                $q = ltrim($q, '0');
+            } elseif (startsWith($q, get_option('proposal_number_prefix'))) {
+                $q = strafter($q, get_option('proposal_number_prefix'));
+                $q = trim($q);
+                $q = ltrim($q, '0');
+            }
+            $noPermissionQuery = get_proposals_sql_where_staff(get_staff_user_id());
+            $this->db->select('*,' . db_prefix() . 'proposals.id as id');
+            $this->db->from(db_prefix() . 'proposals');
+            $this->db->join(db_prefix() . 'currencies', db_prefix() . 'currencies.id = ' . db_prefix() . 'proposals.currency');
+            if (!$has_permission_view_proposals) {
+                $this->db->where($noPermissionQuery);
+            }
+            $this->db->where('(
+                ' . db_prefix() . 'proposals.id LIKE "' . $q . '%"
+                OR ' . db_prefix() . 'proposals.subject LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                OR ' . db_prefix() . 'proposals.content LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                OR ' . db_prefix() . 'proposals.proposal_to LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                OR ' . db_prefix() . 'proposals.zip LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                OR ' . db_prefix() . 'proposals.state LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                OR ' . db_prefix() . 'proposals.city LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                OR ' . db_prefix() . 'proposals.address LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                OR ' . db_prefix() . 'proposals.email LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+                OR ' . db_prefix() . 'proposals.phone LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            )');
+            $this->db->order_by(db_prefix() . 'proposals.id', 'desc');
+            if ($limit != 0) {
+                $this->db->limit($limit);
+            }
+            $this->db->group_by(db_prefix() . 'proposals.id');
+            $result['result'] = $this->db->get()->result_array();
+        }
+        return $result;
+    }
+
+    public function _search_knowledge_base($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'knowledge_base_articles',
+            'search_heading' => _l('kb_string'),
+        ];
+        if (staff_can('view',  'knowledge_base')) {
+            $this->db->select('staff_article, slug, subject')->from(db_prefix() . 'knowledge_base')->like('subject', $q)->or_like('description', $q)->or_like('slug', $q);
+            if ($limit != 0) {
+                $this->db->limit($limit);
+            }
+            $this->db->order_by('subject', 'ASC');
+            $this->db->group_by(db_prefix() . 'knowledge_base.articleid');
+            $result['result'] = $this->db->get()->result_array();
+        }
         return $result;
     }
 
@@ -1446,6 +1924,7 @@ class Misc_model extends App_Model
         $result['result'] = $this->db->get()->result_array();
         return $result;
     }
+
     public function _search_minutes($q, $limit = 0)
     {
         $result = [
@@ -1492,6 +1971,7 @@ class Misc_model extends App_Model
 
         return $result;
     }
+
     public function _search_pur_invoices($q, $limit = 0)
     {
         $result = [
@@ -1519,6 +1999,7 @@ class Misc_model extends App_Model
 
         return $result;
     }
+
     public function _search_stock_import($q, $limit = 0)
     {
         $result = [
@@ -1544,6 +2025,7 @@ class Misc_model extends App_Model
 
         return $result;
     }
+    
     public function _search_goods_delivery($q, $limit = 0)
     {
         $result = [
@@ -1610,601 +2092,6 @@ class Misc_model extends App_Model
             $this->db->limit($limit);
         }
 
-        $result['result'] = $this->db->get()->result_array();
-
-        return $result;
-    }
-
-    public function _search_clients($q, $limit = 0)
-    {
-        $result = [
-            'result'         => [],
-            'type'           => 'clients',
-            'search_heading' => _l('clients'),
-        ];
-
-        $have_assigned_customers        = have_assigned_customers();
-        $have_permission_customers_view = staff_can('view',  'customers');
-
-        if ($have_assigned_customers || $have_permission_customers_view) {
-            // Clients
-            $this->db->select(implode(',', prefixed_table_fields_array(db_prefix() . 'clients')) . ',' . get_sql_select_client_company());
-
-            $this->db->join(db_prefix() . 'countries', db_prefix() . 'countries.country_id = ' . db_prefix() . 'clients.country', 'left');
-            $this->db->join(db_prefix() . 'contacts', db_prefix() . 'contacts.userid = ' . db_prefix() . 'clients.userid AND is_primary = 1', 'left');
-            $this->db->from(db_prefix() . 'clients');
-            if ($have_assigned_customers && !$have_permission_customers_view) {
-                $this->db->where(db_prefix() . 'clients.userid IN (SELECT customer_id FROM ' . db_prefix() . 'customer_admins WHERE staff_id=' . get_staff_user_id() . ')');
-            }
-
-            $this->db->where('(company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR vat LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR ' . db_prefix() . 'clients.phonenumber LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR ' . db_prefix() . 'contacts.phonenumber LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR city LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR zip LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR state LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR zip LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR address LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR email LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR CONCAT(firstname, \' \', lastname) LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR CONCAT(lastname, \' \', firstname) LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR ' . db_prefix() . 'countries.short_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR ' . db_prefix() . 'countries.long_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR ' . db_prefix() . 'countries.numcode LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                )');
-
-            if ($limit != 0) {
-                $this->db->limit($limit);
-            }
-            $result['result'] = $this->db->get()->result_array();
-        }
-
-        return $result;
-    }
-
-    public function _search_knowledge_base($q, $limit = 0)
-    {
-        $result = [
-            'result'         => [],
-            'type'           => 'knowledge_base_articles',
-            'search_heading' => _l('kb_string'),
-        ];
-
-        if (staff_can('view',  'knowledge_base')) {
-            // Knowledge base articles
-            $this->db->select()->from(db_prefix() . 'knowledge_base')->like('subject', $q)->or_like('description', $q)->or_like('slug', $q);
-            if ($limit != 0) {
-                $this->db->limit($limit);
-            }
-            $this->db->order_by('subject', 'ASC');
-            $result['result'] = $this->db->get()->result_array();
-        }
-
-        return $result;
-    }
-
-    public function _search_tasks($q, $limit = 0)
-    {
-        $result = [
-            'result'         => [],
-            'type'           => 'tasks',
-            'search_heading' => _l('tasks'),
-        ];
-
-        $is_admin = is_admin();
-        // Tasks Search
-        $tasks = staff_can('view',  'tasks');
-        // Staff tasks
-        $this->db->select();
-        $this->db->from(db_prefix() . 'tasks');
-        if (!$is_admin) {
-            if (!$tasks) {
-                $where = '(id IN (SELECT taskid FROM ' . db_prefix() . 'task_assigned WHERE staffid = ' . get_staff_user_id() . ') OR id IN (SELECT taskid FROM ' . db_prefix() . 'task_followers WHERE staffid = ' . get_staff_user_id() . ') OR (addedfrom=' . get_staff_user_id() . ' AND is_added_from_contact=0) ';
-                if (get_option('show_all_tasks_for_project_member') == 1) {
-                    $where .= ' OR (rel_type="project" AND rel_id IN (SELECT project_id FROM ' . db_prefix() . 'project_members WHERE staff_id=' . get_staff_user_id() . '))';
-                }
-                $where .= ' OR is_public = 1)';
-                $this->db->where($where);
-            } //!$tasks
-        } //!$is_admin
-        if (!startsWith($q, '#')) {
-            $this->db->where('(name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\' OR description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\')');
-        } else {
-            $this->db->where('id IN
-                (SELECT rel_id FROM ' . db_prefix() . 'taggables WHERE tag_id IN
-                (SELECT id FROM ' . db_prefix() . 'tags WHERE name="' . $this->db->escape_str(strafter($q, '#')) . '")
-                AND ' . db_prefix() . 'taggables.rel_type=\'task\' GROUP BY rel_id HAVING COUNT(tag_id) = 1)
-                ');
-        }
-
-        if ($limit != 0) {
-            $this->db->limit($limit);
-        }
-        $this->db->order_by('name', 'ASC');
-        $result['result'] = $this->db->get()->result_array();
-
-        return $result;
-    }
-
-    public function _search_payments($q, $limit = 0)
-    {
-        $result = [
-            'result'         => [],
-            'type'           => 'invoice_payment_records',
-            'search_heading' => _l('payments'),
-        ];
-
-        // Payments search
-        $has_permission_view_payments     = staff_can('view',  'payments');
-        $has_permission_view_invoices_own = staff_can('view_own',  'invoices');
-        if (staff_can('view',  'payments') || $has_permission_view_invoices_own || get_option('allow_staff_view_invoices_assigned') == '1') {
-            if (is_numeric($q)) {
-                $q = trim($q);
-                $q = ltrim($q, '0');
-            } elseif (startsWith($q, get_option('invoice_prefix'))) {
-                $q = strafter($q, get_option('invoice_prefix'));
-                $q = trim($q);
-                $q = ltrim($q, '0');
-            }
-            $noPermissionQuery = get_invoices_where_sql_for_staff(get_staff_user_id());
-            // Invoice payment records
-            $this->db->select(db_prefix() . 'invoicepaymentrecords.date,' . db_prefix() . 'invoicepaymentrecords.id as paymentid');
-            $this->db->from(db_prefix() . 'invoicepaymentrecords');
-            $this->db->join(db_prefix() . 'payment_modes', '' . db_prefix() . 'invoicepaymentrecords.paymentmode = ' . db_prefix() . 'payment_modes.id', 'LEFT');
-            $this->db->join(db_prefix() . 'invoices', '' . db_prefix() . 'invoices.id = ' . db_prefix() . 'invoicepaymentrecords.invoiceid');
-            if (!$has_permission_view_payments) {
-                $this->db->where('invoiceid IN (select id from ' . db_prefix() . 'invoices where ' . $noPermissionQuery . ')');
-            }
-            $this->db->where('(' . db_prefix() . 'invoicepaymentrecords.id LIKE "' . $this->db->escape_like_str($q) . '"
-                OR ' . db_prefix() . 'payment_modes.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR ' . db_prefix() . 'invoicepaymentrecords.note LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-                OR ' . db_prefix() . 'invoicepaymentrecords.transactionid LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-            )');
-            $this->db->order_by(db_prefix() . 'invoicepaymentrecords.date', 'ASC');
-            $this->db->group_by(db_prefix() . 'invoicepaymentrecords.id');
-            $result['result'] = $this->db->get()->result_array();
-        }
-
-        return $result;
-    }
-
-    public function _search_custom_fields($q, $limit = 0)
-    {
-        $result = [
-            'result'         => [],
-            'type'           => 'custom_fields',
-            'search_heading' => _l('custom_fields'),
-        ];
-
-        $is_admin = is_admin();
-        if ($is_admin) {
-            $this->db->select()->from(db_prefix() . 'customfieldsvalues')->like('value', $q);
-            if ($limit != 0) {
-                $this->db->limit($limit);
-            }
-            $result['result'] = $this->db->get()->result_array();
-        }
-
-        return $result;
-    }
-
-    public function _search_invoice_items($q, $limit = 0)
-    {
-        $result = [
-            'result'         => [],
-            'type'           => 'invoice_items',
-            'search_heading' => _l('invoice_items'),
-        ];
-
-        // Invoice Items Search
-        $has_permission_view_invoices       = staff_can('view',  'invoices');
-        $has_permission_view_invoices_own   = staff_can('view_own',  'invoices');
-        $allow_staff_view_invoices_assigned = get_option('allow_staff_view_invoices_assigned');
-
-        if ($has_permission_view_invoices || $has_permission_view_invoices_own || $allow_staff_view_invoices_assigned == '1') {
-            $noPermissionQuery = get_invoices_where_sql_for_staff(get_staff_user_id());
-            $this->db->select()->from(db_prefix() . 'itemable');
-            $this->db->where('rel_type', 'invoice');
-            $this->db->where('(description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\' OR long_description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\')');
-
-            if (!$has_permission_view_invoices) {
-                $this->db->where('rel_id IN (select id from ' . db_prefix() . 'invoices where ' . $noPermissionQuery . ')');
-            }
-
-            $this->db->order_by('description', 'ASC');
-            $result['result'] = $this->db->get()->result_array();
-        }
-
-        return $result;
-    }
-
-    public function _search_estimate_items($q, $limit = 0)
-    {
-        $result = [
-            'result'         => [],
-            'type'           => 'estimate_items',
-            'search_heading' => _l('estimate_items'),
-        ];
-
-        // Estimate Items Search
-        $has_permission_view_estimates       = staff_can('view',  'estimates');
-        $has_permission_view_estimates_own   = staff_can('view_own',  'estimates');
-        $allow_staff_view_estimates_assigned = get_option('allow_staff_view_estimates_assigned');
-        $default_project = get_default_project();
-        if ($has_permission_view_estimates || $has_permission_view_estimates_own || $allow_staff_view_estimates_assigned) {
-            $noPermissionQuery = get_estimates_where_sql_for_staff(get_staff_user_id());
-            $this->db->select(db_prefix() . 'itemable.rel_id', db_prefix() . 'itemable.description');
-            $this->db->from(db_prefix() . 'itemable');
-            $this->db->join(db_prefix() . 'estimates', db_prefix() . 'estimates.id = ' . db_prefix() . 'itemable.rel_id', 'left');
-            $this->db->where(db_prefix() . 'itemable.rel_type', 'estimate');
-            if (!$has_permission_view_estimates) {
-                $this->db->where(db_prefix() . 'itemable.rel_id IN (select id from ' . db_prefix() . 'estimates where ' . $noPermissionQuery . ')');
-            }
-            $this->db->where(db_prefix() . 'estimates.project_id', $default_project);
-            $this->db->where('(' . db_prefix() . 'itemable.description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\' OR ' . db_prefix() . 'itemable.long_description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\')');
-            $this->db->order_by(db_prefix() . 'itemable.description', 'ASC');
-            $this->db->group_by(db_prefix() . 'estimates.id');
-            $result['result'] = $this->db->get()->result_array();
-        }
-
-        return $result;
-    }
-
-    public function _search_estimate_commodity_groups($q, $limit = 0)
-    {
-        $result = [
-            'result'         => [],
-            'type'           => 'estimate_commodity_groups',
-            'search_heading' => _l('project_budget').' > '._l('Budget head'),
-        ];
-
-        $this->db->select()->from(db_prefix() . 'items_groups')->like('name', $q);
-        if ($limit != 0) {
-            $this->db->limit($limit);
-        }
-        $result['result'] = $this->db->get()->result_array();
-
-        return $result;
-    }
-
-    public function _search_estimate_sub_groups($q, $limit = 0)
-    {
-        $result = [
-            'result'         => [],
-            'type'           => 'estimate_sub_groups',
-            'search_heading' => _l('project_budget').' > '._l('Budget sub head'),
-        ];
-
-        $this->db->select()->from(db_prefix() . 'wh_sub_group')->like('sub_group_name', $q);
-        if ($limit != 0) {
-            $this->db->limit($limit);
-        }
-        $result['result'] = $this->db->get()->result_array();
-
-        return $result;
-    }
-
-    public function _search_estimate_master_areas($q, $limit = 0)
-    {
-        $result = [
-            'result'         => [],
-            'type'           => 'estimate_master_areas',
-            'search_heading' => _l('project_budget').' > '._l('Master area'),
-        ];
-
-        $this->db->select()->from(db_prefix() . 'master_area')->like('category_name', $q)->or_like('description', $q);
-        if ($limit != 0) {
-            $this->db->limit($limit);
-        }
-        $this->db->order_by('category_name', 'ASC');
-        $result['result'] = $this->db->get()->result_array();
-
-        return $result;
-    }
-
-    public function _search_estimate_functionality_areas($q, $limit = 0)
-    {
-        $result = [
-            'result'         => [],
-            'type'           => 'estimate_functionality_areas',
-            'search_heading' => _l('project_budget').' > '._l('Functionality area'),
-        ];
-
-        $this->db->select()->from(db_prefix() . 'functionality_area')->like('category_name', $q)->or_like('description', $q);
-        if ($limit != 0) {
-            $this->db->limit($limit);
-        }
-        $this->db->order_by('category_name', 'ASC');
-        $result['result'] = $this->db->get()->result_array();
-
-        return $result;
-    }
-
-    public function _search_purchase_requests($q, $limit = 0)
-    {
-        $result = [
-            'result'         => [],
-            'type'           => 'purchase_requests',
-            'search_heading' => _l('purchase_request'),
-        ];
-        
-        $default_project = get_default_project();
-        $this->db->select('pr.id, pr.pur_rq_name, pr.pur_rq_code');
-        $this->db->from(db_prefix() . 'pur_request AS pr');
-        $this->db->join(db_prefix() . 'departments AS de', 'de.departmentid = pr.department', 'left');
-        $this->db->join(db_prefix() . 'items_groups AS ig', 'ig.id = pr.group_pur', 'left');
-        $this->db->join(db_prefix() . 'wh_sub_group AS sg', 'sg.id = pr.sub_groups_pur', 'left');
-        $this->db->where('pr.project', $default_project);
-        $this->db->where('(
-            pr.pur_rq_code LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-            OR
-            pr.pur_rq_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-            OR
-            de.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-            OR
-            ig.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-            OR
-            sg.sub_group_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-        )');
-        $this->db->order_by('pr.pur_rq_name', 'ASC');
-        $this->db->group_by('pr.id');
-        if ($limit != 0) {
-            $this->db->limit($limit);
-        }
-        $result['result'] = $this->db->get()->result_array();
-
-        return $result;
-    }
-
-    public function _search_purchase_request_items($q, $limit = 0)
-    {
-        $result = [
-            'result'         => [],
-            'type'           => 'purchase_request_items',
-            'search_heading' => _l('purchase_request_items'),
-        ];
-        
-        $default_project = get_default_project();
-        $this->db->select('pr.id, pr.pur_rq_name, pr.pur_rq_code');
-        $this->db->from(db_prefix() . 'pur_request_detail AS prd');
-        $this->db->join(db_prefix() . 'pur_request AS pr', 'pr.id = prd.pur_request', 'left');
-        $this->db->where('pr.project', $default_project);
-        $this->db->where('(
-            prd.description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-        )');
-        $this->db->order_by('pr.pur_rq_name', 'ASC');
-        $this->db->group_by('pr.id');
-        if ($limit != 0) {
-            $this->db->limit($limit);
-        }
-        $result['result'] = $this->db->get()->result_array();
-
-        return $result;
-    }
-
-    public function _search_quotations($q, $limit = 0)
-    {
-        $result = [
-            'result'         => [],
-            'type'           => 'quotations',
-            'search_heading' => _l('quotations'),
-        ];
-        
-        $default_project = get_default_project();
-        $this->db->select('pe.id');
-        $this->db->from(db_prefix() . 'pur_estimates AS pe');
-        $this->db->join(db_prefix() . 'pur_vendor AS pv', 'pv.userid = pe.vendor', 'left');
-        $this->db->join(db_prefix() . 'items_groups AS ig', 'ig.id = pe.group_pur', 'left');
-        $this->db->join(db_prefix() . 'wh_sub_group AS sg', 'sg.id = pe.sub_groups_pur', 'left');
-        $this->db->where('pe.project', $default_project);
-        $this->db->where('(
-            pv.company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-            OR
-            ig.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-            OR
-            sg.sub_group_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-        )');
-        $this->db->order_by('pe.id', 'ASC');
-        $this->db->group_by('pe.id');
-        if ($limit != 0) {
-            $this->db->limit($limit);
-        }
-        $result['result'] = $this->db->get()->result_array();
-
-        return $result;
-    }
-
-    public function _search_purchase_orders($q, $limit = 0)
-    {
-        $result = [
-            'result'         => [],
-            'type'           => 'purchase_orders',
-            'search_heading' => _l('purchase_orders'),
-        ];
-        
-        $default_project = get_default_project();
-        $this->db->select('po.id, po.pur_order_name, po.pur_order_number');
-        $this->db->from(db_prefix() . 'pur_orders AS po');
-        $this->db->join(db_prefix() . 'pur_vendor AS pv', 'pv.userid = po.vendor', 'left');
-        $this->db->join(db_prefix() . 'items_groups AS ig', 'ig.id = po.group_pur', 'left');
-        $this->db->join(db_prefix() . 'departments AS de', 'de.departmentid = po.department', 'left');
-        $this->db->where('po.project', $default_project);
-        $this->db->where('(
-            po.pur_order_number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-            OR
-            pv.company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-            OR
-            po.pur_order_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-            OR
-            ig.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-            OR
-            po.kind LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-            OR
-            de.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-        )');
-        $this->db->order_by('po.pur_order_name', 'ASC');
-        $this->db->group_by('po.id');
-        if ($limit != 0) {
-            $this->db->limit($limit);
-        }
-        $result['result'] = $this->db->get()->result_array();
-
-        return $result;
-    }
-
-    public function _search_purchase_order_items($q, $limit = 0)
-    {
-        $result = [
-            'result'         => [],
-            'type'           => 'purchase_order_items',
-            'search_heading' => _l('purchase_order_items'),
-        ];
-        
-        $default_project = get_default_project();
-        $this->db->select('po.id, po.pur_order_name, po.pur_order_number');
-        $this->db->from(db_prefix() . 'pur_order_detail AS pod');
-        $this->db->join(db_prefix() . 'pur_orders AS po', 'po.id = pod.pur_order', 'left');
-        $this->db->where('po.project', $default_project);
-        $this->db->where('(
-            pod.description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-        )');
-        $this->db->order_by('po.pur_order_name', 'ASC');
-        $this->db->group_by('po.id');
-        if ($limit != 0) {
-            $this->db->limit($limit);
-        }
-        $result['result'] = $this->db->get()->result_array();
-
-        return $result;
-    }
-
-    public function _search_work_orders($q, $limit = 0)
-    {
-        $result = [
-            'result'         => [],
-            'type'           => 'work_orders',
-            'search_heading' => _l('work_order'),
-        ];
-        
-        $default_project = get_default_project();
-        $this->db->select('wo.id, wo.wo_order_name, wo.wo_order_number');
-        $this->db->from(db_prefix() . 'wo_orders AS wo');
-        $this->db->join(db_prefix() . 'pur_vendor AS pv', 'pv.userid = wo.vendor', 'left');
-        $this->db->join(db_prefix() . 'items_groups AS ig', 'ig.id = wo.group_pur', 'left');
-        $this->db->join(db_prefix() . 'departments AS de', 'de.departmentid = wo.department', 'left');
-        $this->db->where('wo.project', $default_project);
-        $this->db->where('(
-            wo.wo_order_number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-            OR
-            pv.company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-            OR
-            wo.wo_order_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-            OR
-            ig.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-            OR
-            wo.kind LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-            OR
-            de.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-        )');
-        $this->db->order_by('wo.wo_order_name', 'ASC');
-        $this->db->group_by('wo.id');
-        if ($limit != 0) {
-            $this->db->limit($limit);
-        }
-        $result['result'] = $this->db->get()->result_array();
-
-        return $result;
-    }
-
-    public function _search_work_order_items($q, $limit = 0)
-    {
-        $result = [
-            'result'         => [],
-            'type'           => 'work_order_items',
-            'search_heading' => _l('work_order_items'),
-        ];
-        
-        $default_project = get_default_project();
-        $this->db->select('wo.id, wo.wo_order_name, wo.wo_order_number');
-        $this->db->from(db_prefix() . 'wo_order_detail AS wod');
-        $this->db->join(db_prefix() . 'wo_orders AS wo', 'wo.id = wod.wo_order', 'left');
-        $this->db->where('wo.project', $default_project);
-        $this->db->where('(
-            wod.description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-        )');
-        $this->db->order_by('wo.wo_order_name', 'ASC');
-        $this->db->group_by('wo.id');
-        if ($limit != 0) {
-            $this->db->limit($limit);
-        }
-        $result['result'] = $this->db->get()->result_array();
-
-        return $result;
-    }
-
-    public function _search_change_orders($q, $limit = 0)
-    {
-        $result = [
-            'result'         => [],
-            'type'           => 'change_orders',
-            'search_heading' => _l('Change Orders'),
-        ];
-        
-        $default_project = get_default_project();
-        $this->db->select('co.id, co.pur_order_name, co.pur_order_number');
-        $this->db->from(db_prefix() . 'co_orders AS co');
-        $this->db->join(db_prefix() . 'pur_vendor AS pv', 'pv.userid = co.vendor', 'left');
-        $this->db->join(db_prefix() . 'items_groups AS ig', 'ig.id = co.group_pur', 'left');
-        $this->db->join(db_prefix() . 'wh_sub_group AS sg', 'sg.id = co.sub_groups_pur', 'left');
-        $this->db->join(db_prefix() . 'departments AS de', 'de.departmentid = co.department', 'left');
-        $this->db->where('co.project', $default_project);
-        $this->db->where('(
-            co.pur_order_number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-            OR
-            pv.company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-            OR
-            co.pur_order_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-            OR
-            ig.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-            OR
-            sg.sub_group_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-            OR
-            co.type LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-            OR
-            de.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-        )');
-        $this->db->order_by('co.pur_order_name', 'ASC');
-        $this->db->group_by('co.id');
-        if ($limit != 0) {
-            $this->db->limit($limit);
-        }
-        $result['result'] = $this->db->get()->result_array();
-
-        return $result;
-    }
-
-    public function _search_change_order_items($q, $limit = 0)
-    {
-        $result = [
-            'result'         => [],
-            'type'           => 'change_order_items',
-            'search_heading' => _l('Change Order Items'),
-        ];
-        
-        $default_project = get_default_project();
-        $this->db->select('co.id, co.pur_order_name, co.pur_order_number');
-        $this->db->from(db_prefix() . 'co_order_detail AS cod');
-        $this->db->join(db_prefix() . 'co_orders AS co', 'co.id = cod.pur_order', 'left');
-        $this->db->where('co.project', $default_project);
-        $this->db->where('(
-            cod.description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-        )');
-        $this->db->order_by('co.pur_order_name', 'ASC');
-        $this->db->group_by('co.id');
-        if ($limit != 0) {
-            $this->db->limit($limit);
-        }
         $result['result'] = $this->db->get()->result_array();
 
         return $result;

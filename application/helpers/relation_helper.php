@@ -192,7 +192,7 @@ function get_relation_data($type, $rel_id = '', $extra = [])
     } elseif ($type == 'wo_order') {
         if ($rel_id != '') {
         } else {
-            $search = $CI->misc_model->_search_wo_delivery($q);
+            $search = $CI->misc_model->_search_work_orders($q);
             $data   = $search['result'];
         }
     } elseif ($type == 'payment_certificate') {
@@ -208,7 +208,7 @@ function get_relation_data($type, $rel_id = '', $extra = [])
 
         if ($rel_id != '') {
         } else {
-            $search = $CI->misc_model->_search_purchase_request($q);
+            $search = $CI->misc_model->_search_purchase_requests($q);
             $data   = $search['result'];
         }
     } elseif ($type == 'drawing') {
