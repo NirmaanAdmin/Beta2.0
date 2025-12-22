@@ -1750,24 +1750,22 @@ class Misc_model extends App_Model
             }
             $noPermissionQuery = get_invoices_where_sql_for_staff(get_staff_user_id());
             // Invoice payment records
-            $this->db->select('*,' . db_prefix() . 'invoicepaymentrecords.id as paymentid');
+            $this->db->select(db_prefix() . 'invoicepaymentrecords.date,' . db_prefix() . 'invoicepaymentrecords.id as paymentid');
             $this->db->from(db_prefix() . 'invoicepaymentrecords');
             $this->db->join(db_prefix() . 'payment_modes', '' . db_prefix() . 'invoicepaymentrecords.paymentmode = ' . db_prefix() . 'payment_modes.id', 'LEFT');
             $this->db->join(db_prefix() . 'invoices', '' . db_prefix() . 'invoices.id = ' . db_prefix() . 'invoicepaymentrecords.invoiceid');
-
             if (!$has_permission_view_payments) {
                 $this->db->where('invoiceid IN (select id from ' . db_prefix() . 'invoices where ' . $noPermissionQuery . ')');
             }
-
             $this->db->where('(' . db_prefix() . 'invoicepaymentrecords.id LIKE "' . $this->db->escape_like_str($q) . '"
                 OR paymentmode LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR ' . db_prefix() . 'payment_modes.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR ' . db_prefix() . 'invoicepaymentrecords.note LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR number LIKE "' . $this->db->escape_like_str($q) . ' ESCAPE \'!\'"
-                )');
-
+                OR ' . db_prefix() . 'invoicepaymentrecords.transactionid LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            )');
             $this->db->order_by(db_prefix() . 'invoicepaymentrecords.date', 'ASC');
-
+            $this->db->group_by(db_prefix() . 'invoicepaymentrecords.id');
             $result['result'] = $this->db->get()->result_array();
         }
 
