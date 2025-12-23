@@ -615,6 +615,16 @@ class Misc_model extends App_Model
             $result[] = $estimate_functionality_areas_search;
         }
 
+        $items_search = $this->_search_items($q, $limit);
+        if (count($items_search['result']) > 0) {
+            $result[] = $items_search;
+        }
+
+        $unawarded_trackers_search = $this->_search_unawarded_trackers($q, $limit);
+        if (count($unawarded_trackers_search['result']) > 0) {
+            $result[] = $unawarded_trackers_search;
+        }
+
         $purchase_requests_search = $this->_search_purchase_requests($q, $limit);
         if (count($purchase_requests_search['result']) > 0) {
             $result[] = $purchase_requests_search;
@@ -1080,6 +1090,72 @@ class Misc_model extends App_Model
         }
         $this->db->order_by('category_name', 'ASC');
         $this->db->group_by(db_prefix() . 'functionality_area.id');
+        $result['result'] = $this->db->get()->result_array();
+        return $result;
+    }
+
+    public function _search_items($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'items',
+            'search_heading' => _l('items'),
+        ];
+        $this->db->select('it.id, it.commodity_code, it.description');
+        $this->db->from(db_prefix() . 'items AS it');
+        $this->db->join(db_prefix() . 'items_groups AS ig', 'ig.id = it.group_id', 'left');
+        $this->db->join(db_prefix() . 'wh_sub_group AS sg', 'sg.id = it.sub_group', 'left');
+        $this->db->where('(
+            it.commodity_code LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            it.description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            ig.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            sg.sub_group_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            it.long_description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            it.commodity_barcode LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            it.sku_code LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            it.sku_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('it.commodity_code', 'DESC');
+        $this->db->group_by('it.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $result['result'] = $this->db->get()->result_array();
+        return $result;
+    }
+
+    public function _search_unawarded_trackers($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'unawarded_trackers',
+            'search_heading' => _l('unawarded_tracker'),
+        ];
+        $default_project = get_default_project();
+        $this->db->select('epi.id, epi.package_name');
+        $this->db->from(db_prefix() . 'estimate_package_info AS epi');
+        $this->db->join(db_prefix() . 'estimates AS est', 'est.id = epi.estimate_id');
+        $this->db->join(db_prefix() . 'items_groups AS ig', 'ig.id = epi.budget_head');
+        $this->db->where('est.project_id', $default_project);
+        $this->db->where('(
+            epi.package_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            ig.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            epi.kind LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('epi.package_name', 'ASC');
+        $this->db->group_by('epi.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
         $result['result'] = $this->db->get()->result_array();
         return $result;
     }

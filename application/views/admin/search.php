@@ -45,6 +45,12 @@
             case 'estimate_functionality_areas':
             $output = '<a href="'.admin_url('costplanning/setting?group=functionality_area').'">'.e($_result['category_name']).'</a>';
             break;
+            case 'items':
+            $output = '<a href="'.admin_url('purchase/items/'.$_result['id']).'">'.e($_result['commodity_code']).' '.e($_result['description']).'</a>';
+            break;
+            case 'unawarded_trackers':
+            $output = '<a href="'.admin_url('purchase/unawarded_tracker').'">'.e($_result['package_name']).'</a>';
+            break;
             case 'purchase_requests':
             $output = '<a href="'.admin_url('purchase/view_pur_request/'.$_result['id']).'">'.e($_result['pur_rq_code']).'</a>';
             break;
