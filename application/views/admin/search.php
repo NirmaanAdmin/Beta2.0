@@ -108,6 +108,18 @@
             $output .= '<small>'.e($_result['description']).'</small>';
             $output .= '</a>';
             break;
+            case 'stock_import':
+            $output = '<a href="'.admin_url('warehouse/manage_purchase/'.$_result['id']).'">'.e($_result['goods_receipt_code']).'</a>';
+            break;
+            case 'stock_import_items':
+            $output = '<a href="'.admin_url('warehouse/manage_purchase/'.$_result['id']).'">'.e($_result['goods_receipt_code']).'</a>';
+            break;
+            case 'stock_export':
+            $output = '<a href="'.admin_url('warehouse/manage_delivery/'.$_result['id']).'">'.e($_result['goods_delivery_code']).'</a>';
+            break;
+            case 'stock_export_items':
+            $output = '<a href="'.admin_url('warehouse/manage_delivery/'.$_result['id']).'">'.e($_result['goods_delivery_code']).'</a>';
+            break;
             case 'expenses':
             $output = '<a href="'.admin_url('expenses/list_expenses/'.$_result['expenseid']).'">'.e($_result['category_name']). ' - ' .e(app_format_money($_result['amount'], $_result['currency_name'])).'</a>';
             break;

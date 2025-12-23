@@ -186,7 +186,7 @@ function get_relation_data($type, $rel_id = '', $extra = [])
 
         if ($rel_id != '') {
         } else {
-            $search = $CI->misc_model->_search_goods_delivery($q);
+            $search = $CI->misc_model->_search_stock_export($q);
             $data   = $search['result'];
         }
     } elseif ($type == 'wo_order') {

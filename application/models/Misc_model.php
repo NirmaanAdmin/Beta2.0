@@ -705,6 +705,26 @@ class Misc_model extends App_Model
             $result[] = $credit_note_items_search;
         }
 
+        $stock_import_search = $this->_search_stock_import($q, $limit);
+        if (count($stock_import_search['result']) > 0) {
+            $result[] = $stock_import_search;
+        }
+
+        $stock_import_items_search = $this->_search_stock_import_items($q, $limit);
+        if (count($stock_import_items_search['result']) > 0) {
+            $result[] = $stock_import_items_search;
+        }
+
+        $stock_export_search = $this->_search_stock_export($q, $limit);
+        if (count($stock_export_search['result']) > 0) {
+            $result[] = $stock_export_search;
+        }
+
+        $stock_export_items_search = $this->_search_stock_export_items($q, $limit);
+        if (count($stock_export_items_search['result']) > 0) {
+            $result[] = $stock_export_items_search;
+        }
+
         $expenses_search = $this->_search_expenses($q, $limit);
         if (count($expenses_search['result']) > 0) {
             $result[] = $expenses_search;
@@ -1769,6 +1789,125 @@ class Misc_model extends App_Model
         return $result;
     }
 
+    public function _search_stock_import($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'stock_import',
+            'search_heading' => _l('stock_import'),
+        ];
+        $default_project = get_default_project();
+        $this->db->select('gr.id, gr.goods_receipt_code');
+        $this->db->from(db_prefix() . 'goods_receipt AS gr');
+        $this->db->join(db_prefix() . 'pur_vendor AS pv', 'pv.userid = gr.supplier_code', 'left');
+        $this->db->join(db_prefix() . 'pur_orders AS po', 'po.id = gr.pr_order_id', 'left');
+        $this->db->join(db_prefix() . 'wo_orders AS wo', 'wo.id = gr.wo_order_id', 'left');
+        $this->db->where('gr.project', $default_project);
+        $this->db->where('(
+            gr.goods_receipt_code LIKE "' . $this->db->escape_like_str($q) . '"
+            OR
+            pv.company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            gr.kind LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            po.pur_order_number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            po.pur_order_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            wo.wo_order_number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            wo.wo_order_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('gr.goods_receipt_code', 'ASC');
+        $this->db->group_by('gr.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $result['result'] = $this->db->get()->result_array();
+        return $result;
+    }
+
+    public function _search_stock_import_items($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'stock_import_items',
+            'search_heading' => _l('Stock Received Items'),
+        ];
+        $default_project = get_default_project();
+        $this->db->select('gr.id, gr.goods_receipt_code');
+        $this->db->from(db_prefix() . 'goods_receipt_detail AS grd');
+        $this->db->join(db_prefix() . 'goods_receipt AS gr', 'gr.id = grd.goods_receipt_id', 'left');
+        $this->db->where('gr.project', $default_project);
+        $this->db->where('(
+            grd.description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('gr.goods_receipt_code', 'ASC');
+        $this->db->group_by('gr.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $result['result'] = $this->db->get()->result_array();
+        return $result;
+    }
+
+    public function _search_stock_export($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'stock_export',
+            'search_heading' => _l('stock_export'),
+        ];
+        $default_project = get_default_project();
+        $this->db->select('gd.id, gd.goods_delivery_code');
+        $this->db->from(db_prefix() . 'goods_delivery AS gd');
+        $this->db->join(db_prefix() . 'pur_orders AS po', 'po.id = gd.pr_order_id', 'left');
+        $this->db->join(db_prefix() . 'wo_orders AS wo', 'wo.id = gd.wo_order_id', 'left');
+        $this->db->where('gd.project', $default_project);
+        $this->db->where('(
+            gd.goods_delivery_code LIKE "' . $this->db->escape_like_str($q) . '"
+            OR
+            po.pur_order_number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            po.pur_order_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            wo.wo_order_number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            wo.wo_order_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('gd.goods_delivery_code', 'ASC');
+        $this->db->group_by('gd.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $result['result'] = $this->db->get()->result_array();
+        return $result;
+    }
+
+    public function _search_stock_export_items($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'stock_export_items',
+            'search_heading' => _l('Stock Issued Items'),
+        ];
+        $default_project = get_default_project();
+        $this->db->select('gd.id, gd.goods_delivery_code');
+        $this->db->from(db_prefix() . 'goods_delivery_detail AS gdd');
+        $this->db->join(db_prefix() . 'goods_delivery AS gd', 'gd.id = gdd.goods_delivery_id', 'left');
+        $this->db->where('gd.project', $default_project);
+        $this->db->where('(
+            gdd.description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('gd.goods_delivery_code', 'ASC');
+        $this->db->group_by('gd.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $result['result'] = $this->db->get()->result_array();
+        return $result;
+    }
+
     public function _search_expenses($q, $limit = 0)
     {
         $result = [
@@ -2163,58 +2302,6 @@ class Misc_model extends App_Model
 
         // Ensure sorting works with TEXT
         $this->db->order_by('CAST(invoice_number AS CHAR)', 'ASC');
-        $result['result'] = $this->db->get()->result_array();
-
-        return $result;
-    }
-
-    public function _search_stock_import($q, $limit = 0)
-    {
-        $result = [
-            'result'         => [],
-            'type'           => 'stock_import',
-            'search_heading' => _l('stock_import'),
-        ];
-
-        // Goods Receipt
-        $this->db->select();
-        $this->db->from(db_prefix() . 'goods_receipt');
-
-        // Search in the specified column with safe escaping
-        $this->db->where('(goods_receipt_code LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\')');
-
-        if ($limit > 0) {
-            $this->db->limit($limit);
-        }
-
-        // Order by goods receipt code
-        $this->db->order_by('goods_receipt_code', 'ASC');
-        $result['result'] = $this->db->get()->result_array();
-
-        return $result;
-    }
-    
-    public function _search_goods_delivery($q, $limit = 0)
-    {
-        $result = [
-            'result'         => [],
-            'type'           => 'stock_export',
-            'search_heading' => _l('stock_export'),
-        ];
-
-        // Goods Receipt
-        $this->db->select();
-        $this->db->from(db_prefix() . 'goods_delivery');
-
-        // Search in the specified column with safe escaping
-        $this->db->where('(goods_delivery_code LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\')');
-
-        if ($limit > 0) {
-            $this->db->limit($limit);
-        }
-
-        // Order by goods receipt code
-        $this->db->order_by('goods_delivery_code', 'ASC');
         $result['result'] = $this->db->get()->result_array();
 
         return $result;
