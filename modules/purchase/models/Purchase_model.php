@@ -25877,4 +25877,26 @@ class Purchase_model extends App_Model
         return $this->db->get(db_prefix() . 'pur_tender')->row();
 
     }
+
+    public function letter_of_agreement_add_update($data){
+        if(isset($data['loa_id']) && $data['loa_id'] !=''){
+            $id = $data['loa_id'];
+            unset($data['loa_id']);
+            $data['updated_at'] = date('Y-m-d H:i:s');
+            $this->db->where('id', $id);
+            $this->db->update(db_prefix() . 'tender_latter_of_agreement', $data);
+            return $id;
+        } else {
+            unset($data['loa_id']);
+            $data['created_at'] = date('Y-m-d H:i:s');
+            $this->db->insert(db_prefix() . 'tender_latter_of_agreement', $data);
+            $insert_id = $this->db->insert_id();
+            return $insert_id;
+        }
+    }
+
+    public function get_latter_of_agreement_detail($tender_id){
+        $this->db->where('tender_id', $tender_id);
+        return $this->db->get(db_prefix() . 'tender_latter_of_agreement')->result_array();
+    }
 }

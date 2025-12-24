@@ -99,19 +99,32 @@
                 <div class="col-md-12">
                     <div class="panel_s">
                         <div class="panel-body">
-                            <div class="draft-mark">[(Draft LOA)]</div>
-
+                            <?php echo form_open(admin_url('purchase/letter_of_agreement_add_update'), array('id' => 'letter-of-agreement-form')); 
+                            $dreaft_mark = isset($loa_data[0]['draft_mark']) ? $loa_data[0]['draft_mark'] : 'Draft LOA';
+                            ?>
+                            <div class="draft-mark">[(<input type="text" class="form-control" name="draft_mark" value="<?php echo $dreaft_mark; ?>">)]</div>
+                            <!-- Hidden fields for tracking -->
+                            <input type="hidden" name="loa_id" value="<?php echo isset($loa_data[0]['id']) ? $loa_data[0]['id'] : ''; ?>">
+                            <input type="hidden" name="tender_id" value="<?php echo $tender_data[0]['tender_id']; ?>">
+                            <input type="hidden" name="vendor_id" value="<?php echo $tender_data[0]['vendor_id']; ?>">
+                            <input type="hidden" name="project_id" value="<?php echo $tender_data[0]['project_id']; ?>">
                             <div class="header">
-                                <div class="ref">Our ref: ABH-LOA-[UGF-ID]-017-R0</div>
+                                <?php $ref = isset($loa_data[0]['our_ref']) ? $loa_data[0]['our_ref'] : ''; ?>
+                                <div class="ref">Our ref: <input type="text" class="form-control" name="our_ref" value="<?php echo $ref; ?>"></div>
                                 <div class="date"><?php echo date('d M, Y', strtotime($tender_data[0]['date'])) ?></div>
                             </div>
 
                             <div class="address-block">
-                                <p><strong>M/s <?php echo get_vendor_name_by_id($tender_data[0]['vendor_id']); ?></strong></p>
-                                <p><?php echo get_vendor_all_details_by_id($tender_data[0]['vendor_id'])->address; ?></p>
-                                <p>Email: <?php echo get_vendor_all_details_by_id($tender_data[0]['vendor_id'])->com_email; ?></p>
-                                <p><strong>Attn : </strong></p>
-                                <p><strong>Cont. :</strong> <?php echo get_vendor_all_details_by_id($tender_data[0]['vendor_id'])->phonenumber; ?></p>
+                                <?php $company_name = isset($loa_data[0]['company_name']) ? $loa_data[0]['company_name'] : 'M/s ' . get_vendor_name_by_id($tender_data[0]['vendor_id']); ?>
+                                <p><strong><input type="text" class="form-control" name="company_name" value="<?php echo $company_name; ?>"></strong></p>
+                                <?php $address = isset($loa_data[0]['address']) ? $loa_data[0]['address'] : get_vendor_all_details_by_id($tender_data[0]['vendor_id'])->address; ?>
+                                <p><input type="text" class="form-control" name="address" value="<?php echo $address; ?>"></p>
+                                <?php $email = isset($loa_data[0]['email']) ? $loa_data[0]['email'] : get_vendor_all_details_by_id($tender_data[0]['vendor_id'])->com_email; ?>
+                                <p>Email:<input type="text" class="form-control" name="email" value="<?php echo $email; ?>"></p>
+                                <?php $attn = isset($loa_data[0]['attn']) ? $loa_data[0]['attn'] : ''; ?>
+                                <p><strong>Attn : <input type="text" class="form-control" name="attn" value="<?php echo $attn; ?>"></strong></p>
+                                <?php $contact_number = isset($loa_data[0]['contact_number']) ? $loa_data[0]['contact_number'] : get_vendor_all_details_by_id($tender_data[0]['vendor_id'])->phonenumber; ?>
+                                <p><strong>Cont. :<input type="text" class="form-control" name="contact_number" value="<?php echo $contact_number; ?>"> </strong></p>
                             </div>
 
                             <p>Dear Sir,</p>
@@ -137,7 +150,7 @@
                                     <li>Your final offer dated 24<sup>th</sup> August' 2023,</li>
                                 </ul>
 
-                                <p>We hereby accept your final offer of <span class="highlight">Rs: 9,69,06,263/- (Nine Crore Sixty-Nine Lakh Six Thousand Two Hundred Sixty-Three Only)</span> for <span class="highlight">Upper Ground Floor</span> Interior and Mill Works as accepted contract amount including all taxes, GST duties, levies, cess, royalties, excluding of labour cess in conformity with the Conditions of Contract, Specification, Drawings, Bill of Quantities and Addendum etc. issued to you. The labour cess shall be deposited by us. Please note that this a re-measurable contract and payment is subjected to the quantities executed and certified at site.</p>
+                                <p>We hereby accept your final offer of <span class="highlight">Rs: 0</span> for <span class="highlight"><?php echo tender_name_by_id($tender_data[0]['tender_id']); ?></span> Interior and Mill Works as accepted contract amount including all taxes, GST duties, levies, cess, royalties, excluding of labour cess in conformity with the Conditions of Contract, Specification, Drawings, Bill of Quantities and Addendum etc. issued to you. The labour cess shall be deposited by us. Please note that this a re-measurable contract and payment is subjected to the quantities executed and certified at site.</p>
 
                                 <p>The Time for Completion shall be <span class="highlight">on or before 30<sup>th</sup> November' 2023</span> including site mobilization, holidays, monsoon etc.</p>
 
@@ -189,17 +202,28 @@
 
                             <div class="acknowledgement">
                                 <p class="underline">Acknowledged and confirmed by:</p>
-                                <p>Name of the Contractor: - <strong>M/S Ashish Inter Build Pvt. Ltd.</strong></p>
-                                <p>Represented by (in capitals): - <strong>Mr. Mehul Pabari</strong></p>
-                                <p>Designation / Position: - <strong>Project Manager</strong></p>
+                                <?php $contractor_name = isset($loa_data[0]['contractor_name']) ? $loa_data[0]['contractor_name'] : ''; ?>
+                                <p>Name of the Contractor: - <strong><input type="text" class="form-control" name="contractor_name" value="<?php echo $contractor_name; ?>"></strong></p>
+                                <?php $represented_by = isset($loa_data[0]['represented_by']) ? $loa_data[0]['represented_by'] : ''; ?>
+                                <p>Represented by (in capitals): - <strong><input type="text" class="form-control" name="represented_by" value="<?php echo $represented_by; ?>"></strong></p>
+                                <?php $designation = isset($loa_data[0]['designation']) ? $loa_data[0]['designation'] : ''; ?>
+                                <p>Designation / Position: - <strong><input type="text" class="form-control" name="designation" value="<?php echo $designation; ?>"></strong></p>
                                 <p>Signature: - _______________________________</p>
                                 <p>Date: - _______________________________</p>
                                 <p>Company Stamp: - _______________________________</p>
                             </div>
 
-                            <div class="footer">
-                                <p>Document: BGJ-LOA-UGF-AIPL-017-R0</p>
+                            <div class="footer col-md-2 ">
+                                <?php $document_number = isset($loa_data[0]['document_number']) ? $loa_data[0]['document_number'] : ''; ?>
+                                <p>Document: <input type="text" class="form-control" name="document_number" value="<?php echo $document_number; ?>"></p>
                             </div>
+                            <div class="btn-bottom-toolbar btn-toolbar-container-out text-right">
+                                <button class="btn btn-info only-save customer-form-submiter">
+                                    <?php echo _l('submit'); ?>
+                                </button>
+
+                            </div>
+                            <?php echo form_close(); ?>
                         </div>
                     </div>
                 </div>

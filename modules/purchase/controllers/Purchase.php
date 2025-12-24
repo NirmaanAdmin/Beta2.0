@@ -16834,7 +16834,7 @@ class purchase extends AdminController
             $success = $this->purchase_model->add_tender_document($this->input->post(), $tender_id);
             if ($success) {
                 set_alert('success', _l('added_successfully', _l('tender_document')));
-            }
+            } 
             redirect(admin_url('purchase/view_pur_tender/' . $tender_id));
         }
         $data['title'] = _l('add_tender_document');
@@ -16846,6 +16846,7 @@ class purchase extends AdminController
     {
         $data['title'] = _l('Latter of Agreement');
         $data['tender_id'] = $tender_id;
+        $data['loa_data'] = $this->purchase_model->get_latter_of_agreement_detail($tender_id);
         $data['tender_data'] = $this->purchase_model->get_tender_document_detail($tender_id);
         $this->load->view('purchase_tender/latter_of_agreement', $data);
     }
@@ -17118,5 +17119,17 @@ class purchase extends AdminController
         $item_key = $this->input->post('item_key');
 
         echo $this->purchase_model->create_purchase_tender_row_template($name, $item_code, $item_description, $area, $image, $quantity, $item_key, '','', $remarks,$unit_price, $item_text);
+    }
+
+    public function letter_of_agreement_add_update(){
+        if ($this->input->post()) {
+            $data = $this->input->post();
+            
+            $success = $this->purchase_model->letter_of_agreement_add_update($data);
+            if ($success) {
+                set_alert('success', _l('updated_successfully', _l('Latter of Agreement')));
+            } 
+            redirect(admin_url('purchase/view_latter_of_agreement/' . $data['tender_id']));
+        }
     }
 }
