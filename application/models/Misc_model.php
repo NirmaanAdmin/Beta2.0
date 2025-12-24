@@ -685,6 +685,16 @@ class Misc_model extends App_Model
             $result[] = $payments_search;
         }
 
+        $pur_invoices_search = $this->_search_pur_invoices($q, $limit);
+        if (count($pur_invoices_search['result']) > 0) {
+            $result[] = $pur_invoices_search;
+        }
+
+        $pur_invoice_payments_search = $this->_search_pur_invoice_payments($q, $limit);
+        if (count($pur_invoice_payments_search['result']) > 0) {
+            $result[] = $pur_invoice_payments_search;
+        }
+
         $debit_notes_search = $this->_search_debit_notes($q, $limit);
         if (count($debit_notes_search['result']) > 0) {
             $result[] = $debit_notes_search;
@@ -1626,6 +1636,87 @@ class Misc_model extends App_Model
         return $result;
     }
 
+    public function _search_pur_invoices($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'pur_invoices',
+            'search_heading' => _l('Vendor Billing Tracker'),
+        ];
+        $default_project = get_default_project();
+        $this->db->select('pi.id, pi.invoice_number');
+        $this->db->from(db_prefix() . 'pur_invoices AS pi');
+        $this->db->join(db_prefix() . 'pur_vendor AS pv', 'pv.userid = pi.vendor', 'left');
+        $this->db->join(db_prefix() . 'items_groups AS ig', 'ig.id = pi.group_pur', 'left');
+        $this->db->join(db_prefix() . 'itemable AS it', 'it.vbt_id = pi.id AND it.rel_type = "invoice"', 'left');
+        $this->db->join(db_prefix() . 'invoices AS inv', 'inv.id = it.rel_id', 'left');
+        $this->db->join(db_prefix() . 'pur_orders AS po', 'po.id = pi.pur_order', 'left');
+        $this->db->join(db_prefix() . 'wo_orders AS wo', 'wo.id = pi.wo_order', 'left');
+        $this->db->join(db_prefix() . 'pur_order_tracker AS pot', 'pot.id = pi.order_tracker_id', 'left');
+        $this->db->where('pi.project_id', $default_project);
+        $this->db->where('(
+            pi.invoice_number LIKE "' . $this->db->escape_like_str($q) . '"
+            OR
+            pi.vendor_invoice_number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pv.company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            ig.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pi.description_services LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            inv.title LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pi.vendor_submitted_amount_without_tax LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pi.vendor_submitted_tax_amount LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pi.final_certified_amount LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            po.pur_order_number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            po.pur_order_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            wo.wo_order_number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            wo.wo_order_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pot.pur_order_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pi.adminnote LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('pi.id', 'ASC');
+        $this->db->group_by('pi.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $result['result'] = $this->db->get()->result_array();
+        return $result;
+    }
+
+    public function _search_pur_invoice_payments($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'pur_invoice_payments',
+            'search_heading' => _l('Vendor Payment Tracker'),
+        ];
+        $default_project = get_default_project();
+        $this->db->select('pi.id, pi.invoice_number');
+        $this->db->from(db_prefix() . 'pur_invoices AS pi');
+        $this->db->where('pi.project_id', $default_project);
+        $this->db->where('(
+            pi.payment_remarks LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('pi.id', 'ASC');
+        $this->db->group_by('pi.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $result['result'] = $this->db->get()->result_array();
+        return $result;
+    }
+
     public function _search_debit_notes($q, $limit = 0)
     {
         $result = [
@@ -2274,34 +2365,6 @@ class Misc_model extends App_Model
         }
 
         $this->db->order_by('contract_name', 'ASC');
-        $result['result'] = $this->db->get()->result_array();
-
-        return $result;
-    }
-
-    public function _search_pur_invoices($q, $limit = 0)
-    {
-        $result = [
-            'result'         => [],
-            'type'           => 'pur_invoices',
-            'search_heading' => _l('invoices'),
-        ];
-
-        // Invoices
-        $this->db->select();
-        $this->db->from(db_prefix() . 'pur_invoices');
-
-        // Search in the specified columns
-        $this->db->where('(CAST(invoice_number AS CHAR) LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\' 
-        
-        )');
-
-        if ($limit != 0) {
-            $this->db->limit($limit);
-        }
-
-        // Ensure sorting works with TEXT
-        $this->db->order_by('CAST(invoice_number AS CHAR)', 'ASC');
         $result['result'] = $this->db->get()->result_array();
 
         return $result;

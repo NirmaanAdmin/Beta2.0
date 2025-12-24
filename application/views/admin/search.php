@@ -90,6 +90,12 @@
             case 'invoice_payment_records':
             $output = '<a href="'.admin_url('payments/payment/'.$_result['paymentid']).'">#'.$_result['paymentid'].'<span class="pull-right">'.e(date('Y',strtotime($_result['date']))).'</span></a>';
             break;
+            case 'pur_invoices':
+            $output = '<a href="'.admin_url('purchase/purchase_invoice/'.$_result['id']).'">'.e($_result['invoice_number']).'</a>';
+            break;
+            case 'pur_invoice_payments':
+            $output = '<a href="'.admin_url('purchase/purchase_invoice/'.$_result['id']).'">'.e($_result['invoice_number']).'</a>';
+            break;
             case 'debit_note':
             $output = '<a href="'.admin_url('purchase/debit_notes/'.$_result['id']).'">'.e(format_debit_note_number($_result['id'])).'<span class="pull-right">'.e(date('Y',strtotime($_result['date']))).'</span></a>';
             break;
