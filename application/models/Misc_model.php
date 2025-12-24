@@ -660,6 +660,16 @@ class Misc_model extends App_Model
             $result[] = $work_order_items_search;
         }
 
+        $pur_bills_search = $this->_search_pur_bills($q, $limit);
+        if (count($pur_bills_search['result']) > 0) {
+            $result[] = $pur_bills_search;
+        }
+
+        $pur_bill_items_search = $this->_search_pur_bill_items($q, $limit);
+        if (count($pur_bill_items_search['result']) > 0) {
+            $result[] = $pur_bill_items_search;
+        }
+
         $change_orders_search = $this->_search_change_orders($q, $limit);
         if (count($change_orders_search['result']) > 0) {
             $result[] = $change_orders_search;
@@ -1391,6 +1401,73 @@ class Misc_model extends App_Model
         )');
         $this->db->order_by('wo.wo_order_name', 'ASC');
         $this->db->group_by('wo.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $result['result'] = $this->db->get()->result_array();
+        return $result;
+    }
+
+    public function _search_pur_bills($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'pur_bills',
+            'search_heading' => _l('bill_bifurcation'),
+        ];
+        $default_project = get_default_project();
+        $this->db->select('pb.id, pb.bill_code');
+        $this->db->from(db_prefix() . 'pur_bills AS pb');
+        $this->db->join(db_prefix() . 'pur_vendor AS pv', 'pv.userid = pb.vendor', 'left');
+        $this->db->join(db_prefix() . 'pur_orders AS po', 'po.id = pb.pur_order', 'left');
+        $this->db->join(db_prefix() . 'wo_orders AS wo', 'wo.id = pb.wo_order', 'left');
+        $this->db->join(db_prefix() . 'pur_order_tracker AS pot', 'pot.id = pb.order_tracker_id', 'left');
+        $this->db->where('pb.project_id', $default_project);
+        $this->db->where('(
+            pb.bill_code LIKE "' . $this->db->escape_like_str($q) . '"
+            OR
+            pb.bill_number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pv.company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            po.pur_order_number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            po.pur_order_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            wo.wo_order_number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            wo.wo_order_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pot.pur_order_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pb.transactionid LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('pb.id', 'ASC');
+        $this->db->group_by('pb.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $result['result'] = $this->db->get()->result_array();
+        return $result;
+    }
+
+    public function _search_pur_bill_items($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'pur_bill_items',
+            'search_heading' => _l('Bill Bifurcation Items'),
+        ];
+        $default_project = get_default_project();
+        $this->db->select('pb.id, pb.bill_code');
+        $this->db->from(db_prefix() . 'pur_bill_details AS pbd');
+        $this->db->join(db_prefix() . 'pur_bills AS pb', 'pb.id = pbd.pur_bill', 'left');
+        $this->db->where('pb.project_id', $default_project);
+        $this->db->where('(
+            pbd.description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('pb.id', 'ASC');
+        $this->db->group_by('pb.id');
         if ($limit != 0) {
             $this->db->limit($limit);
         }

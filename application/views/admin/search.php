@@ -72,6 +72,12 @@
             case 'work_order_items':
             $output = '<a href="'.admin_url('purchase/work_order/'.$_result['id']).'">'.e($_result['wo_order_number']).'</a>';
             break;
+            case 'pur_bills':
+            $output = '<a href="'.admin_url('purchase/edit_pur_bills/'.$_result['id']).'">'.e($_result['bill_code']).'</a>';
+            break;
+            case 'pur_bill_items':
+            $output = '<a href="'.admin_url('purchase/edit_pur_bills/'.$_result['id']).'">'.e($_result['bill_code']).'</a>';
+            break;
             case 'change_orders':
             $output = '<a href="'.admin_url('changee/changee_order/'.$_result['id']).'">'.e($_result['pur_order_number']).'</a>';
             break;
