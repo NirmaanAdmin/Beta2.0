@@ -660,6 +660,11 @@ class Misc_model extends App_Model
             $result[] = $work_order_items_search;
         }
 
+        $payment_certificate_search = $this->_search_payment_certificate($q, $limit);
+        if (count($payment_certificate_search['result']) > 0) {
+            $result[] = $payment_certificate_search;
+        }
+
         $pur_bills_search = $this->_search_pur_bills($q, $limit);
         if (count($pur_bills_search['result']) > 0) {
             $result[] = $pur_bills_search;
@@ -1401,6 +1406,57 @@ class Misc_model extends App_Model
         )');
         $this->db->order_by('wo.wo_order_name', 'ASC');
         $this->db->group_by('wo.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $result['result'] = $this->db->get()->result_array();
+        return $result;
+    }
+
+    public function _search_payment_certificate($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'payment_certificate',
+            'search_heading' => _l('payment_certificate'),
+        ];
+        $default_project = get_default_project();
+        $this->db->select('pc.id, pc.po_id, pc.wo_id, pc.ot_id, pc.pc_number');
+        $this->db->from(db_prefix() . 'payment_certificate AS pc');
+        $this->db->join(db_prefix() . 'pur_vendor AS pv', 'pv.userid = pc.vendor', 'left');
+        $this->db->join(db_prefix() . 'pur_orders AS po', 'po.id = pc.po_id', 'left');
+        $this->db->join(db_prefix() . 'wo_orders AS wo', 'wo.id = pc.wo_id', 'left');
+        $this->db->join(db_prefix() . 'pur_order_tracker AS pot', 'pot.id = pc.ot_id', 'left');
+        $this->db->where('(
+            pc.po_id IS NOT NULL AND po.project = "'.$default_project.'"
+            OR
+            pc.wo_id IS NOT NULL AND wo.project = "'.$default_project.'"
+            OR
+            pc.ot_id IS NOT NULL AND pot.project = "'.$default_project.'"
+        )');
+        $this->db->where('(
+            pc.serial_no LIKE "' . $this->db->escape_like_str($q) . '"
+            OR
+            pc.pc_number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pv.company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            po.pur_order_number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            po.pur_order_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            wo.wo_order_number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            wo.wo_order_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pot.pur_order_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pc.location LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pc.invoice_ref LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('pc.id', 'ASC');
+        $this->db->group_by('pc.id');
         if ($limit != 0) {
             $this->db->limit($limit);
         }
@@ -2442,51 +2498,6 @@ class Misc_model extends App_Model
         }
 
         $this->db->order_by('contract_name', 'ASC');
-        $result['result'] = $this->db->get()->result_array();
-
-        return $result;
-    }
-    
-    public function _search_payment_certificate($q, $limit = 0)
-    {
-        $result = [
-            'result'         => [],
-            'type'           => 'payment_certificate',
-            'search_heading' => _l('payment_certificate'),
-        ];
-
-        // Select all fields from payment_certificate along with fields from pur_orders and wo_orders
-        $this->db->select(db_prefix() . 'payment_certificate.*, tblpur_orders.pur_order_name, tblpur_orders.pur_order_number, tblpur_orders.id as po_id, tblwo_orders.wo_order_name, tblwo_orders.wo_order_number, tblwo_orders.id as wo_id');
-        $this->db->from(db_prefix() . 'payment_certificate');
-
-        // Left join pur_orders table
-        $this->db->join(db_prefix() . 'pur_orders', db_prefix() . 'pur_orders.id = ' . db_prefix() . 'payment_certificate.po_id', 'left');
-
-
-        $this->db->join(db_prefix() . 'wo_orders', db_prefix() . 'wo_orders.id = ' . db_prefix() . 'payment_certificate.wo_id', 'left');
-
-        // Group search conditions to include pur_orders and wo_orders fields
-        $this->db->group_start();
-        // Search conditions for pur_orders
-
-
-        $this->db->group_start();
-        $this->db->like(db_prefix() . 'pur_orders.pur_order_name', $q);
-        $this->db->or_like(db_prefix() . 'pur_orders.pur_order_number', $q);
-        $this->db->or_like(db_prefix() . 'pur_orders.id', $q);
-        $this->db->or_like(db_prefix() . 'payment_certificate.id', $q);
-        // Search conditions for wo_orders
-        $this->db->or_like(db_prefix() . 'wo_orders.wo_order_name', $q);
-        $this->db->or_like(db_prefix() . 'wo_orders.wo_order_number', $q);
-        $this->db->or_like(db_prefix() . 'wo_orders.id', $q);
-        $this->db->group_end();
-
-        $this->db->group_end();
-
-        if ($limit != 0) {
-            $this->db->limit($limit);
-        }
-
         $result['result'] = $this->db->get()->result_array();
 
         return $result;

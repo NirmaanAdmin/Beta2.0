@@ -72,6 +72,17 @@
             case 'work_order_items':
             $output = '<a href="'.admin_url('purchase/work_order/'.$_result['id']).'">'.e($_result['wo_order_number']).'</a>';
             break;
+            case 'payment_certificate':
+            if(!empty($_result['po_id'])) {
+                $output = '<a href="'.admin_url('purchase/payment_certificate/'.$_result['po_id'].'/'.$_result['id']).'">'.e($_result['pc_number']).'</a>';
+            } else if(!empty($_result['wo_id'])) {
+                $output = '<a href="'.admin_url('purchase/wo_payment_certificate/'.$_result['wo_id'].'/'.$_result['id']).'">'.e($_result['pc_number']).'</a>';
+            } else if(!empty($_result['ot_id'])) {
+                $output = '<a href="'.admin_url('purchase/ot_payment_certificate/'.$_result['ot_id'].'/'.$_result['id']).'">'.e($_result['pc_number']).'</a>';
+            } else {
+                $output = '';
+            }
+            break;
             case 'pur_bills':
             $output = '<a href="'.admin_url('purchase/edit_pur_bills/'.$_result['id']).'">'.e($_result['bill_code']).'</a>';
             break;
