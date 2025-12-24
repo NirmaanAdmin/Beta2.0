@@ -25502,10 +25502,13 @@ class Purchase_model extends App_Model
         $this->db->insert(db_prefix() . 'tender_documents', $data);
         $insert_id = $this->db->insert_id();
         if ($insert_id) {
+            $new_data = [];
+            $new_data['send_to_vendors'] = $data['vendor_id'];
+            $this->db->where('id', $data['tender_id']);
+            $this->db->update(db_prefix() . 'pur_tender', $new_data);
             return true;
         }
         return false;
-
     }
 
     public function get_tender_document_detail($tender_id){
