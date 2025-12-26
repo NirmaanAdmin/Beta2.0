@@ -1000,7 +1000,7 @@ class Misc_model extends App_Model
             $this->db->where(db_prefix() . 'estimates.active', 1);
             $this->db->where(db_prefix() . 'estimates.project_id', $default_project);
             $this->db->where('(
-                ' . db_prefix() . 'estimates.number LIKE "' . $this->db->escape_like_str($q) . '"
+                ' . db_prefix() . 'estimates.number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR
                 ' . db_prefix() . 'clients.company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR
@@ -1528,7 +1528,7 @@ class Misc_model extends App_Model
             pc.ot_id IS NOT NULL AND pot.project = "'.$default_project.'"
         )');
         $this->db->where('(
-            pc.serial_no LIKE "' . $this->db->escape_like_str($q) . '"
+            pc.serial_no LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
             OR
             pc.pc_number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
             OR
@@ -1573,7 +1573,7 @@ class Misc_model extends App_Model
         $this->db->join(db_prefix() . 'pur_order_tracker AS pot', 'pot.id = pb.order_tracker_id', 'left');
         $this->db->where('pb.project_id', $default_project);
         $this->db->where('(
-            pb.bill_code LIKE "' . $this->db->escape_like_str($q) . '"
+            pb.bill_code LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
             OR
             pb.bill_number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
             OR
@@ -1720,7 +1720,7 @@ class Misc_model extends App_Model
             $this->db->where(db_prefix() . 'invoices.project_id', $default_project);
             if (!startsWith($q, '#')) {
                 $this->db->where('(
-                    ' . db_prefix() . 'invoices.number LIKE "' . $this->db->escape_like_str($q) . '"
+                    ' . db_prefix() . 'invoices.number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                     OR
                     ' . db_prefix() . 'invoices.title LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                     OR
@@ -1881,7 +1881,7 @@ class Misc_model extends App_Model
         $this->db->join(db_prefix() . 'pur_order_tracker AS pot', 'pot.id = pi.order_tracker_id', 'left');
         $this->db->where('pi.project_id', $default_project);
         $this->db->where('(
-            pi.invoice_number LIKE "' . $this->db->escape_like_str($q) . '"
+            pi.invoice_number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
             OR
             pi.vendor_invoice_number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
             OR
@@ -1954,7 +1954,7 @@ class Misc_model extends App_Model
         $this->db->from(db_prefix() . 'pur_debit_notes AS pdn');
         $this->db->join(db_prefix() . 'pur_vendor AS pv', 'pv.userid = pdn.vendorid', 'left');
         $this->db->where('(
-            pdn.number LIKE "' . $this->db->escape_like_str($q) . '"
+            pdn.number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
             OR
             pv.company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
             OR
@@ -2018,7 +2018,7 @@ class Misc_model extends App_Model
             }
             $this->db->where(db_prefix() . 'creditnotes.project_id', $default_project);
             $this->db->where('(
-                ' . db_prefix() . 'creditnotes.number LIKE "' . $this->db->escape_like_str($q) . '"
+                ' . db_prefix() . 'creditnotes.number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR
                 ' . db_prefix() . 'creditnotes.reference_no LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
                 OR
@@ -2121,7 +2121,7 @@ class Misc_model extends App_Model
         $this->db->join(db_prefix() . 'wo_orders AS wo', 'wo.id = gr.wo_order_id', 'left');
         $this->db->where('gr.project', $default_project);
         $this->db->where('(
-            gr.goods_receipt_code LIKE "' . $this->db->escape_like_str($q) . '"
+            gr.goods_receipt_code LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
             OR
             pv.company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
             OR
@@ -2182,7 +2182,7 @@ class Misc_model extends App_Model
         $this->db->join(db_prefix() . 'wo_orders AS wo', 'wo.id = gd.wo_order_id', 'left');
         $this->db->where('gd.project', $default_project);
         $this->db->where('(
-            gd.goods_delivery_code LIKE "' . $this->db->escape_like_str($q) . '"
+            gd.goods_delivery_code LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
             OR
             po.pur_order_number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
             OR
