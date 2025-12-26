@@ -16855,6 +16855,7 @@ class purchase extends AdminController
         $data['title'] = _l('Appendix to Contract');
         $data['tender_id'] = $tender_id;
         $data['tender_data'] = $this->purchase_model->get_tender_document_detail($tender_id);
+        $data['atc_data'] = $this->purchase_model->get_appendix_to_contract_detail($tender_id);
         $this->load->view('purchase_tender/appendix_to_contract', $data);
     }
 
@@ -17130,6 +17131,16 @@ class purchase extends AdminController
                 set_alert('success', _l('updated_successfully', _l('Latter of Agreement')));
             } 
             redirect(admin_url('purchase/view_latter_of_agreement/' . $data['tender_id']));
+        }
+    }
+    public function appendix_to_contract_add_update(){
+        if ($this->input->post()) {
+            $data = $this->input->post();
+            $success = $this->purchase_model->appendix_to_contract_add_update($data);
+            if ($success) {
+                set_alert('success', _l('updated_successfully', _l('Appendix to Contract')));
+            } 
+            redirect(admin_url('purchase/view_appendix_to_contract/' . $data['tender_id']));
         }
     }
 }

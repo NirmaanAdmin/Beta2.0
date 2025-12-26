@@ -25902,4 +25902,64 @@ class Purchase_model extends App_Model
         $this->db->where('tender_id', $tender_id);
         return $this->db->get(db_prefix() . 'tender_latter_of_agreement')->result_array();
     }
+
+    public function appendix_to_contract_add_update($data) {
+        $tender_id = $data['tender_id'] ?? 0;
+        $vendor_id = $data['vendor_id'] ?? 0;
+        $project_id = $data['project_id'] ?? 0;
+        $contract_data_values = $data['data'] ?? [];
+        
+        // Validate required fields
+        if (empty($tender_id) || empty($vendor_id) || empty($project_id)) {
+            return false;
+        }
+        
+        // Convert array to JSON
+        $json_data = json_encode($contract_data_values, JSON_UNESCAPED_UNICODE);
+        // Check if record exists
+        $this->db->where('tender_id', $tender_id);
+        $this->db->where('vendor_id', $vendor_id);
+        $this->db->where('project_id', $project_id);
+        $existing = $this->db->get(db_prefix() . 'tender_appendix_to_contract')->row();
+        
+        if ($existing) {
+            $this->db->where('id', $existing->id);
+            $this->db->update(db_prefix() . 'tender_appendix_to_contract', [
+                'data_json' => $json_data,
+                'document_number_1' => $data['document_number_1'] ?? '',
+                'updated_at' => date('Y-m-d H:i:s')
+            ]);
+            return $existing->id;
+        } else {
+            $insert_data = [
+                'tender_id' => $tender_id,
+                'vendor_id' => $vendor_id,
+                'project_id' => $project_id,
+                'data_json' => $json_data,
+                'document_number_1' => $data['document_number_1'] ?? '',
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+            $this->db->insert(db_prefix() . 'tender_appendix_to_contract', $insert_data);
+            return $this->db->insert_id();
+        }
+    }
+
+    public function get_appendix_to_contract_detail($tender_id) {
+    
+        $this->db->where('tender_id', $tender_id);
+        $row = $this->db->get(db_prefix() . 'tender_appendix_to_contract')->row();
+        
+        if ($row) {
+            // Decode JSON if it exists
+            if ($row->data_json) {
+                $row->data_json = json_decode($row->data_json, true);
+            } else {
+                $row->data_json = [];
+            }
+            return $row; // Return the entire row object
+        }
+        return null; // Return null if no record found
+        
+    }
 }
