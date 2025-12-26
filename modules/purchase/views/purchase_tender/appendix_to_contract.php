@@ -143,7 +143,7 @@
                                             <?php $vendor_name = get_vendor_name_by_id($tender_data[0]['vendor_id']);
                                             $vendor_address = get_vendor_all_details_by_id($tender_data[0]['vendor_id'])->address; ?>
                                             <?php $company_name = isset($loa_data[0]['company_name']) ? $loa_data[0]['company_name'] : 'M/s ' . $vendor_name . ' ' . $vendor_address; ?>
-                                            <?php $second_index = isset($atc_data->data_json) ? $atc_data->data_json[1] : $company_name; ?> 
+                                            <?php $second_index = isset($atc_data->data_json) ? $atc_data->data_json[1] : $company_name; ?>
                                             <textarea name="data[]" class="form-control" rows="4"><?php echo $second_index; ?></textarea>
                                         </td>
                                     </tr>
@@ -345,33 +345,36 @@
                                         <td class="clause-number">13.8</td>
                                         <td>Adjustment for change in Cost</td>
                                         <td>
-                                            <textarea name="data[]" class="form-control" rows="12">`No escalation shall be payable on account of price change for any material, labour or any other reason whatsoever, during the contract period or extended period of contract till completion of work.
+                                            <?php $thirtyfirst_index = isset($atc_data->data_json) ? $atc_data->data_json[30] : 'No escalation shall be payable on account of price change for any material, labour or any other reason whatsoever, during the contract period or extended period of contract till completion of work.
                                             The Prime Cost for procurement has been specified for the following materials as per Bill of quantities
                                             WOOVEN VINYL flooring
                                             Kota Stone
                                             Granite Stone
                                             Ceramic Tile
                                             The increase/ decrease in cost due to variation of actual procurement rates shall be adjusted.
-                                            Escalation on any other item except prime rate shall not be payable, whatsoever the reasons. Contractor should include the escalation amount for items other than prime rate in their quoted price.</textarea>
+                                            Escalation on any other item except prime rate shall not be payable, whatsoever the reasons. Contractor should include the escalation amount for items other than prime rate in their quoted price.'; ?>
+                                            <textarea name="data[]" class="form-control" rows="12"><?php echo $thirtyfirst_index; ?></textarea>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="clause-number">14.2</td>
                                         <td>Total amount of advance payment (as a percentage of Accepted Contract Amount)</td>
                                         <td>
-                                            <textarea name="data[]" class="form-control" rows="3">10% of the contract value (Without GST and Labour Cess) shall be paid to the contractor as mobilization advance. The first instalment of 5% shall be released after submission of Bank Guarantee and the second instalment of balance 5% shall be released after full mobilization at site.</textarea>
+                                            <?php $thirtysecond_index = isset($atc_data->data_json) ? $atc_data->data_json[31] : '10% of the contract value (Without GST and Labour Cess) shall be paid to the contractor as mobilization advance. The first instalment of 5% shall be released after submission of Bank Guarantee and the second instalment of balance 5% shall be released after full mobilization at site.'; ?>
+                                            <textarea name="data[]" class="form-control" rows="3"><?php echo $thirtysecond_index; ?></textarea>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="clause-number">14.2.3</td>
                                         <td>Percentage deductions for the repayment of advance payment</td>
-                                        <td><input type="text" class="form-control" name="data[]" value="100% Advance shall be recovered from 1<sup>st</sup> RA bills prior to 75% of Total work done value on pro rata basis."></td>
+                                        <?php $thirtythird_index = isset($atc_data->data_json) ? $atc_data->data_json[32] : '100% Advance shall be recovered from 1<sup>st</sup> RA bills prior to 75% of Total work done value on pro rata basis.'; ?>
+                                        <td><input type="text" class="form-control" name="data[]" value="<?php echo $thirtythird_index; ?>"></td>
                                     </tr>
                                     <tr>
                                         <td class="clause-number">14.3</td>
                                         <td>Period of payment (submission of IPC for the work done in last month)</td>
                                         <td>
-                                            <textarea name="data[]" class="form-control" rows="12">On 5th Working day of every month Payment Terms:
+                                            <?php $thirtyfourth_index = isset($atc_data->data_json) ? $atc_data->data_json[33] : 'On 5th Working day of every month Payment Terms:
                                             Fixed Finishes:
                                             75% of item rate on prorate basis against installation.
                                             15% of item rate on prorate basis against final finishing.
@@ -380,79 +383,94 @@
                                             50% on prorate basis against installation of carcass / structure before finishing at factory.
                                             15% on prorate basis against installation of material of carcass / structure.
                                             25% on a prorate basis against fixing of hardware and final finishings.
-                                            10% on prorate basis against handing over.
+                                            10% on prorate basis against handing over.'; ?>
+                                            <textarea name="data[]" class="form-control" rows="12">
+                                            <?php echo $thirtyfourth_index; ?>
                                             </textarea>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="clause-number">14.3(b)</td>
                                         <td>Numbers of additional paper copies of statements</td>
-                                        <td><input type="text" class="form-control" name="data[]" value="Two"></td>
+                                        <?php $thirtyfifth_index = isset($atc_data->data_json) ? $atc_data->data_json[34] : 'Two'; ?>
+                                        <td><input type="text" class="form-control" name="data[]" value="<?php echo $thirtyfifth_index; ?>"></td>
                                     </tr>
                                     <tr>
                                         <td class="clause-number">14.3(iii)</td>
                                         <td>Percentage of retention</td>
                                         <td>
-                                            <textarea name="data[]" class="form-control" rows="3">5% of work done value shall be deducted from each RA bill towards the obligation of defect liability period.
-                                            Retention shall be released after successful completion of Defect Notification Period.</textarea>
+                                            <?php $thirtysixth_index = isset($atc_data->data_json) ? $atc_data->data_json[35] : '5% of work done value shall be deducted from each RA bill towards the obligation of defect liability period.
+                                            Retention shall be released after successful completion of Defect Notification Period.'; ?>
+                                            <textarea name="data[]" class="form-control" rows="3"><?php echo $thirtysixth_index; ?></textarea>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="clause-number">14.3(iii)</td>
                                         <td>Limit of retention money (as per percentage of Accepted Contract Amount)</td>
-                                        <td><input type="text" class="form-control" name="data[]" value="5%"></td>
+                                        <?php $thirtyseventh_index = isset($atc_data->data_json) ? $atc_data->data_json[36] : '5%'; ?>
+                                        <td><input type="text" class="form-control" name="data[]" value="<?php echo $thirtyseventh_index; ?>"></td>
                                     </tr>
                                     <tr>
                                         <td class="clause-number">14.5(b)9i)</td>
                                         <td>Plant and Materials for payment when shipped</td>
-                                        <td><input type="text" class="form-control" name="data[]" value="Not Applicable"></td>
+                                        <?php $thirtyeighth_index = isset($atc_data->data_json) ? $atc_data->data_json[37] : 'Not Applicable'; ?>
+                                        <td><input type="text" class="form-control" name="data[]" value="<?php echo $thirtyeighth_index; ?>"></td>
                                     </tr>
                                     <tr>
                                         <td class="clause-number">14.5(c)(i)</td>
                                         <td>Plant and Materials for payment when delivered at site</td>
-                                        <td><input type="text" class="form-control" name="data[]" value="Not Applicable"></td>
+                                        <?php $thirtyninth_index = isset($atc_data->data_json) ? $atc_data->data_json[38] : 'Not Applicable'; ?>
+                                        <td><input type="text" class="form-control" name="data[]" value="<?php echo $thirtyninth_index; ?>"></td>
                                     </tr>
                                     <tr>
                                         <td class="clause-number">14.6.2</td>
                                         <td>Minimum amount of Payment Certificate (IPC)</td>
-                                        <td><input type="text" class="form-control" name="data[]" value="Interim payments on monthly on achieving min valuation INR 1,00,00,000/- except first two RA bills."></td>
+                                        <?php $fourteenth_index = isset($atc_data->data_json) ? $atc_data->data_json[39] : 'Interim payments on monthly on achieving min valuation INR 1,00,00,000/- except first two RA bills.'; ?>
+                                        <td><input type="text" class="form-control" name="data[]" value="<?php echo $fourteenth_index; ?>"></td>
                                     </tr>
                                     <tr>
                                         <td class="clause-number">14.7(a)</td>
                                         <td>Period of payment of Advance Payment to contractor</td>
-                                        <td><input type="text" class="form-control" name="data[]" value="As per LOA"></td>
+                                        <?php $fourtyoneth_index = isset($atc_data->data_json) ? $atc_data->data_json[40] : 'As per LOA'; ?>
+                                        <td><input type="text" class="form-control" name="data[]" value="<?php echo $fourtyoneth_index; ?>"></td>
                                     </tr>
                                     <tr>
                                         <td class="clause-number">14.7(b)(i)</td>
                                         <td>Period for the Employer to make interim payments to the contractor under sub-Clause 14.6 [Interim Payment]</td>
                                         <td>
-                                            <textarea name="data[]" class="form-control" rows="5">An ad-hoc amount of 65% of net value of running account bill shall be paid within 21 days from the date of submission of bill in all respect. The balance of 35% shall be paid within 30 days from the date of certification of bill.However, if there is a reduction of more than 5% in the billed amount Vs actual amounts, then the system of ad hoc payment would be discontinued from the next RA bill onwards.</textarea>
+                                            <?php $fourtysecond_index = isset($atc_data->data_json) ? $atc_data->data_json[41] : 'An ad-hoc amount of 65% of net value of running account bill shall be paid within 21 days from the date of submission of bill in all respect. The balance of 35% shall be paid within 30 days from the date of certification of bill.However, if there is a reduction of more than 5% in the billed amount Vs actual amounts, then the system of ad hoc payment would be discontinued from the next RA bill onwards.'; ?>
+                                            <textarea name="data[]" class="form-control" rows="5"><?php echo $fourtysecond_index; ?></textarea>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="clause-number">14.7(b)(ii)</td>
                                         <td>Period for the Employer to make interim payments to the contractor under sub-Clause 14.13 [Final Payment]</td>
-                                        <td><input type="text" class="form-control" name="data[]" value="90 days after certification from Engineer."></td>
+                                        <?php $fourtythird_index = isset($atc_data->data_json) ? $atc_data->data_json[42] : '90 days after certification from Engineer.'; ?>
+                                        <td><input type="text" class="form-control" name="data[]" value="<?php echo $fourtythird_index; ?>"></td>
                                     </tr>
                                     <tr>
                                         <td class="clause-number">14.7(c)</td>
                                         <td>Period for the employer to make final payments to the Contractor</td>
-                                        <td><input type="text" class="form-control" name="data[]" value="90 days"></td>
+                                        <?php $fourtyfourth_index = isset($atc_data->data_json) ? $atc_data->data_json[43] : '90 days'; ?>
+                                        <td><input type="text" class="form-control" name="data[]" value="<?php echo $fourtyfourth_index; ?>"></td>
                                     </tr>
                                     <tr>
                                         <td class="clause-number">14.8</td>
                                         <td>Financing charges for delayed payment (percentage points above the average bank short-term lending rate as referred to under sub-paragraph (a))</td>
-                                        <td><input type="text" class="form-control" name="data[]" value="Not Applicable"></td>
+                                        <?php $fourtyfifth_index = isset($atc_data->data_json) ? $atc_data->data_json[44] : 'Not Applicable'; ?>
+                                        <td><input type="text" class="form-control" name="data[]" value="<?php echo $fourtyfifth_index; ?>"></td>
                                     </tr>
                                     <tr>
                                         <td class="clause-number">14.11(b)</td>
                                         <td>Number of additional paper copies of draft Final Statement</td>
-                                        <td><input type="text" class="form-control" name="data[]" value="Three"></td>
+                                        <?php $fourtysixth_index = isset($atc_data->data_json) ? $atc_data->data_json[45] : 'Three'; ?>
+                                        <td><input type="text" class="form-control" name="data[]" value="<?php echo $fourtysixth_index; ?>"></td>
                                     </tr>
                                     <tr>
                                         <td class="clause-number">14.15</td>
                                         <td>Currencies for payment of contract Price</td>
-                                        <td><input type="text" class="form-control" name="data[]" value="INR"></td>
+                                        <?php $fourtyseventh_index = isset($atc_data->data_json) ? $atc_data->data_json[46] : 'INR'; ?>
+                                        <td><input type="text" class="form-control" name="data[]" value="<?php echo $fourtyseventh_index; ?>"></td>
                                     </tr>
                                     <tr>
                                         <td class="clause-number">14.15(a)(i)</td>
@@ -463,87 +481,103 @@
                                             </ul>
                                         </td>
                                         <td>
-                                            <textarea name="data[]" class="form-control" rows="3">100% Nil</textarea>
+                                            <?php $fourtyeighth_index = isset($atc_data->data_json) ? $atc_data->data_json[47] : '100% Nil'; ?>
+                                            <textarea name="data[]" class="form-control" rows="3"><?php echo $fourtyeighth_index; ?></textarea>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="clause-number">14.15(c)</td>
                                         <td>Currencies and proportion for payment of Delay Damages</td>
-                                        <td><input type="text" class="form-control" name="data[]" value="INR, 100%"></td>
+                                        <?php $fourtyninth_index = isset($atc_data->data_json) ? $atc_data->data_json[48] : 'INR, 100%'; ?>
+                                        <td><input type="text" class="form-control" name="data[]" value="<?php echo $fourtyninth_index; ?>"></td>
                                     </tr>
                                     <tr>
                                         <td class="clause-number">14.15(f)</td>
                                         <td>Rate of exchange</td>
-                                        <td><input type="text" class="form-control" name="data[]" value="Not Applicable"></td>
+                                        <?php $fifthty_index = isset($atc_data->data_json) ? $atc_data->data_json[49] : 'Not Applicable'; ?>
+                                        <td><input type="text" class="form-control" name="data[]" value="<?php echo $fifthty_index; ?>"></td>
                                     </tr>
                                     <tr>
                                         <td class="clause-number">17.2(d)</td>
                                         <td>Forces of nature, the risks of which are allocated to the contractor</td>
-                                        <td><input type="text" class="form-control" name="data[]" value="Not Applicable"></td>
+                                        <?php $fiftyfirst_index = isset($atc_data->data_json) ? $atc_data->data_json[50] : 'Not Applicable'; ?>
+                                        <td><input type="text" class="form-control" name="data[]" value="<?php echo $fiftyfirst_index; ?>"></td>
                                     </tr>
                                     <tr>
                                         <td class="clause-number">19.2(1)(b)</td>
                                         <td>Additional amount to be insured (as a percentage of the replacement value, if less or more than 15%)</td>
-                                        <td><input type="text" class="form-control" name="data[]" value="Not applicable"></td>
+                                        <?php $fiftysecond_index = isset($atc_data->data_json) ? $atc_data->data_json[51] : 'Not Applicable'; ?>
+                                        <td><input type="text" class="form-control" name="data[]" value="<?php echo $fiftysecond_index; ?>"></td>
                                     </tr>
                                     <tr>
                                         <td class="clause-number">19.2(1)(iv)</td>
                                         <td>List of Exceptional Risks which shall not be excluded from the insurance cover for the Work</td>
-                                        <td><input type="text" class="form-control" name="data[]" value="Not applicable"></td>
+                                        <?php $fiftythird_index = isset($atc_data->data_json) ? $atc_data->data_json[52] : 'Not Applicable'; ?>
+                                        <td><input type="text" class="form-control" name="data[]" value="<?php echo $fiftythird_index; ?>"></td>
                                     </tr>
                                     <tr>
                                         <td class="clause-number">19.2.3</td>
                                         <td>Period of insurance required for liability for breach of professional duty</td>
-                                        <td><input type="text" class="form-control" name="data[]" value="Not applicable"></td>
+                                        <?php $fiftyfourth_index = isset($atc_data->data_json) ? $atc_data->data_json[53] : 'Not Applicable'; ?>
+                                        <td><input type="text" class="form-control" name="data[]" value="<?php echo $fiftyfourth_index; ?>"></td>
                                     </tr>
                                     <tr>
                                         <td class="clause-number">19.2.4</td>
                                         <td>Amount of insurance required for injury to person and damaged to property</td>
-                                        <td><input type="text" class="form-control" name="data[]" value="As per the law of land."></td>
+                                        <?php $fiftyfifth_index = isset($atc_data->data_json) ? $atc_data->data_json[54] : 'As per the law of land.'; ?>
+                                        <td><input type="text" class="form-control" name="data[]" value="<?php echo $fiftyfifth_index; ?>"></td>
                                     </tr>
                                     <tr>
                                         <td class="clause-number">19.2.6</td>
                                         <td>Other insurance required by laws and by local practice</td>
-                                        <td><input type="text" class="form-control" name="data[]" value="As per law of Republic of INDIA"></td>
+                                        <?php $fiftysixth_index = isset($atc_data->data_json) ? $atc_data->data_json[55] : 'As per law of Republic of INDIA'; ?>
+                                        <td><input type="text" class="form-control" name="data[]" value="<?php echo $fiftysixth_index; ?>"></td>
                                     </tr>
                                     <tr>
                                         <td class="clause-number">15.5</td>
                                         <td>Employer's Entitlement to Termination</td>
                                         <td>
-                                            <textarea name="data[]" class="form-control" rows="5">Employer reserve the right to foreclose the works.If this clause is exercised at a stage where the work executed is up to 50% of the contract value, then the foreclosure cost payable to Contractor shall be mutually discussed and agreed cost. If the executed contract value is 50% or more, then 1% of the remaining contract value shall be paid as Foreclosure cost to Contractor.</textarea>
+                                            <?php $fiftyseventh_index = isset($atc_data->data_json) ? $atc_data->data_json[56] : 'Employer reserve the right to foreclose the works.If this clause is exercised at a stage where the work executed is up to 50% of the contract value, then the foreclosure cost payable to Contractor shall be mutually discussed and agreed cost. If the executed contract value is 50% or more, then 1% of the remaining contract value shall be paid as Foreclosure cost to Contractor.'; ?>
+                                            <textarea name="data[]" class="form-control" rows="5"><?php echo $fiftyseventh_index; ?></textarea>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="clause-number">18.1</td>
                                         <td>Contractors All Risk Policy</td>
-                                        <td><input type="text" class="form-control" name="data[]" value="Contractor Scope"></td>
+                                        <?php $fiftyeighth_index = isset($atc_data->data_json) ? $atc_data->data_json[57] : 'Contractor Scope'; ?>
+                                        <td><input type="text" class="form-control" name="data[]" value="<?php echo $fiftyeighth_index; ?>"></td>
                                     </tr>
                                     <tr>
                                         <td class="clause-number">18.2</td>
                                         <td>Insurance for Contractor Equipment</td>
-                                        <td><input type="text" class="form-control" name="data[]" value="Contractor Scope"></td>
+                                        <?php $fiftyninth_index = isset($atc_data->data_json) ? $atc_data->data_json[58] : 'Contractor Scope'; ?>
+                                        <td><input type="text" class="form-control" name="data[]" value="<?php echo $fiftyninth_index; ?>"></td>
                                     </tr>
                                     <tr>
                                         <td class="clause-number">18.3</td>
                                         <td>Insurance for Workmen's Compensation Act</td>
-                                        <td><input type="text" class="form-control" name="data[]" value="Contractor Scope"></td>
+                                        <?php $sixtieth_index = isset($atc_data->data_json) ? $atc_data->data_json[59] : 'Contractor Scope'; ?>
+                                        <td><input type="text" class="form-control" name="data[]" value="<?php echo $sixtieth_index; ?>"></td>
                                     </tr>
                                     <tr>
                                         <td class="clause-number">18.3 & 18.4</td>
                                         <td>Maximum amount of third party Insurance.</td>
                                         <td>
-                                            <textarea name="data[]" class="form-control" rows="4">Insurance to be taken in the joint names of the Employer and the Contractor (being the Principal Beneficiary) against such risks, before commencement of the Works. The minimum limit of the coverage under the Policy shall be Rs 50.00 Lakhs per accident or occurrence, there being no limit on the number of such accidents or occurrences.</textarea>
+                                            <?php $sixtyfirst_index = isset($atc_data->data_json) ? $atc_data->data_json[60] : 'Insurance to be taken in the joint names of the Employer and the Contractor (being the Principal Beneficiary) against such risks, before commencement of the Works. The minimum limit of the coverage under the Policy shall be Rs 50.00 Lakhs per accident or occurrence, there being no limit on the number of such accidents or occurrences.'; ?>
+                                            <textarea name="data[]" class="form-control" rows="4"><?php echo $sixtyfirst_index; ?></textarea>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="clause-number">21.1</td>
                                         <td>Time of appointment of Dispute Avoidance /Adjudication Board</td>
-                                        <td><input type="text" class="form-control" name="data[]" value="28 days"></td>
+                                        <?php $sixtysecond_index = isset($atc_data->data_json) ? $atc_data->data_json[61] : '28 days'; ?>
+                                        <td><input type="text" class="form-control" name="data[]" value="<?php echo $sixtysecond_index; ?>"></td>
                                     </tr>
                                     <tr>
                                         <td class="clause-number">21.1</td>
                                         <td>The DAAB shall comprise</td>
-                                        <td><input type="text" class="form-control" name="data[]" value="Three members"></td>
+                                        <?php $sixtythird_index = isset($atc_data->data_json) ? $atc_data->data_json[62] : 'Three members'; ?>
+                                        <td><input type="text" class="form-control" name="data[]" value="<?php echo $sixtythird_index; ?>"></td>
                                     </tr>
                                     <tr>
                                         <td class="clause-number">21.1</td>
@@ -554,23 +588,27 @@
                                             </ul>
                                         </td>
                                         <td>
-                                            <textarea name="data[]" class="form-control" rows="3">TBD TBD</textarea>
+                                            <?php $sixtyfourth_index = isset($atc_data->data_json) ? $atc_data->data_json[63] : 'TBD TBD'; ?>
+                                            <textarea name="data[]" class="form-control" rows="3"><?php echo $sixtyfourth_index; ?></textarea>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="clause-number">21.2</td>
                                         <td>Appointing entity (official) for DAAB members</td>
-                                        <td><input type="text" class="form-control" name="data[]" value="Employer"></td>
+                                        <?php $sixtyfifth_index = isset($atc_data->data_json) ? $atc_data->data_json[64] : 'Employer'; ?>
+                                        <td><input type="text" class="form-control" name="data[]" value="<?php echo $sixtyfifth_index; ?>"></td>
                                     </tr>
                                     <tr>
                                         <td class="clause-number">15.3</td>
                                         <td>Arbitration: Rule Place of Arbitration</td>
-                                        <td><input type="text" class="form-control" name="data[]" value="Arbitration and conciliation act 1996 Mumbai"></td>
+                                        <?php $sixty_sixth_index = isset($atc_data->data_json) ? $atc_data->data_json[65] : 'Arbitration and conciliation act 1996 Mumbai'; ?>
+                                        <td><input type="text" class="form-control" name="data[]" value="<?php echo $sixty_sixth_index; ?>"></td>
                                     </tr>
                                     <tr>
                                         <td></td>
                                         <td>Labour cess</td>
-                                        <td><input type="text" class="form-control" name="data[]" value="Labour cess shall be paid extra."></td>
+                                        <?php $sixty_seventh_index = isset($atc_data->data_json) ? $atc_data->data_json[66] : 'Labour cess shall be paid extra.'; ?>
+                                        <td><input type="text" class="form-control" name="data[]" value="<?php echo $sixty_seventh_index; ?>"></td>
                                     </tr>
                                 </tbody>
                             </table>
