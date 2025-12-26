@@ -48,6 +48,12 @@
             case 'items':
             $output = '<a href="'.admin_url('purchase/items/'.$_result['id']).'">'.e($_result['commodity_code']).' '.e($_result['description']).'</a>';
             break;
+            case 'vendors':
+            $output = '<a href="'.admin_url('purchase/vendor/'.$_result['userid']).'">'.e($_result['company']).'</a>';
+            break;
+            case 'vendor_contacts':
+            $output = '<a href="'.admin_url('purchase/vendor/'.$_result['userid'].'?group=contacts').'">'.e($_result['firstname']).' '.e($_result['lastname']).'</a>';
+            break;
             case 'unawarded_trackers':
             $output = '<a href="'.admin_url('purchase/unawarded_tracker').'">'.e($_result['package_name']).'</a>';
             break;

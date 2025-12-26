@@ -620,6 +620,16 @@ class Misc_model extends App_Model
             $result[] = $items_search;
         }
 
+        $vendors_search = $this->_search_vendors($q, $limit);
+        if (count($vendors_search['result']) > 0) {
+            $result[] = $vendors_search;
+        }
+
+        $vendor_contacts_search = $this->_search_vendor_contacts($q, $limit);
+        if (count($vendor_contacts_search['result']) > 0) {
+            $result[] = $vendor_contacts_search;
+        }
+
         $unawarded_trackers_search = $this->_search_unawarded_trackers($q, $limit);
         if (count($unawarded_trackers_search['result']) > 0) {
             $result[] = $unawarded_trackers_search;
@@ -1174,6 +1184,79 @@ class Misc_model extends App_Model
         }
         $result['result'] = $this->db->get()->result_array();
         return $result;
+    }
+
+    public function _search_vendors($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'vendors',
+            'search_heading' => _l('vendor'),
+        ];
+        $this->db->select('pv.userid, pv.company');
+        $this->db->from(db_prefix() . 'pur_vendor AS pv');
+        $this->db->where('(
+            pv.vendor_code LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pv.company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pv.com_email LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pv.pan_number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pv.vat LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pv.phonenumber LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pv.website LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pv.address LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pv.city LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pv.zip LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pv.bank_detail LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pv.preferred_location LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('pv.company', 'ASC');
+        $this->db->group_by('pv.userid');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $result['result'] = $this->db->get()->result_array();
+        return $result;
+    }
+
+    public function _search_vendor_contacts($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'vendor_contacts',
+            'search_heading' => _l('Vendor Contacts'),
+        ];
+        $this->db->select('pc.userid, pv.company, pc.firstname, pc.lastname');
+        $this->db->from(db_prefix() . 'pur_contacts AS pc');
+        $this->db->join(db_prefix() . 'pur_vendor AS pv', 'pv.userid = pc.userid', 'left');
+        $this->db->where('(
+            pc.firstname LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pc.lastname LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pc.title LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pc.email LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pc.phonenumber LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('pc.firstname', 'ASC');
+        $this->db->group_by('pc.userid');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $result['result'] = $this->db->get()->result_array();
+        return $result;       
     }
 
     public function _search_unawarded_trackers($q, $limit = 0)
