@@ -149,6 +149,12 @@
             case 'stock_export_items':
             $output = '<a href="'.admin_url('warehouse/manage_delivery/'.$_result['id']).'">'.e($_result['goods_delivery_code']).'</a>';
             break;
+            case 'internal_delivery_note':
+            $output = '<a href="'.admin_url('warehouse/view_internal_delivery/'.$_result['id']).'">'.e($_result['internal_delivery_code']).' - '.e($_result['internal_delivery_name']).'</a>';
+            break;
+            case 'loss_adjustment':
+            $output = '<a href="'.admin_url('warehouse/view_lost_adjustment/'.$_result['id']).'">'.e($_result['type']).' - '.e($_result['time']).'</a>';
+            break;
             case 'expenses':
             $output = '<a href="'.admin_url('expenses/list_expenses/'.$_result['expenseid']).'">'.e($_result['category_name']). ' - ' .e(app_format_money($_result['amount'], $_result['currency_name'])).'</a>';
             break;

@@ -760,6 +760,16 @@ class Misc_model extends App_Model
             $result[] = $stock_export_items_search;
         }
 
+        $internal_delivery_note_search = $this->_search_internal_delivery_note($q, $limit);
+        if (count($internal_delivery_note_search['result']) > 0) {
+            $result[] = $internal_delivery_note_search;
+        }
+
+        $loss_adjustment_search = $this->_search_loss_adjustment($q, $limit);
+        if (count($loss_adjustment_search['result']) > 0) {
+            $result[] = $loss_adjustment_search;
+        }
+
         $expenses_search = $this->_search_expenses($q, $limit);
         if (count($expenses_search['result']) > 0) {
             $result[] = $expenses_search;
@@ -2208,6 +2218,60 @@ class Misc_model extends App_Model
         )');
         $this->db->order_by('gd.goods_delivery_code', 'ASC');
         $this->db->group_by('gd.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $result['result'] = $this->db->get()->result_array();
+        return $result;
+    }
+
+    public function _search_internal_delivery_note($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'internal_delivery_note',
+            'search_heading' => _l('internal_delivery_note'),
+        ];
+        $default_project = get_default_project();
+        $this->db->select('idn.id, idn.internal_delivery_code, idn.internal_delivery_name');
+        $this->db->from(db_prefix() . 'internal_delivery_note AS idn');
+        $this->db->where('idn.project', $default_project);
+        $this->db->where('(
+            idn.internal_delivery_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            idn.description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            idn.internal_delivery_code LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            idn.total_amount LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('idn.id', 'ASC');
+        $this->db->group_by('idn.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $result['result'] = $this->db->get()->result_array();
+        return $result;
+    }
+
+    public function _search_loss_adjustment($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'loss_adjustment',
+            'search_heading' => _l('loss_adjustment'),
+        ];
+        $default_project = get_default_project();
+        $this->db->select('wha.id, wha.type, wha.time');
+        $this->db->from(db_prefix() . 'wh_loss_adjustment AS wha');
+        $this->db->where('wha.project', $default_project);
+        $this->db->where('(
+            wha.type LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            wha.reason LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('wha.id', 'ASC');
+        $this->db->group_by('wha.id');
         if ($limit != 0) {
             $this->db->limit($limit);
         }
