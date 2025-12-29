@@ -4178,7 +4178,7 @@ class Warehouse_model extends App_Model
 				$goods_delivery['area'] = !empty($goods_delivery['area']) ? implode(',', $goods_delivery['area']) : NULL;
 
 				$goods_delivery['returnable'] = !empty($goods_delivery['returnable']) ? $goods_delivery['returnable'] : NULL;
-
+				$goods_delivery['warehouse_id'] = !empty($goods_delivery['warehouse_id']) ? $goods_delivery['warehouse_id'] : 1;
 
 
 				$this->db->insert(db_prefix() . 'goods_delivery_detail', $goods_delivery);
@@ -8154,6 +8154,7 @@ class Warehouse_model extends App_Model
 			}
 			$goods_delivery['area'] = !empty($goods_delivery['area']) ? implode(',', $goods_delivery['area']) : NULL;
 			$goods_delivery['returnable'] = !empty($goods_delivery['returnable']) ? $goods_delivery['returnable'] : NULL;
+			$goods_delivery['warehouse_id'] = !empty($goods_delivery['warehouse_id']) ? $goods_delivery['warehouse_id'] : 1;
 
 			$this->db->where('id', $goods_delivery['id']);
 			if ($this->db->update(db_prefix() . 'goods_delivery_detail', $goods_delivery)) {
@@ -8222,6 +8223,7 @@ class Warehouse_model extends App_Model
 				unset($goods_delivery['without_checking_warehouse']);
 			}
 			$goods_delivery['area'] = !empty($goods_delivery['area']) ? implode(',', $goods_delivery['area']) : NULL;
+			$goods_delivery['warehouse_id'] = !empty($goods_delivery['warehouse_id']) ? $goods_delivery['warehouse_id'] : 1;
 
 			$this->db->insert(db_prefix() . 'goods_delivery_detail', $goods_delivery);
 			if ($this->db->insert_id()) {
