@@ -8920,6 +8920,17 @@ class Warehouse_model extends App_Model
 	}
 
 	/**
+	 * Get goods receipt code
+	 */
+	private function get_goods_delivery_code($goods_delivery_id)
+	{
+		$this->db->select('goods_delivery_code');
+		$this->db->where('id', $goods_delivery_id);
+		$result = $this->db->get(db_prefix() . 'goods_delivery')->row();
+		return $result ? $result->goods_delivery_code : 'Unknown';
+	}
+
+	/**
 	 * Get item name
 	 */
 	private function get_item_name($item_id)
