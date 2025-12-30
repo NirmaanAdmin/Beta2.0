@@ -2001,8 +2001,6 @@ class Misc_model extends App_Model
         $this->db->from(db_prefix() . 'pur_invoices AS pi');
         $this->db->join(db_prefix() . 'pur_vendor AS pv', 'pv.userid = pi.vendor', 'left');
         $this->db->join(db_prefix() . 'items_groups AS ig', 'ig.id = pi.group_pur', 'left');
-        $this->db->join(db_prefix() . 'itemable AS it', 'it.vbt_id = pi.id AND it.rel_type = "invoice"', 'left');
-        $this->db->join(db_prefix() . 'invoices AS inv', 'inv.id = it.rel_id', 'left');
         $this->db->join(db_prefix() . 'pur_orders AS po', 'po.id = pi.pur_order', 'left');
         $this->db->join(db_prefix() . 'wo_orders AS wo', 'wo.id = pi.wo_order', 'left');
         $this->db->join(db_prefix() . 'pur_order_tracker AS pot', 'pot.id = pi.order_tracker_id', 'left');
@@ -2017,8 +2015,6 @@ class Misc_model extends App_Model
             ig.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
             OR
             pi.description_services LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-            OR
-            inv.title LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
             OR
             pi.vendor_submitted_amount_without_tax LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
             OR
