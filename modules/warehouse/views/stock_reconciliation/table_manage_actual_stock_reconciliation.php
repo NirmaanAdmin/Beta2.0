@@ -3,18 +3,18 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 
 $aColumns = [
-    db_prefix() . 'stock_reconciliation.goods_delivery_code',  
+    db_prefix() . 'stock_reconciliation.goods_delivery_code',
     3,
     db_prefix() . 'stock_reconciliation_detail.commodity_name',
     db_prefix() . 'stock_reconciliation_detail.description',
     db_prefix() . 'stock_reconciliation_detail.area',
     db_prefix() . 'stock_reconciliation_detail.warehouse_id',
     2,
-    1,                                         
+    1,
     db_prefix() . 'stock_reconciliation_detail.received_quantity',
     db_prefix() . 'stock_reconciliation_detail.issued_quantities',
     db_prefix() . 'stock_reconciliation_detail.returnable_date',
-    db_prefix() . 'stock_reconciliation_detail.return_date',                                          
+    db_prefix() . 'stock_reconciliation_detail.return_date',
     db_prefix() . 'stock_reconciliation_detail.reconciliation_date',
     db_prefix() . 'stock_reconciliation_detail.return_quantity',
     db_prefix() . 'stock_reconciliation_detail.used_quantity',
@@ -25,7 +25,49 @@ $sIndexColumn = 'id';
 $sTable       = db_prefix() . 'stock_reconciliation';
 $join         = ['LEFT JOIN ' . db_prefix() . 'stock_reconciliation_detail ON ' . db_prefix() . 'stock_reconciliation.id = ' . db_prefix() . 'stock_reconciliation_detail.goods_delivery_id'];
 $where = [];
+if ($this->ci->input->post('day_vouchers')) {
+    $day_vouchers = to_sql_date($this->ci->input->post('day_vouchers'));
+    if ($day_vouchers) {
+        $where[] = 'AND ' . $sTable . '.date_add <= "' . $day_vouchers . '"';
+    }
+}
+if ($this->ci->input->post('delivery_status')) {
+    $delivery_status = $this->ci->input->post('delivery_status');
+    if ($delivery_status) {
+        $where[] = 'AND ' . $sTable . '.delivery_status = "' . $delivery_status . '"';
+    }
+}
 
+if ($this->ci->input->post('vendor')) {
+    $vendor = $this->ci->input->post('vendor');
+    if ($vendor) {
+        // Use subqueries to check vendor in related tables without causing duplicates
+        $where[] = 'AND (' . $sTable . '.pr_order_id IN (SELECT id FROM ' . db_prefix() . 'pur_orders WHERE vendor IN(' . implode(',', $vendor) . ')) 
+                     OR ' . $sTable . '.wo_order_id IN (SELECT id FROM ' . db_prefix() . 'wo_orders WHERE vendor IN(' . implode(',', $vendor) . ')))';
+    }
+}
+$wo_po_orders = $this->ci->input->post('wo_po_order') ? $this->ci->input->post('wo_po_order') : [];
+
+if (!empty($wo_po_orders)) {
+    $where_conditions = [];
+    foreach ($wo_po_orders as $order_value) {
+        // Split the value into type and id (format: "type-id")
+        $parts = explode('-', $order_value);
+        if (count($parts) === 3) {
+            $order_type = (int)$parts[1];
+            $order_id = (int)$parts[0];
+
+            if ($order_type === 2) { // Purchase Order
+                $where_conditions[] = '(pr_order_id = ' . $order_id . ')';
+            } elseif ($order_type === 3) { // Work Order
+                $where_conditions[] = '(wo_order_id = ' . $order_id . ')';
+            }
+        }
+    }
+    if (!empty($where_conditions)) {
+        $where[] = 'AND (' . implode(' OR ', $where_conditions) . ')';
+    }
+}
 
 
 
@@ -35,7 +77,7 @@ if (get_default_project()) {
 
 
 
-$result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [db_prefix() . 'stock_reconciliation.id', db_prefix() . 'stock_reconciliation.pr_order_id', db_prefix() . 'stock_reconciliation.wo_order_id', db_prefix() . 'stock_reconciliation_detail.id as detail_id',db_prefix() . 'stock_reconciliation_detail.commodity_code',db_prefix() . 'stock_reconciliation.delivery_status as delivery_status']);
+$result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [db_prefix() . 'stock_reconciliation.id', db_prefix() . 'stock_reconciliation.pr_order_id', db_prefix() . 'stock_reconciliation.wo_order_id', db_prefix() . 'stock_reconciliation_detail.id as detail_id', db_prefix() . 'stock_reconciliation_detail.commodity_code', db_prefix() . 'stock_reconciliation.delivery_status as delivery_status']);
 
 $output  = $result['output'];
 $rResult = $result['rResult'];
@@ -266,11 +308,11 @@ foreach ($rResult as $aRow) {
             }
         }
 
-        if($aColumns[$i] == 1){
-           $_data = get_ordered_quantity($aRow['pr_order_id'],$aRow['wo_order_id'],$aRow[db_prefix() . 'stock_reconciliation_detail.description'],$aRow[db_prefix() . 'stock_reconciliation_detail.commodity_code']);
+        if ($aColumns[$i] == 1) {
+            $_data = get_ordered_quantity($aRow['pr_order_id'], $aRow['wo_order_id'], $aRow[db_prefix() . 'stock_reconciliation_detail.description'], $aRow[db_prefix() . 'stock_reconciliation_detail.commodity_code']);
         }
 
-        if($aColumns[$i] == 2){
+        if ($aColumns[$i] == 2) {
             $_data = _l($aRow['delivery_status']);
         }
 

@@ -3,14 +3,9 @@
 
 var GoodsreceiptParams = {
     "day_vouchers": "input[name='date_add']",
-    "kind": "select[name='kind']",
-    "delivery": "select[name='delivery']",
-    "vendors": "[name='vendors[]']",
-    "group_pur": "[name='group_pur[]']",
-    "tracker_status": "[name='tracker_status[]']",
-    "production_status": "[name='production_status[]']",
-    "wo_po_order" : "[name='wo_po_order[]']",
-    "toggle-filter": "input[name='toggle-filter']"
+    "delivery_status": "select[name='delivery_status']",
+    "vendor": "select[name='vendor[]']",
+    "wo_po_order": "select[name='wo_po_order[]']",
 };
 
 var table_manage_stock_reconciliation_list = $('.table-table_manage_stock_reconciliation_list');
@@ -20,89 +15,53 @@ initDataTable(table_manage_stock_reconciliation_list, admin_url + 'warehouse/tab
 var table_manage_actual_stock_reconciliation = $('.table-table_manage_actual_stock_reconciliation');
 
 initDataTable(table_manage_actual_stock_reconciliation, admin_url + 'warehouse/table_manage_actual_stock_reconciliation', [], [], GoodsreceiptParams, [10, 'desc']);
-$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-    var activeTabId = $('.tracker-pane.active').attr('id');
-    if (activeTabId === 'tracker_2') {
-        table_manage_stock_reconciliation_list.DataTable().ajax.reload();
-    } else {
-        table_manage_actual_stock_reconciliation.DataTable().ajax.reload();
-    }
-});
+
 
 $('#date_add').on('change', function () {
     var activeTabId = $('.tracker-pane.active').attr('id');
     if (activeTabId === 'tracker_2') {
-        table_manage_stock_reconciliation_list.DataTable().ajax.reload();
-    } else {
         table_manage_actual_stock_reconciliation.DataTable().ajax.reload();
-    }
-});
-
-$('#kind').on('change', function () {
-    var activeTabId = $('.tracker-pane.active').attr('id');
-    if (activeTabId === 'tracker_2') {
-        table_manage_goods_receipt.DataTable().ajax.reload();
     } else {
-        table_manage_actual_goods_receipt.DataTable().ajax.reload();
-    }
-});
-$('#delivery').on('change', function () {
-    var activeTabId = $('.tracker-pane.active').attr('id');
-    if (activeTabId === 'tracker_2') {
         table_manage_goods_receipt.DataTable().ajax.reload();
-    } else {
-        table_manage_actual_goods_receipt.DataTable().ajax.reload();
-    }
-});
-$('select[name="vendors[]"]').on('change', function () {
-    $('select[name="vendors[]"]').selectpicker('refresh');
-    var activeTabId = $('.tracker-pane.active').attr('id');
-    if (activeTabId === 'tracker_2') {
-        table_manage_goods_receipt.DataTable().ajax.reload();
-    } else {
-        table_manage_actual_goods_receipt.DataTable().ajax.reload();
-    }
-});
-$('.toggle-filter').on('change', function () {
-    var isChecked = $(this).is(':checked') ? 1 : 0;
-    $(this).val(isChecked); // Update the value of the checkbox (0 or 1)
-
-    // Trigger DataTable reload to apply the new filter
-    table_manage_goods_receipt.DataTable().ajax.reload();
-});
-$('select[name="group_pur[]"]').on('change', function () {
-    $('select[name="group_pur[]"]').selectpicker('refresh');
-    var activeTabId = $('.tracker-pane.active').attr('id');
-    if (activeTabId === 'tracker_1') {
-        table_manage_actual_goods_receipt.DataTable().ajax.reload();
-    }
-});
-$('select[name="tracker_status[]"]').on('change', function () {
-    $('select[name="tracker_status[]"]').selectpicker('refresh');
-    var activeTabId = $('.tracker-pane.active').attr('id');
-    if (activeTabId === 'tracker_1') {
-        table_manage_actual_goods_receipt.DataTable().ajax.reload();
-    }
-});
-$('select[name="production_status[]"]').on('change', function () {
-    $('select[name="production_status[]"]').selectpicker('refresh');
-    var activeTabId = $('.tracker-pane.active').attr('id');
-    if (activeTabId === 'tracker_1') {
-        table_manage_actual_goods_receipt.DataTable().ajax.reload();
     }
 });
 
 $('select[name="wo_po_order[]"]').on('change', function () {
     $('select[name="wo_po_order[]"]').selectpicker('refresh');
     var activeTabId = $('.tracker-pane.active').attr('id');
-    if (activeTabId === 'tracker_1') {
-        table_manage_actual_goods_receipt.DataTable().ajax.reload();
-    }else{
+    if (activeTabId === 'tracker_2') {
+        table_manage_actual_stock_reconciliation.DataTable().ajax.reload();
+    } else {
+        table_manage_goods_receipt.DataTable().ajax.reload();
+    }
+});
+$('select[name="delivery_status"]').on('change', function () {
+    $('select[name="delivery_status"]').selectpicker('refresh');
+    var activeTabId = $('.tracker-pane.active').attr('id');
+    if (activeTabId === 'tracker_2') {
+        table_manage_actual_stock_reconciliation.DataTable().ajax.reload();
+    } else {
+        table_manage_goods_receipt.DataTable().ajax.reload();
+    }
+});
+
+$('select[name="vendor[]"]').on('change', function () {
+    $('select[name="vendor[]"]').selectpicker('refresh');
+    var activeTabId = $('.tracker-pane.active').attr('id');
+    if (activeTabId === 'tracker_2') {
+        table_manage_actual_stock_reconciliation.DataTable().ajax.reload();
+    } else {
         table_manage_goods_receipt.DataTable().ajax.reload();
     }
 });
 
 
+$(document).on('click', '.reset_all_ot_filters', function () {
+    var filterArea = $('.all_ot_filters');
+    filterArea.find('input').val("");
+    filterArea.find('select').not('select[name="project[]"]').selectpicker("val", "");
+    table_manage_actual_stock_reconciliation.DataTable().ajax.reload();
+});
 
 
 init_goods_receipt();
@@ -123,8 +82,8 @@ function init_wo_tracker(id) {
     "use strict";
     load_small_table_item_proposal(id, '#purchase_sm_view', 'purchase_id', 'purchase/view_wo_tracker', '.purchase_sm');
 }
- 
-  
+
+
 function load_small_table_item_proposal(pr_id, selector, input_name, url, table) {
     "use strict";
 
@@ -183,12 +142,12 @@ function toggle_small_view_proposal(table, main_data) {
 
 }
 
-function view_purchase_tracker_attachments(rel_id,view_type) {
+function view_purchase_tracker_attachments(rel_id, view_type) {
     "use strict";
     $.post(admin_url + 'purchase/view_purchase_tracker_attachments', {
         rel_id: rel_id,
         view_type: view_type
-    }).done(function (response) { 
+    }).done(function (response) {
         response = JSON.parse(response);
         if (response.result) {
             $('.view_purchase_attachment_modal').html(response.result);
@@ -203,10 +162,10 @@ function preview_purchase_tracker_btn(invoker) {
     "use strict";
     var id = $(invoker).attr('id');
     var view_type = $(invoker).attr('view_type');;
-    view_purchase_tracker_file(id,view_type);
+    view_purchase_tracker_file(id, view_type);
 }
 
-function view_purchase_tracker_file(id,view_type) {
+function view_purchase_tracker_file(id, view_type) {
     "use strict";
     $('#purchase_tracker_file_data').empty();
     $("#purchase_tracker_file_data").load(admin_url + 'purchase/view_purchase_tracker_file/' + id + '/' + view_type, function (response, status, xhr) {
