@@ -1350,7 +1350,6 @@ class Warehouse_model extends App_Model
 					$stock_insert_reconciliation_id = $this->db->insert_id();
 					$this->update_inventory_setting(['next_inventory_stock_reconciliation_mumber' =>  get_warehouse_option('next_inventory_stock_reconciliation_mumber') + 1]);
 				}
-
 			} else if ($data['wo_order_id'] != '' && $data['wo_order_id'] != 0) {
 				$this->db->where('id', $data['wo_order_id']);
 				$this->db->update(db_prefix() . 'wo_orders', ['goods_id' => 1]);
@@ -1492,9 +1491,9 @@ class Warehouse_model extends App_Model
 				$this->db->insert(db_prefix() . 'goods_receipt_detail', $inventory_receipt);
 			}
 			if ($stock_insert_reconciliation_id) {
-				if($data['pr_order_id'] != '' && $data['pr_order_id'] != 0){
+				if ($data['pr_order_id'] != '' && $data['pr_order_id'] != 0) {
 					$stock_reconciliation_details_data = $this->reconciliation_goods_receipt_get_pur_order($data['pr_order_id']);
-				}elseif ($data['wo_order_id'] != '' && $data['wo_order_id'] != 0) {
+				} elseif ($data['wo_order_id'] != '' && $data['wo_order_id'] != 0) {
 					$stock_reconciliation_details_data = $this->reconciliation_goods_receipt_get_wo_order($data['wo_order_id']);
 				}
 				foreach ($stock_reconciliation_details_data as $key => $value) {
@@ -4215,7 +4214,7 @@ class Warehouse_model extends App_Model
 
 			hooks()->do_action('after_wh_goods_delivery_added', $insert_id);
 		}
-
+		add_stock_issue_activity_log($insert_id);
 		return $insert_id > 0 ? $insert_id : false;
 	}
 
@@ -7849,7 +7848,7 @@ class Warehouse_model extends App_Model
 	 */
 	public function delete_goods_delivery($id)
 	{
-
+		remove_stock_issue_activity_log($id);
 		hooks()->do_action('before_goods_delivery_deleted', $id);
 
 		$affected_rows = 0;
@@ -8001,6 +8000,12 @@ class Warehouse_model extends App_Model
 	public function update_goods_delivery($data, $id = false)
 	{
 		$results = 0;
+		$original_data = [];
+		if (isset($data['id'])) {
+			$goods_delivery_id = $data['id'];
+			$this->db->where('id', $goods_delivery_id);
+			$original_data = $this->db->get(db_prefix() . 'goods_delivery')->row_array();
+		}
 
 		$goods_deliveries = [];
 		$update_goods_deliveries = [];
@@ -8091,11 +8096,17 @@ class Warehouse_model extends App_Model
 
 		$goods_delivery_id = $data['id'];
 		unset($data['id']);
+		// Compare and log changes
+		$changes = $this->compare_data_changes($original_data, $data);
 
 		$this->db->where('id', $goods_delivery_id);
 		$this->db->update(db_prefix() . 'goods_delivery', $data);
 		if ($this->db->affected_rows() > 0) {
 			$results++;
+			// Log item changes if any
+			if (!empty($changes)) {
+				$this->log_goods_delivery_changes($goods_delivery_id, $changes, $original_data);
+			}
 		}
 		$this->save_invetory_files('goods_delivery', $goods_delivery_id);
 		/*update googs delivery*/
@@ -8737,6 +8748,16 @@ class Warehouse_model extends App_Model
 		return $result ? $result->company : 'Unknown Supplier';
 	}
 
+	private function get_satff_name($staff_id)
+	{
+		if (empty($staff_id)) return 'None';
+
+		$this->db->select('firstname, lastname');
+		$this->db->where('staffid', $staff_id);
+		$result = $this->db->get(db_prefix() . 'staff')->row();
+		return $result ? $result->firstname . ' ' . $result->lastname : 'Unknown Staff';
+	}
+
 	/**
 	 * Get area names by IDs (comma-separated)
 	 */
@@ -8767,7 +8788,10 @@ class Warehouse_model extends App_Model
 		switch ($field) {
 			case 'department':
 				return $this->get_department_name($value);
-
+			case 'requester':
+				return $this->get_satff_name($value);
+			case 'buyer_id':
+				return $this->get_satff_name($value);
 			case 'supplier_code':
 				return $this->get_supplier_name($value);
 
@@ -8820,6 +8844,34 @@ class Warehouse_model extends App_Model
 		$CI->db->insert(db_prefix() . 'module_activity_log', [
 			'module_name' => 'stckrec',
 			'rel_id' => $goods_receipt_id,
+			'description' => $description,
+			'date' => date('Y-m-d H:i:s'),
+			'staffid' => get_staff_user_id(),
+			'project_id' => $default_project
+		]);
+	}
+
+	private function log_goods_delivery_changes($goods_delivery_id, $changes, $original_data = [])
+	{
+		$CI = &get_instance();
+		$default_project = get_default_project();
+
+		$description = "Stock delivery <b>" . $this->get_goods_delivery_code($goods_delivery_id) . "</b> has been updated. Changes: ";
+
+		$change_details = [];
+		foreach ($changes as $field => $change) {
+			$from_value = $this->format_field_value($field, $change['from'], $original_data);
+			$to_value = $this->format_field_value($field, $change['to'], $original_data);
+
+			$field_name = ucfirst(str_replace('_', ' ', $field));
+			$change_details[] = "{$field_name} changed from '{$from_value}' to '{$to_value}'";
+		}
+
+		$description .= implode(', ', $change_details);
+
+		$CI->db->insert(db_prefix() . 'module_activity_log', [
+			'module_name' => 'stckiss',
+			'rel_id' => $goods_delivery_id,
 			'description' => $description,
 			'date' => date('Y-m-d H:i:s'),
 			'staffid' => get_staff_user_id(),

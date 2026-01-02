@@ -698,7 +698,7 @@ class warehouse extends AdminController
 		if ($this->input->post()) {
 			$message = '';
 			$data = $this->input->post();
-			if (!$this->input->post('id')) {
+			if (!$this->input->post('id')) { 
 
 				$mess = $this->warehouse_model->add_goods_receipt($data);
 

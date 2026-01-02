@@ -2735,6 +2735,50 @@ function remove_stock_received_activity_log($id)
     return true;
 }
 
+function add_stock_issue_activity_log($id)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if (!empty($id)) {
+        $CI->db->where('id', $id);
+        $stock_received_date = $CI->db->get(db_prefix() . 'goods_delivery')->row();
+        if (!empty($stock_received_date)) {
+            $description = "Stock Issued <b>" . $stock_received_date->goods_delivery_code . "</b> has been created.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'stckiss',
+                'rel_id' => $id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
+
+function remove_stock_issue_activity_log($id)
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    if (!empty($id)) {
+        $CI->db->where('id', $id);
+        $goods_receipt = $CI->db->get(db_prefix() . 'goods_receipt')->row();
+        if (!empty($goods_receipt)) {
+            $description = "Stock Received <b>" . $goods_receipt->goods_receipt_code . "</b> has been deleted.";
+            $CI->db->insert(db_prefix() . 'module_activity_log', [
+                'module_name' => 'stckrec',
+                'rel_id' => $id,
+                'description' => $description,
+                'date' => date('Y-m-d H:i:s'),
+                'staffid' => get_staff_user_id(),
+                'project_id' => $default_project
+            ]);
+        }
+    }
+    return true;
+}
+
 function update_pt_activity_log($id, $purchase_tracker, $type, $field, $old_value, $new_value)
 {
     $CI = &get_instance();
