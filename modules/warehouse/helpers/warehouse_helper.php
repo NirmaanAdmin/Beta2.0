@@ -2763,11 +2763,11 @@ function remove_stock_issue_activity_log($id)
     $default_project = get_default_project();
     if (!empty($id)) {
         $CI->db->where('id', $id);
-        $goods_receipt = $CI->db->get(db_prefix() . 'goods_receipt')->row();
+        $goods_receipt = $CI->db->get(db_prefix() . 'goods_delivery')->row();
         if (!empty($goods_receipt)) {
-            $description = "Stock Received <b>" . $goods_receipt->goods_receipt_code . "</b> has been deleted.";
+            $description = "Stock Issued <b>" . $goods_receipt->goods_delivery_code . "</b> has been deleted.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
-                'module_name' => 'stckrec',
+                'module_name' => 'stckiss',
                 'rel_id' => $id,
                 'description' => $description,
                 'date' => date('Y-m-d H:i:s'),
