@@ -955,4 +955,11 @@ class Estimates extends AdminController
             $this->app->get_table_data('budget_usage', ['estimate_id' => $estimate_id]);
         }
     }
+
+    public function update_estimate_item_package()
+    {
+        $data = $this->input->post();
+        $this->estimates_model->add_assign_unawarded_capex($data);
+        echo json_encode(['success' => true, 'message' => 'Assign Unawarded Capex is updated successfully']);
+    }
 }

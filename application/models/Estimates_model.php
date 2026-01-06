@@ -3393,6 +3393,24 @@ class Estimates_model extends App_Model
     public function table_estimate_items($estimate_id = '', $budget_head_id = '')
     {
         if ($this->input->is_ajax_request()) {
+            $this->db->order_by('id', 'desc');
+            if ($estimate_id != '') {
+                $this->db->where('estimate_id', $estimate_id);
+            }
+            if ($budget_head_id != '') {
+                $this->db->where('budget_head', $budget_head_id);
+            }
+            $all_packages = $this->db->get(db_prefix() . 'estimate_package_info')->result_array();
+            $all_packages = array_merge(
+                [
+                    [
+                        'id' => '',
+                        'package_name' => ''
+                    ]
+                ],
+                $all_packages
+            );
+
             $base_currency = get_base_currency_pur();
             $select = [
                 'it.item_code',
@@ -3403,12 +3421,15 @@ class Estimates_model extends App_Model
                 'it.rate',
                 '(it.qty * it.rate) as amount',
                 'it.remarks',
+                'ubi.packages',
             ];
 
             $sTable       = db_prefix() . 'itemable it';
             $sIndexColumn = 'it.id';
 
-            $join = [];
+            $join = [
+                'LEFT JOIN ' . db_prefix() . 'unawarded_budget_info ubi ON ubi.item_id = it.id AND ubi.budget_head = it.annexure AND ubi.estimate_id = it.rel_id',
+            ];
 
             $where = [];
             if ($estimate_id != '') {
@@ -3436,6 +3457,7 @@ class Estimates_model extends App_Model
 
             $additionalSelect = [
                 'it.unit_id',
+                'it.id',
             ];
 
             $result  = data_tables_init($select, $sIndexColumn, $sTable, $join, $where, $additionalSelect);
@@ -3456,6 +3478,11 @@ class Estimates_model extends App_Model
 
                 $row[] = app_format_money($aRow['rate'], $base_currency);
                 $row[] = app_format_money($aRow['amount'], $base_currency);
+
+                $packages = !empty($aRow['packages']) ? $aRow['packages'] : NULL;
+                $packages_html = render_select('view_item_package', $all_packages, array('id', 'package_name'), '', $packages, array('data-width' => '100%', 'data-none-selected-text' => _l('None'), 'data-live-search' => true, 'data-item_id' => $aRow['id'], 'data-old_packages' => $packages), array(), 'no-mbot', '', false);
+                $row[] = $packages_html;
+                
                 $row[] = clear_textarea_breaks($aRow['remarks']);
 
                 $output['aaData'][] = $row;

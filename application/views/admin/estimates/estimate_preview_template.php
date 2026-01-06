@@ -810,13 +810,14 @@
                                     <thead>
                                         <tr>
                                             <th width="13%"><?php echo _l('estimate_table_item_heading'); ?></th>
-                                            <th width="16%"><?php echo _l('estimate_table_item_description'); ?></th>
+                                            <th width="14%"><?php echo _l('estimate_table_item_description'); ?></th>
                                             <th width="10%" class="qty"><?php echo _l('sub_head'); ?></th>
                                             <th width="12%" class="area"><?php echo _l('area'); ?></th>
                                             <th width="10%" class="qty"><?php echo e(_l('estimate_table_quantity_heading')); ?></th>
-                                            <th width="13%"><?php echo _l('estimate_table_rate_heading'); ?></th>
-                                            <th width="13%"><?php echo _l('estimate_table_amount_heading'); ?></th>
-                                            <th width="13%"><?php echo _l('remarks'); ?></th>
+                                            <th width="11%"><?php echo _l('estimate_table_rate_heading'); ?></th>
+                                            <th width="10%"><?php echo _l('estimate_table_amount_heading'); ?></th>
+                                            <th width="10%"><?php echo _l('Packages'); ?></th>
+                                            <th width="9%"><?php echo _l('remarks'); ?></th>
                                         </tr>
                                         <tbody></tbody>
                                     </thead>
@@ -1784,6 +1785,33 @@ $('a.tab_child_annexures').on('shown.bs.tab', function (e) {
     });
     $(EstimateParams.sub_head).selectpicker('refresh');
     $(EstimateParams.area).selectpicker('refresh');
+    $(tableSelector).on('draw.dt', function () {
+        $('select.selectpicker').selectpicker('render').selectpicker('refresh');
+    });
+});
+$("body").on('change', 'select[name="view_item_package"]', function () {
+    var budget_head_id = $(this).closest('.detailed-costing-tab').data('id');
+    var item_id = $(this).data('item_id');
+    var old_packages = $(this).data('old_packages');
+    var packages = $(this).val();
+    $.post(admin_url + "estimates/update_estimate_item_package", {
+        estimate_id: estimate_id,
+        unawarded_budget_head: budget_head_id,
+        newitems: [
+            {
+                item_id: item_id,
+                old_packages: old_packages,
+                packages: packages
+            }
+        ]
+    }).done(function (res) {
+        var response = JSON.parse(res);
+        if (response.success) {
+            alert_float("success", response.message);
+            $('.table-table_estimate_items_' + budget_head_id).DataTable().ajax.reload();
+            table_unawarded_tracker.DataTable().ajax.reload();
+        }
+    });
 });
 
 var gantt_data = <?php echo json_encode($gantt_data); ?>;
