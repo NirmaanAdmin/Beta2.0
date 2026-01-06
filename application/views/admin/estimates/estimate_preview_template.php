@@ -484,7 +484,7 @@
                                             <?php
                                             foreach ($annexures as $key => $annexure) { ?>
                                                 <li>
-                                                    <a href="#<?php echo $annexure['annexure_key']; ?>" aria-controls="<?php echo $annexure['annexure_key']; ?>" role="tab" id="tab_<?php echo $annexure['annexure_key']; ?>" data-toggle="tab">
+                                                    <a href="#<?php echo $annexure['annexure_key']; ?>" aria-controls="<?php echo $annexure['annexure_key']; ?>" role="tab" id="tab_<?php echo $annexure['annexure_key']; ?>" data-toggle="tab" class="tab_child_annexures">
                                                         <?php echo $annexure['name']; ?>
                                                     </a>
                                                 </li>
@@ -1755,7 +1755,7 @@ function uploadbulkpackagecsv() {
 
 var currentTable = null;
 var currentBudgetHead = null;
-$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+$('a.tab_child_annexures').on('shown.bs.tab', function (e) {
     var target = $(e.target).attr("href"); 
     var $tabPane = $(target);
     var budget_head_id = $tabPane.data('id');
