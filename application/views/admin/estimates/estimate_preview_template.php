@@ -1211,9 +1211,9 @@
                                     <th><?php echo _l('budgeted_rate'); ?></th>
                                     <th><?php echo _l('budgeted_amount'); ?></th>
                                     <th>Packages</th>
-                                    <th>Remaining Amount In Budget</th>
+                                    <!-- <th>Remaining Amount In Budget</th>
                                     <th>Amount Booked In Package</th>
-                                    <th>Amount Booked In Order</th>
+                                    <th>Amount Booked In Order</th> -->
                                 </tr>
                             </thead>
                             <tbody></tbody>

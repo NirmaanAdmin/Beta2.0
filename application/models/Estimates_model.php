@@ -3502,9 +3502,9 @@ class Estimates_model extends App_Model
                 '(it.qty * it.rate) as amount',
                 'it.remarks',
                 'ubi.packages',
-                1,
-                2,
-                3,
+                // 1,
+                // 2,
+                // 3,
             ];
 
             $sTable       = db_prefix() . 'itemable it';
@@ -3663,9 +3663,9 @@ class Estimates_model extends App_Model
                 $row[] = app_format_money($aRow['amount'], $base_currency);
 
                 $row[] = $packages_html;
-                $row[] = app_format_money($remaining_amount, $base_currency);
-                $row[] = app_format_money($booked_in_package, $base_currency);
-                $row[] = app_format_money($booked_in_order, $base_currency);
+                // $row[] = app_format_money($remaining_amount, $base_currency);
+                // $row[] = app_format_money($booked_in_package, $base_currency);
+                // $row[] = app_format_money($booked_in_order, $base_currency);
 
                 $output['aaData'][] = $row;
             }
