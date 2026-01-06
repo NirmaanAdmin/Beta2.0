@@ -2350,11 +2350,21 @@ class Estimates_model extends App_Model
         $budget_head = isset($data['unawarded_budget_head']) ? $data['unawarded_budget_head'] : NULL;
         if (!empty($newitems)) {
             foreach ($newitems as $key => $value) {
-                $old_packages = isset($value['old_packages']) ? $value['old_packages'] : array();
-                $new_packages = isset($value['packages']) ? $value['packages'] : array();
-                $added = array_values(array_diff($new_packages, $old_packages));
-                $removed = array_values(array_diff($old_packages, $new_packages));
-                $unchanged = array_values(array_intersect($old_packages, $new_packages));
+                $old_packages = !empty($value['old_packages']) ? $value['old_packages'] : NULL;
+                $new_packages = !empty($value['packages']) ? $value['packages'] : NULL;
+                $added = $removed = $unchanged = NULL;
+                if(empty($old_packages) && !empty($new_packages)) {
+                    $added = $new_packages;
+                } else if(!empty($old_packages) && empty($new_packages)) {
+                    $removed = $old_packages;
+                } else if(!empty($old_packages) && !empty($new_packages)) {
+                    if ($old_packages != $new_packages) {
+                        $removed = $old_packages;
+                        $added = $new_packages;
+                    } else {
+                        $unchanged = $old_packages;
+                    }
+                }
                 $this->db->where('estimate_id', $estimate_id);
                 $this->db->where('budget_head', $budget_head);
                 $this->db->where('item_id', $value['item_id']);
@@ -2366,7 +2376,7 @@ class Estimates_model extends App_Model
                     $this->db->update(db_prefix() . 'unawarded_budget_info', [
                         'unawarded_qty' => 0.00,
                         'unawarded_rate' => 0.00,
-                        'packages' => !empty($value['packages']) ? implode(',', $value['packages']) : NULL,
+                        'packages' => !empty($value['packages']) ? $value['packages'] : NULL,
                     ]);
                     if ($this->db->affected_rows() > 0) {
                         add_assign_unawarded_capex_activity_log($unawarded_budget_info->id);
@@ -2378,70 +2388,50 @@ class Estimates_model extends App_Model
                         'item_id' => $value['item_id'],
                         'unawarded_qty' => 0.00,
                         'unawarded_rate' => 0.00,
-                        'packages' => !empty($value['packages']) ? implode(',', $value['packages']) : NULL,
+                        'packages' => !empty($value['packages']) ? $value['packages'] : NULL,
                     ]);
                     $unawarded_budget_info_id = $this->db->insert_id();
                     add_assign_unawarded_capex_activity_log($unawarded_budget_info_id);
                 }
                 if (!empty($added)) {
-                    foreach ($added as $akey => $avalue) {
-                        $this->db->insert(db_prefix() . 'estimate_package_items_info', [
-                            'package_id' => $avalue,
-                            'item_id' => $value['item_id'],
-                        ]);
-                        $this->db->where('package_id', $avalue);
-                        $this->db->where('estimate_id', $estimate_id);
-                        $this->db->where('group_pur', $budget_head);
-                        $tender_exists = $this->db->get(db_prefix() . 'pur_tender')->row();
-
-                        if ($tender_exists) {
-                            $tender_id = $tender_exists->id;
-                            $this->db->where('id', $value['item_id']);
-                            $get_desc = $this->db->get(db_prefix() . 'itemable')->row();
-                            $tender_detail_arr = [
-                                'pur_tender' => $tender_id,
-                                'item_code'  => $value['item_id'],
-                                'description' => $get_desc->long_description,
-                                'unit_price' => 0.00,
-                                'quantity'   => 0.00,
-                                'area' => $get_desc->area,
-                                'sub_head' => $get_desc->sub_head,
-                                'package_id' => $avalue,
-                            ];
-
-                            $this->db->insert(db_prefix() . 'pur_tender_detail', $tender_detail_arr);
-                        }
+                    $this->db->where('id', $value['item_id']);
+                    $itemable = $this->db->get(db_prefix() . 'itemable')->row();
+                    $this->db->insert(db_prefix() . 'estimate_package_items_info', [
+                        'package_id' => $added,
+                        'item_id' => $value['item_id'],
+                        'package_qty' => $itemable->qty,
+                        'package_rate' => $itemable->rate,
+                    ]);
+                    $this->update_estimate_package_info($added);
+                    
+                    $this->db->where('package_id', $added);
+                    $this->db->where('estimate_id', $estimate_id);
+                    $this->db->where('group_pur', $budget_head);
+                    $tender_exists = $this->db->get(db_prefix() . 'pur_tender')->row();
+                    if ($tender_exists) {
+                        $tender_id = $tender_exists->id;
+                        $tender_detail_arr = [
+                            'pur_tender' => $tender_id,
+                            'item_code'  => $value['item_id'],
+                            'description' => $itemable->long_description,
+                            'unit_price' => $itemable->qty,
+                            'quantity'   => $itemable->rate,
+                            'area' => $itemable->area,
+                            'sub_head' => $itemable->sub_head,
+                            'package_id' => $added,
+                        ];
+                        $this->db->insert(db_prefix() . 'pur_tender_detail', $tender_detail_arr);
                     }
                 }
                 if (!empty($removed)) {
                     $this->db->where('item_id', $value['item_id']);
-                    $this->db->where_in('package_id', $removed);
+                    $this->db->where('package_id', $removed);
                     $this->db->delete(db_prefix() . 'estimate_package_items_info');
-
+                    $this->update_estimate_package_info($removed);
 
                     $this->db->where('item_code', $value['item_id']);
-                    $this->db->where_in('package_id', $removed);
+                    $this->db->where('package_id', $removed);
                     $this->db->delete(db_prefix() . 'pur_tender_detail');
-
-                    foreach ($removed as $rkey => $rvalue) {
-                        $this->db->where('id', $rvalue);
-                        $estimate_package_info = $this->db->get(db_prefix() . 'estimate_package_info')->row();
-                        $this->db->select('SUM(package_qty * package_rate) AS total_amount');
-                        $this->db->where_in('package_id', $removed);
-                        $estimate_package_items_info_query = $this->db->get(db_prefix() . 'estimate_package_items_info');
-                        $estimate_package_items_info_data = $estimate_package_items_info_query->row_array();
-                        $total_amount = $estimate_package_items_info_data['total_amount'] ?? 0.00;
-                        $total_package = !empty($estimate_package_info->sdeposit_percent)
-                            ? $total_amount + ($total_amount * ($estimate_package_info->sdeposit_percent / 100))
-                            : $total_amount;
-                        $sdeposit_value = $total_package - $total_amount;
-
-                        $this->db->where('id', $rvalue);
-                        $this->db->update(db_prefix() . 'estimate_package_info', [
-                            'sdeposit_value' => $sdeposit_value,
-                            'total_package' => $total_package,
-                        ]);
-                    }
                 }
             }
         }
@@ -3490,6 +3480,15 @@ class Estimates_model extends App_Model
                 $this->db->where('budget_head', $budget_head_id);
             }
             $all_packages = $this->db->get(db_prefix() . 'estimate_package_info')->result_array();
+            $all_packages = array_merge(
+                [
+                    [
+                        'id' => '',
+                        'package_name' => ''
+                    ]
+                ],
+                $all_packages
+            );
 
             $base_currency = get_base_currency_pur();
             $select = [
@@ -3637,18 +3636,16 @@ class Estimates_model extends App_Model
                 $remaining_amount = $aRow['amount'] - $booked_in_order;
 
                 $packages_html = '';
-                $packages = !empty($aRow['packages']) ? explode(',', $aRow['packages']) : array();
+                $packages = !empty($aRow['packages']) ? $aRow['packages'] : NULL;
                 $item_id_name_attr = "newitems[$key][item_id]";
                 $old_packages_name_attr = "newitems[$key][old_packages]";
-                $packages_name_attr = "newitems[$key][packages][]";
+                $packages_name_attr = "newitems[$key][packages]";
                 $packages_html .= form_hidden($item_id_name_attr, $aRow['id']);
                 if (!empty($packages)) {
-                    foreach ($packages as $pkg) {
-                        $packages_html .= form_hidden($old_packages_name_attr . '[]', $pkg);
-                    }
+                    $packages_html .= form_hidden($old_packages_name_attr, $packages);
                 }
 
-                $packages_html .= render_select($packages_name_attr, $all_packages, array('id', 'package_name'), '', $packages, array('data-width' => '100%', 'data-none-selected-text' => _l('None'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
+                $packages_html .= render_select($packages_name_attr, $all_packages, array('id', 'package_name'), '', $packages, array('data-width' => '100%', 'data-none-selected-text' => _l('None'), 'data-live-search' => true), array(), 'no-mbot', '', false);
 
                 $row[] = get_purchase_items($aRow['item_code']);
                 $row[] = clear_textarea_breaks($aRow['long_description']);
@@ -3866,5 +3863,26 @@ class Estimates_model extends App_Model
         $this->db->update(db_prefix() . 'project_timelines', [
             'color' => $data['color'],
         ]);
+    }
+
+    public function update_estimate_package_info($package_id) 
+    {
+        $this->db->where('id', $package_id);
+        $estimate_package_info = $this->db->get(db_prefix() . 'estimate_package_info')->row();
+        $this->db->select('SUM(package_qty * package_rate) AS total_amount');
+        $this->db->where_in('package_id', $package_id);
+        $estimate_package_items_info_query = $this->db->get(db_prefix() . 'estimate_package_items_info');
+        $estimate_package_items_info_data = $estimate_package_items_info_query->row_array();
+        $total_amount = $estimate_package_items_info_data['total_amount'] ?? 0.00;
+        $total_package = !empty($estimate_package_info->sdeposit_percent)
+            ? $total_amount + ($total_amount * ($estimate_package_info->sdeposit_percent / 100))
+            : $total_amount;
+        $sdeposit_value = $total_package - $total_amount;
+        $this->db->where('id', $package_id);
+        $this->db->update(db_prefix() . 'estimate_package_info', [
+            'sdeposit_value' => $sdeposit_value,
+            'total_package' => $total_package,
+        ]);
+        return true;
     }
 }
