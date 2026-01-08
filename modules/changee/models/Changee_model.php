@@ -2547,7 +2547,7 @@ class Changee_model extends App_Model
                     $dt_data['total'] = $rqd['total'];
                     $dt_data['tax_value'] = $rqd['tax_value'];
                     $dt_data['item_text'] = nl2br($rqd['item_text']);
-                    $dt_data['remarks'] = $rqd['remarks'];
+                    $dt_data['remarks'] = !empty($rqd['remarks']) ? nl2br($rqd['remarks']) : NULL;
                     $dt_data['tender_item'] = isset($rqd['tender_item']) ? $rqd['tender_item'] : 0;
                     $dt_data['variation'] = $rqd['variation'];
                     $dt_data['serial_no'] = $rqd['serial_no'];
@@ -2748,7 +2748,7 @@ class Changee_model extends App_Model
                 $dt_data['total'] = $rqd['total'];
                 $dt_data['tax_value'] = $rqd['tax_value'];
                 $dt_data['item_text'] = nl2br($rqd['item_text']);
-                $dt_data['remarks'] = $rqd['remarks'];
+                $dt_data['remarks'] = !empty($rqd['remarks']) ? nl2br($rqd['remarks']) : NULL;
                 $dt_data['tender_item'] = isset($rqd['tender_item']) ? $rqd['tender_item'] : 0;
                 $dt_data['variation'] = $rqd['variation'];
                 $dt_data['serial_no'] = $rqd['serial_no'];
@@ -2801,7 +2801,7 @@ class Changee_model extends App_Model
                 $dt_data['total'] = $rqd['total'];
                 $dt_data['tax_value'] = $rqd['tax_value'];
                 $dt_data['item_text'] = nl2br($rqd['item_text']);
-                $dt_data['remarks'] = nl2br($rqd['remarks']);
+                $dt_data['remarks'] = !empty($rqd['remarks']) ? nl2br($rqd['remarks']) : NULL;
                 $dt_data['tender_item'] = isset($rqd['tender_item']) ? $rqd['tender_item'] : 0;
                 $dt_data['variation'] = $rqd['variation'];
                 $dt_data['serial_no'] = $rqd['serial_no'];
@@ -4871,14 +4871,13 @@ class Changee_model extends App_Model
           <tr>
             <th class="thead-dark" style="width: 10%;font-size: 11px">' . _l('items') . '</th>
             <th class="thead-dark" style="width: 32%;font-size: 11px">' . _l('decription') . '</th>
-            <th class="thead-dark" align="right" style="width: 7%;font-size: 11px">' . _l('awarded_qty') . '</th>
-            <th class="thead-dark" align="right" style="width: 7%;font-size: 11px">' . _l('qty_after_incl_co') . '</th>
-            <th class="thead-dark" align="right" style="width: 7%;font-size: 11px">' . _l('awarded_rate') . '</th>
+            <th class="thead-dark" align="right" style="width: 8%;font-size: 11px">' . _l('awarded_qty') . '</th>
+            <th class="thead-dark" align="right" style="width: 8%;font-size: 11px">' . _l('qty_after_incl_co') . '</th>
+            <th class="thead-dark" align="right" style="width: 8%;font-size: 11px">' . _l('awarded_rate') . '</th>
             <th class="thead-dark" align="right" style="width: 7%;font-size: 11px">' . _l('rate_after_incl_co') . '</th>
-            <th class="thead-dark" align="right" style="width: 8%;font-size: 11px">' . _l('updated_subtotal_before_tax') . '</th>
-            <th class="thead-dark" align="right" style="width: 8%;font-size: 11px">' . _l('tax_value') . '</th>
-            <th class="thead-dark" align="right" style="width: 8%;font-size: 11px">' . _l('debit_note_total') . '</th>
-            <th class="thead-dark" align="right" style="width: 6%;font-size: 11px">Remark</th>
+            <th class="thead-dark" align="right" style="width: 9%;font-size: 11px">' . _l('updated_subtotal_before_tax') . '</th>
+            <th class="thead-dark" align="right" style="width: 9%;font-size: 11px">' . _l('tax_value') . '</th>
+            <th class="thead-dark" align="right" style="width: 9%;font-size: 11px">' . _l('debit_note_total') . '</th>
           </tr>
         </thead>
         <tbody>';
@@ -4929,17 +4928,23 @@ class Changee_model extends App_Model
             if ($diff == 0) {
                 $rate_after_incl_co = '-';
             }
+            $remarks = '';
+            if ($row['tender_item'] == 0 && !empty($row['remarks'])) {
+                $remarks = '<br>Remarks: '.$row['remarks'];
+            }
             $html .= '<tr nobr="true" class="sortable">
             <td style="width: 10%; font-size: 11px;' . $font_weight . '">' . $items->commodity_code . ' - ' . $items->description . $non_tender . '</td>
-            <td style="width: 32%; font-size: 11px">' . str_replace("<br />", " ", $row['description']) . '</td>
-            <td align="right" style="width: 7%; font-size: 11px;' . $font_weight . '">' . changee_pur_html_entity_decode($row['original_quantity']) . ' ' . $units->unit_name . '<br><span style="display: block; font-size: 10px;font-style: italic;">Amendment : ' . $diff_unit . '</span></td>
-            <td align="' . $align . '" style="width: 7%; font-size: 11px;' . $font_weight . '">' . $qty_after_incl_co . '</td>
-            <td align="right" style="width: 7%; font-size: 11px;' . $font_weight . '">₹' . app_format_money($row['original_unit_price'], '') . '<br><span style="display: block; font-size: 10px;font-style: italic;">Amendment : ' . $diff . '</span></td>
+            <td style="width: 32%; font-size: 11px">
+                ' . str_replace("<br />", " ", $row['description']) . '
+                ' . str_replace("<br />", " ", $remarks) . '
+            </td>
+            <td align="right" style="width: 8%; font-size: 11px;' . $font_weight . '">' . changee_pur_html_entity_decode($row['original_quantity']) . ' ' . $units->unit_name . '<br><span style="display: block; font-size: 10px;font-style: italic;">Amendment : ' . $diff_unit . '</span></td>
+            <td align="' . $align . '" style="width: 8%; font-size: 11px;' . $font_weight . '">' . $qty_after_incl_co . '</td>
+            <td align="right" style="width: 8%; font-size: 11px;' . $font_weight . '">₹' . app_format_money($row['original_unit_price'], '') . '<br><span style="display: block; font-size: 10px;font-style: italic;">Amendment : ' . $diff . '</span></td>
             <td align="' . $align . '" style="width: 7%; font-size: 11px;' . $font_weight . '">' . $rate_after_incl_co . '</td>
-            <td align="right" style="width: 8%; font-size: 11px;' . $font_weight . '">₹' . app_format_money($row['into_money_updated'], '') . '</td>
-            <td align="right" style="width: 8%; font-size: 11px;' . $font_weight . '">₹' . app_format_money($row['tax_value'], '') . '</td>
-            <td align="right" style="width: 8%; font-size: 11px;' . $font_weight . '">₹' . app_format_money($row['total'], '') . '</td>
-            <td align="right" style="width: 6%; font-size: 11px;' . $font_weight . '">' . $row['remarks'] . '</td>
+            <td align="right" style="width: 9%; font-size: 11px;' . $font_weight . '">₹' . app_format_money($row['into_money_updated'], '') . '</td>
+            <td align="right" style="width: 9%; font-size: 11px;' . $font_weight . '">₹' . app_format_money($row['tax_value'], '') . '</td>
+            <td align="right" style="width: 9%; font-size: 11px;' . $font_weight . '">₹' . app_format_money($row['total'], '') . '</td>
           </tr>';
 
             $t_mn += $row['total_money'];
@@ -11359,7 +11364,10 @@ class Changee_model extends App_Model
         }
         $row .= '</td>';
         if (!empty($name) && $tender_item == 0) {
-            $row .= '<td class="">' . render_textarea($name_item_description, '', $item_description, ['rows' => 2, 'placeholder' => _l('item_description'), 'readonly' => 'readonly']) . '</td>';
+            $row .= '<td class="">';
+            $row .= render_textarea($name_item_description, '', $item_description, ['rows' => 2, 'placeholder' => _l('item_description'), 'readonly' => 'readonly']);
+            $row .= render_textarea($name_remarks, '', $remarks, ['rows' => 2, 'placeholder' => _l('remarks')]);
+            $row .= '</td>';
         } else {
             $row .= '<td class="">' . render_textarea($name_item_description, '', $item_description, ['rows' => 2, 'placeholder' => _l('item_description')]) . '</td>';
         }

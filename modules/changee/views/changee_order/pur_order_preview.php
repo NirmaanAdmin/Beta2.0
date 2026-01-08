@@ -515,7 +515,6 @@ if ($estimate->currency != 0) {
                                     <th width="10%" align="right"><?php echo _l('debit_note_table_tax_heading'); ?></th>
                                     <th width="10%" align="right"><?php echo _l('tax_value'); ?></th>
                                     <th width="10%" align="right"><?php echo _l('debit_note_total'); ?></th>
-                                    <th width="10%" align="right"><?php echo _l('remarks'); ?></th>
                                  </tr>
                               </thead>
                               <tbody class="ui-sortable">
@@ -558,7 +557,14 @@ if ($estimate->currency != 0) {
                                              $rate_after_incl_co = '-';
                                           }
                                           ?>
-                                          <td align="left"><?php echo nl2br($es['description']); ?></td>
+                                          <td align="left">
+                                             <?php 
+                                             echo nl2br($es['description']);
+                                             if ($es['tender_item'] == 0 && !empty($es['remarks'])) {
+                                                   echo '<br />Remarks: ' . nl2br($es['remarks']);
+                                             }
+                                             ?>
+                                          </td>
                                           <td align="left">
                                              <div style="width: 120px"><?php echo get_area_name_by_id($es['area']); ?></div>
                                           </td>
@@ -593,7 +599,6 @@ if ($estimate->currency != 0) {
                                                             ?></td>
                                           <td align="right"><?php echo app_format_money($es['tax_value'], $base_currency->symbol); ?></td>
                                           <td class="amount" align="right"><?php echo app_format_money($es['total'], $base_currency->symbol); ?></td>
-                                          <td class="remarks" align="right"><?php echo $es['remarks']; ?></td>
                                        </tr>
                                  <?php
                                     }

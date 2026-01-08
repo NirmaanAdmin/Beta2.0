@@ -3933,6 +3933,7 @@ function update_co_item_activity_log($new_data, $rel_type)
         'tax_select' => _l('debit_note_table_tax_heading'),
         'total' => _l('debit_note_total'),
         'variation' => _l('variation'),
+        'remarks' => _l('remarks'),
     ];
     foreach ($changes as $field => $dummy) {
         if (!isset($field_map[$field])) {
