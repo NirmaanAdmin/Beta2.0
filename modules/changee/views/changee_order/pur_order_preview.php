@@ -149,25 +149,25 @@ if ($estimate->currency != 0) {
                <?php } ?> -->
                <?php
                if ($pur_order->group_pur > 0) { ?>
-                  <p class="bold p_mar"><?php echo _l('group_pur') . ': ' ?> <?php foreach ($commodity_groups as $group) {
-                                                                                 if ($group['id'] == $pur_order->group_pur) {
-                                                                                    echo $group['name'];
-                                                                                 }
-                                                                              } ?> </p>
+               <p class="bold p_mar"><?php echo _l('group_pur') . ': ' ?> <?php foreach ($commodity_groups as $group) {
+                  if ($group['id'] == $pur_order->group_pur) {
+                     echo $group['name'];
+                  }
+               } ?> </p>
                <?php }
                if ($pur_order->sub_groups_pur > 0) { ?>
                   <p class="bold p_mar"><?php echo _l('sub_groups_pur') . ': ' ?> <?php foreach ($sub_groups as $group) {
-                                                                                       if ($group['id'] == $pur_order->sub_groups_pur) {
-                                                                                          echo $group['sub_group_name'];
-                                                                                       }
-                                                                                    } ?> </p>
+                     if ($group['id'] == $pur_order->sub_groups_pur) {
+                        echo $group['sub_group_name'];
+                     }
+                  } ?> </p>
                <?php }
                if ($pur_order->area_pur > 0) { ?>
                   <p class="bold p_mar"><?php echo _l('area_pur') . ': ' ?> <?php foreach ($area as $area) {
-                                                                                 if ($area['id'] == $pur_order->area_pur) {
-                                                                                    echo $area['area_name'];
-                                                                                 }
-                                                                              } ?> </p>
+                     if ($area['id'] == $pur_order->area_pur) {
+                        echo $area['area_name'];
+                     }
+                  } ?> </p>
                <?php }
                if ($pur_order->po_order_id > 0) { ?>
                   <p class="bold p_mar"><?php echo _l('releted_to') . ': ' ?><a href="<?php echo admin_url('purchase/purchase_order/' . $pur_order->po_order_id); ?>"><?php echo get_pur_name_by_id($pur_order->po_order_id); ?></a></p>
@@ -186,15 +186,12 @@ if ($estimate->currency != 0) {
                   <p class="bold p_mar"><?php echo _l('project') . ': ' ?> <?php echo get_project_name_by_id($pur_order->project); ?> </p>
                <?php } ?>
 
-
-
-
             </div>
             <div class="col-md-8">
                <div class="btn-group pull-right">
                   <a href="javascript:void(0)" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-file-pdf"></i><?php if (is_mobile()) {
-                                                                                                                                                                                          echo ' PDF';
-                                                                                                                                                                                       } ?> <span class="caret"></span></a>
+                     echo ' PDF';
+                  } ?> <span class="caret"></span></a>
                   <ul class="dropdown-menu dropdown-menu-right">
                      <li class="hidden-xs"><a href="<?php echo admin_url('changee/purorder_pdf/' . $estimate->id . '?output_type=I'); ?>"><?php echo _l('view_pdf'); ?></a></li>
                      <li class="hidden-xs"><a href="<?php echo admin_url('changee/purorder_pdf/' . $estimate->id . '?output_type=I'); ?>" target="_blank"><?php echo _l('view_pdf_in_new_window'); ?></a></li>
@@ -295,10 +292,10 @@ if ($estimate->currency != 0) {
                   <br>
                   <div class="pull-right _buttons  ">
                      <a href="javascript:void(0)" onclick="copy_public_link(<?php echo changee_pur_html_entity_decode($estimate->id); ?>); return false;" class="btn btn-warning btn-with-tooltip mleft10" data-toggle="tooltip" title="<?php if ($estimate->hash == '') {
-                                                                                                                                                                                                                                             echo _l('create_public_link');
-                                                                                                                                                                                                                                          } else {
-                                                                                                                                                                                                                                             echo _l('copy_public_link');
-                                                                                                                                                                                                                                          } ?>" data-placement="bottom"><i class="fa fa-clone "></i></a>
+                        echo _l('create_public_link');
+                     } else {
+                        echo _l('copy_public_link');
+                     } ?>" data-placement="bottom"><i class="fa fa-clone "></i></a>
                   </div>
                   <div class="pull-right col-md-6">
                      <?php if ($estimate->hash != '' && $estimate->hash != null) {
@@ -455,10 +452,10 @@ if ($estimate->currency != 0) {
                      <?php if ($estimate->estimate != 0) { ?>
                         <div class="col-md-12">
                            <h4 class="font-medium mbot15"><?php echo _l('', array(
-                                                               '',
-                                                               '',
-                                                               '<a href="' . admin_url('changee/quotations/' . $estimate->estimate) . '" target="_blank">' . changee_format_pur_estimate_number($estimate->id) . '</a>',
-                                                            )); ?></h4>
+                            '',
+                            '',
+                            '<a href="' . admin_url('changee/quotations/' . $estimate->estimate) . '" target="_blank">' . changee_format_pur_estimate_number($estimate->id) . '</a>',
+                           )); ?></h4>
                         </div>
                      <?php } ?>
                      <div class="col-md-6 col-sm-6">
@@ -506,7 +503,7 @@ if ($estimate->currency != 0) {
                                  <tr>
                                     <th align="center"><?php echo _l('serial_no'); ?></th>
                                     <th width="15%" align="left"><?php echo _l('debit_note_table_item_heading'); ?></th>
-                                    <th width="25%" align="right" class="qty"><?php echo _l('decription'); ?></th>
+                                    <th width="25%" align="left" class="qty"><?php echo _l('decription'); ?></th>
                                     <th width="15%" align="left"><?php echo _l('area'); ?></th>
                                     <th width="10%" align="right" class="qty"><?php echo _l('awarded_qty'); ?></th>
                                     <th width="10%" align="right" class="qty"><?php echo _l('qty_after_incl_co'); ?></th>
@@ -539,14 +536,13 @@ if ($estimate->currency != 0) {
                                              } ?>
                                           </td>
                                           <td class="description" align="left;"><span><strong><?php
-                                                                                                $item = changee_get_item_hp($es['item_code']);
-                                                                                                if (isset($item) && isset($item->commodity_code) && isset($item->description)) {
-                                                                                                   echo changee_pur_html_entity_decode($item->commodity_code . ' - ' . $item->description);
-                                                                                                } else {
-                                                                                                   echo changee_pur_html_entity_decode($es['item_text']);
-                                                                                                }
-                                                                                                ?></strong></td>
-
+                                          $item = changee_get_item_hp($es['item_code']);
+                                          if (isset($item) && isset($item->commodity_code) && isset($item->description)) {
+                                             echo changee_pur_html_entity_decode($item->commodity_code . ' - ' . $item->description);
+                                          } else {
+                                             echo changee_pur_html_entity_decode($es['item_text']);
+                                          }
+                                          ?></strong></td>
                                           <?php
                                           $diff =  $es['unit_price'] - $es['original_unit_price'];
                                           $diff_unit = $es['quantity'] - $es['original_quantity'];
@@ -562,7 +558,7 @@ if ($estimate->currency != 0) {
                                              $rate_after_incl_co = '-';
                                           }
                                           ?>
-                                          <td align="right"><?php echo nl2br($es['description']); ?></td>
+                                          <td align="left"><?php echo nl2br($es['description']); ?></td>
                                           <td align="left">
                                              <div style="width: 120px"><?php echo get_area_name_by_id($es['area']); ?></div>
                                           </td>
