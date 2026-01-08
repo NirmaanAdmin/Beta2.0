@@ -16845,7 +16845,7 @@ class purchase extends AdminController
     public function view_latter_of_agreement($tender_id)
     {
         $data['title'] = _l('Latter of Agreement');
-        $data['tender_id'] = $tender_id;
+        $data['tender_id'] = $tender_id; 
         $data['loa_data'] = $this->purchase_model->get_latter_of_agreement_detail($tender_id);
         $data['tender_data'] = $this->purchase_model->get_tender_document_detail($tender_id);
         $this->load->view('purchase_tender/latter_of_agreement', $data);

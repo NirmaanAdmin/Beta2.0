@@ -125,6 +125,11 @@
                         <div class="panel-body">
                             <div class='doc'>
                                 <h1>Contractor’s General Obligations</h1>
+                                <?php echo form_open(admin_url('purchase/appendix_to_contract_add_update'), array('id' => 'appendix-to-contract-form'));
+                                ?>
+                                <input type="hidden" name="tender_id" value="<?php echo $tender_data[0]['tender_id']; ?>">
+                                <input type="hidden" name="vendor_id" value="<?php echo $tender_data[0]['vendor_id']; ?>">
+                                <input type="hidden" name="project_id" value="<?php echo $tender_data[0]['project_id']; ?>">
                                 <table border="1" cellspacing="0" cellpadding="6" style="border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; font-size: 13px;">
                                     <tr>
                                         <th colspan="2" style="text-align:left;">DOCUMENT CONTROL SHEET</th>
@@ -132,27 +137,27 @@
 
                                     <tr>
                                         <th style="width:40%;">QMS Reference</th>
-                                        <td>QMS-PMC-TDO-CGO-UGFID-R0</td>
+                                        <td><input type="text" class="form-control" name="qms_reference" value="BGJ-LOA-UGFID-017-R0" /></td>
                                     </tr>
                                     <tr>
                                         <th>Document number</th>
-                                        <td>BGJ-LOA-UGFID-017-R0</td>
+                                        <td><input type="text" class="form-control" name="document_number" value="BGJ-LOA-UGFID-017-R0" /></td>
                                     </tr>
                                     <tr>
                                         <th>Document title</th>
-                                        <td>Contractor's General Obligations</td>
+                                        <td><input type="text" class="form-control" name="document_title" value="Contractor's General Obligations" /></td>
                                     </tr>
                                     <tr>
                                         <th>Document purpose</th>
-                                        <td>Issued for Tenders</td>
+                                        <td><input type="text" class="form-control" name="document_purpose" value="Issued for Tenders" /></td>
                                     </tr>
                                     <tr>
                                         <th>Document status</th>
-                                        <td>Approved</td>
+                                        <td><input type="text" class="form-control" name="document_status" value="Approved" /></td>
                                     </tr>
                                     <tr>
                                         <th>No. of pages (including this page)</th>
-                                        <td>34</td>
+                                        <td><input type="text" class="form-control" name="no_of_pages" value="34" /></td>
                                     </tr>
 
                                     <!-- Revision Control -->
@@ -1320,76 +1325,75 @@
                                     </tr>
                                     <tr>
                                         <td>1</td>
-                                        <td>Site Boundary wall</td>
-                                        <td>S/I / U</td>
-                                        <td>U/M</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td></td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                        <td>Gates, Boom Barriers, Fencing, Security posts, Wicked gates/Barricades and others arrangements at Entry /
-                                            Exit Points to<br />secure the site.</td>
-                                        <td><br /><br />U</td>
-                                        <td><br /><br />I/U/M</td>
-                                        <td><br /><br />U</td>
-                                        <td><br /><br />U</td>
-                                        <td><br /><br />U</td>
-                                        <td><br /><br />U</td>
-                                        <td><br /><br />U</td>
-                                        <td><br /><br />U</td>
-                                        <td><br /><br />U</td>
-                                        <td><br /><br />U</td>
-                                        <td><br /><br />U</td>
-                                        <td><br /><br />U</td>
-                                        <td><br /><br />U</td>
-                                        <td></td>
+                                        <td><input type="text" class="form-control" name="desc1" value="Site Boundary wall" /></td>
+                                        <td><input type="text" class="form-control" name="employer1" value="S/I / U" /></td>
+                                        <td><input type="text" class="form-control" name="civil1" value="U/M" /></td>
+                                        <td><input type="text" class="form-control" name="id1" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="electrical1" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="plumbing1" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="external1" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="doors1" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="landscape1" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="horticulture1" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="hvac1" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="waterproofing1" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="lifts1" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="others1" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="remarks1" value="" /></td>
                                     </tr>
                                     <tr>
                                         <td>2</td>
-                                        <td>Site Access control &amp; Biometric</td>
-                                        <td>S/I/U</td>
-                                        <td>U/M</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td></td>
+                                        <td><input class="form-control" type="text" name="desc2" value="Gates, Boom Barriers, Fencing, Security posts, Wicked gates/Barricades and others arrangements at Entry / Exit Points to secure the site." /></td>
+                                        <td><input type="text" class="form-control" name="employer2" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="civil2" value="I/U/M" /></td>
+                                        <td><input type="text" class="form-control" name="id2" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="electrical2" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="plumbing2" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="external2" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="doors2" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="landscape2" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="horticulture2" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="hvac2" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="waterproofing2" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="lifts2" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="others2" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="remarks2" value="" /></td>
                                     </tr>
                                     <tr>
                                         <td>3</td>
-                                        <td>Site Main Gate Security personnel</td>
-                                        <td>S/U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td></td>
+                                        <td><input type="text" class="form-control" name="desc3" value="Site Access control &amp; Biometric" /></td>
+                                        <td><input type="text" class="form-control" name="employer3" value="S/I/U" /></td>
+                                        <td><input type="text" class="form-control" name="civil3" value="U/M" /></td>
+                                        <td><input type="text" class="form-control" name="id3" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="electrical3" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="plumbing3" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="external3" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="doors3" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="landscape3" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="horticulture3" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="hvac3" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="waterproofing3" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="lifts3" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="others3" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="remarks3" value="" /></td>
+                                    </tr>
+                                    <tr>
+                                        <td>4</td>
+                                        <td><input type="text" class="form-control" name="desc4" value="Site Main Gate Security personnel" /></td>
+                                        <td><input type="text" class="form-control" name="employer4" value="S/U" /></td>
+                                        <td><input type="text" class="form-control" name="civil4" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="id4" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="electrical4" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="plumbing4" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="external4" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="doors4" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="landscape4" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="horticulture4" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="hvac4" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="waterproofing4" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="lifts4" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="others4" value="U" /></td>
+                                        <td><input type="text" class="form-control" name="remarks4" value="" /></td>
                                     </tr>
                                     <tr>
                                         <td></td>
@@ -1415,8 +1419,7 @@
                                 <table>
                                     <tr>
                                         <th><br /><br /><br /><br />4</th>
-                                        <th><br /><br />Security for contractors’ storage areas, infrastructure, Labour Camps and at respective works
-                                        </th>
+                                        <th><br /><br />Security for contractors’ storage areas, infrastructure, Labour Camps and at respective works</th>
                                         <th></th>
                                         <th><br /><br /><br /><br />S/U/M</th>
                                         <th><br /><br /><br /><br />S/U<br />/M</th>
@@ -1430,117 +1433,129 @@
                                         <th><br /><br /><br /><br />S/U<br />/M</th>
                                         <th><br /><br /><br /><br />S/U<br />/M</th>
                                         <th><br /><br /><br /><br />S/U/ M</th>
-                                        <th>For better coordination, All contractors will preferably hire the same Security Agencies as appointed by
-                                            Employer and pay directly on actual<br />deployment.</th>
+                                        <th>For better coordination, All contractors will preferably hire the same Security Agencies as appointed by Employer and pay directly on actual<br />deployment.</th>
                                     </tr>
                                     <tr>
-                                        <td><br />5</td>
-                                        <td><br />Security for Labour Camps</td>
+                                        <td>5</td>
+                                        <td>
+                                            <textarea rows="5" cols="90" name="desc5" class="form-control" style="width:100%; height:100px;">Security for Labour Camps</textarea>
+                                        </td>
                                         <td></td>
-                                        <td><br />S/U/M</td>
-                                        <td>S/U<br />/M</td>
-                                        <td>S/ U/ M</td>
-                                        <td><br />S/U/M</td>
-                                        <td>S/U/ M</td>
-                                        <td>S/U<br />/M</td>
-                                        <td>S/U<br />/M</td>
-                                        <td>S/U<br />/M</td>
-                                        <td>S/ U/ M</td>
-                                        <td>S/U<br />/M</td>
-                                        <td>S/U<br />/M</td>
-                                        <td>S/U/ M</td>
-                                        <td></td>
+                                        <td><input type="text" name="civil5" value="S/U/M" class="form-control" /></td>
+                                        <td><input type="text" name="id5" value="S/U/M" class="form-control" /></td>
+                                        <td><input type="text" name="electrical5" value="S/ U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="plumbing5" value="S/U/M" class="form-control" /></td>
+                                        <td><input type="text" name="external5" value="S/U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="doors5" value="S/U/M" class="form-control" /></td>
+                                        <td><input type="text" name="landscape5" value="S/U/M" class="form-control" /></td>
+                                        <td><input type="text" name="horticulture5" value="S/U/M" class="form-control" /></td>
+                                        <td><input type="text" name="hvac5" value="S/ U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="waterproofing5" value="S/U/M" class="form-control" /></td>
+                                        <td><input type="text" name="lifts5" value="S/U/M" class="form-control" /></td>
+                                        <td><input type="text" name="others5" value="S/U/ M" class="form-control" /></td>
+                                        <td>
+                                            <textarea rows="5" cols="90" name="remarks5" class="form-control" style="width:100%; height:100px;"></textarea>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td>6</td>
-                                        <td>Temporary site roads, Approach Roads, Culverts.</td>
+                                        <td>
+                                            <textarea rows="5" cols="90" name="desc6" class="form-control" style="width:100%; height:100px;">Temporary site roads, Approach Roads, Culverts.</textarea>
+                                        </td>
                                         <td></td>
-                                        <td>S/I/U/M</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td></td>
+                                        <td><input type="text" name="civil6" value="S/I/U/M" class="form-control" /></td>
+                                        <td><input type="text" name="id6" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="electrical6" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="plumbing6" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="external6" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="doors6" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="landscape6" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="horticulture6" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="hvac6" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="waterproofing6" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="lifts6" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="others6" value="U" class="form-control" /></td>
+                                        <td>
+                                            <textarea rows="5" cols="90" name="remarks6" class="form-control" style="width:100%; height:100px;"></textarea>
+                                        </td>
                                     </tr>
                                     <tr>
-                                        <td><br /><br />7</td>
-                                        <td><br />Power supply for construction, Common Lighting, common facilities including Back Up power</td>
+                                        <td>7</td>
+                                        <td>
+                                            <textarea rows="5" cols="90" name="desc7" class="form-control" style="width:100%; height:100px;">Power supply for construction, Common Lighting, common facilities including Back Up power</textarea>
+                                        </td>
                                         <td></td>
-                                        <td><br /><br />S/I/U/M</td>
-                                        <td><br /><br />S/U<br />/M</td>
-                                        <td><br /><br />U</td>
-                                        <td><br /><br />U</td>
-                                        <td><br /><br />U</td>
-                                        <td><br /><br />U</td>
-                                        <td><br /><br />U</td>
-                                        <td><br /><br />U</td>
-                                        <td><br /><br />U</td>
-                                        <td><br /><br />U</td>
-                                        <td><br /><br />U</td>
-                                        <td><br /><br />U</td>
-                                        <td>All other trade contractors will pay electricity charges on mutually agreed<br />% age</td>
+                                        <td><input type="text" name="civil7" value="S/I/U/M" class="form-control" /></td>
+                                        <td><input type="text" name="id7" value="S/U/M" class="form-control" /></td>
+                                        <td><input type="text" name="electrical7" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="plumbing7" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="external7" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="doors7" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="landscape7" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="horticulture7" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="hvac7" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="waterproofing7" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="lifts7" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="others7" value="U" class="form-control" /></td>
+                                        <td>
+                                            <textarea rows="5" cols="90" name="remarks7" class="form-control" style="width:100%; height:100px;">All other trade contractors will pay electricity charges on mutually agreed % age</textarea>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td>8</td>
-                                        <td>Debris Chute and Disposal of Debris</td>
-                                        <td></td>
-                                        <td>S/I/U/M</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td></td>
-                                    </tr>
-                                    <tr>
-                                        <td><br />9</td>
-                                        <td>Water supply, Treatment, Network for distribution for construction including testing of water</td>
-                                        <td></td>
-                                        <td><br />S/U/M</td>
-                                        <td><br />S/U<br />/M</td>
-                                        <td><br />U</td>
-                                        <td><br />U</td>
-                                        <td><br />U</td>
-                                        <td><br />U</td>
-                                        <td><br />U</td>
-                                        <td><br />U</td>
-                                        <td><br />U</td>
-                                        <td><br />U</td>
-                                        <td><br />U</td>
-                                        <td><br />U</td>
-                                        <td>All other trade contractors will pay water charges on mutually agreed<br />%age.</td>
-                                    </tr>
-                                    <tr>
-                                        <td><br /><br />10</td>
-                                        <td>Drinking water, RO Treatment, Network for distribution for Drinking water, including testing of<br />water
+                                        <td>
+                                            <textarea rows="5" cols="90" name="desc8" class="form-control" style="width:100%; height:100px;">Debris Chute and Disposal of Debris</textarea>
                                         </td>
                                         <td></td>
-                                        <td><br /><br />S/U/M</td>
-                                        <td>S/U<br />/M</td>
-                                        <td>S/ U/ M</td>
-                                        <td>S/U/M</td>
-                                        <td>S/U/ M</td>
-                                        <td>S/U<br />/M</td>
-                                        <td>S/U<br />/M</td>
-                                        <td>S/U<br />/M</td>
-                                        <td>S/ U/ M</td>
-                                        <td>S/U<br />/M</td>
-                                        <td>S/U<br />/M</td>
-                                        <td>S/U/ M</td>
-                                        <td>All other trade contractors will pay water charges on mutually agreed<br />%age.</td>
+                                        <td><input type="text" name="civil8" value="S/I/U/M" class="form-control" /></td>
+                                        <td><input type="text" name="id8" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="electrical8" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="plumbing8" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="external8" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="doors8" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="landscape8" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="horticulture8" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="hvac8" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="waterproofing8" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="lifts8" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="others8" value="U" class="form-control" /></td>
+                                        <td><textarea rows="5" cols="90" name="remarks8" class="form-control" style="width:100%; height:100px;"></textarea></td>
+                                    </tr>
+                                    <tr>
+                                        <td>9</td>
+                                        <td><textarea rows="5" cols="90" name="desc9" class="form-control" style="width:100%; height:100px;">Water supply, Treatment, Network for distribution for construction including testing of water</textarea></td>
+                                        <td></td>
+                                        <td><input type="text" name="civil9" value="S/U/M" class="form-control" /></td>
+                                        <td><input type="text" name="id9" value="S/U/M" class="form-control" /></td>
+                                        <td><input type="text" name="electrical9" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="plumbing9" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="external9" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="doors9" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="landscape9" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="horticulture9" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="hvac9" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="waterproofing9" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="lifts9" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="others9" value="U" class="form-control" /></td>
+                                        <td><textarea rows="5" cols="90" name="remarks9" class="form-control" style="width:100%; height:100px;">All other trade contractors will pay water charges on mutually agreed %age.</textarea></td>
+                                    </tr>
+                                    <tr>
+                                        <td>10</td>
+                                        <td><textarea rows="5" cols="90" name="desc10" class="form-control" style="width:100%; height:100px;">Drinking water, RO Treatment, Network for distribution for Drinking water, including testing of water</textarea></td>
+                                        <td></td>
+                                        <td><input type="text" name="civil10" value="S/U/M" class="form-control" /></td>
+                                        <td><input type="text" name="id10" value="S/U/M" class="form-control" /></td>
+                                        <td><input type="text" name="electrical10" value="S/ U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="plumbing10" value="S/U/M" class="form-control" /></td>
+                                        <td><input type="text" name="external10" value="S/U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="doors10" value="S/U/M" class="form-control" /></td>
+                                        <td><input type="text" name="landscape10" value="S/U/M" class="form-control" /></td>
+                                        <td><input type="text" name="horticulture10" value="S/U/M" class="form-control" /></td>
+                                        <td><input type="text" name="hvac10" value="S/ U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="waterproofing10" value="S/U/M" class="form-control" /></td>
+                                        <td><input type="text" name="lifts10" value="S/U/M" class="form-control" /></td>
+                                        <td><input type="text" name="others10" value="S/U/ M" class="form-control" /></td>
+                                        <td><textarea rows="5" cols="90" name="remarks10" class="form-control" style="width:100%; height:100px;">All other trade contractors will pay water charges on mutually agreed %age.</textarea></td>
                                     </tr>
                                 </table>
                                 <p></p>
@@ -1548,8 +1563,7 @@
                                 <table>
                                     <tr>
                                         <th><br /><br />11</th>
-                                        <th>handrails, Staircase Temp Rails, inside &amp; outside, Staging, closing of openings, cut outs,
-                                            Shafts,<br />Safety nets at 2 levels</th>
+                                        <th>handrails, Staircase Temp Rails, inside &amp; outside, Staging, closing of openings, cut outs, Shafts,<br />Safety nets at 2 levels</th>
                                         <th></th>
                                         <th><br /><br />S/I/U/M</th>
                                         <th><br /><br />U</th>
@@ -1567,147 +1581,147 @@
                                     </tr>
                                     <tr>
                                         <td>12</td>
-                                        <td>Canteen- Staff and Labour</td>
+                                        <td><textarea name="desc12" class="form-control">Canteen- Staff and Labour</textarea></td>
                                         <td></td>
-                                        <td>S/I/U/M</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td></td>
+                                        <td><input type="text" name="civil12" value="S/I/U/M" class="form-control" /></td>
+                                        <td><input type="text" name="id12" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="electrical12" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="plumbing12" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="external12" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="doors12" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="landscape12" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="horticulture12" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="hvac12" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="waterproofing12" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="lifts12" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="others12" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="remarks12" value="" class="form-control" /></td>
                                     </tr>
                                     <tr>
                                         <td>13</td>
-                                        <td>Toilets Facilities- Mobile Toilets</td>
+                                        <td><textarea name="desc13" class="form-control">Toilets Facilities- Mobile Toilets</textarea></td>
                                         <td></td>
-                                        <td>S/I/U/M</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td></td>
+                                        <td><input type="text" name="civil13" value="S/I/U/M" class="form-control" /></td>
+                                        <td><input type="text" name="id13" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="electrical13" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="plumbing13" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="external13" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="doors13" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="landscape13" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="horticulture13" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="hvac13" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="waterproofing13" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="lifts13" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="others13" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="remarks13" value="" class="form-control" /></td>
                                     </tr>
                                     <tr>
-                                        <td><br />14</td>
-                                        <td><br />Site Office, Store Room, stacking yards</td>
+                                        <td>14</td>
+                                        <td><textarea name="desc14" class="form-control">Site Office, Store Room, stacking yards</textarea></td>
                                         <td></td>
-                                        <td><br />S/I/U/M</td>
-                                        <td>S/I/ U/ M</td>
-                                        <td>S/I<br />/U<br />/ M</td>
-                                        <td><br />S/I/U/ M</td>
-                                        <td><br />S/I/U<br />/M</td>
-                                        <td>S/I/ U/ M</td>
-                                        <td>S/I/ U/ M</td>
-                                        <td>S/I/ U/ M</td>
-                                        <td>S/ I/ U/ M</td>
-                                        <td>S/I/ U/ M</td>
-                                        <td>S/I/ U/ M</td>
-                                        <td><br />S/I/ U/M</td>
-                                        <td></td>
+                                        <td><input type="text" name="civil14" value="S/I/U/M" class="form-control" /></td>
+                                        <td><input type="text" name="id14" value="S/I/ U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="electrical14" value="S/I/U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="plumbing14" value="S/I/U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="external14" value="S/I/U/M" class="form-control" /></td>
+                                        <td><input type="text" name="doors14" value="S/I/ U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="landscape14" value="S/I/ U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="horticulture14" value="S/I/ U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="hvac14" value="S/ I/ U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="waterproofing14" value="S/I/ U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="lifts14" value="S/I/ U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="others14" value="S/I/ U/M" class="form-control" /></td>
+                                        <td><input type="text" name="remarks14" value="" class="form-control" /></td>
                                     </tr>
                                     <tr>
                                         <td>15</td>
-                                        <td>OHC, First aid room &amp; Medical services</td>
+                                        <td><textarea name="desc15" class="form-control">OHC, First aid room &amp; Medical services</textarea></td>
                                         <td></td>
-                                        <td>S/I/U/M</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td></td>
+                                        <td><input type="text" name="civil15" value="S/I/U/M" class="form-control" /></td>
+                                        <td><input type="text" name="id15" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="electrical15" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="plumbing15" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="external15" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="doors15" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="landscape15" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="horticulture15" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="hvac15" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="waterproofing15" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="lifts15" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="others15" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="remarks15" value="" class="form-control" /></td>
                                     </tr>
                                     <tr>
                                         <td>16</td>
-                                        <td>Ambulance</td>
+                                        <td><textarea name="desc16" class="form-control">Ambulance</textarea></td>
                                         <td></td>
-                                        <td>S/I/U/M</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td></td>
+                                        <td><input type="text" name="civil16" value="S/I/U/M" class="form-control" /></td>
+                                        <td><input type="text" name="id16" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="electrical16" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="plumbing16" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="external16" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="doors16" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="landscape16" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="horticulture16" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="hvac16" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="waterproofing16" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="lifts16" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="others16" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="remarks16" value="" class="form-control" /></td>
                                     </tr>
                                     <tr>
                                         <td>17</td>
-                                        <td>Induction Room Safety and Quality</td>
+                                        <td><textarea name="desc17" class="form-control">Induction Room Safety and Quality</textarea></td>
                                         <td></td>
-                                        <td>S/I/U/M</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td>U</td>
-                                        <td></td>
+                                        <td><input type="text" name="civil17" value="S/I/U/M" class="form-control" /></td>
+                                        <td><input type="text" name="id17" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="electrical17" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="plumbing17" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="external17" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="doors17" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="landscape17" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="horticulture17" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="hvac17" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="waterproofing17" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="lifts17" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="others17" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="remarks17" value="" class="form-control" /></td>
                                     </tr>
                                     <tr>
-                                        <td><br /><br />18</td>
-                                        <td>Routine housekeeping for General and Common areas inside and outside Buildings</td>
+                                        <td>18</td>
+                                        <td><textarea name="desc18" class="form-control">Routine housekeeping for General and Common areas inside and outside Buildings</textarea></td>
                                         <td></td>
-                                        <td><br /><br />U/M</td>
-                                        <td><br /><br />U</td>
-                                        <td><br /><br />U</td>
-                                        <td><br /><br />U</td>
-                                        <td><br /><br />U</td>
-                                        <td><br /><br />U</td>
-                                        <td><br /><br />U</td>
-                                        <td><br /><br />U</td>
-                                        <td><br /><br />U</td>
-                                        <td><br /><br />U</td>
-                                        <td><br /><br />U</td>
-                                        <td><br /><br />U</td>
-                                        <td></td>
+                                        <td><input type="text" name="civil18" value="U/M" class="form-control" /></td>
+                                        <td><input type="text" name="id18" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="electrical18" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="plumbing18" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="external18" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="doors18" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="landscape18" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="horticulture18" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="hvac18" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="waterproofing18" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="lifts18" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="others18" value="U" class="form-control" /></td>
+                                        <td><input type="text" name="remarks18" value="" class="form-control" /></td>
                                     </tr>
                                     <tr>
-                                        <td><br />19</td>
-                                        <td><br />Protection and Final Cleaning of Works</td>
+                                        <td>19</td>
+                                        <td><textarea name="desc19" class="form-control">Protection and Final Cleaning of Works</textarea></td>
                                         <td></td>
-                                        <td><br />S/I/U/M</td>
-                                        <td>S/I/ U/ M</td>
-                                        <td>S/I<br />/U<br />/<br />M</td>
-                                        <td><br />S/I/U/ M</td>
-                                        <td><br />S/I/U<br />/M</td>
-                                        <td>S/I/ U/ M</td>
-                                        <td>S/I/ U/ M</td>
-                                        <td>S/I/ U/ M</td>
-                                        <td>S/ I/ U/<br />M</td>
-                                        <td>S/I/ U/ M</td>
-                                        <td>S/I/ U/ M</td>
-                                        <td><br />S/I/ U/M</td>
-                                        <td></td>
+                                        <td><input type="text" name="civil19" value="S/I/U/M" class="form-control" /></td>
+                                        <td><input type="text" name="id19" value="S/I/ U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="electrical19" value="S/I/U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="plumbing19" value="S/I/U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="external19" value="S/I/U/M" class="form-control" /></td>
+                                        <td><input type="text" name="doors19" value="S/I/ U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="landscape19" value="S/I/ U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="horticulture19" value="S/I/ U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="hvac19" value="S/ I/ U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="waterproofing19" value="S/I/ U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="lifts19" value="S/I/ U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="others19" value="S/I/ U/M" class="form-control" /></td>
+                                        <td><input type="text" name="remarks19" value="" class="form-control" /></td>
                                     </tr>
                                 </table>
                                 <p></p>
@@ -1715,8 +1729,7 @@
                                 <table>
                                     <tr>
                                         <th><br /><br />20</th>
-                                        <th><br />Fire Fighting equipment &amp; Fire Extinguishers, Fire Alarms, Emergency Siren, Signages for common
-                                            areas</th>
+                                        <th><br />Fire Fighting equipment &amp; Fire Extinguishers, Fire Alarms, Emergency Siren, Signages for common areas</th>
                                         <th></th>
                                         <th><br /><br />S/I/U/M</th>
                                         <th>S/I/ U/ M</th>
@@ -1732,44 +1745,51 @@
                                         <th>S/I/ U/M</th>
                                         <th>Fire Safety Norms shall be followed by all Contractors for their respective works.</th>
                                     </tr>
+                                    
                                     <tr>
-                                        <td><br /><br />21</td>
-                                        <td>Labour accommodation and facilities including Power, Water supply Sanitation, Power back up including
-                                            maintenance</td>
+                                        <td>21</td>
+                                        <td><textarea name="desc21" class="form-control">Labour accommodation and facilities including Power, Water supply Sanitation, Power back up including maintenance</textarea></td>
                                         <td></td>
-                                        <td><br /><br />S/I/U/M</td>
-                                        <td>S/I/ U/ M</td>
-                                        <td>S/I<br />/U<br />/ M</td>
-                                        <td>S/I/U/ M</td>
-                                        <td>S/I/U<br />/M</td>
-                                        <td>S/I/ U/ M</td>
-                                        <td>S/I/ U/ M</td>
-                                        <td>S/I/ U/ M</td>
-                                        <td>S/ I/ U/ M</td>
-                                        <td>S/I/ U/ M</td>
-                                        <td>S/I/ U/ M</td>
-                                        <td>S/I/ U/M</td>
-                                        <td>If available, Labour camp facility to other contractors will be provided on chargeable basis.</td>
+                                        <td><input type="text" name="civil21" value="S/I/U/M" class="form-control" /></td>
+                                        <td><input type="text" name="id21" value="S/I/ U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="electrical21" value="S/I/U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="plumbing21" value="S/I/U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="external21" value="S/I/U/M" class="form-control" /></td>
+                                        <td><input type="text" name="doors21" value="S/I/ U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="landscape21" value="S/I/ U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="horticulture21" value="S/I/ U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="hvac21" value="S/ I/ U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="waterproofing21" value="S/I/ U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="lifts21" value="S/I/ U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="others21" value="S/I/ U/M" class="form-control" /></td>
+                                        <td><textarea name="remarks21" class="form-control">If available, Labour camp facility to other contractors will be provided on chargeable basis.</textarea></td>
                                     </tr>
                                     <tr>
-                                        <td><br /><br />22</td>
-                                        <td>Crèche Facilities including. Power, Water supply, sanitation including maintenance</td>
+                                        <td>22</td>
+                                        <td><textarea name="desc22" class="form-control">Crèche Facilities including. Power, Water supply, sanitation including maintenance</textarea></td>
                                         <td></td>
-                                        <td><br /><br />S/I/U/M</td>
-                                        <td>S/I/ U/ M</td>
-                                        <td>S/I<br />/U<br />/ M</td>
-                                        <td>S/I/U/ M</td>
-                                        <td>S/I/U<br />/M</td>
-                                        <td>S/I/ U/ M</td>
-                                        <td>S/I/ U/ M</td>
-                                        <td>S/I/ U/ M</td>
-                                        <td>S/ I/ U/ M</td>
-                                        <td>S/I/ U/ M</td>
-                                        <td>S/I/ U/ M</td>
-                                        <td>S/I/ U/M</td>
-                                        <td>If available, Labour camp facility to other contractors will be provided on<br />chargeable basis.</td>
+                                        <td><input type="text" name="civil22" value="S/I/U/M" class="form-control" /></td>
+                                        <td><input type="text" name="id22" value="S/I/ U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="electrical22" value="S/I/U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="plumbing22" value="S/I/U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="external22" value="S/I/U/M" class="form-control" /></td>
+                                        <td><input type="text" name="doors22" value="S/I/ U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="landscape22" value="S/I/ U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="horticulture22" value="S/I/ U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="hvac22" value="S/ I/ U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="waterproofing22" value="S/I/ U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="lifts22" value="S/I/ U/ M" class="form-control" /></td>
+                                        <td><input type="text" name="others22" value="S/I/ U/M" class="form-control" /></td>
+                                        <td><textarea name="remarks22" class="form-control">If available, Labour camp facility to other contractors will be provided on chargeable basis.</textarea></td>
                                     </tr>
                                 </table>
+                                <div class="btn-bottom-toolbar btn-toolbar-container-out text-right">
+                                    <button class="btn btn-info only-save customer-form-submiter">
+                                        <?php echo _l('submit'); ?>
+                                    </button>
+
+                                </div>
+                                <?php echo form_close(); ?>
                             </div>
                         </div>
                     </div>
@@ -1778,7 +1798,7 @@
         </div>
     </div>
 
-   <?php init_tail(); ?>
+    <?php init_tail(); ?>
 </body>
 
-</html> 
+</html>
