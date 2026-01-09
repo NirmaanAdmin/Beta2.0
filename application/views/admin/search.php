@@ -95,6 +95,9 @@
             case 'pur_bill_items':
             $output = '<a href="'.admin_url('purchase/edit_pur_bills/'.$_result['id']).'">'.e($_result['bill_code']).'</a>';
             break;
+            case 'order_tracker':
+            $output = '<a href="'.admin_url('purchase/order_tracker').'">'.e($_result['order_name']).'</a>';
+            break;
             case 'purchase_tracker':
             if($_result['type'] == 1) {
                 $output = '<a href="'.admin_url('purchase/view_purchase/'.$_result['id']).'">'.e($_result['order_name']).'</a>';

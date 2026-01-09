@@ -685,6 +685,11 @@ class Misc_model extends App_Model
             $result[] = $pur_bill_items_search;
         }
 
+        $order_tracker_search = $this->_search_order_tracker($q, $limit);
+        if (count($order_tracker_search['result']) > 0) {
+            $result[] = $order_tracker_search;
+        }
+
         $purchase_tracker_search = $this->_search_purchase_tracker($q, $limit);
         if (count($purchase_tracker_search['result']) > 0) {
             $result[] = $purchase_tracker_search;
@@ -1627,6 +1632,97 @@ class Misc_model extends App_Model
         }
         $result['result'] = $this->db->get()->result_array();
         return $result;
+    }
+
+    public function _search_order_tracker($q, $limit = 0)
+    {
+        $order_tracker_result = [];
+        $result = [
+            'result'         => [],
+            'type'           => 'order_tracker',
+            'search_heading' => _l('order_tracker'),
+        ];
+        $default_project = get_default_project();
+
+        $this->db->select("CONCAT(po.pur_order_number, ' - ', po.pur_order_name) AS order_name");
+        $this->db->from(db_prefix() . 'pur_orders AS po');
+        $this->db->join(db_prefix() . 'pur_vendor AS pv', 'pv.userid = po.vendor', 'left');
+        $this->db->join(db_prefix() . 'items_groups AS ig', 'ig.id = po.group_pur', 'left');
+        $this->db->where('po.approve_status', 2);
+        $this->db->where('po.project', $default_project);
+        $this->db->where('(
+            po.pur_order_number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            po.pur_order_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pv.company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            po.kind LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            ig.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            po.remarks LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('po.id', 'ASC');
+        $this->db->group_by('po.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $pur_orders = $this->db->get()->result_array();
+
+        $this->db->select("CONCAT(wo.wo_order_number, ' - ', wo.wo_order_name) AS order_name");
+        $this->db->from(db_prefix() . 'wo_orders AS wo');
+        $this->db->join(db_prefix() . 'pur_vendor AS pv', 'pv.userid = wo.vendor', 'left');
+        $this->db->join(db_prefix() . 'items_groups AS ig', 'ig.id = wo.group_pur', 'left');
+        $this->db->where('wo.approve_status', 2);
+        $this->db->where('wo.project', $default_project);
+        $this->db->where('(
+            wo.wo_order_number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            wo.wo_order_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pv.company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            wo.kind LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            ig.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            wo.remarks LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('wo.id', 'ASC');
+        $this->db->group_by('wo.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $wo_orders = $this->db->get()->result_array();
+
+        $this->db->select("t.pur_order_name AS order_name");
+        $this->db->from(db_prefix() . 'pur_order_tracker AS t');
+        $this->db->join(db_prefix() . 'pur_vendor AS pv', 'pv.userid = t.vendor', 'left');
+        $this->db->join(db_prefix() . 'items_groups AS ig', 'ig.id = t.group_pur', 'left');
+        $this->db->where('t.project', $default_project);
+        $this->db->where('(
+            t.pur_order_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pv.company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            t.kind LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            ig.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            t.remarks LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('t.id', 'ASC');
+        $this->db->group_by('t.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $pur_order_trackers = $this->db->get()->result_array();
+
+        $order_tracker_result = array_merge($pur_order_trackers, $pur_orders, $wo_orders);
+
+        $result['result'] = $order_tracker_result;
+        return $result;    
     }
 
     public function _search_purchase_tracker($q, $limit = 0)
