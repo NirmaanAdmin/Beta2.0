@@ -33,14 +33,11 @@ $module_name = 'module_activity_log'; ?>
                <div class="panel_s">
                   <div class="panel-body">
                      <div class="row">
-                        
+                          <div class="col-md-12">
+                           <h4 class="no-margin font-bold"><i class="fa fa-clipboard" aria-hidden="true"></i> <?php echo _l('Client Data'); ?></h4>
+                           <hr />
+                        </div>
                      </div>
-
-                    
-
-                    
-
-                    
 
                      <table class="dt-table-loading table table-table_manage_client">
                         <thead>
