@@ -17143,4 +17143,16 @@ class purchase extends AdminController
             redirect(admin_url('purchase/view_appendix_to_contract/' . $data['tender_id']));
         }
     }
+
+
+    public function per_clients()
+    {
+        $data['title'] = _l('Clients');
+        $this->load->view('personal_client/manage_client', $data);
+    }
+
+    public function table_manage_client()
+    {
+        $this->app->get_table_data(module_views_path('purchase', 'personal_client/table_manage_client'));
+    }
 }
