@@ -17148,6 +17148,7 @@ class purchase extends AdminController
     public function per_clients()
     {
         $data['title'] = _l('Clients');
+        $data['per_clients'] = $this->purchase_model->get_personal_clients();
         $this->load->view('personal_client/manage_client', $data);
     }
 

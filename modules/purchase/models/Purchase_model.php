@@ -25962,4 +25962,9 @@ class Purchase_model extends App_Model
         return null; // Return null if no record found
         
     }
+
+    public function get_personal_clients(){
+       $this->db->select('id, name');
+        return $this->db->get(db_prefix() . '_per_clients')->result_array();
+    }
 }
