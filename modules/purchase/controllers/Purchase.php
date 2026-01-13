@@ -17156,4 +17156,12 @@ class purchase extends AdminController
     {
         $this->app->get_table_data(module_views_path('purchase', 'personal_client/table_manage_client'));
     }
+
+    public function get_per_clients_charts()
+    {
+        $data = $this->input->post();
+        $result = $this->purchase_model->get_per_clients_charts($data);
+        echo json_encode($result);
+        die;
+    }
 }
