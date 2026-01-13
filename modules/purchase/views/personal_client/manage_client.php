@@ -121,7 +121,7 @@ $module_name = 'per_client'; ?>
                         </div>
                         <div class="row mtop20">
                            <div class="col-md-6">
-                              <p class="mbot15 dashboard_stat_title">Top 10 Clients By % Profit</p>
+                              <p class="mbot15 dashboard_stat_title">% Profit</p>
                               <div style="width: 100%; height: 400px;">
                                  <canvas id="barChartTopStaffs"></canvas>
                               </div>
