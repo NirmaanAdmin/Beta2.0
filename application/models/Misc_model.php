@@ -695,16 +695,6 @@ class Misc_model extends App_Model
             $result[] = $purchase_tracker_search;
         }
 
-        $change_orders_search = $this->_search_change_orders($q, $limit);
-        if (count($change_orders_search['result']) > 0) {
-            $result[] = $change_orders_search;
-        }
-
-        $change_order_items_search = $this->_search_change_order_items($q, $limit);
-        if (count($change_order_items_search['result']) > 0) {
-            $result[] = $change_order_items_search;
-        }
-
         $invoices_search = $this->_search_invoices($q, $limit);
         if (count($invoices_search['result']) > 0) {
             $result[] = $invoices_search;
@@ -748,6 +738,16 @@ class Misc_model extends App_Model
         $credit_note_items_search = $this->_search_credit_note_items($q, $limit);
         if (count($credit_note_items_search['result']) > 0) {
             $result[] = $credit_note_items_search;
+        }
+
+        $change_orders_search = $this->_search_change_orders($q, $limit);
+        if (count($change_orders_search['result']) > 0) {
+            $result[] = $change_orders_search;
+        }
+
+        $change_order_items_search = $this->_search_change_order_items($q, $limit);
+        if (count($change_order_items_search['result']) > 0) {
+            $result[] = $change_order_items_search;
         }
 
         $stock_import_search = $this->_search_stock_import($q, $limit);
@@ -1847,69 +1847,6 @@ class Misc_model extends App_Model
         return $result;      
     }
 
-    public function _search_change_orders($q, $limit = 0)
-    {
-        $result = [
-            'result'         => [],
-            'type'           => 'change_orders',
-            'search_heading' => _l('Change Orders'),
-        ];
-        $default_project = get_default_project();
-        $this->db->select('co.id, co.pur_order_name, co.pur_order_number');
-        $this->db->from(db_prefix() . 'co_orders AS co');
-        $this->db->join(db_prefix() . 'pur_vendor AS pv', 'pv.userid = co.vendor', 'left');
-        $this->db->join(db_prefix() . 'items_groups AS ig', 'ig.id = co.group_pur', 'left');
-        $this->db->join(db_prefix() . 'wh_sub_group AS sg', 'sg.id = co.sub_groups_pur', 'left');
-        $this->db->join(db_prefix() . 'departments AS de', 'de.departmentid = co.department', 'left');
-        $this->db->where('co.project', $default_project);
-        $this->db->where('(
-            co.pur_order_number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-            OR
-            pv.company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-            OR
-            co.pur_order_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-            OR
-            ig.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-            OR
-            sg.sub_group_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-            OR
-            co.type LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-            OR
-            de.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-        )');
-        $this->db->order_by('co.pur_order_name', 'ASC');
-        $this->db->group_by('co.id');
-        if ($limit != 0) {
-            $this->db->limit($limit);
-        }
-        $result['result'] = $this->db->get()->result_array();
-        return $result;
-    }
-
-    public function _search_change_order_items($q, $limit = 0)
-    {
-        $result = [
-            'result'         => [],
-            'type'           => 'change_order_items',
-            'search_heading' => _l('Change Order Items'),
-        ];
-        $default_project = get_default_project();
-        $this->db->select('co.id, co.pur_order_name, co.pur_order_number');
-        $this->db->from(db_prefix() . 'co_order_detail AS cod');
-        $this->db->join(db_prefix() . 'co_orders AS co', 'co.id = cod.pur_order', 'left');
-        $this->db->where('co.project', $default_project);
-        $this->db->where('(
-            cod.description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
-        )');
-        $this->db->order_by('co.pur_order_name', 'ASC');
-        $this->db->group_by('co.id');
-        if ($limit != 0) {
-            $this->db->limit($limit);
-        }
-        $result['result'] = $this->db->get()->result_array();
-        return $result;
-    }
-
     public function _search_invoices($q, $limit = 0)
     {
         $result = [
@@ -2321,6 +2258,69 @@ class Misc_model extends App_Model
         $this->db->where('(' . db_prefix() . 'itemable.description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\' OR ' . db_prefix() . 'itemable.long_description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\')');
         $this->db->order_by(db_prefix() . 'itemable.description', 'ASC');
         $this->db->group_by(db_prefix() . 'creditnotes.id');
+        $result['result'] = $this->db->get()->result_array();
+        return $result;
+    }
+
+    public function _search_change_orders($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'change_orders',
+            'search_heading' => _l('Change Orders'),
+        ];
+        $default_project = get_default_project();
+        $this->db->select('co.id, co.pur_order_name, co.pur_order_number');
+        $this->db->from(db_prefix() . 'co_orders AS co');
+        $this->db->join(db_prefix() . 'pur_vendor AS pv', 'pv.userid = co.vendor', 'left');
+        $this->db->join(db_prefix() . 'items_groups AS ig', 'ig.id = co.group_pur', 'left');
+        $this->db->join(db_prefix() . 'wh_sub_group AS sg', 'sg.id = co.sub_groups_pur', 'left');
+        $this->db->join(db_prefix() . 'departments AS de', 'de.departmentid = co.department', 'left');
+        $this->db->where('co.project', $default_project);
+        $this->db->where('(
+            co.pur_order_number LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            pv.company LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            co.pur_order_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            ig.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            sg.sub_group_name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            co.type LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+            OR
+            de.name LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('co.pur_order_name', 'ASC');
+        $this->db->group_by('co.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
+        $result['result'] = $this->db->get()->result_array();
+        return $result;
+    }
+
+    public function _search_change_order_items($q, $limit = 0)
+    {
+        $result = [
+            'result'         => [],
+            'type'           => 'change_order_items',
+            'search_heading' => _l('Change Order Items'),
+        ];
+        $default_project = get_default_project();
+        $this->db->select('co.id, co.pur_order_name, co.pur_order_number');
+        $this->db->from(db_prefix() . 'co_order_detail AS cod');
+        $this->db->join(db_prefix() . 'co_orders AS co', 'co.id = cod.pur_order', 'left');
+        $this->db->where('co.project', $default_project);
+        $this->db->where('(
+            cod.description LIKE "%' . $this->db->escape_like_str($q) . '%" ESCAPE \'!\'
+        )');
+        $this->db->order_by('co.pur_order_name', 'ASC');
+        $this->db->group_by('co.id');
+        if ($limit != 0) {
+            $this->db->limit($limit);
+        }
         $result['result'] = $this->db->get()->result_array();
         return $result;
     }
