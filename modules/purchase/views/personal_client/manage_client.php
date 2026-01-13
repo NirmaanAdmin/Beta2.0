@@ -104,13 +104,13 @@ $module_name = 'per_client'; ?>
                                     <div class="top_stats_wrapper">
                                        <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
                                           <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
-                                             <span class="tw-truncate dashboard_stat_title">Average Monthly Profit</span>
+                                             <span class="tw-truncate dashboard_stat_title">Last Month Average Profit</span>
                                           </div>
                                           <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
                                        </div>
                                        <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
                                           <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
-                                             <span class="tw-truncate dashboard_stat_value average_monthly_profit"></span>
+                                             <span class="tw-truncate dashboard_stat_value last_month_average_profit"></span>
                                           </div>
                                           <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
                                        </div>
@@ -251,7 +251,7 @@ $module_name = 'per_client'; ?>
             $('.total_clients').text(response.total_clients);
             $('.total_investment').text('₹'+response.total_investment);
             $('.total_earnings').text('₹'+response.total_earnings);
-            $('.average_monthly_profit').text(response.average_monthly_profit);
+            $('.last_month_average_profit').text('₹'+response.last_month_average_profit);
 
             var staffBarCtx = document.getElementById('barChartTopStaffs').getContext('2d');
             var staffLabels = response.bar_top_client_name;

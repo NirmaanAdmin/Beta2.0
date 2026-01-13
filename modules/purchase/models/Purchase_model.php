@@ -25981,7 +25981,7 @@ class Purchase_model extends App_Model
         $frequency = isset($data['frequency']) ? $data['frequency'] : '';
         $per_clients = isset($data['per_client']) ? $data['per_client'] : '';
 
-        $response['total_clients'] = $response['total_investment'] = $response['total_earnings'] = 0;
+        $response['total_clients'] = $response['total_investment'] = $response['total_earnings'] = $response['last_month_average_profit'] = 0;
         $response['bar_top_client_name'] = $response['bar_top_client_value'] = array();
         $response['line_order_date'] = $response['line_order_total'] = array();
 
@@ -26007,6 +26007,23 @@ class Purchase_model extends App_Model
 
         if (!empty($per_clients_data)) {
             $response['total_clients'] = count($per_clients_data);
+            $last_month_average_profit = 0;
+            $positive_count = 0;
+
+            foreach ($per_clients_data as $client) {
+                if (isset($client['december_2025']) && $client['december_2025'] > 0) {
+                    $last_month_average_profit += $client['december_2025'];
+                    $positive_count++;
+                }
+            }
+
+            // Calculate average only if there are positive values
+            if ($positive_count > 0) {
+                $average = $last_month_average_profit / $positive_count;
+                $response['last_month_average_profit'] = app_format_number($average, '');
+            } else {
+                $response['last_month_average_profit'] = app_format_number(0, '');
+            }
             // Calculate sum manually from the result array
             $total_investment = 0;
             foreach ($per_clients_data as $client) {
@@ -26075,6 +26092,9 @@ class Purchase_model extends App_Model
                 $response['line_order_date'] = array_keys($sorted_months);
                 $response['line_order_total'] = array_values($sorted_months);
             }
+
+
+            
         }
 
         return $response;
