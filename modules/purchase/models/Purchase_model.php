@@ -25975,105 +25975,108 @@ class Purchase_model extends App_Model
      * @return array
      */
     public function get_per_clients_charts($data = array())
-{
-    $response = array();
-    $months = isset($data['months']) ? $data['months'] : '';
-    $frequency = isset($data['frequency']) ? $data['frequency'] : '';
-    $per_clients = isset($data['per_clients']) ? $data['per_clients'] : '';
+    {
+        $response = array();
+        $months = isset($data['months']) ? $data['months'] : '';
+        $frequency = isset($data['frequency']) ? $data['frequency'] : '';
+        $per_clients = isset($data['per_client']) ? $data['per_client'] : '';
 
-    $response['total_clients'] = $response['total_investment'] = $response['total_earnings'] = 0;
-    $response['bar_top_client_name'] = $response['bar_top_client_value'] = array();
-    $response['line_order_date'] = $response['line_order_total'] = array();
+        $response['total_clients'] = $response['total_investment'] = $response['total_earnings'] = 0;
+        $response['bar_top_client_name'] = $response['bar_top_client_value'] = array();
+        $response['line_order_date'] = $response['line_order_total'] = array();
 
-    $this->db->select('*');
-    $this->db->from(db_prefix() . '_per_clients');
-    if (!empty($months) && is_array($months)) {
-        $this->db->where(db_prefix() . '_per_clients.months', $months);
-    }
-    if (!empty($frequency) && is_array($frequency)) {
-        $this->db->where(db_prefix() . '_per_clients.frequency', $frequency);
-    }
-    if (!empty($per_clients) && is_array($per_clients)) {
-        $this->db->where_in(db_prefix() . '_per_clients.id', $per_clients);
-    }
-    $per_clients_data = $this->db->get()->result_array();
-
-    // Initialize arrays for charts
-    $bar_top_clients = array();
-    $line_order_total = array();
-
-    if (!empty($per_clients_data)) {
-        $response['total_clients'] = count($per_clients_data);
-        // Calculate sum manually from the result array
-        $total_investment = 0;
-        foreach ($per_clients_data as $client) {
-            $total_investment += $client['investment'];
-            
-            // Process data for bar chart (top clients by percent_profits)
-            $client_id = $client['id'];
-            if (!isset($bar_top_clients[$client_id])) {
-                $bar_top_clients[$client_id]['name'] = $client['name'];
-                $bar_top_clients[$client_id]['value'] = 0;
-            }
-            // Use percent_profits column for value
-            $bar_top_clients[$client_id]['value'] = (float)$client['percent_profits'];
+        $this->db->select('*');
+        $this->db->from(db_prefix() . '_per_clients');
+        if (!empty($months)) {
+            $this->db->where(db_prefix() . '_per_clients.months', $months);
         }
-        $response['total_investment'] = app_format_number($total_investment, '');
+        if (!empty($frequency) ) {
+            if($frequency != 'all'){
+                 $this->db->where(db_prefix() . '_per_clients.frequency', $frequency);
+            }
+           
+        }
+        if (!empty($per_clients) && is_array($per_clients)) {
+            $this->db->where_in(db_prefix() . '_per_clients.id', $per_clients);
+        }
+        $per_clients_data = $this->db->get()->result_array();
 
-        $earned_to_date = 0;
-        foreach ($per_clients_data as $client) {
-            $earned_to_date += $client['earned_to_date'];
-            
-            // Process data for line chart (monthly sums)
-            // Sum of columns: august_2025, september_2025, october_2025, november_2025, december_2025
-            $monthly_columns = ['august_2025', 'september_2025', 'october_2025', 'november_2025', 'december_2025'];
-            
-            foreach ($monthly_columns as $month_col) {
-                if (isset($client[$month_col])) {
-                    // Format month name from column (e.g., "august_2025" -> "August 2025")
-                    $month_name = ucfirst(str_replace('_', ' ', $month_col));
-                    if (!isset($line_order_total[$month_name])) {
-                        $line_order_total[$month_name] = 0;
+        // Initialize arrays for charts
+        $bar_top_clients = array();
+        $line_order_total = array();
+
+        if (!empty($per_clients_data)) {
+            $response['total_clients'] = count($per_clients_data);
+            // Calculate sum manually from the result array
+            $total_investment = 0;
+            foreach ($per_clients_data as $client) {
+                $total_investment += $client['investment'];
+                
+                // Process data for bar chart (top clients by percent_profits)
+                $client_id = $client['id'];
+                if (!isset($bar_top_clients[$client_id])) {
+                    $bar_top_clients[$client_id]['name'] = $client['name'];
+                    $bar_top_clients[$client_id]['value'] = 0;
+                }
+                // Use percent_profits column for value
+                $bar_top_clients[$client_id]['value'] = (float)$client['percent_profits'];
+            }
+            $response['total_investment'] = app_format_number($total_investment, '');
+
+            $earned_to_date = 0;
+            foreach ($per_clients_data as $client) {
+                $earned_to_date += $client['earned_to_date'];
+                
+                // Process data for line chart (monthly sums)
+                // Sum of columns: august_2025, september_2025, october_2025, november_2025, december_2025
+                $monthly_columns = ['august_2025', 'september_2025', 'october_2025', 'november_2025', 'december_2025'];
+                
+                foreach ($monthly_columns as $month_col) {
+                    if (isset($client[$month_col])) {
+                        // Format month name from column (e.g., "august_2025" -> "August 2025")
+                        $month_name = ucfirst(str_replace('_', ' ', $month_col));
+                        if (!isset($line_order_total[$month_name])) {
+                            $line_order_total[$month_name] = 0;
+                        }
+                        $line_order_total[$month_name] += (float)$client[$month_col];
                     }
-                    $line_order_total[$month_name] += (float)$client[$month_col];
                 }
             }
-        }
-        $response['total_earnings'] = app_format_number(round($earned_to_date, 2), '');
+            $response['total_earnings'] = app_format_number(round($earned_to_date, 2), '');
 
-        // Process bar chart data (top 10 clients by percent_profits)
-        if (!empty($bar_top_clients)) {
-            usort($bar_top_clients, function ($a, $b) {
-                return $b['value'] <=> $a['value'];
-            });
-            $bar_top_clients = array_slice($bar_top_clients, 0, 10);
-            $response['bar_top_client_name'] = array_column($bar_top_clients, 'name');
-            $response['bar_top_client_value'] = array_column($bar_top_clients, 'value');
-        }
-
-        // Process line chart data (monthly sums)
-        if (!empty($line_order_total)) {
-            // Sort months chronologically
-            $sorted_months = [];
-            $month_order = [
-                'August 2025',
-                'September 2025', 
-                'October 2025',
-                'November 2025',
-                'December 2025'
-            ];
-            
-            foreach ($month_order as $month) {
-                if (isset($line_order_total[$month])) {
-                    $sorted_months[$month] = $line_order_total[$month];
-                }
+            // Process bar chart data (top 10 clients by percent_profits)
+            if (!empty($bar_top_clients)) {
+                usort($bar_top_clients, function ($a, $b) {
+                    return $b['value'] <=> $a['value'];
+                });
+                $bar_top_clients = array_slice($bar_top_clients, 0, 10);
+                $response['bar_top_client_name'] = array_column($bar_top_clients, 'name');
+                $response['bar_top_client_value'] = array_column($bar_top_clients, 'value');
             }
-            
-            $response['line_order_date'] = array_keys($sorted_months);
-            $response['line_order_total'] = array_values($sorted_months);
+
+            // Process line chart data (monthly sums)
+            if (!empty($line_order_total)) {
+                // Sort months chronologically
+                $sorted_months = [];
+                $month_order = [
+                    'August 2025',
+                    'September 2025', 
+                    'October 2025',
+                    'November 2025',
+                    'December 2025'
+                ];
+                
+                foreach ($month_order as $month) {
+                    if (isset($line_order_total[$month])) {
+                        $sorted_months[$month] = $line_order_total[$month];
+                    }
+                }
+                
+                $response['line_order_date'] = array_keys($sorted_months);
+                $response['line_order_total'] = array_values($sorted_months);
+            }
         }
+
+        return $response;
     }
-
-    return $response;
-}
 }

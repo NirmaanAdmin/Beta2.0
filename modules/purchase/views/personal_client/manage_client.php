@@ -224,11 +224,12 @@ $module_name = 'per_client'; ?>
          filterArea.find('input').val("");
          filterArea.find('select').selectpicker("val", "");
          table_manage_client.DataTable().ajax.reload();
+         get_pre_client_dashboard();
       });
 
       get_pre_client_dashboard();
 
-      $(document).on('change', 'select[name="module_name[]"], select[name="staff[]"]', function() {
+      $(document).on('change', 'select[name="months"], select[name="frequency"], select[name="per_client[]"]', function() {
          get_pre_client_dashboard();
       });
 
