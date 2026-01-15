@@ -147,6 +147,7 @@ var expenseDropzone;
     $(this).find('tfoot td.total_vendor_submitted_amount').html(sums.total_vendor_submitted_amount);
     $(this).find('tfoot td.total_final_certified_amount').html(sums.total_final_certified_amount);
   });
+  $('.buttons-collection').hide();
 
   var table_pur_invoices = $('.table-table_pur_invoices').DataTable();
 

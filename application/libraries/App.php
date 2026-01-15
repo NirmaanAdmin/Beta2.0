@@ -476,4 +476,25 @@ class App
     {
         return get_contact_permissions();
     }
+
+    /**
+     * Function that will parse table data from the tables folder for amin area
+     * @param  string $table  table filename
+     * @param  array  $params additional params
+     * @return void
+     */
+    public function get_export_table_data($table, $params = [])
+    {
+        $params = hooks()->apply_filters('table_params', $params, $table);
+
+        $customFieldsColumns = [];
+
+        foreach ($params as $key => $val) {
+            $$key = $val;
+        }
+
+        include_once($this->get_table_path($table));
+
+        return json_encode($output);
+    }
 }

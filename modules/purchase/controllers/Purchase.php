@@ -17164,4 +17164,30 @@ class purchase extends AdminController
         echo json_encode($result);
         die;
     }
+
+    public function pur_invoice_export_pdf()
+    {
+        $pur_invoice = $this->purchase_model->get_pur_invoice_pdf_html();
+        try {
+            $pdf = $this->purchase_model->pur_invoice_pdf($pur_invoice);
+            $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+        } catch (Exception $e) {
+            echo pur_html_entity_decode($e->getMessage());
+            die;
+        }
+        $type = 'D';
+        if ($this->input->get('output_type')) {
+            $type = $this->input->get('output_type');
+        }
+        if ($this->input->get('print')) {
+            $type = 'I';
+        }
+        $pdf_name = 'Vendor_Billing_Tracker.pdf';
+        $pdf->Output($pdf_name, $type);
+    }
+
+    public function pur_invoice_export_excel()
+    {
+        $this->purchase_model->pur_invoice_export_excel();
+    }
 }

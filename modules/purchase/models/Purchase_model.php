@@ -26099,4 +26099,210 @@ class Purchase_model extends App_Model
 
         return $response;
     }
+
+    public function pur_invoice_pdf($pur_invoice)
+    {
+        return app_pdf('pur_invoice', module_dir_path(PURCHASE_MODULE_NAME, 'libraries/pdf/Pur_invoice_pdf'), $pur_invoice);
+    }
+
+    public function get_pur_invoice_export_data()
+    {
+        $result = array();
+        $this->db->where('module_name', 'vendor_billing_tracker');
+        $this->db->where('staff_id', get_staff_user_id());
+        $module_filters = $this->db->get(db_prefix() . 'module_filter')->result_array();
+        foreach ($module_filters as $filter) {
+            $filter_name = $filter['filter_name'];
+            $filter_value = $filter['filter_value'];
+            if (in_array($filter_name, ['from_date', 'to_date', 'order_tagged', 'is_expense'])) {
+                $_POST[$filter_name] = $filter_value;
+            }
+            if (in_array($filter_name, ['vendors', 'billing_invoices', 'budget_head', 'billing_status', 'order_tagged_detail', 'res_person'])) {
+                if (!empty($filter_value)) {
+                    $_POST[$filter_name] = array_map('trim', explode(',', $filter_value));
+                } else {
+                    $_POST[$filter_name] = [];
+                }
+            }
+        }
+        $_POST['order'] = [['column' => 2, 'dir' => 'desc']];
+        $table_data_json = $this->app->get_export_table_data(
+            module_views_path('purchase', 'invoices/table_pur_invoices')
+        );
+        $table_data = json_decode($table_data_json, true);
+        if(!empty($table_data)) {
+            $aaData = $table_data['aaData'];
+            if(!empty($aaData)) {
+                foreach ($aaData as $key => $value) {
+                    $row = array();
+                    $row['id'] = $value[1];
+                    $row['invoice_code'] = preg_match('/>(#INV\d+)<\/a>/', $value[2], $m) ? $m[1] : '';
+                    $row['invoice_number'] = preg_match('/<textarea[^>]*>(.*?)<\/textarea>/s', $value[3], $m) ? trim($m[1]) : '';
+                    $row['vendor'] = preg_match('/<a[^>]*>(.*?)<\/a>/', $value[4], $m) ? trim($m[1]) : '';
+                    $row['invoice_date'] = preg_match('/value="([\d\-]+)"/', $value[5], $m) ? date('d-m-Y', strtotime($m[1])) : '';
+                    $row['billing_budget_head'] = preg_match('/<span[^>]*id="budget_span_\d+"[^>]*>([^<]+)</', $value[6], $m) ? trim($m[1]) : '';
+                    $row['description_of_services'] = preg_match('/<textarea[^>]*>(.*?)<\/textarea>/s', $value[7], $m) ? trim($m[1]) : '';
+                    $row['ril_invoice'] = preg_match('/<a[^>]*>(.*?)<\/a>/', $value[8], $m) ? trim($m[1]) : '';
+                    $row['amount_without_tax'] = preg_match('/<span[^>]*>(.*?)<\/span>/', $value[9], $m) ? trim($m[1]) : '';
+                    $row['vendor_submitted_tax_amount'] = preg_match('/<span[^>]*>(.*?)<\/span>/', $value[10], $m) ? trim($m[1]) : '';
+                    $row['certified_amount'] = $value[11];
+                    $row['billing_status'] = preg_match('/<span[^>]*id="status_span_\d+"[^>]*>([^<]+)</', $value[12], $m) ? trim($m[1]) : '';
+                    $row['responsible_person'] = preg_match_all('/<option[^>]*selected[^>]*>(.*?)<\/option>/', $value[13], $m) ? implode(', ', array_map('trim', $m[1])) : '';
+                    $row['vbt_order_name'] = preg_match('/<a[^>]*>(.*?)<\/a>/', $value[14], $m) ? trim($m[1]) : (preg_match('/<div[^>]*>(.*?)<\/div>/', $value[14], $m2) ? trim(strip_tags($m2[1])) : '');
+                    $row['order_budget_head'] = $value[15];
+                    $row['tag'] = '';
+                    $row['attachment'] = '';
+                    $row['adminnote'] = preg_match('/<textarea[^>]*>(.*?)<\/textarea>/s', $value[18], $m) ? trim($m[1]) : '';
+                    $row['is_expense'] = $value[19];
+                    $row['last_action_by'] = $value[20];
+
+                    $result[] = $row;
+                }
+            }
+        }
+        
+        return $result;
+    }
+
+    public function get_pur_invoice_pdf_html()
+    {
+        $pur_invoice_data = $this->get_pur_invoice_export_data();
+        $columns_visibility = [];
+        $this->db->select('datatable_preferences');
+        $this->db->from('tbluser_preferences');
+        $this->db->where('staff_id', get_staff_user_id());
+        $this->db->where('staus', 1);
+        $this->db->where('module', 'vendor_billing_tracker');
+        $user_preferences = $this->db->get()->row();
+        if (!empty($user_preferences) && !empty($user_preferences->datatable_preferences)) {
+            $decoded = json_decode($user_preferences->datatable_preferences, true);
+            if (is_array($decoded)) {
+                $decoded = array_values(array_slice($decoded, 1));
+                $columns_visibility = array_map(
+                    fn($v) => filter_var($v, FILTER_VALIDATE_BOOLEAN),
+                    $decoded
+                );
+            }
+        }
+        $column_labels = [
+            'id'                          => _l('#'),
+            'invoice_code'                => _l('invoice_code'),
+            'invoice_number'              => _l('invoice_number'),
+            'vendor'                      => _l('vendor'),
+            'invoice_date'                => _l('invoice_date'),
+            'billing_budget_head'         => _l('Billing Budget Head'),
+            'description_of_services'     => _l('description_of_services'),
+            'ril_invoice'                 => _l('ril_invoice'),
+            'amount_without_tax'          => _l('amount_without_tax'),
+            'vendor_submitted_tax_amount' => _l('vendor_submitted_tax_amount'),
+            'certified_amount'            => _l('final_certified_amount'),
+            'billing_status'              => _l('billing_status'),
+            'responsible_person'          => _l('responsible_person'),
+            'vbt_order_name'              => _l('vbt_order_name'),
+            'order_budget_head'           => _l('Order Budget Head'),
+            'tag'                         => _l('tag'),
+            'attachment'                  => _l('attachment'),
+            'adminnote'                   => _l('adminnote'),
+            'is_expense'                  => _l('is_expense'),
+            'last_action_by'              => _l('last_action_by')
+        ];
+        $column_keys = array_keys($column_labels);
+        $visible_columns = [];
+        foreach ($column_keys as $i => $key) {
+            if (empty($columns_visibility) || ($columns_visibility[$i] ?? false) === true) {
+                $visible_columns[] = $key;
+            }
+        }
+        $html = '<table class="table purorder-item" style="width:100%">';
+        $html .= '<thead><tr>';
+        foreach ($visible_columns as $key) {
+            $html .= '<th class="thead-dark" align="left">' . $column_labels[$key] . '</th>';
+        }
+        $html .= '</tr></thead><tbody>';
+        if (!empty($pur_invoice_data)) {
+            foreach ($pur_invoice_data as $row) {
+                $html .= '<tr>';
+                foreach ($visible_columns as $key) {
+                    $html .= '<td>' . ($row[$key] ?? '') . '</td>';
+                }
+                $html .= '</tr>';
+            }
+        }
+        $html .= '</tbody></table>';
+
+        $html .= '<link href="' . module_dir_url(PURCHASE_MODULE_NAME, 'assets/css/order_tracker_pdf.css') . '"  rel="stylesheet" type="text/css" />';
+        return $html;
+    }
+
+    public function pur_invoice_export_excel()
+    {
+        $pur_invoice_data = $this->get_pur_invoice_export_data();
+        $columns_visibility = [];
+        $this->db->select('datatable_preferences');
+        $this->db->from('tbluser_preferences');
+        $this->db->where('staff_id', get_staff_user_id());
+        $this->db->where('staus', 1);
+        $this->db->where('module', 'vendor_billing_tracker');
+        $user_preferences = $this->db->get()->row();
+        if (!empty($user_preferences) && !empty($user_preferences->datatable_preferences)) {
+            $decoded = json_decode($user_preferences->datatable_preferences, true);
+            if (is_array($decoded)) {
+                $decoded = array_values(array_slice($decoded, 1));
+                $columns_visibility = array_map(
+                    fn($v) => filter_var($v, FILTER_VALIDATE_BOOLEAN),
+                    $decoded
+                );
+            }
+        }
+        $column_labels = [
+            'id'                          => _l('#'),
+            'invoice_code'                => _l('invoice_code'),
+            'invoice_number'              => _l('invoice_number'),
+            'vendor'                      => _l('vendor'),
+            'invoice_date'                => _l('invoice_date'),
+            'billing_budget_head'         => _l('Billing Budget Head'),
+            'description_of_services'     => _l('description_of_services'),
+            'ril_invoice'                 => _l('ril_invoice'),
+            'amount_without_tax'          => _l('amount_without_tax'),
+            'vendor_submitted_tax_amount' => _l('vendor_submitted_tax_amount'),
+            'certified_amount'            => _l('final_certified_amount'),
+            'billing_status'              => _l('billing_status'),
+            'responsible_person'          => _l('responsible_person'),
+            'vbt_order_name'              => _l('vbt_order_name'),
+            'order_budget_head'           => _l('Order Budget Head'),
+            'tag'                         => _l('tag'),
+            'attachment'                  => _l('attachment'),
+            'adminnote'                   => _l('adminnote'),
+            'is_expense'                  => _l('is_expense'),
+            'last_action_by'              => _l('last_action_by')
+        ];
+        $column_keys = array_keys($column_labels);
+        $visible_columns = [];
+        foreach ($column_keys as $i => $key) {
+            if (empty($columns_visibility) || ($columns_visibility[$i] ?? false) === true) {
+                $visible_columns[] = $key;
+            }
+        }
+
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="Vendor_Billing_Tracker.csv"');
+        $output = fopen('php://output', 'w');
+        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+        $csv_headers = [];
+        foreach ($visible_columns as $key) {
+            $csv_headers[] = $column_labels[$key];
+        }
+        fputcsv($output, $csv_headers);
+        if (!empty($pur_invoice_data)) {
+            foreach ($pur_invoice_data as $row) {
+                $data_row = [];
+                foreach ($visible_columns as $key) {
+                    $data_row[] = $row[$key] ?? '';
+                }
+                fputcsv($output, $data_row);
+            }
+        }
+        fclose($output);
+        exit;
+    }
 }
