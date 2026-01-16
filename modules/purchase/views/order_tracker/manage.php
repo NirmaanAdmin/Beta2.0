@@ -408,6 +408,23 @@
                      ];
                      echo render_select('yield[]', $yield, array('id', 'name'), '', $yield_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('Yield'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false); ?>
                   </div>
+                  <div class="col-md-3 form-group">
+                     <?php
+                     $is_change_order_filter = get_module_filter($module_name, 'is_change_order');
+                     $is_change_order_filter_val = !empty($is_change_order_filter) ? $is_change_order_filter->filter_value : '';
+                     $is_change_order_arr = [
+                        [
+                           'id' => 1,
+                           'name' => _l('Yes'),
+                        ],
+                        [
+                           'id' => 2,
+                           'name' => _l('No'),
+                        ]
+                     ];
+                     echo render_select('is_change_order', $is_change_order_arr, array('id', 'name'), '', $is_change_order_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('is_change_order'), '', 'data-actions-box' => true), array(), 'no-mbot', '', true);
+                     ?>
+                  </div>
                   <div class="col-md-1 form-group">
                      <a href="javascript:void(0)" class="btn btn-info btn-icon reset_all_ot_filters">
                         <?php echo _l('reset_filter'); ?>

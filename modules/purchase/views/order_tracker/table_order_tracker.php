@@ -12,6 +12,7 @@ $order_type_filter_name = 'order_type_filter';
 $project_filter_name = 'projects';
 $aw_unw_order_status_filter_name = 'aw_unw_order_status';
 $yield_filter_name = 'yield';
+$is_change_order_filter_name = 'is_change_order';
 
 // Define common columns for both tables
 $aColumns = [
@@ -245,6 +246,15 @@ if (isset($yield)) {
    }
 }
 
+if ($this->ci->input->post('is_change_order') && $this->ci->input->post('is_change_order') != '') {
+   $is_change_order = $this->ci->input->post('is_change_order');
+   if($is_change_order == 1) {
+      array_push($where, 'AND (co_total > 0)');
+   } elseif ($is_change_order == 2) {
+      array_push($where, 'AND (co_total <= 0)');
+   }
+}
+
 $having = '';
 
 $type_filter_value = !empty($this->ci->input->post('type')) ? implode(',', $this->ci->input->post('type')) : NULL;
@@ -273,6 +283,9 @@ update_module_filter($module_name, $aw_unw_order_status_filter_name, $aw_unw_ord
 
 $yield_filter_value = !empty($this->ci->input->post('yield')) ? implode(',', $this->ci->input->post('yield')) : NULL;
 update_module_filter($module_name, $yield_filter_name, $yield_filter_value);
+
+$is_change_order_filter_name_value = !empty($this->ci->input->post('is_change_order')) ? $this->ci->input->post('is_change_order') : NULL;
+update_module_filter($module_name, $is_change_order_filter_name, $is_change_order_filter_name_value);
 
 // Query and process data
 $result = data_tables_init_union($aColumns, $sIndexColumn, $sTable, $join, $where, [
