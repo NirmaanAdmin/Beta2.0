@@ -4,14 +4,14 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 include_once(APPPATH . 'libraries/pdf/App_pdf.php');
 
-class Pur_invoice_pdf extends App_pdf
+class Export_pur_invoice_pdf extends App_pdf
 {
     protected $pur_invoice;
 
     public function __construct($pur_invoice)
     {
         $pur_invoice                = hooks()->apply_filters('request_html_pdf_data', $pur_invoice);
-        $GLOBALS['Pur_invoice_pdf'] = $pur_invoice;
+        $GLOBALS['Export_pur_invoice_pdf'] = $pur_invoice;
         parent::__construct();
         $this->pur_invoice = $pur_invoice;
 

@@ -26116,7 +26116,7 @@ class Purchase_model extends App_Model
 
     public function pur_invoice_pdf($pur_invoice)
     {
-        return app_pdf('pur_invoice', module_dir_path(PURCHASE_MODULE_NAME, 'libraries/pdf/Pur_invoice_pdf'), $pur_invoice);
+        return app_pdf('pur_invoice', module_dir_path(PURCHASE_MODULE_NAME, 'libraries/pdf/Export_pur_invoice_pdf'), $pur_invoice);
     }
 
     public function get_pur_invoice_export_data()
