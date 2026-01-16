@@ -398,10 +398,17 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
     FROM tblpur_orders po
     LEFT JOIN tblpur_vendor pv ON pv.userid = po.vendor
     LEFT JOIN (
-        SELECT po_order_id, SUM(co_value - (co_value * ((100 + ROUND(((total_tax - subtotal) / subtotal) * 100)) / 100))) AS co_total
+        SELECT
+            po_order_id,
+            co_value AS co_total
         FROM tblco_orders
         WHERE po_order_id IS NOT NULL
-        GROUP BY po_order_id
+        AND id IN (
+            SELECT MAX(id)
+            FROM tblco_orders
+            WHERE po_order_id IS NOT NULL
+            GROUP BY po_order_id
+        )
     ) AS co_sum ON co_sum.po_order_id = po.id
     LEFT JOIN tblprojects pr ON pr.id = po.project
     LEFT JOIN (
@@ -507,10 +514,17 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
     FROM tblwo_orders wo
     LEFT JOIN tblpur_vendor pv ON pv.userid = wo.vendor
     LEFT JOIN (
-        SELECT wo_order_id, SUM(co_value - (co_value * ((100 + ROUND(((total_tax - subtotal) / subtotal) * 100)) / 100))) AS co_total
+        SELECT
+            wo_order_id,
+            co_value AS co_total
         FROM tblco_orders
         WHERE wo_order_id IS NOT NULL
-        GROUP BY wo_order_id
+        AND id IN (
+            SELECT MAX(id)
+            FROM tblco_orders
+            WHERE wo_order_id IS NOT NULL
+            GROUP BY wo_order_id
+        )
     ) AS co_sum ON co_sum.wo_order_id = wo.id
     LEFT JOIN tblprojects pr ON pr.id = wo.project
     LEFT JOIN (
