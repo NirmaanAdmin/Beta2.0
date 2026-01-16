@@ -458,6 +458,36 @@
    $(document).ready(function() {
       var table = $('.table-table_pur_order').DataTable();
 
+      // On page load, fetch and apply saved preferences for the logged-in user
+      $.ajax({
+         url: admin_url + 'purchase/getPreferences',
+         type: 'GET',
+         data: {
+            module: 'purchase_order'
+         },
+         dataType: 'json',
+         success: function(data) {
+            let table = $('.table-table_pur_order').DataTable();
+            $('.toggle-column').each(function() {
+               let colIndex = parseInt($(this).val(), 10);
+               let prefValue = data.preferences && data.preferences[colIndex] !== undefined ?
+                  data.preferences[colIndex] :
+                  "true";
+               let isVisible = (typeof prefValue === "string") ?
+                  (prefValue.toLowerCase() === "true") :
+                  prefValue;
+               table.column(colIndex).visible(isVisible, false);
+               $(this).prop('checked', isVisible);
+            });
+            table.columns.adjust().draw();
+            let allChecked = $('.toggle-column').length === $('.toggle-column:checked').length;
+            $('#select-all-columns').prop('checked', allChecked);
+         },
+         error: function() {
+            console.error('Could not retrieve column preferences.');
+         }
+      });
+
       // Handle "Select All" checkbox
       $('#select-all-columns').on('change', function() {
          var isChecked = $(this).is(':checked');
@@ -472,6 +502,9 @@
          // Sync "Select All" checkbox state
          var allChecked = $('.toggle-column').length === $('.toggle-column:checked').length;
          $('#select-all-columns').prop('checked', allChecked);
+
+         // Save updated preferences
+         saveColumnPreferences();
       });
 
       // Sync checkboxes with column visibility on page load
@@ -484,6 +517,29 @@
       $('.dropdown-menu').on('click', function(e) {
          e.stopPropagation();
       });
+
+      // Function to collect and save preferences via AJAX
+      function saveColumnPreferences() {
+         var preferences = {};
+         $('.toggle-column').each(function() {
+            preferences[$(this).val()] = $(this).is(':checked');
+         });
+         $.ajax({
+            url: admin_url + 'purchase/savePreferences',
+            type: 'POST',
+            data: {
+               preferences: preferences,
+               module: 'purchase_order'
+
+            },
+            success: function(response) {
+               console.log('Preferences saved successfully.');
+            },
+            error: function() {
+               console.error('Failed to save preferences.');
+            }
+         });
+      }
 
       $('#po-charts-section').on('shown.bs.collapse', function () {
          $('.toggle-icon').removeClass('fa-chevron-up').addClass('fa-chevron-down');
