@@ -26707,4 +26707,178 @@ class Purchase_model extends App_Model
         fclose($output);
         exit;
     }
+
+    public function purchase_request_pdf($purchase_request)
+    {
+        return app_pdf('purchase_request', module_dir_path(PURCHASE_MODULE_NAME, 'libraries/pdf/Export_purchase_request_pdf'), $purchase_request);
+    }
+
+    public function get_purchase_request_export_data()
+    {
+        $result = array();
+        $this->db->where('module_name', 'purchase_request');
+        $this->db->where('staff_id', get_staff_user_id());
+        $module_filters = $this->db->get(db_prefix() . 'module_filter')->result_array();
+        foreach ($module_filters as $filter) {
+            $filter_name = $filter['filter_name'];
+            $filter_value = $filter['filter_value'];
+            if (in_array($filter_name, ['from_date', 'to_date'])) {
+                $_POST[$filter_name] = $filter_value;
+            }
+            if (in_array($filter_name, ['department', 'project', 'group_pur', 'sub_groups_pur', 'requester', 'status'])) {
+                if (!empty($filter_value)) {
+                    $_POST[$filter_name] = array_map('trim', explode(',', $filter_value));
+                } else {
+                    $_POST[$filter_name] = [];
+                }
+            }
+        }
+        $_POST['order'] = [['column' => 6, 'dir' => 'desc']];
+        $table_data_json = $this->app->get_export_table_data(
+            module_views_path('purchase', 'purchase_request/table_pur_request')
+        );
+        $table_data = json_decode($table_data_json, true);
+        if(!empty($table_data)) {
+            $aaData = $table_data['aaData'];
+            if(!empty($aaData)) {
+                foreach ($aaData as $key => $value) {
+                    $row = array();
+                    $row['pur_rq_code'] = preg_match('/>(#PR-[^<]+)<\/a>/', $value[0], $m) ? $m[1] : '';
+                    $row['pur_rq_name'] = preg_match('/<a[^>]*>([^<]+)<\/a>/', $value[1], $m) ? trim($m[1]) : '';
+                    $row['department'] = $value[2];
+                    $row['group_pur'] = $value[3];
+                    $row['sub_groups_pur'] = $value[4];
+                    $row['requester'] = preg_match('/<a[^>]*>([^<]+)<\/a>\s*$/', $value[5], $m) ? trim($m[1]) : '';
+                    $row['request_date'] = $value[6];
+                    $row['project'] = $value[7];
+                    $row['status'] = preg_match('/<span[^>]*>([^<]+)<\/span>/', $value[8], $m) ? trim($m[1]) : '';
+                    $row['options'] = '';
+
+                    $result[] = $row;
+                }
+            }
+        }
+        
+        return $result;
+    }
+
+    public function get_purchase_request_pdf_html()
+    {
+        $purchase_request_data = $this->get_purchase_request_export_data();
+        $columns_visibility = [];
+        $this->db->select('datatable_preferences');
+        $this->db->from('tbluser_preferences');
+        $this->db->where('staff_id', get_staff_user_id());
+        $this->db->where('staus', 1);
+        $this->db->where('module', 'purchase_request');
+        $user_preferences = $this->db->get()->row();
+        if (!empty($user_preferences) && !empty($user_preferences->datatable_preferences)) {
+            $decoded = json_decode($user_preferences->datatable_preferences, true);
+            if (is_array($decoded)) {
+                $columns_visibility = array_map(
+                    fn($v) => filter_var($v, FILTER_VALIDATE_BOOLEAN),
+                    $decoded
+                );
+            }
+        }
+        $column_labels = [
+            'pur_rq_code'        => _l('pur_rq_code'),
+            'pur_rq_name'        => _l('pur_rq_name'),
+            'department'         => _l('department'),
+            'group_pur'          => _l('group_pur'),
+            'sub_groups_pur'     => _l('sub_groups_pur'),
+            'requester'          => _l('requester'),
+            'request_date'       => _l('request_date'),
+            'project'            => _l('project'),
+            'status'             => _l('status'),
+            'options'            => _l('options')
+        ];
+        $column_keys = array_keys($column_labels);
+        $visible_columns = [];
+        foreach ($column_keys as $i => $key) {
+            if (empty($columns_visibility) || ($columns_visibility[$i] ?? false) === true) {
+                $visible_columns[] = $key;
+            }
+        }
+        $html = '<table class="table purorder-item" style="width:100%">';
+        $html .= '<thead><tr>';
+        foreach ($visible_columns as $key) {
+            $html .= '<th class="thead-dark" align="left">' . $column_labels[$key] . '</th>';
+        }
+        $html .= '</tr></thead><tbody>';
+        if (!empty($purchase_request_data)) {
+            foreach ($purchase_request_data as $row) {
+                $html .= '<tr>';
+                foreach ($visible_columns as $key) {
+                    $html .= '<td>' . ($row[$key] ?? '') . '</td>';
+                }
+                $html .= '</tr>';
+            }
+        }
+        $html .= '</tbody></table>';
+
+        $html .= '<link href="' . module_dir_url(PURCHASE_MODULE_NAME, 'assets/css/order_tracker_pdf.css') . '"  rel="stylesheet" type="text/css" />';
+        return $html;
+    }
+
+    public function purchase_request_export_excel()
+    {
+        $purchase_request_data = $this->get_purchase_request_export_data();
+        $columns_visibility = [];
+        $this->db->select('datatable_preferences');
+        $this->db->from('tbluser_preferences');
+        $this->db->where('staff_id', get_staff_user_id());
+        $this->db->where('staus', 1);
+        $this->db->where('module', 'purchase_request');
+        $user_preferences = $this->db->get()->row();
+        if (!empty($user_preferences) && !empty($user_preferences->datatable_preferences)) {
+            $decoded = json_decode($user_preferences->datatable_preferences, true);
+            if (is_array($decoded)) {
+                $columns_visibility = array_map(
+                    fn($v) => filter_var($v, FILTER_VALIDATE_BOOLEAN),
+                    $decoded
+                );
+            }
+        }
+        $column_labels = [
+            'pur_rq_code'        => _l('pur_rq_code'),
+            'pur_rq_name'        => _l('pur_rq_name'),
+            'department'         => _l('department'),
+            'group_pur'          => _l('group_pur'),
+            'sub_groups_pur'     => _l('sub_groups_pur'),
+            'requester'          => _l('requester'),
+            'request_date'       => _l('request_date'),
+            'project'            => _l('project'),
+            'status'             => _l('status'),
+            'options'            => _l('options')
+        ];
+        $column_keys = array_keys($column_labels);
+        $visible_columns = [];
+        foreach ($column_keys as $i => $key) {
+            if (empty($columns_visibility) || ($columns_visibility[$i] ?? false) === true) {
+                $visible_columns[] = $key;
+            }
+        }
+
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="Purchase_Request.csv"');
+        $output = fopen('php://output', 'w');
+        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+        $csv_headers = [];
+        foreach ($visible_columns as $key) {
+            $csv_headers[] = $column_labels[$key];
+        }
+        fputcsv($output, $csv_headers);
+        if (!empty($purchase_request_data)) {
+            foreach ($purchase_request_data as $row) {
+                $data_row = [];
+                foreach ($visible_columns as $key) {
+                    $data_row[] = $row[$key] ?? '';
+                }
+                fputcsv($output, $data_row);
+            }
+        }
+        fclose($output);
+        exit;
+    }
 }

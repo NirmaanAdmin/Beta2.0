@@ -29,6 +29,8 @@ var Params = {
     table_pur_request.DataTable().ajax.reload();
   });
 
+  $('.buttons-collection').hide();
+
   appValidateForm($('#send_rq-form'), { subject: 'required', attachment: 'required' });
 
   $(document).on('click', '.reset_all_ot_filters', function () {

@@ -17242,4 +17242,30 @@ class purchase extends AdminController
     {
         $this->purchase_model->work_order_export_excel();
     }
+
+    public function purchase_request_export_pdf()
+    {
+        $purchase_request = $this->purchase_model->get_purchase_request_pdf_html();
+        try {
+            $pdf = $this->purchase_model->purchase_request_pdf($purchase_request);
+            $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+        } catch (Exception $e) {
+            echo pur_html_entity_decode($e->getMessage());
+            die;
+        }
+        $type = 'D';
+        if ($this->input->get('output_type')) {
+            $type = $this->input->get('output_type');
+        }
+        if ($this->input->get('print')) {
+            $type = 'I';
+        }
+        $pdf_name = 'Purchase_Request.pdf';
+        $pdf->Output($pdf_name, $type);
+    }
+
+    public function purchase_request_export_excel()
+    {
+        $this->purchase_model->purchase_request_export_excel();
+    }
 }
