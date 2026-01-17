@@ -58,6 +58,7 @@ var expenseDropzone;
         $(this).find('tfoot td.total_tax_value').html(sums.total_tax_value);
         $(this).find('tfoot td.total_po_value_included_tax').html(sums.total_po_value_included_tax);
     });
+    $('.buttons-collection').hide();
 
     appValidateForm($('#pur_order-expense-form'), {
         expense_name: 'required',

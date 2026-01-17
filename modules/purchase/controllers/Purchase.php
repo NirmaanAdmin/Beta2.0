@@ -17190,4 +17190,56 @@ class purchase extends AdminController
     {
         $this->purchase_model->pur_invoice_export_excel();
     }
+
+    public function purchase_order_export_pdf()
+    {
+        $purchase_order = $this->purchase_model->get_purchase_order_pdf_html();
+        try {
+            $pdf = $this->purchase_model->purchase_order_pdf($purchase_order);
+            $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+        } catch (Exception $e) {
+            echo pur_html_entity_decode($e->getMessage());
+            die;
+        }
+        $type = 'D';
+        if ($this->input->get('output_type')) {
+            $type = $this->input->get('output_type');
+        }
+        if ($this->input->get('print')) {
+            $type = 'I';
+        }
+        $pdf_name = 'Purchase_Order.pdf';
+        $pdf->Output($pdf_name, $type);
+    }
+
+    public function purchase_order_export_excel()
+    {
+        $this->purchase_model->purchase_order_export_excel();
+    }
+
+    public function work_order_export_pdf()
+    {
+        $work_order = $this->purchase_model->get_work_order_pdf_html();
+        try {
+            $pdf = $this->purchase_model->work_order_pdf($work_order);
+            $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+        } catch (Exception $e) {
+            echo pur_html_entity_decode($e->getMessage());
+            die;
+        }
+        $type = 'D';
+        if ($this->input->get('output_type')) {
+            $type = $this->input->get('output_type');
+        }
+        if ($this->input->get('print')) {
+            $type = 'I';
+        }
+        $pdf_name = 'Work_Order.pdf';
+        $pdf->Output($pdf_name, $type);
+    }
+
+    public function work_order_export_excel()
+    {
+        $this->purchase_model->work_order_export_excel();
+    }
 }

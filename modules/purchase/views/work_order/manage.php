@@ -4,7 +4,7 @@
    .show_hide_columns {
       position: absolute;
       z-index: 5000;
-      left: 204px
+      left: 239px
    }
    .n_width {
       width: 25% !important;
@@ -15,6 +15,11 @@
    }
    .dashboard_stat_value {
       font-size: 19px;
+   }
+   .export-btn-div {
+      position: absolute;
+      z-index: 999;
+      left: 143px;
    }
 </style>
 <?php $module_name = 'work_order'; ?>
@@ -295,6 +300,20 @@
                         </div>
                      </div>
                      <?php echo form_hidden('work_orderid', $work_orderid); ?>
+
+                     <div class="btn-group export-btn-div" id="export-btn-div">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding: 4px 7px;">
+                           <i class="fa fa-download"></i> <?php echo _l('Export'); ?> <span class="caret"></span>
+                        </button>
+                        <div class="dropdown-menu" style="padding: 10px;min-width: 94px;">
+                           <a class="dropdown-item export-btn" href="<?php echo admin_url('purchase/work_order_export_pdf'); ?>" data-type="pdf">
+                              <i class="fa fa-file-pdf text-danger"></i> PDF
+                           </a><br>
+                           <a class="dropdown-item export-btn" href="<?php echo admin_url('purchase/work_order_export_excel'); ?>" data-type="excel">
+                              <i class="fa fa-file-excel text-success"></i> Excel
+                           </a>
+                        </div>
+                     </div>
                      
                      <div class="">
                         <table class="dt-table-loading table table-table_wo_order">
