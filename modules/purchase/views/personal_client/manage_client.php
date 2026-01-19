@@ -109,7 +109,7 @@ $module_name = 'per_client'; ?>
                                     <div class="top_stats_wrapper">
                                        <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
                                           <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
-                                             <span class="tw-truncate dashboard_stat_title">Last Month Average Profit</span>
+                                             <span class="tw-truncate dashboard_stat_title">Average Profit</span>
                                           </div>
                                           <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
                                        </div>
@@ -198,7 +198,21 @@ $module_name = 'per_client'; ?>
                            </tr>
                         </thead>
                         <tbody></tbody>
-                        <tbody></tbody>
+                        <tfoot>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                              <td class="investment"></td>
+                              <td></td>
+                              <td class="aug"></td>
+                              <td class="sep"></td>
+                              <td class="oct"></td>
+                              <td class="nov"></td>
+                              <td class="dec"></td>
+                              <td></td>
+                              <td></td>
+                           </tfoot>
                      </table>
 
                   </div>

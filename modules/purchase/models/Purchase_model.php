@@ -26021,19 +26021,22 @@ class Purchase_model extends App_Model
 
         if (!empty($per_clients_data)) {
             $response['total_clients'] = count($per_clients_data);
-            $last_month_average_profit = 0;
-            $positive_count = 0;
+           $all_months_total_profit = 0;
+            $all_months_total_profit = 0;
+            $total_possible_months = count($per_clients_data) * 5; // Each client has 5 months
 
             foreach ($per_clients_data as $client) {
-                if (isset($client['december_2025']) && $client['december_2025'] > 0) {
-                    $last_month_average_profit += $client['december_2025'];
-                    $positive_count++;
-                }
+                // Sum all 5 months for each client (including zeros)
+                $all_months_total_profit += 
+                    (isset($client['august_2025']) ? $client['august_2025'] : 0) +
+                    (isset($client['september_2025']) ? $client['september_2025'] : 0) +
+                    (isset($client['october_2025']) ? $client['october_2025'] : 0) +
+                    (isset($client['november_2025']) ? $client['november_2025'] : 0) +
+                    (isset($client['december_2025']) ? $client['december_2025'] : 0);
             }
-
-            // Calculate average only if there are positive values
-            if ($positive_count > 0) {
-                $average = $last_month_average_profit / $positive_count;
+            // Calculate average across all months
+            if ($total_possible_months > 0) {
+                $average = $all_months_total_profit / 5;
                 $response['last_month_average_profit'] = app_format_number($average, '');
             } else {
                 $response['last_month_average_profit'] = app_format_number(0, '');
@@ -27192,7 +27195,7 @@ class Purchase_model extends App_Model
                         <td class="number-cell">₹' . app_format_number($client['investment'], '') . '</td>
                         <td>' . $client['frequency'] . '</td>
                         <td class="number-cell">₹' . app_format_number($client['earned_to_date'], '') . '</td>
-                        <td class="percent-cell">' . app_format_number($client['percent_profits'], '') . '%</td>
+                        <td class="">' . app_format_number($client['percent_profits'], '') . '%</td>
                     </tr>';
             }
             
@@ -27226,7 +27229,6 @@ class Purchase_model extends App_Model
                         <th width="8%">' . _l('October 2025') . '</th>
                         <th width="8%">' . _l('November 2025') . '</th>
                         <th width="8%">' . _l('December 2025') . '</th>
-                        <th width="8%">' . _l('Total Months') . '</th>
                     </tr>
                 </thead>
                 <tbody>';
@@ -27262,7 +27264,6 @@ class Purchase_model extends App_Model
                         <td class="number-cell">₹' . app_format_number($client['october_2025'], '') . '</td>
                         <td class="number-cell">₹' . app_format_number($client['november_2025'], '') . '</td>
                         <td class="number-cell">₹' . app_format_number($client['december_2025'], '') . '</td>
-                        <td class="number-cell">₹' . app_format_number($client_monthly_total, '') . '</td>
                     </tr>';
             }
             
@@ -27275,7 +27276,6 @@ class Purchase_model extends App_Model
                         <td class="number-cell">₹' . app_format_number($october_total, '') . '</td>
                         <td class="number-cell">₹' . app_format_number($november_total, '') . '</td>
                         <td class="number-cell">₹' . app_format_number($december_total, '') . '</td>
-                        <td class="number-cell">₹' . app_format_number($all_months_total, '') . '</td>
                     </tr>';
             
             $html .= '
