@@ -16834,7 +16834,7 @@ class purchase extends AdminController
             $success = $this->purchase_model->add_tender_document($this->input->post(), $tender_id);
             if ($success) {
                 set_alert('success', _l('added_successfully', _l('tender_document')));
-            } 
+            }
             redirect(admin_url('purchase/view_pur_tender/' . $tender_id));
         }
         $data['title'] = _l('add_tender_document');
@@ -16845,7 +16845,7 @@ class purchase extends AdminController
     public function view_latter_of_agreement($tender_id)
     {
         $data['title'] = _l('Latter of Agreement');
-        $data['tender_id'] = $tender_id; 
+        $data['tender_id'] = $tender_id;
         $data['loa_data'] = $this->purchase_model->get_latter_of_agreement_detail($tender_id);
         $data['tender_data'] = $this->purchase_model->get_tender_document_detail($tender_id);
         $this->load->view('purchase_tender/latter_of_agreement', $data);
@@ -17119,27 +17119,29 @@ class purchase extends AdminController
         $remarks = $this->input->post('remarks');
         $item_key = $this->input->post('item_key');
 
-        echo $this->purchase_model->create_purchase_tender_row_template($name, $item_code, $item_description, $area, $image, $quantity, $item_key, '','', $remarks,$unit_price, $item_text);
+        echo $this->purchase_model->create_purchase_tender_row_template($name, $item_code, $item_description, $area, $image, $quantity, $item_key, '', '', $remarks, $unit_price, $item_text);
     }
 
-    public function letter_of_agreement_add_update(){
+    public function letter_of_agreement_add_update()
+    {
         if ($this->input->post()) {
             $data = $this->input->post();
-            
+
             $success = $this->purchase_model->letter_of_agreement_add_update($data);
             if ($success) {
                 set_alert('success', _l('updated_successfully', _l('Latter of Agreement')));
-            } 
+            }
             redirect(admin_url('purchase/view_latter_of_agreement/' . $data['tender_id']));
         }
     }
-    public function appendix_to_contract_add_update(){
+    public function appendix_to_contract_add_update()
+    {
         if ($this->input->post()) {
             $data = $this->input->post();
             $success = $this->purchase_model->appendix_to_contract_add_update($data);
             if ($success) {
                 set_alert('success', _l('updated_successfully', _l('Appendix to Contract')));
-            } 
+            }
             redirect(admin_url('purchase/view_appendix_to_contract/' . $data['tender_id']));
         }
     }
@@ -17267,5 +17269,31 @@ class purchase extends AdminController
     public function purchase_request_export_excel()
     {
         $this->purchase_model->purchase_request_export_excel();
+    }
+
+    public function per_client_pdf()
+    {
+
+        $per_client = $this->purchase_model->get_per_client_pdf_html();
+
+        try {
+            $pdf = $this->purchase_model->perclients_pdf($per_client);
+            $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+        } catch (Exception $e) {
+            echo pur_html_entity_decode($e->getMessage());
+            die;
+        }
+
+        $type = 'D';
+
+        if ($this->input->get('output_type')) {
+            $type = $this->input->get('output_type');
+        }
+
+        if ($this->input->get('print')) {
+            $type = 'I';
+        }
+        $pdf_name = 'clients.pdf';
+        $pdf->Output($pdf_name, $type);
     }
 }

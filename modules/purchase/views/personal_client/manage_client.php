@@ -47,6 +47,11 @@ $module_name = 'per_client'; ?>
                               <?php echo _l('Client Data Charts'); ?> <i class="fa fa-chevron-down toggle-icon"></i>
                            </button>
                         </div>
+                        <div class="col-md-12 mtop10" style="justify-content: right; display: flex;">
+                           <a href="javascript:void(0);" id="generate-pdf" class="btn btn-default" data-toggle="tooltip" title="<?php echo _l('Generate PDF'); ?>">
+                              <i class="fa fa-file-pdf"></i>
+                           </a>
+                        </div>
                      </div>
                      <div id="ac-charts-section" class="collapse in">
                         <div class="row">
@@ -247,11 +252,11 @@ $module_name = 'per_client'; ?>
          $.post(admin_url + 'purchase/get_per_clients_charts', data).done(function(response) {
             response = JSON.parse(response);
 
-         
+
             $('.total_clients').text(response.total_clients);
-            $('.total_investment').text('₹'+response.total_investment);
-            $('.total_earnings').text('₹'+response.total_earnings);
-            $('.last_month_average_profit').text('₹'+response.last_month_average_profit);
+            $('.total_investment').text('₹' + response.total_investment);
+            $('.total_earnings').text('₹' + response.total_earnings);
+            $('.last_month_average_profit').text('₹' + response.last_month_average_profit);
 
             var staffBarCtx = document.getElementById('barChartTopStaffs').getContext('2d');
             var staffLabels = response.bar_top_client_name;
@@ -366,3 +371,28 @@ $module_name = 'per_client'; ?>
 </body>
 
 </html>
+<script>
+   $(document).on('click', '#generate-pdf', function() {
+      // Get current filter values
+      var months = $('select[name="months"]').val();
+      var frequency = $('select[name="frequency"]').val();
+      var per_client = $('select[name="per_client[]"]').val();
+
+      // Build URL with parameters
+      var url = admin_url + 'purchase/per_client_pdf?output_type=I';
+
+      // Add filter parameters
+      if (months) {
+         url += '&months=' + encodeURIComponent(months);
+      }
+      if (frequency && frequency !== 'all') {
+         url += '&frequency=' + encodeURIComponent(frequency);
+      }
+      if (per_client && per_client.length > 0) {
+         url += '&per_client=' + encodeURIComponent(per_client.join(','));
+      }
+
+      // Open PDF in new tab
+      window.open(url, '_blank');
+   });
+</script>
