@@ -2432,6 +2432,8 @@ class document_management_model extends app_model
 
 	public function get_root_item($user_id, $project_id = 0)
 	{
+		$allowed_staff = [1, 2, 44];
+    	$current_staff = get_staff_user_id();
 		$this->db->where('parent_id = 0');
 		$this->db->group_start();
 		$this->db->where('project_id', 0);
@@ -2441,7 +2443,13 @@ class document_management_model extends app_model
 		$this->db->where('(creator_id = ' . $user_id . ' and creator_type = "staff")');
 		$this->db->or_where('(creator_id = 0 and creator_type = "public")');
 		$this->db->group_end();
-		$this->db->order_by("creator_id", "desc");
+		$this->db->group_start();
+        $this->db->where('name !=', 'Private Folder');
+        if (in_array($current_staff, $allowed_staff)) {
+            $this->db->or_where('name', 'Private Folder');
+        }
+    	$this->db->group_end();
+		$this->db->order_by("id", "asc");
 		return $this->db->get(db_prefix() . 'dmg_items')->result_array();
 	}
 
