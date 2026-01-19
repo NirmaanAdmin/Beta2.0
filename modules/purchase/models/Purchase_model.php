@@ -26891,19 +26891,17 @@ class Purchase_model extends App_Model
         return app_pdf('per_clients', module_dir_path(PURCHASE_MODULE_NAME, 'libraries/pdf/Per_clients_pdf'), $per_clients);
     }
 
-    public function get_per_client_pdf_html($id = null)
+    public function get_per_client_pdf_html()
     {
         // Get the chart data using the same logic as get_per_clients_charts
-        $data = array();
+        $data = $this->input->post();
         
         // Get filter parameters if available
-        if ($this->input->get()) {
-            $data['months'] = $this->input->get('months');
-            $data['frequency'] = $this->input->get('frequency');
-            $per_client = $this->input->get('per_client');
-            if (!empty($per_client)) {
-                $data['per_client'] = is_array($per_client) ? $per_client : explode(',', $per_client);
-            }
+        $data['months'] = $data['months'] ?? NULL;
+        $data['frequency'] = $data['frequency'] ?? NULL;
+        $per_client = $data['per_client'] ?? NULL;
+        if (!empty($per_client)) {
+            $data['per_client'] = is_array($per_client) ? $per_client : explode(',', $per_client);
         }
         
         // Get chart data
@@ -27153,9 +27151,29 @@ class Purchase_model extends App_Model
             </div>
         </div>';
         
-       
-        
+        if (!empty($data['bar_chart_img'])) {
+            $data['bar_chart_img'] = str_replace("[removed]", "", $data['bar_chart_img']);
+            if ($data['bar_chart_img'] && strpos($data['bar_chart_img'], 'data:image') !== 0) {
+                $data['bar_chart_img'] = 'data:image/png;base64,' . $data['bar_chart_img'];
+            }
+            $html .= '
+            <div class="chart-container">
+                <h3 class="chart-title">% Profit</h3>
+                <img src="'.$data['bar_chart_img'].'" width="100%">
+            </div>';
+        }
 
+        if (!empty($data['line_chart_img'])) {
+            $data['line_chart_img'] = str_replace("[removed]", "", $data['line_chart_img']);
+            if ($data['line_chart_img'] && strpos($data['line_chart_img'], 'data:image') !== 0) {
+                $data['line_chart_img'] = 'data:image/png;base64,' . $data['line_chart_img'];
+            }
+            $html .= '
+            <div class="chart-container">
+                <h3 class="chart-title">Monthly Earnings Trend</h3>
+                <img src="'.$data['line_chart_img'].'" width="100%">
+            </div>';
+        }
         
         // Client Data Table
         $html .= '

@@ -130,12 +130,14 @@ $module_name = 'per_client'; ?>
                               <div style="width: 100%; height: 400px;">
                                  <canvas id="barChartTopStaffs"></canvas>
                               </div>
+                              <input type="hidden" id="bar_chart_img" name="bar_chart_img">
                            </div>
                            <div class="col-md-6">
                               <p class="mbot15 dashboard_stat_title">Monthly Earnings Trend</p>
                               <div style="width: 100%; height: 400px;">
                                  <canvas id="lineChartOverTime"></canvas>
                               </div>
+                              <input type="hidden" id="line_chart_img" name="line_chart_img">
                            </div>
                         </div>
                      </div>
@@ -279,6 +281,10 @@ $module_name = 'per_client'; ?>
             if (window.barTopStaffsChart) {
                barTopStaffsChart.data.labels = staffLabels;
                barTopStaffsChart.data.datasets[0].data = staffData;
+               setTimeout(function () {
+                  var base64 = barTopStaffsChart.toBase64Image();
+                  $('#bar_chart_img').val(base64);
+               }, 300);
                barTopStaffsChart.update();
             } else {
                window.barTopStaffsChart = new Chart(staffBarCtx, {
@@ -297,6 +303,12 @@ $module_name = 'per_client'; ?>
                      indexAxis: 'y',
                      responsive: true,
                      maintainAspectRatio: false,
+                     animation: {
+                        onComplete: function () {
+                           var base64 = barTopStaffsChart.toBase64Image();
+                           $('#bar_chart_img').val(base64);
+                        }
+                     },
                      plugins: {
                         legend: {
                            display: false
@@ -305,6 +317,9 @@ $module_name = 'per_client'; ?>
                      scales: {
                         x: {
                            beginAtZero: true,
+                           ticks: {
+                              color: '#000'
+                           },
                            title: {
                               display: true,
                               text: '% Profit'
@@ -312,7 +327,8 @@ $module_name = 'per_client'; ?>
                         },
                         y: {
                            ticks: {
-                              autoSkip: false
+                              autoSkip: false,
+                              color: '#000'
                            },
                            title: {
                               display: true,
@@ -330,6 +346,10 @@ $module_name = 'per_client'; ?>
             if (lineChartOverTime) {
                lineChartOverTime.data.labels = response.line_order_date;
                lineChartOverTime.data.datasets[0].data = response.line_order_total;
+               setTimeout(function () {
+                  var base64 = lineChartOverTime.toBase64Image();
+                  $('#line_chart_img').val(base64);
+               }, 300);
                lineChartOverTime.update();
             } else {
                lineChartOverTime = new Chart(lineCtx, {
@@ -348,6 +368,12 @@ $module_name = 'per_client'; ?>
                   options: {
                      responsive: true,
                      maintainAspectRatio: false,
+                     animation: {
+                        onComplete: function () {
+                           var base64 = lineChartOverTime.toBase64Image();
+                           $('#line_chart_img').val(base64);
+                        }
+                     },
                      plugins: {
                         legend: {
                            display: true,
@@ -360,6 +386,9 @@ $module_name = 'per_client'; ?>
                      },
                      scales: {
                         x: {
+                           ticks: {
+                              color: '#000'
+                           },
                            title: {
                               display: true,
                               text: ''
@@ -367,6 +396,9 @@ $module_name = 'per_client'; ?>
                         },
                         y: {
                            beginAtZero: true,
+                           ticks: {
+                              color: '#000'
+                           },
                            title: {
                               display: true,
                               text: 'Total Count'
@@ -386,27 +418,35 @@ $module_name = 'per_client'; ?>
 
 </html>
 <script>
-   $(document).on('click', '#generate-pdf', function() {
-      // Get current filter values
+   $(document).on('click', '#generate-pdf', function (e) {
+      e.preventDefault();
       var months = $('select[name="months"]').val();
       var frequency = $('select[name="frequency"]').val();
       var per_client = $('select[name="per_client[]"]').val();
-
-      // Build URL with parameters
-      var url = admin_url + 'purchase/per_client_pdf?output_type=I';
-
-      // Add filter parameters
-      if (months) {
-         url += '&months=' + encodeURIComponent(months);
-      }
-      if (frequency && frequency !== 'all') {
-         url += '&frequency=' + encodeURIComponent(frequency);
-      }
-      if (per_client && per_client.length > 0) {
-         url += '&per_client=' + encodeURIComponent(per_client.join(','));
-      }
-
-      // Open PDF in new tab
-      window.open(url, '_blank');
+      var bar_chart_img = $('input[name="bar_chart_img"]').val();
+      var line_chart_img = $('input[name="line_chart_img"]').val();
+      var form = $('<form>', {
+         action: admin_url + 'purchase/per_client_pdf',
+         method: 'POST',
+         target: '_blank'
+      });
+      form.append($('<input>', {
+        type: 'hidden',
+        name: "csrf_token_name",
+        value: $('input[name="csrf_token_name"]').val()
+      }));
+      form.append($('<input>', { type: 'hidden', name: 'output_type', value: 'I' }));
+      form.append($('<input>', { type: 'hidden', name: 'months', value: months || '' }));
+      form.append($('<input>', { type: 'hidden', name: 'frequency', value: frequency || '' }));
+      form.append($('<input>', {
+         type: 'hidden',
+         name: 'per_client',
+         value: per_client ? per_client.join(',') : ''
+      }));
+      form.append($('<input>', { type: 'hidden', name: 'bar_chart_img', value: bar_chart_img || '' }));
+      form.append($('<input>', { type: 'hidden', name: 'line_chart_img', value: line_chart_img || '' }));
+      $('body').append(form);
+      form.submit();
+      form.remove();
    });
 </script>

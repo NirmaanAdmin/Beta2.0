@@ -17273,27 +17273,20 @@ class purchase extends AdminController
 
     public function per_client_pdf()
     {
-
-        $per_client = $this->purchase_model->get_per_client_pdf_html();
-
+        $output_type = $this->input->post('output_type') ?: $this->input->get('output_type');
+        $html = $this->purchase_model->get_per_client_pdf_html($data);
         try {
-            $pdf = $this->purchase_model->perclients_pdf($per_client);
+            $pdf = $this->purchase_model->perclients_pdf($html);
             $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
         } catch (Exception $e) {
-            echo pur_html_entity_decode($e->getMessage());
+            echo $e->getMessage();
             die;
         }
-
-        $type = 'D';
-
-        if ($this->input->get('output_type')) {
-            $type = $this->input->get('output_type');
+        $type = 'I';
+        if ($output_type) {
+            $type = $output_type;
         }
-
-        if ($this->input->get('print')) {
-            $type = 'I';
-        }
-        $pdf_name = 'clients.pdf';
-        $pdf->Output($pdf_name, $type);
+        $pdf->Output('Clients.pdf', $type);
+        exit;
     }
 }
