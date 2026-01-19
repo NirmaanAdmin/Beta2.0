@@ -13,6 +13,16 @@ $module_name = 'purchase_request';
   .dashboard_stat_value {
     font-size: 19px;
   }
+  .show_hide_columns {
+    position: absolute;
+    z-index: 5000;
+    left: 229px
+  }
+  .export-btn-div {
+    position: absolute;
+    z-index: 999;
+    left: 133px;
+  }
 </style>
 <div id="wrapper">
   <div class="content">
@@ -220,21 +230,74 @@ $module_name = 'purchase_request';
             </div>
             <br>
 
-            <?php render_datatable(array(
-              _l('pur_rq_code'),
-              _l('pur_rq_name'),
-              _l('department'),
-              _l('group_pur'),
-              _l('sub_groups_pur'),
-              // _l('area_pur'),
-              _l('requester'),
-              // _l('department'),
-              _l('request_date'),
-              _l('project'),
-              _l('status'),
-              // _l('po_no'),
-              _l('options'),
-            ), 'table_pur_request'); ?>
+            <div class="row">
+              <div class="col-md-12" id="small-table">
+               <div class="btn-group show_hide_columns" id="show_hide_columns">
+                  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding: 4px 7px;">
+                     <i class="fa fa-cog"></i> <?php  ?> <span class="caret"></span>
+                  </button>
+                  <div class="dropdown-menu" style="padding: 10px; min-width: 250px;">
+                     <div>
+                        <input type="checkbox" id="select-all-columns"> <strong><?php echo _l('select_all'); ?></strong>
+                     </div>
+                     <hr>
+                     <?php
+                     $columns = [
+                        'pur_rq_code',
+                        'pur_rq_name',
+                        'department',
+                        'group_pur',
+                        'sub_groups_pur',
+                        'requester',
+                        'request_date',
+                        'project',
+                        'status',
+                        'options'
+                     ];
+                     ?>
+                     <div>
+                        <?php foreach ($columns as $key => $label): ?>
+                           <input type="checkbox" class="toggle-column" value="<?php echo $key; ?>" checked>
+                           <?php echo _l($label); ?><br>
+                        <?php endforeach; ?>
+                     </div>
+                  </div>
+               </div>
+               <div class="btn-group export-btn-div" id="export-btn-div">
+                  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding: 4px 7px;">
+                     <i class="fa fa-download"></i> <?php echo _l('Export'); ?> <span class="caret"></span>
+                  </button>
+                  <div class="dropdown-menu" style="padding: 10px;min-width: 94px;">
+                     <a class="dropdown-item export-btn" href="<?php echo admin_url('purchase/purchase_request_export_pdf'); ?>" data-type="pdf">
+                        <i class="fa fa-file-pdf text-danger"></i> PDF
+                     </a><br>
+                     <a class="dropdown-item export-btn" href="<?php echo admin_url('purchase/purchase_request_export_excel'); ?>" data-type="excel">
+                        <i class="fa fa-file-excel text-success"></i> Excel
+                     </a>
+                  </div>
+               </div>
+               <div class="">
+                  <table class="dt-table-loading table table-table_pur_request">
+                     <thead>
+                        <tr>
+                           <th><?php echo _l('pur_rq_code'); ?></th>
+                           <th><?php echo _l('pur_rq_name'); ?></th>
+                           <th><?php echo _l('department'); ?></th>
+                           <th><?php echo _l('group_pur'); ?></th>
+                           <th><?php echo _l('sub_groups_pur'); ?></th>
+                           <th><?php echo _l('requester'); ?></th>
+                           <th><?php echo _l('request_date'); ?></th>
+                           <th><?php echo _l('project'); ?></th>
+                           <th><?php echo _l('status'); ?></th>
+                           <th><?php echo _l('options'); ?></th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                     </tbody>
+                  </table>
+               </div>
+              </div>
+            </div>
 
           </div>
         </div>
@@ -330,6 +393,91 @@ $module_name = 'purchase_request';
 <?php init_tail(); ?>
 <script>
    $(document).ready(function() {
+      var table = $('.table-table_pur_request').DataTable();
+
+      // On page load, fetch and apply saved preferences for the logged-in user
+      $.ajax({
+         url: admin_url + 'purchase/getPreferences',
+         type: 'GET',
+         data: {
+            module: 'purchase_request'
+         },
+         dataType: 'json',
+         success: function(data) {
+            let table = $('.table-table_pur_request').DataTable();
+            $('.toggle-column').each(function() {
+               let colIndex = parseInt($(this).val(), 10);
+               let prefValue = data.preferences && data.preferences[colIndex] !== undefined ?
+                  data.preferences[colIndex] :
+                  "true";
+               let isVisible = (typeof prefValue === "string") ?
+                  (prefValue.toLowerCase() === "true") :
+                  prefValue;
+               table.column(colIndex).visible(isVisible, false);
+               $(this).prop('checked', isVisible);
+            });
+            table.columns.adjust().draw();
+            let allChecked = $('.toggle-column').length === $('.toggle-column:checked').length;
+            $('#select-all-columns').prop('checked', allChecked);
+         },
+         error: function() {
+            console.error('Could not retrieve column preferences.');
+         }
+      });
+
+      // Handle "Select All" checkbox
+      $('#select-all-columns').on('change', function() {
+         var isChecked = $(this).is(':checked');
+         $('.toggle-column').prop('checked', isChecked).trigger('change');
+      });
+
+      // Handle individual column visibility toggling
+      $('.toggle-column').on('change', function() {
+         var column = table.column($(this).val());
+         column.visible($(this).is(':checked'));
+
+         // Sync "Select All" checkbox state
+         var allChecked = $('.toggle-column').length === $('.toggle-column:checked').length;
+         $('#select-all-columns').prop('checked', allChecked);
+
+         // Save updated preferences
+         saveColumnPreferences();
+      });
+
+      // Sync checkboxes with column visibility on page load
+      table.columns().every(function(index) {
+         var column = this;
+         $('.toggle-column[value="' + index + '"]').prop('checked', column.visible());
+      });
+
+      // Prevent dropdown from closing when clicking inside
+      $('.dropdown-menu').on('click', function(e) {
+         e.stopPropagation();
+      });
+
+      // Function to collect and save preferences via AJAX
+      function saveColumnPreferences() {
+         var preferences = {};
+         $('.toggle-column').each(function() {
+            preferences[$(this).val()] = $(this).is(':checked');
+         });
+         $.ajax({
+            url: admin_url + 'purchase/savePreferences',
+            type: 'POST',
+            data: {
+               preferences: preferences,
+               module: 'purchase_request'
+
+            },
+            success: function(response) {
+               console.log('Preferences saved successfully.');
+            },
+            error: function() {
+               console.error('Failed to save preferences.');
+            }
+         });
+      }
+
       $('#po-charts-section').on('shown.bs.collapse', function () {
         $('.toggle-icon').removeClass('fa-chevron-up').addClass('fa-chevron-down');
       });
