@@ -27314,4 +27314,191 @@ class Purchase_model extends App_Model
         
         return $html;
     }
+
+    public function payment_certificate_pdf($payment_certificate)
+    {
+        return app_pdf('payment_certificate', module_dir_path(PURCHASE_MODULE_NAME, 'libraries/pdf/Export_payment_certificate_pdf'), $payment_certificate);
+    }
+
+    public function get_payment_certificate_export_data()
+    {
+        $result = array();
+        $this->db->where('module_name', 'payment_certificate');
+        $this->db->where('staff_id', get_staff_user_id());
+        $module_filters = $this->db->get(db_prefix() . 'module_filter')->result_array();
+        foreach ($module_filters as $filter) {
+            $filter_name = $filter['filter_name'];
+            $filter_value = $filter['filter_value'];
+            if (in_array($filter_name, ['vendors', 'group_pur', 'approval_status', 'projects', 'applied_to_vendor_bill', 'order_tagged_detail', 'res_person'])) {
+                if (!empty($filter_value)) {
+                    $_POST[$filter_name] = array_map('trim', explode(',', $filter_value));
+                } else {
+                    $_POST[$filter_name] = [];
+                }
+            }
+        }
+        $_POST['order'] = [['column' => 7, 'dir' => 'desc']];
+        $table_data_json = $this->app->get_export_table_data(
+            module_views_path('purchase', 'payment_certificate/table_payment_certificate')
+        );
+        $table_data = json_decode($table_data_json, true);
+        if(!empty($table_data)) {
+            $aaData = $table_data['aaData'];
+            if(!empty($aaData)) {
+                foreach ($aaData as $key => $value) {
+                    $row = array();
+                    $row['payment_cert'] = '';
+                    $row['payment_certificate_number'] = preg_match('/<a[^>]*>([^<]+)<\/a>/', $value[2], $m) ? trim($m[1]) : '';
+                    $row['order_name'] = preg_match('/<a[^>]*>([^<]+)<\/a>/', $value[3], $m) ? trim($m[1]) : '';
+                    $row['vendor'] = preg_match('/<a[^>]*>([^<]+)<\/a>/', $value[4], $m) ? trim($m[1]) : '';
+                    $row['order_date'] = $value[5];
+                    $row['group_pur'] = $value[6];
+                    $row['this_bill'] = $value[7];
+                    $row['submission_date'] = $value[8];
+                    $row['approval_status'] = preg_match('/<span[^>]*>(.*?)<\/span>/', $value[9], $m) ? trim($m[1]) : '';
+                    $row['pending_approval'] = $value[10];
+                    $row['applied_to_vendor_bill'] = preg_match('/<span[^>]*>(.*?)<\/span>/', $value[11], $m) ? trim($m[1]) : '';
+                    $row['invoice'] = preg_match('/<a[^>]*>([^<]+)<\/a>/', $value[12], $m) ? trim($m[1]) : '';
+                    $row['options'] = '';
+                    $row['responsible_person'] = preg_match_all('/<option[^>]*selected[^>]*>(.*?)<\/option>/', $value[14], $m) ? implode(', ', array_map('trim', $m[1])) : '';
+                    $row['last_action_by'] = $value[15];
+
+                    $result[] = $row;
+                }
+            }
+        }
+        
+        return $result;
+    }
+
+    public function get_payment_certificate_pdf_html()
+    {
+        $payment_certificate_data = $this->get_payment_certificate_export_data();
+        $columns_visibility = [];
+        $this->db->select('datatable_preferences');
+        $this->db->from('tbluser_preferences');
+        $this->db->where('staff_id', get_staff_user_id());
+        $this->db->where('staus', 1);
+        $this->db->where('module', 'payment_certificate');
+        $user_preferences = $this->db->get()->row();
+        if (!empty($user_preferences) && !empty($user_preferences->datatable_preferences)) {
+            $decoded = json_decode($user_preferences->datatable_preferences, true);
+            if (is_array($decoded)) {
+                $decoded = array_values(array_slice($decoded, 1));
+                $columns_visibility = array_map(
+                    fn($v) => filter_var($v, FILTER_VALIDATE_BOOLEAN),
+                    $decoded
+                );
+            }
+        }
+        $column_labels = [
+            'payment_cert'                 => _l('Payment cert'),
+            'payment_certificate_number'   => _l('payment_certificate_number'),
+            'order_name'                   => _l('order_name'),
+            'vendor'                       => _l('vendor'),
+            'order_date'                   => _l('order_date'),
+            'group_pur'                    => _l('group_pur'),
+            'this_bill'                    => _l('this_bill'),
+            'submission_date'              => _l('submission_date'),
+            'approval_status'              => _l('approval_status'),
+            'pending_approval'             => _l('pending_approval'),
+            'applied_to_vendor_bill'       => _l('applied_to_vendor_bill'),
+            'invoice'                      => _l('Invoice'),
+            'options'                      => _l('options'),
+            'responsible_person'           => _l('responsible_person'),
+            'last_action_by'               => _l('last_action_by')
+        ];
+        $column_keys = array_keys($column_labels);
+        $visible_columns = [];
+        foreach ($column_keys as $i => $key) {
+            if (empty($columns_visibility) || ($columns_visibility[$i] ?? false) === true) {
+                $visible_columns[] = $key;
+            }
+        }
+        $html = '<table class="table purorder-item" style="width:100%">';
+        $html .= '<thead><tr>';
+        foreach ($visible_columns as $key) {
+            $html .= '<th class="thead-dark" align="left">' . $column_labels[$key] . '</th>';
+        }
+        $html .= '</tr></thead><tbody>';
+        if (!empty($payment_certificate_data)) {
+            foreach ($payment_certificate_data as $row) {
+                $html .= '<tr>';
+                foreach ($visible_columns as $key) {
+                    $html .= '<td>' . ($row[$key] ?? '') . '</td>';
+                }
+                $html .= '</tr>';
+            }
+        }
+        $html .= '</tbody></table>';
+
+        $html .= '<link href="' . module_dir_url(PURCHASE_MODULE_NAME, 'assets/css/order_tracker_pdf.css') . '"  rel="stylesheet" type="text/css" />';
+        return $html;
+    }
+
+    public function payment_certificate_export_excel()
+    {
+        $payment_certificate_data = $this->get_payment_certificate_export_data();
+        $columns_visibility = [];
+        $this->db->select('datatable_preferences');
+        $this->db->from('tbluser_preferences');
+        $this->db->where('staff_id', get_staff_user_id());
+        $this->db->where('staus', 1);
+        $this->db->where('module', 'payment_certificate');
+        $user_preferences = $this->db->get()->row();
+        if (!empty($user_preferences) && !empty($user_preferences->datatable_preferences)) {
+            $decoded = json_decode($user_preferences->datatable_preferences, true);
+            if (is_array($decoded)) {
+                $columns_visibility = array_map(
+                    fn($v) => filter_var($v, FILTER_VALIDATE_BOOLEAN),
+                    $decoded
+                );
+            }
+        }
+        $column_labels = [
+            'payment_cert'                 => _l('Payment cert'),
+            'payment_certificate_number'   => _l('payment_certificate_number'),
+            'order_name'                   => _l('order_name'),
+            'vendor'                       => _l('vendor'),
+            'order_date'                   => _l('order_date'),
+            'group_pur'                    => _l('group_pur'),
+            'this_bill'                    => _l('this_bill'),
+            'submission_date'              => _l('submission_date'),
+            'approval_status'              => _l('approval_status'),
+            'pending_approval'             => _l('pending_approval'),
+            'applied_to_vendor_bill'       => _l('applied_to_vendor_bill'),
+            'invoice'                      => _l('Invoice'),
+            'options'                      => _l('options'),
+            'responsible_person'           => _l('responsible_person'),
+            'last_action_by'               => _l('last_action_by')
+        ];
+        $column_keys = array_keys($column_labels);
+        $visible_columns = [];
+        foreach ($column_keys as $i => $key) {
+            if (empty($columns_visibility) || ($columns_visibility[$i] ?? false) === true) {
+                $visible_columns[] = $key;
+            }
+        }
+
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="Payment_certificate.csv"');
+        $output = fopen('php://output', 'w');
+        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+        $csv_headers = [];
+        foreach ($visible_columns as $key) {
+            $csv_headers[] = $column_labels[$key];
+        }
+        fputcsv($output, $csv_headers);
+        if (!empty($payment_certificate_data)) {
+            foreach ($payment_certificate_data as $row) {
+                $data_row = [];
+                foreach ($visible_columns as $key) {
+                    $data_row[] = $row[$key] ?? '';
+                }
+                fputcsv($output, $data_row);
+            }
+        }
+        fclose($output);
+        exit;
+    }
 }

@@ -5,7 +5,7 @@ $module_name = 'payment_certificate'; ?>
    .show_hide_columns {
       position: absolute;
       z-index: 5000;
-      left: 295px
+      left: 337px
    }
 
    .show_hide_columns1 {
@@ -25,6 +25,11 @@ $module_name = 'payment_certificate'; ?>
    }
    .bulk-title {
       font-weight: bold;
+   }
+   .export-btn-div {
+      position: absolute;
+      z-index: 999;
+      left: 240px;
    }
 </style>
 <div id="wrapper">
@@ -265,6 +270,20 @@ $module_name = 'payment_certificate'; ?>
                            <a onclick="bulk_convert_payment_certificate(); return false;" data-toggle="modal" data-table=".table-table_payment_certificate" class=" hide bulk-actions-btn table-btn">Bulk Convert</a>
                         </div>
 
+                        <div class="btn-group export-btn-div" id="export-btn-div">
+                           <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding: 4px 7px;">
+                              <i class="fa fa-download"></i> <?php echo _l('Export'); ?> <span class="caret"></span>
+                           </button>
+                           <div class="dropdown-menu" style="padding: 10px;min-width: 94px;">
+                              <a class="dropdown-item export-btn" href="<?php echo admin_url('purchase/payment_certificate_export_pdf'); ?>" data-type="pdf">
+                                 <i class="fa fa-file-pdf text-danger"></i> PDF
+                              </a><br>
+                              <a class="dropdown-item export-btn" href="<?php echo admin_url('purchase/payment_certificate_export_excel'); ?>" data-type="excel">
+                                 <i class="fa fa-file-excel text-success"></i> Excel
+                              </a>
+                           </div>
+                        </div>
+
                         <table class="dt-table-loading table table-table_payment_certificate">
                            <thead>
                               <tr>
@@ -325,6 +344,37 @@ $module_name = 'payment_certificate'; ?>
 <script>
    $(document).ready(function() {
       var table_payment_certificate = $('.table-table_payment_certificate');
+
+      // On page load, fetch and apply saved preferences for the logged-in user
+      $.ajax({
+         url: admin_url + 'purchase/getPreferences',
+         type: 'GET',
+         data: {
+            module: 'payment_certificate'
+         },
+         dataType: 'json',
+         success: function(data) {
+            let table_payment_certificate = $('.table-table_payment_certificate').DataTable();
+            $('.toggle-column').each(function() {
+               let colIndex = parseInt($(this).val(), 10);
+               let prefValue = data.preferences && data.preferences[colIndex] !== undefined ?
+                  data.preferences[colIndex] :
+                  "true";
+               let isVisible = (typeof prefValue === "string") ?
+                  (prefValue.toLowerCase() === "true") :
+                  prefValue;
+               table_payment_certificate.column(colIndex).visible(isVisible, false);
+               $(this).prop('checked', isVisible);
+            });
+            table_payment_certificate.columns.adjust().draw();
+            let allChecked = $('.toggle-column').length === $('.toggle-column:checked').length;
+            $('#select-all-columns').prop('checked', allChecked);
+         },
+         error: function() {
+            console.error('Could not retrieve column preferences.');
+         }
+      });
+
       var Params = {
          "vendors": "[name='vendors[]']",
          "group_pur": "[name='group_pur[]']",
@@ -369,6 +419,9 @@ $module_name = 'payment_certificate'; ?>
          // Sync "Select All" checkbox state
          var allChecked = $('.toggle-column').length === $('.toggle-column:checked').length;
          $('#select-all-columns').prop('checked', allChecked);
+
+         // Save updated preferences
+         saveColumnPreferences();
       });
 
       // Sync checkboxes with column visibility on page load
@@ -386,6 +439,29 @@ $module_name = 'payment_certificate'; ?>
          $('.toggle-column[data-id="group_pur"]').prop('checked', false).trigger('change');
          $('.selectpicker').selectpicker('refresh');
       });
+
+      // Function to collect and save preferences via AJAX
+      function saveColumnPreferences() {
+         var preferences = {};
+         $('.toggle-column').each(function() {
+            preferences[$(this).val()] = $(this).is(':checked');
+         });
+         $.ajax({
+            url: admin_url + 'purchase/savePreferences',
+            type: 'POST',
+            data: {
+               preferences: preferences,
+               module: 'payment_certificate'
+
+            },
+            success: function(response) {
+               console.log('Preferences saved successfully.');
+            },
+            error: function() {
+               console.error('Failed to save preferences.');
+            }
+         });
+      }
 
       $(document).on('change', 'select[name="responsible_person[]"]', function(e) {
          e.preventDefault();
@@ -448,6 +524,8 @@ $module_name = 'payment_certificate'; ?>
             $('select#bulk_responsible_person').val(convert_responsible_person).trigger('change');
          }
       });
+
+      $('.buttons-collection').hide();
    });
 </script>
 <script>

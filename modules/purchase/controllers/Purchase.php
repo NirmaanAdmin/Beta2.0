@@ -17289,4 +17289,30 @@ class purchase extends AdminController
         $pdf->Output('Clients.pdf', $type);
         exit;
     }
+
+    public function payment_certificate_export_pdf()
+    {
+        $payment_certificate = $this->purchase_model->get_payment_certificate_pdf_html();
+        try {
+            $pdf = $this->purchase_model->payment_certificate_pdf($payment_certificate);
+            $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+        } catch (Exception $e) {
+            echo pur_html_entity_decode($e->getMessage());
+            die;
+        }
+        $type = 'D';
+        if ($this->input->get('output_type')) {
+            $type = $this->input->get('output_type');
+        }
+        if ($this->input->get('print')) {
+            $type = 'I';
+        }
+        $pdf_name = 'Payment_certificate.pdf';
+        $pdf->Output($pdf_name, $type);
+    }
+
+    public function payment_certificate_export_excel()
+    {
+        $this->purchase_model->payment_certificate_export_excel();
+    }
 }
