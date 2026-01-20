@@ -15106,4 +15106,199 @@ class Changee_model extends App_Model
 
         return $response;
     }
+
+    public function changee_order_pdf($changee_order)
+    {
+        return app_pdf('changee_order', module_dir_path(CHANGEE_MODULE_NAME, 'libraries/pdf/Export_changee_order_pdf'), $changee_order);
+    }
+
+    public function get_changee_order_export_data()
+    {
+        $result = array();
+        $this->db->where('module_name', 'changee_order');
+        $this->db->where('staff_id', get_staff_user_id());
+        $module_filters = $this->db->get(db_prefix() . 'module_filter')->result_array();
+        foreach ($module_filters as $filter) {
+            $filter_name = $filter['filter_name'];
+            $filter_value = $filter['filter_value'];
+            if (in_array($filter_name, ['from_date', 'to_date'])) {
+                $_POST[$filter_name] = $filter_value;
+            }
+            if (in_array($filter_name, ['vendor', 'status', 'type', 'project', 'department', 'delivery_status', 'changee_request'])) {
+                if (!empty($filter_value)) {
+                    $_POST[$filter_name] = array_map('trim', explode(',', $filter_value));
+                } else {
+                    $_POST[$filter_name] = [];
+                }
+            }
+        }
+        $_POST['order'] = [['column' => 2, 'dir' => 'desc']];
+        $table_data_json = $this->app->get_export_table_data(
+            module_views_path('changee', 'changee_order/table_pur_order')
+        );
+        $table_data = json_decode($table_data_json, true);
+        if(!empty($table_data)) {
+            $aaData = $table_data['aaData'];
+            if(!empty($aaData)) {
+                foreach ($aaData as $key => $value) {
+                    $row = array();
+                    $row['changee_order'] = preg_match('/>(#[^<]+)<\/a>/', $value[0], $m) ? trim($m[1]) : '';
+                    $row['vendor'] = preg_match('/<a[^>]*>(.*?)<\/a>/', $value[1], $m) ? trim($m[1]) : '';
+                    $row['order_date'] = $value[2];
+                    $row['group_pur'] = $value[3];
+                    $row['sub_groups_pur'] = $value[4];
+                    $row['area_pur'] = $value[5];
+                    $row['type'] = $value[6];
+                    $row['project'] = $value[7];
+                    $row['department'] = $value[8];
+                    $row['co_description'] = $value[9];
+                    $row['approval_status'] = preg_match('/<span[^>]*>(.*?)<\/span>/', $value[10], $m) ? trim($m[1]) : '';
+                    $row['co_value'] = $value[11];
+                    $row['tax_value'] = $value[12];
+                    $row['co_value_included_tax'] = $value[13];
+                    $row['tags'] = '';
+                    $row['payment_status'] = preg_match('/<div[^>]*class="[^"]*progress-bar[^"]*"[^>]*>([^<]+)<\/div>/i', $value[15], $m) ? trim($m[1]) : '';
+                    $row['convert_expense'] = preg_match('/<a[^>]*>(.*?)<\/a>/', $value[16], $m) ? trim($m[1]) : '';
+
+                    $result[] = $row;
+                }
+            }
+        }
+        
+        return $result;
+    }
+
+    public function get_changee_order_pdf_html()
+    {
+        $changee_order_data = $this->get_changee_order_export_data();
+        $columns_visibility = [];
+        $this->db->select('datatable_preferences');
+        $this->db->from('tbluser_preferences');
+        $this->db->where('staff_id', get_staff_user_id());
+        $this->db->where('staus', 1);
+        $this->db->where('module', 'changee_order');
+        $user_preferences = $this->db->get()->row();
+        if (!empty($user_preferences) && !empty($user_preferences->datatable_preferences)) {
+            $decoded = json_decode($user_preferences->datatable_preferences, true);
+            if (is_array($decoded)) {
+                $columns_visibility = array_map(
+                    fn($v) => filter_var($v, FILTER_VALIDATE_BOOLEAN),
+                    $decoded
+                );
+            }
+        }
+        $column_labels = [
+            'changee_order'         => _l('changee_order'),
+            'vendor'                => _l('vendor'),
+            'order_date'            => _l('order_date'),
+            'group_pur'             => _l('group_pur'),
+            'sub_groups_pur'        => _l('sub_groups_pur'),
+            'area_pur'              => _l('area_pur'),
+            'type'                  => _l('type'),
+            'project'               => _l('project'),
+            'department'            => _l('department'),
+            'co_description'        => _l('co_description'),
+            'approval_status'       => _l('approval_status'),
+            'co_value'              => _l('co_value'),
+            'tax_value'             => _l('tax_value'),
+            'co_value_included_tax' => _l('co_value_included_tax'),
+            'tags'                  => _l('tags'),
+            'payment_status'        => _l('payment_status'),
+            'convert_expense'       => _l('convert_expense')
+        ];
+        $column_keys = array_keys($column_labels);
+        $visible_columns = [];
+        foreach ($column_keys as $i => $key) {
+            if (empty($columns_visibility) || ($columns_visibility[$i] ?? false) === true) {
+                $visible_columns[] = $key;
+            }
+        }
+        $html = '<table class="table purorder-item" style="width:100%">';
+        $html .= '<thead><tr>';
+        foreach ($visible_columns as $key) {
+            $html .= '<th class="thead-dark" align="left">' . $column_labels[$key] . '</th>';
+        }
+        $html .= '</tr></thead><tbody>';
+        if (!empty($changee_order_data)) {
+            foreach ($changee_order_data as $row) {
+                $html .= '<tr>';
+                foreach ($visible_columns as $key) {
+                    $html .= '<td>' . ($row[$key] ?? '') . '</td>';
+                }
+                $html .= '</tr>';
+            }
+        }
+        $html .= '</tbody></table>';
+
+        $html .= '<link href="' . module_dir_url(PURCHASE_MODULE_NAME, 'assets/css/order_tracker_pdf.css') . '"  rel="stylesheet" type="text/css" />';
+        return $html;
+    }
+
+    public function changee_order_export_excel()
+    {
+        $changee_order_data = $this->get_changee_order_export_data();
+        $columns_visibility = [];
+        $this->db->select('datatable_preferences');
+        $this->db->from('tbluser_preferences');
+        $this->db->where('staff_id', get_staff_user_id());
+        $this->db->where('staus', 1);
+        $this->db->where('module', 'changee_order');
+        $user_preferences = $this->db->get()->row();
+        if (!empty($user_preferences) && !empty($user_preferences->datatable_preferences)) {
+            $decoded = json_decode($user_preferences->datatable_preferences, true);
+            if (is_array($decoded)) {
+                $columns_visibility = array_map(
+                    fn($v) => filter_var($v, FILTER_VALIDATE_BOOLEAN),
+                    $decoded
+                );
+            }
+        }
+        $column_labels = [
+            'changee_order'         => _l('changee_order'),
+            'vendor'                => _l('vendor'),
+            'order_date'            => _l('order_date'),
+            'group_pur'             => _l('group_pur'),
+            'sub_groups_pur'        => _l('sub_groups_pur'),
+            'area_pur'              => _l('area_pur'),
+            'type'                  => _l('type'),
+            'project'               => _l('project'),
+            'department'            => _l('department'),
+            'co_description'        => _l('co_description'),
+            'approval_status'       => _l('approval_status'),
+            'co_value'              => _l('co_value'),
+            'tax_value'             => _l('tax_value'),
+            'co_value_included_tax' => _l('co_value_included_tax'),
+            'tags'                  => _l('tags'),
+            'payment_status'        => _l('payment_status'),
+            'convert_expense'       => _l('convert_expense')
+        ];
+        $column_keys = array_keys($column_labels);
+        $visible_columns = [];
+        foreach ($column_keys as $i => $key) {
+            if (empty($columns_visibility) || ($columns_visibility[$i] ?? false) === true) {
+                $visible_columns[] = $key;
+            }
+        }
+
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="Change_Order.csv"');
+        $output = fopen('php://output', 'w');
+        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+        $csv_headers = [];
+        foreach ($visible_columns as $key) {
+            $csv_headers[] = $column_labels[$key];
+        }
+        fputcsv($output, $csv_headers);
+        if (!empty($changee_order_data)) {
+            foreach ($changee_order_data as $row) {
+                $data_row = [];
+                foreach ($visible_columns as $key) {
+                    $data_row[] = $row[$key] ?? '';
+                }
+                fputcsv($output, $data_row);
+            }
+        }
+        fclose($output);
+        exit;
+    }
 }
