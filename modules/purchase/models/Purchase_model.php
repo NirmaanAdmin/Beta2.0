@@ -26891,7 +26891,7 @@ class Purchase_model extends App_Model
         return app_pdf('per_clients', module_dir_path(PURCHASE_MODULE_NAME, 'libraries/pdf/Per_clients_pdf'), $per_clients);
     }
 
-    public function get_per_client_pdf_html()
+     public function get_per_client_pdf_html()
     {
         // Get the chart data using the same logic as get_per_clients_charts
         $data = $this->input->post();
@@ -26953,25 +26953,24 @@ class Purchase_model extends App_Model
                 color: #7f8c8d;
                 margin-top: 0;
             }
-            .statistics-section {
-                margin-bottom: 30px;
-                page-break-inside: avoid;
+            .statistics-table {
+                width: 100%;
+                border-collapse: separate;
+                border-spacing: 10px; /* gap between boxes */
             }
-            .statistics-grid {
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: space-between;
-                margin-top: 15px;
+
+            .statistics-table td {
+                width: 25%;
+                vertical-align: top;
             }
+
             .stat-box {
-                width: 24%;
                 border: 1px solid #e0e0e0;
                 border-radius: 5px;
                 padding: 15px;
-                margin-bottom: 15px;
                 background-color: #f9f9f9;
-                box-sizing: border-box;
             }
+
             .stat-title {
                 font-weight: bold;
                 font-size: 14px;
@@ -27082,6 +27081,28 @@ class Purchase_model extends App_Model
             .logo img {
                 max-height: 60px;
             }
+           .charts-table{
+                width: 100%;
+                border-collapse: collapse;
+                page-break-inside: avoid;
+            }
+
+            .chart-box{
+                border: 1px solid #e0e0e0;
+                padding: 6px; /* smaller padding */
+                margin-bottom: 10px;
+                page-break-inside: avoid;
+            }
+
+            .chart-title{
+                font-size: 14px;
+                font-weight: bold;
+                margin: 0 0 6px 0;
+                padding: 0 0 4px 0;
+                border-bottom: 1px solid #3498db;
+            }
+
+
             @media print {
                 body {
                     -webkit-print-color-adjust: exact;
@@ -27092,17 +27113,10 @@ class Purchase_model extends App_Model
         <body>
         <div class="pdf-container">';
         
-        // Logo and Header
-        $html .= '
-        <div class="logo">';
         
-        $company_logo = get_option('company_logo_dark');
-        if (!empty($company_logo)) {
-            $html .= '<img src="' . FCPATH . 'uploads/company/' . $company_logo . '" alt="' . get_option('companyname') . '">';
-        }
         
         $html .= '
-        </div>
+        
         <div class="header">
             <h1>' . _l('Client Data Report') . '</h1>
             <p>' . date('F j, Y h:i A') . '</p>
@@ -27115,65 +27129,75 @@ class Purchase_model extends App_Model
         </div>';
         
         // Statistics Section
-        $html .= '
-        <div class="statistics-section">
-            <div class="statistics-grid">';
-        
-        // Stat Box 1: Total Clients
-        $html .= '
-                <div class="stat-box">
-                    <div class="stat-title">' . _l('Total Clients') . '</div>
-                    <div class="stat-value">' . $chart_data['total_clients'] . '</div>
-                </div>';
-        
-        // Stat Box 2: Total Investment
-        $html .= '
-                <div class="stat-box">
-                    <div class="stat-title">' . _l('Total Investment') . '</div>
-                    <div class="stat-value">₹' . $chart_data['total_investment'] . '</div>
-                </div>';
-        
-        // Stat Box 3: Total Earnings
-        $html .= '
-                <div class="stat-box">
-                    <div class="stat-title">' . _l('Total Earnings') . '</div>
-                    <div class="stat-value">₹' . $chart_data['total_earnings'] . '</div>
-                </div>';
-        
-        // Stat Box 4: Last Month Average Profit
-        $html .= '
-                <div class="stat-box">
-                    <div class="stat-title">' . _l('Last Month Average Profit') . '</div>
-                    <div class="stat-value">₹' . $chart_data['last_month_average_profit'] . '</div>
-                </div>';
-        
-        $html .= '
-            </div>
-        </div>';
-        
-        if (!empty($data['bar_chart_img'])) {
-            $data['bar_chart_img'] = str_replace("[removed]", "", $data['bar_chart_img']);
-            if ($data['bar_chart_img'] && strpos($data['bar_chart_img'], 'data:image') !== 0) {
-                $data['bar_chart_img'] = 'data:image/png;base64,' . $data['bar_chart_img'];
-            }
-            $html .= '
-            <div class="chart-container">
-                <h3 class="chart-title">% Profit</h3>
-                <img src="'.$data['bar_chart_img'].'" width="100%">
+       $html .= '
+            <div class="statistics-section">
+                <table class="statistics-table">
+                    <tr>
+                        <td>
+                            <div class="stat-box">
+                                <div class="stat-title">' . _l('Total Clients') . '</div>
+                                <div class="stat-value">' . $chart_data['total_clients'] . '</div>
+                            </div>
+                        </td>
+
+                        <td>
+                            <div class="stat-box">
+                                <div class="stat-title">' . _l('Total Investment') . '</div>
+                                <div class="stat-value">₹' . $chart_data['total_investment'] . '</div>
+                            </div>
+                        </td>
+
+                        <td>
+                            <div class="stat-box">
+                                <div class="stat-title">' . _l('Total Earnings') . '</div>
+                                <div class="stat-value">₹' . $chart_data['total_earnings'] . '</div>
+                            </div>
+                        </td>
+
+                        <td>
+                            <div class="stat-box">
+                                <div class="stat-title">' . _l('Average Profit') . '</div>
+                                <div class="stat-value">₹' . $chart_data['last_month_average_profit'] . '</div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
             </div>';
+
+        
+       if (!empty($data['bar_chart_img']) || !empty($data['line_chart_img'])) {
+
+            if (!empty($data['bar_chart_img'])) {
+                $data['bar_chart_img'] = str_replace("[removed]", "", $data['bar_chart_img']);
+                if ($data['bar_chart_img'] && strpos($data['bar_chart_img'], 'data:image') !== 0) {
+                    $data['bar_chart_img'] = 'data:image/png;base64,' . $data['bar_chart_img'];
+                }
+            }
+
+            if (!empty($data['line_chart_img'])) {
+                $data['line_chart_img'] = str_replace("[removed]", "", $data['line_chart_img']);
+                if ($data['line_chart_img'] && strpos($data['line_chart_img'], 'data:image') !== 0) {
+                    $data['line_chart_img'] = 'data:image/png;base64,' . $data['line_chart_img'];
+                }
+            }
+
+            $html .= '
+            <table class="charts-table" cellpadding="4" cellspacing="0">
+                <tr>
+                    <td width="100%" valign="top">
+
+                        
+
+                        <div class="chart-box">
+                            <h3 class="chart-title">Monthly Earnings Trend</h3>
+                            <img src="'.$data['line_chart_img'].'" width="520" />
+                        </div>
+
+                    </td>
+                </tr>
+            </table>';
         }
 
-        if (!empty($data['line_chart_img'])) {
-            $data['line_chart_img'] = str_replace("[removed]", "", $data['line_chart_img']);
-            if ($data['line_chart_img'] && strpos($data['line_chart_img'], 'data:image') !== 0) {
-                $data['line_chart_img'] = 'data:image/png;base64,' . $data['line_chart_img'];
-            }
-            $html .= '
-            <div class="chart-container">
-                <h3 class="chart-title">Monthly Earnings Trend</h3>
-                <img src="'.$data['line_chart_img'].'" width="100%">
-            </div>';
-        }
         
         // Client Data Table
         $html .= '
