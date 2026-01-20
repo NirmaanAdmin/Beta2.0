@@ -436,7 +436,7 @@ $module_name = 'payment_certificate'; ?>
       });
 
       table_payment_certificate.on('draw.dt', function () {
-         $('.toggle-column[data-id="group_pur"]').prop('checked', false).trigger('change');
+         // $('.toggle-column[data-id="group_pur"]').prop('checked', false).trigger('change');
          $('.selectpicker').selectpicker('refresh');
       });
 
