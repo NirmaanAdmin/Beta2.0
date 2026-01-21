@@ -251,25 +251,32 @@
       return false;
     }
     var total = 0;
-    var rows = $('.all_bill_row_model');
-    if (rows.length > 0) {
-      $.each(rows, function () {
-        var row = $(this);
-        var item_key = parseFloat(row.data('item_key')) || 0;
-        var unit_price = parseFloat(row.data('unit_price')) || 0;
-        total += calculate_bill_bifurcation(item_key, unit_price);
-      });
-    }
-    var rows = $('.all_pc_bill_row_model');
-    if (rows.length > 0) {
-      $.each(rows, function () {
-        var row = $(this);
-        var item_key = parseFloat(row.data('item_key')) || 0;
-        var unit_price = parseFloat(row.data('unit_price')) || 0;
-        var pc_id = parseFloat(row.data('pc_id')) || 0;
-        total += calculate_pc_bill_bifurcation(item_key, unit_price, pc_id);
-      });
-    }
+    // var rows = $('.all_bill_row_model');
+    // if (rows.length > 0) {
+    //   $.each(rows, function () {
+    //     var row = $(this);
+    //     var item_key = parseFloat(row.data('item_key')) || 0;
+    //     var unit_price = parseFloat(row.data('unit_price')) || 0;
+    //     total += calculate_bill_bifurcation(item_key, unit_price);
+    //   });
+    // }
+    // var rows = $('.all_pc_bill_row_model');
+    // if (rows.length > 0) {
+    //   $.each(rows, function () {
+    //     var row = $(this);
+    //     var item_key = parseFloat(row.data('item_key')) || 0;
+    //     var unit_price = parseFloat(row.data('unit_price')) || 0;
+    //     var pc_id = parseFloat(row.data('pc_id')) || 0;
+    //     total += calculate_pc_bill_bifurcation(item_key, unit_price, pc_id);
+    //   });
+    // }
+    var rows = $('.table.has-calculations tbody tr.item');
+    $.each(rows, function () {
+      var quantity = parseFloat($(this).find('td.quantities input').val()) || 0;
+      var rate = parseFloat($(this).find('td.rate input').val()) || 0;
+      var item_amount = quantity * rate;
+      total += item_amount;
+    });
     $('.wh-total').html(
       format_money(total) +
       hidden_input('grand_total', accounting.toFixed(total, app.options.decimal_places))
