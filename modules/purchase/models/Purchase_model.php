@@ -25628,7 +25628,23 @@ class Purchase_model extends App_Model
             if(!empty($pur_bills_bifurcation)) {
                 $bill_percentage = $pur_bills_bifurcation->bill_percentage;
             }
+
             $amount_to_be_used = 0;
+            if(!empty($pur_bills_bifurcation)) {
+                $amount_to_be_used = $pur_bills_bifurcation->billed_quantity * (($unit_price * ($pur_bills_bifurcation->bill_percentage - $pur_bills_bifurcation->hold)) / 100);
+            }
+            $this->db->where('bill_item_id', $bill_item_id);
+            $this->db->where('item_id', $value['item_id']);
+            $this->db->where('pc_id <', $pc_id);
+            $this->db->order_by('pc_id', 'asc');
+            $other_pc_bills_bifurcation = $this->db->get(db_prefix() . 'pur_pc_bills_bifurcation')->result_array();
+            if(!empty($pur_bills_bifurcation) && !empty($other_pc_bills_bifurcation)) {
+                foreach ($other_pc_bills_bifurcation as $okey => $ovalue) {
+                    $other_pc_bills_bifurcation_used = $ovalue['billed_quantity'] * (($unit_price * ($pur_bills_bifurcation->bill_percentage - $ovalue['hold'])) / 100);
+                    $amount_to_be_used = $amount_to_be_used - $other_pc_bills_bifurcation_used;
+                }
+            }
+
             $html .= '<tr class="pc_bill_items">';
             $html .= '<td class="hide">'.form_hidden('newpcbillitems['.$item_key.']['.$pc_id.']['.$value['item_id'].'][pc_id]', $pc_id).'</td>';
             $html .= '<td class="hide">'.form_hidden('newpcbillitems['.$item_key.']['.$pc_id.']['.$value['item_id'].'][item_id]', $value['item_id']).'</td>';
