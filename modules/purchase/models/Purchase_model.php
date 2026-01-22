@@ -25599,12 +25599,14 @@ class Purchase_model extends App_Model
         $html .= '<table class="table items table_pc_bill_rows">';
         $html .= '<thead>';
         $html .= '<tr>';
-        $html .= '<th align="left" width="30%">' . _l('PC'.$pc_key.' Description') . '</th>';
-        $html .= '<th align="left" width="14%">' . _l('bill_percentage') . '</th>';
-        $html .= '<th align="left" width="14%">' . _l('Bill Unit Price') . '</th>';
-        $html .= '<th align="left" width="14%">' . _l('PC'.$pc_key.' Hold %') . '</th>';
-        $html .= '<th align="left" width="14%">' . _l('PC'.$pc_key.' Qty') . '</th>';
-        $html .= '<th align="left" width="14%">' . _l('PC'.$pc_key.' Amount') . '</th>';
+        $html .= '<th align="left" width="20%">' . _l('PC'.$pc_key.' Description') . '</th>';
+        $html .= '<th align="left" width="12%">' . _l('bill_percentage') . '</th>';
+        $html .= '<th align="left" width="12%">' . _l('Bill Unit Price') . '</th>';
+        $html .= '<th align="left" width="10%">' . _l('Amount to be used') . '</th>';
+        $html .= '<th align="left" width="12%">' . _l('PC'.$pc_key.' Hold %') . '</th>';
+        $html .= '<th align="left" width="12%">' . _l('PC'.$pc_key.' Qty') . '</th>';
+        $html .= '<th align="left" width="12%">' . _l('PC'.$pc_key.' Amount') . '</th>';
+        $html .= '<th align="left" width="10%">' . _l('Remaining Amount') . '</th>';
         $html .= '</tr>';
         $html .= '</thead>';
         $default_purchase_bill_rows = get_default_purchase_bill_rows();
@@ -25626,6 +25628,7 @@ class Purchase_model extends App_Model
             if(!empty($pur_bills_bifurcation)) {
                 $bill_percentage = $pur_bills_bifurcation->bill_percentage;
             }
+            $amount_to_be_used = 0;
             $html .= '<tr class="pc_bill_items">';
             $html .= '<td class="hide">'.form_hidden('newpcbillitems['.$item_key.']['.$pc_id.']['.$value['item_id'].'][pc_id]', $pc_id).'</td>';
             $html .= '<td class="hide">'.form_hidden('newpcbillitems['.$item_key.']['.$pc_id.']['.$value['item_id'].'][item_id]', $value['item_id']).'</td>';
@@ -25633,6 +25636,8 @@ class Purchase_model extends App_Model
             $html .= '<td align="left">'.$bill_percentage.'</td>';
             $html .= '<td align="left" class="hide all_pc_bill_percentage">'.form_hidden('newpcbillitems['.$item_key.']['.$pc_id.']['.$value['item_id'].'][bill_percentage]', $bill_percentage).'</td>';
             $html .= '<td align="left" class="all_pc_bill_unit_price"></td>';
+            $html .= '<td align="left" class="hide all_pc_amount_to_be_used">'.form_hidden('newpcbillitems['.$item_key.']['.$pc_id.']['.$value['item_id'].'][amount_to_be_used]', $amount_to_be_used).'</td>';
+            $html .= '<td align="left">'.app_format_money($amount_to_be_used, $base_currency->symbol).'</td>';
             $html .= '<td align="left" class="all_pc_bill_hold">' 
               . render_input('newpcbillitems['.$item_key.']['.$pc_id.']['.$value['item_id'].'][hold]', '', $value['hold'], 'number', ['min' => 0, 'max' => 100, 'onblur' => 'calculate_pc_bill_bifurcation('.$item_key.', '.$unit_price.', '.$pc_id.');', 'onchange' => 'calculate_pc_bill_bifurcation('.$item_key.', '.$unit_price.', '.$pc_id.');']) 
               . '</td>';
@@ -25640,6 +25645,7 @@ class Purchase_model extends App_Model
               . render_input('newpcbillitems['.$item_key.']['.$pc_id.']['.$value['item_id'].'][billed_quantity]', '', $value['billed_quantity'], 'number', ['min' => 0, 'max' => 100, 'onblur' => 'calculate_pc_bill_bifurcation('.$item_key.', '.$unit_price.', '.$pc_id.');', 'onchange' => 'calculate_pc_bill_bifurcation('.$item_key.', '.$unit_price.', '.$pc_id.');']) 
               . '</td>';
             $html .= '<td align="left" class="all_pc_bill_billed_amount"></td>';
+            $html .= '<td align="left" class="all_pc_bill_remaining_amount"></td>';
             $html .= '</tr>';
         }
         $html .= '</tbody>';

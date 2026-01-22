@@ -533,6 +533,8 @@
       var pc_bill_percentage = parseFloat(row.find(".all_pc_bill_percentage input").val()) || 0;
       var pc_bill_hold = parseFloat(row.find(".all_pc_bill_hold input").val()) || 0;
       var pc_bill_billed_quantity = parseFloat(row.find(".all_pc_bill_billed_quantity input").val()) || 0;
+      var pc_amount_to_be_used = parseFloat(row.find(".all_pc_amount_to_be_used input").val()) || 0;
+      var pc_remaining_amount = 0;
       var pc_bill_unit_price = 0;
       if (pc_bill_percentage > 0) {
         pc_bill_unit_price = (unit_price * pc_bill_percentage) / 100;
@@ -548,6 +550,8 @@
       }
       row.find(".all_pc_bill_billed_amount").html(format_money(pc_billed_amount));
       total_pc_billed_amount += pc_billed_amount; 
+      pc_remaining_amount = pc_amount_to_be_used - pc_billed_amount;
+      row.find(".all_pc_bill_remaining_amount").html(format_money(pc_remaining_amount));
     });
     $('#pc_bill_modal_' + id + '_' + pc_id + ' .total_pc_bill_unit_price').html(format_money(total_pc_bill_unit_price));
     $('#pc_bill_modal_' + id + '_' + pc_id + ' .total_pc_bill_percentage').html(total_pc_bill_percentage.toFixed(2)+'%');

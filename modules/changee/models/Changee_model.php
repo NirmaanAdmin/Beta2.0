@@ -2574,6 +2574,8 @@ class Changee_model extends App_Model
                     $dt_data['quantity'] = ($rqd['quantity'] != '' && $rqd['quantity'] != null) ? $rqd['quantity'] : 0;
 
                     $this->db->insert(db_prefix() . 'co_order_detail', $dt_data);
+                    $new_quote_insert_id = $this->db->insert_id();
+                    $this->insert_pur_bill_details($new_quote_insert_id);
                 }
             }
 
@@ -2782,6 +2784,7 @@ class Changee_model extends App_Model
                     $this->log_po_activity($id, 'changee_order_activity_added_item', false, serialize([
                         $this->get_items_by_id($rqd['item_code'])->description,
                     ]));
+                    $this->insert_pur_bill_details($new_quote_insert_id);
                 }
             }
         }
@@ -2831,6 +2834,7 @@ class Changee_model extends App_Model
                 $this->db->update(db_prefix() . 'co_order_detail', $dt_data);
                 if ($this->db->affected_rows() > 0) {
                     $affectedRows++;
+                    $this->update_pur_bill_details($rqd['id']);
                 }
             }
         }
@@ -2838,6 +2842,7 @@ class Changee_model extends App_Model
         if (count($remove_order) > 0) {
             foreach ($remove_order as $remove_id) {
                 add_co_item_activity_log($remove_id, 'pur_order', false);
+                $this->delete_pur_bill_details($remove_id);
                 $this->db->where('id', $remove_id);
                 $pur_order_id = $this->db->get(db_prefix() . 'co_order_detail')->row();
                 $item_detail = $this->get_items_by_id($pur_order_id->item_code);
@@ -15300,5 +15305,100 @@ class Changee_model extends App_Model
         }
         fclose($output);
         exit;
+    }
+
+    public function insert_pur_bill_details($co_item_id) 
+    {
+        $this->db->where('id', $co_item_id);
+        $this->db->where('tender_item', 1);
+        $co_order_detail = $this->db->get(db_prefix() . 'co_order_detail')->row();
+        if(!empty($co_order_detail)) {
+            $co_orders = $this->get_pur_order($co_order_detail->pur_order);
+            if(!empty($co_orders->po_order_id) || !empty($co_orders->wo_order_id)) {
+                if(!empty($co_orders->po_order_id)) {
+                    $this->db->where('pur_order', $co_orders->po_order_id);
+                }
+                if(!empty($co_orders->wo_order_id)) {
+                    $this->db->where('wo_order', $co_orders->wo_order_id);
+                }
+                $pur_bills = $this->db->get(db_prefix() . 'pur_bills')->row(); 
+                if(!empty($pur_bills)) {
+                    $pur_bill_details = array();
+                    $pur_bill_details['pur_bill'] = $pur_bills->id;
+                    $pur_bill_details['item_code'] = $co_order_detail->item_code;
+                    $pur_bill_details['description'] = $co_order_detail->description;
+                    $pur_bill_details['unit_id'] = $co_order_detail->unit_id;
+                    $pur_bill_details['unit_price'] = $co_order_detail->unit_price;
+                    $pur_bill_details['quantity'] = $co_order_detail->quantity;
+                    $pur_bill_details['total_money'] = 0.00;
+                    $pur_bill_details['item_name'] = pur_get_item_variatiom($co_order_detail->item_code);
+                    $pur_bill_details['co_item_id'] = $co_item_id;
+                    $this->db->insert(db_prefix() . 'pur_bill_details', $pur_bill_details);
+                    $this->update_pur_bill_total($pur_bills->id);
+                }
+            }
+        }
+        return true;
+    }
+
+    public function update_pur_bill_details($co_item_id) 
+    {
+        $this->db->where('id', $co_item_id);
+        $this->db->where('tender_item', 1);
+        $co_order_detail = $this->db->get(db_prefix() . 'co_order_detail')->row();
+        if(!empty($co_order_detail)) {
+            $co_orders = $this->get_pur_order($co_order_detail->pur_order);
+            if(!empty($co_orders->po_order_id) || !empty($co_orders->wo_order_id)) {
+                if(!empty($co_orders->po_order_id)) {
+                    $this->db->where('pur_order', $co_orders->po_order_id);
+                }
+                if(!empty($co_orders->wo_order_id)) {
+                    $this->db->where('wo_order', $co_orders->wo_order_id);
+                }
+                $pur_bills = $this->db->get(db_prefix() . 'pur_bills')->row(); 
+                if(!empty($pur_bills)) {
+                    $pur_bill_details = array();
+                    $pur_bill_details['pur_bill'] = $pur_bills->id;
+                    $pur_bill_details['item_code'] = $co_order_detail->item_code;
+                    $pur_bill_details['description'] = $co_order_detail->description;
+                    $pur_bill_details['unit_id'] = $co_order_detail->unit_id;
+                    $pur_bill_details['unit_price'] = $co_order_detail->unit_price;
+                    $pur_bill_details['quantity'] = $co_order_detail->quantity;
+                    $pur_bill_details['total_money'] = 0.00;
+                    $pur_bill_details['item_name'] = pur_get_item_variatiom($co_order_detail->item_code);
+                    $this->db->where('co_item_id', $co_item_id);
+                    $this->db->update(db_prefix() . 'pur_bill_details', $pur_bill_details);
+                    $this->update_pur_bill_total($pur_bills->id);
+                }
+            }
+        }
+        return true;
+    }
+
+    public function delete_pur_bill_details($co_item_id) 
+    {
+        $this->db->where('co_item_id', $co_item_id);
+        $pur_bill_details = $this->db->get(db_prefix() . 'pur_bill_details')->row();
+
+        $this->db->where('co_item_id', $co_item_id);
+        $this->db->delete(db_prefix() . 'pur_bill_details');
+        if(!empty($pur_bill_details)) {
+            $this->update_pur_bill_total($pur_bill_details->pur_bill);
+        }
+        return true;
+    }
+
+    public function update_pur_bill_total($id)
+    {
+        $this->db->select('SUM(quantity * unit_price) AS total_amount');
+        $this->db->from(db_prefix() . 'pur_bill_details');
+        $this->db->where('pur_bill', $id);
+        $result = $this->db->get()->row();
+        $total_amount = $result->total_amount ?? 0;
+        $this->db->where('id', $id);
+        $this->db->update(db_prefix() . 'pur_bills', [
+            'total' => $total_amount
+        ]);
+        return $total_amount;
     }
 }
