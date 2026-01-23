@@ -48,8 +48,12 @@ $module_name = 'per_client'; ?>
                            </button>
                         </div>
                         <div class="col-md-12 mtop10" style="justify-content: right; display: flex;">
-                           <a href="javascript:void(0);" id="generate-pdf" class="btn btn-default" data-toggle="tooltip" title="<?php echo _l('Generate PDF'); ?>">
+                           <a href="javascript:void(0);" id="generate-pdf" class="btn btn-default" style="margin-right: 10px;" data-toggle="tooltip" title="<?php echo _l('Generate PDF'); ?>">
                               <i class="fa fa-file-pdf"></i>
+                           </a>
+                           <!-- NEW ZIP BUTTON -->
+                           <a href="javascript:void(0);" id="export-pdf-zip" class="btn btn-success" data-toggle="tooltip" title="Export All Client PDFs (ZIP)">
+                              <i class="fa fa-file-zipper-o"></i> Export ZIP
                            </a>
                         </div>
                      </div>
@@ -201,20 +205,20 @@ $module_name = 'per_client'; ?>
                         </thead>
                         <tbody></tbody>
                         <tfoot>
-                              <td></td>
-                              <td></td>
-                              <td></td>
-                              <td></td>
-                              <td class="investment"></td>
-                              <td></td>
-                              <td class="aug"></td>
-                              <td class="sep"></td>
-                              <td class="oct"></td>
-                              <td class="nov"></td>
-                              <td class="dec"></td>
-                              <td></td>
-                              <td></td>
-                           </tfoot>
+                           <td></td>
+                           <td></td>
+                           <td></td>
+                           <td></td>
+                           <td class="investment"></td>
+                           <td></td>
+                           <td class="aug"></td>
+                           <td class="sep"></td>
+                           <td class="oct"></td>
+                           <td class="nov"></td>
+                           <td class="dec"></td>
+                           <td></td>
+                           <td></td>
+                        </tfoot>
                      </table>
 
                   </div>
@@ -281,7 +285,7 @@ $module_name = 'per_client'; ?>
             if (window.barTopStaffsChart) {
                barTopStaffsChart.data.labels = staffLabels;
                barTopStaffsChart.data.datasets[0].data = staffData;
-               setTimeout(function () {
+               setTimeout(function() {
                   var base64 = barTopStaffsChart.toBase64Image();
                   $('#bar_chart_img').val(base64);
                }, 300);
@@ -304,7 +308,7 @@ $module_name = 'per_client'; ?>
                      responsive: true,
                      maintainAspectRatio: false,
                      animation: {
-                        onComplete: function () {
+                        onComplete: function() {
                            var base64 = barTopStaffsChart.toBase64Image();
                            $('#bar_chart_img').val(base64);
                         }
@@ -346,7 +350,7 @@ $module_name = 'per_client'; ?>
             if (lineChartOverTime) {
                lineChartOverTime.data.labels = response.line_order_date;
                lineChartOverTime.data.datasets[0].data = response.line_order_total;
-               setTimeout(function () {
+               setTimeout(function() {
                   var base64 = lineChartOverTime.toBase64Image();
                   $('#line_chart_img').val(base64);
                }, 300);
@@ -369,7 +373,7 @@ $module_name = 'per_client'; ?>
                      responsive: true,
                      maintainAspectRatio: false,
                      animation: {
-                        onComplete: function () {
+                        onComplete: function() {
                            var base64 = lineChartOverTime.toBase64Image();
                            $('#line_chart_img').val(base64);
                         }
@@ -418,7 +422,7 @@ $module_name = 'per_client'; ?>
 
 </html>
 <script>
-   $(document).on('click', '#generate-pdf', function (e) {
+   $(document).on('click', '#generate-pdf', function(e) {
       e.preventDefault();
       var months = $('select[name="months"]').val();
       var frequency = $('select[name="frequency"]').val();
@@ -431,22 +435,73 @@ $module_name = 'per_client'; ?>
          target: '_blank'
       });
       form.append($('<input>', {
-        type: 'hidden',
-        name: "csrf_token_name",
-        value: $('input[name="csrf_token_name"]').val()
+         type: 'hidden',
+         name: "csrf_token_name",
+         value: $('input[name="csrf_token_name"]').val()
       }));
-      form.append($('<input>', { type: 'hidden', name: 'output_type', value: 'I' }));
-      form.append($('<input>', { type: 'hidden', name: 'months', value: months || '' }));
-      form.append($('<input>', { type: 'hidden', name: 'frequency', value: frequency || '' }));
+      form.append($('<input>', {
+         type: 'hidden',
+         name: 'output_type',
+         value: 'I'
+      }));
+      form.append($('<input>', {
+         type: 'hidden',
+         name: 'months',
+         value: months || ''
+      }));
+      form.append($('<input>', {
+         type: 'hidden',
+         name: 'frequency',
+         value: frequency || ''
+      }));
       form.append($('<input>', {
          type: 'hidden',
          name: 'per_client',
          value: per_client ? per_client.join(',') : ''
       }));
-      form.append($('<input>', { type: 'hidden', name: 'bar_chart_img', value: bar_chart_img || '' }));
-      form.append($('<input>', { type: 'hidden', name: 'line_chart_img', value: line_chart_img || '' }));
+      form.append($('<input>', {
+         type: 'hidden',
+         name: 'bar_chart_img',
+         value: bar_chart_img || ''
+      }));
+      form.append($('<input>', {
+         type: 'hidden',
+         name: 'line_chart_img',
+         value: line_chart_img || ''
+      }));
       $('body').append(form);
       form.submit();
       form.remove();
    });
+$(document).on('click', '#export-pdf-zip', function (e) {
+   e.preventDefault();
+
+   var months = $('select[name="months"]').val();
+   var frequency = $('select[name="frequency"]').val();
+   var per_client = $('select[name="per_client[]"]').val();
+
+   var form = $('<form>', {
+      action: admin_url + 'purchase/per_client_pdf_zip',
+      method: 'POST',
+      target: '_blank'
+   });
+
+   form.append($('<input>', {
+      type: 'hidden',
+      name: "csrf_token_name",
+      value: $('input[name="csrf_token_name"]').val()
+   }));
+
+   form.append($('<input>', { type: 'hidden', name: 'months', value: months || '' }));
+   form.append($('<input>', { type: 'hidden', name: 'frequency', value: frequency || '' }));
+   form.append($('<input>', {
+      type: 'hidden',
+      name: 'per_client',
+      value: per_client ? per_client.join(',') : ''
+   }));
+
+   $('body').append(form);
+   form.submit();
+   form.remove();
+});
 </script>

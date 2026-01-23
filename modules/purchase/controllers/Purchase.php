@@ -17315,4 +17315,91 @@ class purchase extends AdminController
     {
         $this->purchase_model->payment_certificate_export_excel();
     }
+
+    public function per_client_pdf_zip()
+    {
+        $months     = $this->input->post('months');
+        $frequency  = $this->input->post('frequency');
+        $per_client = $this->input->post('per_client'); // comma separated
+
+        $client_ids = [];
+        if (!empty($per_client)) {
+            $client_ids = explode(',', $per_client);
+        }
+
+        // If no specific clients selected -> export all clients
+        if (empty($client_ids)) {
+            $client_ids = $this->purchase_model->get_all_client_ids(); // create this function
+        }
+
+        if (empty($client_ids)) {
+            show_error('No clients found for export.');
+        }
+
+        // Temp folder
+        $tmp_dir = FCPATH . 'uploads/per_client_zip_' . time();
+        if (!is_dir($tmp_dir)) {
+            mkdir($tmp_dir, 0755, true);
+        }
+
+        // Generate PDF for each client
+        foreach ($client_ids as $client_id) {
+
+            $client = $this->purchase_model->get_client_by_id($client_id);
+            if (!$client) {
+                continue;
+            }
+
+            // Prepare data for html generation
+            $data = [];
+            $data['months']     = $months;
+            $data['frequency']  = $frequency;
+            $data['per_client'] = [$client_id]; // for single client
+
+            $html = $this->purchase_model->get_per_single_client_pdf_html($data, $client_id);
+
+            try {
+                $pdf = $this->purchase_model->perclients_pdf($html);
+                $pdf->SetAutoPageBreak(true, PDF_MARGIN_BOTTOM);
+
+                $safeName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $client->name);
+                $filename = $safeName . '.pdf';
+
+                $pdf->Output($tmp_dir . '/' . $filename, 'F'); // Save to file
+
+            } catch (Exception $e) {
+                continue;
+            }
+        }
+
+        // Create ZIP
+        $zip_name = 'Client_PDFs_' . date('Y-m-d_H-i-s') . '.zip';
+        $zip_path = $tmp_dir . '/' . $zip_name;
+
+        $zip = new ZipArchive();
+        if ($zip->open($zip_path, ZipArchive::CREATE) !== true) {
+            show_error('Unable to create ZIP file.');
+        }
+
+        // Add PDFs into zip
+        $files = glob($tmp_dir . '/*.pdf');
+        foreach ($files as $file) {
+            $zip->addFile($file, basename($file));
+        }
+        $zip->close();
+
+        // Download ZIP
+        header('Content-Type: application/zip');
+        header('Content-Disposition: attachment; filename="' . $zip_name . '"');
+        header('Content-Length: ' . filesize($zip_path));
+        readfile($zip_path);
+
+        // Cleanup folder after output
+        @unlink($zip_path);
+        foreach ($files as $file) {
+            @unlink($file);
+        }
+        @rmdir($tmp_dir);
+        exit;
+    }
 }
