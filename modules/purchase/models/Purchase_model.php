@@ -27569,11 +27569,439 @@ class Purchase_model extends App_Model
         $this->db->where('id', $client_id);
         return $this->db->get(db_prefix().'_per_clients')->row();
     }
+    // public function get_per_single_client_pdf_html($data, $client_id)
+    // {
+    //     // Get the chart data using the same logic as get_per_clients_charts
+    //     $data = $this->input->post();
+        
+    //     // Get filter parameters if available
+    //     $data['months'] = $data['months'] ?? NULL;
+    //     $data['frequency'] = $data['frequency'] ?? NULL;
+    //     $per_client = $data['per_client'] ?? NULL;
+    //     if (!empty($per_client)) {
+    //         $data['per_client'] = is_array($per_client) ? $per_client : explode(',', $per_client);
+    //     }
+        
+    //     // Get chart data
+    //     $chart_data = $this->get_per_by_id_clients_charts($data, $client_id);
+        
+    //     // Get client table data (similar to your table view)
+    //     $this->db->select('*');
+    //     $this->db->from(db_prefix() . '_per_clients');
+        
+    //     if (!empty($data['months'])) {
+    //         $this->db->where('months', $data['months']);
+    //     }
+        
+    //     if (!empty($data['frequency']) && $data['frequency'] != 'all') {
+    //         $this->db->where('frequency', $data['frequency']);
+    //     }
+        
+    //     if (!empty($data['per_client']) && is_array($data['per_client'])) {
+    //         $this->db->where_in('id', $data['per_client']);
+    //     }
+    //     $this->db->where('id', $client_id);
+    //     $clients_data = $this->db->get()->result_array();
+    //     $chartImgs = $this->get_single_client_chart_images($client_id, $data);
+    //     // Start HTML
+    //     $html = '
+    //     <!DOCTYPE html>
+    //     <html>
+    //     <head>
+    //     <meta charset="UTF-8">
+    //     <style>
+    //         body {
+    //             font-family: Arial, sans-serif;
+    //             font-size: 12px;
+    //             color: #333;
+    //         }
+    //         .pdf-container {
+    //             width: 100%;
+    //             margin: 0 auto;
+    //         }
+    //         .header {
+    //             text-align: center;
+    //             margin-bottom: 30px;
+    //         }
+    //         .header h1 {
+    //             color: #2c3e50;
+    //             margin-bottom: 5px;
+    //         }
+    //         .header p {
+    //             color: #7f8c8d;
+    //             margin-top: 0;
+    //         }
+    //         .statistics-table {
+    //             width: 100%;
+    //             border-collapse: separate;
+    //             border-spacing: 10px; /* gap between boxes */
+    //         }
+
+    //         .statistics-table td {
+    //             width: 25%;
+    //             vertical-align: top;
+    //         }
+
+    //         .stat-box {
+    //             border: 1px solid #e0e0e0;
+    //             border-radius: 5px;
+    //             padding: 15px;
+    //             background-color: #f9f9f9;
+    //         }
+
+    //         .stat-title {
+    //             font-weight: bold;
+    //             font-size: 14px;
+    //             color: #2c3e50;
+    //             margin-bottom: 8px;
+    //             border-bottom: 1px solid #eee;
+    //             padding-bottom: 5px;
+    //         }
+    //         .stat-value {
+    //             font-size: 18px;
+    //             color: #27ae60;
+    //             font-weight: bold;
+    //         }
+    //         .charts-section {
+    //             margin-bottom: 40px;
+    //             page-break-inside: avoid;
+    //         }
+    //         .chart-container {
+    //             margin-bottom: 30px;
+    //             page-break-inside: avoid;
+    //         }
+    //         .chart-title {
+    //             font-size: 16px;
+    //             font-weight: bold;
+    //             color: #2c3e50;
+    //             margin-bottom: 15px;
+    //             padding-bottom: 8px;
+    //             border-bottom: 2px solid #3498db;
+    //         }
+    //         .chart-table {
+    //             width: 100%;
+    //             border-collapse: collapse;
+    //             margin-top: 10px;
+    //         }
+    //         .chart-table th {
+    //             background-color: #f2f6fa;
+    //             border: 1px solid #ddd;
+    //             padding: 8px;
+    //             text-align: left;
+    //             font-weight: bold;
+    //         }
+    //         .chart-table td {
+    //             border: 1px solid #ddd;
+    //             padding: 8px;
+    //         }
+    //         .chart-table tr:nth-child(even) {
+    //             background-color: #f9f9f9;
+    //         }
+    //         .client-table-section {
+    //             margin-top: 30px;
+    //         }
+    //         .client-table {
+    //             width: 100%;
+    //             border-collapse: collapse;
+    //             margin-top: 15px;
+    //             font-size: 11px;
+    //         }
+    //         .client-table th {
+    //             background-color: #34495e;
+    //             color: white;
+    //             padding: 10px 8px;
+    //             text-align: left;
+    //             font-weight: bold;
+    //         }
+    //         .client-table td {
+    //             border: 1px solid #ddd;
+    //             padding: 8px;
+    //             vertical-align: top;
+    //         }
+    //         .client-table tr:nth-child(even) {
+    //             background-color: #f8f9fa;
+    //         }
+    //         .client-table .number-cell {
+    //             text-align: right;
+    //             font-family: "Courier New", monospace;
+    //         }
+    //         .client-table .percent-cell {
+    //             text-align: right;
+    //             color: #27ae60;
+    //             font-weight: bold;
+    //         }
+            
+    //         .footer {
+    //             margin-top: 40px;
+    //             padding-top: 15px;
+    //             border-top: 1px solid #ddd;
+    //             font-size: 10px;
+    //             color: #7f8c8d;
+    //             text-align: center;
+    //         }
+    //         .filter-info {
+    //             background-color: #f8f9fa;
+    //             border-left: 4px solid #3498db;
+    //             padding: 10px;
+    //             margin-bottom: 20px;
+    //             font-size: 11px;
+    //         }
+    //         .filter-info strong {
+    //             color: #2c3e50;
+    //         }
+    //         .logo {
+    //             text-align: center;
+    //             margin-bottom: 20px;
+    //         }
+    //         .logo img {
+    //             max-height: 60px;
+    //         }
+    //        .charts-table{
+    //             width: 100%;
+    //             border-collapse: collapse;
+    //             page-break-inside: avoid;
+    //         }
+
+    //         .chart-box{
+    //             border: 1px solid #e0e0e0;
+    //             padding: 6px; /* smaller padding */
+    //             margin-bottom: 10px;
+    //             page-break-inside: avoid;
+    //         }
+
+    //         .chart-title{
+    //             font-size: 14px;
+    //             font-weight: bold;
+    //             margin: 0 0 6px 0;
+    //             padding: 0 0 4px 0;
+    //             border-bottom: 1px solid #3498db;
+    //         }
+
+
+    //         @media print {
+    //             body {
+    //                 -webkit-print-color-adjust: exact;
+    //             }
+    //         }
+    //     </style>
+    //     </head>
+    //     <body>
+    //     <div class="pdf-container">';
+        
+        
+        
+    //     $html .= '
+        
+    //     <div class="header">
+    //         <h1>' . _l('Client Data Report') . '</h1>
+    //         <p>' . date('F j, Y h:i A') . '</p>
+    //     </div>';
+        
+    //     // Filter Information
+        
+        
+    //     $html .= '
+    //     </div>';
+        
+    //     // Statistics Section
+    //    $html .= '
+    //         <div class="statistics-section">
+    //             <table class="statistics-table">
+    //                 <tr>
+    //                     <td>
+    //                         <div class="stat-box">
+    //                             <div class="stat-title">' . _l('Total Clients') . '</div>
+    //                             <div class="stat-value">' . $chart_data['total_clients'] . '</div>
+    //                         </div>
+    //                     </td>
+
+    //                     <td>
+    //                         <div class="stat-box">
+    //                             <div class="stat-title">' . _l('Total Investment') . '</div>
+    //                             <div class="stat-value">₹' . $chart_data['total_investment'] . '</div>
+    //                         </div>
+    //                     </td>
+
+    //                     <td>
+    //                         <div class="stat-box">
+    //                             <div class="stat-title">' . _l('Total Earnings') . '</div>
+    //                             <div class="stat-value">₹' . $chart_data['total_earnings'] . '</div>
+    //                         </div>
+    //                     </td>
+
+    //                     <td>
+    //                         <div class="stat-box">
+    //                             <div class="stat-title">' . _l('Average Profit') . '</div>
+    //                             <div class="stat-value">₹' . $chart_data['last_month_average_profit'] . '</div>
+    //                         </div>
+    //                     </td>
+    //                 </tr>
+    //             </table>
+    //         </div>';
+
+
+    //     if (!empty($chartImgs['line'])) {
+           
+
+    //         $html .= '
+    //         <table class="charts-table" cellpadding="4" cellspacing="0">
+    //             <tr>
+    //                 <td width="100%" valign="top">
+    //                     <div class="chart-box">
+    //                         <h3 class="chart-title">Monthly Earnings Trend</h3>
+    //                         <img src="'.$chartImgs['line'].'" width="520" />
+    //                     </div>
+
+    //                 </td>
+    //             </tr>
+    //         </table>';
+    //     }
+            
+         
+    //     // Client Data Table
+    //     $html .= '
+    //     <div class="client-table-section">';
+        
+    //     if (!empty($clients_data)) {
+    //         // First table with client info and summary
+    //         $html .= '
+    //         <table class="client-table">
+    //             <thead>
+    //                 <tr>
+    //                     <th width="6%">' . _l('Client Id') . '</th>
+    //                     <th width="15%">' . _l('Name') . '</th>
+    //                     <th width="10%">' . _l('Phone') . '</th>
+    //                     <th width="10%">' . _l('Start Date') . '</th>
+    //                     <th width="10%">' . _l('Investment') . '</th>
+    //                     <th width="8%">' . _l('Frequency') . '</th>
+    //                     <th width="8%">' . _l('Earned To Date') . '</th>
+    //                     <th width="8%">' . _l('Percent Profits') . '</th>
+    //                 </tr>
+    //             </thead>
+    //             <tbody>';
+            
+    //         $total_investment = 0;
+    //         $total_earned = 0;
+            
+    //         foreach ($clients_data as $client) {
+    //             $total_investment += $client['investment'];
+    //             $total_earned += $client['earned_to_date'];
+                
+    //             $html .= '
+    //                 <tr>
+    //                     <td>' . $client['client_id'] . '</td>
+    //                     <td>' . $client['name'] . '</td>
+    //                     <td>' . $client['phone'] . '</td>
+    //                     <td>' . date('d M, Y', strtotime($client['start_date'])) . '</td>
+    //                     <td class="number-cell">₹' . app_format_number($client['investment'], '') . '</td>
+    //                     <td>' . $client['frequency'] . '</td>
+    //                     <td class="number-cell">₹' . app_format_number($client['earned_to_date'], '') . '</td>
+    //                     <td class="">' . app_format_number($client['percent_profits'], '') . '%</td>
+    //                 </tr>';
+    //         }
+            
+    //         // Add summary row for first table
+    //         $html .= '
+    //                 <tr style="background-color: #34495e; color: white; font-weight: bold;">
+    //                     <td colspan="4">' . _l('Total') . ' (' . count($clients_data) . ' ' . _l('clients') . ')</td>
+    //                     <td class="number-cell">₹' . app_format_number($total_investment, '') . '</td>
+    //                     <td></td>
+    //                     <td class="number-cell">₹' . app_format_number($total_earned, '') . '</td>
+    //                     <td></td>
+    //                 </tr>';
+            
+    //         $html .= '
+    //             </tbody>
+    //         </table>';
+            
+    //         // Add page break for the second table
+    //         $html .= '
+            
+    //         <h3 style="text-align: center; margin-bottom: 20px;">' . _l('Individual Month Breakdown') . '</h3>
+            
+    //         <table class="client-table">
+    //             <thead>
+    //                 <tr>
+    //                     <th width="6%">' . _l('Client Id') . '</th>
+    //                     <th width="15%">' . _l('Name') . '</th>
+    //                     <th width="8%">' . _l('August 2025') . '</th>
+    //                     <th width="8%">' . _l('September 2025') . '</th>
+    //                     <th width="8%">' . _l('October 2025') . '</th>
+    //                     <th width="8%">' . _l('November 2025') . '</th>
+    //                     <th width="8%">' . _l('December 2025') . '</th>
+    //                 </tr>
+    //             </thead>
+    //             <tbody>';
+            
+    //         // Initialize totals for each month
+    //         $august_total = 0;
+    //         $september_total = 0;
+    //         $october_total = 0;
+    //         $november_total = 0;
+    //         $december_total = 0;
+    //         $all_months_total = 0;
+            
+    //         foreach ($clients_data as $client) {
+    //             // Calculate individual monthly totals
+    //             $august_total += $client['august_2025'];
+    //             $september_total += $client['september_2025'];
+    //             $october_total += $client['october_2025'];
+    //             $november_total += $client['november_2025'];
+    //             $december_total += $client['december_2025'];
+                
+    //             // Calculate total for all months for this client
+    //             $client_monthly_total = $client['august_2025'] + $client['september_2025'] + 
+    //                                    $client['october_2025'] + $client['november_2025'] + 
+    //                                    $client['december_2025'];
+    //             $all_months_total += $client_monthly_total;
+                
+    //             $html .= '
+    //                 <tr>
+    //                     <td>' . $client['client_id'] . '</td>
+    //                     <td>' . $client['name'] . '</td>
+    //                     <td class="number-cell">₹' . app_format_number($client['august_2025'], '') . '</td>
+    //                     <td class="number-cell">₹' . app_format_number($client['september_2025'], '') . '</td>
+    //                     <td class="number-cell">₹' . app_format_number($client['october_2025'], '') . '</td>
+    //                     <td class="number-cell">₹' . app_format_number($client['november_2025'], '') . '</td>
+    //                     <td class="number-cell">₹' . app_format_number($client['december_2025'], '') . '</td>
+    //                 </tr>';
+    //         }
+            
+    //         // Add totals row for all months
+    //         $html .= '
+    //                 <tr style="background-color: #34495e; color: white; font-weight: bold;">
+    //                     <td colspan="2">' . _l('Monthly Totals') . '</td>
+    //                     <td class="number-cell">₹' . app_format_number($august_total, '') . '</td>
+    //                     <td class="number-cell">₹' . app_format_number($september_total, '') . '</td>
+    //                     <td class="number-cell">₹' . app_format_number($october_total, '') . '</td>
+    //                     <td class="number-cell">₹' . app_format_number($november_total, '') . '</td>
+    //                     <td class="number-cell">₹' . app_format_number($december_total, '') . '</td>
+    //                 </tr>';
+            
+    //         $html .= '
+    //             </tbody>
+    //         </table>';
+            
+    //     } else {
+    //         $html .= '<p style="text-align: center; padding: 30px; color: #7f8c8d;">' . _l('No client data found with the applied filters') . '</p>';
+    //     }
+        
+    //     $html .= '
+    //     </div>';
+        
+    //     // Footer
+    //     $html .= '
+    //     </body>
+    //     </html>';
+        
+    //     return $html;
+    // }
+
     public function get_per_single_client_pdf_html($data, $client_id)
     {
         // Get the chart data using the same logic as get_per_clients_charts
         $data = $this->input->post();
-        
+
         // Get filter parameters if available
         $data['months'] = $data['months'] ?? NULL;
         $data['frequency'] = $data['frequency'] ?? NULL;
@@ -27581,28 +28009,31 @@ class Purchase_model extends App_Model
         if (!empty($per_client)) {
             $data['per_client'] = is_array($per_client) ? $per_client : explode(',', $per_client);
         }
-        
+
         // Get chart data
         $chart_data = $this->get_per_by_id_clients_charts($data, $client_id);
-        
+
         // Get client table data (similar to your table view)
         $this->db->select('*');
         $this->db->from(db_prefix() . '_per_clients');
-        
+
         if (!empty($data['months'])) {
             $this->db->where('months', $data['months']);
         }
-        
+
         if (!empty($data['frequency']) && $data['frequency'] != 'all') {
             $this->db->where('frequency', $data['frequency']);
         }
-        
+
         if (!empty($data['per_client']) && is_array($data['per_client'])) {
             $this->db->where_in('id', $data['per_client']);
         }
+
         $this->db->where('id', $client_id);
         $clients_data = $this->db->get()->result_array();
+
         $chartImgs = $this->get_single_client_chart_images($client_id, $data);
+
         // Start HTML
         $html = '
         <!DOCTYPE html>
@@ -27610,15 +28041,39 @@ class Purchase_model extends App_Model
         <head>
         <meta charset="UTF-8">
         <style>
-            body {
+
+            /* ===============================
+                FORCE ALL CONTENT INTO ONE PAGE
+            =============================== */
+            @page {
+                size: A0 portrait; /* BIG SIZE = ONE PAGE PDF */
+                margin: 10mm;
+            }
+
+            html, body {
+                margin: 0;
+                padding: 0;
                 font-family: Arial, sans-serif;
                 font-size: 12px;
                 color: #333;
             }
+
+            /* REMOVE ALL PAGE BREAKS */
+            * {
+                page-break-before: avoid !important;
+                page-break-after: avoid !important;
+                page-break-inside: avoid !important;
+
+                break-before: avoid !important;
+                break-after: avoid !important;
+                break-inside: avoid !important;
+            }
+
             .pdf-container {
                 width: 100%;
                 margin: 0 auto;
             }
+
             .header {
                 text-align: center;
                 margin-bottom: 30px;
@@ -27631,12 +28086,12 @@ class Purchase_model extends App_Model
                 color: #7f8c8d;
                 margin-top: 0;
             }
+
             .statistics-table {
                 width: 100%;
                 border-collapse: separate;
-                border-spacing: 10px; /* gap between boxes */
+                border-spacing: 10px;
             }
-
             .statistics-table td {
                 width: 25%;
                 vertical-align: top;
@@ -27662,44 +28117,9 @@ class Purchase_model extends App_Model
                 color: #27ae60;
                 font-weight: bold;
             }
-            .charts-section {
-                margin-bottom: 40px;
-                page-break-inside: avoid;
-            }
-            .chart-container {
-                margin-bottom: 30px;
-                page-break-inside: avoid;
-            }
-            .chart-title {
-                font-size: 16px;
-                font-weight: bold;
-                color: #2c3e50;
-                margin-bottom: 15px;
-                padding-bottom: 8px;
-                border-bottom: 2px solid #3498db;
-            }
-            .chart-table {
-                width: 100%;
-                border-collapse: collapse;
-                margin-top: 10px;
-            }
-            .chart-table th {
-                background-color: #f2f6fa;
-                border: 1px solid #ddd;
-                padding: 8px;
-                text-align: left;
-                font-weight: bold;
-            }
-            .chart-table td {
-                border: 1px solid #ddd;
-                padding: 8px;
-            }
-            .chart-table tr:nth-child(even) {
-                background-color: #f9f9f9;
-            }
+
             .client-table-section {
                 margin-top: 30px;
-                page-break-before: always;
             }
             .client-table {
                 width: 100%;
@@ -27726,88 +28146,49 @@ class Purchase_model extends App_Model
                 text-align: right;
                 font-family: "Courier New", monospace;
             }
-            .client-table .percent-cell {
-                text-align: right;
-                color: #27ae60;
-                font-weight: bold;
-            }
-            .page-break {
-                page-break-before: always;
-            }
-            .footer {
-                margin-top: 40px;
-                padding-top: 15px;
-                border-top: 1px solid #ddd;
-                font-size: 10px;
-                color: #7f8c8d;
-                text-align: center;
-            }
-            .filter-info {
-                background-color: #f8f9fa;
-                border-left: 4px solid #3498db;
-                padding: 10px;
-                margin-bottom: 20px;
-                font-size: 11px;
-            }
-            .filter-info strong {
-                color: #2c3e50;
-            }
-            .logo {
-                text-align: center;
-                margin-bottom: 20px;
-            }
-            .logo img {
-                max-height: 60px;
-            }
-           .charts-table{
+
+            .charts-table {
                 width: 100%;
                 border-collapse: collapse;
-                page-break-inside: avoid;
             }
 
-            .chart-box{
+            .chart-box {
                 border: 1px solid #e0e0e0;
-                padding: 6px; /* smaller padding */
+                padding: 6px;
                 margin-bottom: 10px;
-                page-break-inside: avoid;
             }
 
-            .chart-title{
+            .chart-title {
                 font-size: 14px;
                 font-weight: bold;
                 margin: 0 0 6px 0;
                 padding: 0 0 4px 0;
                 border-bottom: 1px solid #3498db;
             }
-
+            .statistics-section{
+                margin-top: 30px;
+            }
 
             @media print {
                 body {
                     -webkit-print-color-adjust: exact;
                 }
             }
+
         </style>
         </head>
         <body>
         <div class="pdf-container">';
-        
-        
-        
+
+
         $html .= '
-        
         <div class="header">
             <h1>' . _l('Client Data Report') . '</h1>
             <p>' . date('F j, Y h:i A') . '</p>
         </div>';
-        
-        // Filter Information
-        
-        
-        $html .= '
-        </div>';
-        
+
         // Statistics Section
-       $html .= '
+        $html .= '
             <div class="statistics-section">
                 <table class="statistics-table">
                     <tr>
@@ -27842,31 +28223,26 @@ class Purchase_model extends App_Model
                 </table>
             </div>';
 
-
+        // Chart Section
         if (!empty($chartImgs['line'])) {
-           
-
             $html .= '
             <table class="charts-table" cellpadding="4" cellspacing="0">
                 <tr>
                     <td width="100%" valign="top">
                         <div class="chart-box">
                             <h3 class="chart-title">Monthly Earnings Trend</h3>
-                            <img src="'.$chartImgs['line'].'" width="520" />
+                            <img src="' . $chartImgs['line'] . '" width="520" />
                         </div>
-
                     </td>
                 </tr>
-            </table>';
+            </table><br><br>';
         }
-            
-         
+
         // Client Data Table
-        $html .= '
-        <div class="client-table-section">';
-        
+        $html .= '<div class="client-table-section">';
+
         if (!empty($clients_data)) {
-            // First table with client info and summary
+
             $html .= '
             <table class="client-table">
                 <thead>
@@ -27882,14 +28258,14 @@ class Purchase_model extends App_Model
                     </tr>
                 </thead>
                 <tbody>';
-            
+
             $total_investment = 0;
             $total_earned = 0;
-            
+
             foreach ($clients_data as $client) {
                 $total_investment += $client['investment'];
                 $total_earned += $client['earned_to_date'];
-                
+
                 $html .= '
                     <tr>
                         <td>' . $client['client_id'] . '</td>
@@ -27899,11 +28275,10 @@ class Purchase_model extends App_Model
                         <td class="number-cell">₹' . app_format_number($client['investment'], '') . '</td>
                         <td>' . $client['frequency'] . '</td>
                         <td class="number-cell">₹' . app_format_number($client['earned_to_date'], '') . '</td>
-                        <td class="">' . app_format_number($client['percent_profits'], '') . '%</td>
+                        <td>' . app_format_number($client['percent_profits'], '') . '%</td>
                     </tr>';
             }
-            
-            // Add summary row for first table
+
             $html .= '
                     <tr style="background-color: #34495e; color: white; font-weight: bold;">
                         <td colspan="4">' . _l('Total') . ' (' . count($clients_data) . ' ' . _l('clients') . ')</td>
@@ -27912,16 +28287,13 @@ class Purchase_model extends App_Model
                         <td class="number-cell">₹' . app_format_number($total_earned, '') . '</td>
                         <td></td>
                     </tr>';
-            
+
+            $html .= '</tbody></table>';
+
+            // Month Breakdown Table (NO page break)
             $html .= '
-                </tbody>
-            </table>';
-            
-            // Add page break for the second table
-            $html .= '
-            
-            <h3 style="text-align: center; margin-bottom: 20px;">' . _l('Individual Month Breakdown') . '</h3>
-            
+            <h3 style="text-align: center; margin: 20px 0;">' . _l('Individual Month Breakdown') . '</h3>
+
             <table class="client-table">
                 <thead>
                     <tr>
@@ -27935,29 +28307,16 @@ class Purchase_model extends App_Model
                     </tr>
                 </thead>
                 <tbody>';
-            
-            // Initialize totals for each month
-            $august_total = 0;
-            $september_total = 0;
-            $october_total = 0;
-            $november_total = 0;
-            $december_total = 0;
-            $all_months_total = 0;
-            
+
+            $august_total = $september_total = $october_total = $november_total = $december_total = 0;
+
             foreach ($clients_data as $client) {
-                // Calculate individual monthly totals
                 $august_total += $client['august_2025'];
                 $september_total += $client['september_2025'];
                 $october_total += $client['october_2025'];
                 $november_total += $client['november_2025'];
                 $december_total += $client['december_2025'];
-                
-                // Calculate total for all months for this client
-                $client_monthly_total = $client['august_2025'] + $client['september_2025'] + 
-                                       $client['october_2025'] + $client['november_2025'] + 
-                                       $client['december_2025'];
-                $all_months_total += $client_monthly_total;
-                
+
                 $html .= '
                     <tr>
                         <td>' . $client['client_id'] . '</td>
@@ -27969,8 +28328,7 @@ class Purchase_model extends App_Model
                         <td class="number-cell">₹' . app_format_number($client['december_2025'], '') . '</td>
                     </tr>';
             }
-            
-            // Add totals row for all months
+
             $html .= '
                     <tr style="background-color: #34495e; color: white; font-weight: bold;">
                         <td colspan="2">' . _l('Monthly Totals') . '</td>
@@ -27980,25 +28338,19 @@ class Purchase_model extends App_Model
                         <td class="number-cell">₹' . app_format_number($november_total, '') . '</td>
                         <td class="number-cell">₹' . app_format_number($december_total, '') . '</td>
                     </tr>';
-            
-            $html .= '
-                </tbody>
-            </table>';
-            
+
+            $html .= '</tbody></table>';
+
         } else {
-            $html .= '<p style="text-align: center; padding: 30px; color: #7f8c8d;">' . _l('No client data found with the applied filters') . '</p>';
+            $html .= '<p style="text-align:center;padding:30px;color:#7f8c8d;">' . _l('No client data found with the applied filters') . '</p>';
         }
-        
-        $html .= '
-        </div>';
-        
-        // Footer
-        $html .= '
-        </body>
-        </html>';
-        
+
+        $html .= '</div>'; // client-table-section
+        $html .= '</div></body></html>';
+
         return $html;
     }
+
 
     public function get_per_by_id_clients_charts($data = array(),$client_id)
     {
