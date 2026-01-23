@@ -27548,9 +27548,12 @@ class Purchase_model extends App_Model
         exit;
     }
 
-    public function get_all_client_ids()
+    public function get_all_client_ids($frequency)
     {
         $this->db->select('id');
+         if (!empty($frequency) && $frequency != 'all') {
+            $this->db->where('frequency', $frequency);
+        }
         $this->db->from(db_prefix().'_per_clients'); // change table name as per your system
         $result = $this->db->get()->result_array();
 

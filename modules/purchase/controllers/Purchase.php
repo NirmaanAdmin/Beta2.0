@@ -17329,7 +17329,7 @@ class purchase extends AdminController
 
         // If no specific clients selected -> export all clients
         if (empty($client_ids)) {
-            $client_ids = $this->purchase_model->get_all_client_ids(); // create this function
+            $client_ids = $this->purchase_model->get_all_client_ids($frequency); // create this function
         }
 
         if (empty($client_ids)) {
