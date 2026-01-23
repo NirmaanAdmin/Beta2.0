@@ -21,6 +21,35 @@ $(function(){
 </script>
 <script>
 $(document).ready(function() {
+	var table = $('.table-invoices').DataTable();
+
+  // Handle "Select All" checkbox
+  $('#select-all-columns').on('change', function() {
+      var isChecked = $(this).is(':checked');
+      $('.toggle-column').prop('checked', isChecked).trigger('change');
+  });
+
+  // Handle individual column visibility toggling
+  $('.toggle-column').on('change', function() {
+      var column = table.column($(this).val());
+      column.visible($(this).is(':checked'));
+
+      // Sync "Select All" checkbox state
+      var allChecked = $('.toggle-column').length === $('.toggle-column:checked').length;
+      $('#select-all-columns').prop('checked', allChecked);
+  });
+
+  // Sync checkboxes with column visibility on page load
+  table.columns().every(function(index) {
+      var column = this;
+      $('.toggle-column[value="' + index + '"]').prop('checked', column.visible());
+  });
+
+  // Prevent dropdown from closing when clicking inside
+  $('.dropdown-menu').on('click', function(e) {
+      e.stopPropagation();
+  });
+        
   $('#ci-charts-section').on('shown.bs.collapse', function () {
      $('.toggle-icon').removeClass('fa-chevron-up').addClass('fa-chevron-down');
   });

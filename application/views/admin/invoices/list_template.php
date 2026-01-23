@@ -139,6 +139,38 @@
         <div class="col-md-12" id="small-table">
             <div class="panel_s">
                 <div class="panel-body panel-table-full">
+                    <div class="btn-group show_hide_columns" id="show_hide_columns" style="position: absolute !important; z-index: 99999; left: 204px !important">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding: 4px 7px;"><i class="fa fa-cog"></i> <?php  ?> <span class="caret"></span>
+                        </button>
+                        <div class="dropdown-menu" style="padding: 10px; min-width: 250px;">
+                            <div>
+                                <input type="checkbox" id="select-all-columns"> <strong><?php echo _l('select_all'); ?></strong>
+                            </div>
+                            <hr>
+                            <?php
+                            $columns = [
+                                '#',
+                                _l('invoice_dt_table_heading_number'),
+                                _l('invoice_title'),
+                                _l('invoice_dt_table_heading_amount'),
+                                _l('invoice_amount_due'),
+                                _l('invoice_dt_table_heading_date'),
+                                _l('invoice_dt_table_heading_client'),
+                                _l('project'),
+                                _l('tags'),
+                                _l('invoice_dt_table_heading_duedate'),
+                                _l('invoice_dt_table_heading_status'),
+                                _l('last_action_by')
+                            ];
+                            ?>
+                            <div>
+                                <?php foreach ($columns as $key => $label): ?>
+                                    <input type="checkbox" class="toggle-column" value="<?php echo $key; ?>" checked>
+                                    <?php echo $label; ?><br>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    </div>
                     <!-- if invoiceid found in url -->
                     <?php echo form_hidden('invoiceid', $invoiceid); ?>
                     <?php $this->load->view('admin/invoices/table_html'); ?>
