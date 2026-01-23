@@ -27602,7 +27602,7 @@ class Purchase_model extends App_Model
         }
         $this->db->where('id', $client_id);
         $clients_data = $this->db->get()->result_array();
-        
+        $chartImgs = $this->get_single_client_chart_images($client_id, $data);
         // Start HTML
         $html = '
         <!DOCTYPE html>
@@ -27842,41 +27842,25 @@ class Purchase_model extends App_Model
                 </table>
             </div>';
 
-        
-       if (!empty($data['bar_chart_img']) || !empty($data['line_chart_img'])) {
 
-            if (!empty($data['bar_chart_img'])) {
-                $data['bar_chart_img'] = str_replace("[removed]", "", $data['bar_chart_img']);
-                if ($data['bar_chart_img'] && strpos($data['bar_chart_img'], 'data:image') !== 0) {
-                    $data['bar_chart_img'] = 'data:image/png;base64,' . $data['bar_chart_img'];
-                }
-            }
-
-            if (!empty($data['line_chart_img'])) {
-                $data['line_chart_img'] = str_replace("[removed]", "", $data['line_chart_img']);
-                if ($data['line_chart_img'] && strpos($data['line_chart_img'], 'data:image') !== 0) {
-                    $data['line_chart_img'] = 'data:image/png;base64,' . $data['line_chart_img'];
-                }
-            }
+        if (!empty($chartImgs['line'])) {
+           
 
             $html .= '
             <table class="charts-table" cellpadding="4" cellspacing="0">
                 <tr>
                     <td width="100%" valign="top">
-
-                        
-
                         <div class="chart-box">
                             <h3 class="chart-title">Monthly Earnings Trend</h3>
-                            <img src="'.$data['line_chart_img'].'" width="520" />
+                            <img src="'.$chartImgs['line'].'" width="520" />
                         </div>
 
                     </td>
                 </tr>
             </table>';
         }
-
-        
+            
+         
         // Client Data Table
         $html .= '
         <div class="client-table-section">';
@@ -28145,5 +28129,212 @@ class Purchase_model extends App_Model
 
         return $response;
     }
+
+    private function quickchart_url($chartConfig)
+    {
+        $encoded = urlencode(json_encode($chartConfig));
+        return "https://quickchart.io/chart?c={$encoded}&format=png&backgroundColor=white";
+    }
+
+    public function get_per_client_row($client_id)
+    {
+        $this->db->where('id', $client_id);
+        return $this->db->get(db_prefix() . '_per_clients')->row_array(); // tbl_per_clients
+    }
+
+    // public function get_single_client_chart_images($client_id)
+    // {
+    //     $client = $this->get_per_client_row($client_id);
+
+    //     if (!$client) {
+    //         return ['bar' => '', 'line' => ''];
+    //     }
+
+    //     // ---- BAR Chart : % Profit (Single value)
+    //     $barConfig = [
+    //         "type" => "bar",
+    //         "data" => [
+    //             "labels" => [$client['name']],
+    //             "datasets" => [[
+    //                 "label" => "% Profit",
+    //                 "data" => [(float)$client['percent_profits']],
+    //                 "borderWidth" => 1
+    //             ]]
+    //         ],
+    //         "options" => [
+    //             "plugins" => [
+    //                 "legend" => ["display" => false]
+    //             ],
+    //             "scales" => [
+    //                 "y" => [
+    //                     "beginAtZero" => true,
+    //                     "title" => ["display" => true, "text" => "% Profit"]
+    //                 ],
+    //                 "x" => [
+    //                     "title" => ["display" => true, "text" => "Client"]
+    //                 ]
+    //             ]
+    //         ]
+    //     ];
+
+    //     // ---- LINE Chart : Monthly Earnings
+    //     $labels = ["Aug 2025", "Sep 2025", "Oct 2025", "Nov 2025", "Dec 2025"];
+    //     $values = [
+    //         (float)$client['august_2025'],
+    //         (float)$client['september_2025'],
+    //         (float)$client['october_2025'],
+    //         (float)$client['november_2025'],
+    //         (float)$client['december_2025'],
+    //     ];
+
+    //     $lineConfig = [
+    //         "type" => "line",
+    //         "data" => [
+    //             "labels" => $labels,
+    //             "datasets" => [[
+    //                 "label" => "Monthly Earnings Trend",
+    //                 "data" => $values,
+    //                 "fill" => false,
+    //                 "borderWidth" => 3,
+    //                 "tension" => 0.3
+    //             ]]
+    //         ],
+    //         "options" => [
+    //             "plugins" => [
+    //                 "legend" => ["display" => true, "position" => "bottom"]
+    //             ],
+    //             "scales" => [
+    //                 "y" => [
+    //                     "beginAtZero" => true,
+    //                     "title" => ["display" => true, "text" => "Earnings"]
+    //                 ],
+    //                 "x" => [
+    //                     "title" => ["display" => true, "text" => "Month"]
+    //                 ]
+    //             ]
+    //         ]
+    //     ];
+
+    //     return [
+    //         'bar'  => $this->quickchart_url($barConfig),
+    //         'line' => $this->quickchart_url($lineConfig),
+    //     ];
+    // }
+    public function get_single_client_chart_images($client_id, $data = [])
+    {
+        // chart data using your existing logic
+        $chartData = $this->get_per_by_id_clients_charts($data, $client_id);
+
+        if (empty($chartData)) {
+            return ['bar' => '', 'line' => ''];
+        }
+
+        /**
+         * BAR CHART CONFIG
+         * Uses:
+         *  - bar_top_client_name
+         *  - bar_top_client_value
+         */
+        // $barLabels = isset($chartData['bar_top_client_name']) ? $chartData['bar_top_client_name'] : [];
+        // $barValues = isset($chartData['bar_top_client_value']) ? $chartData['bar_top_client_value'] : [];
+
+        // // fallback if empty
+        // if (empty($barLabels) || empty($barValues)) {
+        //     $client = $this->get_per_client_row($client_id);
+        //     if ($client) {
+        //         $barLabels = [$client['name']];
+        //         $barValues = [(float)$client['percent_profits']];
+        //     }
+        // }
+
+        // $barConfig = [
+        //     "type" => "bar",
+        //     "data" => [
+        //         "labels" => $barLabels,
+        //         "datasets" => [[
+        //             "label" => "% Profit",
+        //             "data" => array_map('floatval', $barValues),
+        //             "borderWidth" => 1
+        //         ]]
+        //     ],
+        //     "options" => [
+        //         "indexAxis" => "y", // SAME as your dashboard (horizontal bar)
+        //         "plugins" => [
+        //             "legend" => ["display" => false]
+        //         ],
+        //         "scales" => [
+        //             "x" => [
+        //                 "beginAtZero" => true,
+        //                 "title" => ["display" => true, "text" => "% Profit"]
+        //             ],
+        //             "y" => [
+        //                 "title" => ["display" => true, "text" => "Client"]
+        //             ]
+        //         ]
+        //     ]
+        // ];
+
+        /**
+         * LINE CHART CONFIG
+         * Uses:
+         *  - line_order_date
+         *  - line_order_total
+         */
+        $lineLabels = isset($chartData['line_order_date']) ? $chartData['line_order_date'] : [];
+        $lineValues = isset($chartData['line_order_total']) ? $chartData['line_order_total'] : [];
+
+        // fallback if empty
+        if (empty($lineLabels) || empty($lineValues)) {
+            $lineLabels = ["August 2025", "September 2025", "October 2025", "November 2025", "December 2025"];
+            $client = $this->get_per_client_row($client_id);
+
+            if ($client) {
+                $lineValues = [
+                    (float)($client['august_2025'] ?? 0),
+                    (float)($client['september_2025'] ?? 0),
+                    (float)($client['october_2025'] ?? 0),
+                    (float)($client['november_2025'] ?? 0),
+                    (float)($client['december_2025'] ?? 0),
+                ];
+            } else {
+                $lineValues = [0, 0, 0, 0, 0];
+            }
+        }
+
+        $lineConfig = [
+            "type" => "line",
+            "data" => [
+                "labels" => $lineLabels,
+                "datasets" => [[
+                    "label" => "Monthly Earnings Trend",
+                    "data" => array_map('floatval', $lineValues),
+                    "fill" => false,
+                    "borderWidth" => 3,
+                    "tension" => 0.3
+                ]]
+            ],
+            "options" => [
+                "plugins" => [
+                    "legend" => ["display" => true, "position" => "bottom"]
+                ],
+                "scales" => [
+                    "y" => [
+                        "beginAtZero" => true,
+                        "title" => ["display" => true, "text" => "Earnings"]
+                    ],
+                    "x" => [
+                        "title" => ["display" => true, "text" => "Month"]
+                    ]
+                ]
+            ]
+        ];
+
+        return [
+            // 'bar'  => $this->quickchart_url($barConfig),
+            'line' => $this->quickchart_url($lineConfig),
+        ];
+    }
+
+
 
 }
