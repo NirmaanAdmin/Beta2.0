@@ -3167,6 +3167,14 @@ class purchase extends AdminController
         $data['specification'] = $this->purchase_model->get_specification();
         $data['title'] = _l('item_list');
 
+        $data['ajaxItems'] = false;
+        if (total_rows(db_prefix() . 'items') <= wh_ajax_on_total_items()) {
+            $data['items'] = $this->warehouse_model->wh_get_grouped('', true);
+        } else {
+            $data['items']     = [];
+            $data['ajaxItems'] = true;
+        }
+
         $data['item_id'] = $id;
 
         $this->load->view('items/item_list', $data);

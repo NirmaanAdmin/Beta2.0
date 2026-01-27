@@ -59,10 +59,18 @@ var hidden_columns = [3,7];
 
    });
 
-     
-    table_item_list = $('table.table-table_item_list');
-    _table_api = initDataTable(table_item_list, admin_url+'purchase/table_item_list', [0], [0], '',  [2, 'desc']);
+    var Params = {
+      "commodity_ft": "[name='commodity_filter[]']",
+      "group_pur": "[name='group_pur[]']",
+    };
 
+    table_item_list = $('table.table-table_item_list');
+    _table_api = initDataTable(table_item_list, admin_url+'purchase/table_item_list', [0], [0], Params,  [2, 'desc']);
+    $.each(Params, function(i, obj) {
+      $('select' + obj).on('change', function() {  
+        table_item_list.DataTable().ajax.reload();
+      });
+    });
 
   init_commodity_detail();
   function init_commodity_detail(id) {
@@ -490,4 +498,7 @@ function purchase_delete_bulk_action(event) {
     }
 
   });
+
+  // Maybe items ajax search
+  init_ajax_search('items','#commodity_filter.ajax-search',undefined,admin_url+'warehouse/wh_commodity_code_search_all');
 </script>

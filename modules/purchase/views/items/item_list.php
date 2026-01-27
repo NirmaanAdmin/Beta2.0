@@ -1,5 +1,6 @@
 <?php init_head(); ?>
 
+<?php $module_name = 'purchase_items'; ?>
 <div id="wrapper">
    <div class="content">
       <div class="row">
@@ -32,6 +33,25 @@
                      <div class="col-md-1 pull-right">
                         <a href="#" class="btn btn-default pull-right btn-with-tooltip toggle-small-view hidden-xs" onclick="toggle_small_view_proposal('.proposal_sm','#proposal_sm_view'); return false;" data-toggle="tooltip" title="<?php echo _l('invoices_toggle_table_tooltip'); ?>"><i class="fa fa-angle-double-left"></i></a>
                     </div>
+                    </div>
+
+                    <div class="row all_filters">
+                      <div class="col-md-3">
+                        <?php $this->load->view('purchase/item_include/item_select', ['select_name' => 'commodity_filter[]', 'id_name' => 'commodity_filter', 'multiple' => true, 'data_none_selected_text' => 'Uniclass Code']); ?>
+                      </div>
+
+                      <div class="col-md-3 form-group">
+                        <?php
+                        $group_pur_type_filter = get_module_filter($module_name, 'group_pur');
+                        $group_pur_type_filter_val = !empty($group_pur_type_filter) ? explode(",", $group_pur_type_filter->filter_value) : [];
+                        echo render_select('group_pur[]', $commodity_groups, array('id', 'name'), '', $group_pur_type_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('group_name'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false); ?>
+                      </div>
+
+                      <div class="col-md-1 form-group">
+                        <a href="javascript:void(0)" class="btn btn-info btn-icon reset_all_filters">
+                          <?php echo _l('reset_filter'); ?>
+                        </a>
+                      </div>
                     </div>
 
                     <div class="modal bulk_actions" id="table_commodity_list_bulk_actions" tabindex="-1" role="dialog">
@@ -353,6 +373,16 @@
 <!-- add one commodity list sibar end -->   
 
 <?php init_tail(); ?>
+<script>
+    $(document).ready(function() {
+        $(document).on('click', '.reset_all_filters', function () {
+          var filterArea = $('.all_filters');
+          filterArea.find('input').val("");
+          filterArea.find('select').selectpicker("val", "");
+          $('.table-table_item_list').DataTable().ajax.reload();
+        });
+    });
+</script>
 </body>
 </html>
 <?php require 'modules/purchase/assets/js/item_list_js.php';?>

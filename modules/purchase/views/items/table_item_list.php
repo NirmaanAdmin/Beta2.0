@@ -1,7 +1,8 @@
 <?php
 
 defined('BASEPATH') or exit('No direct script access allowed');
-
+$module_name = 'purchase_items';
+$group_pur_filter_name = 'group_pur';
 
 $aColumns = [
     '1',
@@ -18,16 +19,37 @@ $aColumns = [
 $sIndexColumn = 'id';
 $sTable       = db_prefix().'items';
 
-
-
 $where = [];
 
 if(get_status_modules_pur('warehouse')){
     array_push($where, 'AND '.db_prefix().'items.can_be_purchased = "can_be_purchased"');
 }
 
-$join =[];
+$commodity_ft = $this->ci->input->post('commodity_ft');
+$group_pur = $this->ci->input->post('group_pur');
 
+if (isset($commodity_ft)) {
+    $where_commodity_ft = '';
+    foreach ($commodity_ft as $commodity_id) {
+        if ($commodity_id != '') {
+            if ($where_commodity_ft == '') {
+                $where_commodity_ft .= 'AND (tblitems.id = "' . $commodity_id . '"';
+            } else {
+                $where_commodity_ft .= ' or tblitems.id = "' . $commodity_id . '"';
+            }
+        }
+    }
+    if ($where_commodity_ft != '') {
+        $where_commodity_ft .= ')';
+        array_push($where, $where_commodity_ft);
+    }
+}
+
+if ($group_pur && count($group_pur) > 0) {
+    array_push($where, 'AND '.db_prefix().'items.group_id IN (' . implode(',', $group_pur) . ')');
+}
+
+$join = [];
 
 $custom_fields = get_custom_fields('items', [
     'show_on_table' => 1,
@@ -45,6 +67,9 @@ foreach ($custom_fields as $key => $field) {
 if (count($custom_fields) > 4) {
     @$this->ci->db->query('SET SQL_BIG_SELECTS=1');
 }
+
+$group_pur_filter_name_value = !empty($this->ci->input->post('group_pur')) ? implode(',', $this->ci->input->post('group_pur')) : NULL;
+update_module_filter($module_name, $group_pur_filter_name, $group_pur_filter_name_value);
 
 $result  = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [
     'commodity_barcode', 
