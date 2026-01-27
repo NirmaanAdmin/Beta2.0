@@ -47,6 +47,35 @@ $module_name = 'module_activity_log'; ?>
                               <?php echo _l('New'); ?>
                            </a>
                         </div>
+                        <div class="_buttons col-md-9">
+                           <div class="_buttons col-md-3 pull-right">
+                              <div class="form-group">
+                                 <select name="month_filter" id="month_filter" class="form-control">
+                                    <option value="">Select Month</option>
+
+                                    <?php
+                                    $start    = new DateTime('2025-09-01');
+                                    $end      = new DateTime('2028-09-01');
+                                    $current  = date('Y-m'); // current month
+
+                                    while ($start <= $end) {
+                                       $value = $start->format('Y-m');
+                                       $label = $start->format('F Y');
+                                       $selected = ($value === $current) ? 'selected' : '';
+                                    ?>
+                                       <option value="<?php echo $value; ?>" <?php echo $selected; ?>>
+                                          <?php echo $label; ?>
+                                       </option>
+                                    <?php
+                                       $start->modify('+1 month');
+                                    }
+                                    ?>
+                                 </select>
+
+                              </div>
+
+                           </div>
+                        </div>
                      </div>
                      <br>
                      <div class="row">
@@ -125,7 +154,10 @@ $module_name = 'module_activity_log'; ?>
                                     <tr>
                                        <th><?php echo _l('Name'); ?></th>
                                        <th><?php echo _l('Assar Holds'); ?></th>
-                                       <th><?php echo _l('Earnings Forecast %'); ?></th>
+                                       <th><?php echo _l('Earnings Forecast %'); ?><button id="apply_to_all" class="btn btn-sm btn-primary" style="margin-left: 10px;">
+                                             Apply To All
+                                          </button>
+                                       </th>
                                        <th><?php echo _l('Client Earnings Forecast ₹'); ?></th>
                                     </tr>
                                  </thead>
@@ -148,7 +180,7 @@ $module_name = 'module_activity_log'; ?>
       var table_assar = $('.table-table_assar');
       var Params = {};
       initDataTable(table_assar, admin_url + 'purchase/table_assar', [], [], Params, [3, 'asc']);
-   
+
       // Handle "Select All" checkbox
       $('#select-all-columns').on('change', function() {
          var isChecked = $(this).is(':checked');
@@ -182,8 +214,53 @@ $module_name = 'module_activity_log'; ?>
       });
 
       var table_main_sheet = $('.table-table_main_sheet');
-      var Params = {};
-      initDataTable(table_main_sheet, admin_url + 'purchase/table_main_sheet', [], [], Params, [0, 'asc']);
+      var Params_main_sheet = {
+         "month": "[name='month_filter']",
+      };
+      initDataTable(table_main_sheet, admin_url + 'purchase/table_main_sheet', [], [], Params_main_sheet, [0, 'asc']);
+      $('#month_filter').on('change', function() {
+         table_main_sheet.DataTable().ajax.reload();
+      });
+   });
+
+
+   $(document).on('blur', '.assar-input', function() {
+
+      let client_id = $(this).data('client');
+      let holds = $(this).val();
+      let month = $('#month_filter').val();
+      var table_main_sheet = $('.table-table_main_sheet');
+      if (month == '') {
+         alert('Please select month first');
+         return;
+      }
+
+      $.post(admin_url + 'purchase/save_main_sheet', {
+         client_id: client_id,
+         assar_holds: holds,
+         month: month
+      }, function(response) {
+
+         // ✅ reload main sheet table after save
+         table_main_sheet.DataTable().ajax.reload(null, false);
+
+      });
+
+   });
+   $('#apply_to_all').on('click', function() {
+
+      let firstValue = $('.assar-input').first().val();
+
+      if (firstValue === '') {
+         alert('Enter value in first row first');
+         return;
+      }
+
+      $('.assar-input').each(function() {
+
+         $(this).val(firstValue).trigger('blur');
+
+      });
 
    });
 </script>

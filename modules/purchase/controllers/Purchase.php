@@ -17421,9 +17421,9 @@ class purchase extends AdminController
             if ($id == '') {
                 $id = $this->purchase_model->add_assar($assar_data);
                 if ($id) {
-                set_alert('success', _l('added_successfully', _l('Client')));
-                redirect(admin_url('purchase/assar'));
-            }
+                    set_alert('success', _l('added_successfully', _l('Client')));
+                    redirect(admin_url('purchase/assar'));
+                }
             } else {
                 $success = $this->purchase_model->update_assar($assar_data, $id);
                 if ($success) {
@@ -17432,7 +17432,7 @@ class purchase extends AdminController
                 redirect(admin_url('purchase/assar/' . $id));
             }
         }
-         if ($id == '') {
+        if ($id == '') {
             $title = _l('Create New ASSAR');
             $is_edit = false;
         } else {
@@ -17440,7 +17440,7 @@ class purchase extends AdminController
             $is_edit = true;
             $data['assar'] = $this->purchase_model->get_assar($id);
         }
-        
+
         $data['title'] = $title;
         $this->load->view('assar/add_assar', $data);
     }
@@ -17459,6 +17459,44 @@ class purchase extends AdminController
             set_alert('warning', _l('problem_deleting', _l('ASSAR')));
         }
         redirect(admin_url('purchase/assar'));
-        
+    }
+    public function save_main_sheet()
+    {
+        $client = $this->input->post('client_id');
+        $holds  = $this->input->post('assar_holds');
+        $month  = $this->input->post('month');
+
+        // get investment
+        $investment = $this->db
+            ->get_where('tblassar_clients', ['id' => $client])
+            ->row()->investment;
+
+        $earning = $holds * $investment / 100;
+
+        // check record exists?
+        $exists = $this->db
+            ->where('client_id', $client)
+            ->where('month_year', $month)
+            ->get('tbl_assar_main_sheet')
+            ->num_rows();
+       
+        if ($exists > 0) {
+            // UPDATE
+            
+            $this->db->where('client_id', $client);
+            $this->db->where('month_year', $month);
+            $this->db->update('tbl_assar_main_sheet', [
+                'assar_holds' => $holds,
+                'client_earnings' => $earning,
+            ]);
+        } else {
+            // INSERT
+            $this->db->insert('tbl_assar_main_sheet', [
+                'client_id' => $client,
+                'month_year' => $month,
+                'assar_holds' => $holds,
+                'client_earnings' => $earning
+            ]);
+        }
     }
 }
