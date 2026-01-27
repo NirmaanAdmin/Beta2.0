@@ -28691,10 +28691,36 @@ class Purchase_model extends App_Model
     public function add_assar($data){
         
         $data['created_at'] = date('Y-m-d H:i:s');
+        $data['start_date'] = to_sql_date($data['start_date']);
         $this->db->insert(db_prefix() . 'assar_clients', $data);
         $insert_id = $this->db->insert_id();
         if ($insert_id) {
             return $insert_id;
+        }
+        return false;
+    }
+
+    public function get_assar($id){
+        $this->db->where('id', $id);
+        return $this->db->get(db_prefix() . 'assar_clients')->row_array();
+    }
+
+    public function update_assar($data, $id){
+        $data['start_date'] = to_sql_date($data['start_date']);
+        $data['updated_at'] = date('Y-m-d H:i:s');
+        $this->db->where('id', $id);
+        $this->db->update(db_prefix() . 'assar_clients', $data);
+        if ($this->db->affected_rows() > 0) {
+            return true;
+        }
+        return false;
+    }
+
+    public function delete_assar($id){
+        $this->db->where('id', $id);
+        $this->db->delete(db_prefix() . 'assar_clients');
+        if ($this->db->affected_rows() > 0) {
+            return true;
         }
         return false;
     }

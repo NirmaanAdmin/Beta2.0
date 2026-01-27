@@ -31,7 +31,7 @@ $result = data_tables_init(
     $sTable,
     $join,
     $where,
-    [],
+    ['id'],
     '',
     [],
     $having
@@ -58,6 +58,19 @@ foreach ($rResult as $aRow) {
             $_data = $aRow['client_id'];
         } elseif ($aColumns[$i] == 'name') {
             $_data = $aRow['name'];
+
+            $numberOutput = '';
+            $numberOutput .= $aRow['name'];
+
+            $numberOutput .= '<div class="row-options">';
+
+            $numberOutput .= '<a href="' . admin_url('purchase/add_assar/' . $aRow['id']) . '">' . _l('edit') . '</a>';
+
+            $numberOutput .= ' | <a href="' . admin_url('purchase/delete_assar/' . $aRow['id']) . '" class="text-danger _delete">' . _l('delete') . '</a>';
+
+            $numberOutput .= '</div>';
+
+            $_data = $numberOutput;
         } elseif ($aColumns[$i] == 'phone') {
             $_data = $aRow['phone'];
         } elseif ($aColumns[$i] == 'start_date') {
@@ -66,7 +79,7 @@ foreach ($rResult as $aRow) {
             $_data = app_format_money($aRow['investment'], '₹');
         } elseif ($aColumns[$i] == 'status') {
             $status = '';
-            if($aRow['status'] == 1){
+            if ($aRow['status'] == 1) {
                 $status = 'Active';
             } else {
                 $status = 'Inactive';

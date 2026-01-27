@@ -17414,17 +17414,33 @@ class purchase extends AdminController
         $this->app->get_table_data(module_views_path('purchase', 'assar/table_assar'));
     }
 
-    public function add_assar()
+    public function add_assar($id = '')
     {
         if ($this->input->post()) {
             $assar_data = $this->input->post();
-            $id = $this->purchase_model->add_assar($assar_data);
-            if ($id) {
+            if ($id == '') {
+                $id = $this->purchase_model->add_assar($assar_data);
+                if ($id) {
                 set_alert('success', _l('added_successfully', _l('Client')));
                 redirect(admin_url('purchase/assar'));
             }
+            } else {
+                $success = $this->purchase_model->update_assar($assar_data, $id);
+                if ($success) {
+                    set_alert('success', _l('updated_successfully', _l('Client')));
+                }
+                redirect(admin_url('purchase/assar/' . $id));
+            }
         }
-        $title = _l('Create New ASSAR');
+         if ($id == '') {
+            $title = _l('Create New ASSAR');
+            $is_edit = false;
+        } else {
+            $title = _l('Edit ASSAR');
+            $is_edit = true;
+            $data['assar'] = $this->purchase_model->get_assar($id);
+        }
+        
         $data['title'] = $title;
         $this->load->view('assar/add_assar', $data);
     }
@@ -17432,5 +17448,17 @@ class purchase extends AdminController
     public function table_main_sheet()
     {
         $this->app->get_table_data(module_views_path('purchase', 'assar/table_main_sheet'));
+    }
+
+    public function delete_assar($id)
+    {
+        $response = $this->purchase_model->delete_assar($id);
+        if ($response == true) {
+            set_alert('success', _l('deleted', _l('ASSAR')));
+        } else {
+            set_alert('warning', _l('problem_deleting', _l('ASSAR')));
+        }
+        redirect(admin_url('purchase/assar'));
+        
     }
 }
