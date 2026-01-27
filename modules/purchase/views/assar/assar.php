@@ -159,7 +159,7 @@ $module_name = 'module_activity_log'; ?>
                               </table>
                            </div>
                            <div role="tabpanel" class="col-md-12 tab-pane tracker-pane" id="main_sheet">
-                              <table class="dt-table-loading table table-table_main_sheet">
+                              <table class="dt-table-loading table table-table_main_sheet" >
                                  <thead>
                                     <tr>
                                        <th><?php echo _l('Client ID'); ?></th>
@@ -168,8 +168,7 @@ $module_name = 'module_activity_log'; ?>
                                        <button id="apply_to_all" class="btn btn-sm btn-primary" style="position: absolute; left: 57%;top: 3%;z-index: 9999;">
                                           Apply To All
                                        </button>
-                                       <th><?php echo _l('Earnings Forecast %'); ?>
-                                       </th>
+                                       <th style="position: relative;"><?php echo _l('Earnings Forecast %'); ?></th>
                                        <th><?php echo _l('Client Earnings Forecast ₹'); ?></th>
                                     </tr>
                                  </thead>
