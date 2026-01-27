@@ -17428,4 +17428,9 @@ class purchase extends AdminController
         $data['title'] = $title;
         $this->load->view('assar/add_assar', $data);
     }
+
+    public function table_main_sheet()
+    {
+        $this->app->get_table_data(module_views_path('purchase', 'assar/table_main_sheet'));
+    }
 }

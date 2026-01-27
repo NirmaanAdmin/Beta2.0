@@ -117,11 +117,20 @@ $module_name = 'module_activity_log'; ?>
                                     </tr>
                                  </thead>
                                  <tbody></tbody>
-                                 <tbody></tbody>
                               </table>
                            </div>
-                           <div role="tabpanel" class="col-md-12 tab-pane tracker-pane active" id="main_sheet">
-                              Main Sheet Content Goes Here
+                           <div role="tabpanel" class="col-md-12 tab-pane tracker-pane" id="main_sheet">
+                              <table class="dt-table-loading table table-table_main_sheet">
+                                 <thead>
+                                    <tr>
+                                       <th><?php echo _l('Name'); ?></th>
+                                       <th><?php echo _l('Assar Holds'); ?></th>
+                                       <th><?php echo _l('Earnings Forecast %'); ?></th>
+                                       <th><?php echo _l('Client Earnings Forecast ₹'); ?></th>
+                                    </tr>
+                                 </thead>
+                                 <tbody></tbody>
+                              </table>
                            </div>
                         </div>
                      </div>
@@ -139,18 +148,7 @@ $module_name = 'module_activity_log'; ?>
       var table_assar = $('.table-table_assar');
       var Params = {};
       initDataTable(table_assar, admin_url + 'purchase/table_assar', [], [], Params, [3, 'asc']);
-      $.each(Params, function(i, obj) {
-         $('select' + obj).on('change', function() {
-            table_assar.DataTable().ajax.reload();
-         });
-      });
-      $(document).on('click', '.reset_all_filters', function() {
-         var filterArea = $('.all_filters');
-         filterArea.find('input').val("");
-         filterArea.find('select').selectpicker("val", "");
-         table_assar.DataTable().ajax.reload();
-      });
-
+   
       // Handle "Select All" checkbox
       $('#select-all-columns').on('change', function() {
          var isChecked = $(this).is(':checked');
@@ -183,10 +181,12 @@ $module_name = 'module_activity_log'; ?>
          $('.selectpicker').selectpicker('refresh');
       });
 
+      var table_main_sheet = $('.table-table_main_sheet');
+      var Params = {};
+      initDataTable(table_main_sheet, admin_url + 'purchase/table_main_sheet', [], [], Params, [0, 'asc']);
 
    });
 </script>
-<script src="<?php echo module_dir_url(PURCHASE_MODULE_NAME, 'assets/plugins/charts/chart.js'); ?>?v=<?php echo PURCHASE_REVISION; ?>"></script>
 </body>
 
 </html>
