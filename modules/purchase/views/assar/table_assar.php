@@ -39,6 +39,9 @@ $result = data_tables_init(
 
 $output  = $result['output'];
 $rResult = $result['rResult'];
+$footer_data = [
+    'investment' => 0,
+];
 
 $aColumns = array_map(function ($col) {
     $col = trim($col);
@@ -92,6 +95,11 @@ foreach ($rResult as $aRow) {
         }
         $row[] = $_data;
     }
+    $footer_data['investment'] += $aRow['investment'];
     $output['aaData'][] = $row;
     $sr++;
 }
+foreach ($footer_data as $key => $total) {
+    $footer_data[$key] = app_format_money($total, '₹');
+}
+$output['sums'] = $footer_data;

@@ -146,12 +146,23 @@ $module_name = 'module_activity_log'; ?>
                                     </tr>
                                  </thead>
                                  <tbody></tbody>
+                                 <tfoot>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td class="investment"></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                 </tfoot>
                               </table>
                            </div>
                            <div role="tabpanel" class="col-md-12 tab-pane tracker-pane" id="main_sheet">
                               <table class="dt-table-loading table table-table_main_sheet">
                                  <thead>
                                     <tr>
+                                       <th><?php echo _l('Client ID'); ?></th>
                                        <th><?php echo _l('Name'); ?></th>
                                        <th><?php echo _l('Assar Holds'); ?></th>
                                        <th><?php echo _l('Earnings Forecast %'); ?><button id="apply_to_all" class="btn btn-sm btn-primary" style="margin-left: 10px;">
@@ -162,6 +173,13 @@ $module_name = 'module_activity_log'; ?>
                                     </tr>
                                  </thead>
                                  <tbody></tbody>
+                                 <tfoot>
+                                    <td></td>
+                                    <td></td>
+                                    <td class="investment"></td>
+                                    <td></td>
+                                    <td class="client_earnings_forecast"></td>
+                                 </tfoot>
                               </table>
                            </div>
                         </div>
@@ -180,6 +198,13 @@ $module_name = 'module_activity_log'; ?>
       var table_assar = $('.table-table_assar');
       var Params = {};
       initDataTable(table_assar, admin_url + 'purchase/table_assar', [], [], Params, [3, 'asc']);
+      $('.table-table_assar').on('draw.dt', function() {
+         var reportsTable = $(this).DataTable();
+         var sums = reportsTable.ajax.json().sums;
+         $(this).find('tfoot').addClass('bold');
+         $(this).find('tfoot td').eq(0).html("Total (Per Page)");
+         $(this).find('tfoot td.investment').html(sums.investment);
+      });
 
       // Handle "Select All" checkbox
       $('#select-all-columns').on('change', function() {
@@ -220,6 +245,16 @@ $module_name = 'module_activity_log'; ?>
       initDataTable(table_main_sheet, admin_url + 'purchase/table_main_sheet', [], [], Params_main_sheet, [0, 'asc']);
       $('#month_filter').on('change', function() {
          table_main_sheet.DataTable().ajax.reload();
+      });
+
+
+      $('.table-table_main_sheet').on('draw.dt', function() {
+         var reportsTable = $(this).DataTable();
+         var sums = reportsTable.ajax.json().sums;
+         $(this).find('tfoot').addClass('bold');
+         $(this).find('tfoot td').eq(0).html("Total (Per Page)");
+         $(this).find('tfoot td.investment').html(sums.investment);
+         $(this).find('tfoot td.client_earnings_forecast').html(sums.client_earnings_forecast);
       });
    });
 
