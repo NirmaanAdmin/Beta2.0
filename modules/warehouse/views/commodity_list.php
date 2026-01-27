@@ -7,6 +7,7 @@
   }
 </style>
 
+<?php $module_name = 'warehouse_items'; ?>
 <div id="wrapper">
   <div class="content">
     <div class="row">
@@ -49,71 +50,78 @@
                 <?php } ?>
               </div>
             </div>
-            <div class="row">
-              <div class=" col-md-3">
-                <div class="form-group">
-                  <select name="warehouse_filter[]" id="warehouse_filter" class="selectpicker" multiple="true" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('warehouse_filter'); ?>">
-
-                    <?php foreach ($warehouse_filter as $warehouse) { ?>
-                      <option value="<?php echo html_entity_decode($warehouse['warehouse_id']); ?>"><?php echo html_entity_decode($warehouse['warehouse_name']); ?></option>
-                    <?php } ?>
-                  </select>
-                </div>
+            <div class="row all_filters">
+              <div class="col-md-3 form-group">
+                <?php
+                $warehouse_filter_type_filter = get_module_filter($module_name, 'warehouse_filter');
+                $warehouse_filter_type_filter_val = !empty($warehouse_filter_type_filter) ? explode(",", $warehouse_filter_type_filter->filter_value) : [];
+                ?>
+                <select name="warehouse_filter[]" id="warehouse_filter" class="selectpicker" multiple="true" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('warehouse_filter'); ?>" data-actions-box="true">
+                  <?php foreach ($warehouse_filter as $warehouse) { ?>
+                    <option value="<?php echo html_entity_decode($warehouse['warehouse_id']); ?>"
+                      <?php echo in_array($warehouse['warehouse_id'], $warehouse_filter_type_filter_val) ? 'selected' : ''; ?>>
+                      <?php echo html_entity_decode($warehouse['warehouse_name']); ?>
+                    </option>
+                  <?php } ?>
+                </select>
               </div>
-              <div class=" col-md-3">
-                <?php $this->load->view('warehouse/item_include/item_select', ['select_name' => 'commodity_filter[]', 'id_name' => 'commodity_filter', 'multiple' => true, 'data_none_selected_text' => 'commodity']); ?>
+              <div class="col-md-3">
+                <?php $this->load->view('warehouse/item_include/item_select', ['select_name' => 'commodity_filter[]', 'id_name' => 'commodity_filter', 'multiple' => true, 'data_none_selected_text' => 'Uniclass Code']); ?>
               </div>
-              <div class=" col-md-2">
-                <div class="form-group">
-
-                  <select name="item_filter[]" id="item_filter" class="selectpicker" multiple="true" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('tags'); ?>">
-
-                    <?php foreach ($item_tags as $item_f) { ?>
-                      <option value="<?php echo html_entity_decode($item_f['id']); ?>"><?php echo html_entity_decode($item_f['name']); ?></option>
-                    <?php } ?>
-
-                  </select>
-                </div>
-              </div>
-
-              <div class=" col-md-2">
-                <div class="form-group">
-                  <select name="alert_filter" id="alert_filter" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('alert_filter'); ?>">
-
-                    <option value=""></option>
-                    <option value="3"><?php echo _l('minimum_stock'); ?></option>
-                    <option value="4"><?php echo _l('maximum_stock'); ?></option>
-                    <option value="1"><?php echo _l('out_of_stock'); ?></option>
-                    <option value="2"><?php echo _l('1_month_before_expiration_date'); ?></option>
-
-                  </select>
-                </div>
-              </div>
-              <?php
-              $can_be_type = [];
-              $can_be_type[] = [
-                'id' => 'can_be_sold',
-                'label' => _l('can_be_sold'),
-              ];
-              $can_be_type[] = [
-                'id' => 'can_be_purchased',
-                'label' => _l('can_be_purchased'),
-              ];
-              $can_be_type[] = [
-                'id' => 'can_be_manufacturing',
-                'label' => _l('can_be_manufacturing'),
-              ];
-              $can_be_type[] = [
-                'id' => 'can_be_inventory',
-                'label' => _l('can_be_inventory'),
-              ];
-
-
-              ?>
-              <div class="col-md-2">
-                <?php echo render_select('can_be_value_filter[]', $can_be_type, array('id', array('label')), '', ['can_be_inventory'], ['multiple' => true, 'data-width' => '100%', 'class' => 'selectpicker'], array(), '', '', false); ?>
+              <div class="col-md-3 form-group">
+                <?php
+                $item_filter_type_filter = get_module_filter($module_name, 'item_filter');
+                $item_filter_type_filter_val = !empty($item_filter_type_filter) ? explode(",", $item_filter_type_filter->filter_value) : [];
+                ?>
+                <select name="item_filter[]" id="item_filter" class="selectpicker" multiple="true" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('tags'); ?>" data-actions-box="true">
+                  <?php foreach ($item_tags as $item_f) { ?>
+                    <option value="<?php echo html_entity_decode($item_f['id']); ?>"
+                      <?php echo in_array($item_f['id'], $item_filter_type_filter_val) ? 'selected' : ''; ?>>
+                      <?php echo html_entity_decode($item_f['name']); ?>
+                    </option>
+                  <?php } ?>
+                </select>
               </div>
 
+              <div class="col-md-3 form-group">
+                <?php
+                $alert_filter_type_filter = get_module_filter($module_name, 'alert_filter');
+                $alert_filter_type_filter_val = !empty($alert_filter_type_filter) ? $alert_filter_type_filter : '';
+                $alert_filter = [
+                  ['id' => '',  'name' => ''],
+                  ['id' => '3', 'name' => _l('minimum_stock')],
+                  ['id' => '4', 'name' => _l('maximum_stock')],
+                  ['id' => '1', 'name' => _l('out_of_stock')],
+                  ['id' => '2', 'name' => _l('1_month_before_expiration_date')],
+                ];
+                echo render_select('alert_filter', $alert_filter, array('id', 'name'), '', $alert_filter_type_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('alert_filter'), 'data-live-search' => true), array(), 'no-mbot', '', false); ?>
+              </div>
+              
+              <div class="col-md-3 form-group">
+                <?php
+                $can_be_value_filter_type_filter = get_module_filter($module_name, 'can_be_value_filter');
+                $can_be_value_filter_type_filter_val = !empty($can_be_value_filter_type_filter) ? explode(",", $can_be_value_filter_type_filter->filter_value) : ['can_be_inventory'];
+                $can_be_type = [
+                  0 => ['id' => 'can_be_sold', 'name' => _l('can_be_sold')],
+                  1 => ['id' => 'can_be_purchased', 'name' => _l('can_be_purchased')],
+                  2 => ['id' => 'can_be_manufacturing', 'name' => _l('can_be_manufacturing')],
+                  3 => ['id' => 'can_be_inventory', 'name' => _l('can_be_inventory')],
+                ];
+                echo render_select('can_be_value_filter[]', $can_be_type, array('id', array('name')), '', $can_be_value_filter_type_filter_val, ['multiple' => true, 'data-width' => '100%', 'data-actions-box' => true], array(), '', '', false); ?>
+              </div>
+
+              <div class="col-md-3 form-group">
+                <?php
+                $group_pur_type_filter = get_module_filter($module_name, 'group_pur');
+                $group_pur_type_filter_val = !empty($group_pur_type_filter) ? explode(",", $group_pur_type_filter->filter_value) : [];
+                echo render_select('group_pur[]', $commodity_groups, array('id', 'name'), '', $group_pur_type_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('group_name'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false); ?>
+              </div>
+
+              <div class="col-md-1 form-group">
+                <a href="javascript:void(0)" class="btn btn-info btn-icon reset_all_filters">
+                  <?php echo _l('reset_filter'); ?>
+                </a>
+              </div>
             </div>
 
             <div class="row">
@@ -930,6 +938,13 @@
     // Prevent dropdown from closing when clicking inside
     $('.dropdown-menu').on('click', function(e) {
       e.stopPropagation();
+    });
+
+    $(document).on('click', '.reset_all_filters', function () {
+      var filterArea = $('.all_filters');
+      filterArea.find('input').val("");
+      filterArea.find('select').selectpicker("val", "");
+      table.ajax.reload();
     });
   });
 </script>

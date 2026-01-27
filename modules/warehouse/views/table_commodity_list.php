@@ -1,6 +1,13 @@
 <?php
 
 defined('BASEPATH') or exit('No direct script access allowed');
+$module_name = 'warehouse_items';
+$warehouse_filter_name = 'warehouse_filter';
+$item_filter_name = 'item_filter';
+$alert_filter_name = 'alert_filter';
+$can_be_value_filter_name = 'can_be_value_filter';
+$group_pur_filter_name = 'group_pur';
+
 $arr_inventory_min_data = $this->ci->warehouse_model->arr_inventory_min(false);
 $filter_arr_inventory_min_max = $this->ci->warehouse_model->filter_arr_inventory_min_max();
 $arr_inventory_min_id = $filter_arr_inventory_min_max['inventory_min'];
@@ -37,6 +44,7 @@ $warehouse_ft = $this->ci->input->post('warehouse_ft');
 $commodity_ft = $this->ci->input->post('commodity_ft');
 $alert_filter = $this->ci->input->post('alert_filter');
 $can_be_value_filter = $this->ci->input->post('can_be_value_filter');
+$group_pur = $this->ci->input->post('group_pur');
 
 $tags_ft = $this->ci->input->post('item_filter');
 $parent_item = $this->ci->input->post('parent_item');
@@ -183,6 +191,10 @@ if(isset($barcode_filter) && strlen($barcode_filter) > 0){
 	$where[] = 'AND ('.db_prefix().'items.commodity_barcode = "'.$barcode_filter.'" OR '.db_prefix().'items.commodity_barcode = "'.substr($barcode_filter, 0, -1).'")' ;
 }
 
+if ($group_pur && count($group_pur) > 0) {
+    array_push($where, 'AND '.db_prefix().'items.group_id IN (' . implode(',', $group_pur) . ')');
+}
+
 $custom_fields = get_custom_fields('items', [
     'show_on_table' => 1,
     ]);
@@ -200,6 +212,21 @@ foreach ($custom_fields as $key => $field) {
 if (count($custom_fields) > 4) {
     @$this->ci->db->query('SET SQL_BIG_SELECTS=1');
 }
+
+$warehouse_filter_name_value = !empty($this->ci->input->post('warehouse_ft')) ? implode(',', $this->ci->input->post('warehouse_ft')) : NULL;
+update_module_filter($module_name, $warehouse_filter_name, $warehouse_filter_name_value);
+
+$item_filter_name_value = !empty($this->ci->input->post('item_filter')) ? implode(',', $this->ci->input->post('item_filter')) : NULL;
+update_module_filter($module_name, $item_filter_name, $item_filter_name_value);
+
+$alert_filter_name_value = !empty($this->ci->input->post('alert_filter')) ? $this->ci->input->post('alert_filter') : NULL;
+update_module_filter($module_name, $alert_filter_name, $alert_filter_name_value);
+
+$can_be_value_filter_name_value = !empty($this->ci->input->post('can_be_value_filter')) ? implode(',', $this->ci->input->post('can_be_value_filter')) : NULL;
+update_module_filter($module_name, $can_be_value_filter_name, $can_be_value_filter_name_value);
+
+$group_pur_filter_name_value = !empty($this->ci->input->post('group_pur')) ? implode(',', $this->ci->input->post('group_pur')) : NULL;
+update_module_filter($module_name, $group_pur_filter_name, $group_pur_filter_name_value);
 
 $module = 'warehouse';
 $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [db_prefix() . 'items.id', db_prefix() . 'items.description', db_prefix() . 'items.unit_id', db_prefix() . 'items.commodity_code', db_prefix() . 'items.commodity_barcode', db_prefix() . 'items.commodity_type', db_prefix() . 'items.warehouse_id', db_prefix() . 'items.origin', db_prefix() . 'items.color_id', db_prefix() . 'items.style_id', db_prefix() . 'items.model_id', db_prefix() . 'items.size_id', db_prefix() . 'items.rate', db_prefix() . 'items.tax', db_prefix() . 'items.group_id', db_prefix() . 'items.long_description', db_prefix() . 'items.sku_code', db_prefix() . 'items.sku_name', db_prefix() . 'items.sub_group', db_prefix() . 'items.color', db_prefix() . 'items.guarantee', db_prefix().'items.profif_ratio', db_prefix().'items.without_checking_warehouse', db_prefix().'items.parent_id', db_prefix().'items.tax2', 

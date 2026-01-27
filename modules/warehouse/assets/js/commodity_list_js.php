@@ -92,6 +92,7 @@
       "filter_all_simple_variation": "[name='filter_all_simple_variation_value']",
       "can_be_value_filter": "[name='can_be_value_filter[]']",
       "barcode_filter": "[name='barcode_filter']",
+      "group_pur": "[name='group_pur[]']",
     };
 
     var table_commodity_list = $('table.table-table_commodity_list');
