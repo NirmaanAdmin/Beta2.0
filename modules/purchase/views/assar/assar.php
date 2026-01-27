@@ -118,7 +118,7 @@ $module_name = 'module_activity_log'; ?>
    $(document).ready(function() {
       var table_assar = $('.table-table_assar');
       var Params = {};
-      initDataTable(table_assar, admin_url + 'purchase/table_assar', [], [], Params, [0, 'desc']);
+      initDataTable(table_assar, admin_url + 'purchase/table_assar', [], [], Params, [3, 'asc']);
       $.each(Params, function(i, obj) {
          $('select' + obj).on('change', function() {
             table_assar.DataTable().ajax.reload();
