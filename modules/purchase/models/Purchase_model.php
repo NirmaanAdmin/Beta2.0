@@ -28688,5 +28688,14 @@ class Purchase_model extends App_Model
     }
 
 
-
+    public function add_assar($data){
+        
+        $data['created_at'] = date('Y-m-d H:i:s');
+        $this->db->insert(db_prefix() . 'assar_clients', $data);
+        $insert_id = $this->db->insert_id();
+        if ($insert_id) {
+            return $insert_id;
+        }
+        return false;
+    }
 }

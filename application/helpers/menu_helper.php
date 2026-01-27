@@ -14,6 +14,7 @@ function app_init_admin_sidebar_menu_items()
         'badge'    => [],
     ]);
 
+
     if (
         staff_can('view',  'customers')
         || (have_assigned_customers()
@@ -27,6 +28,23 @@ function app_init_admin_sidebar_menu_items()
             'badge'    => [],
         ]);
     }
+    $base = base_url(); 
+
+    if (
+        strpos($base, 'localhost/betacrm2new') !== false ||
+        strpos($base, 'beta.nirmaan360construction.com') !== false
+    ) {
+
+        $CI->app_menu->add_sidebar_menu_item('assar', [
+            'name'     => _l('ASSAR'),
+            'href'     => admin_url('purchase/assar'),
+            'icon'     => 'fa-regular fa-user',
+            'position' => 8,
+            'badge'    => [],
+        ]);
+    }
+
+
 
     $CI->app_menu->add_sidebar_menu_item('cost_planning', [
         'collapse' => true,

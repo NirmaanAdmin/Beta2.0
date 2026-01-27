@@ -17402,4 +17402,30 @@ class purchase extends AdminController
         @rmdir($tmp_dir);
         exit;
     }
+
+    public function assar()
+    {
+        $data['title'] = _l('ASSAR');
+        $this->load->view('assar/assar', $data);
+    }
+
+    public function table_assar()
+    {
+        $this->app->get_table_data(module_views_path('purchase', 'assar/table_assar'));
+    }
+
+    public function add_assar()
+    {
+        if ($this->input->post()) {
+            $assar_data = $this->input->post();
+            $id = $this->purchase_model->add_assar($assar_data);
+            if ($id) {
+                set_alert('success', _l('added_successfully', _l('Client')));
+                redirect(admin_url('purchase/assar'));
+            }
+        }
+        $title = _l('Create New ASSAR');
+        $data['title'] = $title;
+        $this->load->view('assar/add_assar', $data);
+    }
 }

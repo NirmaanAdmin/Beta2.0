@@ -55,6 +55,7 @@ $module_name = 'per_client'; ?>
                            <a href="javascript:void(0);" id="export-pdf-zip" class="btn btn-success" data-toggle="tooltip" title="Export All Client PDFs (ZIP)">
                               <i class="fa fa-file-zipper-o"></i> Export ZIP
                            </a>
+
                         </div>
                      </div>
                      <div id="ac-charts-section" class="collapse in">
@@ -473,35 +474,43 @@ $module_name = 'per_client'; ?>
       form.submit();
       form.remove();
    });
-$(document).on('click', '#export-pdf-zip', function (e) {
-   e.preventDefault();
+   $(document).on('click', '#export-pdf-zip', function(e) {
+      e.preventDefault();
 
-   var months = $('select[name="months"]').val();
-   var frequency = $('select[name="frequency"]').val();
-   var per_client = $('select[name="per_client[]"]').val();
+      var months = $('select[name="months"]').val();
+      var frequency = $('select[name="frequency"]').val();
+      var per_client = $('select[name="per_client[]"]').val();
 
-   var form = $('<form>', {
-      action: admin_url + 'purchase/per_client_pdf_zip',
-      method: 'POST',
-      target: '_blank'
+      var form = $('<form>', {
+         action: admin_url + 'purchase/per_client_pdf_zip',
+         method: 'POST',
+         target: '_blank'
+      });
+
+      form.append($('<input>', {
+         type: 'hidden',
+         name: "csrf_token_name",
+         value: $('input[name="csrf_token_name"]').val()
+      }));
+
+      form.append($('<input>', {
+         type: 'hidden',
+         name: 'months',
+         value: months || ''
+      }));
+      form.append($('<input>', {
+         type: 'hidden',
+         name: 'frequency',
+         value: frequency || ''
+      }));
+      form.append($('<input>', {
+         type: 'hidden',
+         name: 'per_client',
+         value: per_client ? per_client.join(',') : ''
+      }));
+
+      $('body').append(form);
+      form.submit();
+      form.remove();
    });
-
-   form.append($('<input>', {
-      type: 'hidden',
-      name: "csrf_token_name",
-      value: $('input[name="csrf_token_name"]').val()
-   }));
-
-   form.append($('<input>', { type: 'hidden', name: 'months', value: months || '' }));
-   form.append($('<input>', { type: 'hidden', name: 'frequency', value: frequency || '' }));
-   form.append($('<input>', {
-      type: 'hidden',
-      name: 'per_client',
-      value: per_client ? per_client.join(',') : ''
-   }));
-
-   $('body').append(form);
-   form.submit();
-   form.remove();
-});
 </script>
