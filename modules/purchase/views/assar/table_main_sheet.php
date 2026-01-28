@@ -49,7 +49,8 @@ $aColumns = array_map(function ($col) {
     }
     return trim($col, '"` ');
 }, $aColumns);
-
+$client_count = 0;
+$client_count = count($rResult);
 foreach ($rResult as $aRow) {
 
     $row = [];
@@ -91,4 +92,5 @@ foreach ($rResult as $aRow) {
 foreach ($footer_data as $key => $total) {
     $footer_data[$key] = app_format_money($total, '₹');
 }
+$footer_data['client_count'] = $client_count;
 $output['sums'] = $footer_data;

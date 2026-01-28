@@ -28,6 +28,9 @@ $module_name = 'module_activity_log'; ?>
    b {
       font-weight: 700;
    }
+   .n_width{
+      width: 25% !important;
+   }
 </style>
 <div id="wrapper">
    <div class="content">
@@ -159,13 +162,72 @@ $module_name = 'module_activity_log'; ?>
                               </table>
                            </div>
                            <div role="tabpanel" class="col-md-12 tab-pane tracker-pane" id="main_sheet">
-                              <table class="dt-table-loading table table-table_main_sheet" >
+                              <div id="ac-charts-section" class="">
+                                 <div class="row">
+                                    <div class="col-md-12 mtop20">
+                                       <div class="row">
+                                          <div class="quick-stats-invoices col-md-3 tw-mb-2 sm:tw-mb-0 n_width">
+                                             <div class="top_stats_wrapper">
+                                                <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                                   <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                                      <span class="tw-truncate dashboard_stat_title">Total Pool of Money</span>
+                                                   </div>
+                                                   <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                                                </div>
+                                                <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                                                   <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                                      <span class="tw-truncate dashboard_stat_value total_pool_of_money"></span>
+                                                   </div>
+                                                   <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                                                </div>
+                                             </div>
+                                          </div>
+                                          <div class="quick-stats-invoices col-md-3 tw-mb-2 sm:tw-mb-0 n_width">
+                                             <div class="top_stats_wrapper">
+                                                <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                                   <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                                      <span class="tw-truncate dashboard_stat_title">Client Payouts Forecast</span>
+                                                   </div>
+                                                   <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                                                </div>
+                                                <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                                                   <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                                      <span class="tw-truncate dashboard_stat_value client_payouts_forecast"></span>
+                                                   </div>
+                                                   <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                                                </div>
+                                             </div>
+                                          </div>
+                                          <div class="quick-stats-invoices col-md-3 tw-mb-2 sm:tw-mb-0 n_width">
+                                             <div class="top_stats_wrapper">
+                                                <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                                                   <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                                      <span class="tw-truncate dashboard_stat_title">Minimum Profit required everyday</span>
+                                                   </div>
+                                                   <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                                                </div>
+                                                <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                                                   <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                                      <span class="tw-truncate dashboard_stat_value minimum_profit_required_everyday"></span>
+                                                   </div>
+                                                   <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                                                </div>
+                                             </div>
+                                          </div>
+
+                                       </div>
+                                    </div>
+                                 </div>
+
+                              </div>
+                              <br>
+                              <table class="dt-table-loading table table-table_main_sheet">
                                  <thead>
                                     <tr>
                                        <th><?php echo _l('Client ID'); ?></th>
                                        <th><?php echo _l('Name'); ?></th>
                                        <th><?php echo _l('Assar Holds'); ?></th>
-                                       <button id="apply_to_all" class="btn btn-sm btn-primary" style="position: absolute; left: 57.5%;top: 44px;z-index: 9999;">
+                                       <button id="apply_to_all" class="btn btn-sm btn-primary" style="position: absolute; left: 57.5%;top: 9.3%;z-index: 9999;">
                                           Apply To All
                                        </button>
                                        <th style="position: relative;"><?php echo _l('Earnings Forecast %'); ?></th>
@@ -255,6 +317,22 @@ $module_name = 'module_activity_log'; ?>
          $(this).find('tfoot td').eq(0).html("Total (Per Page)");
          $(this).find('tfoot td.investment').html(sums.investment);
          $(this).find('tfoot td.client_earnings_forecast').html(sums.client_earnings_forecast);
+         $('.total_pool_of_money').text(sums.investment);
+         $('.client_payouts_forecast').text(sums.client_earnings_forecast);
+         let forecast = parseFloat(
+            sums.client_earnings_forecast
+            .replace(/₹/g, '')
+            .replace(/,/g, '')
+            .trim()
+         );
+
+         let minimum_profit_required_everyday = isNaN(forecast) ?
+            0 :
+            forecast / sums.client_count;
+
+         $('.minimum_profit_required_everyday')
+            .text('₹' + minimum_profit_required_everyday.toFixed(2));
+
       });
    });
 
