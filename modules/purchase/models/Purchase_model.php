@@ -28352,7 +28352,7 @@ class Purchase_model extends App_Model
     }
 
 
-    public function get_per_by_id_clients_charts($data = array(),$client_id)
+    public function get_per_by_id_clients_charts($data = array(),$client_id = null)
     {
         $response = array();
         $months = isset($data['months']) ? $data['months'] : '';
