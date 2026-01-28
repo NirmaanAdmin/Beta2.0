@@ -227,7 +227,7 @@ $module_name = 'module_activity_log'; ?>
                                        <th><?php echo _l('Client ID'); ?></th>
                                        <th><?php echo _l('Name'); ?></th>
                                        <th><?php echo _l('Assar Holds'); ?></th>
-                                       <button id="apply_to_all" class="btn btn-sm btn-primary" style="position: absolute; left: 57.5%;top: 9.3%;z-index: 9999;">
+                                       <button id="apply_to_all" class="btn btn-sm btn-primary" style="position: absolute; left: 57.5%;top: 9%;z-index: 9999;">
                                           Apply To All
                                        </button>
                                        <th style="position: relative;"><?php echo _l('Earnings Forecast %'); ?></th>
