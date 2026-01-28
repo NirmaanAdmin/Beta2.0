@@ -17487,10 +17487,10 @@ class purchase extends AdminController
             ->where('month_year', $month)
             ->get('tbl_assar_main_sheet')
             ->num_rows();
-       
+
         if ($exists > 0) {
             // UPDATE
-            
+
             $this->db->where('client_id', $client);
             $this->db->where('month_year', $month);
             $this->db->update('tbl_assar_main_sheet', [
@@ -17506,5 +17506,65 @@ class purchase extends AdminController
                 'client_earnings' => $earning
             ]);
         }
+    }
+
+    public function table_daily_return_net()
+    {
+        $this->app->get_table_data(module_views_path('purchase', 'assar/table_daily_return_net'));
+    }
+
+    public function sync_daily_return_net()
+    {
+        $month = $this->input->post('month');
+
+        // --------------------------------------------------
+        // Build Date Range
+        // --------------------------------------------------
+        $start = date('Y-m-08', strtotime($month . '-01'));
+        $end   = date('Y-m-06', strtotime($start . ' +1 month'));
+
+        $get_client_count = $this->db
+            ->select('COUNT(*) as cnt')
+            ->get('tblassar_clients')
+            ->row();
+        // --------------------------------------------------
+        // AVG CLIENT EARNINGS
+        // --------------------------------------------------
+        $avg_daily_pl = 0;
+        $avg_return_per = 0;
+
+        $pl_data = $this->db
+            ->select('SUM(client_earnings) as total, COUNT(*) as cnt')
+            ->where('month_year', $month)
+            ->get('tbl_assar_main_sheet')
+            ->row();
+
+        if ($pl_data && $get_client_count->cnt > 0) {
+            $avg_daily_pl = $pl_data->total / $get_client_count->cnt;
+        }
+
+        // --------------------------------------------------
+        // TOTAL INVESTMENT
+        // --------------------------------------------------
+        $investment_data = $this->db
+            ->select('SUM(investment) as total_investment')
+            ->get('tblassar_clients')
+            ->row();
+
+        if ($investment_data && $investment_data->total_investment > 0) {
+            $avg_return_per = ($avg_daily_pl / $investment_data->total_investment) * 100;
+        }
+        // --------------------------------------------------
+        // UPDATE BOTH COLUMNS
+        // --------------------------------------------------
+        $this->db
+            ->where('entry_date >=', $start)
+            ->where('entry_date <=', $end)
+            ->update(db_prefix() . 'daily_return_net', [
+                'actual_pl' => round($avg_daily_pl, 2),
+                'return_per' => round($avg_return_per, 2)
+            ]);
+
+        echo json_encode(['success' => true]);
     }
 }

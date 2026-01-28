@@ -28,7 +28,8 @@ $module_name = 'module_activity_log'; ?>
    b {
       font-weight: 700;
    }
-   .n_width{
+
+   .n_width {
       width: 25% !important;
    }
 </style>
@@ -250,7 +251,27 @@ $module_name = 'module_activity_log'; ?>
                               </table>
                            </div>
                            <div role="tabpanel" class="col-md-12 tab-pane tracker-pane" id="daily_return_net">
-                              <h3>Daily Return Net - Coming Soon</h3>
+                              <div class="mbot10 pull-right">
+                                 <button id="sync_daily_return"
+                                    class="btn btn-info">
+                                    <i class="fa fa-refresh"></i> Sync Daily Return
+                                 </button>
+                              </div>
+
+                              <table class="dt-table-loading table table-table_daily_return_net">
+                                 <thead>
+                                    <tr>
+                                       <th><?php echo _l('Date'); ?></th>
+                                       <th><?php echo _l('% return'); ?></th>
+                                       <th><?php echo _l('Actual P&L'); ?></th>
+                                       <th><?php echo _l('Notes'); ?></th>
+                                    </tr>
+                                 </thead>
+                                 <tbody></tbody>
+                                 <tfoot>
+
+                                 </tfoot>
+                              </table>
                            </div>
                         </div>
                      </div>
@@ -383,6 +404,30 @@ $module_name = 'module_activity_log'; ?>
 
       });
 
+   });
+   var table_daily_return_net = $('.table-table_daily_return_net');
+   var Params_daily_return_net = {
+      "month": "[name='month_filter']",
+   };
+   initDataTable(table_daily_return_net, admin_url + 'purchase/table_daily_return_net', [], [], Params_daily_return_net, [0, 'asc']);
+   $('#month_filter').on('change', function() {
+      table_daily_return_net.DataTable().ajax.reload();
+   });
+
+   $('#sync_daily_return').on('click', function() {
+
+      if (!confirm('Sync daily return for selected month?')) {
+         return;
+      }
+
+      $.post(admin_url + 'purchase/sync_daily_return_net', {
+         month: $('#month_filter').val()
+      }).done(function() {
+
+         alert_float('success', 'Daily return synced');
+         $('.table-table_daily_return_net').DataTable().ajax.reload();
+
+      });
    });
 </script>
 </body>
