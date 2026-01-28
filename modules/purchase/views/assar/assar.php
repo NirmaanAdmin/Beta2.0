@@ -429,6 +429,22 @@ $module_name = 'module_activity_log'; ?>
 
       });
    });
+
+   $('body').on('blur', '.actual-pl, .notes', function() {
+
+      let row_id = $(this).data('id');
+      let field = $(this).hasClass('actual-pl') ? 'actual_pl' : 'notes';
+      let value = $(this).val();
+
+      $.post(admin_url + 'purchase/update_daily_return_field', {
+         id: row_id,
+         field: field,
+         value: value
+      }).done(function() {
+         alert_float('success', 'Updated successfully');
+         $('.table-table_daily_return_net').DataTable().ajax.reload();
+      });
+   });
 </script>
 </body>
 

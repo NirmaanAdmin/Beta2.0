@@ -26,6 +26,7 @@ $investment_data = $this->ci->db
     ->select('SUM(investment) as total_investment')
     ->get('tblassar_clients')
     ->row();
+
 $get_client_count = $this->ci->db
     ->select('COUNT(*) as cnt')
     ->get('tblassar_clients')
@@ -112,12 +113,14 @@ foreach ($rResult as $row) {
     $data[] = '<input type="number"
                 step="0.01"
                 class="form-control actual-pl"
+                data-id="' . $row['id'] . '"
                 data-date="' . $row['entry_date'] . '"
                 value="' . $row['actual_pl'] . '">';
 
     // Notes
     $data[] = '<input type="text"
                 class="form-control notes"
+                data-id="' . $row['id'] . '"
                 data-date="' . $row['entry_date'] . '"
                 value="' . $row['notes'] . '">';
 

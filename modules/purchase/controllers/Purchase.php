@@ -17567,4 +17567,57 @@ class purchase extends AdminController
 
         echo json_encode(['success' => true]);
     }
+
+    public function update_daily_return_field()
+    {
+        $id    = $this->input->post('id');
+        $field = $this->input->post('field');
+        $value = $this->input->post('value');
+
+        if (!in_array($field, ['actual_pl', 'notes'])) {
+            die('Invalid field');
+        }
+
+        // ---------------------------
+        // Update NOTES only
+        // ---------------------------
+        if ($field == 'notes') {
+
+            $this->db
+                ->where('id', $id)
+                ->update(db_prefix() . 'daily_return_net', [
+                    'notes' => $value
+                ]);
+
+            echo json_encode(['success' => true]);
+            return;
+        }
+
+        // ---------------------------
+        // If ACTUAL PL updated
+        // ---------------------------
+        $actual_pl = (float)$value;
+
+        // Get total investment
+        $investment_data = $this->db
+            ->select('SUM(investment) as total_investment')
+            ->get('tblassar_clients')
+            ->row();
+
+        $return_per = 0;
+
+        if ($investment_data && $investment_data->total_investment > 0) {
+            $return_per = ($actual_pl / $investment_data->total_investment) * 100;
+        }
+
+        // Update both columns
+        $this->db
+            ->where('id', $id)
+            ->update(db_prefix() . 'daily_return_net', [
+                'actual_pl' => round($actual_pl, 2),
+                'return_per' => round($return_per, 2)
+            ]);
+
+        echo json_encode(['success' => true]);
+    }
 }
