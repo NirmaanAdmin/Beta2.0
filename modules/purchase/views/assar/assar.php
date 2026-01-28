@@ -95,6 +95,11 @@ $module_name = 'module_activity_log'; ?>
                                        Main Sheet
                                     </a>
                                  </li>
+                                 <li role="presentation">
+                                    <a href="#daily_return_net" aria-controls="daily_return_net" role="tab" id="tab_daily_return_net" data-toggle="tab">
+                                       Daily Return Net
+                                    </a>
+                                 </li>
                               </ul>
                            </div>
                         </div>
@@ -243,6 +248,9 @@ $module_name = 'module_activity_log'; ?>
                                     <td class="client_earnings_forecast"></td>
                                  </tfoot>
                               </table>
+                           </div>
+                           <div role="tabpanel" class="col-md-12 tab-pane tracker-pane" id="daily_return_net">
+                              <h3>Daily Return Net - Coming Soon</h3>
                            </div>
                         </div>
                      </div>
