@@ -20,6 +20,44 @@ class Export_purchase_order_pdf extends App_pdf
         $this->purchase_order = $this->fix_editor_html($this->purchase_order);
     }
 
+    public function Header()
+    {
+        if ($this->page != 1) {
+            return;
+        }
+        $default_project = get_default_project();
+        $project_name = get_project_name_by_id($default_project);
+        $this->SetPageOrientation('L', true);
+        $pageWidth  = $this->getPageWidth();
+        $pageHeight = $this->getPageHeight();
+        $this->SetAutoPageBreak(false, 0);
+        $this->Image(
+            FCPATH . 'uploads/export_table_company_images/landscape.jpeg',
+            0,
+            0,
+            $pageWidth,
+            $pageHeight
+        );
+
+        $this->SetTextColor(255, 255, 255);
+        $this->SetFont($this->get_font_name(), 'B', 17);
+        $this->SetXY(30, 190);
+        $this->Cell(80, 12, _l('pur_order'), 0, 0, 'C');
+
+        $this->SetTextColor(0, 0, 0);
+        $this->SetFont($this->get_font_name(), 'B', 13);
+        $this->SetXY(222, 132);
+        $this->Cell(80, 12, $project_name, 0, 0, 'C');
+
+        $this->SetTextColor(0, 0, 0);
+        $this->SetFont($this->get_font_name(), 'B', 10);
+        $this->SetXY(224, 200);
+        $this->Cell(80, 12, 'BASILIUS INTERNATIONAL LLP', 0, 0, 'C');
+
+        $this->SetAutoPageBreak(true, PDF_MARGIN_BOTTOM);
+        $this->setPageMark();
+    }
+
     // Override the Footer method from TCPDF or FPDI
     public function Footer()
     {
