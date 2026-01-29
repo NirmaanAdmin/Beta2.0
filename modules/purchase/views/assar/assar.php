@@ -32,6 +32,17 @@ $module_name = 'module_activity_log'; ?>
    .n_width {
       width: 25% !important;
    }
+
+   .close-tab {
+      color: red;
+      margin-left: 8px;
+      cursor: pointer;
+      font-weight: bold;
+   }
+
+   .close-tab:hover {
+      color: darkred;
+   }
 </style>
 <div id="wrapper">
    <div class="content">
@@ -307,7 +318,30 @@ $module_name = 'module_activity_log'; ?>
 
                            </div>
                            <div role="tabpanel" class="col-md-12 tab-pane tracker-pane" id="monthly_summary">
-                              <h3>Monthly Summary Coming Soon...</h3>
+                              <table class="dt-table-loading table table-table_monthly_summary">
+                                 <thead>
+                                    <tr>
+                                       <th><?php echo _l('Client ID'); ?></th>
+                                       <th><?php echo _l('Name'); ?></th>
+                                       <th><?php echo _l('Investment'); ?></th>
+                                       <th><?php echo _l('Principal'); ?></th>
+                                       <th><?php echo _l('Total Days'); ?></th>
+                                       <th><?php echo _l('Total P&L'); ?></th>
+                                       <th><?php echo _l('Rolled Over? (Y/N)'); ?></th>
+                                       <th><?php echo _l('Commission'); ?></th>
+                                       <th><?php echo _l('Payout GROSS'); ?></th>
+                                       <th><?php echo _l('TDS'); ?></th>
+                                       <th><?php echo _l('Payout Net'); ?></th>
+                                       <th><?php echo _l('Payout Date'); ?></th>
+                                       <th><?php echo _l('Notes'); ?></th>
+                                       <th><?php echo _l('Net Rollover'); ?></th>
+                                    </tr>
+                                 </thead>
+                                 <tbody></tbody>
+                                 <tfoot>
+
+                                 </tfoot>
+                              </table>
                            </div>
 
                         </div>
@@ -547,6 +581,11 @@ $module_name = 'module_activity_log'; ?>
                      role="tab"
                      data-toggle="tab">
                      ${rangeText}
+                     <span class="close-tab"
+                           data-from="${row.date_from}"
+                           data-to="${row.date_to}">
+                        &times;
+                     </span>
                   </a>
                </li>
                `);
@@ -565,7 +604,7 @@ $module_name = 'module_activity_log'; ?>
             $('#rangeTabContent .tab-pane').removeClass('active');
 
             // 🔥 ACTIVATE LAST RANGE TAB
-            let lastTab = $('#rangeTabs li:not(:last) a').last();
+            let lastTab = $('#rangeTabs li:not(:last) a').first();
             lastTab.parent().addClass('active');
             $(lastTab.attr('href')).addClass('active');
 
@@ -623,6 +662,11 @@ $module_name = 'module_activity_log'; ?>
                   role="tab"
                   data-toggle="tab">
                   ${rangeText}
+                  <span class="close-tab"
+                        data-from="${from}"
+                        data-to="${to}">
+                     &times;
+                  </span>
                </a>
                </li>
             `);
@@ -682,50 +726,100 @@ $module_name = 'module_activity_log'; ?>
          let range = formatDate(from) + ' - ' + formatDate(to);
 
          let html = `
-      <table class="table table-bordered">
-      <thead>
-      <tr>
-      <th>Date Range</th>
-      <th>Client ID</th>
-      <th>Client Name</th>
-      <th>Investment</th>
-      <th>Assar Holds</th>
-      <th>Client P&L %</th>
-      <th>Client P&L</th>
-      <th>Cummulative Month P&L</th>
-      <th>Accumulated P&L</th>
-      <th>Cummulative Capital</th>
-      <th>Notes</th>
-      </tr>
-      </thead>
-      <tbody>
-      `;
+                     <table class="table table-bordered">
+                     <thead>
+                     <tr>
+                     <th>Date Range</th>
+                     <th>Client ID</th>
+                     <th>Client Name</th>
+                     <th>Investment</th>
+                     <th>Assar Holds</th>
+                     <th>Client P&L %</th>
+                     <th>Client P&L</th>
+                     <th>Cummulative Month P&L</th>
+                     <th>Accumulated P&L</th>
+                     <th>Cummulative Capital</th>
+                     <th>Notes</th>
+                     </tr>
+                     </thead>
+                     <tbody>
+                     `;
 
          $.each(res, function(i, row) {
             html += `
-         <tr>
-         <td>${range}</td>
-         <td>${row.client_id}</td>
-         <td>${row.client_name}</td>
-         <td>₹${row.investment}</td>
-         <td>₹${row.assar_holds}</td>
-         <td>${row.client_pl_percent}</td>
-         <td>₹${row.client_pl}</td>
-         <td>₹${row.cumulative_month_pl}</td>
-         <td>₹${row.accumulated_pl}</td>
-         <td>₹${row.cumulative_capital}</td>
-         <td>
-            <input class="form-control notes_new" data-id="${row.id}"
-                  value="${row.notes??''}">
-         </td>
-         </tr>
-         `;
+                     <tr>
+                     <td>${range}</td>
+                     <td>${row.client_id}</td>
+                     <td>${row.client_name}</td>
+                     <td>₹${row.investment}</td>
+                     <td>₹${row.assar_holds}</td>
+                     <td>${row.client_pl_percent}</td>
+                     <td>₹${row.client_pl}</td>
+                     <td>₹${row.cumulative_month_pl}</td>
+                     <td>₹${row.accumulated_pl}</td>
+                     <td>₹${row.cumulative_capital}</td>
+                     <td>
+                        <input class="form-control notes_new" data-id="${row.id}"
+                              value="${row.notes??''}">
+                     </td>
+                     </tr>
+                     `;
          });
 
          html += '</tbody></table>';
 
          $('#' + tabId).html(html);
       }
+
+      $(document).on('click', '.close-tab', function(e) {
+
+         e.stopPropagation(); // prevent tab click
+
+         if (!confirm('Delete this date range data?')) return;
+
+         let from = $(this).data('from');
+         let to = $(this).data('to');
+
+         let tabLink = $(this).closest('a');
+         let tabId = tabLink.attr('href');
+
+         $.post(
+            "<?php echo admin_url('purchase/delete_daily_return_range'); ?>", {
+               from_date: from,
+               to_date: to
+            },
+            function() {
+
+               // 🔥 remove tab + content
+               tabLink.parent().remove();
+               $(tabId).remove();
+
+               // 🔥 remove from usedRanges
+               usedRanges = usedRanges.filter(r => {
+                  return !(r.from == from && r.to == to);
+               });
+
+               // ✅ FLOAT MESSAGE
+               alert_float('success', 'Deleted successfully');
+
+               // 🔥 find next available tab
+               let nextTab = $('#rangeTabs li:not(:last) a').first();
+
+               if (nextTab.length) {
+
+                  nextTab.tab('show');
+                  nextTab.trigger('click'); // load data
+
+               } else {
+
+                  $('#tab_plus').tab('show');
+
+               }
+
+            }
+         );
+
+      });
 
    });
    $('body').on('blur', '.notes_new', function() {
@@ -741,6 +835,19 @@ $module_name = 'module_activity_log'; ?>
       }).done(function() {
          alert_float('success', 'Updated successfully');
       });
+   });
+
+
+
+
+
+   var table_monthly_summary = $('.table-table_monthly_summary');
+   var Params_monthly_summary = {
+      "month": "[name='month_filter']",
+   };
+   initDataTable(table_monthly_summary, admin_url + 'purchase/table_monthly_summary', [], [], Params_monthly_summary, [0, 'asc']);
+   $('#month_filter').on('change', function() {
+      table_monthly_summary.DataTable().ajax.reload();
    });
 </script>
 

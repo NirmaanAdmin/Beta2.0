@@ -17714,7 +17714,7 @@ class purchase extends AdminController
         $rows = $this->db
             ->select('date_from, date_to')
             ->from(db_prefix() . '_daily_return_snapshot')
-            ->group_by(['date_from','date_to'])
+            ->group_by(['date_from', 'date_to'])
             ->order_by('date_from', 'ASC')
             ->get()
             ->result_array();
@@ -17749,5 +17749,23 @@ class purchase extends AdminController
             ]);
 
         echo json_encode(['success' => true]);
+    }
+    public function delete_daily_return_range()
+    {
+        $from = $this->input->post('from_date');
+        $to   = $this->input->post('to_date');
+
+        $this->db
+            ->where('date_from', $from)
+            ->where('date_to', $to)
+            ->delete('tbl_daily_return_snapshot');
+
+        echo json_encode(['status' => 'ok']);
+    }
+
+
+    public function table_monthly_summary()
+    {
+        $this->app->get_table_data(module_views_path('purchase', 'assar/table_monthly_summary'));
     }
 }
