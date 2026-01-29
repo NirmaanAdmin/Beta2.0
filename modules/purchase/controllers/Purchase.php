@@ -17620,4 +17620,134 @@ class purchase extends AdminController
 
         echo json_encode(['success' => true]);
     }
+
+    // public function get_clients_for_daily_return()
+    // {
+    //     $from = $this->input->post('from_date');
+    //     $to   = $this->input->post('to_date');
+
+    //     // Get total return % for date range
+    //     $total_return = $this->db
+    //         ->select('ROUND(IFNULL(SUM(return_per),0),2) as total_return')
+    //         ->from('tbldaily_return_net')
+    //         ->where('entry_date >=', $from)
+    //         ->where('entry_date <=', $to)
+    //         ->get()
+    //         ->row()
+    //         ->total_return;
+
+    //     // Get clients
+    //     $clients = $this->db
+    //         ->select('client_id,name,investment')
+    //         ->from('tblassar_clients')
+    //         ->get()
+    //         ->result_array();
+
+    //     // Attach same return % to every client
+    //     foreach ($clients as &$c) {
+    //         $c['client_pl_percent'] = $total_return;
+    //     }
+
+    //     echo json_encode($clients);
+    // }
+
+    public function get_clients_for_daily_return()
+    {
+        $from = $this->input->post('from_date');
+        $to   = $this->input->post('to_date');
+
+        // 1) Calculate total return %
+        $total_return = $this->db
+            ->select('IFNULL(SUM(return_per),0) as total')
+            ->from('tbldaily_return_net')
+            ->where('entry_date >=', $from)
+            ->where('entry_date <=', $to)
+            ->get()
+            ->row()
+            ->total;
+
+        // 2) Fetch clients
+        $clients = $this->db
+            ->get('tblassar_clients')
+            ->result_array();
+
+        $insertData = [];
+
+        foreach ($clients as $c) {
+
+            $pl = ($c['investment'] * $total_return) / 100;
+
+            $insertData[] = [
+                'date_from' => $from,
+                'date_to' => $to,
+                'client_id' => $c['client_id'],
+                'client_name' => $c['name'],
+                'investment' => $c['investment'],
+                'assar_holds' => $c['investment'],
+                'client_pl_percent' => $total_return,
+                'client_pl' => $pl,
+                'cumulative_month_pl' => $pl,
+                'accumulated_pl' => $pl,
+                'cumulative_capital' => $c['investment'] + $pl
+            ];
+        }
+
+        // 3) Delete if same range exists
+        $this->db->where('date_from', $from)
+            ->where('date_to', $to)
+            ->delete('tbl_daily_return_snapshot');
+
+        // 4) Save snapshot
+        $this->db->insert_batch('tbl_daily_return_snapshot', $insertData);
+
+        // 5) Fetch back from snapshot table
+        $result = $this->db
+            ->where('date_from', $from)
+            ->where('date_to', $to)
+            ->get('tbl_daily_return_snapshot')
+            ->result_array();
+
+        echo json_encode($result);
+    }
+    public function get_saved_daily_return_ranges()
+    {
+        $rows = $this->db
+            ->select('date_from, date_to')
+            ->from(db_prefix() . '_daily_return_snapshot')
+            ->group_by(['date_from','date_to'])
+            ->order_by('date_from', 'ASC')
+            ->get()
+            ->result_array();
+
+        echo json_encode($rows);
+    }
+
+
+
+    public function get_snapshot_rows()
+    {
+        $from = $this->input->post('from_date');
+        $to   = $this->input->post('to_date');
+
+        echo json_encode(
+            $this->db
+                ->where('date_from', $from)
+                ->where('date_to', $to)
+                ->get('tbl_daily_return_snapshot')
+                ->result_array()
+        );
+    }
+    public function update_daily_return_notes()
+    {
+        $id    = $this->input->post('id');
+        $notes = $this->input->post('value');
+
+        $this->db
+            ->where('id', $id)
+            ->update(db_prefix() . '_daily_return_snapshot', [
+                'notes' => $notes
+            ]);
+
+        echo json_encode(['success' => true]);
+    }
 }

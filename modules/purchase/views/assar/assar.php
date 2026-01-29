@@ -279,14 +279,56 @@ $module_name = 'module_activity_log'; ?>
                               </table>
                            </div>
                            <div role="tabpanel" class="col-md-12 tab-pane tracker-pane" id="daily_return_log">
-                              <h3>Daily Return Log - Coming Soon</h3>
+
+                              <div class="horizontal-tabs">
+                                 <ul class="nav nav-tabs nav-tabs-horizontal mbot15" id="rangeTabs" role="tablist">
+
+                                    <!-- PLUS TAB -->
+                                    <li role="presentation" class="active">
+                                       <a href="#plus" id="tab_plus" role="tab" data-toggle="tab">
+                                          <i class="fa fa-plus"></i>
+                                       </a>
+                                    </li>
+
+                                 </ul>
+                              </div>
+
+                              <div class="tab-content" id="rangeTabContent">
+
+                                 <!-- PLUS CONTENT -->
+                                 <div role="tabpanel" class="tab-pane active" id="plus"></div>
+
+                              </div>
+
                            </div>
+
                         </div>
                      </div>
                   </div>
                </div>
             </div>
          </div>
+      </div>
+   </div>
+</div>
+<div class="modal fade" id="dateRangeModal">
+   <div class="modal-dialog">
+      <div class="modal-content">
+
+         <div class="modal-header">
+            <h4>Select Date Range</h4>
+         </div>
+
+         <div class="modal-body">
+            <input type="date" id="from_date" class="form-control">
+            <br>
+            <input type="date" id="to_date" class="form-control">
+         </div>
+
+         <div class="modal-footer">
+            <button id="createTab" class="btn btn-primary">Create</button>
+         </div>
+
       </div>
    </div>
 </div>
@@ -453,7 +495,249 @@ $module_name = 'module_activity_log'; ?>
          $('.table-table_daily_return_net').DataTable().ajax.reload();
       });
    });
+
+   $(document).ready(function() {
+
+      let usedRanges = [];
+
+      /* ---------- FORMAT DATE ---------- */
+      function formatDate(d) {
+         return new Date(d).toLocaleDateString('en-IN', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric'
+         });
+      }
+
+      /* ---------- LOAD SAVED TABS ---------- */
+      $.ajax({
+         url: "<?php echo admin_url('purchase/get_saved_daily_return_ranges'); ?>",
+         dataType: "json",
+         success: function(ranges) {
+
+            if (ranges.length == 0) {
+               return; // no saved tabs
+            }
+
+            $.each(ranges, function(i, row) {
+
+               usedRanges.push({
+                  from: row.date_from,
+                  to: row.date_to
+               });
+
+               let rangeText =
+                  formatDate(row.date_from) + ' - ' + formatDate(row.date_to);
+
+               let tabId = 'tab_' + row.date_from + '_' + row.date_to;
+
+               $('#rangeTabs li:last').before(`
+               <li role="presentation">
+                  <a href="#${tabId}"
+                     data-from="${row.date_from}"
+                     data-to="${row.date_to}"
+                     role="tab"
+                     data-toggle="tab">
+                     ${rangeText}
+                  </a>
+               </li>
+               `);
+
+               $('#rangeTabContent').append(`
+               <div role="tabpanel"
+                     class="tab-pane"
+                     id="${tabId}">
+               </div>
+               `);
+
+            });
+
+            // 🔥 REMOVE ACTIVE FROM PLUS
+            $('#rangeTabs li').removeClass('active');
+            $('#rangeTabContent .tab-pane').removeClass('active');
+
+            // 🔥 ACTIVATE LAST RANGE TAB
+            let lastTab = $('#rangeTabs li:not(:last) a').last();
+            lastTab.parent().addClass('active');
+            $(lastTab.attr('href')).addClass('active');
+
+            // 🔥 LOAD DATA
+            lastTab.trigger('click');
+
+         }
+
+      });
+
+      /* ---------- PLUS CLICK ---------- */
+      $(document).on('click', '#tab_plus', function() {
+         $('#dateRangeModal').modal('show');
+      });
+
+      /* ---------- OVERLAP ---------- */
+      function isOverlap(from, to) {
+         for (let i = 0; i < usedRanges.length; i++) {
+            if (from <= usedRanges[i].to && to >= usedRanges[i].from) {
+               return true;
+            }
+         }
+         return false;
+      }
+
+      /* ---------- CREATE TAB ---------- */
+      $('#createTab').click(function() {
+
+         let from = $('#from_date').val();
+         let to = $('#to_date').val();
+
+         if (!from || !to) {
+            alert('Select dates');
+            return;
+         }
+
+         if (isOverlap(from, to)) {
+            alert('Range already exists');
+            return;
+         }
+
+         usedRanges.push({
+            from,
+            to
+         });
+
+         let rangeText = formatDate(from) + ' - ' + formatDate(to);
+         let tabId = 'tab_' + Date.now();
+
+         $('#rangeTabs li:last').before(`
+               <li role="presentation">
+               <a href="#${tabId}"
+                  data-from="${from}"
+                  data-to="${to}"
+                  role="tab"
+                  data-toggle="tab">
+                  ${rangeText}
+               </a>
+               </li>
+            `);
+
+         $('#rangeTabContent').append(`
+               <div role="tabpanel"
+                  class="tab-pane"
+                  id="${tabId}">
+               </div>
+            `);
+
+         // Save + fetch snapshot
+         $.ajax({
+            url: "<?php echo admin_url('purchase/get_clients_for_daily_return'); ?>",
+            type: "POST",
+            dataType: "json",
+            data: {
+               from_date: from,
+               to_date: to
+            },
+            success: function(res) {
+               renderTable(tabId, res, from, to);
+            }
+         });
+
+         $('#rangeTabs a[href="#' + tabId + '"]').tab('show');
+         $('#dateRangeModal').modal('hide');
+      });
+
+      /* ---------- CLICK EXISTING TAB ---------- */
+      $(document).on('click', '#rangeTabs a[data-from]', function() {
+
+         let from = $(this).data('from');
+         let to = $(this).data('to');
+         let tabId = $(this).attr('href').replace('#', '');
+
+         if ($('#' + tabId).html().trim() != '') return;
+
+         $.ajax({
+            url: "<?php echo admin_url('purchase/get_snapshot_rows'); ?>",
+            type: "POST",
+            dataType: "json",
+            data: {
+               from_date: from,
+               to_date: to
+            },
+            success: function(res) {
+               renderTable(tabId, res, from, to);
+            }
+         });
+
+      });
+
+      /* ---------- RENDER TABLE ---------- */
+      function renderTable(tabId, res, from, to) {
+
+         let range = formatDate(from) + ' - ' + formatDate(to);
+
+         let html = `
+      <table class="table table-bordered">
+      <thead>
+      <tr>
+      <th>Date Range</th>
+      <th>Client ID</th>
+      <th>Client Name</th>
+      <th>Investment</th>
+      <th>Assar Holds</th>
+      <th>Client P&L %</th>
+      <th>Client P&L</th>
+      <th>Cummulative Month P&L</th>
+      <th>Accumulated P&L</th>
+      <th>Cummulative Capital</th>
+      <th>Notes</th>
+      </tr>
+      </thead>
+      <tbody>
+      `;
+
+         $.each(res, function(i, row) {
+            html += `
+         <tr>
+         <td>${range}</td>
+         <td>${row.client_id}</td>
+         <td>${row.client_name}</td>
+         <td>₹${row.investment}</td>
+         <td>₹${row.assar_holds}</td>
+         <td>${row.client_pl_percent}</td>
+         <td>₹${row.client_pl}</td>
+         <td>₹${row.cumulative_month_pl}</td>
+         <td>₹${row.accumulated_pl}</td>
+         <td>₹${row.cumulative_capital}</td>
+         <td>
+            <input class="form-control notes_new" data-id="${row.id}"
+                  value="${row.notes??''}">
+         </td>
+         </tr>
+         `;
+         });
+
+         html += '</tbody></table>';
+
+         $('#' + tabId).html(html);
+      }
+
+   });
+   $('body').on('blur', '.notes_new', function() {
+
+      let row_id = $(this).data('id');
+      let field = 'notes';
+      let value = $(this).val();
+
+      $.post(admin_url + 'purchase/update_daily_return_notes', {
+         id: row_id,
+         field: field,
+         value: value
+      }).done(function() {
+         alert_float('success', 'Updated successfully');
+      });
+   });
 </script>
+
+
+
 </body>
 
 </html>
