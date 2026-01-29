@@ -106,6 +106,11 @@ $module_name = 'module_activity_log'; ?>
                                        Daily Return Log
                                     </a>
                                  </li>
+                                 <li role="presentation">
+                                    <a href="#monthly_summary" aria-controls="monthly_summary" role="tab" id="tab_monthly_summary" data-toggle="tab">
+                                       Monthly Summary
+                                    </a>
+                                 </li>
                               </ul>
                            </div>
                         </div>
@@ -300,6 +305,9 @@ $module_name = 'module_activity_log'; ?>
 
                               </div>
 
+                           </div>
+                           <div role="tabpanel" class="col-md-12 tab-pane tracker-pane" id="monthly_summary">
+                              <h3>Monthly Summary Coming Soon...</h3>
                            </div>
 
                         </div>
