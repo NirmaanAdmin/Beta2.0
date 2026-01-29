@@ -1,9 +1,11 @@
 <?php 
 $query = '';
-if(is_admin() && $main_tree == 0) {
-	$query = 'parent_id = '.$parent_id.' AND filetype = "folder"';
-} else if ($creator_type == 'staff') {
-	$query = 'parent_id = '.$parent_id.' and ((creator_id IN (1, '.$user_id.') and creator_type = "staff") or (creator_id = 0 and creator_type = "public")) and filetype = "folder"';
+if ($creator_type == 'staff') {
+	if ($main_tree == 0) {
+		$query = 'parent_id = '.$parent_id.' AND filetype = "folder"';
+	} else {
+		$query = 'parent_id = '.$parent_id.' and ((creator_id IN (1, '.$user_id.') and creator_type = "staff") or (creator_id = 0 and creator_type = "public")) and filetype = "folder"';
+	}
 } else {
 	$query = 'parent_id = '.$parent_id.' and ((creator_id IN (1, '.$user_id.') and creator_type = "customer") or (creator_id = 0 and creator_type = "public")) and filetype = "folder"';
 }
