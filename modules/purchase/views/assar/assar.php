@@ -733,24 +733,24 @@ $module_name = 'module_activity_log'; ?>
          let totalCapital = 0;
 
          let html = `
-<table class="table table-bordered">
-<thead>
-<tr>
-<th>Date Range</th>
-<th>Client ID</th>
-<th>Client Name</th>
-<th>Investment</th>
-<th>Assar Holds</th>
-<th>Client P&L %</th>
-<th>Client P&L</th>
-<th>Cummulative P&L this month</th>
-<th>Accumulated P&L Till date</th>
-<th>Cummulative Capital</th>
-<th>Notes</th>
-</tr>
-</thead>
-<tbody>
-`;
+               <table class="table table-bordered">
+               <thead>
+               <tr>
+               <th>Date Range</th>
+               <th>Client ID</th>
+               <th>Client Name</th>
+               <th>Investment</th>
+               <th>Assar Holds</th>
+               <th>Client P&L %</th>
+               <th>Client P&L</th>
+               <th>Cummulative P&L this month</th>
+               <th>Accumulated P&L Till date</th>
+               <th>Cummulative Capital</th>
+               <th>Notes</th>
+               </tr>
+               </thead>
+               <tbody>
+               `;
 
          $.each(res, function(i, row) {
 

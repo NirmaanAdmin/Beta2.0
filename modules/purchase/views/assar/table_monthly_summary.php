@@ -72,7 +72,37 @@ if (!empty($month)) {
 } else {
     $total_days = date('t'); // fallback current month
 }
+// ================================
+// Prepare Total P&L Per Client
+// ================================
 
+$client_pl_map = [];
+
+if (!empty($month)) {
+
+    // Build month start & end
+    if (strpos($month, '-') !== false) {
+        $month_start = date('Y-m-01', strtotime($month . '-01'));
+        $month_end   = date('Y-m-t', strtotime($month . '-01'));
+    } else {
+        $year = date('Y');
+        $month_start = $year . '-' . str_pad($month, 2, '0', STR_PAD_LEFT) . '-01';
+        $month_end   = date('Y-m-t', strtotime($month_start));
+    }
+    
+    // Fetch summed P&L
+    $pl_results = $this->ci->db
+        ->select('client_id, SUM(client_pl) as total_pl')
+        ->from(db_prefix() . '_daily_return_snapshot')
+        ->where('date_from >=', $month_start)
+        ->where('date_to <=', $month_end)
+        ->group_by('client_id')
+        ->get()
+        ->result_array();
+    foreach ($pl_results as $row) {
+        $client_pl_map[$row['client_id']] = $row['total_pl'];
+    }
+}
 foreach ($rResult as $aRow) {
     $row = [];
 
@@ -90,7 +120,13 @@ foreach ($rResult as $aRow) {
         } elseif ($aColumns[$i] == 2) {
             $_data = $total_days;
         } elseif ($aColumns[$i] == 3) {
-            $_data = 'Total P&L';
+            $client_id = $aRow['client_id'];
+
+            $pl = isset($client_pl_map[$client_id])
+                ? $client_pl_map[$client_id]
+                : 0;
+
+            $_data = app_format_money($pl, '₹');
         } elseif ($aColumns[$i] == 4) {
             $_data = 'Rolled Over? (Y/N)';
         } elseif ($aColumns[$i] == 5) {
