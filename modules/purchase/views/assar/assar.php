@@ -725,51 +725,93 @@ $module_name = 'module_activity_log'; ?>
 
          let range = formatDate(from) + ' - ' + formatDate(to);
 
+         let totalInvestment = 0;
+         let totalAssar = 0;
+         let totalPL = 0;
+         let totalCumMonthPL = 0;
+         let totalAccumPL = 0;
+         let totalCapital = 0;
+
          let html = `
-                     <table class="table table-bordered">
-                     <thead>
-                     <tr>
-                     <th>Date Range</th>
-                     <th>Client ID</th>
-                     <th>Client Name</th>
-                     <th>Investment</th>
-                     <th>Assar Holds</th>
-                     <th>Client P&L %</th>
-                     <th>Client P&L</th>
-                     <th>Cummulative Month P&L</th>
-                     <th>Accumulated P&L</th>
-                     <th>Cummulative Capital</th>
-                     <th>Notes</th>
-                     </tr>
-                     </thead>
-                     <tbody>
-                     `;
+<table class="table table-bordered">
+<thead>
+<tr>
+<th>Date Range</th>
+<th>Client ID</th>
+<th>Client Name</th>
+<th>Investment</th>
+<th>Assar Holds</th>
+<th>Client P&L %</th>
+<th>Client P&L</th>
+<th>Cummulative P&L this month</th>
+<th>Accumulated P&L Till date</th>
+<th>Cummulative Capital</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+`;
 
          $.each(res, function(i, row) {
+
+            let investment = parseFloat(row.investment) || 0;
+            let assar = parseFloat(row.assar_holds) || 0;
+            let pl = parseFloat(row.client_pl) || 0;
+            let cumMonth = parseFloat(row.cumulative_month_pl) || 0;
+            let accum = parseFloat(row.accumulated_pl) || 0;
+            let capital = parseFloat(row.cumulative_capital) || 0;
+
+            totalInvestment += investment;
+            totalAssar += assar;
+            totalPL += pl;
+            totalCumMonthPL += cumMonth;
+            totalAccumPL += accum;
+            totalCapital += capital;
+
             html += `
                      <tr>
                      <td>${range}</td>
                      <td>${row.client_id}</td>
                      <td>${row.client_name}</td>
-                     <td>₹${row.investment}</td>
-                     <td>₹${row.assar_holds}</td>
+                     <td>₹${investment.toFixed(2)}</td>
+                     <td>₹${assar.toFixed(2)}</td>
                      <td>${row.client_pl_percent}</td>
-                     <td>₹${row.client_pl}</td>
-                     <td>₹${row.cumulative_month_pl}</td>
-                     <td>₹${row.accumulated_pl}</td>
-                     <td>₹${row.cumulative_capital}</td>
+                     <td>₹${pl.toFixed(2)}</td>
+                     <td>₹${cumMonth.toFixed(2)}</td>
+                     <td>₹${accum.toFixed(2)}</td>
+                     <td>₹${capital.toFixed(2)}</td>
                      <td>
-                        <input class="form-control notes_new" data-id="${row.id}"
-                              value="${row.notes??''}">
+                        <input class="form-control notes-new"
+                              data-id="${row.id}"
+                              value="${row.notes ?? ''}">
                      </td>
                      </tr>
                      `;
+
          });
 
-         html += '</tbody></table>';
+         // ✅ TOTAL ROW
+         html += `
+               </tbody>
+               <tfoot>
+               <tr style="font-weight:bold;background:#f5f5f5;">
+                  <td colspan="3">TOTAL</td>
+                  <td>₹${totalInvestment.toFixed(2)}</td>
+                  <td>₹${totalAssar.toFixed(2)}</td>
+                  <td></td>
+                  <td>₹${totalPL.toFixed(2)}</td>
+                  <td>₹${totalCumMonthPL.toFixed(2)}</td>
+                  <td>₹${totalAccumPL.toFixed(2)}</td>
+                  <td>₹${totalCapital.toFixed(2)}</td>
+                  <td></td>
+               </tr>
+               </tfoot>
+               </table>
+               `;
 
          $('#' + tabId).html(html);
       }
+
 
       $(document).on('click', '.close-tab', function(e) {
 
@@ -790,19 +832,15 @@ $module_name = 'module_activity_log'; ?>
             },
             function() {
 
-               // 🔥 remove tab + content
                tabLink.parent().remove();
                $(tabId).remove();
 
-               // 🔥 remove from usedRanges
                usedRanges = usedRanges.filter(r => {
                   return !(r.from == from && r.to == to);
                });
 
-               // ✅ FLOAT MESSAGE
                alert_float('success', 'Deleted successfully');
 
-               // 🔥 find next available tab
                let nextTab = $('#rangeTabs li:not(:last) a').first();
 
                if (nextTab.length) {
@@ -836,10 +874,6 @@ $module_name = 'module_activity_log'; ?>
          alert_float('success', 'Updated successfully');
       });
    });
-
-
-
-
 
    var table_monthly_summary = $('.table-table_monthly_summary');
    var Params_monthly_summary = {
