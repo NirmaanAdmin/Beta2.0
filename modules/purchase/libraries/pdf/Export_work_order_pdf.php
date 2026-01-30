@@ -15,9 +15,47 @@ class Export_work_order_pdf extends App_pdf
         parent::__construct();
         $this->work_order = $work_order;
 
-        $this->SetTitle(_l('Vendor Billing Tracker'));
+        $this->SetTitle(_l('work_order'));
         # Don't remove these lines - important for the PDF layout
         $this->work_order = $this->fix_editor_html($this->work_order);
+    }
+
+    public function Header()
+    {
+        if ($this->page != 1) {
+            return;
+        }
+        $default_project = get_default_project();
+        $project_name = get_project_name_by_id($default_project);
+        $this->SetPageOrientation('L', true);
+        $pageWidth  = $this->getPageWidth();
+        $pageHeight = $this->getPageHeight();
+        $this->SetAutoPageBreak(false, 0);
+        $this->Image(
+            FCPATH . 'uploads/export_table_company_images/landscape.jpeg',
+            0,
+            0,
+            $pageWidth,
+            $pageHeight
+        );
+
+        $this->SetTextColor(255, 255, 255);
+        $this->SetFont($this->get_font_name(), 'B', 17);
+        $this->SetXY(30, 190);
+        $this->Cell(80, 12, _l('work_order'), 0, 0, 'C');
+
+        $this->SetTextColor(0, 0, 0);
+        $this->SetFont($this->get_font_name(), 'B', 13);
+        $this->SetXY(222, 132);
+        $this->Cell(80, 12, $project_name, 0, 0, 'C');
+
+        $this->SetTextColor(0, 0, 0);
+        $this->SetFont($this->get_font_name(), 'B', 10);
+        $this->SetXY(224, 200);
+        $this->Cell(80, 12, 'BASILIUS INTERNATIONAL LLP', 0, 0, 'C');
+
+        $this->SetAutoPageBreak(true, PDF_MARGIN_BOTTOM);
+        $this->setPageMark();
     }
 
     // Override the Footer method from TCPDF or FPDI
