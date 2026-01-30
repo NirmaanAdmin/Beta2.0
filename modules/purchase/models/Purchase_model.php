@@ -21788,7 +21788,7 @@ class Purchase_model extends App_Model
                                 $this->db->where('pc_id', $pcbvalue['pc_id']);
                                 $this->db->where('item_id', $pcbvalue['item_id']);
                                 $this->db->update(db_prefix() . 'pur_pc_bills_bifurcation', [
-                                    'item_description' => $pcbvalue['item_description'],
+                                    'item_description' => isset($newbillitems[$rqd['id']][$pcbvalue['item_id']]['item_description']) ? $newbillitems[$rqd['id']][$pcbvalue['item_id']]['item_description'] : NULL,
                                     'hold' => $pcbvalue['hold'],
                                     'billed_quantity' => $pcbvalue['billed_quantity'],
                                 ]);
@@ -21797,7 +21797,7 @@ class Purchase_model extends App_Model
                                     'bill_item_id' => $rqd['id'],
                                     'item_id' => $pcbvalue['item_id'],
                                     'pc_id' => $pcbvalue['pc_id'],
-                                    'item_description' => $pcbvalue['item_description'],
+                                    'item_description' => isset($newbillitems[$rqd['id']][$pcbvalue['item_id']]['item_description']) ? $newbillitems[$rqd['id']][$pcbvalue['item_id']]['item_description'] : NULL,
                                     'hold' => $pcbvalue['hold'],
                                     'billed_quantity' => $pcbvalue['billed_quantity'],
                                 ]);
@@ -25648,7 +25648,7 @@ class Purchase_model extends App_Model
             $html .= '<tr class="pc_bill_items">';
             $html .= '<td class="hide">'.form_hidden('newpcbillitems['.$item_key.']['.$pc_id.']['.$value['item_id'].'][pc_id]', $pc_id).'</td>';
             $html .= '<td class="hide">'.form_hidden('newpcbillitems['.$item_key.']['.$pc_id.']['.$value['item_id'].'][item_id]', $value['item_id']).'</td>';
-            $html .= '<td align="left">' . render_textarea('newpcbillitems['.$item_key.']['.$pc_id.']['.$value['item_id'].'][item_description]', '', $value['item_description'], ['rows' => 2]) . '</td>';
+            $html .= '<td align="left">' . render_textarea('newpcbillitems['.$item_key.']['.$pc_id.']['.$value['item_id'].'][item_description]', '', $value['item_description'], ['rows' => 2, 'readonly'=> true]) . '</td>';
             $html .= '<td align="left">'.$bill_percentage.'</td>';
             $html .= '<td align="left" class="hide all_pc_bill_percentage">'.form_hidden('newpcbillitems['.$item_key.']['.$pc_id.']['.$value['item_id'].'][bill_percentage]', $bill_percentage).'</td>';
             $html .= '<td align="left" class="all_pc_bill_unit_price"></td>';
