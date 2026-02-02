@@ -21494,7 +21494,7 @@ class Purchase_model extends App_Model
 
         if(!empty($payment_certificates)) {
             foreach ($payment_certificates as $pkey => $pvalue) {
-                $row .= '<td class="pc_bill_bifurcation">
+                $row .= '<td class="pc_bill_bifurcation bill_bifurcation_' . $item_key . '_' . $pvalue['id'] . '">
                     <a href="javascript:void(0)" 
                        onclick="add_pc_bill_bifurcation(' . (int)$item_key . ', ' . $unit_price . ', ' . $pvalue['id'] . '); return false;" 
                        class="btn btn-info pull-right">

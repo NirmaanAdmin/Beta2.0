@@ -260,16 +260,27 @@
     //     total += calculate_bill_bifurcation(item_key, unit_price);
     //   });
     // }
-    // var rows = $('.all_pc_bill_row_model');
-    // if (rows.length > 0) {
-    //   $.each(rows, function () {
-    //     var row = $(this);
-    //     var item_key = parseFloat(row.data('item_key')) || 0;
-    //     var unit_price = parseFloat(row.data('unit_price')) || 0;
-    //     var pc_id = parseFloat(row.data('pc_id')) || 0;
-    //     total += calculate_pc_bill_bifurcation(item_key, unit_price, pc_id);
-    //   });
-    // }
+    var pc_bill_rows = $('.all_pc_bill_row_model');
+    if (pc_bill_rows.length > 0) {
+      $.each(pc_bill_rows, function () {
+        var row = $(this);
+        var item_key = parseFloat(row.data('item_key')) || 0;
+        var unit_price = parseFloat(row.data('unit_price')) || 0;
+        var pc_id = parseFloat(row.data('pc_id')) || 0;
+        var pc_amount = calculate_pc_bill_bifurcation(item_key, unit_price, pc_id);
+        var selector = '.bill_bifurcation_' + item_key + '_' + pc_id;
+        $(selector).find('.pc-amount').remove();
+        $(selector).find('a').after(
+          '<div class="pc-amount-wrapper" ' +
+          'style="display:flex;justify-content:flex-end;margin-top:4px;width:100%;">' +
+            '<p class="pc-amount" ' +
+            'style="margin:0;font-weight:600;white-space:nowrap;">' +
+              format_money(pc_amount) +
+            '</p>' +
+          '</div>'
+        );
+      });
+    }
     var rows = $('.table.has-calculations tbody tr.item');
     $.each(rows, function () {
       var quantity = parseFloat($(this).find('td.quantities input').val()) || 0;
