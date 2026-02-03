@@ -21505,6 +21505,14 @@ class Purchase_model extends App_Model
                    . _l('add_bill_bifurcation') .
                 '</a>
             </td>';
+        } else if($manual_pur_bill == 1) {
+            $row .= '<td>
+                <a href="javascript:void(0)" 
+                   onclick="bill_bifurcation_unsaved_item(); return false;" 
+                   class="btn btn-success pull-right">'
+                   . _l('add_bill_bifurcation') .
+                '</a>
+            </td>';
         } else {
             $row .= '<td></td>';
         }
@@ -21515,6 +21523,14 @@ class Purchase_model extends App_Model
                     $row .= '<td class="pc_bill_bifurcation bill_bifurcation_' . $item_key . '_' . $pvalue['id'] . '">
                         <a href="javascript:void(0)" 
                            onclick="add_pc_bill_bifurcation(' . (int)$item_key . ', ' . $unit_price . ', ' . $pvalue['id'] . '); return false;" 
+                           class="btn btn-info pull-right">
+                        Add PC' . ($pkey + 1) . ' Bifurcation
+                        </a>
+                    </td>';
+                } else if($manual_pur_bill == 1) {
+                    $row .= '<td>
+                        <a href="javascript:void(0)" 
+                           onclick="bill_bifurcation_unsaved_item(); return false;" 
                            class="btn btn-info pull-right">
                         Add PC' . ($pkey + 1) . ' Bifurcation
                         </a>

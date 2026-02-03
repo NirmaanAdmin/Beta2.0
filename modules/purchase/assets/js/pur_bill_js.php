@@ -435,6 +435,11 @@
     $('#pc_bill_modal_'+id+'_'+pc_id).modal('show');
   }
 
+  function bill_bifurcation_unsaved_item() {
+    alert_float('warning', "Please save the item before adding the PC Bill bifurcation.");
+    return false;
+  }
+
   function calculate_bill_bifurcation(id, unit_price) {
     var total_bill_unit_price = 0;
     var total_bill_percentage = 0;
