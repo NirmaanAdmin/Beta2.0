@@ -17177,6 +17177,8 @@ class purchase extends AdminController
 
     public function pur_invoice_export_pdf()
     {
+        ini_set('memory_limit', '2096M');
+        ini_set('max_execution_time', 0);
         $pur_invoice = $this->purchase_model->get_pur_invoice_pdf_html();
         try {
             $pdf = $this->purchase_model->pur_invoice_pdf($pur_invoice);
@@ -17198,6 +17200,8 @@ class purchase extends AdminController
 
     public function pur_invoice_export_excel()
     {
+        ini_set('memory_limit', '2096M');
+        ini_set('max_execution_time', 0);
         $this->purchase_model->pur_invoice_export_excel();
     }
 
