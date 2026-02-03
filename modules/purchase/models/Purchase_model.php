@@ -21437,7 +21437,7 @@ class Purchase_model extends App_Model
         return true;
     }
 
-    public function create_purchase_bill_row_template($name = '', $item_name = '', $item_description = '', $item_code = '', $quantity = '', $unit_id = '', $unit_name = '', $unit_price = '', $total_money = 0, $item_key = '', $is_edit = false, $currency_rate = 1, $to_currency = '', $pur_bill_id = '', $payment_certificates = array())
+    public function create_purchase_bill_row_template($name = '', $item_name = '', $item_description = '', $item_code = '', $quantity = '', $unit_id = '', $unit_name = '', $unit_price = '', $total_money = 0, $item_key = '', $is_edit = false, $currency_rate = 1, $to_currency = '', $pur_bill_id = '', $payment_certificates = array(), $manual_pur_bill = 0)
     {
         $this->load->model('currencies_model');
         $base_currency = $this->currencies_model->get_base_currency();
@@ -21459,7 +21459,7 @@ class Purchase_model extends App_Model
             $row .= '<tr class="main"><td></td>';
         } else {
             $row .= '<tr class="sortable item list_item_' . $item_key . '">
-                    <td class="dragger"><input type="hidden" class="order" name="' . $name . '[order]"><input type="hidden" class="ids" name="' . $name . '[id]" value="' . $item_key . '"></td>';
+                    <td class="dragger"><input type="hidden" class="order" name="' . $name . '[order]"><input type="hidden" class="ids" name="' . $name . '[id]" value="' . $item_key . '"><input type="hidden" class="manual-pur-bill" name="' . $name . '[manual_pur_bill]" value="' . $manual_pur_bill . '"></td>';
             $name_item_code = $name . '[item_code]';
             $name_item_name = $name . '[item_name]';
             $name_item_description = $name . '[item_description]';
@@ -21474,39 +21474,68 @@ class Purchase_model extends App_Model
         }
         $row .= '<td class="">' . render_textarea($name_item_name, '', $item_name, ['rows' => 2, 'placeholder' => _l('pur_item_name'), 'readonly' => true]) . '</td>';
 
-        $row .= '<td class="">' . render_textarea($name_item_description, '', $item_description, ['rows' => 2, 'placeholder' => _l('item_description'), 'readonly' => true]) . '</td>';
+        if($is_edit == false) {
+            $array_item_description_attr = ['rows' => 2, 'placeholder' => _l('item_description')];
+        } else {
+            $array_item_description_attr = ['rows' => 2, 'placeholder' => _l('item_description'), 'readonly' => true];
+        }
+        $row .= '<td class="">' . render_textarea($name_item_description, '', $item_description, $array_item_description_attr) . '</td>';
 
+        if ($is_edit == false) {
+            unset($array_rate_attr['readonly']);
+            unset($array_qty_attr['readonly']);
+        }
         $row .= '<td class="rate">' . render_input($name_unit_price, '', $unit_price, 'number', $array_rate_attr, [], 'no-margin', $text_right_class) . '</td>';
 
         $row .= '
-        <td class="quantities">' .
-            render_input($name_quantity, '', $quantity, 'number', $array_qty_attr, [], 'no-margin', $text_right_class) .
-            render_input($name_unit_name, '', $unit_name, 'text', ['placeholder' => _l('unit'), 'readonly' => true], [], 'no-margin', 'input-transparent text-right pur_input_none') .
-        '</td>';
+        <td class="quantities">'.render_input($name_quantity, '', $quantity, 'number', $array_qty_attr, [], 'no-margin', $text_right_class);
+        if ($is_edit == false) {
+            $units_list = $this->get_units();
+            $row .= render_select($name_unit_id, $units_list, ['id', 'label'], '', $unit_id, ['id']);
+        } else {
+            $row .= render_input($name_unit_name, '', $unit_name, 'text', ['placeholder' => _l('unit'), 'readonly' => true], [], 'no-margin', 'input-transparent text-right pur_input_none');
+        }
+        $row .= '</td>';
 
-        $row .= '<td class="bill_bifurcation">
-            <a href="javascript:void(0)" 
-               onclick="add_bill_bifurcation(' . (int)$item_key . ', ' . $unit_price . '); return false;" 
-               class="btn btn-success pull-right">'
-               . _l('add_bill_bifurcation') .
-            '</a>
-        </td>';
+        if ($is_edit == true) {
+            $row .= '<td class="bill_bifurcation">
+                <a href="javascript:void(0)" 
+                   onclick="add_bill_bifurcation(' . (int)$item_key . ', ' . $unit_price . '); return false;" 
+                   class="btn btn-success pull-right">'
+                   . _l('add_bill_bifurcation') .
+                '</a>
+            </td>';
+        } else {
+            $row .= '<td></td>';
+        }
 
         if(!empty($payment_certificates)) {
             foreach ($payment_certificates as $pkey => $pvalue) {
-                $row .= '<td class="pc_bill_bifurcation bill_bifurcation_' . $item_key . '_' . $pvalue['id'] . '">
-                    <a href="javascript:void(0)" 
-                       onclick="add_pc_bill_bifurcation(' . (int)$item_key . ', ' . $unit_price . ', ' . $pvalue['id'] . '); return false;" 
-                       class="btn btn-info pull-right">
-                    Add PC' . ($pkey + 1) . ' Bifurcation
-                    </a>
-                </td>';
+                if ($is_edit == true) {
+                    $row .= '<td class="pc_bill_bifurcation bill_bifurcation_' . $item_key . '_' . $pvalue['id'] . '">
+                        <a href="javascript:void(0)" 
+                           onclick="add_pc_bill_bifurcation(' . (int)$item_key . ', ' . $unit_price . ', ' . $pvalue['id'] . '); return false;" 
+                           class="btn btn-info pull-right">
+                        Add PC' . ($pkey + 1) . ' Bifurcation
+                        </a>
+                    </td>';
+                } else {
+                    $row .= '<td></td>';
+                }
             }
         }
 
         $row .= '<td class="hide commodity_code">' . render_input($name_item_code, '', $item_code, 'text', ['placeholder' => _l('commodity_code')]) . '</td>';
 
         $row .= '<td class="hide unit_id">' . render_input($name_unit_id, '', $unit_id, 'text', ['placeholder' => _l('unit_id')]) . '</td>';
+
+        if($name == '') {
+            $row .= '<td><button type="button" onclick="pur_add_item_to_table(\'undefined\',\'undefined\'); return false;" class="btn pull-right btn-info"><i class="fa fa-check"></i></button></td>';
+        } else if($manual_pur_bill == 1) {
+            $row .= '<td><a href="#" class="btn btn-danger pull-right" onclick="pur_delete_item(this,' . $item_key . ',\'.invoice-item\'); return false;"><i class="fa fa-trash"></i></a></td>';
+        } else {
+            $row .= '<td></td>';
+        }
 
         $row .= '</tr>';
         return $row;
@@ -21663,40 +21692,15 @@ class Purchase_model extends App_Model
 
         if (count($new_order) > 0) {
             foreach ($new_order as $key => $rqd) {
-
                 $dt_data = [];
-                $dt_data['pur_invoice'] = $id;
+                $dt_data['pur_bill'] = $id;
                 $dt_data['item_code'] = $rqd['item_code'];
-                $dt_data['unit_id'] = isset($rqd['unit_id']) ? $rqd['unit_id'] : null;
-                $dt_data['unit_price'] = $rqd['unit_price'];
-                $dt_data['into_money'] = $rqd['into_money'];
-                $dt_data['total'] = $rqd['total'];
-                $dt_data['tax_value'] = $rqd['tax_value'];
-                $dt_data['item_name'] = $rqd['item_name'];
-                $dt_data['total_money'] = $rqd['total_money'];
-                $dt_data['discount_money'] = $rqd['discount_money'];
-                $dt_data['discount_percent'] = $rqd['discount'];
                 $dt_data['description'] = nl2br($rqd['item_description']);
-
-                $tax_money = 0;
-                $tax_rate_value = 0;
-                $tax_rate = null;
-                $tax_id = null;
-                $tax_name = null;
-
-                if (isset($rqd['tax_select'])) {
-                    $tax_rate_data = $this->pur_get_tax_rate($rqd['tax_select']);
-                    $tax_rate_value = $tax_rate_data['tax_rate'];
-                    $tax_rate = $tax_rate_data['tax_rate_str'];
-                    $tax_id = $tax_rate_data['tax_id_str'];
-                    $tax_name = $tax_rate_data['tax_name_str'];
-                }
-
-                $dt_data['tax'] = $tax_id;
-                $dt_data['tax_rate'] = $tax_rate;
-                $dt_data['tax_name'] = $tax_name;
-
+                $dt_data['unit_id'] = isset($rqd['unit_id']) ? $rqd['unit_id'] : null;
+                $dt_data['unit_price'] = ($rqd['unit_price'] != '' && $rqd['unit_price'] != null) ? $rqd['unit_price'] : 0;
                 $dt_data['quantity'] = ($rqd['quantity'] != '' && $rqd['quantity'] != null) ? $rqd['quantity'] : 0;
+                $dt_data['item_name'] = isset($rqd['item_name']) ? $rqd['item_name'] : null;
+                $dt_data['manual_pur_bill'] = isset($rqd['manual_pur_bill']) ? $rqd['manual_pur_bill'] : 0;
 
                 $this->db->insert(db_prefix() . 'pur_bill_details', $dt_data);
                 $new_quote_insert_id = $this->db->insert_id();

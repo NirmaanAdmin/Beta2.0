@@ -30,45 +30,6 @@
       pur_calculate_total();
     });
 
-    $("body").on('change', 'select[name="currency"]', function() {
-
-      var currency_id = $(this).val();
-      if (currency_id != '') {
-        $.post(admin_url + 'purchase/get_currency_rate/' + currency_id).done(function(response) {
-          response = JSON.parse(response);
-          if (response.currency_rate != 1) {
-            $('#currency_rate_div').removeClass('hide');
-
-            $('input[name="currency_rate"]').val(response.currency_rate).change();
-
-            $('#convert_str').html(response.convert_str);
-            $('.th_currency').html(response.currency_name);
-          } else {
-            $('input[name="currency_rate"]').val(response.currency_rate).change();
-            $('#currency_rate_div').addClass('hide');
-            $('#convert_str').html(response.convert_str);
-            $('.th_currency').html(response.currency_name);
-
-          }
-
-        });
-      } else {
-        alert_float('warning', "<?php echo _l('please_select_currency'); ?>")
-      }
-      init_pi_currency();
-    });
-
-    $("input[name='currency_rate']").on('change', function() {
-      var currency_rate = $(this).val();
-      var rows = $('.table.has-calculations tbody tr.item');
-      $.each(rows, function() {
-        var old_price = $(this).find('td.rate input[name="og_price"]').val();
-        var new_price = currency_rate * old_price;
-        $(this).find('td.rate input[type="number"]').val(accounting.toFixed(new_price, app.options.decimal_places)).change();
-
-      });
-    });
-
     $("body").on("change", 'select[name="discount_type"]', function() {
       // if discount_type == ''
       if ($(this).val() === "") {
@@ -158,7 +119,6 @@
         response = JSON.parse(response);
         if (response) {
           $('select[name="currency"]').val(response.currency).change();
-          $('input[name="currency_rate"]').val(response.currency_rate).change();
           $('input[name="shipping_fee"]').val(response.shipping_fee);
           $('input[name="order_discount"]').val(response.order_discount);
           $('select[name="add_discount_type"]').val('amount');
@@ -251,6 +211,7 @@
       return false;
     }
     var total = 0;
+    var order_total = 0; 
     // var rows = $('.all_bill_row_model');
     // if (rows.length > 0) {
     //   $.each(rows, function () {
@@ -287,7 +248,12 @@
       var rate = parseFloat($(this).find('td.rate input').val()) || 0;
       var item_amount = quantity * rate;
       total += item_amount;
+      var manual_pur_bill = $(this).find('td input.manual-pur-bill').val() || 0;
+      if(manual_pur_bill == 0) {
+        order_total += item_amount;
+      }
     });
+    $('.wh-order-total').html(format_money(order_total));
     $('.wh-total').html(
       format_money(total) +
       hidden_input('grand_total', accounting.toFixed(total, app.options.decimal_places))
@@ -321,10 +287,9 @@
 
   function pur_add_item_to_preview(id) {
     "use strict";
-    var currency_rate = $('input[name="currency_rate"]').val();
+    var currency_rate = 1;
     requestGetJSON('purchase/get_item_by_id/' + id + '/' + currency_rate).done(function(response) {
       clear_item_preview_values();
-
       $('.main input[name="item_code"]').val(response.itemid);
       $('.main textarea[name="item_name"]').val(response.code_description);
       $('.main textarea[name="description"]').val(response.long_description);
@@ -332,10 +297,7 @@
       $('.main input[name="unit_name"]').val(response.unit_name);
       $('.main input[name="unit_id"]').val(response.unit_id);
       $('.main input[name="quantity"]').val(1);
-
       $('.selectpicker').selectpicker('refresh');
-
-
       var taxSelectedArray = [];
       if (response.taxname && response.taxrate) {
         taxSelectedArray.push(response.taxname + '|' + response.taxrate);
@@ -343,15 +305,12 @@
       if (response.taxname_2 && response.taxrate_2) {
         taxSelectedArray.push(response.taxname_2 + '|' + response.taxrate_2);
       }
-
       $('.main select.taxes').selectpicker('val', taxSelectedArray);
       $('.main input[name="unit"]').val(response.unit_name);
-
       var $currency = $("body").find('.accounting-template select[name="currency"]');
       var baseCurency = $currency.attr('data-base');
       var selectedCurrency = $currency.find('option:selected').val();
       var $rateInputPreview = $('.main input[name="rate"]');
-
       if (baseCurency == selectedCurrency) {
         $rateInputPreview.val(response.purchase_price);
       } else {
@@ -362,7 +321,6 @@
           $rateInputPreview.val(itemCurrencyRate);
         }
       }
-
       $(document).trigger({
         type: "item-added-to-preview",
         item: response,
@@ -373,24 +331,18 @@
 
   function pur_add_item_to_table(data, itemid) {
     "use strict";
-
     data = typeof(data) == 'undefined' || data == 'undefined' ? pur_get_item_preview_values() : data;
-
     if (data.quantity == "") {
-
       return;
     }
-    var currency_rate = $('input[name="currency_rate"]').val();
-    var to_currency = $('select[name="currency"]').val();
     var table_row = '';
     var item_key = lastAddedItemKey ? lastAddedItemKey += 1 : $("body").find('.invoice-items-table tbody .item').length + 1;
     lastAddedItemKey = item_key;
     $("body").append('<div class="dt-loader"></div>');
-    pur_get_item_row_template('newitems[' + item_key + ']', data.item_name, data.description, data.quantity, data.unit_name, data.unit_price, data.taxname, data.item_code, data.unit_id, data.tax_rate, data.discount, itemid, currency_rate, to_currency).done(function(output) {
+    var pur_bill_id = '<?php echo $pur_bill->id; ?>';
+    pur_get_item_row_template('newitems[' + item_key + ']', data.item_name, data.description, data.quantity, data.unit_name, data.unit_price, data.item_code, data.unit_id, itemid, pur_bill_id).done(function(output) {
       table_row += output;
-
       $('.invoice-item table.invoice-items-table.items tbody').append(table_row);
-
       setTimeout(function() {
         pur_calculate_total();
       }, 15);
@@ -400,7 +352,6 @@
       $('body').find('#items-warning').remove();
       $("body").find('.dt-loader').remove();
       $('#item_select').selectpicker('val', '');
-
       return true;
     });
     return false;
@@ -408,27 +359,19 @@
 
   function pur_get_item_preview_values() {
     "use strict";
-
     var response = {};
     response.item_name = $('.invoice-item .main textarea[name="item_name"]').val();
     response.description = $('.invoice-item .main textarea[name="description"]').val();
     response.quantity = $('.invoice-item .main input[name="quantity"]').val();
     response.unit_name = $('.invoice-item .main input[name="unit_name"]').val();
     response.unit_price = $('.invoice-item .main input[name="unit_price"]').val();
-    response.taxname = $('.main select.taxes').selectpicker('val');
     response.item_code = $('.invoice-item .main input[name="item_code"]').val();
-    response.unit_id = $('.invoice-item .main input[name="unit_id"]').val();
-    response.tax_rate = $('.invoice-item .main input[name="tax_rate"]').val();
-    response.discount = $('.invoice-item .main input[name="discount"]').val();
-
-
+    response.unit_id = $('.invoice-item .main select[name="unit_id"]').val();
     return response;
   }
 
-
   function pur_clear_item_preview_values(parent) {
     "use strict";
-
     var previewArea = $(parent + ' .main');
     previewArea.find('input').val('');
     previewArea.find('textarea').val('');
@@ -448,7 +391,6 @@
 
   function pur_delete_item(row, itemid, parent) {
     "use strict";
-
     $(row).parents('tr').addClass('animated fadeOut', function() {
       setTimeout(function() {
         $(row).parents('tr').remove();
@@ -460,28 +402,22 @@
     }
   }
 
-  function pur_get_item_row_template(name, item_name, description, quantity, unit_name, unit_price, taxname, item_code, unit_id, tax_rate, discount, item_key, currency_rate, to_currency) {
+  function pur_get_item_row_template(name, item_name, description, quantity, unit_name, unit_price, item_code, unit_id, item_key, pur_bill_id) {
     "use strict";
-
     jQuery.ajaxSetup({
       async: false
     });
-
-    var d = $.post(admin_url + 'purchase/get_purchase_invoice_row_template', {
+    var d = $.post(admin_url + 'purchase/get_purchase_bill_row_template', {
       name: name,
       item_name: item_name,
       item_description: description,
       quantity: quantity,
       unit_name: unit_name,
       unit_price: unit_price,
-      taxname: taxname,
       item_code: item_code,
       unit_id: unit_id,
-      tax_rate: tax_rate,
-      discount: discount,
       item_key: item_key,
-      currency_rate: currency_rate,
-      to_currency: to_currency
+      pur_bill_id: pur_bill_id
     });
     jQuery.ajaxSetup({
       async: true

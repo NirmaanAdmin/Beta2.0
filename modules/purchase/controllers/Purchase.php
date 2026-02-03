@@ -15216,6 +15216,8 @@ class purchase extends AdminController
 
         $data['payment_certificates'] = $this->purchase_model->get_all_bill_payment_certificates($id);
 
+        $pur_bill_row_template = $this->purchase_model->create_purchase_bill_row_template('', '', '', '', '', '', '', '', 0, '', false, 1, '', '', $data['payment_certificates'], 0);
+
         if (count($data['pur_bill_detail']) > 0) {
             $index_order = 0;
             foreach ($data['pur_bill_detail'] as $bill_detail) {
@@ -15228,7 +15230,7 @@ class purchase extends AdminController
                     $item_name = pur_get_item_variatiom($bill_detail['item_code']);
                 }
 
-                $pur_bill_row_template .= $this->purchase_model->create_purchase_bill_row_template('items[' . $index_order . ']', $item_name, $bill_detail['description'], $bill_detail['item_code'], $bill_detail['quantity'], $bill_detail['unit_id'], $unit_name, $bill_detail['unit_price'], $bill_detail['total_money'], $bill_detail['id'], true, $currency_rate, $to_currency, $data['pur_bill']->id, $data['payment_certificates']);
+                $pur_bill_row_template .= $this->purchase_model->create_purchase_bill_row_template('items[' . $index_order . ']', $item_name, $bill_detail['description'], $bill_detail['item_code'], $bill_detail['quantity'], $bill_detail['unit_id'], $unit_name, $bill_detail['unit_price'], $bill_detail['total_money'], $bill_detail['id'], true, $currency_rate, $to_currency, $data['pur_bill']->id, $data['payment_certificates'], $bill_detail['manual_pur_bill']);
 
                 $pur_bill_row_model .= $this->purchase_model->get_purchase_bill_row_model($bill_detail, $item_name);
 
@@ -15259,6 +15261,27 @@ class purchase extends AdminController
 
         $this->load->view('pur_bills/pur_bills', $data);
     }
+
+    /**
+     * Gets the bill bifurcation row template.
+     */
+    public function get_purchase_bill_row_template()
+    {
+        $name = $this->input->post('name');
+        $item_name = $this->input->post('item_name');
+        $item_description = $this->input->post('item_description');
+        $quantity = $this->input->post('quantity');
+        $unit_name = $this->input->post('unit_name');
+        $unit_price = $this->input->post('unit_price');
+        $item_code = $this->input->post('item_code');
+        $unit_id = $this->input->post('unit_id');
+        $item_key = $this->input->post('item_key');
+        $pur_bill_id = $this->input->post('pur_bill_id');
+        $payment_certificates = $this->purchase_model->get_all_bill_payment_certificates($pur_bill_id);
+
+        echo $this->purchase_model->create_purchase_bill_row_template($name, $item_name, $item_description, $item_code, $quantity, $unit_id, $unit_name, $unit_price, 0, $item_key, false, 1, '', $pur_bill_id, $payment_certificates, 1);
+    }
+
     public function pur_bill_form()
     {
         if ($this->input->post()) {

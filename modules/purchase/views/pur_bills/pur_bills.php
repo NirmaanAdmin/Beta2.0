@@ -190,6 +190,11 @@
 			            } ?>
 			        </div>
 					<div class="panel-body mtop10 invoice-item">
+						<div class="row">
+			              <div class="col-md-4">
+			                <?php $this->load->view('purchase/item_include/main_item_select'); ?>
+			              </div>
+			            </div>
 				        <div class="row">
 				        	<div class="col-md-12">
 				        		<div class="table-responsive s_table ">
@@ -208,6 +213,7 @@
 				        								<th align="right">PC<?php echo $pkey+1; ?> Bifurcation <i class="fa fa-exclamation-circle" aria-hidden="true" data-toggle="tooltip" data-title="<?php echo $pvalue['pc_number']; ?>"></i></th>
 				        							<?php }
 				        						} ?>
+				        						<th align="center"><i class="fa fa-cog"></i></th>
 				        					</tr>
 				        				</thead>
 				        				<tbody>
@@ -219,6 +225,13 @@
 				        	<div class="col-md-8 col-md-offset-4">
 				        		<table class="table text-right">
 				        			<tbody>
+				        				<tr>
+				        					<td>
+				        						<span class="bold"><?php echo _l('Order total'); ?> :</span>
+				        					</td>
+				        					<td class="wh-order-total">
+				        					</td>
+				        				</tr>
 				        				<tr id="totalmoney">
 				        					<td><span class="bold"><?php echo _l('grand_total'); ?> :</span>
 				        						<?php echo form_hidden('grand_total', ''); ?>
