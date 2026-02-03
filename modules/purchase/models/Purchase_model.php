@@ -21474,22 +21474,23 @@ class Purchase_model extends App_Model
         }
         $row .= '<td class="">' . render_textarea($name_item_name, '', $item_name, ['rows' => 2, 'placeholder' => _l('pur_item_name'), 'readonly' => true]) . '</td>';
 
-        if($is_edit == false) {
-            $array_item_description_attr = ['rows' => 2, 'placeholder' => _l('item_description')];
-        } else {
-            $array_item_description_attr = ['rows' => 2, 'placeholder' => _l('item_description'), 'readonly' => true];
+        $array_item_description_attr = ['rows' => 2, 'placeholder' => _l('item_description')];
+        if ($is_edit && $manual_pur_bill != 1) {
+            $array_item_description_attr['readonly'] = true;
         }
         $row .= '<td class="">' . render_textarea($name_item_description, '', $item_description, $array_item_description_attr) . '</td>';
 
-        if ($is_edit == false) {
-            unset($array_rate_attr['readonly']);
+        if (!$is_edit || ($is_edit && $manual_pur_bill == 1)) {
             unset($array_qty_attr['readonly']);
+        }
+        if (!$is_edit) {
+            unset($array_rate_attr['readonly']);
         }
         $row .= '<td class="rate">' . render_input($name_unit_price, '', $unit_price, 'number', $array_rate_attr, [], 'no-margin', $text_right_class) . '</td>';
 
         $row .= '
         <td class="quantities">'.render_input($name_quantity, '', $quantity, 'number', $array_qty_attr, [], 'no-margin', $text_right_class);
-        if ($is_edit == false) {
+        if (!$is_edit || ($is_edit && $manual_pur_bill == 1)) {
             $units_list = $this->get_units();
             $row .= render_select($name_unit_id, $units_list, ['id', 'label'], '', $unit_id, ['id']);
         } else {
@@ -21830,6 +21831,10 @@ class Purchase_model extends App_Model
 
         if (count($remove_order) > 0) {
             foreach ($remove_order as $remove_id) {
+                $this->db->where('bill_item_id', $remove_id);
+                $this->db->delete(db_prefix() . 'pur_bills_bifurcation');
+                $this->db->where('bill_item_id', $remove_id);
+                $this->db->delete(db_prefix() . 'pur_pc_bills_bifurcation');
                 $this->db->where('id', $remove_id);
                 if ($this->db->delete(db_prefix() . 'pur_bill_details')) {
                     $affectedRows++;
