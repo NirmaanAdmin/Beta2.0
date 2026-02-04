@@ -25403,7 +25403,6 @@ class Purchase_model extends App_Model
         </table>
         <br>';
 
-        $default_purchase_bill_rows = get_default_purchase_bill_rows();
         $payment_certificates = $this->get_all_bill_payment_certificates($id);
 
         $html .= '<table class="table" style="width: 100%" border="1" style="font-size:12px">
@@ -25417,6 +25416,7 @@ class Purchase_model extends App_Model
 
         if(!empty($pur_bill_detail)) {
             foreach ($pur_bill_detail as $pkey => $pvalue) {
+                $default_purchase_bill_rows = get_default_purchase_bill_rows();
                 $item_name = pur_get_item_variatiom($pvalue['item_code']);
                 $html .= '<tr class="pay_cert_title">
                   <td>'.$item_name.'</td>
@@ -25461,6 +25461,7 @@ class Purchase_model extends App_Model
                 }
                 if(!empty($payment_certificates)) {
                     foreach ($payment_certificates as $pckey => $pcvalue) {
+                        $default_purchase_bill_rows = get_default_purchase_bill_rows();
                         $html .= '<tr class="pay_cert_value">
                           <td colspan="6"><b>PC'.($pckey + 1).' Bifurcation ('.$pcvalue['pc_number'].')</b></td>
                         </tr>';
