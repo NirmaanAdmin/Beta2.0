@@ -225,6 +225,17 @@
 				        	<div class="col-md-8 col-md-offset-4">
 				        		<table class="table text-right">
 				        			<tbody>
+				        				<?php
+				        				if(!empty($payment_certificates)) {
+				        					foreach ($payment_certificates as $pkey => $pvalue) { ?>
+						        				<tr>
+						        					<td>
+						        						<span class="bold">Total PC<?php echo ($pkey + 1); ?> Bifurcation :</span>
+						        					</td>
+						        					<td class="pc-total-<?php echo $pvalue['id']; ?>"></td>
+						        				</tr>
+						        			<?php }
+				        				} ?>
 				        				<tr>
 				        					<td>
 				        						<span class="bold"><?php echo _l('Order total'); ?> :</span>
