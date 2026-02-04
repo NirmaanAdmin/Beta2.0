@@ -52,7 +52,7 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <?php echo render_select('department', $departments, ['departmentid', 'name'], 'ticket_settings_departments', (count($departments) == 1) ? $departments[0]['departmentid'] : ''); ?>
+                                        <?php echo render_select('department', $departments, ['departmentid', 'name'], 'ticket_settings_departments', (count($departments) == 1) ? $departments[0]['departmentid'] : '', ['required' => true]); ?>
                                     </div>
                                     <div class="col-md-6">
                                         <?php echo render_input('cc', 'CC'); ?>
