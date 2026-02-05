@@ -236,6 +236,15 @@
 						        				</tr>
 						        			<?php }
 				        				} ?>
+				        				<?php
+				        				if(!empty($payment_certificates)) { ?>
+				        					<tr>
+					        					<td>
+					        						<span class="bold">Total for Total PC :</span>
+					        					</td>
+					        					<td class="total_for_total_pc"></td>
+					        				</tr>
+					        			<?php } ?>
 				        				<tr>
 				        					<td>
 				        						<span class="bold"><?php echo _l('Order total'); ?> :</span>
