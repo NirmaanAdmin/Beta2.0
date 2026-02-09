@@ -94,21 +94,21 @@ class Download extends App_Controller
     {
         $this->load->model('tickets_model');
         if ($folder_indicator == 'ticket') {
-            if (is_logged_in()) {
-                $this->db->where('id', $attachmentid);
-                $attachment = $this->db->get(db_prefix() . 'ticket_attachments')->row();
-                if (!$attachment) {
-                    show_404();
-                }
-                $ticket   = $this->tickets_model->get_ticket_by_id($attachment->ticketid);
-                $ticketid = $attachment->ticketid;
-                if ($ticket->userid == get_client_user_id() || is_staff_logged_in()) {
-                    if ($attachment->id != $attachmentid) {
-                        show_404();
-                    }
-                    $path = get_upload_path_by_type('ticket') . $ticketid . '/' . $attachment->file_name;
-                }
+            // if (is_logged_in()) {
+            $this->db->where('id', $attachmentid);
+            $attachment = $this->db->get(db_prefix() . 'ticket_attachments')->row();
+            if (!$attachment) {
+                show_404();
             }
+            $ticket   = $this->tickets_model->get_ticket_by_id($attachment->ticketid);
+            $ticketid = $attachment->ticketid;
+            // if ($ticket->userid == get_client_user_id() || is_staff_logged_in()) {
+            if ($attachment->id != $attachmentid) {
+                show_404();
+            }
+            $path = get_upload_path_by_type('ticket') . $ticketid . '/' . $attachment->file_name;
+            // }
+            // }
         } elseif ($folder_indicator == 'newsfeed') {
             if (is_staff_logged_in()) {
                 if (!$attachmentid) {
@@ -133,7 +133,7 @@ class Download extends App_Controller
                 }
                 $path = get_upload_path_by_type('purchase') . $attachment->rel_type . '/' . $attachment->rel_id . '/' . $attachment->file_name;
             }
-        }  elseif ($folder_indicator == 'payment_certificate') {
+        } elseif ($folder_indicator == 'payment_certificate') {
             if (is_staff_logged_in() || is_vendor_logged_in()) {
                 if (!$attachmentid) {
                     show_404();
@@ -146,7 +146,7 @@ class Download extends App_Controller
                 $rel_type = 'payment_certificate';
                 $path = get_upload_path_by_type('purchase') . $rel_type . '/' . $attachment->rel_id . '/' . $attachment->file_name;
             }
-        }  elseif ($folder_indicator == 'meeting_management') {
+        } elseif ($folder_indicator == 'meeting_management') {
             if (is_staff_logged_in()) {
                 if (!$attachmentid) {
                     show_404();
@@ -223,7 +223,7 @@ class Download extends App_Controller
             $this->db->where('rel_type', 'expense');
             $file = $this->db->get(db_prefix() . 'files')->row();
             $path = get_upload_path_by_type('expense') . $file->rel_id . '/' . $file->file_name;
-        // l_attachment_key is if request is coming from public form
+            // l_attachment_key is if request is coming from public form
         } elseif ($folder_indicator == 'lead_attachment' || $folder_indicator == 'l_attachment_key') {
             if (!is_staff_logged_in() && strpos($_SERVER['HTTP_REFERER'], 'forms/l/') === false) {
                 show_404();
