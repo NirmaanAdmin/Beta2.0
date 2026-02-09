@@ -4668,7 +4668,7 @@ class Warehouse_model extends App_Model
 			if (!empty($delivery_value['quantities_json'])) {
 				$quantities_json = json_decode($delivery_value['quantities_json'], true);
 				foreach ($quantities_json as $key => $value) {
-					$all_quantities .= get_vendor_name($key) . ": <b>" . _d($value) . "</b>, ";
+					$all_quantities .= get_vendor_name($key) . ": <b>" . $value . "</b>, ";
 				}
 				$all_quantities = rtrim($all_quantities, ', ');
 			}
@@ -4693,7 +4693,7 @@ class Warehouse_model extends App_Model
 			if (!empty($delivery_value['lot_number'])) {
 				$lot_number = json_decode($delivery_value['lot_number'], true);
 				foreach ($lot_number as $key => $value) {
-					$all_lot_number .= _d($value) . ", ";
+					$all_lot_number .= $value . ", ";
 				}
 				$all_lot_number = rtrim($all_lot_number, ', ');
 			}
