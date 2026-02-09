@@ -240,9 +240,18 @@
 				        				if(!empty($payment_certificates)) { ?>
 				        					<tr>
 					        					<td>
-					        						<span class="bold">Total for Total PC :</span>
+					        						<span class="bold">Total Amount of PC :</span>
 					        					</td>
-					        					<td class="total_for_total_pc"></td>
+					        					<td class="total_amount_of_pc"></td>
+					        				</tr>
+					        			<?php } ?>
+					        			<?php
+				        				if(!empty($payment_certificates)) { ?>
+				        					<tr>
+					        					<td>
+					        						<span class="bold">Balance amount for payment :</span>
+					        					</td>
+					        					<td class="balance_amount_for_payment"></td>
 					        				</tr>
 					        			<?php } ?>
 				        				<tr>

@@ -223,7 +223,8 @@
     // }
     var pc_bill_rows = $('.all_pc_bill_row_model');
     var total_pc_bifurcation = {};
-    var total_for_total_pc = 0;
+    var total_amount_of_pc = 0;
+    var balance_amount_for_payment = 0;
     if (pc_bill_rows.length > 0) {
       $.each(pc_bill_rows, function () {
         var row = $(this);
@@ -246,7 +247,7 @@
           total_pc_bifurcation[pc_id] = 0;
         }
         total_pc_bifurcation[pc_id] += pc_amount;
-        total_for_total_pc += pc_amount;
+        total_amount_of_pc += pc_amount;
       });
     }
     if (Object.keys(total_pc_bifurcation).length > 0) {
@@ -256,7 +257,7 @@
       });
     }
     if (Object.keys(total_pc_bifurcation).length > 0) {
-      $('.total_for_total_pc').html(format_money(total_for_total_pc));
+      $('.total_amount_of_pc').html(format_money(total_amount_of_pc));
     }
 
     var rows = $('.table.has-calculations tbody tr.item');
@@ -270,6 +271,10 @@
         order_total += item_amount;
       }
     });
+    if (Object.keys(total_pc_bifurcation).length > 0) {
+      balance_amount_for_payment = total - total_amount_of_pc;
+      $('.balance_amount_for_payment').html(format_money(balance_amount_for_payment));
+    }
     $('.wh-order-total').html(format_money(order_total));
     $('.wh-total').html(
       format_money(total) +
