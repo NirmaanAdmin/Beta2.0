@@ -21231,7 +21231,7 @@ class Warehouse_model extends App_Model
 					$available_quantity = $available_quantity - $total_quantity;
 				}
 
-				if (!empty($co_exist)) {
+				if (!empty($co_exist) && empty($goods_receipt_description)) {
 					$updated_co_quantity = $this->get_changee_order_quantity($value['commodity_code'], $value['description'], $pur_order, 'pur_orders');
 					$available_quantity = $available_quantity + $updated_co_quantity;
 					$available_quantity = round($available_quantity, 2);
