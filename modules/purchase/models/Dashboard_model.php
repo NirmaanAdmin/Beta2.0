@@ -45,7 +45,6 @@ class Dashboard_model extends App_Model
 	        combined_orders.order_number,
 	        combined_orders.subtotal
 	        FROM (
-	            -- FIRST BLOCK: tblpur_orders
 	            SELECT DISTINCT 
 	                po.id,
 	                po.aw_unw_order_status,
@@ -96,7 +95,6 @@ class Dashboard_model extends App_Model
 
 	            UNION ALL
 
-	            -- SECOND BLOCK: tblwo_orders
 	            SELECT DISTINCT 
 	                wo.id,
 	                wo.aw_unw_order_status,
@@ -147,7 +145,6 @@ class Dashboard_model extends App_Model
 
 	            UNION ALL
 
-	            -- THIRD BLOCK: tblpur_order_tracker
 	            SELECT DISTINCT 
 	                t.id,
 	                t.aw_unw_order_status,
@@ -184,7 +181,6 @@ class Dashboard_model extends App_Model
 	            ) AS inv_ot_sum ON inv_ot_sum.order_tracker_id = t.id
 	        ) AS combined_orders
 	        LEFT JOIN tblassets_group ON tblassets_group.group_id = combined_orders.group_pur";
-
 		$module_name = 'purchase_dashboard';
 		$vendor_filter_name = 'vendor';
 		$project_filter_name = 'project';
@@ -235,14 +231,13 @@ class Dashboard_model extends App_Model
 		if (!empty($to_date)) {
 			$conditions[] = "combined_orders.order_date <= '" . date('Y-m-d', strtotime($to_date)) . "'";
 		}
-
 		if (!empty($conditions)) {
 			$sql .= " WHERE " . implode(" AND ", $conditions);
 		}
-
 		$query = $this->db->query($sql);
 		$result = $query->result_array();
 
+		// Procurement Summary
 		$response['cost_to_complete'] = 0;
 		$cost_to_complete = 0;
 		if (!empty($result)) {
@@ -255,19 +250,18 @@ class Dashboard_model extends App_Model
 			$rev_contract_value = array_sum(array_column($result, 'total_rev_contract_value'));
 		}
 		$response['rev_contract_value'] = app_format_money($rev_contract_value, $base_currency);
-
 		$response['percentage_utilized'] = 0;
 		if ($cost_to_complete > 0) {
 			$response['percentage_utilized'] = round(($rev_contract_value / $cost_to_complete) * 100);
 		}
+		$response['budgeted_procurement_net_value'] = app_format_money(($cost_to_complete - $rev_contract_value), $base_currency);
+
 		$response['cost_to_complete_ratio'] = $response['percentage_utilized'];
 		$response['rev_contract_value_ratio'] = 100 - $response['cost_to_complete_ratio'];
-		$response['budgeted_procurement_net_value'] = app_format_money(($cost_to_complete - $rev_contract_value), $base_currency);
 
 		$response['budgeted_actual_category_labels'] = array();
 		$response['budgeted_category_value'] = array();
 		$response['actual_category_value'] = array();
-
 		if (!empty($result)) {
 			$grouped_filter = array_values(array_reduce($result, function ($carry, $item) {
 				$key = trim($item['group_name']);
@@ -276,7 +270,6 @@ class Dashboard_model extends App_Model
 				$carry[$key]['total_rev_contract_value'] = ($carry[$key]['total_rev_contract_value'] ?? 0) + (float)$item['total_rev_contract_value'];
 				return $carry;
 			}, []));
-
 			if (!empty($grouped_filter)) {
 				foreach ($grouped_filter as $key => $value) {
 					$response['budgeted_actual_category_labels'][] = $value['group_name'];
@@ -300,7 +293,6 @@ class Dashboard_model extends App_Model
 				$carry[$key]['total_rev_contract_value'] = ($carry[$key]['total_rev_contract_value'] ?? 0) + (float)$item['total_rev_contract_value'];
 				return $carry;
 			}, []);
-
 			if (!empty($monthlyData)) {
 				uksort($monthlyData, function ($a, $b) {
 					$dateA = DateTime::createFromFormat('m-Y', $a);
@@ -309,7 +301,6 @@ class Dashboard_model extends App_Model
 				});
 				$monthlyData = array_values($monthlyData);
 			}
-
 			$response['procurement_table_data'] = '
 				<div class="table-responsive s_table">
 				  <table class="table items table-bordered">
@@ -342,14 +333,14 @@ class Dashboard_model extends App_Model
 			</div>';
 		}
 
+		// Delivery Schedules
 		$response['on_time_deliveries_percentage'] = 0;
+		$response['average_delay'] = 0;
 		$response['delivery_delay_po'] = array();
 		$response['delivery_delay_days'] = array();
 		$response['delivery_performance_labels'] = array();
 		$response['delivery_performance_values'] = array();
 		$response['delivery_table_data'] = array();
-		$response['average_delay'] = 0;
-
 		$this->db->select(
 			db_prefix() . 'goods_receipt.pr_order_id as po_id, ' .
 				db_prefix() . 'pur_orders.pur_order_number as pur_order_number, ' .
@@ -364,7 +355,6 @@ class Dashboard_model extends App_Model
 		$this->db->join(db_prefix() . 'items', db_prefix() . 'items.id = ' . db_prefix() . 'goods_receipt_detail.commodity_code', 'left');
 		$this->db->where(db_prefix() . 'goods_receipt_detail.est_delivery_date IS NOT NULL');
 		$this->db->where(db_prefix() . 'goods_receipt_detail.delivery_date IS NOT NULL');
-
 		if (!empty($vendors)) {
 			$this->db->where(db_prefix() . 'pur_orders.vendor', $vendors);
 		}
@@ -383,13 +373,10 @@ class Dashboard_model extends App_Model
 		if (!empty($to_date)) {
 			$this->db->where(db_prefix() . 'pur_orders.order_date <=', date('Y-m-d', strtotime($to_date)));
 		}
-
 		$this->db->group_by(db_prefix() . 'goods_receipt_detail.id');
 		$goods_receipt_detail = $this->db->get()->result_array();
-
 		if (!empty($goods_receipt_detail)) {
 			$po_ids = array_column($goods_receipt_detail, 'po_id');
-
 			$this->db->select(
 				db_prefix() . 'pur_orders.id as po_id, ' .
 					db_prefix() . 'pur_orders.pur_order_number as pur_order_number, ' .
@@ -403,7 +390,6 @@ class Dashboard_model extends App_Model
 			$this->db->join(db_prefix() . 'items', db_prefix() . 'items.id = ' . db_prefix() . 'pur_order_detail.item_code', 'left');
 			$this->db->where(db_prefix() . 'pur_order_detail.est_delivery_date IS NOT NULL');
 			$this->db->where(db_prefix() . 'pur_order_detail.delivery_date IS NOT NULL');
-
 			if (!empty($po_ids)) {
 				$this->db->where_not_in(db_prefix() . 'pur_orders.id', $po_ids);
 			}
@@ -425,28 +411,21 @@ class Dashboard_model extends App_Model
 			if (!empty($to_date)) {
 				$this->db->where(db_prefix() . 'pur_orders.order_date <=', date('Y-m-d', strtotime($to_date)));
 			}
-
 			$this->db->group_by(db_prefix() . 'pur_order_detail.id');
 			$pur_order_detail = $this->db->get()->result_array();
-
 			$delivery_schedule = array_merge($goods_receipt_detail, $pur_order_detail);
-
 			$all_schedule_count = count($delivery_schedule);
 			$est_delivery_count = count(array_filter($delivery_schedule, function ($item) {
 				return strtotime($item['est_delivery_date']) >= strtotime($item['delivery_date']);
 			}));
-
 			if ($all_schedule_count > 0) {
 				$response['on_time_deliveries_percentage'] = round(($est_delivery_count / $all_schedule_count) * 100);
 			}
-
 			$response['delivery_performance_labels'] = ['On-Time', 'Delayed'];
 			$response['delivery_performance_values'] = [$response['on_time_deliveries_percentage'], round(100 - $response['on_time_deliveries_percentage'])];
-
 			$delay_delivery_data = array_filter($delivery_schedule, function ($item) {
 				return strtotime($item['est_delivery_date']) < strtotime($item['delivery_date']);
 			});
-
 			if (!empty($delay_delivery_data)) {
 				$delay_delivery_data = array_values(array_filter(
 					array_map(function ($item) {
@@ -459,7 +438,6 @@ class Dashboard_model extends App_Model
 					}, $delay_delivery_data),
 					fn($item) => !is_null($item)
 				));
-
 				$response['delivery_table_data'] = '
 		        <div class="table-responsive s_table">
 		          <table class="table items table-bordered">
@@ -473,7 +451,6 @@ class Dashboard_model extends App_Model
 		              </tr>
 		            </thead>
 		            <tbody>';
-
 				if (!empty($delay_delivery_data)) {
 					foreach ($delay_delivery_data as $drow) {
 						$response['delivery_table_data'] .= '
@@ -491,12 +468,10 @@ class Dashboard_model extends App_Model
 		                <td colspan="5" align="center">No data available</td>
 		              </tr>';
 				}
-
 				$response['delivery_table_data'] .= '
 		            </tbody>
 		          </table>
 		        </div>';
-
 				$delay_delivery_data = array_values(array_reduce($delay_delivery_data, function ($carry, $item) {
 					$key = $item['po_id'];
 					if (!isset($carry[$key])) {
@@ -510,24 +485,21 @@ class Dashboard_model extends App_Model
 					}
 					return $carry;
 				}, []));
-
 				$response['delivery_delay_po'] = array_column($delay_delivery_data, 'pur_order_number');
 				$response['delivery_delay_days'] = array_column($delay_delivery_data, 'delay_days');
-
 				$total_delay_days = array_sum($response['delivery_delay_days']);
 				$response['average_delay'] = count($response['delivery_delay_days']) > 0 ? round($total_delay_days / count($response['delivery_delay_days']), 2) : 0;
 			}
 		}
 
-
+		// Post Order Milestone
 		$response['total_procurement_items'] = 0;
 		$response['late_deliveries'] = 0;
 		$response['shop_drawing_approved'] = 0;
+		$response['shop_drawing_pending_approval'] = 0;
 		$this->db->select('count(' . db_prefix() . 'pur_order_detail.id) as total_procurement_items');
 		$this->db->from(db_prefix() . 'pur_orders');
 		$this->db->join(db_prefix() . 'pur_order_detail', db_prefix() . 'pur_order_detail.pur_order = ' . db_prefix() . 'pur_orders.id', 'left');
-
-		// Apply conditions before running the query
 		if (!empty($vendors)) {
 			$this->db->where(db_prefix() . 'pur_orders.vendor', $vendors);
 		}
@@ -546,27 +518,18 @@ class Dashboard_model extends App_Model
 		if (!empty($to_date)) {
 			$this->db->where(db_prefix() . 'pur_orders.order_date <=', date('Y-m-d', strtotime($to_date)));
 		}
-
 		$get_po_total_items = $this->db->get()->result_array();
-
 		if (!empty($get_po_total_items)) {
 			$response['total_procurement_items'] = $get_po_total_items[0]['total_procurement_items'];
 		}
-
-
-
 		$this->db->select('COUNT(' . db_prefix() . 'pur_order_detail.id) as late_deliveries');
 		$this->db->from(db_prefix() . 'pur_orders');
 		$this->db->join(db_prefix() . 'pur_order_detail', db_prefix() . 'pur_order_detail.pur_order = ' . db_prefix() . 'pur_orders.id', 'left');
-
-		// Late deliveries condition (delivery_date > est_delivery_date OR not delivered but past estimated date)
 		$this->db->group_start();
 		$this->db->where(db_prefix() . 'pur_order_detail.est_delivery_date >', 0);
 		$this->db->where(db_prefix() . 'pur_order_detail.delivery_date >', db_prefix() . 'pur_order_detail.est_delivery_date', false);
 		$this->db->or_where(db_prefix() . 'pur_order_detail.est_delivery_date <', 'NOW()', false);
 		$this->db->group_end();
-
-		// Apply filters
 		if (!empty($vendors)) {
 			$this->db->where(db_prefix() . 'pur_orders.vendor', $vendors);
 		}
@@ -585,24 +548,16 @@ class Dashboard_model extends App_Model
 		if (!empty($to_date)) {
 			$this->db->where(db_prefix() . 'pur_orders.order_date <=', date('Y-m-d', strtotime($to_date)));
 		}
-
-		$get_po_late_deliveries = $this->db->get()->row_array(); // Using row_array() since COUNT returns a single row
-
+		$get_po_late_deliveries = $this->db->get()->row_array();
 		if (!empty($get_po_late_deliveries)) {
 			$response['late_deliveries'] = (int) $get_po_late_deliveries['late_deliveries'];
 		}
-
-
 		$this->db->select('COUNT(' . db_prefix() . 'pur_order_detail.id) as shop_approval');
 		$this->db->from(db_prefix() . 'pur_orders');
 		$this->db->join(db_prefix() . 'pur_order_detail', db_prefix() . 'pur_order_detail.pur_order = ' . db_prefix() . 'pur_orders.id', 'left');
-
-
 		$this->db->group_start();
 		$this->db->where(db_prefix() . 'pur_order_detail.shop_approval >', 0);
 		$this->db->group_end();
-
-		// Apply filters
 		if (!empty($vendors)) {
 			$this->db->where(db_prefix() . 'pur_orders.vendor', $vendors);
 		}
@@ -621,29 +576,19 @@ class Dashboard_model extends App_Model
 		if (!empty($to_date)) {
 			$this->db->where(db_prefix() . 'pur_orders.order_date <=', date('Y-m-d', strtotime($to_date)));
 		}
-
 		$get_po_shop_approval = $this->db->get()->row_array();
-
 		if (!empty($get_po_shop_approval)) {
 			$response['shop_drawing_approved'] = (int) $get_po_shop_approval['shop_approval'];
 		}
-
-		$response['shop_drawing_pending_approval'] = 0;
-
 		$this->db->select('COUNT(' . db_prefix() . 'pur_order_detail.id) as shop_submission_count');
 		$this->db->from(db_prefix() . 'pur_orders');
 		$this->db->join(db_prefix() . 'pur_order_detail', db_prefix() . 'pur_order_detail.pur_order = ' . db_prefix() . 'pur_orders.id', 'left');
-
-		// Conditions:
-		// 1. shop_submission is not empty (either a valid date or > 0, depending on your DB structure)
-		// 2. shop_approval is empty (NULL or 0)
-		$this->db->where(db_prefix() . 'pur_order_detail.shop_submission IS NOT NULL', null, false); // Check for non-NULL
-		$this->db->where(db_prefix() . 'pur_order_detail.shop_submission >', 0); // Optional: if stored as timestamp
+		$this->db->where(db_prefix() . 'pur_order_detail.shop_submission IS NOT NULL', null, false);
+		$this->db->where(db_prefix() . 'pur_order_detail.shop_submission >', 0);
 		$this->db->group_start();
-		$this->db->where(db_prefix() . 'pur_order_detail.shop_approval IS NULL', null, false); // NULL check
-		$this->db->or_where(db_prefix() . 'pur_order_detail.shop_approval', 0); // If stored as 0 when empty
+		$this->db->where(db_prefix() . 'pur_order_detail.shop_approval IS NULL', null, false);
+		$this->db->or_where(db_prefix() . 'pur_order_detail.shop_approval', 0);
 		$this->db->group_end();
-		// Apply filters
 		if (!empty($vendors)) {
 			$this->db->where(db_prefix() . 'pur_orders.vendor', $vendors);
 		}
@@ -662,23 +607,19 @@ class Dashboard_model extends App_Model
 		if (!empty($to_date)) {
 			$this->db->where(db_prefix() . 'pur_orders.order_date <=', date('Y-m-d', strtotime($to_date)));
 		}
-
 		$get_po_shop_approval = $this->db->get()->row_array();
-
 		if (!empty($get_po_shop_approval)) {
 			$response['shop_drawing_pending_approval'] = (int) $get_po_shop_approval['shop_submission_count'];
 		}
 
-
 		$response['production_status_approved'] = 0;
-
+		$response['rfq_sent'] = 0;
+		$response['poi_sent'] = 0;
+		$response['pir_sent'] = 0;
 		$this->db->select('COUNT(' . db_prefix() . 'pur_order_detail.id) as production_status');
 		$this->db->from(db_prefix() . 'pur_orders');
 		$this->db->join(db_prefix() . 'pur_order_detail', db_prefix() . 'pur_order_detail.pur_order = ' . db_prefix() . 'pur_orders.id', 'left');
-
 		$this->db->where(db_prefix() . 'pur_order_detail.production_status', 2);
-
-		// Apply filters
 		if (!empty($vendors)) {
 			$this->db->where(db_prefix() . 'pur_orders.vendor', $vendors);
 		}
@@ -697,20 +638,12 @@ class Dashboard_model extends App_Model
 		if (!empty($to_date)) {
 			$this->db->where(db_prefix() . 'pur_orders.order_date <=', date('Y-m-d', strtotime($to_date)));
 		}
-
 		$result = $this->db->get()->row_array();
 		$response['production_status_approved'] = isset($result['production_status']) ? (int)$result['production_status'] : 0;
-
-
-		$response['rfq_sent'] = 0;
-
 		$this->db->select('COUNT(' . db_prefix() . 'pur_order_detail.id) as rfq_sent');
 		$this->db->from(db_prefix() . 'pur_orders');
 		$this->db->join(db_prefix() . 'pur_order_detail', db_prefix() . 'pur_order_detail.pur_order = ' . db_prefix() . 'pur_orders.id', 'left');
-
 		$this->db->where(db_prefix() . 'pur_order_detail.tracker_status', 3);
-
-		// Apply filters
 		if (!empty($vendors)) {
 			$this->db->where(db_prefix() . 'pur_orders.vendor', $vendors);
 		}
@@ -729,19 +662,12 @@ class Dashboard_model extends App_Model
 		if (!empty($to_date)) {
 			$this->db->where(db_prefix() . 'pur_orders.order_date <=', date('Y-m-d', strtotime($to_date)));
 		}
-
 		$result = $this->db->get()->row_array();
 		$response['rfq_sent'] = isset($result['rfq_sent']) ? (int)$result['rfq_sent'] : 0;
-
-		$response['poi_sent'] = 0;
-
 		$this->db->select('COUNT(' . db_prefix() . 'pur_order_detail.id) as poi_sent');
 		$this->db->from(db_prefix() . 'pur_orders');
 		$this->db->join(db_prefix() . 'pur_order_detail', db_prefix() . 'pur_order_detail.pur_order = ' . db_prefix() . 'pur_orders.id', 'left');
-
 		$this->db->where(db_prefix() . 'pur_order_detail.tracker_status', 5);
-
-		// Apply filters
 		if (!empty($vendors)) {
 			$this->db->where(db_prefix() . 'pur_orders.vendor', $vendors);
 		}
@@ -760,20 +686,12 @@ class Dashboard_model extends App_Model
 		if (!empty($to_date)) {
 			$this->db->where(db_prefix() . 'pur_orders.order_date <=', date('Y-m-d', strtotime($to_date)));
 		}
-
 		$result = $this->db->get()->row_array();
 		$response['poi_sent'] = isset($result['poi_sent']) ? (int)$result['poi_sent'] : 0;
-
-
-		$response['pir_sent'] = 0;
-
 		$this->db->select('COUNT(' . db_prefix() . 'pur_order_detail.id) as pir_sent');
 		$this->db->from(db_prefix() . 'pur_orders');
 		$this->db->join(db_prefix() . 'pur_order_detail', db_prefix() . 'pur_order_detail.pur_order = ' . db_prefix() . 'pur_orders.id', 'left');
-
 		$this->db->where(db_prefix() . 'pur_order_detail.tracker_status', 6);
-
-		// Apply filters
 		if (!empty($vendors)) {
 			$this->db->where(db_prefix() . 'pur_orders.vendor', $vendors);
 		}
@@ -792,10 +710,8 @@ class Dashboard_model extends App_Model
 		if (!empty($to_date)) {
 			$this->db->where(db_prefix() . 'pur_orders.order_date <=', date('Y-m-d', strtotime($to_date)));
 		}
-
 		$result = $this->db->get()->row_array();
 		$response['pir_sent'] = isset($result['pir_sent']) ? (int)$result['pir_sent'] : 0;
-
 
 		return $response;
 	}

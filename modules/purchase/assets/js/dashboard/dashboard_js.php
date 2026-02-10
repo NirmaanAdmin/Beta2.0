@@ -38,21 +38,28 @@
       $.post(admin_url + 'purchase/dashboard/get_purchase_order_dashboard', data).done(function(response) {
         response = JSON.parse(response);
 
-        // Update value summaries
+        // Procurement Summary
         $('.cost_to_complete').text(response.cost_to_complete);
         $('.rev_contract_value').text(response.rev_contract_value);
         $('.percentage_utilized').text(response.percentage_utilized + '%');
         $('.budgeted_procurement_net_value').text(response.budgeted_procurement_net_value);
+
+        // Procurement Data
         $('.procurement_table_data').html(response.procurement_table_data);
+
+        // Delivery Schedules
         $('.on_time_deliveries_percentage').text(response.on_time_deliveries_percentage + '%');
-        $('.delivery_table_data').html(response.delivery_table_data);
         $('.average_delay').text(response.average_delay + ' Days');
 
+        // Delivery Data
+        $('.delivery_table_data').html(response.delivery_table_data);
+
+        // Post Order Milestone
         $('.total_procurement_items').text(response.total_procurement_items);
         $('.late_deliveries').text(response.late_deliveries);
         $('.shop_drawing_approved').text(response.shop_drawing_approved);
-        $('.shop_drawing_pending_approval').text(response.shop_drawing_pending_approval)
-        $('.procurement_table_data_secound').html(response.procurement_table_data_secound);
+        $('.shop_drawing_pending_approval').text(response.shop_drawing_pending_approval);
+
         // DOUGHNUT CHART - Budget Utilization
         var budgetUtilizationCtx = document.getElementById('doughnutChartbudgetUtilization').getContext('2d');
         var budgetUtilizationLabels = ['Budgeted', 'Actual'];
@@ -115,7 +122,6 @@
             }
           ]
         };
-
         if (budgetedVsActualCategory) {
           budgetedVsActualCategory.data.labels = barData.labels;
           budgetedVsActualCategory.data.datasets[0].data = barData.datasets[0].data;
@@ -156,7 +162,6 @@
         var deliveryDelayBarCtx = document.getElementById('barChartDeliveryDelay').getContext('2d');
         var deliveryDelayLabels = response.delivery_delay_po;
         var deliveryDelayData = response.delivery_delay_days;
-
         if (window.barDeliveryDelayChart) {
           barDeliveryDelayChart.data.labels = deliveryDelayLabels;
           barDeliveryDelayChart.data.datasets[0].data = deliveryDelayData;
@@ -209,7 +214,6 @@
         var deliveryPerformancePieCtx = document.getElementById('pieChartDeliveryPerformance').getContext('2d');
         var deliveryPerformancePieLabels = response.delivery_performance_labels;
         var deliveryPerformancePieData = response.delivery_performance_values;
-
         if (window.deliveryPerformancePieChart) {
           deliveryPerformancePieChart.data.labels = deliveryPerformancePieLabels;
           deliveryPerformancePieChart.data.datasets[0].data = deliveryPerformancePieData;
@@ -247,10 +251,7 @@
         }
 
         // BAR CHART
-        // after you’ve fetched “response” via $.post or fetch…
         const ctx = document.getElementById('barChartProcurementStatus').getContext('2d');
-
-        // 1) Define labels and data directly
         const procurementStatusLabels = [
           'Shop Drawings Submited',
           'Production Status Approved',
@@ -265,7 +266,6 @@
           response.poi_sent,
           response.pir_sent
         ];
-
         if (window.barprocurementStatusChart) {
           window.barprocurementStatusChart.data.labels = procurementStatusLabels;
           window.barprocurementStatusChart.data.datasets[0].data = procurementStatusData;
