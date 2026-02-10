@@ -83,7 +83,7 @@
     <div class="panel_s">
       <div class="panel-body dashboard-budget-summary">
         <div class="col-md-12">
-          <p class="no-margin main_head_title">Budget vs Actual Procurement</p>
+          <p class="no-margin main_head_title">Procurement Summary</p>
           <hr class="mtop10">
         </div>
 
