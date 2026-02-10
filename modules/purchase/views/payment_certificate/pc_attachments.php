@@ -105,7 +105,7 @@
                 <?php } else {
                 } ?>
               </td>
-              <td><?php echo get_staff_full_name($value['requester']); ?></td>
+              <td><?php echo get_staff_full_name($value['addedfrom']); ?></td>
               <td><?php echo date('d M, Y', strtotime($value['date_add'])); ?></td>
               <td>
                 <a href="<?php echo admin_url('warehouse/stock_export_pdf/' . $value['id'] . '/?output_type=I') ?>"
