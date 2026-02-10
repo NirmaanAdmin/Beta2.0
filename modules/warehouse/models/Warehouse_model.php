@@ -1550,7 +1550,6 @@ class Warehouse_model extends App_Model
 					$dt_data = [];
 					$dt_data['goods_receipt_id'] = $insert_id;
 					$dt_data['checklist_id'] = $checklist_id;
-
 					// Properly handle checkbox value (1 if checked, 0 if not)
 					$dt_data['required'] = (isset($required_arr[$checklist_id]) && $required_arr[$checklist_id] == '1') ? 1 : 0;
 
@@ -3615,7 +3614,7 @@ class Warehouse_model extends App_Model
 		$invoice_date = '<br /><b>' . _l('invoice_data_date') . ' ' . _d($goods_receipt->date_add) . '</b><br />';
 		$kind = '<b>Category : </b>' . $get_all_order_details->kind  . '<br>';
 		$budget_head = '<b>Budget Head : </b>' . $budget_head->name  . '<br>';
-		$requseter = '<b>Requester : </b>' . $staff_name->firstname . ' ' . $staff_name->lastname  . '<br>';
+		$requseter = '<b>Uploaded By : </b>' . $staff_name->firstname . ' ' . $staff_name->lastname  . '<br><br><br>';
 		$html .= '<table class="table">
 		<tbody>
 		<tr>
@@ -3787,25 +3786,86 @@ class Warehouse_model extends App_Model
 		// </table>
 		$html .= '<br><br><br>
 		';
-
+		$list_approve_status = $this->get_list_approval_details($goods_receipt_id, 1);
 		if ($warehouse_lotnumber_bottom_infor_option == 1) {
-			$html .= '<table class="table">
-			<tbody>
-			<tr>
-			<td class="fw_width35"><h4>' . _l('deliver_name') . '</h4></td>
-			<td class="fw_width30"><h4>' . _l('stocker') . '</h4></td>
-			<td class="fw_width30"><h4>' . _l('chief_accountant') . '</h4></td>
 
-			</tr>
-			<tr>
-			<td class="fw_width35 fstyle">' . _l('sign_full_name') . '</td>
-			<td class="fw_width30 fstyle ">' . _l('sign_full_name') . '</td>
-			<td class="fw_width30 fstyle">' . _l('sign_full_name') . '</td>
-			</tr
+			// Approved image HTML
+			$approved_html = '';
 
-			</tbody>
-			</table>';
+			if (!empty($list_approve_status)) {
+
+				$CI = &get_instance();
+				$CI->load->model('staff_model');
+
+				foreach ($list_approve_status as $value) {
+
+					if (isset($value['approve']) && $value['approve'] == 1) {
+
+						// Build staff name
+						$staff_name = '';
+						$staff_ids = explode(', ', $value['staffid']);
+
+						foreach ($staff_ids as $sid) {
+							$staff = $CI->staff_model->get($sid);
+							if ($staff) {
+								if ($staff_name != '') {
+									$staff_name .= ' / ';
+								}
+								$staff_name .= $staff->full_name;
+							}
+						}
+
+						// Approved image + name (PDF safe)
+						$approved_html = '
+                <div >
+					<div>
+                        ' . html_entity_decode($staff_name) . '
+                    </div>
+                    <img src="' . FCPATH . 'modules/warehouse/uploads/approval/approved.png' . '" 
+                         style="width:120px; margin-bottom:5px;">
+                    
+                </div>
+            ';
+
+						break; // show only once
+					}
+				}
+			}
+
+
+
+			$html .= '
+				<table class="table">
+					<tbody>
+						<tr>
+							<td class="fw_width30">
+								<h4>' . _l('deliver_name') . '</h4>
+							</td>
+
+							<td class="width_27">
+								<h4>' . _l('stocker') . '</h4>
+							</td>
+
+							<td class="width_27">
+								<h4>' . _l('chief_accountant') . '</h4>
+							</td>
+
+							<td class="width_27 text-center">
+								
+								<h4>' . _l('Approved By') . '</h4>
+							</td>
+						</tr>
+
+						<tr>
+							<td class="fw_width30 fstyle">' . _l('sign_full_name') . '</td>
+							<td class="width_27 fstyle">' . _l('sign_full_name') . '</td>
+							<td class="width_27 fstyle">' . _l('sign_full_name') . '</td>
+							<td class="width_27 fstyle">' . $approved_html . '' . _l('sign_full_name') . '</td>
+						</tr>
+					</tbody>
+				</table>';
 		}
+
 
 		//display serial number
 		if (strlen($serial_number_html) > 0) {
@@ -21957,6 +22017,7 @@ class Warehouse_model extends App_Model
                  <a href=" ' . $href_url . '" target="_blank" download>' . $f['file_name'] . '</a>
                  <br />
                  <small class="text-muted">' . $f['filetype'] . '</small>
+				 <small class="text-muted"><strong>Uploaded By: ' . get_staff_full_name($f['staffid']) . '</strong></small>
               </div>
               <div class="col-md-4 text-right">';
 				if ($f['staffid'] == get_staff_user_id() || is_admin()) {
@@ -24665,42 +24726,42 @@ class Warehouse_model extends App_Model
 
 	public function get_po_goods_receipt($pr_order_id)
 	{
-		$this->db->select('id, pr_order_id, wo_order_id');
+		$this->db->select('*');
 		$this->db->where('pr_order_id', $pr_order_id);
 		return $this->db->get(db_prefix() . 'goods_receipt')->result_array();
 	}
 
 	public function get_wo_goods_receipt($wo_order_id)
 	{
-		$this->db->select('id, pr_order_id, wo_order_id');
+		$this->db->select('*');
 		$this->db->where('wo_order_id', $wo_order_id);
 		return $this->db->get(db_prefix() . 'goods_receipt')->result_array();
 	}
 
 	public function get_po_goods_delivery($pr_order_id)
 	{
-		$this->db->select('id, pr_order_id, wo_order_id');
+		$this->db->select('*');
 		$this->db->where('pr_order_id', $pr_order_id);
 		return $this->db->get(db_prefix() . 'goods_delivery')->result_array();
 	}
 
 	public function get_wo_goods_delivery($wo_order_id)
 	{
-		$this->db->select('id, pr_order_id, wo_order_id');
+		$this->db->select('*');
 		$this->db->where('wo_order_id', $wo_order_id);
 		return $this->db->get(db_prefix() . 'goods_delivery')->result_array();
 	}
 
 	public function get_po_stock_reconciliation($pr_order_id)
 	{
-		$this->db->select('id, pr_order_id, wo_order_id');
+		$this->db->select('*');
 		$this->db->where('pr_order_id', $pr_order_id);
 		return $this->db->get(db_prefix() . 'stock_reconciliation')->result_array();
 	}
 
 	public function get_wo_stock_reconciliation($wo_order_id)
 	{
-		$this->db->select('id, pr_order_id, wo_order_id');
+		$this->db->select('*');
 		$this->db->where('wo_order_id', $wo_order_id);
 		return $this->db->get(db_prefix() . 'stock_reconciliation')->result_array();
 	}

@@ -26,6 +26,8 @@
         <tr>
           <th></th>
           <th><?php echo _l('Name'); ?></th>
+          <th><?php echo _l('Uploaded By'); ?></th>
+          <th><?php echo _l('Date'); ?></th>
           <th><?php echo _l('Preview'); ?></th>
           <th><?php echo _l('Delete'); ?></th>
         </tr>
@@ -35,7 +37,7 @@
           $path = get_upload_path_by_type('purchase') . 'payment_certificate/' . $value['rel_id'] . '/' . $value['file_name'];
           $is_image = is_image($path);
           $preview_img = $is_image ? '<img src="' . site_url('download/preview_image?path=' . protected_file_url_by_path($path) . '&type=' . $value['filetype']) . '" style="height: 50px;">' : '';
-          ?>
+        ?>
           <tr class="sortable item" data-id="<?php echo $value['id']; ?>">
             <td class="draggerer"></td>
             <td>
@@ -43,6 +45,8 @@
                 <?php echo $value['file_name']; ?>
               </a>
             </td>
+            <td><?php echo get_staff_full_name($value['staffid']); ?></td>
+            <td><?php echo date('d M, Y', strtotime($value['dateadded'])); ?></td>
             <td>
               <a name="preview-payment-cert-btn" onclick="preview_paymentcert_btn(this); return false;" rel_id="<?php echo $value['rel_id']; ?>" id="<?php echo $value['id']; ?>" href="javascript:void(0);" class="btn btn-success btn-sm mright5" data-toggle="tooltip" title="<?php echo _l('preview_file'); ?>">
                 <i class="fa fa-eye"></i>
@@ -58,88 +62,95 @@
         <?php } ?>
       </tbody>
       <tfoot>
-        <?php if (isset($goods_receipt) && count($goods_receipt) > 0) { 
+        <?php if (isset($goods_receipt) && count($goods_receipt) > 0) {
           foreach ($goods_receipt as $value) { ?>
-          <tr>
-            <td>
-            </td>
-            <td>
-              <?php if(!empty($value['pr_order_id'])) { ?>
-                <a href="<?php echo admin_url('purchase/purchase_order/' . $value['pr_order_id']) ?>"><?php echo get_pur_order_name($value['pr_order_id']).' ('._l('goods_receipt').')' ?></a>
-              <?php } elseif (!empty($value['wo_order_id'])) { ?>
-                <a href="<?php echo admin_url('purchase/work_order/' . $value['wo_order_id']) ?>"><?php echo get_wo_order_name($value['wo_order_id']).' ('._l('goods_receipt').')' ?></a>
-              <?php } else {
+            <tr>
+              <td>
+              </td>
+              <td>
 
-              } ?>
-            </td> 
-            <td>
-              <a href="<?php echo admin_url('warehouse/stock_import_pdf/' . $value['id'] . '/?output_type=I') ?>" 
-                 target="_blank"
-                 class="btn btn-success btn-sm mright5" 
-                 data-toggle="tooltip" 
-                 title="<?php echo _l('preview_file'); ?>">
-                 <i class="fa fa-eye"></i>
-              </a>
-            </td>
-            <td>
-            </td>
-          </tr>
-        <?php } } ?>
-        <?php if (isset($goods_delivery) && count($goods_delivery) > 0) { 
+                <?php if (!empty($value['pr_order_id'])) { ?>
+                  <a href="<?php echo admin_url('purchase/purchase_order/' . $value['pr_order_id']) ?>"><?php echo get_pur_order_name($value['pr_order_id']) . ' (' . _l('goods_receipt') . ')' ?></a>
+                <?php } elseif (!empty($value['wo_order_id'])) { ?>
+                  <a href="<?php echo admin_url('purchase/work_order/' . $value['wo_order_id']) ?>"><?php echo get_wo_order_name($value['wo_order_id']) . ' (' . _l('goods_receipt') . ')' ?></a>
+                <?php } else {
+                } ?>
+              </td>
+              <td><?php echo get_staff_full_name($value['buyer_id']); ?></td>
+              <td><?php echo date('d M, Y', strtotime($value['date_add'])); ?></td>
+              <td>
+                <a href="<?php echo admin_url('warehouse/stock_import_pdf/' . $value['id'] . '/?output_type=I') ?>"
+                  target="_blank"
+                  class="btn btn-success btn-sm mright5"
+                  data-toggle="tooltip"
+                  title="<?php echo _l('preview_file'); ?>">
+                  <i class="fa fa-eye"></i>
+                </a>
+              </td>
+              <td>
+              </td>
+            </tr>
+        <?php }
+        } ?>
+        <?php if (isset($goods_delivery) && count($goods_delivery) > 0) {
           foreach ($goods_delivery as $value) { ?>
-          <tr>
-            <td>
-            </td>
-            <td>
-              <?php if(!empty($value['pr_order_id'])) { ?>
-                <a href="<?php echo admin_url('purchase/purchase_order/' . $value['pr_order_id']) ?>"><?php echo get_pur_order_name($value['pr_order_id']).' ('._l('goods_delivery').')' ?></a>
-              <?php } elseif (!empty($value['wo_order_id'])) { ?>
-                <a href="<?php echo admin_url('purchase/work_order/' . $value['wo_order_id']) ?>"><?php echo get_wo_order_name($value['wo_order_id']).' ('._l('goods_delivery').')' ?></a>
-              <?php } else {
-
-              } ?>
-            </td>
-            <td>
-              <a href="<?php echo admin_url('warehouse/stock_export_pdf/' . $value['id'] . '/?output_type=I') ?>" 
-                 target="_blank"
-                 class="btn btn-success btn-sm mright5" 
-                 data-toggle="tooltip" 
-                 title="<?php echo _l('preview_file'); ?>">
-                 <i class="fa fa-eye"></i>
-              </a>
-            </td>
-            <td>
-            </td>
-          </tr>
-        <?php } } ?>
+            <tr>
+              <td>
+              </td>
+              <td>
+                <?php if (!empty($value['pr_order_id'])) { ?>
+                  <a href="<?php echo admin_url('purchase/purchase_order/' . $value['pr_order_id']) ?>"><?php echo get_pur_order_name($value['pr_order_id']) . ' (' . _l('goods_delivery') . ')' ?></a>
+                <?php } elseif (!empty($value['wo_order_id'])) { ?>
+                  <a href="<?php echo admin_url('purchase/work_order/' . $value['wo_order_id']) ?>"><?php echo get_wo_order_name($value['wo_order_id']) . ' (' . _l('goods_delivery') . ')' ?></a>
+                <?php } else {
+                } ?>
+              </td>
+              <td><?php echo get_staff_full_name($value['requester']); ?></td>
+              <td><?php echo date('d M, Y', strtotime($value['date_add'])); ?></td>
+              <td>
+                <a href="<?php echo admin_url('warehouse/stock_export_pdf/' . $value['id'] . '/?output_type=I') ?>"
+                  target="_blank"
+                  class="btn btn-success btn-sm mright5"
+                  data-toggle="tooltip"
+                  title="<?php echo _l('preview_file'); ?>">
+                  <i class="fa fa-eye"></i>
+                </a>
+              </td>
+              <td>
+              </td>
+            </tr>
+        <?php }
+        } ?>
 
         <?php if (isset($stock_reconciliation) && count($stock_reconciliation) > 0) { 
           foreach ($stock_reconciliation as $value) { ?>
-          <tr>
-            <td>
-            </td>
-            <td>
-              <?php if(!empty($value['pr_order_id'])) { ?>
-                <a href="<?php echo admin_url('purchase/purchase_order/' . $value['pr_order_id']) ?>"><?php echo get_pur_order_name($value['pr_order_id']).' ('._l('Stock Reconciliation').')' ?></a>
-              <?php } elseif (!empty($value['wo_order_id'])) { ?>
-                <a href="<?php echo admin_url('purchase/work_order/' . $value['wo_order_id']) ?>"><?php echo get_wo_order_name($value['wo_order_id']).' ('._l('Stock Reconciliation').')' ?></a>
-              <?php } else {
-
-              } ?>
-            </td>
-            <td>
-              <a href="<?php echo admin_url('warehouse/stock_reconcile_export_pdf/' . $value['id'] . '/?output_type=I') ?>" 
-                 target="_blank"
-                 class="btn btn-success btn-sm mright5" 
-                 data-toggle="tooltip" 
-                 title="<?php echo _l('preview_file'); ?>">
-                 <i class="fa fa-eye"></i>
-              </a>
-            </td>
-            <td>
-            </td>
-          </tr>
-        <?php } } ?>
+            <tr>
+              <td>
+              </td>
+              <td>
+                <?php if (!empty($value['pr_order_id'])) { ?>
+                  <a href="<?php echo admin_url('purchase/purchase_order/' . $value['pr_order_id']) ?>"><?php echo get_pur_order_name($value['pr_order_id']) . ' (' . _l('Stock Reconciliation') . ')' ?></a>
+                <?php } elseif (!empty($value['wo_order_id'])) { ?>
+                  <a href="<?php echo admin_url('purchase/work_order/' . $value['wo_order_id']) ?>"><?php echo get_wo_order_name($value['wo_order_id']) . ' (' . _l('Stock Reconciliation') . ')' ?></a>
+                <?php } else {
+                } ?>
+              </td>
+              <td><?php echo get_staff_full_name($value['addedfrom']); ?></td>
+              <td><?php echo date('d M, Y', strtotime($value['date_add'])); ?></td>
+              <td>
+                <a href="<?php echo admin_url('warehouse/stock_reconcile_export_pdf/' . $value['id'] . '/?output_type=I') ?>"
+                  target="_blank"
+                  class="btn btn-success btn-sm mright5"
+                  data-toggle="tooltip"
+                  title="<?php echo _l('preview_file'); ?>">
+                  <i class="fa fa-eye"></i>
+                </a>
+              </td>
+              <td>
+              </td>
+            </tr>
+        <?php }
+        } ?>
       </tfoot>
     </table>
   </div>

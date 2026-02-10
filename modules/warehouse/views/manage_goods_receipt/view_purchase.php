@@ -579,6 +579,7 @@
                   </a>
                   <br />
                   <small class="text-muted">' . $value['filetype'] . '</small>
+                  <small class="text-muted"><strong>Uploaded By: ' . get_staff_full_name($value['staffid']) . '</strong></small>
                   </div>
                   <div class="col-md-4 text-right">';
 
