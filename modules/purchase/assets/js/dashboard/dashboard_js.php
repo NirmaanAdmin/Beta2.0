@@ -43,6 +43,9 @@
         $('.rev_contract_value').text(response.rev_contract_value);
         $('.percentage_utilized').text(response.percentage_utilized + '%');
         $('.budgeted_procurement_net_value').text(response.budgeted_procurement_net_value);
+        $('.po_amount_incl_co').text(response.po_amount_incl_co);
+        $('.wo_amount_incl_co').text(response.wo_amount_incl_co);
+        $('.unawarded_capex').text(response.unawarded_capex);
 
         // Procurement Data
         $('.procurement_table_data').html(response.procurement_table_data);

@@ -165,6 +165,69 @@
             </div>
 
           </div>
+
+          <br>
+
+          <div class="row">
+
+            <div class="quick-stats-invoices col-md-6 tw-mb-2 sm:tw-mb-0">
+              <div class="top_stats_wrapper">
+                <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                  <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                    <span class="tw-truncate dashboard_stat_title">PO Amount (Incl CO)</span>
+                  </div>
+                  <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                </div>
+                <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                  <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                    <span class="tw-truncate dashboard_stat_value po_amount_incl_co"></span>
+                  </div>
+                  <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="quick-stats-invoices col-md-6 tw-mb-2 sm:tw-mb-0">
+              <div class="top_stats_wrapper">
+                <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                  <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                    <span class="tw-truncate dashboard_stat_title">WO Amount (Incl CO)</span>
+                  </div>
+                  <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                </div>
+                <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                  <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                    <span class="tw-truncate dashboard_stat_value wo_amount_incl_co"></span>
+                  </div>
+                  <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <br>
+
+          <div class="row">
+
+            <div class="quick-stats-invoices col-md-6 tw-mb-2 sm:tw-mb-0">
+              <div class="top_stats_wrapper">
+                <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                  <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                    <span class="tw-truncate dashboard_stat_title">Unawarded Capex</span>
+                  </div>
+                  <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                </div>
+                <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                  <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                    <span class="tw-truncate dashboard_stat_value unawarded_capex"></span>
+                  </div>
+                  <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                </div>
+              </div>
+            </div>
+
+          </div>
         </div>
 
         <div class="col-md-6">

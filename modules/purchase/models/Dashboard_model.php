@@ -255,6 +255,130 @@ class Dashboard_model extends App_Model
 			$response['percentage_utilized'] = round(($rev_contract_value / $cost_to_complete) * 100);
 		}
 		$response['budgeted_procurement_net_value'] = app_format_money(($cost_to_complete - $rev_contract_value), $base_currency);
+		$po_amount_incl_co = 0;
+		$this->db->select('SUM(' . db_prefix() . 'pur_orders.total) as total');
+		$this->db->from(db_prefix() . 'pur_orders');
+		$this->db->where(db_prefix() . 'pur_orders.approve_status', 2);
+		if (!empty($vendors)) {
+			$this->db->where(db_prefix() . 'pur_orders.vendor', $vendors);
+		}
+		if (!empty($projects)) {
+			$this->db->where(db_prefix() . 'pur_orders.project', $projects);
+		}
+		if (!empty($group_pur)) {
+			$this->db->where(db_prefix() . 'pur_orders.group_pur', $group_pur);
+		}
+		if (!empty($kind)) {
+			$this->db->where(db_prefix() . 'pur_orders.kind', $kind);
+		}
+		if (!empty($from_date)) {
+			$this->db->where(db_prefix() . 'pur_orders.order_date >=', date('Y-m-d', strtotime($from_date)));
+		}
+		if (!empty($to_date)) {
+			$this->db->where(db_prefix() . 'pur_orders.order_date <=', date('Y-m-d', strtotime($to_date)));
+		}
+		$pur_orders_total_data = $this->db->get()->row_array();
+		$pur_orders_total_amount = isset($pur_orders_total_data['total']) ? (int)$pur_orders_total_data['total'] : 0;
+		$this->db->select('SUM(' . db_prefix() . 'co_orders.co_value) as co_value');
+		$this->db->from(db_prefix() . 'co_orders');
+		$this->db->where(db_prefix() . 'co_orders.approve_status', 2);
+		$this->db->where(db_prefix() . 'co_orders.po_order_id IS NOT NULL', null, false);
+		if (!empty($vendors)) {
+			$this->db->where(db_prefix() . 'co_orders.vendor', $vendors);
+		}
+		if (!empty($projects)) {
+			$this->db->where(db_prefix() . 'co_orders.project', $projects);
+		}
+		if (!empty($group_pur)) {
+			$this->db->where(db_prefix() . 'co_orders.group_pur', $group_pur);
+		}
+		if (!empty($kind)) {
+			$this->db->where(db_prefix() . 'co_orders.kind', $kind);
+		}
+		if (!empty($from_date)) {
+			$this->db->where(db_prefix() . 'co_orders.order_date >=', date('Y-m-d', strtotime($from_date)));
+		}
+		if (!empty($to_date)) {
+			$this->db->where(db_prefix() . 'co_orders.order_date <=', date('Y-m-d', strtotime($to_date)));
+		}
+		$co_orders_total_data = $this->db->get()->row_array();
+		$co_orders_total_amount = isset($co_orders_total_data['co_value']) ? (int)$co_orders_total_data['co_value'] : 0;
+		$po_amount_incl_co = $pur_orders_total_amount + $co_orders_total_amount;
+		$response['po_amount_incl_co'] = app_format_money($po_amount_incl_co, $base_currency);
+		$wo_amount_incl_co = 0;
+		$this->db->select('SUM(' . db_prefix() . 'wo_orders.total) as total');
+		$this->db->from(db_prefix() . 'wo_orders');
+		$this->db->where(db_prefix() . 'wo_orders.approve_status', 2);
+		if (!empty($vendors)) {
+			$this->db->where(db_prefix() . 'wo_orders.vendor', $vendors);
+		}
+		if (!empty($projects)) {
+			$this->db->where(db_prefix() . 'wo_orders.project', $projects);
+		}
+		if (!empty($group_pur)) {
+			$this->db->where(db_prefix() . 'wo_orders.group_pur', $group_pur);
+		}
+		if (!empty($kind)) {
+			$this->db->where(db_prefix() . 'wo_orders.kind', $kind);
+		}
+		if (!empty($from_date)) {
+			$this->db->where(db_prefix() . 'wo_orders.order_date >=', date('Y-m-d', strtotime($from_date)));
+		}
+		if (!empty($to_date)) {
+			$this->db->where(db_prefix() . 'wo_orders.order_date <=', date('Y-m-d', strtotime($to_date)));
+		}
+		$wo_orders_total_data = $this->db->get()->row_array();
+		$wo_orders_total_amount = isset($wo_orders_total_data['total']) ? (int)$wo_orders_total_data['total'] : 0;
+		$this->db->select('SUM(' . db_prefix() . 'co_orders.co_value) as co_value');
+		$this->db->from(db_prefix() . 'co_orders');
+		$this->db->where(db_prefix() . 'co_orders.approve_status', 2);
+		$this->db->where(db_prefix() . 'co_orders.wo_order_id IS NOT NULL', null, false);
+		if (!empty($vendors)) {
+			$this->db->where(db_prefix() . 'co_orders.vendor', $vendors);
+		}
+		if (!empty($projects)) {
+			$this->db->where(db_prefix() . 'co_orders.project', $projects);
+		}
+		if (!empty($group_pur)) {
+			$this->db->where(db_prefix() . 'co_orders.group_pur', $group_pur);
+		}
+		if (!empty($kind)) {
+			$this->db->where(db_prefix() . 'co_orders.kind', $kind);
+		}
+		if (!empty($from_date)) {
+			$this->db->where(db_prefix() . 'co_orders.order_date >=', date('Y-m-d', strtotime($from_date)));
+		}
+		if (!empty($to_date)) {
+			$this->db->where(db_prefix() . 'co_orders.order_date <=', date('Y-m-d', strtotime($to_date)));
+		}
+		$co_orders_total_data = $this->db->get()->row_array();
+		$co_orders_total_amount = isset($co_orders_total_data['co_value']) ? (int)$co_orders_total_data['co_value'] : 0;
+		$wo_amount_incl_co = $wo_orders_total_amount + $co_orders_total_amount;
+		$response['wo_amount_incl_co'] = app_format_money($wo_amount_incl_co, $base_currency);
+		$unawarded_capex = 0;
+		$this->db->select('(
+		    ' . db_prefix() . 'estimate_package_info.total_package
+		    -
+		    (
+		        (SELECT IFNULL(SUM(total), 0)
+		         FROM ' . db_prefix() . 'pur_orders
+		         WHERE package_id = ' . db_prefix() . 'estimate_package_info.id)
+		        +
+		        (SELECT IFNULL(SUM(total), 0)
+		         FROM ' . db_prefix() . 'wo_orders
+		         WHERE package_id = ' . db_prefix() . 'estimate_package_info.id)
+		    )
+		) AS pending_value_in_package', false);
+		$this->db->from(db_prefix() . 'estimate_package_info');
+		$this->db->join(db_prefix() . 'estimates', db_prefix() . 'estimates.id = ' . db_prefix() . 'estimate_package_info.estimate_id', 'left');
+		if (!empty($projects)) {
+			$this->db->where(db_prefix() . 'estimates.project_id', $projects);
+		}
+		$estimate_package_info = $this->db->get()->result_array();
+		if(!empty($estimate_package_info)) {
+			$unawarded_capex = array_sum(array_column($estimate_package_info, 'pending_value_in_package'));
+		}
+		$response['unawarded_capex'] = app_format_money($unawarded_capex, $base_currency);
 
 		$response['cost_to_complete_ratio'] = $response['percentage_utilized'];
 		$response['rev_contract_value_ratio'] = 100 - $response['cost_to_complete_ratio'];
