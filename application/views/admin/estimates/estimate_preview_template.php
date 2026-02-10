@@ -941,6 +941,19 @@
                                </thead>
                                <tbody>
                                </tbody>
+                               <tfoot>
+                                  <td></td>
+                                  <td></td>
+                                  <td></td>
+                                  <td></td>
+                                  <td></td>
+                                  <td></td>
+                                  <td></td>
+                                  <td></td>
+                                  <td class="pending_value_in_package"></td>
+                                  <td></td>
+                                  <td></td>
+                               </tfoot>
                             </table>
                         </div>
                     </div>
@@ -1493,6 +1506,13 @@ var packageParams = {
     "budget_head": "[name='package_budget_head']"
 };
 initDataTable('.table-table_unawarded_tracker', admin_url + 'purchase/table_unawarded_tracker/' + estimate_id, [], [], packageParams, [0, 'desc']);
+$('.table-table_unawarded_tracker').on('draw.dt', function () {
+    var reportsTable = $(this).DataTable();
+    var sums = reportsTable.ajax.json().sums;
+    $(this).find('tfoot').addClass('bold');
+    $(this).find('tfoot td').eq(0).html("Total (Per Page)");
+    $(this).find('tfoot td.pending_value_in_package').html(sums.pending_value_in_package);
+});
 $(document).on('change', 'select[name="package_budget_head"]', function () {
     $('select[name="package_budget_head"]').selectpicker('refresh');
     table_unawarded_tracker.DataTable().ajax.reload();

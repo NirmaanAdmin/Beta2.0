@@ -94,6 +94,10 @@ $result = data_tables_init_union_unawarded($aColumns, $sIndexColumn, $sTable, $j
 $output  = $result['output'];
 $rResult = $result['rResult'];
 
+$footer_data = [
+   'pending_value_in_package' => 0,
+];
+
 $sr = 1;
 foreach ($rResult as $aRow) {
    $row = [];
@@ -177,8 +181,16 @@ foreach ($rResult as $aRow) {
 
       $row[] = $_data;
    }
+
+   $footer_data['pending_value_in_package'] += $aRow['pending_value_in_package'];
+
    $output['aaData'][] = $row;
    $sr++;
 }
+
+foreach ($footer_data as $key => $total) {
+   $footer_data[$key] = app_format_money($total, $base_currency->symbol);
+}
+$output['sums'] = $footer_data;
 
 ?>

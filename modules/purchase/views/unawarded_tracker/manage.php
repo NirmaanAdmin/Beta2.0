@@ -230,6 +230,20 @@
                            </thead>
                            <tbody>
                            </tbody>
+                           <tfoot>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                              <td class="pending_value_in_package"></td>
+                              <td></td>
+                              <td></td>
+                           </tfoot>
                         </table>
                      </div>
 
