@@ -317,7 +317,9 @@
           });
         }
 
-       item_tracker_report_for_charts(); 
+       item_tracker_report_for_charts();
+       po_issued_in_last_month();
+       wo_issued_in_last_month();
       });
     }
     var fnServerParams;
@@ -338,6 +340,44 @@
             .responsive.recalc();
         });
       });
+    }
+
+    function po_issued_in_last_month() {
+      "use strict";
+      var poIssuedParams = {};
+      if ($('select[name="vendors"]').val() != '') {
+        poIssuedParams["vendor[]"] = '[name="vendors"]';
+      }
+      if ($('select[name="group_pur"]').val() != '') {
+        poIssuedParams["group_pur[]"] = '[name="group_pur"]';
+      }
+      if ($('select[name="projects"]').val() != '') {
+        poIssuedParams["project[]"] = '[name="projects"]';
+      }
+      var table_po_issued_in_last_month = $('.table-table_po_issued_in_last_month');
+      if ($.fn.DataTable.isDataTable('.table-table_po_issued_in_last_month')) {
+        $('.table-table_po_issued_in_last_month').DataTable().destroy();
+      }
+      initDataTable('.table-table_po_issued_in_last_month', admin_url + 'purchase/table_po_issued_in_last_month', [], [], poIssuedParams, [4, 'desc']);
+    }
+
+    function wo_issued_in_last_month() {
+      "use strict";
+      var woIssuedParams = {};
+      if ($('select[name="vendors"]').val() != '') {
+        woIssuedParams["vendor[]"] = '[name="vendors"]';
+      }
+      if ($('select[name="group_pur"]').val() != '') {
+        woIssuedParams["group_pur[]"] = '[name="group_pur"]';
+      }
+      if ($('select[name="projects"]').val() != '') {
+        woIssuedParams["project[]"] = '[name="projects"]';
+      }
+      var table_wo_issued_in_last_month = $('.table-table_wo_issued_in_last_month');
+      if ($.fn.DataTable.isDataTable('.table-table_wo_issued_in_last_month')) {
+        $('.table-table_wo_issued_in_last_month').DataTable().destroy();
+      }
+      initDataTable('.table-table_wo_issued_in_last_month', admin_url + 'purchase/table_wo_issued_in_last_month', [], [], woIssuedParams, [4, 'desc']);
     }
   })(jQuery);
 </script>

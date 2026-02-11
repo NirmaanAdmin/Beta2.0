@@ -17795,4 +17795,14 @@ class purchase extends AdminController
     {
         $this->app->get_table_data(module_views_path('purchase', 'assar/table_monthly_summary'));
     }
+
+    public function table_po_issued_in_last_month()
+    {
+        $this->app->get_table_data(module_views_path('purchase', 'purchase_order/table_pur_order'), ['purchase_dashboard' => true]);
+    }
+
+    public function table_wo_issued_in_last_month()
+    {
+        $this->app->get_table_data(module_views_path('purchase', 'work_order/table_wo_order'), ['purchase_dashboard' => true]);
+    }
 }
