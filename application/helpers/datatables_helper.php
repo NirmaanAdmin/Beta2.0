@@ -1414,21 +1414,42 @@ function data_tables_actual_purchase_tracker_init($aColumns, $join = [], $where 
             grd.imp_local_status,
             grd.tracker_status,
             grd.production_status,
-            grd.payment_date,
-            grd.est_delivery_date,
-            grd.delivery_date,
+            (CASE WHEN grd.payment_date IS NOT NULL THEN grd.payment_date WHEN grd.payment_date IS NULL AND pc.pc_date IS NOT NULL THEN pc.pc_date ELSE NULL END) AS payment_date,
+            (CASE
+                WHEN grd.est_delivery_date IS NOT NULL THEN grd.est_delivery_date
+                WHEN grd.est_delivery_date IS NULL AND gr.pr_order_id IS NOT NULL THEN DATE_ADD(po.order_date, INTERVAL po.lead_time_days DAY)
+                WHEN grd.est_delivery_date IS NULL AND gr.wo_order_id IS NOT NULL THEN DATE_ADD(wo.order_date, INTERVAL wo.lead_time_days DAY)
+                ELSE NULL
+            END) AS est_delivery_date,
+            (CASE WHEN grd.delivery_date IS NOT NULL THEN grd.delivery_date WHEN grd.delivery_date IS NULL THEN gr.date_add ELSE NULL END) AS delivery_date,
             grd.remarks,
             grd.lead_time_days,
-            grd.advance_payment,
+            (CASE
+                WHEN grd.advance_payment != 0 THEN grd.advance_payment
+                WHEN grd.advance_payment = 0 AND gr.pr_order_id IS NOT NULL AND pc.po_this_bill IS NOT NULL THEN LEAST(100.00, ROUND(ROUND((pc.po_this_bill * 100 / po.subtotal) * 2) / 2,2))
+                WHEN grd.advance_payment = 0 AND gr.wo_order_id IS NOT NULL AND pc.po_this_bill IS NOT NULL THEN LEAST(100.00, ROUND(ROUND((pc.po_this_bill * 100 / wo.subtotal) * 2) / 2,2))
+                ELSE 0
+            END) AS advance_payment,
             grd.shop_submission,
             grd.shop_approval,
             grd.actual_remarks,
-            po.group_pur,
+            (CASE WHEN gr.pr_order_id IS NOT NULL THEN po.group_pur WHEN gr.wo_order_id IS NOT NULL THEN wo.group_pur ELSE NULL END) AS group_pur,
             grd.last_action
         FROM tblgoods_receipt_detail grd
         LEFT JOIN tblgoods_receipt gr ON gr.id = grd.goods_receipt_id
-        LEFT JOIN tblpur_orders po ON po.id = gr.pr_order_id
-        LEFT JOIN tblwo_orders wo ON wo.id = gr.wo_order_id        
+        LEFT JOIN tblpur_orders po ON po.id = gr.pr_order_id AND gr.pr_order_id IS NOT NULL
+        LEFT JOIN tblwo_orders wo ON wo.id = gr.wo_order_id AND gr.wo_order_id IS NOT NULL
+        LEFT JOIN (
+            SELECT po_id, wo_id, MIN(DATE(dateadded)) AS pc_date, SUM(po_this_bill) AS po_this_bill
+            FROM tblpayment_certificate
+            GROUP BY po_id, wo_id
+        ) pc 
+        ON (
+            (pc.po_id = gr.pr_order_id)
+            OR
+            (pc.wo_id = gr.wo_order_id)
+        )
+        GROUP BY grd.id
 
         UNION ALL
 
@@ -1455,12 +1476,20 @@ function data_tables_actual_purchase_tracker_init($aColumns, $join = [], $where 
             pod.imp_local_status,
             pod.tracker_status,
             pod.production_status,
-            pod.payment_date,
-            pod.est_delivery_date,
+            (CASE WHEN pod.payment_date IS NOT NULL THEN pod.payment_date WHEN pod.payment_date IS NULL AND pc.pc_date IS NOT NULL THEN pc.pc_date ELSE NULL END) AS payment_date,
+            (CASE 
+                WHEN pod.est_delivery_date IS NOT NULL THEN pod.est_delivery_date
+                WHEN pod.est_delivery_date IS NULL AND po.id IS NOT NULL THEN DATE_ADD(po.order_date, INTERVAL po.lead_time_days DAY)
+                ELSE NULL
+            END) AS est_delivery_date,
             pod.delivery_date,
             pod.remarks,
             pod.lead_time_days,
-            pod.advance_payment,
+            (CASE
+                WHEN pod.advance_payment != 0 THEN pod.advance_payment
+                WHEN pod.advance_payment = 0 AND po.id IS NOT NULL AND pc.po_this_bill IS NOT NULL THEN LEAST(100.00, ROUND(ROUND((pc.po_this_bill * 100 / po.subtotal) * 2) / 2,2))
+                ELSE 0
+            END) AS advance_payment,
             pod.shop_submission,
             pod.shop_approval,
             pod.actual_remarks,
@@ -1468,7 +1497,13 @@ function data_tables_actual_purchase_tracker_init($aColumns, $join = [], $where 
             pod.last_action
         FROM tblpur_order_detail pod
         LEFT JOIN tblpur_orders po ON po.id = pod.pur_order
+        LEFT JOIN (
+            SELECT po_id, MIN(DATE(dateadded)) AS pc_date, SUM(po_this_bill) AS po_this_bill
+            FROM tblpayment_certificate
+            GROUP BY po_id
+        ) pc ON pc.po_id = po.id
         WHERE po.goods_id = 0
+        GROUP BY pod.id
 
         UNION ALL
 
@@ -1495,12 +1530,20 @@ function data_tables_actual_purchase_tracker_init($aColumns, $join = [], $where 
             wod.imp_local_status,
             wod.tracker_status,
             wod.production_status,
-            wod.payment_date,
-            wod.est_delivery_date,
+            (CASE WHEN wod.payment_date IS NOT NULL THEN wod.payment_date WHEN wod.payment_date IS NULL AND pc.pc_date IS NOT NULL THEN pc.pc_date ELSE NULL END) AS payment_date,
+            (CASE 
+                WHEN wod.est_delivery_date IS NOT NULL THEN wod.est_delivery_date
+                WHEN wod.est_delivery_date IS NULL AND wo.id IS NOT NULL THEN DATE_ADD(wo.order_date, INTERVAL wo.lead_time_days DAY)
+                ELSE NULL
+            END) AS est_delivery_date,
             wod.delivery_date,
             wod.remarks,
             wod.lead_time_days,
-            wod.advance_payment,
+            (CASE
+                WHEN wod.advance_payment != 0 THEN wod.advance_payment
+                WHEN wod.advance_payment = 0 AND wo.id IS NOT NULL AND pc.po_this_bill IS NOT NULL THEN LEAST(100.00, ROUND(ROUND((pc.po_this_bill * 100 / wo.subtotal) * 2) / 2,2))
+                ELSE 0
+            END) AS advance_payment,
             wod.shop_submission,
             wod.shop_approval,
             wod.actual_remarks,
@@ -1508,7 +1551,13 @@ function data_tables_actual_purchase_tracker_init($aColumns, $join = [], $where 
             wod.last_action
         FROM tblwo_order_detail wod
         LEFT JOIN tblwo_orders wo ON wo.id = wod.wo_order
+        LEFT JOIN (
+            SELECT wo_id, MIN(DATE(dateadded)) AS pc_date, SUM(po_this_bill) AS po_this_bill
+            FROM tblpayment_certificate
+            GROUP BY wo_id
+        ) pc ON pc.wo_id = wo.id
         WHERE wo.goods_id = 0
+        GROUP BY wod.id
     ) AS combined_orders
     LEFT JOIN aggregated agg ON combined_orders.id = agg.goods_receipt_id
 ) AS final_result";

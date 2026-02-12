@@ -406,6 +406,10 @@
                           <?php endforeach; ?>
                         </select>
                       </div>
+                      <div class="col-md-6">
+                        <?php $lead_time_days = (isset($wo_order) ? $wo_order->lead_time_days : 0);
+                        echo render_input('lead_time_days', 'lead_time_days', $lead_time_days, 'number'); ?>
+                      </div>
                     </div>
 
                     <!-- <div class="row">

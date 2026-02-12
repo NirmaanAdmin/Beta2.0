@@ -267,6 +267,13 @@
                     </div>
 
                     <div class="row">
+                      <div class="col-md-6">
+                        <?php $lead_time_days = (isset($pur_order) ? $pur_order->lead_time_days : 0);
+                        echo render_input('lead_time_days', 'lead_time_days', $lead_time_days, 'number'); ?>
+                      </div>
+                    </div>
+
+                    <div class="row">
                       <div class="col-md-12 form-group">
                         <div id="inputTagsWrapper">
                           <label for="tags" class="control-label"><i class="fa fa-tag" aria-hidden="true"></i> <?php echo _l('tags'); ?></label>
