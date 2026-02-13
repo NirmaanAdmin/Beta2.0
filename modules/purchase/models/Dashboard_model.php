@@ -581,7 +581,6 @@ class Dashboard_model extends App_Model
 			}
 		}
 
-		// Post Order Milestone
 		$response['total_procurement_items'] = 0;
 		$response['late_deliveries'] = 0;
 		$response['shop_drawing_approved'] = 0;

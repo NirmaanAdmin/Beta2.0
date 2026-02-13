@@ -310,7 +310,7 @@
           <hr class="mtop10">
         </div>
 
-        <div class="col-md-5">
+        <div class="col-md-6">
           <div class="row">
 
             <div class="quick-stats-invoices col-md-6 tw-mb-2 sm:tw-mb-0">
@@ -330,12 +330,6 @@
               </div>
             </div>
 
-          </div>
-
-          <br>
-
-          <div class="row">
-
             <div class="quick-stats-invoices col-md-6 tw-mb-2 sm:tw-mb-0">
               <div class="top_stats_wrapper">
                 <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
@@ -354,45 +348,12 @@
             </div>
 
           </div>
-        </div>
 
-        <div class="col-md-7">
-          <div class="row">
-            <p class="mbot15 dashboard_stat_title">Delivery Delays in Days</p>
-            <div style="width: 100%; height: 400px;">
-              <canvas id="barChartDeliveryDelay"></canvas>
-            </div>
-          </div>
-        </div>
+          <br>
 
-        <div class="col-md-12 mtop20">
-          <div class="row">
-            <div class="col-md-5">
-              <p class="mbot15 dashboard_stat_title">Delivery Performance</p>
-              <div style="width: 100%; height: 450px;">
-                <canvas id="pieChartDeliveryPerformance"></canvas>
-              </div>
-            </div>
-            <div class="col-md-7">
-              
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <div class="panel_s">
-      <div class="panel-body dashboard-budget-summary">
-        <div class="col-md-12">
-          <p class="no-margin main_head_title">Post Order Milestone</p>
-          <hr class="mtop10">
-        </div>
-
-        <div class="col-md-5">
           <div class="row">
 
-            <div class="quick-stats-invoices col-md-7 tw-mb-2 sm:tw-mb-0">
+            <div class="quick-stats-invoices col-md-6 tw-mb-2 sm:tw-mb-0">
               <div class="top_stats_wrapper">
                 <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
                   <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
@@ -408,10 +369,8 @@
                 </div>
               </div>
             </div>
-          </div>
-          <br>
-          <div class="row">
-            <div class="quick-stats-invoices col-md-7 tw-mb-2 sm:tw-mb-0">
+
+            <div class="quick-stats-invoices col-md-6 tw-mb-2 sm:tw-mb-0">
               <div class="top_stats_wrapper">
                 <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
                   <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
@@ -434,7 +393,7 @@
 
           <div class="row">
 
-            <div class="quick-stats-invoices col-md-7 tw-mb-2 sm:tw-mb-0">
+            <div class="quick-stats-invoices col-md-6 tw-mb-2 sm:tw-mb-0">
               <div class="top_stats_wrapper">
                 <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
                   <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
@@ -450,10 +409,8 @@
                 </div>
               </div>
             </div>
-          </div>
-          <br>
-          <div class="row">
-            <div class="quick-stats-invoices col-md-7 tw-mb-2 sm:tw-mb-0">
+
+            <div class="quick-stats-invoices col-md-6 tw-mb-2 sm:tw-mb-0">
               <div class="top_stats_wrapper">
                 <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
                   <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
@@ -473,11 +430,28 @@
           </div>
         </div>
 
-        <div class="col-md-7">
+        <div class="col-md-6">
           <div class="row">
-            <p class="mbot15 dashboard_stat_title">Procurement Status</p>
-            <div style="width: 100%; height: 450px; display: flex; justify-content: center;">
-              <canvas id="barChartProcurementStatus"></canvas>
+            <p class="mbot15 dashboard_stat_title">Delivery Delays in Days</p>
+            <div style="width: 100%; height: 400px;">
+              <canvas id="barChartDeliveryDelay"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-12 mtop20">
+          <div class="row">
+            <div class="col-md-5">
+              <p class="mbot15 dashboard_stat_title">Delivery Performance</p>
+              <div style="width: 100%; height: 450px;">
+                <canvas id="pieChartDeliveryPerformance"></canvas>
+              </div>
+            </div>
+            <div class="col-md-7">
+              <p class="mbot15 dashboard_stat_title">Procurement Status</p>
+              <div style="width: 100%; height: 450px; display: flex; justify-content: center;">
+                <canvas id="barChartProcurementStatus"></canvas>
+              </div>
             </div>
           </div>
         </div>
