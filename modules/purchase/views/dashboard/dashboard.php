@@ -374,8 +374,7 @@
               </div>
             </div>
             <div class="col-md-7">
-              <p class="mbot15 dashboard_stat_title">Delivery Data</p>
-              <div class="delivery_table_data"></div>
+              
             </div>
           </div>
         </div>

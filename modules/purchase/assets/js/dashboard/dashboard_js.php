@@ -54,9 +54,6 @@
         $('.on_time_deliveries_percentage').text(response.on_time_deliveries_percentage + '%');
         $('.average_delay').text(response.average_delay + ' Days');
 
-        // Delivery Data
-        $('.delivery_table_data').html(response.delivery_table_data);
-
         // Post Order Milestone
         $('.total_procurement_items').text(response.total_procurement_items);
         $('.late_deliveries').text(response.late_deliveries);

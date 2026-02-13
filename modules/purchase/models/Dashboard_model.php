@@ -464,7 +464,6 @@ class Dashboard_model extends App_Model
 		$response['delivery_delay_days'] = array();
 		$response['delivery_performance_labels'] = array();
 		$response['delivery_performance_values'] = array();
-		$response['delivery_table_data'] = array();
 		$this->db->select(
 			db_prefix() . 'goods_receipt.pr_order_id as po_id, ' .
 				db_prefix() . 'pur_orders.pur_order_number as pur_order_number, ' .
@@ -562,40 +561,6 @@ class Dashboard_model extends App_Model
 					}, $delay_delivery_data),
 					fn($item) => !is_null($item)
 				));
-				$response['delivery_table_data'] = '
-		        <div class="table-responsive s_table">
-		          <table class="table items table-bordered">
-		            <thead>
-		              <tr>
-		                <th align="left" width="25%">PO Name</th>
-		                <th align="left" width="30%">' . _l('description') . '</th>
-		                <th align="right" width="15%">' . _l('est_delivery_date') . '</th>
-		                <th align="right" width="15%">' . _l('delivery_date') . '</th>
-		                <th align="right" width="15%">Delay (Days)</th>
-		              </tr>
-		            </thead>
-		            <tbody>';
-				if (!empty($delay_delivery_data)) {
-					foreach ($delay_delivery_data as $drow) {
-						$response['delivery_table_data'] .= '
-		                  <tr>
-		                  	<td align="left">' . html_entity_decode($drow['pur_order_number']) . '</td>
-		                    <td align="left">' . html_entity_decode($drow['commodity_name']) . '</td>
-		                    <td align="right">' . date('d-m-Y', strtotime($drow['est_delivery_date'])) . '</td>
-		                    <td align="right">' . date('d-m-Y', strtotime($drow['delivery_date'])) . '</td>
-		                    <td align="right">' . html_entity_decode($drow['delay_days']) . '</td>
-		                  </tr>';
-					}
-				} else {
-					$response['delivery_table_data'] .= '
-		              <tr>
-		                <td colspan="5" align="center">No data available</td>
-		              </tr>';
-				}
-				$response['delivery_table_data'] .= '
-		            </tbody>
-		          </table>
-		        </div>';
 				$delay_delivery_data = array_values(array_reduce($delay_delivery_data, function ($carry, $item) {
 					$key = $item['po_id'];
 					if (!isset($carry[$key])) {
