@@ -1673,6 +1673,7 @@ class purchase extends AdminController
         } else {
             $data['pur_order_detail'] = $this->purchase_model->get_pur_order_detail($id);
             $data['pur_order'] = $this->purchase_model->get_pur_order($id);
+            $data['shop_drawings'] = $this->purchase_model->get_order_shop_drawings($id, 'purchase_orders');
             $data['attachments'] = $this->purchase_model->get_purchase_attachments('pur_order', $id);
 
             $currency_rate = 1;
@@ -10044,6 +10045,7 @@ class purchase extends AdminController
             $data['wo_order_detail'] = $this->purchase_model->get_wo_order_detail($id);
 
             $data['wo_order'] = $this->purchase_model->get_wo_order($id);
+            $data['shop_drawings'] = $this->purchase_model->get_order_shop_drawings($id, 'work_orders');
             $data['attachments'] = $this->purchase_model->get_work_order_attachments('wo_order', $id);
 
             $currency_rate = 1;
@@ -17804,5 +17806,11 @@ class purchase extends AdminController
     public function table_wo_issued_in_last_month()
     {
         $this->app->get_table_data(module_views_path('purchase', 'work_order/table_wo_order'), ['purchase_dashboard' => true]);
+    }
+
+    public function delete_order_shop_drawings_attachment($id)
+    {
+        $this->purchase_model->delete_order_shop_drawings_attachment($id);
+        redirect($_SERVER['HTTP_REFERER']);
     }
 }

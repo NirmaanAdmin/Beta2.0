@@ -593,7 +593,7 @@
                                 }
 
                                 $attachments = $this->warehouse_model->get_inventory_shop_drawing_attachments(
-                                  'goods_receipt_shop_d',
+                                  'goods_receipt_shop_drawings',
                                   $receipt_value['id'],
                                   $view_type
                                 );

@@ -124,6 +124,7 @@ if (!empty($wo_po_orders)) {
 if (get_default_project()) {
     $where[] = 'AND project = "' . get_default_project() . '"';
 }
+$this->ci->load->model('purchase/purchase_model');
 $this->ci->load->model('warehouse/warehouse_model');
 
 $result = data_tables_actual_purchase_tracker_init($aColumns, $join, $where, [
@@ -376,11 +377,26 @@ foreach ($rResult as $aRow) {
                 $view_type = 'work_orders';
             }
 
+            $attachments = array();
             $attachments = $this->ci->warehouse_model->get_inventory_shop_drawing_attachments(
-                'goods_receipt_shop_d',
+                'goods_receipt_shop_drawings',
                 $aRow['item_detail_id'],
                 $view_type
             );
+            if(empty($attachments)) {
+                if(!empty($aRow['pr_order_id'])) {
+                    $attachments = $this->ci->purchase_model->get_order_shop_drawings(
+                        $aRow['pr_order_id'],
+                        'purchase_orders'
+                    );
+                }
+                if(!empty($aRow['wo_order_id'])) {
+                    $attachments = $this->ci->purchase_model->get_order_shop_drawings(
+                        $aRow['wo_order_id'],
+                        'work_orders'
+                    );
+                }
+            }
 
             if (!empty($attachments)) {
                 $_data = '<a href="javascript:void(0)" onclick="view_purchase_tracker_attachments(' . $attachments[0]['rel_id'] . ', \'' . $attachments[0]['view_type'] . '\'); return false;" class="btn btn-info btn-icon">View Files</a>';

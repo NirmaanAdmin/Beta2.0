@@ -2874,6 +2874,7 @@ class Purchase_model extends App_Model
         $cron_email['options'] = json_encode($cron_email_options, true);
         $this->db->insert(db_prefix() . 'cron_email', $cron_email);
         $this->save_purchase_files('pur_order', $insert_id);
+        $this->save_order_shop_drawings_attachments($insert_id, 'purchase_orders');
         $this->update_cost_control_remarks($cost_control_remarks, $insert_id);
         if ($insert_id) {
             // Update next purchase order number in settings
@@ -3096,6 +3097,7 @@ class Purchase_model extends App_Model
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'pur_orders', $data);
         $this->save_purchase_files('pur_order', $id);
+        $this->save_order_shop_drawings_attachments($id, 'purchase_orders');
         // $this->update_cost_control_remarks($cost_control_remarks, $insert_id);
 
         if ($this->db->affected_rows() > 0) {
@@ -16623,6 +16625,7 @@ class Purchase_model extends App_Model
         $this->db->insert(db_prefix() . 'cron_email', $cron_email);
 
         $this->save_purchase_files('wo_order', $insert_id);
+        $this->save_order_shop_drawings_attachments($insert_id, 'work_orders');
         $this->update_cost_control_remarks($cost_control_remarks, $insert_id);
 
         if ($insert_id) {
@@ -16838,6 +16841,7 @@ class Purchase_model extends App_Model
         $this->db->update(db_prefix() . 'wo_orders', $data);
 
         $this->save_purchase_files('wo_order', $id);
+        $this->save_order_shop_drawings_attachments($id, 'work_orders');
 
         if ($this->db->affected_rows() > 0) {
             $affectedRows++;
@@ -22088,12 +22092,21 @@ class Purchase_model extends App_Model
         $rel_id = $input['rel_id'];
         $view_type = $input['view_type'];
         $this->load->model('warehouse/warehouse_model');
-        $attachments = $this->warehouse_model->get_inventory_shop_drawing_attachments_new('goods_receipt_shop_d', $rel_id);
+        $attachments = array();
+        $attachments = $this->warehouse_model->get_inventory_shop_drawing_attachments_new('goods_receipt_shop_drawings', $rel_id);
+        if(empty($attachments)) {
+            $attachments = $this->get_order_shop_drawings(
+                $rel_id,
+                $view_type
+            );
+        }
 
         if (count($attachments) > 0) {
             $file_html .= '<p class="bold text-muted">' . _l('customer_attachments') . '</p>';
             foreach ($attachments as $f) {
-                if ($view_type != '') {
+                if ($f['rel_type'] == 'order_shop_drawings') {
+                    $href_url = site_url('modules/warehouse/uploads/purchase_tracker/order_shop_drawings/' . $f['view_type'] . '/' . $f['rel_id'] . '/' . $f['file_name']) . '" download';
+                } else if ($view_type != '') {
                     $href_url = site_url('modules/warehouse/uploads/purchase_tracker/goods_receipt_shop_drawings/' . $view_type . '/' . $f['rel_id'] . '/' . $f['file_name']) . '" download';
                 } else {
                     $href_url = site_url('modules/warehouse/uploads/purchase_tracker/goods_receipt_shop_drawings/' . $f['rel_id'] . '/' . $f['file_name']) . '" download';
@@ -22108,8 +22121,10 @@ class Purchase_model extends App_Model
                  <small class="text-muted">' . $f['filetype'] . '</small>
               </div>
               <div class="col-md-4 text-right">';
-                if ($f['staffid'] == get_staff_user_id() || is_admin()) {
-                    $file_html .= '<a href="#" class="text-danger" onclick="delete_purchase_tracker_attachment(' . $f['id'] . '); return false;"><i class="fa fa-times"></i></a>';
+                if ($f['rel_type'] != 'order_shop_drawings') {
+                    if ($f['staffid'] == get_staff_user_id() || is_admin()) {
+                        $file_html .= '<a href="#" class="text-danger" onclick="delete_purchase_tracker_attachment(' . $f['id'] . '); return false;"><i class="fa fa-times"></i></a>';
+                    }
                 }
                 $file_html .= '</div></div>';
             }
@@ -28749,5 +28764,57 @@ class Purchase_model extends App_Model
             return true;
         }
         return false;
+    }
+
+    public function get_order_shop_drawings($rel_id, $view_type)
+    {
+        $this->db->where('rel_id', $rel_id);
+        $this->db->where('rel_type', 'order_shop_drawings');
+        $this->db->where('view_type', $view_type);
+        $this->db->order_by('dateadded', 'desc');
+        $invetory_files = $this->db->get(db_prefix() . 'invetory_files')->result_array();
+        return $invetory_files;
+    }
+
+    public function save_order_shop_drawings_attachments($rel_id, $view_type)
+    {
+        $related_to = 'order_shop_drawings';
+        $path = WAREHOUSE_MODULE_UPLOAD_FOLDER . '/purchase_tracker/' . $related_to . '/' . $view_type . '/' . $rel_id . '/';
+        $uploadedFiles = handle_order_shop_drawings_attachments_array($path);
+        if ($uploadedFiles && is_array($uploadedFiles)) {
+            foreach ($uploadedFiles as $file) {
+                $data = array();
+                $data['dateadded'] = date('Y-m-d H:i:s');
+                $data['rel_type'] = $related_to;
+                $data['rel_id'] = $rel_id;
+                $data['staffid'] = get_staff_user_id();
+                $data['attachment_key'] = app_generate_hash();
+                $data['file_name'] = $file['file_name'];
+                $data['filetype'] = $file['filetype'];
+                $data['view_type'] = $view_type;
+                $this->db->insert(db_prefix() . 'invetory_files', $data);
+            }
+        }
+        return true;
+    }
+
+    public function delete_order_shop_drawings_attachment($id)
+    {
+        $deleted = false;
+        $this->db->where('id', $id);
+        $attachment = $this->db->get(db_prefix() . 'invetory_files')->row();
+        if ($attachment) {
+            if (unlink(FCPATH . 'modules/warehouse/uploads/purchase_tracker/order_shop_drawings/' . $attachment->view_type . '/' . $attachment->rel_id . '/' . $attachment->file_name)) {
+                $this->db->where('id', $attachment->id);
+                $this->db->delete(db_prefix() . 'invetory_files');
+                $deleted = true;
+            }
+            $other_attachments = list_files(FCPATH . 'modules/warehouse/uploads/purchase_tracker/order_shop_drawings/' . $attachment->view_type . '/' . $attachment->rel_id);
+            if (count($other_attachments) == 0) {
+                delete_dir(FCPATH . 'modules/warehouse/uploads/purchase_tracker/order_shop_drawings/' . $attachment->view_type . '/' . $attachment->rel_id);
+            }
+        }
+
+        return $deleted;
     }
 }

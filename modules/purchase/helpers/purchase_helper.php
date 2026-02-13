@@ -7022,3 +7022,48 @@ function add_vendor_attachment_activity_log($id, $file_name, $is_create = true)
     }
     return true;
 }
+
+function handle_order_shop_drawings_attachments_array($path)
+{
+    $uploaded_files = [];
+    if (!is_dir($path)) {
+        mkdir($path, 0755, true);
+    }
+    if (
+        isset($_FILES['shop_drawings']['name'])
+        && ($_FILES['shop_drawings']['name'] != '' || is_array($_FILES['shop_drawings']['name']) && count($_FILES['shop_drawings']['name']) > 0)
+    ) {
+        if (!is_array($_FILES['shop_drawings']['name'])) {
+            $_FILES['shop_drawings']['name'] = [$_FILES['shop_drawings']['name']];
+            $_FILES['shop_drawings']['type'] = [$_FILES['shop_drawings']['type']];
+            $_FILES['shop_drawings']['tmp_name'] = [$_FILES['shop_drawings']['tmp_name']];
+            $_FILES['shop_drawings']['error'] = [$_FILES['shop_drawings']['error']];
+            $_FILES['shop_drawings']['size'] = [$_FILES['shop_drawings']['size']];
+        }
+        _file_attachments_index_fix('shop_drawings');
+        for ($i = 0; $i < count($_FILES['shop_drawings']['name']); $i++) {
+            $tmpFilePath = $_FILES['shop_drawings']['tmp_name'][$i];
+            if (!empty($tmpFilePath) && $tmpFilePath != '') {
+                if (
+                    _perfex_upload_error($_FILES['shop_drawings']['error'][$i])
+                    || !_upload_extension_allowed($_FILES['shop_drawings']['name'][$i])
+                ) {
+                    continue;
+                }
+                _maybe_create_upload_path($path);
+                $filename = unique_filename($path, $_FILES['shop_drawings']['name'][$i]);
+                $newFilePath = $path . $filename;
+                if (move_uploaded_file($tmpFilePath, $newFilePath)) {
+                    array_push($uploaded_files, [
+                        'file_name' => $filename,
+                        'filetype'  => $_FILES['shop_drawings']['type'][$i],
+                    ]);
+                }
+            }
+        }
+    }
+    if (count($uploaded_files) > 0) {
+        return $uploaded_files;
+    }
+    return false;
+}

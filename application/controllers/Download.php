@@ -297,6 +297,18 @@ class Download extends App_Controller
             }
 
             $path = get_upload_path_by_type('estimate_request') . $attachment->rel_id . '/' . $attachment->file_name;
+        } elseif ($folder_indicator == 'order_shop_drawings') {
+            if (is_staff_logged_in()) {
+                if (!$attachmentid) {
+                    show_404();
+                }
+                $this->db->where('id', $attachmentid);
+                $attachment = $this->db->get(db_prefix() . 'invetory_files')->row();
+                if (!$attachment) {
+                    show_404();
+                }
+                $path = FCPATH . 'modules/warehouse/uploads/purchase_tracker/order_shop_drawings/' . $attachment->view_type . '/' . $attachment->rel_id . '/' . $attachment->file_name;
+            }
         } else {
             die('folder not specified');
         }

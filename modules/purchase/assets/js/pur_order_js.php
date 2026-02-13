@@ -389,6 +389,54 @@
       }
     });
 
+    // + button for adding more shop_drawings
+    var addMoreShopdrawingsInputKey = 1;
+    $("body").on("click", ".add_more_shop_drawings", function () {
+      if ($(this).hasClass("disabled")) {
+        return false;
+      }
+
+      var total_shop_drawings = $('.shop_drawings input[name*="shop_drawings"]').length;
+      if ($(this).data("max") && total_shop_drawings >= $(this).data("max")) {
+        return false;
+      }
+
+      var newshop_drawing = $(".shop_drawings")
+        .find(".shop_drawing")
+        .eq(0)
+        .clone()
+        .appendTo(".shop_drawings");
+      newshop_drawing.find("input").removeAttr("aria-describedby aria-invalid");
+      newshop_drawing
+        .find("input")
+        .attr("name", "shop_drawings[" + addMoreShopdrawingsInputKey + "]")
+        .val("");
+      newshop_drawing
+        .find(
+          $.fn.appFormValidator.internal_options.error_element + '[id*="error"]'
+        )
+        .remove();
+      newshop_drawing
+        .find("." + $.fn.appFormValidator.internal_options.field_wrapper_class)
+        .removeClass(
+          $.fn.appFormValidator.internal_options.field_wrapper_error_class
+        );
+      newshop_drawing.find("i").removeClass("fa-plus").addClass("fa-minus");
+      newshop_drawing
+        .find("button")
+        .removeClass("add_more_shop_drawings")
+        .addClass("remove_shop_drawing")
+        .removeClass("btn-success")
+        .removeClass("btn-default")
+        .addClass("btn-danger");
+      addMoreShopdrawingsInputKey++;
+    });
+
+    // Remove shop_drawing
+    $("body").on("click", ".remove_shop_drawing", function () {
+      $(this).parents(".shop_drawing").remove();
+    });
+
   });
 
   var lastAddedItemKey = null;
