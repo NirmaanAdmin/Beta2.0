@@ -317,28 +317,8 @@
           });
         }
 
-       item_tracker_report_for_charts();
        po_issued_in_last_month();
        wo_issued_in_last_month();
-      });
-    }
-    var fnServerParams;
-    fnServerParams = {
-      "vendors": '[name="vendors"]',
-    };
-    function item_tracker_report_for_charts() {
-      "use strict";
-      var table_rec_campaign = $('.table-item-tracker-report');
-      if ($.fn.DataTable.isDataTable('.table-item-tracker-report')) {
-        $('.table-item-tracker-report').DataTable().destroy();
-      }
-      initDataTable('.table-item-tracker-report', admin_url + 'purchase/item_tracker_report_for_charts', false, false, fnServerParams, undefined, true);
-      $.each(fnServerParams, function(i, obj) {
-        $('select' + obj).on('change', function() {
-          table_rec_campaign.DataTable().ajax.reload()
-            .columns.adjust()
-            .responsive.recalc();
-        });
       });
     }
 
