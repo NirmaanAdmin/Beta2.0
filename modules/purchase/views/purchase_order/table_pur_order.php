@@ -41,14 +41,12 @@ $aColumns = [
 
 if(isset($vendor) || isset($project) || isset($purchase_dashboard)) {
     $aColumns = [
-    'pur_order_number',
-    'total',
-    'total_tax',
-    'vendor',
-    'order_date',
-    'number',
-    'approve_status',
-
+        'pur_order_number',
+        'total',
+        'total_tax',
+        'vendor',
+        'order_date',
+        'approve_status',
     ];
 }
 

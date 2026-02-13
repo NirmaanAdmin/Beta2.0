@@ -12,7 +12,6 @@
         _l('estimates_total_tax'),
         _l('vendor'),
         _l('order_date'),
-        _l('payment_status'),
         _l('status'),
         );
         $custom_fields = get_custom_fields('pur_order',array('show_on_table'=>1));

@@ -273,7 +273,6 @@
                     <th><?php echo _l('estimates_total_tax'); ?></th>
                     <th><?php echo _l('vendor'); ?></th>
                     <th><?php echo _l('order_date'); ?></th>
-                    <th><?php echo _l('payment_status'); ?></th>
                     <th><?php echo _l('status'); ?></th>
                   </tr>
                 </thead>
@@ -293,7 +292,6 @@
                     <th><?php echo _l('estimates_total_tax'); ?></th>
                     <th><?php echo _l('vendor'); ?></th>
                     <th><?php echo _l('order_date'); ?></th>
-                    <th><?php echo _l('payment_status'); ?></th>
                     <th><?php echo _l('status'); ?></th>
                   </tr>
                 </thead>
