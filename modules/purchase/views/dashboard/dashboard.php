@@ -459,6 +459,52 @@
       </div>
     </div>
 
+    <div class="panel_s">
+      <div class="panel-body dashboard-budget-summary">
+        <div class="col-md-12">
+          <p class="no-margin main_head_title">Material Delivery data</p>
+          <hr class="mtop10">
+        </div>
+        <div class="col-md-12 mtop10">
+          <div class="row">
+            <div class="scroll-wrapper" style="max-height: 750px; overflow-y: auto;">
+              <table class="table table-table_po_critical_deliver">
+                <thead>
+                  <tr>
+                    <th><?php echo _l('PO Name'); ?></th>
+                    <th><?php echo _l('description'); ?></th>
+                    <th><?php echo _l('vendor'); ?></th>
+                    <th><?php echo _l('est_delivery_date'); ?></th>
+                    <th><?php echo _l('delivery_date'); ?></th>
+                    <th><?php echo _l('status'); ?></th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-12 mtop10">
+          <div class="row">
+            <div class="scroll-wrapper" style="max-height: 750px; overflow-y: auto;">
+              <table class="table table-table_po_upcoming_deliver">
+                <thead>
+                  <tr>
+                    <th><?php echo _l('PO Name'); ?></th>
+                    <th><?php echo _l('description'); ?></th>
+                    <th><?php echo _l('vendor'); ?></th>
+                    <th><?php echo _l('est_delivery_date'); ?></th>
+                    <th><?php echo _l('delivery_date'); ?></th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 <?php init_tail(); ?>

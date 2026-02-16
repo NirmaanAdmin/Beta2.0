@@ -47,6 +47,16 @@ class Dashboard extends AdminController
         echo json_encode($result);
         die;
     }
+
+    public function table_po_critical_deliver()
+    {
+        $this->app->get_table_data(module_views_path('purchase', 'dashboard/table_po_deliver'), ['po_critical_deliver' => true]);
+    }
+
+    public function table_po_upcoming_deliver()
+    {
+        $this->app->get_table_data(module_views_path('purchase', 'dashboard/table_po_deliver'), ['po_upcoming_deliver' => true]);
+    }
 }
 
 ?>

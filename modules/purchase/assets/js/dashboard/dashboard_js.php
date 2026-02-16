@@ -314,6 +314,8 @@
 
        po_issued_in_last_month();
        wo_issued_in_last_month();
+       po_critical_deliver();
+       po_upcoming_deliver();
       });
     }
 
@@ -353,6 +355,62 @@
         $('.table-table_wo_issued_in_last_month').DataTable().destroy();
       }
       initDataTable('.table-table_wo_issued_in_last_month', admin_url + 'purchase/table_wo_issued_in_last_month', [], [], woIssuedParams, [4, 'desc']);
+    }
+
+    function po_critical_deliver() {
+      "use strict";
+      var poCriticalParams = {};
+      if ($('select[name="vendors"]').val() != '') {
+        poCriticalParams["vendor"] = '[name="vendors"]';
+      }
+      if ($('select[name="group_pur"]').val() != '') {
+        poCriticalParams["group_pur"] = '[name="group_pur"]';
+      }
+      if ($('select[name="projects"]').val() != '') {
+        poCriticalParams["project"] = '[name="projects"]';
+      }
+      if ($('select[name="kind"]').val() != '') {
+        poCriticalParams["kind"] = '[name="kind"]';
+      }
+      if ($('input[name="from_date"]').val() != '') {
+        poCriticalParams["from_date"] = '[name="from_date"]';
+      }
+      if ($('input[name="to_date"]').val() != '') {
+        poCriticalParams["to_date"] = '[name="to_date"]';
+      }
+      var table_po_critical_deliver = $('.table-table_po_critical_deliver');
+      if ($.fn.DataTable.isDataTable('.table-table_po_critical_deliver')) {
+        $('.table-table_po_critical_deliver').DataTable().destroy();
+      }
+      initDataTable('.table-table_po_critical_deliver', admin_url + 'purchase/dashboard/table_po_critical_deliver', [], [], poCriticalParams, [3, 'desc']);
+    }
+
+    function po_upcoming_deliver() {
+      "use strict";
+      var poUpcomingParams = {};
+      if ($('select[name="vendors"]').val() != '') {
+        poUpcomingParams["vendor"] = '[name="vendors"]';
+      }
+      if ($('select[name="group_pur"]').val() != '') {
+        poUpcomingParams["group_pur"] = '[name="group_pur"]';
+      }
+      if ($('select[name="projects"]').val() != '') {
+        poUpcomingParams["project"] = '[name="projects"]';
+      }
+      if ($('select[name="kind"]').val() != '') {
+        poUpcomingParams["kind"] = '[name="kind"]';
+      }
+      if ($('input[name="from_date"]').val() != '') {
+        poUpcomingParams["from_date"] = '[name="from_date"]';
+      }
+      if ($('input[name="to_date"]').val() != '') {
+        poUpcomingParams["to_date"] = '[name="to_date"]';
+      }
+      var table_po_upcoming_deliver = $('.table-table_po_upcoming_deliver');
+      if ($.fn.DataTable.isDataTable('.table-table_po_upcoming_deliver')) {
+        $('.table-table_po_upcoming_deliver').DataTable().destroy();
+      }
+      initDataTable('.table-table_po_upcoming_deliver', admin_url + 'purchase/dashboard/table_po_upcoming_deliver', [], [], poUpcomingParams, [3, 'desc']);
     }
   })(jQuery);
 </script>
