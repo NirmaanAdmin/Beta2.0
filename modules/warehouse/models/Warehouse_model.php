@@ -23924,7 +23924,8 @@ class Warehouse_model extends App_Model
 			$base_currency = pur_get_currency_by_id($request->currency);
 		}
 
-		$response['total_receipts'] = $response['total_received_po'] = $response['total_po'] = $response['total_quantity_received'] = $response['total_client_supply'] = $response['total_bought_out_items'] = $response['fully_documented'] = $response['incompleted'] = 0;
+		$response['total_receipts'] = $response['total_received_po'] = $response['total_po'] = $response['total_quantity_received'] = $response['total_client_supply'] = $response['total_bought_out_items'] = $response['fully_documented'] = $response['incompleted'] = $response['amount_vs_order_value'] = $response['nos_vs_order_items'] = 0;
+		
 		$response['line_order_date'] = $response['line_order_total'] = array();
 		$response['bar_top_vendor_name'] = $response['bar_top_vendor_value'] = array();
 		$default_project = get_default_project();

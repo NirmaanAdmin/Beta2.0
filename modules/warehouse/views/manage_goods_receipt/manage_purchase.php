@@ -134,6 +134,44 @@ $module_name = 'warehouse_goods_receipt';
                   </div>
                 </div>
               </div>
+              <div class="row">
+                <div class="col-md-12 mtop20">
+                  <div class="row">
+                    <div class="quick-stats-invoices col-md-3 tw-mb-2 sm:tw-mb-0 n_width">
+                      <div class="top_stats_wrapper">
+                        <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                          <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                            <span class="tw-truncate dashboard_stat_title">Amount vs Order value in %</span>
+                          </div>
+                          <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                        </div>
+                        <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                          <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                            <span class="tw-truncate dashboard_stat_value amount_vs_order_value"></span>
+                          </div>
+                          <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="quick-stats-invoices col-md-3 tw-mb-2 sm:tw-mb-0 n_width">
+                      <div class="top_stats_wrapper">
+                        <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                          <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                            <span class="tw-truncate dashboard_stat_title">Nos vs Order items in %</span>
+                          </div>
+                          <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                        </div>
+                        <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                          <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                            <span class="tw-truncate dashboard_stat_value nos_vs_order_items"></span>
+                          </div>
+                          <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
               <div class="row mtop20">
                 <div class="col-md-4">
                   <p class="mbot15 dashboard_stat_title">Receipts Over Time</p>

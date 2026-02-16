@@ -239,6 +239,8 @@ function get_stock_received_dashboard() {
     $('.total_quantity_received').text(response.total_quantity_received);
     $('.total_client_supply').text(response.total_client_supply);
     $('.total_bought_out_items').text(response.total_bought_out_items);
+    $('.amount_vs_order_value').text(response.amount_vs_order_value + '%');
+    $('.nos_vs_order_items').text(response.nos_vs_order_items + '%');
 
     // LINE CHART - Receipts Over Time
     var lineCtx = document.getElementById('lineChartOverTime').getContext('2d');
