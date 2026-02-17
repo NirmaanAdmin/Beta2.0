@@ -23947,6 +23947,94 @@ class Warehouse_model extends App_Model
 		}
 		$pur_orders = $this->db->get()->result_array();
 
+		$this->db->select('SUM(pod.quantity) as total_po_quantity, COUNT(pod.id) as total_pur_order_rows', false
+		);
+		$this->db->from(db_prefix() . 'pur_order_detail as pod');
+		$this->db->join(
+		    db_prefix() . 'pur_orders as po',
+		    'po.id = pod.pur_order',
+		    'left'
+		);
+		if (!empty($vendors) && is_array($vendors)) {
+		    $this->db->where_in('po.vendor', $vendors);
+		}
+		$this->db->where('po.approve_status', 2);
+		$pur_order_detail = $this->db->get()->row_array();
+		$total_po_quantity = !empty($pur_order_detail) ? $pur_order_detail['total_po_quantity'] : 0;
+		$total_pur_order_rows = !empty($pur_order_detail) ? $pur_order_detail['total_pur_order_rows'] : 0;
+
+		$this->db->select('SUM(cod.quantity) as total_co_quantity, COUNT(cod.id) as total_co_order_rows', false
+		);
+		$this->db->from(db_prefix() . 'co_order_detail as cod');
+		$this->db->join(
+		    db_prefix() . 'co_orders as co',
+		    'co.id = cod.pur_order',
+		    'left'
+		);
+		if (!empty($vendors) && is_array($vendors)) {
+		    $this->db->where_in('co.vendor', $vendors);
+		}
+		$this->db->where('co.po_order_id IS NOT NULL', null, false);
+		$this->db->where('co.po_order_id != 0', null, false);
+		$this->db->where('cod.tender_item', 1);
+		$this->db->where('co.approve_status', 2);
+		$co_order_detail = $this->db->get()->row_array();
+		$total_co_quantity = !empty($co_order_detail) ? $co_order_detail['total_co_quantity'] : 0;
+		$total_co_order_rows = !empty($co_order_detail) ? $co_order_detail['total_co_order_rows'] : 0;
+
+		$total_order_quantity = $total_po_quantity + $total_co_quantity;
+		$total_order_rows = $total_pur_order_rows + $total_co_order_rows;
+
+		$this->db->select('SUM(grd.quantities) as total_gr_quantity', false);
+		$this->db->from(db_prefix() . 'goods_receipt_detail as grd');
+		$this->db->join(
+		    db_prefix() . 'goods_receipt as gr',
+		    'gr.id = grd.goods_receipt_id',
+		    'left'
+		);
+		$this->db->join(
+		    db_prefix() . 'pur_orders as po',
+		    'po.id = gr.pr_order_id',
+		    'left'
+		);
+		if (!empty($vendors) && is_array($vendors)) {
+		    $this->db->where_in('po.vendor', $vendors);
+		}
+		$this->db->where('gr.pr_order_id IS NOT NULL', null, false);
+		$this->db->where('gr.pr_order_id != 0', null, false);
+		$goods_receipt_detail = $this->db->get()->row_array();
+		$total_gr_quantity = !empty($goods_receipt_detail) ? $goods_receipt_detail['total_gr_quantity'] : 0;
+		if($total_order_quantity > 0) {
+			$response['amount_vs_order_value'] = ($total_gr_quantity * 100) / $total_order_quantity;
+			$response['amount_vs_order_value'] = $response['amount_vs_order_value'] > 100 ? 100 : round($response['amount_vs_order_value']);
+		}
+
+		$this->db->select('grd.id');
+		$this->db->from(db_prefix() . 'goods_receipt_detail as grd');
+		$this->db->join(
+		    db_prefix() . 'goods_receipt as gr',
+		    'gr.id = grd.goods_receipt_id',
+		    'inner'
+		);
+		$this->db->join(
+		    db_prefix() . 'pur_orders as po',
+		    'po.id = gr.pr_order_id',
+		    'inner'
+		);
+		if (!empty($vendors) && is_array($vendors)) {
+		    $this->db->where_in('po.vendor', $vendors);
+		}
+		$this->db->where('gr.pr_order_id >', 0);
+		$this->db->group_by([
+		    'grd.commodity_code',
+		    'grd.description'
+		]);
+		$goods_receipt_detail = $this->db->get()->result_array();
+		if($total_order_rows > 0) {
+			$response['nos_vs_order_items'] = (count($goods_receipt_detail) * 100) / $total_order_rows;
+			$response['nos_vs_order_items'] = $response['nos_vs_order_items'] > 100 ? 100 : round($response['nos_vs_order_items']);
+		}
+
 		$this->db->select(
 			db_prefix() . 'goods_receipt.id, ' .
 				db_prefix() . 'goods_receipt.pr_order_id, ' .
