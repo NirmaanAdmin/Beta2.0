@@ -345,7 +345,7 @@
                           <td><?php echo get_area_name_by_id($delivery_value['area'] ?? ''); ?></td>
                           <td><?php echo html_entity_decode($warehouse_name) ?></td>
                           <td><?php echo html_entity_decode($received_quantity) ?></td>
-                          <td><?php echo $ordered_quantity ?></td>
+                          <td><?php echo $ordered_quantity.' '.$unit_name ?></td>
                           <td><?php echo html_entity_decode($all_issued_quantities) ?></td>
                           <td><?php echo html_entity_decode($all_returnable_date) ?></td>
                           <td><?php echo html_entity_decode($all_reconciliation_date) ?></td>

@@ -2889,7 +2889,7 @@ function get_ordered_quantity($pur_order = null, $wo_order = null, $description 
             ", false);
         }
     }
-
+                        
     // Commodity code filter (if tables have this column)
     if ($commodity_code !== null && $commodity_code !== '') {
         if (is_array($commodity_code) && !empty($commodity_code)) {
@@ -2903,7 +2903,6 @@ function get_ordered_quantity($pur_order = null, $wo_order = null, $description 
     if ($normalized_desc !== null && $normalized_desc !== '') {
         $CI->db->having('non_break_description', $normalized_desc);
     }
-
     $result = $CI->db->get()->row();
     return !empty($result) && $result->quantity !== null ? (float)$result->quantity : 0.0;
 }
