@@ -207,15 +207,8 @@
                       $index = 1; // Use a counter instead of $delivery variable which might cause issues
 
                       foreach ($goods_delivery_detail as $delivery_value) {
-                        $ordered_quantity = '';
-                        // Calculate ordered quantity INSIDE the loop for each item
-                        // $ordered_quantity = get_ordered_quantity(
-                        //   $goods_delivery->pr_order_id ?? 0,
-                        //   $goods_delivery->wo_order_id ?? 0,
-                        //   $delivery_value['description'] ?? '',
-                        //   $delivery_value['commodity_code'] ?? ''
-                        // );
-
+                        $ordered_quantity = (isset($delivery_value) ? $delivery_value['quantities'] : '');
+                        
                         $available_quantity = (isset($delivery_value) ? $delivery_value['available_quantity'] : '');
                         $received_quantity = (isset($delivery_value) ? $delivery_value['received_quantity'] : '');
                         $total_money = (isset($delivery_value) ? $delivery_value['total_money'] : '');
