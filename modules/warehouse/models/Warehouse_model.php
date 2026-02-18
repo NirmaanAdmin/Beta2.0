@@ -23291,10 +23291,153 @@ class Warehouse_model extends App_Model
 		return $arr_pur_resquest;
 	}
 
+	// public function reconciliation_goods_receipt_get_pur_order($pur_order)
+	// {
+	// 	$stock_reconciliation_row_template = '';
+	// 	$goods_receipt_arr = [];
+	// 	// 1. Select the field(s) you need
+	// 	$this->db->select('*');
+
+	// 	// 2. Set goods_receipt as the FROM table
+	// 	$this->db->from(db_prefix() . 'goods_receipt');
+
+	// 	// 3. LEFT JOIN goods_receipt_detail on the delivery_id
+	// 	$this->db->join(
+	// 		db_prefix() . 'goods_receipt_detail',
+	// 		db_prefix() . 'goods_receipt_detail.goods_receipt_id = '
+	// 			. db_prefix() . 'goods_receipt.id',
+	// 		'left'
+	// 	);
+
+
+	// 	$this->db->where(
+	// 		db_prefix() . 'goods_receipt.pr_order_id',
+	// 		$pur_order
+	// 	);
+
+
+	// 	// 5. Execute
+	// 	$goods_delivery_description = $this->db->get()->result_array();
+	// 	$groupedItems = [];
+
+	// 	foreach ($goods_delivery_description as $delivery) {
+	// 		$commodityCode = $delivery['commodity_code'];
+	// 		$description = $delivery['description'];
+
+	// 		// Skip if commodity_code is empty
+	// 		if (empty($commodityCode)) {
+	// 			continue;
+	// 		}
+
+	// 		// Create a unique key combining commodity_code and description
+	// 		$groupKey = $commodityCode . '|' . $description;
+
+	// 		// Initialize group if not exists
+	// 		if (!isset($groupedItems[$groupKey])) {
+	// 			$groupedItems[$groupKey] = [
+	// 				'commodity_code' => $delivery['commodity_code'],
+	// 				'commodity_name' => $delivery['commodity_name'],
+	// 				'description'   => $delivery['description'],
+	// 				'area'          => $delivery['area'],
+	// 				'warehouse_id'  => $delivery['warehouse_id'],
+	// 				'vendor_quantities' => [], // Stores summed quantities per vendor
+	// 				'returnable'     => $delivery['returnable'],
+	// 				'vendor_dates' => [],
+	// 				'unit_id' => $delivery['unit_id'],
+	// 			];
+	// 		}
+
+	// 		// Process quantities_json if exists
+	// 		$quantitiesJson = $delivery['quantities_json'];
+	// 		if (!empty($quantitiesJson)) {
+	// 			$quantities = json_decode($quantitiesJson, true);
+
+	// 			foreach ($quantities as $vendorId => $quantity) {
+	// 				if (isset($groupedItems[$groupKey]['vendor_quantities'][$vendorId])) {
+	// 					$groupedItems[$groupKey]['vendor_quantities'][$vendorId] += (int)$quantity;
+	// 				} else {
+	// 					$groupedItems[$groupKey]['vendor_quantities'][$vendorId] = (int)$quantity;
+	// 				}
+	// 			}
+	// 		}
+
+	// 		// Process returnable_date if exists
+	// 		$returnableDateJson = $delivery['returnable_date'];
+	// 		if (!empty($returnableDateJson)) {
+	// 			$returnableDates = json_decode($returnableDateJson, true);
+
+	// 			foreach ($returnableDates as $vendorId => $date) {
+	// 				if (isset($groupedItems[$groupKey]['vendor_dates'][$vendorId])) {
+	// 					$groupedItems[$groupKey]['vendor_dates'][$vendorId] = $date;
+	// 				} else {
+	// 					$groupedItems[$groupKey]['vendor_dates'][$vendorId] = $date;
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+
+	// 	$warehouse_data = $this->warehouse_model->get_warehouse();
+	// 	// Convert to indexed array if needed
+	// 	$result = array_values($groupedItems);
+	// 	$index_receipt = 0;
+
+	// 	foreach ($result as $key => $delivery_detail) {
+	// 		$unit_name = wh_get_unit_name($delivery_detail['unit_id']);
+	// 		$taxname = '';
+	// 		$expiry_date = null;
+	// 		$lot_number = $delivery_detail['lot_number'];
+	// 		$commodity_name = $delivery_detail['commodity_name'];
+	// 		$without_checking_warehouse = 0;
+
+	// 		if (strlen($commodity_name) == 0) {
+	// 			$commodity_name = wh_get_item_variatiom($delivery_detail['commodity_code']);
+	// 		}
+
+	// 		$get_commodity = $this->warehouse_model->get_commodity($delivery_detail['commodity_code']);
+	// 		if ($get_commodity) {
+	// 			$without_checking_warehouse = $get_commodity->without_checking_warehouse;
+	// 		}
+
+
+	// 		$goods_receipt_arr[] = [
+	// 			'warehouse_id' => $delivery_detail['warehouse_id'],
+	// 			'commodity_name' => $commodity_name,
+	// 			'quantities' => $delivery_detail['quantities'],
+	// 			'unit_id' => $delivery_detail['unit_id'],
+	// 			'commodity_code' => $delivery_detail['commodity_code'],
+	// 			'description' => $delivery_detail['description'],
+	// 			'quantities_json' => $delivery_detail['quantities_json'],
+	// 			'received_quantity' => get_stock_received_quantity(
+	// 				$pur_order,
+	// 				$delivery_detail['description'],
+	// 				'',
+	// 				$delivery_detail['commodity_code']
+	// 			),
+	// 			'area' => $delivery_detail['area'],
+	// 		];
+	// 	}
+
+	// 	return $goods_receipt_arr;
+	// }
+
 	public function reconciliation_goods_receipt_get_pur_order($pur_order)
 	{
 		$stock_reconciliation_row_template = '';
 		$goods_receipt_arr = [];
+
+		// Get change orders first (internal logic only)
+		$co_exist = $this->purchase_model->get_po_changes($pur_order);
+
+		// Get currency rate (internal logic only)
+		$currency_rate = 1;
+		$this->load->model('purchase/purchase_model');
+		$get_pur_order = $this->purchase_model->get_pur_order($pur_order);
+		if ($get_pur_order) {
+			if ($get_pur_order->currency_rate != null) {
+				$currency_rate = $get_pur_order->currency_rate;
+			}
+		}
+
 		// 1. Select the field(s) you need
 		$this->db->select('*');
 
@@ -23309,15 +23452,31 @@ class Warehouse_model extends App_Model
 			'left'
 		);
 
-
 		$this->db->where(
 			db_prefix() . 'goods_receipt.pr_order_id',
 			$pur_order
 		);
 
-
 		// 5. Execute
 		$goods_delivery_description = $this->db->get()->result_array();
+
+		// If change orders exist, we need to adjust quantities but keep the same return structure
+		if (!empty($co_exist)) {
+			// Get change order items to adjust quantities
+			$sql = 'select item_code as commodity_code, ' . db_prefix() . 'co_order_detail.description, quantity from ' . db_prefix() . 'co_order_detail
+			left join ' . db_prefix() . 'co_orders on ' . db_prefix() . 'co_orders.id =  ' . db_prefix() . 'co_order_detail.pur_order
+			where ' . db_prefix() . 'co_orders.po_order_id = ' . $pur_order . ' and ' . db_prefix() . 'co_order_detail.tender_item = 1';
+			$co_items = $this->db->query($sql)->result_array();
+
+			// Create a map of change order quantities by description and commodity code
+			$co_quantity_map = [];
+			foreach ($co_items as $co_item) {
+				$clean_description = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $co_item['description']));
+				$key = $co_item['commodity_code'] . '|' . $clean_description;
+				$co_quantity_map[$key] = $co_item['quantity'];
+			}
+		}
+
 		$groupedItems = [];
 
 		foreach ($goods_delivery_description as $delivery) {
@@ -23344,7 +23503,34 @@ class Warehouse_model extends App_Model
 					'returnable'     => $delivery['returnable'],
 					'vendor_dates' => [],
 					'unit_id' => $delivery['unit_id'],
+					'quantities' => $delivery['quantities'],
+					'quantities_json' => $delivery['quantities_json'],
 				];
+
+				// Adjust quantities if change order exists for this item
+				if (!empty($co_exist)) {
+					$clean_description = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $delivery['description']));
+					$map_key = $commodityCode . '|' . $clean_description;
+					if (isset($co_quantity_map[$map_key])) {
+						// If this item has a change order, adjust the quantity
+						$groupedItems[$groupKey]['quantities'] = $co_quantity_map[$map_key];
+
+						// Also adjust quantities_json if it exists
+						if (!empty($delivery['quantities_json'])) {
+							// Recalculate based on change order quantity
+							// This maintains the same vendor distribution ratio
+							$quantities = json_decode($delivery['quantities_json'], true);
+							$total = array_sum($quantities);
+							if ($total > 0) {
+								$ratio = $co_quantity_map[$map_key] / $total;
+								foreach ($quantities as $vendorId => $qty) {
+									$quantities[$vendorId] = round($qty * $ratio);
+								}
+								$groupedItems[$groupKey]['quantities_json'] = json_encode($quantities);
+							}
+						}
+					}
+				}
 			}
 
 			// Process quantities_json if exists
@@ -23383,64 +23569,15 @@ class Warehouse_model extends App_Model
 
 		foreach ($result as $key => $delivery_detail) {
 			$unit_name = wh_get_unit_name($delivery_detail['unit_id']);
-			$taxname = '';
-			$expiry_date = null;
-			$lot_number = $delivery_detail['lot_number'];
 			$commodity_name = $delivery_detail['commodity_name'];
-			$without_checking_warehouse = 0;
 
 			if (strlen($commodity_name) == 0) {
 				$commodity_name = wh_get_item_variatiom($delivery_detail['commodity_code']);
 			}
 
 			$get_commodity = $this->warehouse_model->get_commodity($delivery_detail['commodity_code']);
-			if ($get_commodity) {
-				$without_checking_warehouse = $get_commodity->without_checking_warehouse;
-			}
 
-			// $stock_reconciliation_row_template .= $this->create_stock_reconciliation_row_template(
-			// 	$warehouse_data,
-			// 	'newitems[' . $index_receipt . ']',
-			// 	$commodity_name,
-			// 	$delivery_detail['warehouse_id'],
-			// 	$delivery_detail['vendor_quantities'],
-			// 	$delivery_detail['quantities'],
-			// 	$unit_name,
-			// 	$delivery_detail['unit_price'],
-			// 	$taxname,
-			// 	$delivery_detail['commodity_code'],
-			// 	$delivery_detail['unit_id'],
-			// 	$delivery_detail['vendor_id'],
-			// 	$delivery_detail['tax_rate'],
-			// 	$delivery_detail['total_money'],
-			// 	$delivery_detail['discount'],
-			// 	$delivery_detail['discount_money'],
-			// 	$delivery_detail['total_after_discount'],
-			// 	$delivery_detail['guarantee_period'],
-			// 	$delivery_detail['issued_date'],
-			// 	$lot_number,
-			// 	$delivery_detail['note'],
-			// 	$delivery_detail['sub_total'],
-			// 	$delivery_detail['tax_name'],
-			// 	$delivery_detail['tax_id'],
-			// 	$delivery_detail['id'],
-			// 	false,
-			// 	$is_purchase_order,
-			// 	$delivery_detail['serial_number'],
-			// 	$without_checking_warehouse,
-			// 	$delivery_detail['description'],
-			// 	$delivery_detail['quantities_json'],
-			// 	$delivery_detail['area'],
-			// 	'',
-			// 	$delivery_detail['vendor_dates'],
-			// 	'',
-			// 	'',
-			// 	'',
-			// 	'',
-			// 	$pur_order,
-			// 	'',
-			// );
-			// $index_receipt++;
+			// Return exactly the same array structure as before
 			$goods_receipt_arr[] = [
 				'warehouse_id' => $delivery_detail['warehouse_id'],
 				'commodity_name' => $commodity_name,
@@ -23462,10 +23599,196 @@ class Warehouse_model extends App_Model
 		return $goods_receipt_arr;
 	}
 
+	// public function reconciliation_goods_receipt_get_wo_order($wo_order)
+	// {
+	// 	$stock_reconciliation_row_template = '';
+	// 	$goods_receipt_arr = [];
+	// 	// 1. Select the field(s) you need
+	// 	$this->db->select('*');
+
+	// 	// 2. Set goods_receipt as the FROM table
+	// 	$this->db->from(db_prefix() . 'goods_receipt');
+
+	// 	// 3. LEFT JOIN goods_receipt_detail on the delivery_id
+	// 	$this->db->join(
+	// 		db_prefix() . 'goods_receipt_detail',
+	// 		db_prefix() . 'goods_receipt_detail.goods_receipt_id = '
+	// 			. db_prefix() . 'goods_receipt.id',
+	// 		'left'
+	// 	);
+
+
+	// 	$this->db->where(
+	// 		db_prefix() . 'goods_receipt.wo_order_id',
+	// 		$wo_order
+	// 	);
+
+
+	// 	// 5. Execute
+	// 	$goods_delivery_description = $this->db->get()->result_array();
+	// 	$groupedItems = [];
+
+	// 	foreach ($goods_delivery_description as $delivery) {
+	// 		$commodityCode = $delivery['commodity_code'];
+	// 		$description = $delivery['description'];
+
+	// 		// Skip if commodity_code is empty
+	// 		if (empty($commodityCode)) {
+	// 			continue;
+	// 		}
+
+	// 		// Create a unique key combining commodity_code and description
+	// 		$groupKey = $commodityCode . '|' . $description;
+
+	// 		// Initialize group if not exists
+	// 		if (!isset($groupedItems[$groupKey])) {
+	// 			$groupedItems[$groupKey] = [
+	// 				'commodity_code' => $delivery['commodity_code'],
+	// 				'commodity_name' => $delivery['commodity_name'],
+	// 				'description'   => $delivery['description'],
+	// 				'area'          => $delivery['area'],
+	// 				'warehouse_id'  => $delivery['warehouse_id'],
+	// 				'vendor_quantities' => [], // Stores summed quantities per vendor
+	// 				'returnable'     => $delivery['returnable'],
+	// 				'vendor_dates' => [],
+	// 				'unit_id' => $delivery['unit_id'],
+	// 			];
+	// 		}
+
+	// 		// Process quantities_json if exists
+	// 		$quantitiesJson = $delivery['quantities_json'];
+	// 		if (!empty($quantitiesJson)) {
+	// 			$quantities = json_decode($quantitiesJson, true);
+
+	// 			foreach ($quantities as $vendorId => $quantity) {
+	// 				if (isset($groupedItems[$groupKey]['vendor_quantities'][$vendorId])) {
+	// 					$groupedItems[$groupKey]['vendor_quantities'][$vendorId] += (int)$quantity;
+	// 				} else {
+	// 					$groupedItems[$groupKey]['vendor_quantities'][$vendorId] = (int)$quantity;
+	// 				}
+	// 			}
+	// 		}
+
+	// 		// Process returnable_date if exists
+	// 		$returnableDateJson = $delivery['returnable_date'];
+	// 		if (!empty($returnableDateJson)) {
+	// 			$returnableDates = json_decode($returnableDateJson, true);
+
+	// 			foreach ($returnableDates as $vendorId => $date) {
+	// 				if (isset($groupedItems[$groupKey]['vendor_dates'][$vendorId])) {
+	// 					$groupedItems[$groupKey]['vendor_dates'][$vendorId] = $date;
+	// 				} else {
+	// 					$groupedItems[$groupKey]['vendor_dates'][$vendorId] = $date;
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+
+	// 	$warehouse_data = $this->warehouse_model->get_warehouse();
+	// 	// Convert to indexed array if needed
+	// 	$result = array_values($groupedItems);
+	// 	$index_receipt = 0;
+
+	// 	foreach ($result as $key => $delivery_detail) {
+	// 		$unit_name = wh_get_unit_name($delivery_detail['unit_id']);
+	// 		$taxname = '';
+	// 		$expiry_date = null;
+	// 		$lot_number = $delivery_detail['lot_number'];
+	// 		$commodity_name = $delivery_detail['commodity_name'];
+	// 		$without_checking_warehouse = 0;
+
+	// 		if (strlen($commodity_name) == 0) {
+	// 			$commodity_name = wh_get_item_variatiom($delivery_detail['commodity_code']);
+	// 		}
+
+	// 		$get_commodity = $this->warehouse_model->get_commodity($delivery_detail['commodity_code']);
+	// 		if ($get_commodity) {
+	// 			$without_checking_warehouse = $get_commodity->without_checking_warehouse;
+	// 		}
+
+	// 		// $stock_reconciliation_row_template .= $this->create_stock_reconciliation_row_template(
+	// 		// 	$warehouse_data,
+	// 		// 	'newitems[' . $index_receipt . ']',
+	// 		// 	$commodity_name,
+	// 		// 	$delivery_detail['warehouse_id'],
+	// 		// 	$delivery_detail['vendor_quantities'],
+	// 		// 	$delivery_detail['quantities'],
+	// 		// 	$unit_name,
+	// 		// 	$delivery_detail['unit_price'],
+	// 		// 	$taxname,
+	// 		// 	$delivery_detail['commodity_code'],
+	// 		// 	$delivery_detail['unit_id'],
+	// 		// 	$delivery_detail['vendor_id'],
+	// 		// 	$delivery_detail['tax_rate'],
+	// 		// 	$delivery_detail['total_money'],
+	// 		// 	$delivery_detail['discount'],
+	// 		// 	$delivery_detail['discount_money'],
+	// 		// 	$delivery_detail['total_after_discount'],
+	// 		// 	$delivery_detail['guarantee_period'],
+	// 		// 	$delivery_detail['issued_date'],
+	// 		// 	$lot_number,
+	// 		// 	$delivery_detail['note'],
+	// 		// 	$delivery_detail['sub_total'],
+	// 		// 	$delivery_detail['tax_name'],
+	// 		// 	$delivery_detail['tax_id'],
+	// 		// 	$delivery_detail['id'],
+	// 		// 	false,
+	// 		// 	$is_purchase_order,
+	// 		// 	$delivery_detail['serial_number'],
+	// 		// 	$without_checking_warehouse,
+	// 		// 	$delivery_detail['description'],
+	// 		// 	$delivery_detail['quantities_json'],
+	// 		// 	$delivery_detail['area'],
+	// 		// 	'',
+	// 		// 	$delivery_detail['vendor_dates'],
+	// 		// 	'',
+	// 		// 	'',
+	// 		// 	'',
+	// 		// 	'',
+	// 		// 	$pur_order,
+	// 		// 	'',
+	// 		// );
+	// 		// $index_receipt++;
+	// 		$goods_receipt_arr[] = [
+	// 			'warehouse_id' => $delivery_detail['warehouse_id'],
+	// 			'commodity_name' => $commodity_name,
+	// 			'quantities' => $delivery_detail['quantities'],
+	// 			'unit_id' => $delivery_detail['unit_id'],
+	// 			'commodity_code' => $delivery_detail['commodity_code'],
+	// 			'description' => $delivery_detail['description'],
+	// 			'quantities_json' => $delivery_detail['quantities_json'],
+	// 			'received_quantity' => get_stock_received_quantity(
+	// 				'',
+	// 				$delivery_detail['description'],
+	// 				$wo_order,
+	// 				$delivery_detail['commodity_code']
+	// 			),
+	// 			'area' => $delivery_detail['area'],
+	// 		];
+	// 	}
+
+	// 	return $goods_receipt_arr;
+	// }
+
+
 	public function reconciliation_goods_receipt_get_wo_order($wo_order)
 	{
 		$stock_reconciliation_row_template = '';
 		$goods_receipt_arr = [];
+
+		// Get change orders for this work order
+		$co_exist = $this->purchase_model->get_change_wo_order($wo_order);
+
+		// Get currency rate if needed
+		$currency_rate = 1;
+		$this->load->model('purchase/purchase_model');
+		$get_wo_order = $this->purchase_model->get_wo_order($wo_order);
+		if ($get_wo_order) {
+			if ($get_wo_order->currency_rate != null) {
+				$currency_rate = $get_wo_order->currency_rate;
+			}
+		}
+
 		// 1. Select the field(s) you need
 		$this->db->select('*');
 
@@ -23480,17 +23803,38 @@ class Warehouse_model extends App_Model
 			'left'
 		);
 
-
 		$this->db->where(
 			db_prefix() . 'goods_receipt.wo_order_id',
 			$wo_order
 		);
 
-
 		// 5. Execute
 		$goods_delivery_description = $this->db->get()->result_array();
+
+		// Also get original work order items to include any items not yet received
+		$sql = 'select item_code as commodity_code, ' . db_prefix() . 'wo_order_detail.description, ' . db_prefix() . 'wo_order_detail.unit_id, unit_price, quantity as quantities, ' . db_prefix() . 'wo_order_detail.tax as tax, ' . db_prefix() . 'wo_order_detail.area as area from ' . db_prefix() . 'wo_order_detail
+		left join ' . db_prefix() . 'items on ' . db_prefix() . 'wo_order_detail.item_code =  ' . db_prefix() . 'items.id
+		where ' . db_prefix() . 'wo_order_detail.wo_order = ' . $wo_order . '
+		GROUP BY ' . db_prefix() . 'wo_order_detail.id';
+		$original_items = $this->db->query($sql)->result_array();
+
+		// Get change order items if they exist
+		$co_items = [];
+		if (!empty($co_exist)) {
+			$sql = 'select item_code as commodity_code, ' . db_prefix() . 'co_order_detail.description, ' . db_prefix() . 'co_order_detail.unit_id, unit_price, quantity as quantities, ' . db_prefix() . 'co_order_detail.tax as tax, ' . db_prefix() . 'co_order_detail.area as area from ' . db_prefix() . 'co_order_detail
+			left join ' . db_prefix() . 'co_orders on ' . db_prefix() . 'co_orders.id =  ' . db_prefix() . 'co_order_detail.pur_order
+			left join ' . db_prefix() . 'items on ' . db_prefix() . 'co_order_detail.item_code =  ' . db_prefix() . 'items.id
+			where ' . db_prefix() . 'co_orders.wo_order_id = ' . $wo_order . ' and ' . db_prefix() . 'co_order_detail.tender_item = 1
+			GROUP BY ' . db_prefix() . 'co_order_detail.id';
+			$co_items = $this->db->query($sql)->result_array();
+		}
+
+		// Combine original and change order items
+		$all_items = array_merge($original_items, $co_items);
+
 		$groupedItems = [];
 
+		// First, process existing goods receipts
 		foreach ($goods_delivery_description as $delivery) {
 			$commodityCode = $delivery['commodity_code'];
 			$description = $delivery['description'];
@@ -23515,6 +23859,10 @@ class Warehouse_model extends App_Model
 					'returnable'     => $delivery['returnable'],
 					'vendor_dates' => [],
 					'unit_id' => $delivery['unit_id'],
+					'quantities' => $delivery['quantities'],
+					'quantities_json' => $delivery['quantities_json'],
+					'received_quantity' => $delivery['quantities'], // Already received
+					'unit_price' => isset($delivery['unit_price']) ? $delivery['unit_price'] / $currency_rate : 0,
 				];
 			}
 
@@ -23547,6 +23895,81 @@ class Warehouse_model extends App_Model
 			}
 		}
 
+		// Now add items from work order that haven't been received yet
+		foreach ($all_items as $item) {
+			$commodityCode = $item['commodity_code'];
+			$clean_description = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $item['description']));
+			$groupKey = $commodityCode . '|' . $item['description']; // Use original description for key
+
+			// Calculate available quantity
+			$available_quantity = (float)$item['quantities'];
+
+			// Subtract already received quantities
+			$total_received = 0;
+			if (isset($groupedItems[$groupKey])) {
+				$total_received = $groupedItems[$groupKey]['received_quantity'] ?? 0;
+			} else {
+				// Check if there are any receipts for this item not yet in groupedItems
+				$this->db->select(db_prefix() . 'goods_receipt_detail.quantities');
+				$this->db->select("
+					REPLACE(
+						REPLACE(
+							REPLACE(
+								REPLACE(" . db_prefix() . "goods_receipt_detail.description, '\r', ''),
+							'\n', ''),
+						'<br />', ''),
+					'<br/>', '') AS non_break_description
+				");
+				$this->db->where(db_prefix() . 'goods_receipt.approval', 1);
+				$this->db->where('wo_order_id', $wo_order);
+				$this->db->join(db_prefix() . 'goods_receipt', db_prefix() . 'goods_receipt.id = ' . db_prefix() . 'goods_receipt_detail.goods_receipt_id', 'left');
+				$this->db->group_by(db_prefix() . 'goods_receipt_detail.id');
+				$this->db->having('non_break_description', $clean_description);
+				$goods_receipt_description = $this->db->get(db_prefix() . 'goods_receipt_detail')->result_array();
+
+				if (!empty($goods_receipt_description)) {
+					foreach ($goods_receipt_description as $qitem) {
+						$total_received += $qitem['quantities'];
+					}
+				}
+			}
+
+			$available_quantity = $available_quantity - $total_received;
+
+			// Apply change order adjustments if this is an original item
+			if (!empty($co_exist) && !in_array($item, $co_items, true)) {
+				// This is an original item, check if change order modified it
+				$updated_co_quantity = $this->get_changee_order_quantity($item['commodity_code'], $item['description'], $wo_order, 'wo_orders');
+				$available_quantity = $available_quantity + $updated_co_quantity;
+			}
+
+			$available_quantity = round($available_quantity, 2);
+
+			// If item not in receipts yet and has available quantity, add it
+			if ($available_quantity > 0 && !isset($groupedItems[$groupKey])) {
+				$unit_price = round((float)$item['unit_price'] / $currency_rate, 5);
+
+				// Create quantities_json structure for new items
+				$quantities_json = json_encode([]); // Empty by default, can be populated based on requirements
+
+				$groupedItems[$groupKey] = [
+					'commodity_code' => $commodityCode,
+					'commodity_name' => wh_get_item_variatiom($commodityCode),
+					'description'   => $item['description'],
+					'area'          => $item['area'] ?? '',
+					'warehouse_id'  => '', // To be selected by user
+					'vendor_quantities' => [],
+					'returnable'     => 0,
+					'vendor_dates' => [],
+					'unit_id' => $item['unit_id'],
+					'quantities' => 0, // No received quantity yet
+					'quantities_json' => $quantities_json,
+					'received_quantity' => 0,
+					'unit_price' => $unit_price,
+				];
+			}
+		}
+
 		$warehouse_data = $this->warehouse_model->get_warehouse();
 		// Convert to indexed array if needed
 		$result = array_values($groupedItems);
@@ -23554,64 +23977,15 @@ class Warehouse_model extends App_Model
 
 		foreach ($result as $key => $delivery_detail) {
 			$unit_name = wh_get_unit_name($delivery_detail['unit_id']);
-			$taxname = '';
-			$expiry_date = null;
-			$lot_number = $delivery_detail['lot_number'];
 			$commodity_name = $delivery_detail['commodity_name'];
-			$without_checking_warehouse = 0;
 
 			if (strlen($commodity_name) == 0) {
 				$commodity_name = wh_get_item_variatiom($delivery_detail['commodity_code']);
 			}
 
 			$get_commodity = $this->warehouse_model->get_commodity($delivery_detail['commodity_code']);
-			if ($get_commodity) {
-				$without_checking_warehouse = $get_commodity->without_checking_warehouse;
-			}
 
-			// $stock_reconciliation_row_template .= $this->create_stock_reconciliation_row_template(
-			// 	$warehouse_data,
-			// 	'newitems[' . $index_receipt . ']',
-			// 	$commodity_name,
-			// 	$delivery_detail['warehouse_id'],
-			// 	$delivery_detail['vendor_quantities'],
-			// 	$delivery_detail['quantities'],
-			// 	$unit_name,
-			// 	$delivery_detail['unit_price'],
-			// 	$taxname,
-			// 	$delivery_detail['commodity_code'],
-			// 	$delivery_detail['unit_id'],
-			// 	$delivery_detail['vendor_id'],
-			// 	$delivery_detail['tax_rate'],
-			// 	$delivery_detail['total_money'],
-			// 	$delivery_detail['discount'],
-			// 	$delivery_detail['discount_money'],
-			// 	$delivery_detail['total_after_discount'],
-			// 	$delivery_detail['guarantee_period'],
-			// 	$delivery_detail['issued_date'],
-			// 	$lot_number,
-			// 	$delivery_detail['note'],
-			// 	$delivery_detail['sub_total'],
-			// 	$delivery_detail['tax_name'],
-			// 	$delivery_detail['tax_id'],
-			// 	$delivery_detail['id'],
-			// 	false,
-			// 	$is_purchase_order,
-			// 	$delivery_detail['serial_number'],
-			// 	$without_checking_warehouse,
-			// 	$delivery_detail['description'],
-			// 	$delivery_detail['quantities_json'],
-			// 	$delivery_detail['area'],
-			// 	'',
-			// 	$delivery_detail['vendor_dates'],
-			// 	'',
-			// 	'',
-			// 	'',
-			// 	'',
-			// 	$pur_order,
-			// 	'',
-			// );
-			// $index_receipt++;
+			// Return exactly the same array structure as before
 			$goods_receipt_arr[] = [
 				'warehouse_id' => $delivery_detail['warehouse_id'],
 				'commodity_name' => $commodity_name,
@@ -23925,7 +24299,7 @@ class Warehouse_model extends App_Model
 		}
 
 		$response['total_receipts'] = $response['total_received_po'] = $response['total_po'] = $response['total_quantity_received'] = $response['total_client_supply'] = $response['total_bought_out_items'] = $response['fully_documented'] = $response['incompleted'] = $response['amount_vs_order_value'] = $response['nos_vs_order_items'] = 0;
-		
+
 		$response['line_order_date'] = $response['line_order_total'] = array();
 		$response['bar_top_vendor_name'] = $response['bar_top_vendor_value'] = array();
 		$default_project = get_default_project();
@@ -23947,32 +24321,36 @@ class Warehouse_model extends App_Model
 		}
 		$pur_orders = $this->db->get()->result_array();
 
-		$this->db->select('SUM(pod.quantity) as total_po_quantity, COUNT(pod.id) as total_pur_order_rows', false
+		$this->db->select(
+			'SUM(pod.quantity) as total_po_quantity, COUNT(pod.id) as total_pur_order_rows',
+			false
 		);
 		$this->db->from(db_prefix() . 'pur_order_detail as pod');
 		$this->db->join(
-		    db_prefix() . 'pur_orders as po',
-		    'po.id = pod.pur_order',
-		    'left'
+			db_prefix() . 'pur_orders as po',
+			'po.id = pod.pur_order',
+			'left'
 		);
 		if (!empty($vendors) && is_array($vendors)) {
-		    $this->db->where_in('po.vendor', $vendors);
+			$this->db->where_in('po.vendor', $vendors);
 		}
 		$this->db->where('po.approve_status', 2);
 		$pur_order_detail = $this->db->get()->row_array();
 		$total_po_quantity = !empty($pur_order_detail) ? $pur_order_detail['total_po_quantity'] : 0;
 		$total_pur_order_rows = !empty($pur_order_detail) ? $pur_order_detail['total_pur_order_rows'] : 0;
 
-		$this->db->select('SUM(cod.quantity) as total_co_quantity, COUNT(cod.id) as total_co_order_rows', false
+		$this->db->select(
+			'SUM(cod.quantity) as total_co_quantity, COUNT(cod.id) as total_co_order_rows',
+			false
 		);
 		$this->db->from(db_prefix() . 'co_order_detail as cod');
 		$this->db->join(
-		    db_prefix() . 'co_orders as co',
-		    'co.id = cod.pur_order',
-		    'left'
+			db_prefix() . 'co_orders as co',
+			'co.id = cod.pur_order',
+			'left'
 		);
 		if (!empty($vendors) && is_array($vendors)) {
-		    $this->db->where_in('co.vendor', $vendors);
+			$this->db->where_in('co.vendor', $vendors);
 		}
 		$this->db->where('co.po_order_id IS NOT NULL', null, false);
 		$this->db->where('co.po_order_id != 0', null, false);
@@ -23988,23 +24366,23 @@ class Warehouse_model extends App_Model
 		$this->db->select('SUM(grd.quantities) as total_gr_quantity', false);
 		$this->db->from(db_prefix() . 'goods_receipt_detail as grd');
 		$this->db->join(
-		    db_prefix() . 'goods_receipt as gr',
-		    'gr.id = grd.goods_receipt_id',
-		    'left'
+			db_prefix() . 'goods_receipt as gr',
+			'gr.id = grd.goods_receipt_id',
+			'left'
 		);
 		$this->db->join(
-		    db_prefix() . 'pur_orders as po',
-		    'po.id = gr.pr_order_id',
-		    'left'
+			db_prefix() . 'pur_orders as po',
+			'po.id = gr.pr_order_id',
+			'left'
 		);
 		if (!empty($vendors) && is_array($vendors)) {
-		    $this->db->where_in('po.vendor', $vendors);
+			$this->db->where_in('po.vendor', $vendors);
 		}
 		$this->db->where('gr.pr_order_id IS NOT NULL', null, false);
 		$this->db->where('gr.pr_order_id != 0', null, false);
 		$goods_receipt_detail = $this->db->get()->row_array();
 		$total_gr_quantity = !empty($goods_receipt_detail) ? $goods_receipt_detail['total_gr_quantity'] : 0;
-		if($total_order_quantity > 0) {
+		if ($total_order_quantity > 0) {
 			$response['amount_vs_order_value'] = ($total_gr_quantity * 100) / $total_order_quantity;
 			$response['amount_vs_order_value'] = $response['amount_vs_order_value'] > 100 ? 100 : round($response['amount_vs_order_value']);
 		}
@@ -24012,25 +24390,25 @@ class Warehouse_model extends App_Model
 		$this->db->select('grd.id');
 		$this->db->from(db_prefix() . 'goods_receipt_detail as grd');
 		$this->db->join(
-		    db_prefix() . 'goods_receipt as gr',
-		    'gr.id = grd.goods_receipt_id',
-		    'inner'
+			db_prefix() . 'goods_receipt as gr',
+			'gr.id = grd.goods_receipt_id',
+			'inner'
 		);
 		$this->db->join(
-		    db_prefix() . 'pur_orders as po',
-		    'po.id = gr.pr_order_id',
-		    'inner'
+			db_prefix() . 'pur_orders as po',
+			'po.id = gr.pr_order_id',
+			'inner'
 		);
 		if (!empty($vendors) && is_array($vendors)) {
-		    $this->db->where_in('po.vendor', $vendors);
+			$this->db->where_in('po.vendor', $vendors);
 		}
 		$this->db->where('gr.pr_order_id >', 0);
 		$this->db->group_by([
-		    'grd.commodity_code',
-		    'grd.description'
+			'grd.commodity_code',
+			'grd.description'
 		]);
 		$goods_receipt_detail = $this->db->get()->result_array();
-		if($total_order_rows > 0) {
+		if ($total_order_rows > 0) {
 			$response['nos_vs_order_items'] = (count($goods_receipt_detail) * 100) / $total_order_rows;
 			$response['nos_vs_order_items'] = $response['nos_vs_order_items'] > 100 ? 100 : round($response['nos_vs_order_items']);
 		}

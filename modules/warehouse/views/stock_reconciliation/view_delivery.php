@@ -192,6 +192,7 @@
                         <th colspan="1"><?php echo _l('area') ?></th>
                         <th colspan="1"><?php echo _l('warehouse_name') ?></th>
                         <th colspan="1"><?php echo _l('received_quantity') ?></th>
+                        <th colspan="1"><?php echo _l('Ordered Quantity') ?></th>
                         <th colspan="1"><?php echo _l('Issued Quantity') ?></th>
                         <th colspan="1"><?php echo _l('Return Date') ?></th>
                         <th colspan="1" c><?php echo _l('Reconciliation Date') ?></th>
@@ -203,11 +204,18 @@
                     <tbody class="ui-sortable">
                       <?php
                       $subtotal = 0;
-                      // echo '<pre>';
-                      // print_r($goods_delivery_detail);
-                      // die;
-                      foreach ($goods_delivery_detail as $delivery => $delivery_value) {
-                        $delivery++;
+                      $index = 1; // Use a counter instead of $delivery variable which might cause issues
+
+                      foreach ($goods_delivery_detail as $delivery_value) {
+                        $ordered_quantity = '';
+                        // Calculate ordered quantity INSIDE the loop for each item
+                        // $ordered_quantity = get_ordered_quantity(
+                        //   $goods_delivery->pr_order_id ?? 0,
+                        //   $goods_delivery->wo_order_id ?? 0,
+                        //   $delivery_value['description'] ?? '',
+                        //   $delivery_value['commodity_code'] ?? ''
+                        // );
+
                         $available_quantity = (isset($delivery_value) ? $delivery_value['available_quantity'] : '');
                         $received_quantity = (isset($delivery_value) ? $delivery_value['received_quantity'] : '');
                         $total_money = (isset($delivery_value) ? $delivery_value['total_money'] : '');
@@ -223,8 +231,6 @@
                         $commodity_name = get_commodity_name($delivery_value['commodity_code']) != null ? get_commodity_name($delivery_value['commodity_code'])->description : '';
                         $subtotal += (float)$delivery_value['quantities'] * (float)$delivery_value['unit_price'];
                         $item_subtotal = (float)$delivery_value['quantities'] * (float)$delivery_value['unit_price'];
-
-
 
                         $warehouse_name = '';
 
@@ -256,8 +262,6 @@
                           }
                         }
 
-
-
                         $unit_name = '';
                         if (is_numeric($delivery_value['unit_id'])) {
                           $unit_name = get_unit_type($delivery_value['unit_id']) != null ? get_unit_type($delivery_value['unit_id'])->unit_name : '';
@@ -281,13 +285,12 @@
                           $commodity_name = wh_get_item_variatiom($delivery_value['commodity_code']);
                         }
 
-
                         $all_issued_quantities = '';
                         if (!empty($delivery_value['issued_quantities'])) {
                           $issued_quantities_json = json_decode($delivery_value['issued_quantities'], true);
 
                           foreach ($issued_quantities_json as $key => $value) {
-                            $all_issued_quantities .= get_vendor_name($key) . ": <strong style='font-weight: 700'>" . $value . "<strong>,</br>";
+                            $all_issued_quantities .= get_vendor_name($key) . ": <strong style='font-weight: 700'>" . $value . "</strong>,</br>";
                           }
                           $all_issued_quantities = rtrim($all_issued_quantities, ',</br>');
                         }
@@ -297,7 +300,7 @@
                           $returnable_date_json = json_decode($delivery_value['returnable_date'], true);
 
                           foreach ($returnable_date_json as $key => $value) {
-                            $all_returnable_date .= get_vendor_name($key) . ": <strong style='font-weight: 700'>" . $value . "<strong>,</br>";
+                            $all_returnable_date .= get_vendor_name($key) . ": <strong style='font-weight: 700'>" . $value . "</strong>,</br>";
                           }
                           $all_returnable_date = rtrim($all_returnable_date, ',</br>');
                         }
@@ -307,7 +310,7 @@
                           $reconciliation_date_json = json_decode($delivery_value['reconciliation_date'], true);
 
                           foreach ($reconciliation_date_json as $key => $value) {
-                            $all_reconciliation_date .= get_vendor_name($key) . ": <strong style='font-weight: 700'>" . $value . "<strong>,</br>";
+                            $all_reconciliation_date .= get_vendor_name($key) . ": <strong style='font-weight: 700'>" . $value . "</strong>,</br>";
                           }
                           $all_reconciliation_date = rtrim($all_reconciliation_date, ',</br>');
                         }
@@ -317,7 +320,7 @@
                           $return_quantity_json = json_decode($delivery_value['return_quantity'], true);
 
                           foreach ($return_quantity_json as $key => $value) {
-                            $all_return_quantity .= get_vendor_name($key) . ": <strong style='font-weight: 700'>" . $value . "<strong>,</br>";
+                            $all_return_quantity .= get_vendor_name($key) . ": <strong style='font-weight: 700'>" . $value . "</strong>,</br>";
                           }
                           $all_return_quantity = rtrim($all_return_quantity, ',</br>');
                         }
@@ -327,7 +330,7 @@
                           $used_quantity_json = json_decode($delivery_value['used_quantity'], true);
 
                           foreach ($used_quantity_json as $key => $value) {
-                            $all_used_quantity .= get_vendor_name($key) . ": <strong style='font-weight: 700'>" . $value . "<strong>,</br>";
+                            $all_used_quantity .= get_vendor_name($key) . ": <strong style='font-weight: 700'>" . $value . "</strong>,</br>";
                           }
                           $all_used_quantity = rtrim($all_used_quantity, ',</br>');
                         }
@@ -337,20 +340,19 @@
                           $location_json = json_decode($delivery_value['location'], true);
 
                           foreach ($location_json as $key => $value) {
-                            $all_location .= get_vendor_name($key) . ": <strong style='font-weight: 700'>" . $value . "<strong>,</br>";
+                            $all_location .= get_vendor_name($key) . ": <strong style='font-weight: 700'>" . $value . "</strong>,</br>";
                           }
                           $all_location = rtrim($all_location, ',</br>');
                         }
-
                       ?>
-
                         <tr>
-                          <td><?php echo html_entity_decode($delivery) ?></td>
+                          <td><?php echo html_entity_decode($index) ?></td>
                           <td><?php echo html_entity_decode($commodity_name) ?></td>
-                          <td><?php echo html_entity_decode($delivery_value['description']) ?></td>
-                          <td><?php echo get_area_name_by_id($delivery_value['area']); ?></td>
+                          <td><?php echo html_entity_decode($delivery_value['description'] ?? '') ?></td>
+                          <td><?php echo get_area_name_by_id($delivery_value['area'] ?? ''); ?></td>
                           <td><?php echo html_entity_decode($warehouse_name) ?></td>
                           <td><?php echo html_entity_decode($received_quantity) ?></td>
+                          <td><?php echo $ordered_quantity ?></td>
                           <td><?php echo html_entity_decode($all_issued_quantities) ?></td>
                           <td><?php echo html_entity_decode($all_returnable_date) ?></td>
                           <td><?php echo html_entity_decode($all_reconciliation_date) ?></td>
@@ -358,7 +360,10 @@
                           <td><?php echo html_entity_decode($all_used_quantity) ?></td>
                           <td><?php echo html_entity_decode($all_location) ?></td>
                         </tr>
-                      <?php  } ?>
+                      <?php
+                        $index++;
+                      }
+                      ?>
                     </tbody>
                   </table>
 
@@ -735,25 +740,25 @@
 </script>
 
 <script>
-   function preview_goods_reconciliation_attachment(invoker) {
-      "use strict";
-      var id = $(invoker).attr('id');
-      var rel_id = $(invoker).attr('rel_id');
-      view_preview_goods_reconciliation_attachment(id, rel_id);
-   }
+  function preview_goods_reconciliation_attachment(invoker) {
+    "use strict";
+    var id = $(invoker).attr('id');
+    var rel_id = $(invoker).attr('rel_id');
+    view_preview_goods_reconciliation_attachment(id, rel_id);
+  }
 
-   function view_preview_goods_reconciliation_attachment(id, rel_id) {
-      "use strict";
-      $('#goods_reconciliation_file_data').empty();
-      $("#goods_reconciliation_file_data").load(admin_url + 'warehouse/file_goods_reconciliation_preview/' + id + '/' + rel_id, function(response, status, xhr) {
-         if (status == "error") {
-            alert_float('danger', xhr.statusText);
-         }
-      });
-   }
+  function view_preview_goods_reconciliation_attachment(id, rel_id) {
+    "use strict";
+    $('#goods_reconciliation_file_data').empty();
+    $("#goods_reconciliation_file_data").load(admin_url + 'warehouse/file_goods_reconciliation_preview/' + id + '/' + rel_id, function(response, status, xhr) {
+      if (status == "error") {
+        alert_float('danger', xhr.statusText);
+      }
+    });
+  }
 
-   function close_modal_preview() {
-      "use strict";
-      $('._project_file').modal('hide');
-   }
+  function close_modal_preview() {
+    "use strict";
+    $('._project_file').modal('hide');
+  }
 </script>
