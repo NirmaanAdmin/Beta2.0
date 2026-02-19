@@ -9044,7 +9044,7 @@ class warehouse extends AdminController
 	// 	]);
 	// }
 
-	public function change_production_status($status, $id, $purchase_tracker = true, $purOrder)
+	public function change_production_status($status, $id, $purchase_tracker = true, $purOrder, $changeOrder)
 	{
 
 		// Define an array of statuses with their corresponding labels and texts
@@ -9055,7 +9055,7 @@ class warehouse extends AdminController
 			4 => ['label' => 'warning', 'table' => 'delivered', 'text' => _l('Delivered')],
 
 		];
-		$success = $this->warehouse_model->change_production_status($status, $id, $purchase_tracker, $purOrder, $production_labels);
+		$success = $this->warehouse_model->change_production_status($status, $id, $purchase_tracker, $purOrder, $changeOrder, $production_labels);
 		$message = $success ? _l('change_production_status_successfully') : _l('change_production_status_fail');
 
 		$html = '';
@@ -9100,6 +9100,7 @@ class warehouse extends AdminController
 		$payment_date = $this->input->post('payment_date');
 		$purchase_tracker = $this->input->post('purchase_tracker');
 		$purOrder = $this->input->post('purOrder');
+		$changeOrder = $this->input->post('changeOrder') ?? "false";
 
 		if (!$id  || !$payment_date) {
 			echo json_encode(['success' => false, 'message' => _l('invalid_request')]);
@@ -9107,7 +9108,13 @@ class warehouse extends AdminController
 		}
 		// Perform the update
 		if ($purchase_tracker == "false") {
-			if ($purOrder == "true") {
+			if ($changeOrder == "true") {
+				$co_order_detail = $this->warehouse_model->get_co_order_detail_row($id);
+				update_pt_activity_log($id, $purchase_tracker, 'change_orders', _l('payment_date'), _d($co_order_detail->payment_date), _d($payment_date));
+				$this->db->where('id', $id);
+				$success = $this->db->update('tblco_order_detail', ['payment_date' => $payment_date]);
+				update_change_orders_tracker_details_last_action($id);
+			} elseif ($purOrder == "true") {
 				$pur_order_detail = $this->warehouse_model->get_pur_order_detail_row($id);
 				update_pt_activity_log($id, $purchase_tracker, 'pur_orders', _l('payment_date'), _d($pur_order_detail->payment_date), _d($payment_date));
 				$this->db->where('id', $id);
@@ -9140,6 +9147,7 @@ class warehouse extends AdminController
 		$est_delivery_date_date = $this->input->post('est_delivery_date');
 		$purchase_tracker = $this->input->post('purchase_tracker');
 		$purOrder = $this->input->post('purOrder');
+		$changeOrder = $this->input->post('changeOrder') ?? "false";
 
 		if (!$id  || !$est_delivery_date_date) {
 			echo json_encode(['success' => false, 'message' => _l('invalid_request')]);
@@ -9147,7 +9155,13 @@ class warehouse extends AdminController
 		}
 		// Perform the update
 		if ($purchase_tracker == "false") {
-			if ($purOrder == "true") {
+			if ($changeOrder == "true") {
+				$co_order_detail = $this->warehouse_model->get_co_order_detail_row($id);
+				update_pt_activity_log($id, $purchase_tracker, 'change_orders', _l('est_delivery_date'), _d($co_order_detail->est_delivery_date), _d($est_delivery_date_date));
+				$this->db->where('id', $id);
+				$success = $this->db->update('tblco_order_detail', ['est_delivery_date' => $est_delivery_date_date]);
+				update_change_orders_tracker_details_last_action($id);
+			} elseif ($purOrder == "true") {
 				$pur_order_detail = $this->warehouse_model->get_pur_order_detail_row($id);
 				update_pt_activity_log($id, $purchase_tracker, 'pur_orders', _l('est_delivery_date'), _d($pur_order_detail->est_delivery_date), _d($est_delivery_date_date));
 				$this->db->where('id', $id);
@@ -9180,6 +9194,7 @@ class warehouse extends AdminController
 		$remarks = $this->input->post('remarks');
 		$purchase_tracker = $this->input->post('purchase_tracker');
 		$purOrder = $this->input->post('purOrder');
+		$changeOrder = $this->input->post('changeOrder') ?? "false";
 
 		if (!$id  || !$remarks) {
 			echo json_encode(['success' => false, 'message' => _l('invalid_request')]);
@@ -9187,7 +9202,13 @@ class warehouse extends AdminController
 		}
 		// Perform the update
 		if ($purchase_tracker == "false") {
-			if ($purOrder == "true") {
+			if ($changeOrder == "true") {
+				$co_order_detail = $this->warehouse_model->get_co_order_detail_row($id);
+				update_pt_activity_log($id, $purchase_tracker, 'change_orders', _l('management_remarks'), $co_order_detail->management_remarks, $remarks);
+				$this->db->where('id', $id);
+				$success = $this->db->update('tblco_order_detail', ['management_remarks' => $remarks]);
+				update_change_orders_tracker_details_last_action($id);
+			} elseif ($purOrder == "true") {
 				$pur_order_detail = $this->warehouse_model->get_pur_order_detail_row($id);
 				update_pt_activity_log($id, $purchase_tracker, 'pur_orders', _l('management_remarks'), $pur_order_detail->remarks, $remarks);
 				$this->db->where('id', $id);
@@ -9221,6 +9242,7 @@ class warehouse extends AdminController
 		$delivery_date = $this->input->post('delivery_date');
 		$purchase_tracker = $this->input->post('purchase_tracker');
 		$purOrder = $this->input->post('purOrder');
+		$changeOrder = $this->input->post('changeOrder') ?? "false";
 
 		if (!$id  || !$delivery_date) {
 			echo json_encode(['success' => false, 'message' => _l('invalid_request')]);
@@ -9228,7 +9250,13 @@ class warehouse extends AdminController
 		}
 		// Perform the update
 		if ($purchase_tracker == "false") {
-			if ($purOrder == "true") {
+			if ($changeOrder == "true") {
+				$co_order_detail = $this->warehouse_model->get_co_order_detail_row($id);
+				update_pt_activity_log($id, $purchase_tracker, 'change_orders', _l('delivery_date'), _d($co_order_detail->delivery_date), _d($delivery_date));
+				$this->db->where('id', $id);
+				$success = $this->db->update('tblco_order_detail', ['delivery_date' => $delivery_date]);
+				update_change_orders_tracker_details_last_action($id);
+			} elseif ($purOrder == "true") {
 				$pur_order_detail = $this->warehouse_model->get_pur_order_detail_row($id);
 				update_pt_activity_log($id, $purchase_tracker, 'pur_orders', _l('delivery_date'), _d($pur_order_detail->delivery_date), _d($delivery_date));
 				$this->db->where('id', $id);
@@ -9452,7 +9480,7 @@ class warehouse extends AdminController
 		$this->load->view('warehouse_dashboard/warehouse_dashboard', $data);
 	}
 
-	public function change_imp_local_status($status, $id, $purchase_tracker = true, $purOrder)
+	public function change_imp_local_status($status, $id, $purchase_tracker = true, $purOrder, $changeOrder)
 	{
 		// Define an array of statuses with their corresponding labels and texts
 		$imp_local_labels = [
@@ -9460,7 +9488,7 @@ class warehouse extends AdminController
 			2 => ['label' => 'success', 'table' => 'imported', 'text' => _l('imported')],
 			3 => ['label' => 'info', 'table' => 'local', 'text' => _l('local')],
 		];
-		$success = $this->warehouse_model->change_imp_local_status($status, $id, $purchase_tracker, $purOrder, $imp_local_labels);
+		$success = $this->warehouse_model->change_imp_local_status($status, $id, $purchase_tracker, $purOrder, $changeOrder, $imp_local_labels);
 		$message = $success ? _l('change_status_successfully') : _l('change_status_fail');
 		$html = '';
 		$status_str = $imp_local_labels[$status]['text'] ?? '';
@@ -9491,7 +9519,7 @@ class warehouse extends AdminController
 		]);
 	}
 
-	public function change_tracker_status($status, $id, $purchase_tracker = true, $purOrder)
+	public function change_tracker_status($status, $id, $purchase_tracker = true, $purOrder, $changeOrder)
 	{
 		// Define an array of statuses with their corresponding labels and texts
 		$tracker_status_labels = [
@@ -9502,7 +9530,7 @@ class warehouse extends AdminController
 			5 => ['label' => 'info', 'table' => 'POI', 'text' => 'POI'],
 			6 => ['label' => 'info', 'table' => 'PIR', 'text' => 'PIR'],
 		];
-		$success = $this->warehouse_model->change_tracker_status($status, $id, $purchase_tracker, $purOrder, $tracker_status_labels);
+		$success = $this->warehouse_model->change_tracker_status($status, $id, $purchase_tracker, $purOrder, $changeOrder, $tracker_status_labels);
 		$message = $success ? _l('change_status_successfully') : _l('change_status_fail');
 		$html = '';
 		$status_str = $tracker_status_labels[$status]['text'] ?? '';
@@ -9539,13 +9567,21 @@ class warehouse extends AdminController
 		$lead_time_days = $this->input->post('lead_time_days');
 		$purchase_tracker = $this->input->post('purchase_tracker');
 		$purOrder = $this->input->post('purOrder');
+		$changeOrder = $this->input->post('changeOrder') ?? "false";
+
 		if (!$id  || !$lead_time_days) {
 			echo json_encode(['success' => false, 'message' => _l('invalid_request')]);
 			return;
 		}
 		// Perform the update
 		if ($purchase_tracker == "false") {
-			if ($purOrder == "true") {
+			if ($changeOrder == "true") {
+				$co_order_detail = $this->warehouse_model->get_co_order_detail_row($id);
+				update_pt_activity_log($id, $purchase_tracker, 'change_orders', _l('lead_time_days'), $co_order_detail->lead_time_days, $lead_time_days);
+				$this->db->where('id', $id);
+				$success = $this->db->update('tblco_order_detail', ['lead_time_days' => $lead_time_days]);
+				update_change_orders_tracker_details_last_action($id);
+			} elseif ($purOrder == "true") {
 				$pur_order_detail = $this->warehouse_model->get_pur_order_detail_row($id);
 				update_pt_activity_log($id, $purchase_tracker, 'pur_orders', _l('lead_time_days'), $pur_order_detail->lead_time_days, $lead_time_days);
 				$this->db->where('id', $id);
@@ -9579,6 +9615,7 @@ class warehouse extends AdminController
 		$advance_payment = $this->input->post('advance_payment');
 		$purchase_tracker = $this->input->post('purchase_tracker');
 		$purOrder = $this->input->post('purOrder');
+		$changeOrder = $this->input->post('changeOrder') ?? "false";
 
 		if (!$id  || !$advance_payment) {
 			echo json_encode(['success' => false, 'message' => _l('invalid_request')]);
@@ -9586,7 +9623,13 @@ class warehouse extends AdminController
 		}
 		// Perform the update
 		if ($purchase_tracker == "false") {
-			if ($purOrder == "true") {
+			if ($changeOrder == "true") {
+				$co_order_detail = $this->warehouse_model->get_co_order_detail_row($id);
+				update_pt_activity_log($id, $purchase_tracker, 'change_orders', _l('advance_payment'), $co_order_detail->advance_payment, $advance_payment);
+				$this->db->where('id', $id);
+				$success = $this->db->update('tblco_order_detail', ['advance_payment' => $advance_payment]);
+				update_change_orders_tracker_details_last_action($id);
+			} elseif ($purOrder == "true") {
 				$pur_order_detail = $this->warehouse_model->get_pur_order_detail_row($id);
 				update_pt_activity_log($id, $purchase_tracker, 'pur_orders', _l('advance_payment'), $pur_order_detail->advance_payment, $advance_payment);
 				$this->db->where('id', $id);
@@ -9620,6 +9663,7 @@ class warehouse extends AdminController
 		$shop_submission = $this->input->post('shop_submission');
 		$purchase_tracker = $this->input->post('purchase_tracker');
 		$purOrder = $this->input->post('purOrder');
+		$changeOrder = $this->input->post('changeOrder') ?? "false";
 
 		if (!$id  || !$shop_submission) {
 			echo json_encode(['success' => false, 'message' => _l('invalid_request')]);
@@ -9627,7 +9671,13 @@ class warehouse extends AdminController
 		}
 		// Perform the update
 		if ($purchase_tracker == "false") {
-			if ($purOrder == "true") {
+			if ($changeOrder == "true") {
+				$co_order_detail = $this->warehouse_model->get_co_order_detail_row($id);
+				update_pt_activity_log($id, $purchase_tracker, 'change_orders', _l('shop_drawings_submission'), _d($co_order_detail->shop_submission), _d($shop_submission));
+				$this->db->where('id', $id);
+				$success = $this->db->update('tblco_order_detail', ['shop_submission' => $shop_submission]);
+				update_change_orders_tracker_details_last_action($id);
+			} elseif ($purOrder == "true") {
 				$pur_order_detail = $this->warehouse_model->get_pur_order_detail_row($id);
 				update_pt_activity_log($id, $purchase_tracker, 'pur_orders', _l('shop_drawings_submission'), _d($pur_order_detail->shop_submission), _d($shop_submission));
 				$this->db->where('id', $id);
@@ -9712,6 +9762,7 @@ class warehouse extends AdminController
 		$shop_approval = $this->input->post('shop_approval');
 		$purchase_tracker = $this->input->post('purchase_tracker');
 		$purOrder = $this->input->post('purOrder');
+		$changeOrder = $this->input->post('changeOrder') ?? "false";
 
 		if (!$id  || !$shop_approval) {
 			echo json_encode(['success' => false, 'message' => _l('invalid_request')]);
@@ -9719,7 +9770,13 @@ class warehouse extends AdminController
 		}
 		// Perform the update
 		if ($purchase_tracker == "false") {
-			if ($purOrder == "true") {
+			if ($changeOrder == "true") {
+				$co_order_detail = $this->warehouse_model->get_co_order_detail_row($id);
+				update_pt_activity_log($id, $purchase_tracker, 'change_orders', _l('shop_drawings_approval'), _d($co_order_detail->shop_approval), _d($shop_approval));
+				$this->db->where('id', $id);
+				$success = $this->db->update('tblco_order_detail', ['shop_approval' => $shop_approval]);
+				update_change_orders_tracker_details_last_action($id);
+			} elseif ($purOrder == "true") {
 				$pur_order_detail = $this->warehouse_model->get_pur_order_detail_row($id);
 				update_pt_activity_log($id, $purchase_tracker, 'pur_orders', _l('shop_drawings_approval'), _d($pur_order_detail->shop_approval), _d($shop_approval));
 				$this->db->where('id', $id);
@@ -9753,6 +9810,7 @@ class warehouse extends AdminController
 		$actual_remarks = $this->input->post('actual_remarks');
 		$purchase_tracker = $this->input->post('purchase_tracker');
 		$purOrder = $this->input->post('purOrder');
+		$changeOrder = $this->input->post('changeOrder') ?? "false";
 
 		if (!$id  || !$actual_remarks) {
 			echo json_encode(['success' => false, 'message' => _l('invalid_request')]);
@@ -9760,7 +9818,13 @@ class warehouse extends AdminController
 		}
 		// Perform the update
 		if ($purchase_tracker == "false") {
-			if ($purOrder == "true") {
+			if ($changeOrder == "true") {
+				$co_order_detail = $this->warehouse_model->get_co_order_detail_row($id);
+				update_pt_activity_log($id, $purchase_tracker, 'change_orders', _l('procurement_remarks'), $co_order_detail->actual_remarks, $actual_remarks);
+				$this->db->where('id', $id);
+				$success = $this->db->update('tblco_order_detail', ['actual_remarks' => $actual_remarks]);
+				update_change_orders_tracker_details_last_action($id);
+			} elseif ($purOrder == "true") {
 				$pur_order_detail = $this->warehouse_model->get_pur_order_detail_row($id);
 				update_pt_activity_log($id, $purchase_tracker, 'pur_orders', _l('procurement_remarks'), $pur_order_detail->actual_remarks, $actual_remarks);
 				$this->db->where('id', $id);

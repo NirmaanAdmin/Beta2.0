@@ -2795,6 +2795,17 @@ function update_pt_activity_log($id, $purchase_tracker, $type, $field, $old_valu
             $CI->db->where('id', $id);
             $wo_order_detail = $CI->db->get(db_prefix() . 'wo_order_detail')->row();
             $description = "" . $field . " field is updated from <b>" . $old_value . "</b> to <b>" . $new_value . "</b> in order <b>" . get_work_order_name($wo_order_detail->wo_order) . "</b>.";
+        } else if ($purchase_tracker == "false" && $type == "change_orders") {
+            $CI->db->where('id', $id);
+            $co_order_detail = $CI->db->get(db_prefix() . 'co_order_detail')->row();
+            $CI->db->where('id', $co_order_detail->pur_order);
+            $co_orders = $CI->db->get(db_prefix() . 'co_orders')->row();
+            if(!empty($co_orders->po_order_id)) {
+                $description = "" . $field . " field is updated from <b>" . $old_value . "</b> to <b>" . $new_value . "</b> in order <b>" . get_pur_order_name($co_orders->po_order_id) . "</b>.";
+            }
+            if(!empty($co_orders->wo_order_id)) {
+                $description = "" . $field . " field is updated from <b>" . $old_value . "</b> to <b>" . $new_value . "</b> in order <b>" . get_work_order_name($co_orders->wo_order_id) . "</b>.";
+            }
         } else {
             $CI->db->select(
                 db_prefix() . 'goods_receipt.goods_receipt_code,' .
@@ -2918,4 +2929,16 @@ function formatDateForInput($date_string)
     }
 
     return $date_string;
+}
+
+function update_change_orders_tracker_details_last_action($id)
+{
+    $CI = &get_instance();
+    if (!empty($id)) {
+        $CI->db->where('id', $id);
+        $CI->db->update(db_prefix() . 'co_order_detail', [
+            'last_action' => get_staff_user_id()
+        ]);
+    }
+    return true;
 }

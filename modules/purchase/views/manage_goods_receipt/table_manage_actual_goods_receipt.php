@@ -133,6 +133,7 @@ $result = data_tables_actual_purchase_tracker_init($aColumns, $join, $where, [
     'item_detail_id',
     'type',
     'wo_order_id',
+    'order_item_type',
     'last_action'
 ]);
 
@@ -226,10 +227,11 @@ foreach ($rResult as $aRow) {
                 $imp_local_status .= '</a>';
                 $imp_local_status .= '<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="tableImpLocalStatus-' . $aRow['item_detail_id'] . '">';
                 $purOrder = ($aRow['type'] == 2 ? 'true' : 'false');
+                $changeOrder = (!empty($aRow['order_item_type']) && $aRow['order_item_type'] == 'change_order_item' ? 'true' : 'false');
                 foreach ($imp_local_labels as $key => $status) {
                     if ($key != $aRow['imp_local_status']) {
                         $imp_local_status .= '<li>
-                    <a href="#" onclick="change_imp_local_status(' . $key . ', ' . $aRow['item_detail_id'] . ', ' . ($aRow['type'] == 1 ? 'true' : 'false') . ', ' . $purOrder . '); return false;">
+                    <a href="#" onclick="change_imp_local_status(' . $key . ', ' . $aRow['item_detail_id'] . ', ' . ($aRow['type'] == 1 ? 'true' : 'false') . ', ' . $purOrder . ', ' . $changeOrder . '); return false;">
                             ' . $status['text'] . '
                         </a>
                     </li>';
@@ -260,10 +262,11 @@ foreach ($rResult as $aRow) {
                 $tracker_status .= '</a>';
                 $tracker_status .= '<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="tableTrackerStatus-' . $aRow['item_detail_id'] . '">';
                 $purOrder = ($aRow['type'] == 2 ? 'true' : 'false');
+                $changeOrder = (!empty($aRow['order_item_type']) && $aRow['order_item_type'] == 'change_order_item' ? 'true' : 'false');
                 foreach ($tracker_status_labels as $key => $status) {
                     if ($key != $aRow['tracker_status']) {
                         $tracker_status .= '<li>
-                      <a href="#" onclick="change_tracker_status(' . $key . ', ' . $aRow['item_detail_id'] . ', ' . ($aRow['type'] == 1 ? 'true' : 'false') . ', ' . $purOrder . '); return false;"> 
+                      <a href="#" onclick="change_tracker_status(' . $key . ', ' . $aRow['item_detail_id'] . ', ' . ($aRow['type'] == 1 ? 'true' : 'false') . ', ' . $purOrder . ', ' . $changeOrder . '); return false;"> 
                           ' . $status['text'] . '
                       </a>
                   </li>';
@@ -292,10 +295,11 @@ foreach ($rResult as $aRow) {
                 $production_status .= '<ul class="dropdown-menu dropdown-menu-right" aria-labelledby="tablePurOderStatus-' . $aRow['item_detail_id'] . '">';
 
                 $purOrder = ($aRow['type'] == 2 ? 'true' : 'false');
+                $changeOrder = (!empty($aRow['order_item_type']) && $aRow['order_item_type'] == 'change_order_item' ? 'true' : 'false');
                 foreach ($production_labels as $key => $status) {
                     if ($key != $aRow['production_status']) {
                         $production_status .= '<li>
-                      <a href="#" onclick="change_production_status(' . $key . ', ' . $aRow['item_detail_id'] . ', ' . ($aRow['type'] == 1 ? 'true' : 'false') . ', ' . $purOrder . '); return false;"> 
+                      <a href="#" onclick="change_production_status(' . $key . ', ' . $aRow['item_detail_id'] . ', ' . ($aRow['type'] == 1 ? 'true' : 'false') . ', ' . $purOrder . ', ' . $changeOrder . '); return false;"> 
                           ' . $status['text'] . '
                       </a>
                   </li>';
@@ -311,43 +315,53 @@ foreach ($rResult as $aRow) {
               value="' . htmlspecialchars($aRow['payment_date']) . '"
               data-id="' . $aRow['item_detail_id'] . '"
               data-tracker="' . ($aRow['type'] == 1 ? 'true' : 'false') . '"
-              data-purorder="' . ($aRow['type'] == 2 ? 'true' : 'false') . '">';
+              data-purorder="' . ($aRow['type'] == 2 ? 'true' : 'false') . '"
+              data-changeorder="' . (!empty($aRow['order_item_type']) && $aRow['order_item_type'] == 'change_order_item' ? 'true' : 'false') . '"
+            >';
         } elseif ($aColumns[$i] == 'est_delivery_date') {
             $_data = '<input type="date" class="form-control est-delivery-date-input"
               value="' . htmlspecialchars($aRow['est_delivery_date']) . '"
               data-id="' . $aRow['item_detail_id'] . '"
               data-tracker="' . ($aRow['type'] == 1 ? 'true' : 'false') . '"
-              data-purorder="' . ($aRow['type'] == 2 ? 'true' : 'false') . '">';
+              data-purorder="' . ($aRow['type'] == 2 ? 'true' : 'false') . '"
+              data-changeorder="' . (!empty($aRow['order_item_type']) && $aRow['order_item_type'] == 'change_order_item' ? 'true' : 'false') . '"
+            >';
         } elseif ($aColumns[$i] == 'delivery_date') {
             $_data = '<input type="date" class="form-control delivery-date-input"
               value="' . htmlspecialchars($aRow['delivery_date']) . '"
               data-id="' . $aRow['item_detail_id'] . '"
               data-tracker="' . ($aRow['type'] == 1 ? 'true' : 'false') . '"
-              data-purorder="' . ($aRow['type'] == 2 ? 'true' : 'false') . '">';
+              data-purorder="' . ($aRow['type'] == 2 ? 'true' : 'false') . '"
+              data-changeorder="' . (!empty($aRow['order_item_type']) && $aRow['order_item_type'] == 'change_order_item' ? 'true' : 'false') . '"
+            >';
         } elseif ($aColumns[$i] == 'remarks') {
             $remarks = $aRow['remarks'];
             $_data = '<textarea style="width: 154px;height: 50px;" 
                 class="form-control remarks-input"
                 data-id="' . $aRow['item_detail_id'] . '" 
                 data-tracker="' . ($aRow['type'] == 1 ? 'true' : 'false') . '"
-                data-purorder="' . ($aRow['type'] == 2 ? 'true' : 'false') . '">' .
-                htmlspecialchars($remarks) .
-                '</textarea>';
+                data-purorder="' . ($aRow['type'] == 2 ? 'true' : 'false') . '"
+                data-changeorder="' . (!empty($aRow['order_item_type']) && $aRow['order_item_type'] == 'change_order_item' ? 'true' : 'false') . '"
+            >'.htmlspecialchars($remarks).'</textarea>';
         } elseif ($aColumns[$i] == 'lead_time_days') {
             $_data = '<div class="form-group">
                 <input type="number" id="lead_time_days" name="lead_time_days" class="form-control" min="0" max="100" 
-                       value="' . $aRow['lead_time_days'] . '" 
-                       data-id="' . $aRow['item_detail_id'] . '" 
-                       data-tracker="' . ($aRow['type'] == 1 ? 'true' : 'false') . '"
-                       data-purOrder="' . ($aRow['type'] == 2 ? 'true' : 'false') . '">
+                   value="' . $aRow['lead_time_days'] . '" 
+                   data-id="' . $aRow['item_detail_id'] . '" 
+                   data-tracker="' . ($aRow['type'] == 1 ? 'true' : 'false') . '"
+                   data-purOrder="' . ($aRow['type'] == 2 ? 'true' : 'false') . '"
+                   data-changeorder="' . (!empty($aRow['order_item_type']) && $aRow['order_item_type'] == 'change_order_item' ? 'true' : 'false') . '"
+                >
             </div>';
         } elseif ($aColumns[$i] == 'advance_payment') {
             $_data = '<div class="form-group">
                 <input type="number" id="advance_payment" name="advance_payment" class="form-control" min="0" max="100" 
-                       value="' . $aRow['advance_payment'] . '" 
-                       data-id="' . $aRow['item_detail_id'] . '" 
-                       data-tracker="' . ($aRow['type'] == 1 ? 'true' : 'false') . '"
-                       data-purOrder="' . ($aRow['type'] == 2 ? 'true' : 'false') . '">
+                   value="' . $aRow['advance_payment'] . '" 
+                   data-id="' . $aRow['item_detail_id'] . '" 
+                   data-tracker="' . ($aRow['type'] == 1 ? 'true' : 'false') . '"
+                   data-purOrder="' . ($aRow['type'] == 2 ? 'true' : 'false') . '"
+                   data-changeorder="' . (!empty($aRow['order_item_type']) && $aRow['order_item_type'] == 'change_order_item' ? 'true' : 'false') . '"
+                >
             </div>';
         } elseif ($aColumns[$i] == 1) {
 
@@ -408,22 +422,26 @@ foreach ($rResult as $aRow) {
                value="' . htmlspecialchars($aRow['shop_submission']) . '"
                data-id="' . $aRow['item_detail_id'] . '"
                data-tracker="' . ($aRow['type'] == 1 ? 'true' : 'false') . '"
-               data-purOrder="' . ($aRow['type'] == 2 ? 'true' : 'false') . '">';
+               data-purOrder="' . ($aRow['type'] == 2 ? 'true' : 'false') . '"
+               data-changeorder="' . (!empty($aRow['order_item_type']) && $aRow['order_item_type'] == 'change_order_item' ? 'true' : 'false') . '"
+            >';
         } elseif ($aColumns[$i] == 'shop_approval') {
             $_data = '<input type="date" id="shop_approval" name="shop_approval" class="form-control"
                value="' . htmlspecialchars($aRow['shop_approval']) . '"
                data-id="' . $aRow['item_detail_id'] . '"
                data-tracker="' . ($aRow['type'] == 1 ? 'true' : 'false') . '"
-               data-purOrder="' . ($aRow['type'] == 2 ? 'true' : 'false') . '">';
+               data-purOrder="' . ($aRow['type'] == 2 ? 'true' : 'false') . '"
+               data-changeorder="' . (!empty($aRow['order_item_type']) && $aRow['order_item_type'] == 'change_order_item' ? 'true' : 'false') . '"
+            >';
         } elseif ($aColumns[$i] == 'actual_remarks') {
             $_data = '<textarea style="width: 154px;height: 50px;" 
                 class="form-control" 
                 name="actual_remarks"
                 data-id="' . $aRow['item_detail_id'] . '" 
                 data-tracker="' . ($aRow['type'] == 1 ? 'true' : 'false') . '"
-                data-purOrder="' . ($aRow['type'] == 2 ? 'true' : 'false') . '">' .
-                htmlspecialchars($aRow['actual_remarks']) .
-                '</textarea>';
+                data-purOrder="' . ($aRow['type'] == 2 ? 'true' : 'false') . '"
+                data-changeorder="' . (!empty($aRow['order_item_type']) && $aRow['order_item_type'] == 'change_order_item' ? 'true' : 'false') . '"
+            >'.htmlspecialchars($aRow['actual_remarks']).'</textarea>';
         }
 
         $row[] = $_data;

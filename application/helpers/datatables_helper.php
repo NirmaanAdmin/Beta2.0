@@ -1403,6 +1403,7 @@ function data_tables_actual_purchase_tracker_init($aColumns, $join = [], $where 
             gr.approval,
             1 AS type,
             gr.project,
+            NULL AS order_item_type,
             grd.id as item_detail_id,
             grd.commodity_code,
             grd.description,
@@ -1465,45 +1466,113 @@ function data_tables_actual_purchase_tracker_init($aColumns, $join = [], $where 
             po.approve_status AS approval,
             2 AS type,
             po.project,
-            pod.id as item_detail_id,
-            pod.item_code AS commodity_code,
-            pod.description,
-            pod.area,
-            pod.quantity AS po_quantities,
+            (CASE WHEN cod.id IS NOT NULL THEN 'change_order_item' WHEN pod.id IS NOT NULL THEN 'order_item' ELSE NULL END) AS order_item_type,
+            (CASE WHEN cod.id IS NOT NULL THEN cod.id WHEN pod.id IS NOT NULL THEN pod.id ELSE NULL END) AS item_detail_id,
+            (CASE WHEN cod.id IS NOT NULL THEN cod.item_code WHEN pod.id IS NOT NULL THEN pod.item_code ELSE NULL END) AS commodity_code,
+            (CASE WHEN cod.id IS NOT NULL THEN cod.description WHEN pod.id IS NOT NULL THEN pod.description ELSE NULL END) AS description,
+            (CASE WHEN cod.id IS NOT NULL THEN cod.area WHEN pod.id IS NOT NULL THEN pod.area ELSE NULL END) AS area,
+            (CASE WHEN cod.id IS NOT NULL THEN cod.quantity WHEN pod.id IS NOT NULL THEN pod.quantity ELSE NULL END) AS po_quantities,
             0 AS quantities,
-            pod.quantity AS remaining_quantities,
-            pod.unit_id,
-            pod.imp_local_status,
-            pod.tracker_status,
-            pod.production_status,
-            (CASE WHEN pod.payment_date IS NOT NULL THEN pod.payment_date WHEN pod.payment_date IS NULL AND pc.pc_date IS NOT NULL THEN pc.pc_date ELSE NULL END) AS payment_date,
-            (CASE 
-                WHEN pod.est_delivery_date IS NOT NULL THEN pod.est_delivery_date
-                WHEN pod.est_delivery_date IS NULL AND po.id IS NOT NULL THEN DATE_ADD(po.order_date, INTERVAL po.lead_time_days DAY)
-                ELSE NULL
-            END) AS est_delivery_date,
-            pod.delivery_date,
-            pod.remarks,
-            pod.lead_time_days,
-            (CASE
-                WHEN pod.advance_payment != 0 THEN pod.advance_payment
-                WHEN pod.advance_payment = 0 AND po.id IS NOT NULL AND pc.po_this_bill IS NOT NULL THEN LEAST(100.00, ROUND(ROUND((pc.po_this_bill * 100 / po.subtotal) * 2) / 2,2))
-                ELSE 0
-            END) AS advance_payment,
-            pod.shop_submission,
-            pod.shop_approval,
-            pod.actual_remarks,
+            (CASE WHEN cod.id IS NOT NULL THEN cod.quantity WHEN pod.id IS NOT NULL THEN pod.quantity ELSE NULL END) AS remaining_quantities,
+            (CASE WHEN cod.id IS NOT NULL THEN cod.unit_id WHEN pod.id IS NOT NULL THEN pod.unit_id ELSE NULL END) AS unit_id,
+            (CASE WHEN cod.id IS NOT NULL THEN cod.imp_local_status WHEN pod.id IS NOT NULL THEN pod.imp_local_status ELSE NULL END) AS imp_local_status,
+            (CASE WHEN cod.id IS NOT NULL THEN cod.tracker_status WHEN pod.id IS NOT NULL THEN pod.tracker_status ELSE NULL END) AS tracker_status,
+            (CASE WHEN cod.id IS NOT NULL THEN cod.production_status WHEN pod.id IS NOT NULL THEN pod.production_status ELSE NULL END) AS production_status,
+            (
+                CASE 
+                    WHEN cod.id IS NOT NULL THEN 
+                    (
+                        CASE 
+                            WHEN cod.payment_date IS NOT NULL THEN cod.payment_date
+                            WHEN cod.payment_date IS NULL AND pc.pc_date IS NOT NULL THEN pc.pc_date
+                            ELSE NULL 
+                        END
+                    )
+                    WHEN pod.id IS NOT NULL THEN 
+                    (
+                        CASE 
+                            WHEN pod.payment_date IS NOT NULL THEN pod.payment_date
+                            WHEN pod.payment_date IS NULL AND pc.pc_date IS NOT NULL THEN pc.pc_date
+                            ELSE NULL 
+                        END
+                    )
+                    ELSE NULL
+                END
+            ) AS payment_date,
+            (
+                CASE
+                    WHEN cod.id IS NOT NULL THEN 
+                    (
+                        CASE 
+                            WHEN cod.est_delivery_date IS NOT NULL 
+                                THEN cod.est_delivery_date
+                            WHEN cod.est_delivery_date IS NULL 
+                                AND po.id IS NOT NULL 
+                                THEN DATE_ADD(po.order_date, INTERVAL po.lead_time_days DAY)
+                            ELSE NULL
+                        END
+                    ) 
+                    WHEN pod.id IS NOT NULL THEN
+                    (
+                        CASE 
+                            WHEN pod.est_delivery_date IS NOT NULL 
+                                THEN pod.est_delivery_date
+                            WHEN pod.est_delivery_date IS NULL 
+                                AND po.id IS NOT NULL 
+                                THEN DATE_ADD(po.order_date, INTERVAL po.lead_time_days DAY)
+                            ELSE NULL
+                        END
+                    )
+                    ELSE NULL
+                END
+            ) AS est_delivery_date,
+            (CASE WHEN cod.id IS NOT NULL THEN cod.delivery_date WHEN pod.id IS NOT NULL THEN pod.delivery_date ELSE NULL END) AS delivery_date,
+            (CASE WHEN cod.id IS NOT NULL THEN cod.management_remarks WHEN pod.id IS NOT NULL THEN pod.remarks ELSE NULL END) AS remarks,
+            (CASE WHEN cod.id IS NOT NULL THEN cod.lead_time_days WHEN pod.id IS NOT NULL THEN pod.lead_time_days ELSE NULL END) AS lead_time_days,
+            (
+                CASE
+                    WHEN cod.id IS NOT NULL THEN 
+                    (
+                        CASE
+                        WHEN cod.advance_payment != 0 THEN cod.advance_payment
+                        WHEN cod.advance_payment = 0 AND po.id IS NOT NULL AND pc.po_this_bill IS NOT NULL THEN LEAST(100.00, ROUND(ROUND((pc.po_this_bill * 100 / po.subtotal) * 2) / 2,2))
+                        ELSE 0
+                        END
+                    ) 
+                    WHEN pod.id IS NOT NULL THEN
+                    (
+                        CASE
+                        WHEN pod.advance_payment != 0 THEN pod.advance_payment
+                        WHEN pod.advance_payment = 0 AND po.id IS NOT NULL AND pc.po_this_bill IS NOT NULL THEN LEAST(100.00, ROUND(ROUND((pc.po_this_bill * 100 / po.subtotal) * 2) / 2,2))
+                        ELSE 0
+                        END
+                    )
+                    ELSE 0
+                END
+            ) AS advance_payment,
+            (CASE WHEN cod.id IS NOT NULL THEN cod.shop_submission WHEN pod.id IS NOT NULL THEN pod.shop_submission ELSE NULL END) AS shop_submission,
+            (CASE WHEN cod.id IS NOT NULL THEN cod.shop_approval WHEN pod.id IS NOT NULL THEN pod.shop_approval ELSE NULL END) AS shop_approval,
+            (CASE WHEN cod.id IS NOT NULL THEN cod.actual_remarks WHEN pod.id IS NOT NULL THEN pod.actual_remarks ELSE NULL END) AS actual_remarks,
             po.group_pur,
-            pod.last_action
+            (CASE WHEN cod.id IS NOT NULL THEN cod.last_action WHEN pod.id IS NOT NULL THEN pod.last_action ELSE NULL END) AS last_action
         FROM tblpur_order_detail pod
         LEFT JOIN tblpur_orders po ON po.id = pod.pur_order
+        LEFT JOIN (
+            SELECT id,po_order_id FROM tblco_orders co1
+            WHERE co1.id = (
+                SELECT MAX(co2.id)
+                FROM tblco_orders co2
+                WHERE co2.po_order_id = co1.po_order_id
+            )
+        ) co ON co.po_order_id = po.id
+        LEFT JOIN tblco_order_detail cod ON cod.pur_order = co.id
         LEFT JOIN (
             SELECT po_id, MIN(DATE(dateadded)) AS pc_date, SUM(po_this_bill) AS po_this_bill
             FROM tblpayment_certificate
             GROUP BY po_id
         ) pc ON pc.po_id = po.id
         WHERE po.goods_id = 0
-        GROUP BY pod.id
+        GROUP BY pr_order_id, commodity_code, description
 
         UNION ALL
 
@@ -1519,45 +1588,113 @@ function data_tables_actual_purchase_tracker_init($aColumns, $join = [], $where 
             wo.approve_status AS approval,
             3 AS type, 
             wo.project,
-            wod.id as item_detail_id,
-            wod.item_code AS commodity_code,
-            wod.description,
-            wod.area,
-            wod.quantity AS po_quantities,
+            (CASE WHEN cod.id IS NOT NULL THEN 'change_order_item' WHEN wod.id IS NOT NULL THEN 'order_item' ELSE NULL END) AS order_item_type,
+            (CASE WHEN cod.id IS NOT NULL THEN cod.id WHEN wod.id IS NOT NULL THEN wod.id ELSE NULL END) AS item_detail_id,
+            (CASE WHEN cod.id IS NOT NULL THEN cod.item_code WHEN wod.id IS NOT NULL THEN wod.item_code ELSE NULL END) AS commodity_code,
+            (CASE WHEN cod.id IS NOT NULL THEN cod.description WHEN wod.id IS NOT NULL THEN wod.description ELSE NULL END) AS description,
+            (CASE WHEN cod.id IS NOT NULL THEN cod.area WHEN wod.id IS NOT NULL THEN wod.area ELSE NULL END) AS area,
+            (CASE WHEN cod.id IS NOT NULL THEN cod.quantity WHEN wod.id IS NOT NULL THEN wod.quantity ELSE NULL END) AS po_quantities,
             0 AS quantities,
-            wod.quantity AS remaining_quantities,
-            wod.unit_id,
-            wod.imp_local_status,
-            wod.tracker_status,
-            wod.production_status,
-            (CASE WHEN wod.payment_date IS NOT NULL THEN wod.payment_date WHEN wod.payment_date IS NULL AND pc.pc_date IS NOT NULL THEN pc.pc_date ELSE NULL END) AS payment_date,
-            (CASE 
-                WHEN wod.est_delivery_date IS NOT NULL THEN wod.est_delivery_date
-                WHEN wod.est_delivery_date IS NULL AND wo.id IS NOT NULL THEN DATE_ADD(wo.order_date, INTERVAL wo.lead_time_days DAY)
-                ELSE NULL
-            END) AS est_delivery_date,
-            wod.delivery_date,
-            wod.remarks,
-            wod.lead_time_days,
-            (CASE
-                WHEN wod.advance_payment != 0 THEN wod.advance_payment
-                WHEN wod.advance_payment = 0 AND wo.id IS NOT NULL AND pc.po_this_bill IS NOT NULL THEN LEAST(100.00, ROUND(ROUND((pc.po_this_bill * 100 / wo.subtotal) * 2) / 2,2))
-                ELSE 0
-            END) AS advance_payment,
-            wod.shop_submission,
-            wod.shop_approval,
-            wod.actual_remarks,
+            (CASE WHEN cod.id IS NOT NULL THEN cod.quantity WHEN wod.id IS NOT NULL THEN wod.quantity ELSE NULL END) AS remaining_quantities,
+            (CASE WHEN cod.id IS NOT NULL THEN cod.unit_id WHEN wod.id IS NOT NULL THEN wod.unit_id ELSE NULL END) AS unit_id,
+            (CASE WHEN cod.id IS NOT NULL THEN cod.imp_local_status WHEN wod.id IS NOT NULL THEN wod.imp_local_status ELSE NULL END) AS imp_local_status,
+            (CASE WHEN cod.id IS NOT NULL THEN cod.tracker_status WHEN wod.id IS NOT NULL THEN wod.tracker_status ELSE NULL END) AS tracker_status,
+            (CASE WHEN cod.id IS NOT NULL THEN cod.production_status WHEN wod.id IS NOT NULL THEN wod.production_status ELSE NULL END) AS production_status,
+            (
+                CASE 
+                    WHEN cod.id IS NOT NULL THEN 
+                    (
+                        CASE 
+                            WHEN cod.payment_date IS NOT NULL THEN cod.payment_date
+                            WHEN cod.payment_date IS NULL AND pc.pc_date IS NOT NULL THEN pc.pc_date
+                            ELSE NULL 
+                        END
+                    )
+                    WHEN wod.id IS NOT NULL THEN 
+                    (
+                        CASE 
+                            WHEN wod.payment_date IS NOT NULL THEN wod.payment_date
+                            WHEN wod.payment_date IS NULL AND pc.pc_date IS NOT NULL THEN pc.pc_date
+                            ELSE NULL 
+                        END
+                    )
+                    ELSE NULL
+                END
+            ) AS payment_date,
+            (
+                CASE
+                    WHEN cod.id IS NOT NULL THEN 
+                    (
+                        CASE 
+                            WHEN cod.est_delivery_date IS NOT NULL 
+                                THEN cod.est_delivery_date
+                            WHEN cod.est_delivery_date IS NULL 
+                                AND wo.id IS NOT NULL 
+                                THEN DATE_ADD(wo.order_date, INTERVAL wo.lead_time_days DAY)
+                            ELSE NULL
+                        END
+                    ) 
+                    WHEN wod.id IS NOT NULL THEN
+                    (
+                        CASE 
+                            WHEN wod.est_delivery_date IS NOT NULL 
+                                THEN wod.est_delivery_date
+                            WHEN wod.est_delivery_date IS NULL 
+                                AND wo.id IS NOT NULL 
+                                THEN DATE_ADD(wo.order_date, INTERVAL wo.lead_time_days DAY)
+                            ELSE NULL
+                        END
+                    )
+                    ELSE NULL
+                END
+            ) AS est_delivery_date,
+            (CASE WHEN cod.id IS NOT NULL THEN cod.delivery_date WHEN wod.id IS NOT NULL THEN wod.delivery_date ELSE NULL END) AS delivery_date,
+            (CASE WHEN cod.id IS NOT NULL THEN cod.management_remarks WHEN wod.id IS NOT NULL THEN wod.remarks ELSE NULL END) AS remarks,
+            (CASE WHEN cod.id IS NOT NULL THEN cod.lead_time_days WHEN wod.id IS NOT NULL THEN wod.lead_time_days ELSE NULL END) AS lead_time_days,
+            (
+                CASE
+                    WHEN cod.id IS NOT NULL THEN 
+                    (
+                        CASE
+                        WHEN cod.advance_payment != 0 THEN cod.advance_payment
+                        WHEN cod.advance_payment = 0 AND wo.id IS NOT NULL AND pc.po_this_bill IS NOT NULL THEN LEAST(100.00, ROUND(ROUND((pc.po_this_bill * 100 / wo.subtotal) * 2) / 2,2))
+                        ELSE 0
+                        END
+                    ) 
+                    WHEN wod.id IS NOT NULL THEN
+                    (
+                        CASE
+                        WHEN wod.advance_payment != 0 THEN wod.advance_payment
+                        WHEN wod.advance_payment = 0 AND wo.id IS NOT NULL AND pc.po_this_bill IS NOT NULL THEN LEAST(100.00, ROUND(ROUND((pc.po_this_bill * 100 / wo.subtotal) * 2) / 2,2))
+                        ELSE 0
+                        END
+                    )
+                    ELSE 0
+                END
+            ) AS advance_payment,
+            (CASE WHEN cod.id IS NOT NULL THEN cod.shop_submission WHEN wod.id IS NOT NULL THEN wod.shop_submission ELSE NULL END) AS shop_submission,
+            (CASE WHEN cod.id IS NOT NULL THEN cod.shop_approval WHEN wod.id IS NOT NULL THEN wod.shop_approval ELSE NULL END) AS shop_approval,
+            (CASE WHEN cod.id IS NOT NULL THEN cod.actual_remarks WHEN wod.id IS NOT NULL THEN wod.actual_remarks ELSE NULL END) AS actual_remarks,
             wo.group_pur,
-            wod.last_action
+            (CASE WHEN cod.id IS NOT NULL THEN cod.last_action WHEN wod.id IS NOT NULL THEN wod.last_action ELSE NULL END) AS last_action
         FROM tblwo_order_detail wod
         LEFT JOIN tblwo_orders wo ON wo.id = wod.wo_order
+        LEFT JOIN (
+            SELECT id,wo_order_id FROM tblco_orders co1
+            WHERE co1.id = (
+                SELECT MAX(co2.id)
+                FROM tblco_orders co2
+                WHERE co2.wo_order_id = co1.wo_order_id
+            )
+        ) co ON co.wo_order_id = wo.id
+        LEFT JOIN tblco_order_detail cod ON cod.pur_order = co.id
         LEFT JOIN (
             SELECT wo_id, MIN(DATE(dateadded)) AS pc_date, SUM(po_this_bill) AS po_this_bill
             FROM tblpayment_certificate
             GROUP BY wo_id
         ) pc ON pc.wo_id = wo.id
         WHERE wo.goods_id = 0
-        GROUP BY wod.id
+        GROUP BY wo_order_id, commodity_code, description
     ) AS combined_orders
     LEFT JOIN aggregated agg ON combined_orders.id = agg.goods_receipt_id
 ) AS final_result";

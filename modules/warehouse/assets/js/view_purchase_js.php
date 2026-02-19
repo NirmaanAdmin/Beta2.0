@@ -95,11 +95,13 @@
       var paymentDate = $(this).val();
       var purchase_tracker = $(this).data('tracker');
       var purOrder = $(this).data('purorder');
+      var changeOrder = $(this).data('changeorder') || false;
       $.post(admin_url + 'warehouse/update_payment_date', {
         id: rowId,
         payment_date: paymentDate,
         purchase_tracker: purchase_tracker,
-        purOrder: purOrder
+        purOrder: purOrder,
+        changeOrder: changeOrder
       }).done(function(response) {
         response = JSON.parse(response);
         if (response.success) {
@@ -117,11 +119,13 @@
       var estDeliveryDate = $(this).val();
       var purchase_tracker = $(this).data('tracker');
       var purOrder = $(this).data('purorder');
+      var changeOrder = $(this).data('changeorder') || false;
       $.post(admin_url + 'warehouse/update_est_delivery_date', {
         id: rowId,
         est_delivery_date: estDeliveryDate,
         purchase_tracker: purchase_tracker,
-        purOrder: purOrder
+        purOrder: purOrder,
+        changeOrder: changeOrder
       }).done(function(response) {
         response = JSON.parse(response);
         if (response.success) {
@@ -139,11 +143,13 @@
       var DeliveryDate = $(this).val();
       var purchase_tracker = $(this).data('tracker');
       var purOrder = $(this).data('purorder');
+      var changeOrder = $(this).data('changeorder') || false;
       $.post(admin_url + 'warehouse/update_delivery_date', {
         id: rowId,
         delivery_date: DeliveryDate,
         purchase_tracker: purchase_tracker,
-        purOrder: purOrder
+        purOrder: purOrder,
+        changeOrder: changeOrder
       }).done(function(response) {
         response = JSON.parse(response);
         if (response.success) {
@@ -161,11 +167,13 @@
       var remarks = $(this).val();
       var purchase_tracker = $(this).data('tracker');
       var purOrder = $(this).data('purorder');
+      var changeOrder = $(this).data('changeorder') || false;
       $.post(admin_url + 'warehouse/update_remarks', {
         id: rowId,
         remarks: remarks,
         purchase_tracker: purchase_tracker,
-        purOrder: purOrder
+        purOrder: purOrder,
+        changeOrder: changeOrder
       }).done(function(response) {
         response = JSON.parse(response);
         if (response.success) {
@@ -183,11 +191,13 @@
       var lead_time_days = $(this).val();
       var purchase_tracker = $(this).data('tracker');
       var purOrder = $(this).data('purorder');
+      var changeOrder = $(this).data('changeorder') || false;
       $.post(admin_url + 'warehouse/update_lead_time_days', {
         id: rowId,
         lead_time_days: lead_time_days,
         purchase_tracker: purchase_tracker,
-        purOrder: purOrder
+        purOrder: purOrder,
+        changeOrder: changeOrder
       }).done(function(response) {
         response = JSON.parse(response);
         if (response.success) {
@@ -205,11 +215,13 @@
       var advance_payment = $(this).val();
       var purchase_tracker = $(this).data('tracker');
       var purOrder = $(this).data('purorder');
+      var changeOrder = $(this).data('changeorder') || false;
       $.post(admin_url + 'warehouse/update_advance_payment', {
         id: rowId,
         advance_payment: advance_payment,
         purchase_tracker: purchase_tracker,
-        purOrder: purOrder
+        purOrder: purOrder,
+        changeOrder: changeOrder
       }).done(function(response) {
         response = JSON.parse(response);
         if (response.success) {
@@ -227,11 +239,13 @@
       var shop_submission = $(this).val();
       var purchase_tracker = $(this).data('tracker');
       var purOrder = $(this).data('purorder');
+      var changeOrder = $(this).data('changeorder') || false;
       $.post(admin_url + 'warehouse/update_shop_submission', {
         id: rowId,
         shop_submission: shop_submission,
         purchase_tracker: purchase_tracker,
-        purOrder: purOrder
+        purOrder: purOrder,
+        changeOrder: changeOrder
       }).done(function(response) {
         response = JSON.parse(response);
         if (response.success) {
@@ -249,11 +263,13 @@
       var shop_approval = $(this).val();
       var purchase_tracker = $(this).data('tracker');
       var purOrder = $(this).data('purorder');
+      var changeOrder = $(this).data('changeorder') || false;
       $.post(admin_url + 'warehouse/update_shop_approval', {
         id: rowId,
         shop_approval: shop_approval,
         purchase_tracker: purchase_tracker,
-        purOrder: purOrder
+        purOrder: purOrder,
+        changeOrder: changeOrder
       }).done(function(response) {
         response = JSON.parse(response);
         if (response.success) {
@@ -271,11 +287,13 @@
       var actual_remarks = $(this).val();
       var purchase_tracker = $(this).data('tracker');
       var purOrder = $(this).data('purorder');
+      var changeOrder = $(this).data('changeorder') || false;
       $.post(admin_url + 'warehouse/update_actual_remarks', {
         id: rowId,
         actual_remarks: actual_remarks,
         purchase_tracker: purchase_tracker,
-        purOrder: purOrder
+        purOrder: purOrder,
+        changeOrder: changeOrder
       }).done(function(response) {
         response = JSON.parse(response);
         if (response.success) {
@@ -488,10 +506,10 @@
     window.location.href = url;
   }
 
-  function change_production_status(status, id, purchase_tracker, purOrder) {
+  function change_production_status(status, id, purchase_tracker, purOrder, changeOrder) {
     "use strict";
     if (id > 0) {
-      $.post(admin_url + 'warehouse/change_production_status/' + status + '/' + id + '/' + purchase_tracker + '/' + purOrder)
+      $.post(admin_url + 'warehouse/change_production_status/' + status + '/' + id + '/' + purchase_tracker + '/' + purOrder + '/' + changeOrder)
         .done(function(response) {
           try {
             response = JSON.parse(response);
@@ -528,10 +546,10 @@
     }
   }
 
-  function change_imp_local_status(status, id, purchase_tracker, purOrder) {
+  function change_imp_local_status(status, id, purchase_tracker, purOrder, changeOrder) {
     "use strict";
     if (id > 0) {
-      $.post(admin_url + 'warehouse/change_imp_local_status/' + status + '/' + id + '/' + purchase_tracker + '/' + purOrder)
+      $.post(admin_url + 'warehouse/change_imp_local_status/' + status + '/' + id + '/' + purchase_tracker + '/' + purOrder + '/' + changeOrder)
         .done(function(response) {
           try {
             response = JSON.parse(response);
@@ -569,10 +587,10 @@
     }
   }
 
-  function change_tracker_status(status, id, purchase_tracker, purOrder) {
+  function change_tracker_status(status, id, purchase_tracker, purOrder, changeOrder) {
     "use strict";
     if (id > 0) {
-      $.post(admin_url + 'warehouse/change_tracker_status/' + status + '/' + id + '/' + purchase_tracker + '/' + purOrder)
+      $.post(admin_url + 'warehouse/change_tracker_status/' + status + '/' + id + '/' + purchase_tracker + '/' + purOrder + '/' + changeOrder)
         .done(function(response) {
           try {
             response = JSON.parse(response);
