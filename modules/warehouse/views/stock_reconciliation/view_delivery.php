@@ -205,10 +205,9 @@
                       <?php
                       $subtotal = 0;
                       $index = 1; // Use a counter instead of $delivery variable which might cause issues
-
                       foreach ($goods_delivery_detail as $delivery_value) {
-                        $ordered_quantity = (isset($delivery_value) ? $delivery_value['quantities'] : '');
-                        
+                        // $ordered_quantity = (isset($delivery_value) ? $delivery_value['quantities'] : '');
+                        $ordered_quantity = get_ordered_quantity($goods_delivery->pr_order_id, $goods_delivery->wo_order_id, $delivery_value['description'], $delivery_value['commodity_code']);
                         $available_quantity = (isset($delivery_value) ? $delivery_value['available_quantity'] : '');
                         $received_quantity = (isset($delivery_value) ? $delivery_value['received_quantity'] : '');
                         $total_money = (isset($delivery_value) ? $delivery_value['total_money'] : '');

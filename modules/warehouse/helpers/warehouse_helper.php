@@ -2800,10 +2800,10 @@ function update_pt_activity_log($id, $purchase_tracker, $type, $field, $old_valu
             $co_order_detail = $CI->db->get(db_prefix() . 'co_order_detail')->row();
             $CI->db->where('id', $co_order_detail->pur_order);
             $co_orders = $CI->db->get(db_prefix() . 'co_orders')->row();
-            if(!empty($co_orders->po_order_id)) {
+            if (!empty($co_orders->po_order_id)) {
                 $description = "" . $field . " field is updated from <b>" . $old_value . "</b> to <b>" . $new_value . "</b> in order <b>" . get_pur_order_name($co_orders->po_order_id) . "</b>.";
             }
-            if(!empty($co_orders->wo_order_id)) {
+            if (!empty($co_orders->wo_order_id)) {
                 $description = "" . $field . " field is updated from <b>" . $old_value . "</b> to <b>" . $new_value . "</b> in order <b>" . get_work_order_name($co_orders->wo_order_id) . "</b>.";
             }
         } else {
@@ -2852,7 +2852,7 @@ function get_ordered_quantity($pur_order = null, $wo_order = null, $description 
         return 0.0;
     }
 
-    // Normalize the incoming description (if needed)
+    // Normalize the incoming description
     $normalized_desc = null;
     if ($description !== null) {
         $normalized_desc = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $description));
@@ -2868,7 +2868,7 @@ function get_ordered_quantity($pur_order = null, $wo_order = null, $description 
         $CI->db->join(db_prefix() . 'pur_orders po', 'po.id = pod.pur_order', 'inner');
         $CI->db->where('po.id', (int)$pur_order);
 
-        // Add description column for filtering (if needed)
+        // Add description column for filtering
         if ($description !== null) {
             $CI->db->select("
                 REPLACE(
@@ -2887,7 +2887,7 @@ function get_ordered_quantity($pur_order = null, $wo_order = null, $description 
         $CI->db->join(db_prefix() . 'wo_orders wo', 'wo.id = wod.wo_order', 'inner');
         $CI->db->where('wo.id', (int)$wo_order);
 
-        // Add description column for filtering (if needed)
+        // Add description column for filtering
         if ($description !== null) {
             $CI->db->select("
                 REPLACE(
@@ -2900,21 +2900,53 @@ function get_ordered_quantity($pur_order = null, $wo_order = null, $description 
             ", false);
         }
     }
-                        
-    // Commodity code filter (if tables have this column)
+
+    // Add commodity code filter if provided
     if ($commodity_code !== null && $commodity_code !== '') {
-        if (is_array($commodity_code) && !empty($commodity_code)) {
-            $CI->db->where_in(($has_pur_order ? 'pod.' : 'wod.') . 'commodity_code', $commodity_code);
-        } elseif (is_string($commodity_code)) {
-            $CI->db->where(($has_pur_order ? 'pod.' : 'wod.') . 'commodity_code', $commodity_code);
-        }
+        $CI->db->where('pod.item_code', $commodity_code);
     }
 
     // Description filter (use HAVING since it's on the alias)
     if ($normalized_desc !== null && $normalized_desc !== '') {
         $CI->db->having('non_break_description', $normalized_desc);
     }
+
     $result = $CI->db->get()->row();
+    // If no result found in original order and it's a purchase order, check change orders
+    if (empty($result)) {
+        $CI->db->reset_query();
+
+        // Query to get quantity from change orders
+        $sql = 'SELECT cod.quantity, 
+                REPLACE(
+                    REPLACE(
+                        REPLACE(
+                            REPLACE(cod.description, "\\r", ""),
+                        "\\n", ""),
+                    "<br />", ""),
+                "<br/>", "") AS non_break_description
+                FROM ' . db_prefix() . 'co_order_detail cod
+                LEFT JOIN ' . db_prefix() . 'co_orders co ON co.id = cod.pur_order
+                WHERE co.po_order_id = ' . (int)$pur_order . '
+                AND cod.tender_item = 1';
+
+        // Add commodity code filter if provided
+        if ($commodity_code !== null && $commodity_code !== '') {
+            $sql .= ' AND cod.item_code = "' . $CI->db->escape_str($commodity_code) . '"';
+        }
+
+        // Add description filter if provided
+        if ($normalized_desc !== null && $normalized_desc !== '') {
+            $sql .= ' HAVING non_break_description = "' . $CI->db->escape_str($normalized_desc) . '"';
+        }
+
+        $co_result = $CI->db->query($sql)->row();
+
+        if (!empty($co_result) && $co_result->quantity !== null) {
+            return (float)$co_result->quantity;
+        }
+    }
+
     return !empty($result) && $result->quantity !== null ? (float)$result->quantity : 0.0;
 }
 
