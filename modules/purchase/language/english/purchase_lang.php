@@ -995,3 +995,4 @@ $lang['purchase_order_items'] = 'Purchase Order Items';
 $lang['work_order_items'] = 'Work Order Items';
 $lang['purchase_request_items'] = 'Purchase Request Items';
 $lang['is_change_order'] = 'Is Change Order?';
+$lang['cashflow'] = 'Cashflow';

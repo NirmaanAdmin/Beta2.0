@@ -269,6 +269,14 @@ function purchase_module_init_menu_items()
         ]);
     }
 
+    $CI->app_menu->add_sidebar_children_item('purchase', [
+        'slug' => 'cashflow',
+        'name' => _l('cashflow'),
+        'icon' => 'fa fa-line-chart',
+        'href' => admin_url('purchase/cashflow'),
+        'position' => 5,
+    ]);
+
     if (has_permission('purchase_quotations', '', 'view')  || has_permission('purchase_quotations', '', 'view_own')) {
         $CI->app_menu->add_sidebar_children_item('purchase', [
             'slug' => 'purchase-quotation',

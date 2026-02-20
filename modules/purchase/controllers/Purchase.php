@@ -17600,4 +17600,10 @@ class purchase extends AdminController
         $this->purchase_model->delete_order_shop_drawings_attachment($id);
         redirect($_SERVER['HTTP_REFERER']);
     }
+
+    public function cashflow()
+    {
+        $data['title'] = _l('cashflow');
+        $this->load->view('cashflow/manage', $data);
+    }
 }
