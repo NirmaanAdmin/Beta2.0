@@ -11,9 +11,12 @@
                         <th><?php echo _l('Timeline'); ?></th>
                         <th><?php echo _l('Cumulative Cashflow (%)'); ?></th>
                         <th><?php echo _l('Months'); ?></th>
+                        <th><?php echo _l('Actual/Forecast %'); ?></th>
                         <th><?php echo _l('Month'); ?></th>
                         <th><?php echo _l('Monthly Cashflow ('.$base_currency->name.')'); ?></th>
                         <th><?php echo _l('Cumulative Cashflow ('.$base_currency->name.')'); ?></th>
+                        <th><?php echo _l('Forecast Monthly Cashflow'); ?></th>
+                        <th><?php echo _l('Actual Cumulative Cashflow'); ?></th>
                      </thead>
                      <tbody>
                         <?php
@@ -23,9 +26,12 @@
                                  <td><?php echo $value['timeline']; ?>%</td>
                                  <td><?php echo $value['cumulative_cashflow']; ?>%</td>
                                  <td><?php echo $value['months_cal']; ?></td>
+                                 <td></td>
                                  <td><?php echo $value['months_cal_name']; ?></td>
                                  <td><?php echo app_format_money($value['monthly_cashflow_value'], $base_currency->symbol); ?></td>
                                  <td><?php echo app_format_money($value['cumulative_cashflow_value'], $base_currency->symbol); ?></td>
+                                 <td></td>
+                                 <td></td>
                               </tr>
                            <?php }
                         } ?>
