@@ -71,7 +71,7 @@
                     <a href="#" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                       Resend
                     </a>
-                    < </div>
+                    </div>
                   </div>
                   <!-- <div class="btn-group mright5">
                   <a href="#" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -82,7 +82,7 @@
                     <li class="hidden-xs"><a href="<?php echo admin_url('purchase/wo_order?pur_tender=' . $pur_tender->id . ''); ?>" target="_blank">Work Order</a></li>
                   </ul>
                 </div> -->
-                  <div id="book-order-container" class="col-md-6">
+                  <div id="book-order-container" class="col-md-4">
                   </div>
                 </div>
               </div>
