@@ -938,9 +938,9 @@
                               </tr>
                             <?php } ?>
                             <tr>
-                              <td colspan="4" class="text-center"><span class="bold"><?php echo _l('mark_a_contract'); ?></span></td>
+                              <td colspan="4" class="text-center"><span class="bold"><?php echo _l('Vendor Note'); ?></span></td>
                               <?php foreach ($quotations as $quote) { ?>
-                                <td colspan="2"><input name="mark_a_contract[<?php echo pur_html_entity_decode($quote['id']); ?>]" type="text" value="<?php echo pur_html_entity_decode($quote['make_a_contract']); ?>" /></td>
+                                <td colspan="2"><?php echo pur_html_entity_decode($quote['vendornote']); ?></td>
                               <?php } ?>
                             </tr>
                             <tr>

@@ -2047,7 +2047,6 @@ class Purchase_model extends App_Model
             $data['total'] = $data['grand_total'];
             unset($data['grand_total']);
         }
-        $data['project_id'] = 8;
         $this->db->insert(db_prefix() . 'pur_estimates', $data);
         $insert_id = $this->db->insert_id();
         // $this->send_mail_to_approver($data, 'pur_quotation', 'quotation', $insert_id);
@@ -11872,7 +11871,7 @@ class Purchase_model extends App_Model
      *
      * @return     string
      */
-    public function create_quotation_row_template($name = '', $item_name = '', $area = '', $image = '', $quantity = '', $unit_name = '', $unit_price = '', $taxname = '',  $item_code = '', $unit_id = '', $tax_rate = '', $total_money = '', $discount = '', $discount_money = '', $total = '', $into_money = '', $tax_id = '', $tax_value = '', $item_key = '', $is_edit = false, $currency_rate = 1, $to_currency = '', $quote_detail = [])
+    public function create_quotation_row_template($name = '', $item_name = '', $description = '', $area = '', $image = '', $quantity = '', $unit_name = '', $unit_price = '', $taxname = '',  $item_code = '', $unit_id = '', $tax_rate = '', $total_money = '', $discount = '', $discount_money = '', $total = '', $into_money = '', $tax_id = '', $tax_value = '', $item_key = '', $is_edit = false, $currency_rate = 1, $to_currency = '', $quote_detail = [])
     {
 
         $this->load->model('invoice_items_model');
@@ -11880,6 +11879,7 @@ class Purchase_model extends App_Model
 
         $name_item_code = 'item_code';
         $name_item_name = 'item_name';
+        $name_description = 'description';
         $name_area = 'area';
         $name_image = 'image';
         $name_unit_id = 'unit_id';
@@ -11924,6 +11924,7 @@ class Purchase_model extends App_Model
                     <td class="dragger"><input type="hidden" class="order" name="' . $name . '[order]"><input type="hidden" class="ids" name="' . $name . '[id]" value="' . $item_key . '"></td>';
             $name_item_code = $name . '[item_code]';
             $name_item_name = $name . '[item_name]';
+            $name_description = $name . '[description]';
             $name_area = $name . '[area][]';
             $name_image = $name . '[image]';
             $name_unit_id = $name . '[unit_id]';
@@ -11986,6 +11987,7 @@ class Purchase_model extends App_Model
         }
 
         $row .= '<td class="">' . render_textarea($name_item_name, '', $item_name, ['rows' => 2, 'placeholder' => 'Product code name', 'readonly' => true]) . '</td>';
+        $row .= '<td class="">' . render_textarea($name_description, '', $description, ['rows' => 2, 'placeholder' => ' Description', 'readonly' => true]) . '</td>';
         $row .= '<td class="area">' . get_vendor_area_list($name_area, $area) . '</td>';
         $row .= '<td class="">' . $full_item_image . '</td>';
 
@@ -23068,8 +23070,19 @@ class Purchase_model extends App_Model
 
     public function get_pur_tender_detail($pur_tender)
     {
-        $this->db->where('pur_tender', $pur_tender);
-        $pur_tender_lst = $this->db->get(db_prefix() . 'pur_tender_detail')->result_array();
+        $this->db->select(db_prefix() . 'pur_estimate_detail.*');
+        $this->db->from(db_prefix() . 'pur_estimate_detail');
+
+        $this->db->join(
+            db_prefix() . 'pur_estimates',
+            db_prefix() . 'pur_estimates.id = ' . db_prefix() . 'pur_estimate_detail.pur_estimate',
+            'inner'
+        );
+
+        $this->db->where(db_prefix() . 'pur_estimates.pur_tender', $pur_tender);
+        $this->db->where(db_prefix() . 'pur_estimates.status', 2);
+
+        $pur_tender_lst = $this->db->get()->result_array();
 
         foreach ($pur_tender_lst as $key => $detail) {
             $pur_tender_lst[$key]['into_money'] = (float) $detail['into_money'];

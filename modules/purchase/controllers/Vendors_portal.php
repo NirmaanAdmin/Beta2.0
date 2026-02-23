@@ -565,7 +565,7 @@ class Vendors_portal extends App_Controller
         $this->load->model('currencies_model');
         $data['currencies'] = $this->currencies_model->get();
         $data['base_currency'] = $this->currencies_model->get_base_currency();
-
+        $purchase_tender_id = $this->input->get('purchase_tender');
         $pur_quotation_row_template = '';
 
         if ($id == '') {
@@ -584,7 +584,6 @@ class Vendors_portal extends App_Controller
             if ($data['estimate']->currency != 0 && $data['estimate']->to_currency != null) {
                 $to_currency = $data['estimate']->to_currency;
             }
-
             if (count($data['estimate_detail']) > 0) {
                 $index_quote = 0;
                 foreach ($data['estimate_detail'] as $quote_detail) {
@@ -597,7 +596,7 @@ class Vendors_portal extends App_Controller
                         $item_name = pur_get_item_variatiom($quote_detail['item_code']);
                     }
 
-                    $pur_quotation_row_template .= $this->purchase_model->create_quotation_row_template('items[' . $index_quote . ']',  $item_name, $quote_detail['area'], '', $quote_detail['quantity'], $unit_name, $quote_detail['unit_price'], $taxname, $quote_detail['item_code'], $quote_detail['unit_id'], $quote_detail['tax_rate'],  $quote_detail['total_money'], $quote_detail['discount_%'], $quote_detail['discount_money'], $quote_detail['total'], $quote_detail['into_money'], $quote_detail['tax'], $quote_detail['tax_value'], $quote_detail['id'], true, $currency_rate, $to_currency);
+                    $pur_quotation_row_template .= $this->purchase_model->create_quotation_row_template('items[' . $index_quote . ']',  $item_name,$quote_detail['description'], $quote_detail['area'], '', $quote_detail['quantity'], $unit_name, $quote_detail['unit_price'], $taxname, $quote_detail['item_code'], $quote_detail['unit_id'], $quote_detail['tax_rate'],  $quote_detail['total_money'], $quote_detail['discount_%'], $quote_detail['discount_money'], $quote_detail['total'], $quote_detail['into_money'], $quote_detail['tax'], $quote_detail['tax_value'], $quote_detail['id'], true, $currency_rate, $to_currency);
                 }
             }
 
@@ -637,7 +636,12 @@ class Vendors_portal extends App_Controller
             $data['ajaxItems'] = true;
         }
 
-        $data['pur_tender'] = $this->purchase_model->get_purchase_tender_by_vendor(get_vendor_user_id());
+        // $data['pur_tender'] = $this->purchase_model->get_purchase_tender_by_vendor(get_vendor_user_id());
+                    // echo '<pre>'; print_r($estimate); die;
+         if($purchase_tender_id > 0){
+            $data['pur_tender'][] = (array) $this->purchase_model->get_pur_tender($purchase_tender_id);
+        }
+
         $data['pur_quotation_row_template'] = $pur_quotation_row_template;
 
         $this->load->model('taxes_model');
@@ -669,7 +673,6 @@ class Vendors_portal extends App_Controller
         }
         $data['title']             = $title;
 
-        // echo '<pre>'; print_r($data);die;
         $this->data($data);
         $this->view('vendor_portal/estimate');
         $this->layout();
@@ -788,9 +791,9 @@ class Vendors_portal extends App_Controller
             $estimate_data = $this->input->post();
             $estimate_data['vendor'] = get_vendor_user_id();
             $estimate_data['terms'] = $this->input->post('terms', false);
-            if (!empty($estimate_data['pur_request'])) {
-                $pur_request = $this->purchase_model->get_purchase_request($estimate_data['pur_request']);
-                $estimate_data['project'] = !empty($pur_request) ? $pur_request->project : '';
+            if (!empty($estimate_data['pur_tender'])) {
+                $pur_tender = $this->purchase_model->get_pur_tender($estimate_data['pur_tender']);
+                $estimate_data['project_id'] = !empty($pur_tender) ? $pur_tender->project : '';
             }
             if ($id == '') {
                 $estimate_data['subtotal'] = $estimate_data['total'];
@@ -2294,7 +2297,7 @@ class Vendors_portal extends App_Controller
                     $item_name = pur_get_item_variatiom($item['item_code']);
                 }
 
-                $list_item .= $this->purchase_model->create_quotation_row_template('newitems[' . $index_quote . ']',  $item_name, $item['area'], $item['image'], $item['quantity'], $unit_name, $item['unit_price'], $taxname, $item['item_code'], $item['unit_id'], $item['tax_rate'],  $item['total'], '', '', $item['total'], $item['into_money'], $item['tax'], $item['tax_value'], $index_quote, true, $currency_rate, $to_currency,$item);
+                $list_item .= $this->purchase_model->create_quotation_row_template('newitems[' . $index_quote . ']',  $item_name, $item['description'], $item['area'], $item['image'], $item['quantity'], $unit_name, $item['unit_price'], $taxname, $item['item_code'], $item['unit_id'], $item['tax_rate'],  $item['total'], '', '', $item['total'], $item['into_money'], $item['tax'], $item['tax_value'], $index_quote, true, $currency_rate, $to_currency,$item);
             }
         }
 

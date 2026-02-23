@@ -4543,7 +4543,18 @@ function get_vendor_area_list($name_area, $area)
     if (!is_array($selected)) {
         $selected = explode(",", $selected);
     }
-    return render_select($name_area, $get_area, array('id', 'area_name'), '', $selected, ['multiple' => true, 'disabled' => true], array('id' => 'project_area'), '', '', false);
+    return render_select(
+        $name_area,
+        $get_area,
+        array('id', 'area_name'),
+        '',
+        $selected,
+        ['multiple' => true, 'readonly' => true, 'style' => 'pointer-events: none; cursor: not-allowed;'],
+        array('id' => 'project_area'),
+        '',
+        '',
+        false
+    );
 }
 
 function get_quotations_by_pur_tender($pur_tender)

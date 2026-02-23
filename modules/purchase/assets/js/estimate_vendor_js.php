@@ -772,9 +772,7 @@ function clear_item_preview_values(default_taxes) {
     $('input[name="task_id"]').val('');
     $('input[name="expense_id"]').val('');
 }
-$(document).ready(function() {
-    coppy_pur_tender();
-});
+
 function coppy_pur_tender(){
   "use strict";
   var pur_tender = $('select[name="pur_tender"]').val();

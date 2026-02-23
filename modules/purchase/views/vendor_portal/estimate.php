@@ -8,6 +8,10 @@
   .area .dropdown-menu .open {
     width: max-content !important;
   }
+
+  select[style*="pointer-events: none"] {
+    background-color: #f5f5f5;
+  }
 </style>
 <?php hooks()->do_action('app_admin_head'); ?>
 <div id="wrapper">
@@ -27,9 +31,16 @@
         <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
         <div class="panel_s accounting-template estimate">
           <div class="panel-body">
-            <?php $additional_discount = 0; ?>
+            <?php $additional_discount = 0;  ?>
+
             <input type="hidden" name="additional_discount" value="<?php echo pur_html_entity_decode($additional_discount); ?>">
-            <input type="hidden" name="pur_tender" value="<?php echo pur_html_entity_decode($pur_tender[0]['id']); ?>">
+            <?php
+            if (isset($estimate)) {
+            } else { ?>
+              <input type="hidden" name="pur_tender" value="<?php echo $pur_tender[0]['id']; ?>">
+            <?php }
+            ?>
+
             <div class="horizontal-scrollable-tabs preview-tabs-top">
               <div class="horizontal-tabs">
                 <ul class="nav nav-tabs nav-tabs-horizontal mbot15" role="tablist">
@@ -73,6 +84,7 @@
                 <div class="row">
                   <div class="col-md-6">
                     <?php
+
                     $next_estimate_number = max_number_estimates() + 1;
                     $format = get_option('estimate_number_format');
 
@@ -157,14 +169,31 @@
 
                     <div class="col-md-12">
                       <label for="pur_tender"><?php echo _l('Purchase Tender'); ?></label>
-                      <select name="pur_tender" id="pur_tender" onchange="coppy_pur_tender(); return false;" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>" disabled>
-                        <option value=""></option>
-                        <?php foreach ($pur_tender as $s) { ?>
-                          <option value="<?php echo pur_html_entity_decode($s['id']); ?>" <?php if (isset($estimate) && $estimate->pur_tender != '' && $estimate->pur_tender->id == $s['id']) {
-                                                                                            echo 'selected';
-                                                                                          } ?> selected><?php echo pur_html_entity_decode($s['pur_tn_code'] . ' - ' . $s['pur_tn_name']); ?></option>
-                        <?php } ?>
-                      </select>
+                      <?php
+                      if (isset($estimate) && $estimate->pur_tender != '') {
+                        $pur_tender_name[] = (array) $this->purchase_model->get_pur_tender($estimate->pur_tender); ?>
+
+                        <select name="pur_tender" id="pur_tender" onchange="coppy_pur_tender(); return false;" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>" disabled>
+                          <option value=""></option>
+                          <?php foreach ($pur_tender_name as $s) { ?>
+                            <option value="<?php echo pur_html_entity_decode($s['id']); ?>" <?php if (isset($estimate) && $estimate->pur_tender != '' && $estimate->pur_tender == $s['id']) {
+                                                                                              echo 'selected';
+                                                                                            } ?> selected><?php echo pur_html_entity_decode($s['pur_tn_code'] . ' - ' . $s['pur_tn_name']); ?></option>
+                          <?php } ?>
+                        </select>
+                      <?php } else { ?>
+                        <select name="pur_tender" id="pur_tender" onchange="coppy_pur_tender(); return false;" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>" disabled>
+                          <option value=""></option>
+                          <?php foreach ($pur_tender as $s) { ?>
+                            <option value="<?php echo pur_html_entity_decode($s['id']); ?>" <?php if (isset($estimate) && $estimate->pur_tender != '' && $estimate->pur_tender == $s['id']) {
+                                                                                              echo 'selected';
+                                                                                            } ?> selected><?php echo pur_html_entity_decode($s['pur_tn_code'] . ' - ' . $s['pur_tn_name']); ?></option>
+                          <?php } ?>
+                        </select>
+                      <?php
+                      }
+                      ?>
+
                     </div>
 
                     <div class="clearfix mbot15"></div>
@@ -410,6 +439,7 @@
                       <tr>
                         <th></th>
                         <th align="left"><i class="fa fa-exclamation-circle" aria-hidden="true" data-toggle="tooltip" data-title="<?php echo _l('item_description_new_lines_notice'); ?>"></i> <?php echo _l('invoice_table_item_heading'); ?></th>
+                        <th><?php echo _l('description'); ?></th>
                         <th align="right"><?php echo _l('area'); ?></th>
                         <th align="right"><?php echo _l('Image'); ?></th>
                         <th align="right"><?php echo _l('unit_price'); ?><span class="th_currency"><?php echo '(' . $estimate_currency->name . ')'; ?></span></th>
@@ -518,3 +548,14 @@
 </html>
 
 <?php require 'modules/purchase/assets/js/estimate_vendor_js.php'; ?>
+
+<script>
+  $(document).ready(function() {
+    <?php if (isset($estimate)) { ?>
+
+    <?php } else { ?>
+      coppy_pur_tender();
+    <?php } ?>
+
+  });
+</script>
