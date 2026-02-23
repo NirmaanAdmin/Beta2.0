@@ -7102,3 +7102,156 @@ function get_vendor_by_id($vendor_id)
 
     return $CI->db->get()->row_array();
 }
+function get_quotation_approval_button($quotation_id, $approve_status, $quotation, $has_approved_quotation = false)
+{
+    $CI = &get_instance();
+
+    $html = '';
+
+    // Load required models
+    $CI->load->model('purchase_model');
+    $CI->load->model('staff_model');
+
+    $list_approval_details = get_list_approval_details($quotation_id, 'pur_quotation');
+    $check_approve_status   = $CI->purchase_model->check_approval_details($quotation_id, 'tender_quotes');
+    $get_staff_sign         = $CI->purchase_model->get_staff_sign($quotation_id, 'tender_quotes');
+    $list_approve_status    = $CI->purchase_model->get_list_approval_details($quotation_id, 'tender_quotes');
+
+    /* -----------------------------------------------------------
+           MAIN STATUS BUTTON / LABEL
+        ------------------------------------------------------------ */
+
+    if (empty($list_approval_details)) {
+        if ($approve_status == 2) {
+            $html .= '<span class="label label-success">' . _l('approved') . '</span>';
+        } else {
+            // Only show button if NO quotation has status 2
+            if (!$has_approved_quotation) {
+                $html .= '<a data-toggle="tooltip" 
+                                data-loading-text="' . _l('wait_text') . '" 
+                                class="btn btn-xs btn-success lead-top-btn lead-view" 
+                                data-placement="top" href="#" 
+                                onclick="send_request_approve(' . $quotation_id . '); return false;">'
+                    . _l('send_request_approve_pur') . '</a>';
+            }
+        }
+    } else if ($approve_status == 1) {
+        $html .= '<span class="label label-primary">' . _l('pur_draft') . '</span>';
+    } else if ($approve_status == 2) {
+        $html .= '<span class="label label-success">' . _l('approved') . '</span>';
+    } else if ($approve_status == 3) {
+        $html .= '<span class="label label-danger">' . _l('rejected') . '</span>';
+    }
+
+
+    /* -----------------------------------------------------------
+           APPROVAL ACTIONS
+        ------------------------------------------------------------ */
+
+    if (isset($check_approve_status['staffid']) && !empty($check_approve_status['staffid'])) {
+
+        if (
+            in_array(get_staff_user_id(), $check_approve_status['staffid']) &&
+            !in_array(get_staff_user_id(), $get_staff_sign) &&
+            isset($quotation) && $quotation && $quotation['status'] == 1
+        ) {
+            $html .= '<div class="btn-group mtop5" style="margin-left: 10px;">';
+            $html .= '<a href="#" class="btn btn-success dropdown-toggle" data-toggle="dropdown">';
+            $html .= _l('approve') . '<span class="caret"></span>';
+            $html .= '</a>';
+
+            $html .= '<ul class="dropdown-menu dropdown-menu-' . (is_mobile() ? 'left' : 'right') . ' ul_style">';
+            $html .= '<li><div class="col-md-12">';
+            $html .= render_textarea('reason_' . $quotation_id, 'reason', '', ['placeholder' => _l('reason')]);
+            $html .= '</div></li>';
+
+            $html .= '<li><div class="row text-right col-md-12">';
+            $html .= '<a href="#" data-loading-text="' . _l('wait_text') . '" 
+                            onclick="approve_request(' . $quotation_id . '); return false;" 
+                            class="btn btn-success mright15">' . _l('approve') . '</a>';
+
+            $html .= '<a href="#" data-loading-text="' . _l('wait_text') . '" 
+                            onclick="deny_request(' . $quotation_id . '); return false;" 
+                            class="btn btn-warning">' . _l('deny') . '</a>';
+            $html .= '</div></li>';
+
+            $html .= '</ul></div>';
+        }
+
+        if (
+            in_array(get_staff_user_id(), $check_approve_status['staffid']) &&
+            in_array(get_staff_user_id(), $get_staff_sign)
+        ) {
+            $html .= '<button onclick="accept_action();" 
+                            class="btn btn-success action-button mtop5">'
+                . _l('e_signature_sign') . '</button>';
+        }
+    }
+
+    /* -----------------------------------------------------------
+           APPROVAL HISTORY / SIGNATURES
+        ------------------------------------------------------------ */
+
+    if (count($list_approve_status) > 0) {
+
+        $html .= '<div class="row mtop10">';
+        $html .= '<div class="col-md-12 project-overview-expenses-finance">';
+
+        foreach ($list_approve_status as $value) {
+
+            $value['staffid'] = explode(', ', $value['staffid'] ?? '');
+
+            $html .= '<div class="col-md-4 apr_div">';
+            $html .= '<p class="text-uppercase text-muted no-mtop bold">';
+
+            $staff_name = '';
+            foreach ($value['staffid'] as $val) {
+                if ($staff_name != '') {
+                    $staff_name .= ' or ';
+                }
+                $staff = $CI->staff_model->get($val);
+                if ($staff) {
+                    $staff_name .= $staff->firstname;
+                }
+            }
+
+            $html .= $staff_name . '</p>';
+
+            if ($value['action'] == 'sign') {
+
+                if ($value['approve'] == 2) {
+                    $html .= '<img src="' . site_url(PURCHASE_PATH . 'pur_order/signature/' . $quotation_id . '/signature_' . $value['id'] . '.png') . '" 
+                                    class="img_style" style="width:100%;">';
+
+                    $html .= '<p class="bold text-center text-success">'
+                        . _l('signed') . ' ' . _dt($value['date']) . '</p>';
+                }
+            } else {
+
+                if ($value['approve'] == 2) {
+                    $img = ($value['approve_by_admin'] == 1)
+                        ? 'approved_by_admin.png'
+                        : 'approved.png';
+
+                    $html .= '<img src="' . site_url(PURCHASE_PATH . 'approval/' . $img) . '" 
+                                    class="img_style" style="width:100%;">';
+                } elseif ($value['approve'] == 3) {
+
+                    $html .= '<img src="' . site_url(PURCHASE_PATH . 'approval/rejected.png') . '" 
+                                    class="img_style" style="width:100%;">';
+                }
+
+                $html .= '<p>' . $value['note'] . '</p>';
+                $html .= '<p class="bold text-center text-'
+                    . ($value['approve'] == 2 ? 'success' : 'danger') . '">'
+                    . _dt($value['date']) . '</p>';
+            }
+
+            $html .= '</div>';
+        }
+
+        $html .= '</div></div>';
+    }
+
+    return $html;
+}

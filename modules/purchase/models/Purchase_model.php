@@ -4225,6 +4225,12 @@ class Purchase_model extends App_Model
 
                 return true;
                 break;
+            case 'tender_quotes':
+                $data_update['status'] = $status;
+                $this->db->where('id', $rel_id);
+                $this->db->update(db_prefix() . 'pur_estimates', $data_update);
+                return true;
+                break;
             default:
                 return false;
                 break;
