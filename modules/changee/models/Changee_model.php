@@ -15316,6 +15316,18 @@ class Changee_model extends App_Model
             $co_orders = $this->get_pur_order($co_order_detail->pur_order);
             if(!empty($co_orders->po_order_id) || !empty($co_orders->wo_order_id)) {
                 if(!empty($co_orders->po_order_id)) {
+                    $tender_item = $this->check_co_tender_item_in_pur_bill_details($co_order_detail->item_code, $co_order_detail->description, $co_orders->po_order_id, 'pur_orders');
+                    if(!empty($tender_item)) {
+                        return true;
+                    }
+                }
+                if(!empty($co_orders->wo_order_id)) {
+                    $tender_item = $this->check_co_tender_item_in_pur_bill_details($co_order_detail->item_code, $co_order_detail->description, $co_orders->wo_order_id, 'wo_orders');
+                    if(!empty($tender_item)) {
+                        return true;
+                    }
+                }
+                if(!empty($co_orders->po_order_id)) {
                     $this->db->where('pur_order', $co_orders->po_order_id);
                 }
                 if(!empty($co_orders->wo_order_id)) {
@@ -15400,5 +15412,30 @@ class Changee_model extends App_Model
             'total' => $total_amount
         ]);
         return $total_amount;
+    }
+
+    public function check_co_tender_item_in_pur_bill_details($item_code, $description, $order_id, $type)
+    {
+        $non_break_description = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $description));
+        $this->db->select("
+            REPLACE(
+                REPLACE(
+                    REPLACE(
+                        REPLACE(" . db_prefix() . "pur_bill_details.description, '\r', ''),
+                    '\n', ''),
+                '<br />', ''),
+            '<br/>', '') AS non_break_description
+        ");
+        $this->db->join(db_prefix() . 'pur_bills', db_prefix() . 'pur_bills.id = ' . db_prefix() . 'pur_bill_details.pur_bill', 'left');
+        if ($type == "pur_orders") {
+            $this->db->where(db_prefix() . 'pur_bills.pur_order', $order_id);
+        }
+        if ($type == "wo_orders") {
+            $this->db->where(db_prefix() . 'pur_bills.wo_order', $order_id);
+        }
+        $this->db->where(db_prefix() . 'pur_bill_details.item_code', $item_code);
+        $this->db->group_by(db_prefix() . 'pur_bill_details.id');
+        $this->db->having('non_break_description', $non_break_description);
+        return $this->db->get(db_prefix() . 'pur_bill_details')->result_array();
     }
 }
