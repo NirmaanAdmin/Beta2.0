@@ -28908,4 +28908,36 @@ class Purchase_model extends App_Model
         }
         return false; // no approved quote found
     }
+
+    public function calculate_cashflow()
+    {
+        $cashflow_data = array();
+        $timelines_values = array(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100);
+        $cumulative_values = array(0, 3, 10, 15, 27, 42, 60, 75, 90, 95, 100);
+        $default_total_months = 42;
+        $default_month = '2026-01-01';
+        $default_cum_value = 407;
+        $previous_cumulative_value = 0;
+        foreach ($timelines_values as $index => $timeline) {
+            $cumulative = $cumulative_values[$index];
+            $months_cal = max(1, round(($default_total_months * $timeline) / 100));
+            $months_cal_name = ($months_cal == 1) ? date('M-y', strtotime($default_month)) : date('M-y', strtotime("+{$months_cal} months", strtotime($default_month)));
+            $cumulative_cashflow_value = ($default_cum_value * $cumulative) / 100;
+            if ($index == 0) {
+                $monthly_cashflow_value = $cumulative_cashflow_value;
+            } else {
+                $monthly_cashflow_value = $cumulative_cashflow_value - $previous_cumulative_value;
+            }
+            $previous_cumulative_value = $cumulative_cashflow_value;
+            $cashflow_data[$index] = array(
+                'timeline' => $timeline,
+                'cumulative_cashflow' => $cumulative,
+                'months_cal' => $months_cal,
+                'months_cal_name' => $months_cal_name,
+                'cumulative_cashflow_value' => $cumulative_cashflow_value,
+                'monthly_cashflow_value' => $monthly_cashflow_value
+            );
+        }
+        return $cashflow_data;
+    }
 }
