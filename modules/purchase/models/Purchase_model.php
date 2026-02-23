@@ -1983,8 +1983,8 @@ class Purchase_model extends App_Model
         // }else{
         //     $data['status'] = 2;
         // }
-        $check_appr = $this->check_approval_setting($data['project'], 'pur_quotation', 0);
-        $data['status'] = ($check_appr == true) ? 2 : 1;
+        // $check_appr = $this->check_approval_setting($data['project'], 'tender_quotes', 0);
+        $data['status'] =  1;
 
         $data['to_currency'] = $data['currency'];
 
@@ -2047,7 +2047,7 @@ class Purchase_model extends App_Model
             $data['total'] = $data['grand_total'];
             unset($data['grand_total']);
         }
-
+        $data['project_id'] = 8;
         $this->db->insert(db_prefix() . 'pur_estimates', $data);
         $insert_id = $this->db->insert_id();
         // $this->send_mail_to_approver($data, 'pur_quotation', 'quotation', $insert_id);
@@ -3679,6 +3679,12 @@ class Purchase_model extends App_Model
             $module = $this->get_wo_order($data['rel_id']);
             $project = $module->project;
             $p_status = $module->approve_status;
+        }
+        
+        if($data['rel_type'] == 'tender_quotes'){
+            $rel_name = 'tender_quotes';
+            $module = $this->get_pur_tender_quote($data['rel_id']);
+            $project = $module->project_id;
         }
         $data_new = $this->check_approval_setting($project, $data['rel_type'], 1);
 
@@ -17179,6 +17185,12 @@ class Purchase_model extends App_Model
         return $this->db->get(db_prefix() . 'wo_orders')->row();
     }
 
+    public function get_pur_tender_quote($id)
+    {
+        $this->db->where('id', $id);
+        return $this->db->get(db_prefix() . 'pur_estimates')->row();
+    }
+    
     public function get_order_tracker($id)
     {
         $this->db->where('id', $id);
@@ -28816,5 +28828,78 @@ class Purchase_model extends App_Model
         }
 
         return $deleted;
+    }
+
+        /**
+     * Get vendors by IDs
+     * @param mixed $vendor_ids (array or comma-separated string)
+     * @return array
+     */
+    public function get_vendors_by_ids($vendor_ids)
+    {
+        // If empty, return empty array
+        if (empty($vendor_ids)) {
+            return [];
+        }
+        
+        // Convert to array if it's a string
+        if (is_string($vendor_ids)) {
+            $vendor_ids = explode(',', $vendor_ids);
+        }
+        
+        // Ensure it's an array
+        if (!is_array($vendor_ids)) {
+            return [];
+        }
+        
+        // Sanitize IDs - remove any non-numeric values and empty values
+        $vendor_ids = array_map('intval', $vendor_ids);
+        $vendor_ids = array_filter($vendor_ids, function($value) {
+            return $value > 0;
+        });
+        
+        // Remove duplicates
+        $vendor_ids = array_unique($vendor_ids);
+        
+        // If no valid IDs after sanitization, return empty array
+        if (empty($vendor_ids)) {
+            return [];
+        }
+        
+        // Get vendors from database
+        $this->db->select('userid, company, vendor_code, phonenumber, address, city, country');
+        $this->db->from('tblpur_vendor'); // Update with your actual table name
+        $this->db->where_in('userid', $vendor_ids);
+        $this->db->where('active', 1); // Only get active vendors
+        $this->db->order_by('company', 'ASC');
+        
+        $query = $this->db->get();
+        
+        return $query->result_array();
+    }
+
+        /**
+     * Check if there are approved quotes for a tender and return single vendor ID
+     * @param int $id Tender ID
+     * @return mixed Returns vendor_id (int) if found, false if no approved quote
+     */
+    public function check_approved_quote($id)
+    {
+        // Validate input
+        if (empty($id) || !is_numeric($id)) {
+            log_activity('Invalid tender ID provided to check_approved_quote: ' . $id);
+            return false;
+        }
+        
+        $this->db->select('vendor');
+        $this->db->from('tblpur_estimates');
+        $this->db->where('pur_tender', $id);
+        $this->db->where('status', 2);
+        $query = $this->db->get();
+        if ($query->num_rows() > 0) {
+            $result = $query->row();
+            return $result->vendor; // Return single vendor ID
+        }
+        return false; // no approved quote found
     }
 }

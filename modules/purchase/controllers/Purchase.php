@@ -15497,14 +15497,14 @@ class purchase extends AdminController
         $data['items'] = $this->purchase_model->get_items();
         $data['taxes_data'] = $this->purchase_model->get_html_tax_pur_tender($id);
         $data['base_currency'] = $this->currencies_model->get_base_currency();
-        $data['check_appr'] = $this->purchase_model->get_approve_setting('pur_tender');
-        $data['get_staff_sign'] = $this->purchase_model->get_staff_sign($id, 'pur_tender');
-        $data['check_approve_status'] = $this->purchase_model->check_approval_details($id, 'pur_tender');
-        $data['list_approve_status'] = $this->purchase_model->get_list_approval_details($id, 'pur_tender');
+        $data['check_appr'] = $this->purchase_model->get_approve_setting('tender_quotes');
+        $data['get_staff_sign'] = $this->purchase_model->get_staff_sign($id, 'tender_quotes');
+        $data['check_approve_status'] = $this->purchase_model->check_approval_details($id, 'tender_quotes');
+        $data['list_approve_status'] = $this->purchase_model->get_list_approval_details($id, 'tender_quotes');
         $data['taxes'] = $this->purchase_model->get_taxes();
         $data['pur_tender_attachments'] = $this->purchase_model->get_purchase_tender_attachments($id);
-        $data['check_approval_setting'] = $this->purchase_model->check_approval_setting($data['pur_request']->project, 'pur_request', 0);
-        $data['attachments'] = $this->purchase_model->get_purchase_attachments('pur_tender', $id);
+        $data['check_approval_setting'] = $this->purchase_model->check_approval_setting($data['pur_tender']->project, 'tender_quotes', 0);
+        $data['attachments'] = $this->purchase_model->get_purchase_attachments('tender_quotes', $id);
         $data['pur_tender'] = $this->purchase_model->get_purchase_tender($id);
         $data['commodity_groups_request'] = $this->purchase_model->get_commodity_group_add_commodity();
         $data['sub_groups_request'] = $this->purchase_model->get_sub_group();
@@ -15513,6 +15513,7 @@ class purchase extends AdminController
         $data['vendors'] = $this->purchase_model->get_vendor();
         $data['projects'] = $this->projects_model->get_items();
         $data['tender_document_detail'] = $this->purchase_model->get_tender_document_detail($id);
+        $data['check_approved_quote'] = $this->purchase_model->check_approved_quote($id);
         $this->load->view('purchase_tender/view_pur_tender', $data);
     }
 
@@ -17605,5 +17606,603 @@ class purchase extends AdminController
     {
         $data['title'] = _l('cashflow');
         $this->load->view('cashflow/manage', $data);
+    }
+
+    /**
+     * Get vendors by IDs for AJAX request
+     * @return json
+     */
+    public function get_vendors_by_ids()
+    {
+        try {
+
+            // Get vendor IDs from POST data
+            $vendor_ids = $this->input->post('vendor_ids');
+
+            // Get vendors from model
+            $vendors = $this->purchase_model->get_vendors_by_ids($vendor_ids);
+
+            // Return as JSON
+            echo json_encode($vendors);
+        } catch (Exception $e) {
+            log_activity('Error in get_vendors_by_ids: ' . $e->getMessage());
+            echo json_encode(['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Get filtered quotations for tender comparison
+     */
+    public function get_filtered_quotations()
+    {
+        try {
+            $tender_id = $this->input->post('tender_id');
+            $vendor_ids = $this->input->post('vendor_ids');
+
+            if (!$tender_id) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => _l('tender_id_required')
+                ]);
+                return;
+            }
+
+            // Load required models
+            $this->load->model('currencies_model');
+
+            // Get tender data
+            $pur_tender = $this->purchase_model->get_purchase_tender($tender_id);
+
+            if (!$pur_tender) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => _l('tender_not_found')
+                ]);
+                return;
+            }
+
+            // Process vendor IDs
+            $selected_vendors = [];
+            if (!empty($vendor_ids)) {
+                if (is_array($vendor_ids)) {
+                    $selected_vendors = array_map('intval', $vendor_ids);
+                } else {
+                    $selected_vendors = explode(',', $vendor_ids);
+                    $selected_vendors = array_map('intval', $selected_vendors);
+                }
+            }
+
+            // Get quotations only from selected vendors using your existing function
+            $quotations = [];
+            if (!empty($selected_vendors)) {
+                // Get all quotations for this tender
+                $all_quotations = get_quotations_by_pur_tender($tender_id);
+
+                // Filter quotations by selected vendors
+                foreach ($all_quotations as $quote) {
+                    if (in_array($quote['vendor'], $selected_vendors)) {
+                        $quotations[] = $quote;
+                    }
+                }
+            }
+
+            // Get base currency
+            $base_currency = $this->currencies_model->get_base_currency();
+
+            // Get tender items
+            $list_items = $this->purchase_model->get_pur_tender_detail($tender_id);
+
+            // Generate HTML for the comparison table
+            $html = $this->generate_comparison_table_html($tender_id, $quotations, $list_items, $base_currency, $selected_vendors, $pur_tender);
+
+            echo json_encode([
+                'success' => true,
+                'html' => $html,
+                'message' => _l('comparison_table_updated'),
+                'quotations_count' => count($quotations)
+            ]);
+        } catch (Exception $e) {
+            log_activity('Error in get_filtered_quotations: ' . $e->getMessage());
+            echo json_encode([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Generate comparison table HTML
+     */
+    // private function generate_comparison_table_html($tender_id, $quotations, $list_items, $base_currency, $selected_vendors, $pur_tender)
+    // {
+    //     $html = '';
+
+    //     // Start form
+    //     $html .= form_open(admin_url('purchase/compare_quote_pur_tender/' . $tender_id), array('id' => 'compare_quote_pur_tender-form'));
+
+    //     // Selected vendors info with company names
+    //     $html .= '<div class="row mb-3" style="justify-content: space-around; display: flex;">';
+    //     $html .= '<div class="alert alert-info col-md-5">';
+    //     if (!empty($selected_vendors)) {
+    //         $vendor_names = [];
+    //         foreach ($selected_vendors as $vendor_id) {
+    //             $vendor = get_vendor_by_id($vendor_id);
+    //             if ($vendor) {
+    //                 $vendor_names[] = $vendor['company'];
+    //             }
+    //         }
+    //         $html .= implode(' | ', $vendor_names);
+    //     } else {
+    //         $html .= '<span class="text-danger">' . _l('no_vendors_selected') . '</span>';
+    //     }
+    //     $html .= '</div>';
+
+    //     // Quotations count info
+    //     $html .= '<div class="alert alert-success col-md-6">';
+    //     $html .= '<strong>' . _l('total_quotations') . ': </strong>' . count($quotations);
+    //     $html .= '</div></div>';
+    //     if (!empty($quotations)) {
+    //         $html .= '<table class="table table-bordered compare_quotes_table">';
+    //         $html .= '<thead class="bold">';
+    //         $html .= '<tr>';
+    //         $html .= '<th rowspan="2" scope="col" width="5%"><span class="bold">' . _l('items') . '</span></th>';
+    //         $html .= '<th rowspan="2" scope="col" width="10%"><span class="bold">' . _l('pur_qty') . '</span></th>';
+    //         $html .= '<th rowspan="2" scope="col" width="10%"><span class="bold">' . _l('unit') . '</span></th>';
+    //         $html .= '<th rowspan="2" scope="col" width="25%"><span class="bold">' . _l('description') . '</span></th>';
+
+    //         foreach ($quotations as $quote) {
+    //             $vendor_name = get_vendor_company_name($quote['vendor']);
+    //             $quote_number = format_pur_estimate_number($quote['id']);
+    //             $html .= '<th colspan="2" class="text-center" width="25%">';
+    //             $html .= '<span class="bold text-danger">';
+    //             $html .= $quote_number . ' - ' . $vendor_name;
+    //             $html .= '</span>';
+    //             $html .= '</th>';
+    //         }
+    //         $html .= '</tr>';
+
+    //         $html .= '<tr>';
+    //         foreach ($quotations as $quote) {
+    //             $html .= '<th class="text-right"><span class="bold">' . _l('purchase_unit_price') . '</span></th>';
+    //             $html .= '<th class="text-right"><span class="bold">' . _l('total') . '</span></th>';
+    //         }
+    //         $html .= '</tr>';
+    //         $html .= '</thead>';
+
+    //         $html .= '<tbody>';
+    //         foreach ($list_items as $key => $item) {
+    //             $html .= '<tr>';
+    //             $html .= '<td>' . ($key + 1) . '</td>';
+    //             $html .= '<td>' . $item['quantity'] . '</td>';
+
+    //             // Get unit name
+    //             $unit_name = '';
+    //             $unit = get_unit_type_item($item['unit_id']);
+    //             if ($unit) {
+    //                 $unit_name = $unit->unit_name;
+    //             }
+    //             $html .= '<td>' . $unit_name . '</td>';
+
+    //             // Get item description
+    //             $item_description = '';
+    //             $item_data = get_item_hp($item['item_code']);
+    //             if ($item_data) {
+    //                 $item_description = $item_data->description;
+    //             }
+    //             $html .= '<td>' . $item_description . '</td>';
+
+    //             foreach ($quotations as $quote) {
+    //                 $_currency = $base_currency;
+    //                 if ($quote['currency'] != 0) {
+    //                     $_currency = pur_get_currency_by_id($quote['currency']);
+    //                 }
+
+    //                 // Get item details from quote
+    //                 $item_quote = get_item_detail_in_quote($item['item_code'], $quote['id']);
+
+    //                 if ($item_quote) {
+    //                     $html .= '<td class="text-right">' . app_format_money($item_quote->unit_price, $_currency->name) . '</td>';
+    //                     $html .= '<td class="text-right">' . app_format_money($item_quote->total_money, $_currency->name) . '</td>';
+    //                 } else {
+    //                     $html .= '<td class="text-right text-muted">-</td>';
+    //                     $html .= '<td class="text-right text-muted">-</td>';
+    //                 }
+    //             }
+    //             $html .= '</tr>';
+    //         }
+    //         // Mark a contract row
+    //         $html .= '<tr>';
+    //         $html .= '<td colspan="4" class="text-center"><span class="bold">' . _l('mark_a_contract') . '</span></td>';
+    //         foreach ($quotations as $quote) {
+    //             $make_contract = isset($quote['make_a_contract']) ? $quote['make_a_contract'] : '';
+    //             $html .= '<td colspan="2">';
+    //             $html .= '<input name="mark_a_contract[' . $quote['id'] . ']" type="text" value="' . $make_contract . '" class="form-control" />';
+    //             $html .= '</td>';
+    //         }
+    //         $html .= '</tr>';
+
+    //         // Total row
+    //         $html .= '<tr class="info">';
+    //         $html .= '<td colspan="4" class="text-center"><span class="bold">' . _l('total_purchase_amount') . '</span></td>';
+    //         foreach ($quotations as $quote) {
+    //             $_currency = $base_currency;
+    //             if ($quote['currency'] != 0) {
+    //                 $_currency = pur_get_currency_by_id($quote['currency']);
+    //             }
+
+    //             $html .= '<td colspan="2" class="text-right">';
+    //             $html .= '<span class="bold text-info">' . app_format_money($quote['total'], $_currency->name) . '</span>';
+
+    //             if ($_currency->id != $base_currency->id) {
+    //                 $convert_rate =  pur_get_currency_rate($_currency->name, $base_currency->name);
+    //                 $convert_value = round(($quote['total'] * $convert_rate), 2);
+    //                 $html .= '<br><i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="' . _l('pur_convert_from') . ' ' . $_currency->name . ' ' . _l('pur_to') . ' ' . $base_currency->name . ' ' . _l('pur_with_currency_rate') . ': ' . $convert_rate . '"></i>&nbsp;&nbsp;';
+    //                 $html .= '<span class="bold text-info">' . app_format_money($convert_value, $base_currency->name) . '</span>';
+    //             }
+
+    //             $html .= '</td>';
+    //         }
+    //         $html .= '</tr>';
+
+    //         $html .= '</tbody>';
+    //         $html .= '</table>';
+    //     } else {
+    //         $html .= '<div class="alert alert-warning text-center">';
+    //         $html .= '<h4><i class="fa fa-exclamation-triangle"></i> ' . _l('no_quotations_for_selected_vendors') . '</h4>';
+    //         $html .= '<p>' . _l('select_different_vendors_or_create_quotations') . '</p>';
+    //         $html .= '</div>';
+    //     }
+
+    //     $html .= form_close();
+    //     return $html;
+    // }
+
+
+    private function generate_comparison_table_html($tender_id, $quotations, $list_items, $base_currency, $selected_vendors, $pur_tender)
+    {
+        $html = '';
+
+        // Start form
+        $html .= form_open(admin_url('purchase/compare_quote_pur_tender/' . $tender_id), array('id' => 'compare_quote_pur_tender-form'));
+
+        // Selected vendors info with company names
+        $html .= '<div class="row mb-3" style="justify-content: space-around; display: flex;">';
+        $html .= '<div class="alert alert-info col-md-5">';
+        if (!empty($selected_vendors)) {
+            $vendor_names = [];
+            foreach ($selected_vendors as $vendor_id) {
+                $vendor = get_vendor_by_id($vendor_id);
+                if ($vendor) {
+                    $vendor_names[] = $vendor['company'];
+                }
+            }
+            $html .= implode(' | ', $vendor_names);
+        } else {
+            $html .= '<span class="text-danger">' . _l('no_vendors_selected') . '</span>';
+        }
+        $html .= '</div>';
+
+        // Quotations count info
+        $html .= '<div class="alert alert-success col-md-6">';
+        $html .= '<strong>' . _l('total_quotations') . ': </strong>' . count($quotations);
+        $html .= '</div></div>';
+
+        if (!empty($quotations)) {
+            $html .= '<table class="table table-bordered compare_quotes_table">';
+            $html .= '<thead class="bold">';
+            $html .= '<tr>';
+            $html .= '<th rowspan="2" scope="col" width="5%"><span class="bold">' . _l('items') . '</span></th>';
+            $html .= '<th rowspan="2" scope="col" width="8%"><span class="bold">' . _l('pur_qty') . '</span></th>';
+            $html .= '<th rowspan="2" scope="col" width="8%"><span class="bold">' . _l('unit') . '</span></th>';
+            $html .= '<th rowspan="2" scope="col" width="20%"><span class="bold">' . _l('description') . '</span></th>';
+
+            foreach ($quotations as $quote) {
+                $vendor_name = get_vendor_company_name($quote['vendor']);
+                $quote_number = format_pur_estimate_number($quote['id']);
+                $html .= '<th colspan="2" class="text-center" width="20%">';
+                $html .= '<span class="bold text-danger">';
+                $html .= $quote_number . ' - ' . $vendor_name;
+                $html .= '</span>';
+
+                // Add approval button for each quotation header
+                $html .= '<div class="mt-1" style="text-align: end;">';
+                $html .= $this->get_quotation_approval_button($quote['id'], $quote['status'] ?? 1,$quote);
+                $html .= '</div>';
+
+                $html .= '</th>';
+            }
+            $html .= '</tr>';
+
+            $html .= '<tr>';
+            foreach ($quotations as $quote) {
+                $html .= '<th class="text-right"><span class="bold">' . _l('purchase_unit_price') . '</span></th>';
+                $html .= '<th class="text-right"><span class="bold">' . _l('total') . '</span></th>';
+            }
+            $html .= '</tr>';
+            $html .= '</thead>';
+
+            $html .= '<tbody>';
+            foreach ($list_items as $key => $item) {
+                $html .= '<tr>';
+                $html .= '<td>' . ($key + 1) . '</td>';
+                $html .= '<td>' . $item['quantity'] . '</td>';
+
+                // Get unit name
+                $unit_name = '';
+                $unit = get_unit_type_item($item['unit_id']);
+                if ($unit) {
+                    $unit_name = $unit->unit_name;
+                }
+                $html .= '<td>' . $unit_name . '</td>';
+
+                // Get item description
+                $item_description = '';
+                $item_data = get_item_hp($item['item_code']);
+                if ($item_data) {
+                    $item_description = $item_data->description;
+                }
+                $html .= '<td>' . $item_description . '</td>';
+
+                foreach ($quotations as $quote) {
+                    $_currency = $base_currency;
+                    if ($quote['currency'] != 0) {
+                        $_currency = pur_get_currency_by_id($quote['currency']);
+                    }
+
+                    // Get item details from quote
+                    $item_quote = get_item_detail_in_quote($item['item_code'], $quote['id']);
+
+                    if ($item_quote) {
+                        $html .= '<td class="text-right">' . app_format_money($item_quote->unit_price, $_currency->name) . '</td>';
+                        $html .= '<td class="text-right">' . app_format_money($item_quote->total_money, $_currency->name) . '</td>';
+                    } else {
+                        $html .= '<td class="text-right text-muted">-</td>';
+                        $html .= '<td class="text-right text-muted">-</td>';
+                    }
+                }
+                $html .= '</tr>';
+            }
+
+            // Mark a contract row
+            $html .= '<tr>';
+            $html .= '<td colspan="4" class="text-center"><span class="bold">' . _l('mark_a_contract') . '</span></td>';
+            foreach ($quotations as $quote) {
+                $make_contract = isset($quote['make_a_contract']) ? $quote['make_a_contract'] : '';
+                $html .= '<td colspan="2">';
+                $html .= '<input name="mark_a_contract[' . $quote['id'] . ']" type="text" value="' . $make_contract . '" class="form-control" />';
+                $html .= '</td>';
+            }
+            $html .= '</tr>';
+
+            // Total row
+            $html .= '<tr class="info">';
+            $html .= '<td colspan="4" class="text-center"><span class="bold">' . _l('total_purchase_amount') . '</span></td>';
+            foreach ($quotations as $quote) {
+                $_currency = $base_currency;
+                if ($quote['currency'] != 0) {
+                    $_currency = pur_get_currency_by_id($quote['currency']);
+                }
+
+                $html .= '<td colspan="2" class="text-right">';
+                $html .= '<span class="bold text-info">' . app_format_money($quote['total'], $_currency->name) . '</span>';
+
+                if ($_currency->id != $base_currency->id) {
+                    $convert_rate =  pur_get_currency_rate($_currency->name, $base_currency->name);
+                    $convert_value = round(($quote['total'] * $convert_rate), 2);
+                    $html .= '<br><i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="' . _l('pur_convert_from') . ' ' . $_currency->name . ' ' . _l('pur_to') . ' ' . $base_currency->name . ' ' . _l('pur_with_currency_rate') . ': ' . $convert_rate . '"></i>&nbsp;&nbsp;';
+                    $html .= '<span class="bold text-info">' . app_format_money($convert_value, $base_currency->name) . '</span>';
+                }
+
+                $html .= '</td>';
+            }
+            $html .= '</tr>';
+
+            $html .= '</tbody>';
+            $html .= '</table>';
+
+            // Add approval status section at the bottom
+            $html .= '<div class="row">';
+            foreach ($quotations as $quote) {
+                $list_approval_details = get_list_approval_details($quote['id'], 'pur_quotation');
+                if (!empty($list_approval_details)) {
+                    $html .= '<div class="col-md-12">';
+                    $html .= '<h4 class="font-medium mbot15">' . _l('approval_details_for') . ' ' . format_pur_estimate_number($quote['id']) . '</h4>';
+                    $html .= '<div class="row">';
+                    $html .= '<div class="col-md-12 project-overview-expenses-finance">';
+
+                    foreach ($list_approval_details as $value) {
+                        $value['staffid'] = explode(', ', $value['staffid'] ?? '');
+
+                        $html .= '<div class="col-md-4 apr_div">';
+                        $html .= '<p class="text-uppercase text-muted no-mtop bold">';
+
+                        $staff_name = '';
+                        foreach ($value['staffid'] as $key => $val) {
+                            if ($staff_name != '') {
+                                $staff_name .= ' or ';
+                            }
+                            $staff = $this->staff_model->get($val);
+                            if ($staff) {
+                                $staff_name .= $staff->firstname;
+                            }
+                        }
+                        $html .= $staff_name;
+                        $html .= '</p>';
+
+                        if ($value['approve'] == 2) {
+                            if ($value['approve_by_admin'] == 1) {
+                                $html .= '<img src="' . site_url(PURCHASE_PATH . 'approval/approved_by_admin.png') . '" class="img_style">';
+                            } else {
+                                $html .= '<img src="' . site_url(PURCHASE_PATH . 'approval/approved.png') . '" class="img_style">';
+                            }
+                        } elseif ($value['approve'] == 3) {
+                            $html .= '<img src="' . site_url(PURCHASE_PATH . 'approval/rejected.png') . '" class="img_style">';
+                        }
+
+                        $html .= '<br><br>';
+                        $html .= '<p>' . $value['note'] . '</p>';
+                        $html .= '<p class="bold text-center text-' . ($value['approve'] == 2 ? 'success' : ($value['approve'] == 3 ? 'danger' : '')) . '">' . _dt($value['date']) . '</p>';
+                        $html .= '</div>';
+                    }
+
+                    $html .= '</div>';
+                    $html .= '</div>';
+                    $html .= '</div>';
+                }
+            }
+            $html .= '</div>';
+        } else {
+            $html .= '<div class="alert alert-warning text-center">';
+            $html .= '<h4><i class="fa fa-exclamation-triangle"></i> ' . _l('no_quotations_for_selected_vendors') . '</h4>';
+            $html .= '<p>' . _l('select_different_vendors_or_create_quotations') . '</p>';
+            $html .= '</div>';
+        }
+
+        $html .= form_close();
+        return $html;
+    }
+
+    /**
+     * Get quotation approval button based on status
+     */
+    public function get_quotation_approval_button($quotation_id, $approve_status,$quotation)
+    {
+        $html = '';
+        $list_approval_details = get_list_approval_details($quotation_id, 'pur_quotation');
+        $check_approve_status = $this->purchase_model->check_approval_details($quotation_id, 'tender_quotes');
+        $get_staff_sign = $this->purchase_model->get_staff_sign($quotation_id, 'tender_quotes');
+        $list_approve_status = $this->purchase_model->get_list_approval_details($quotation_id, 'tender_quotes');
+        if (empty($list_approval_details)) {
+            if ($approve_status == 2) {
+                $html .= '<span class="label label-success">' . _l('approved') . '</span>';
+            } else {
+                $html .= '<a data-toggle="tooltip" data-loading-text="' . _l('wait_text') . '" 
+                        class="btn btn-xs btn-success lead-top-btn lead-view" 
+                        data-placement="top" href="#" 
+                        onclick="send_request_approve(' . $quotation_id . '); return false;">'
+                    . _l('send_request_approve_pur') . '</a>';
+            }
+        } else if ($approve_status == 1) {
+            $html .= '<span class="label label-primary">' . _l('pur_draft') . '</span>';
+        } else if ($approve_status == 2) {
+            $html .= '<span class="label label-success">' . _l('approved') . '</span>';
+        } else if ($approve_status == 3) {
+            $html .= '<span class="label label-danger">' . _l('rejected') . '</span>';
+        }
+        if (isset($check_approve_status['staffid']) && !empty($check_approve_status['staffid'])) {
+
+            // If user is in approval list and hasn't signed yet and quotation is not approved/rejected
+            if (
+                in_array(get_staff_user_id(), $check_approve_status['staffid']) &&
+                !in_array(get_staff_user_id(), $get_staff_sign) &&
+                isset($quotation) && $quotation && $quotation['status'] == 1
+            ) {
+                $html .= '<div class="btn-group mtop5" style="margin-left: 10px;">';
+                $html .= '<a href="#" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+                $html .= _l('approve') . '<span class="caret"></span>';
+                $html .= '</a>';
+                $html .= '<ul class="dropdown-menu dropdown-menu-' . (is_mobile() ? 'left' : 'right') . ' ul_style">';
+                $html .= '<li>';
+                $html .= '<div class="col-md-12">';
+                $html .= render_textarea('reason_' . $quotation_id, 'reason', '', ['placeholder' => _l('reason')]);
+                $html .= '</div>';
+                $html .= '</li>';
+                $html .= '<li>';
+                $html .= '<div class="row text-right col-md-12">';
+                $html .= '<a href="#" data-loading-text="' . _l('wait_text') . '" 
+                       onclick="approve_request(' . $quotation_id . '); return false;" 
+                       class="btn btn-success mright15">' . _l('approve') . '</a>';
+                $html .= '<a href="#" data-loading-text="' . _l('wait_text') . '" 
+                       onclick="deny_request(' . $quotation_id . '); return false;" 
+                       class="btn btn-warning">' . _l('deny') . '</a>';
+                $html .= '</div>';
+                $html .= '</li>';
+                $html .= '</ul>';
+                $html .= '</div>';
+            }
+
+            // If user is in approval list and has already signed
+            if (
+                in_array(get_staff_user_id(), $check_approve_status['staffid']) &&
+                in_array(get_staff_user_id(), $get_staff_sign)
+            ) {
+
+                $html .= '<button onclick="accept_action();" 
+                      class="btn btn-success action-button mtop5">' . _l('e_signature_sign') . '</button>';
+            }
+        }
+
+        if (count($list_approve_status) > 0) {
+        $this->load->model('staff_model');
+        
+        $html .= '<div class="row mtop10">';
+        $html .= '<div class="col-md-12 project-overview-expenses-finance">';
+        
+        foreach ($list_approve_status as $value) {
+            $value['staffid'] = explode(', ', $value['staffid'] ?? '');
+            
+            if ($value['action'] == 'sign') {
+                $html .= '<div class="col-md-4 apr_div">';
+                $html .= '<p class="text-uppercase text-muted no-mtop bold">';
+                
+                $staff_name = '';
+                foreach ($value['staffid'] as $key => $val) {
+                    if ($staff_name != '') {
+                        $staff_name .= ' or ';
+                    }
+                    $staff = $this->staff_model->get($val);
+                    if ($staff) {
+                        $staff_name .= $staff->firstname;
+                    }
+                }
+                $html .= $staff_name;
+                $html .= '</p>';
+                
+                if ($value['approve'] == 2) {
+                    $html .= '<img src="' . site_url(PURCHASE_PATH . 'pur_order/signature/' . $quotation_id . '/signature_' . $value['id'] . '.png') . '" class="img_style" style="width: 100%; height: auto;">';
+                    $html .= '<br><br>';
+                    $html .= '<p class="bold text-center text-success">' . _l('signed') . ' ' . _dt($value['date']) . '</p>';
+                }
+                
+                $html .= '</div>';
+            } else {
+                $html .= '<div class="col-md-4 apr_div">';
+                $html .= '<p class="text-uppercase text-muted no-mtop bold">';
+                
+                $staff_name = '';
+                foreach ($value['staffid'] as $key => $val) {
+                    if ($staff_name != '') {
+                        $staff_name .= ' or ';
+                    }
+                    $staff = $this->staff_model->get($val);
+                    if ($staff) {
+                        $staff_name .= $staff->firstname;
+                    }
+                }
+                $html .= $staff_name;
+                $html .= '</p>';
+                
+                if ($value['approve'] == 2) {
+                    if ($value['approve_by_admin'] == 1) {
+                        $html .= '<img src="' . site_url(PURCHASE_PATH . 'approval/approved_by_admin.png') . '" class="img_style" style="width: 100%; height: auto;">';
+                    } else {
+                        $html .= '<img src="' . site_url(PURCHASE_PATH . 'approval/approved.png') . '" class="img_style" style="width: 100%; height: auto;">';
+                    }
+                } elseif ($value['approve'] == 3) {
+                    $html .= '<img src="' . site_url(PURCHASE_PATH . 'approval/rejected.png') . '" class="img_style" style="width: 100%; height: auto;">';
+                }
+                
+                $html .= '<br><br>';
+                $html .= '<p>' . $value['note'] . '</p>';
+                $html .= '<p class="bold text-center text-' . ($value['approve'] == 2 ? 'success' : 'danger') . '">' . _dt($value['date']) . '</p>';
+                $html .= '</div>';
+            }
+        }
+        
+        $html .= '</div>';
+        $html .= '</div>';
+    }
+
+        return $html;
     }
 }

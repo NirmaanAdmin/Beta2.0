@@ -3714,7 +3714,7 @@ function get_by_deafult_order_summary()
     $val = '<p class="p1"></p>
 <p class="p2" style="text-align: center;"><span class="s1"><b>WORK ORDER</b></span></p>
 <p class="p1"><b><span class="Apple-converted-space">                                                                                                            </span></b></p>
-<p class="p3">Ref: Bl/'.($default_project == 8 ? 'ALIBAUG' : 'JAMNAGAR').'/24-25/' . str_pad($next_number, 5, '0', STR_PAD_LEFT) . ' <strong><br>Dated: <span class="order_full_date">' . date("d-M-Y") . '</span></strong></p>
+<p class="p3">Ref: Bl/' . ($default_project == 8 ? 'ALIBAUG' : 'JAMNAGAR') . '/24-25/' . str_pad($next_number, 5, '0', STR_PAD_LEFT) . ' <strong><br>Dated: <span class="order_full_date">' . date("d-M-Y") . '</span></strong></p>
 <p class="p5">To,<b></b></p>
 <p class="p6"><b>M/s. <span class="vendor_name"></span><br></b><span class="vendor_address"></span><br><span class="vendor_city"></span><span class="vendor_state"></span><span class="vendor_pincode"></span></span><span class="vendor_country"></span><br>Email:<span class="s2"> </span><span class="s1"><span class="vendor_contact_email"></span></span> <br>Contact - <span class="vendor_contact_phone"><br>GST Registration no- <span class="vendor_gst"></span><br>Bank Details:<span class="vendor_bank_details"></span></p>
 <p class="p5">Dear Mr. <span class="vendor_name"></span>,</p>
@@ -4762,7 +4762,7 @@ function get_purchase_work_order()
 function update_payment_certificate_last_action($id)
 {
     $CI = &get_instance();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $CI->db->update(db_prefix() . 'payment_certificate', [
             'last_action' => get_staff_user_id()
@@ -4774,7 +4774,7 @@ function update_payment_certificate_last_action($id)
 function get_last_action_full_name($userid = '')
 {
     $CI = &get_instance();
-    if(!empty($userid)) {
+    if (!empty($userid)) {
         $CI->db->where('staffid', $userid);
         $staff = $CI->db->select('firstname,lastname')->from(db_prefix() . 'staff')->get()->row();
         return $staff ? $staff->firstname . ' ' . $staff->lastname : '';
@@ -4786,7 +4786,7 @@ function get_last_action_full_name($userid = '')
 function update_pur_invoices_last_action($id)
 {
     $CI = &get_instance();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $CI->db->update(db_prefix() . 'pur_invoices', [
             'last_action' => get_staff_user_id()
@@ -4798,7 +4798,7 @@ function update_pur_invoices_last_action($id)
 function update_client_invoices_last_action($id)
 {
     $CI = &get_instance();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $CI->db->update(db_prefix() . 'invoices', [
             'last_action' => get_staff_user_id()
@@ -4810,7 +4810,7 @@ function update_client_invoices_last_action($id)
 function update_client_payments_last_action($id)
 {
     $CI = &get_instance();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $CI->db->update(db_prefix() . 'invoicepaymentrecords', [
             'last_action' => get_staff_user_id()
@@ -4822,7 +4822,7 @@ function update_client_payments_last_action($id)
 function update_order_tracker_last_action($id)
 {
     $CI = &get_instance();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $CI->db->update(db_prefix() . 'pur_order_tracker', [
             'last_action' => get_staff_user_id()
@@ -4834,7 +4834,7 @@ function update_order_tracker_last_action($id)
 function update_pur_orders_last_action($id)
 {
     $CI = &get_instance();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $CI->db->update(db_prefix() . 'pur_orders', [
             'last_action' => get_staff_user_id()
@@ -4846,7 +4846,7 @@ function update_pur_orders_last_action($id)
 function update_wo_orders_last_action($id)
 {
     $CI = &get_instance();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $CI->db->update(db_prefix() . 'wo_orders', [
             'last_action' => get_staff_user_id()
@@ -4937,7 +4937,7 @@ function get_default_purchase_bill_rows()
 function update_pur_bills_last_action($id)
 {
     $CI = &get_instance();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $CI->db->update(db_prefix() . 'pur_bills', [
             'last_action' => get_staff_user_id()
@@ -4950,11 +4950,11 @@ function add_vbt_activity_log($id, $by_module = '')
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $pur_invoices = $CI->db->get(db_prefix() . 'pur_invoices')->row();
-        if(!empty($pur_invoices)) {
-            $description = "Vendor bill <b>".$pur_invoices->invoice_number."</b> has been created<b>".$by_module."</b>.";
+        if (!empty($pur_invoices)) {
+            $description = "Vendor bill <b>" . $pur_invoices->invoice_number . "</b> has been created<b>" . $by_module . "</b>.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'vbt',
                 'rel_id' => $id,
@@ -4972,13 +4972,13 @@ function update_vbt_activity_log($id, $field, $old_value, $new_value)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $pur_invoices = $CI->db->get(db_prefix() . 'pur_invoices')->row();
-        if(!empty($pur_invoices)) {
+        if (!empty($pur_invoices)) {
             $old_value = !empty($old_value) ? $old_value : 'None';
             $new_value = !empty($new_value) ? $new_value : 'None';
-            $description = "".$field." field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in vendor bill <b>".$pur_invoices->invoice_number."</b>.";
+            $description = "" . $field . " field is updated from <b>" . $old_value . "</b> to <b>" . $new_value . "</b> in vendor bill <b>" . $pur_invoices->invoice_number . "</b>.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'vbt',
                 'rel_id' => $id,
@@ -4996,11 +4996,11 @@ function remove_vbt_activity_log($id)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $pur_invoices = $CI->db->get(db_prefix() . 'pur_invoices')->row();
-        if(!empty($pur_invoices)) {
-            $description = "Vendor bill <b>".$pur_invoices->invoice_number."</b> has been deleted.";
+        if (!empty($pur_invoices)) {
+            $description = "Vendor bill <b>" . $pur_invoices->invoice_number . "</b> has been deleted.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'vbt',
                 'rel_id' => $id,
@@ -5018,12 +5018,12 @@ function add_bulk_assign_vbt_activity_log($id, $field, $new_value)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $pur_invoices = $CI->db->get(db_prefix() . 'pur_invoices')->row();
-        if(!empty($pur_invoices)) {
+        if (!empty($pur_invoices)) {
             $new_value = !empty($new_value) ? $new_value : 'None';
-            $description = "".$field." field is updated to <b>".$new_value."</b> in vendor bill <b>".$pur_invoices->invoice_number."</b>.";
+            $description = "" . $field . " field is updated to <b>" . $new_value . "</b> in vendor bill <b>" . $pur_invoices->invoice_number . "</b>.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'vbt',
                 'rel_id' => $id,
@@ -5041,10 +5041,10 @@ function add_ot_activity_log($id)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $pur_order_tracker = $CI->db->get(db_prefix() . 'pur_order_tracker')->row();
-        if(!empty($pur_order_tracker)) {
+        if (!empty($pur_order_tracker)) {
             $description = 'Order tracker with contract/order scope <b>' . $pur_order_tracker->pur_order_name . '</b> has been created.';
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'ot',
@@ -5062,7 +5062,7 @@ function update_ot_activity_log($id, $table_name, $field, $old_value, $new_value
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $order_scope = '';
         if ($table_name == 'pur_orders') {
             $CI->db->where('id', $id);
@@ -5077,10 +5077,10 @@ function update_ot_activity_log($id, $table_name, $field, $old_value, $new_value
             $pur_order_tracker = $CI->db->get(db_prefix() . 'pur_order_tracker')->row();
             $order_scope = $pur_order_tracker->pur_order_name;
         }
-        if(!empty($order_scope)) {
+        if (!empty($order_scope)) {
             $old_value = !empty($old_value) ? $old_value : 'None';
             $new_value = !empty($new_value) ? $new_value : 'None';
-            $description = "".$field." field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in contract/order scope <b>".$order_scope."</b>.";
+            $description = "" . $field . " field is updated from <b>" . $old_value . "</b> to <b>" . $new_value . "</b> in contract/order scope <b>" . $order_scope . "</b>.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'ot',
                 'description' => $description,
@@ -5097,10 +5097,10 @@ function remove_ot_activity_log($id)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $pur_order_tracker = $CI->db->get(db_prefix() . 'pur_order_tracker')->row();
-        if(!empty($pur_order_tracker)) {
+        if (!empty($pur_order_tracker)) {
             $description = 'Order tracker with contract/order scope <b>' . $pur_order_tracker->pur_order_name . '</b> has been deleted.';
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'ot',
@@ -5142,11 +5142,11 @@ function add_pc_activity_log($id)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $payment_certificate = $CI->db->get(db_prefix() . 'payment_certificate')->row();
-        if(!empty($payment_certificate)) {
-            $description = "Payment certificate <b>".$payment_certificate->pc_number."</b> has been created.";
+        if (!empty($payment_certificate)) {
+            $description = "Payment certificate <b>" . $payment_certificate->pc_number . "</b> has been created.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'pc',
                 'rel_id' => $id,
@@ -5164,13 +5164,13 @@ function update_pc_activity_log($id, $field, $old_value, $new_value)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $payment_certificate = $CI->db->get(db_prefix() . 'payment_certificate')->row();
-        if(!empty($payment_certificate)) {
+        if (!empty($payment_certificate)) {
             $old_value = !empty($old_value) ? $old_value : 'None';
             $new_value = !empty($new_value) ? $new_value : 'None';
-            $description = "".$field." field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in payment certificate <b>".$payment_certificate->pc_number."</b>.";
+            $description = "" . $field . " field is updated from <b>" . $old_value . "</b> to <b>" . $new_value . "</b> in payment certificate <b>" . $payment_certificate->pc_number . "</b>.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'pc',
                 'rel_id' => $id,
@@ -5188,11 +5188,11 @@ function remove_pc_activity_log($id)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $payment_certificate = $CI->db->get(db_prefix() . 'payment_certificate')->row();
-        if(!empty($payment_certificate)) {
-            $description = "Payment certificate <b>".$payment_certificate->pc_number."</b> has been deleted.";
+        if (!empty($payment_certificate)) {
+            $description = "Payment certificate <b>" . $payment_certificate->pc_number . "</b> has been deleted.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'pc',
                 'rel_id' => $id,
@@ -5210,13 +5210,13 @@ function add_converted_to_vendor_bill_pc_activity_log($id)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $payment_certificate = $CI->db->get(db_prefix() . 'payment_certificate')->row();
-        if(!empty($payment_certificate)) {
+        if (!empty($payment_certificate)) {
             $CI->db->where('id', $payment_certificate->pur_invoice_id);
             $pur_invoices = $CI->db->get(db_prefix() . 'pur_invoices')->row();
-            $description = "Payment certificate <b>".$payment_certificate->pc_number."</b> has been converted to vendor bill <b>".$pur_invoices->invoice_number."</b>.";
+            $description = "Payment certificate <b>" . $payment_certificate->pc_number . "</b> has been converted to vendor bill <b>" . $pur_invoices->invoice_number . "</b>.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'pc',
                 'rel_id' => $id,
@@ -5234,12 +5234,12 @@ function add_pc_attachment_activity_log($id, $file_name, $is_create = true)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $payment_certificate = $CI->db->get(db_prefix() . 'payment_certificate')->row();
-        if(!empty($payment_certificate)) {
+        if (!empty($payment_certificate)) {
             $is_create_value = $is_create ? 'added' : 'removed';
-            $description = "Attachment <b>".$file_name."</b> has been ".$is_create_value." for payment certificate <b>".$payment_certificate->pc_number."</b>.";
+            $description = "Attachment <b>" . $file_name . "</b> has been " . $is_create_value . " for payment certificate <b>" . $payment_certificate->pc_number . "</b>.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'pc',
                 'rel_id' => $id,
@@ -5257,18 +5257,18 @@ function add_pc_status_activity_log($id)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $payment_certificate_details = $CI->db->get(db_prefix() . 'payment_certificate_details')->row();
-        if(!empty($payment_certificate_details)) {
+        if (!empty($payment_certificate_details)) {
             $CI->db->where('id', $payment_certificate_details->rel_id);
             $payment_certificate = $CI->db->get(db_prefix() . 'payment_certificate')->row();
-            if(empty($payment_certificate_details->approve)) {
-                $description = "An approval request has been created for payment certificate <b>".$payment_certificate->pc_number."</b> by <b>".get_last_action_full_name($payment_certificate_details->sender)."</b>.";
-            } else if($payment_certificate_details->approve == 2) {
-                $description = "Payment certificate <b>".$payment_certificate->pc_number."</b> has been approved by <b>".get_last_action_full_name($payment_certificate_details->staff_approve)."</b>.";
-            } else if($payment_certificate_details->approve == 3) {
-                $description = "Payment certificate <b>".$payment_certificate->pc_number."</b> has been rejected by <b>".get_last_action_full_name($payment_certificate_details->staff_approve)."</b>.";
+            if (empty($payment_certificate_details->approve)) {
+                $description = "An approval request has been created for payment certificate <b>" . $payment_certificate->pc_number . "</b> by <b>" . get_last_action_full_name($payment_certificate_details->sender) . "</b>.";
+            } else if ($payment_certificate_details->approve == 2) {
+                $description = "Payment certificate <b>" . $payment_certificate->pc_number . "</b> has been approved by <b>" . get_last_action_full_name($payment_certificate_details->staff_approve) . "</b>.";
+            } else if ($payment_certificate_details->approve == 3) {
+                $description = "Payment certificate <b>" . $payment_certificate->pc_number . "</b> has been rejected by <b>" . get_last_action_full_name($payment_certificate_details->staff_approve) . "</b>.";
             }
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'pc',
@@ -5397,8 +5397,10 @@ function update_all_pc_fields_activity_log($id, $new_data)
         }
         $c_old = strtolower(strip_tags($old_value));
         $c_new = strtolower(strip_tags($new_value));
-        if (in_array($c_old, ['₹0.00', '0', '0.00', '', 'none'])
-            && in_array($c_new, ['₹0.00', '0', '0.00', '', 'none'])) {
+        if (
+            in_array($c_old, ['₹0.00', '0', '0.00', '', 'none'])
+            && in_array($c_new, ['₹0.00', '0', '0.00', '', 'none'])
+        ) {
             continue;
         }
         update_pc_activity_log($id, $field_map[$field], $old_value, $new_value);
@@ -5410,30 +5412,30 @@ function update_pc_approval_status_activity_log($id, $to_status)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $payment_certificate = $CI->db->get(db_prefix() . 'payment_certificate')->row();
-        if(!empty($payment_certificate)) {
+        if (!empty($payment_certificate)) {
             $from_status = $payment_certificate->approve_status;
-            if($from_status == 1) {
+            if ($from_status == 1) {
                 $from_status_name = _l('purchase_draft');
-            } else if($from_status == 2) {
+            } else if ($from_status == 2) {
                 $from_status_name = _l('purchase_approved');
-            } else if($from_status == 3) {
+            } else if ($from_status == 3) {
                 $from_status_name = _l('pur_rejected');
             } else {
                 $from_status_name = _l('purchase_draft');
             }
-            if($to_status == 1) {
+            if ($to_status == 1) {
                 $to_status_name = _l('purchase_draft');
-            } else if($to_status == 2) {
+            } else if ($to_status == 2) {
                 $to_status_name = _l('purchase_approved');
-            } else if($to_status == 3) {
+            } else if ($to_status == 3) {
                 $to_status_name = _l('pur_rejected');
             } else {
                 $to_status_name = _l('purchase_draft');
             }
-            $description = "An approval status is updated from <b>".$from_status_name."</b> to <b>".$to_status_name."</b> in payment certificate <b>".$payment_certificate->pc_number."</b>.";
+            $description = "An approval status is updated from <b>" . $from_status_name . "</b> to <b>" . $to_status_name . "</b> in payment certificate <b>" . $payment_certificate->pc_number . "</b>.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'pc',
                 'rel_id' => $id,
@@ -5451,11 +5453,11 @@ function add_po_activity_log($id)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $pur_orders = $CI->db->get(db_prefix() . 'pur_orders')->row();
-        if(!empty($pur_orders)) {
-            $description = "Purchase order <b>".$pur_orders->pur_order_number." - ".$pur_orders->pur_order_name."</b> has been created.";
+        if (!empty($pur_orders)) {
+            $description = "Purchase order <b>" . $pur_orders->pur_order_number . " - " . $pur_orders->pur_order_name . "</b> has been created.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'po',
                 'rel_id' => $id,
@@ -5473,11 +5475,11 @@ function remove_po_activity_log($id)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $pur_orders = $CI->db->get(db_prefix() . 'pur_orders')->row();
-        if(!empty($pur_orders)) {
-            $description = "Purchase order <b>".$pur_orders->pur_order_number." - ".$pur_orders->pur_order_name."</b> has been deleted.";
+        if (!empty($pur_orders)) {
+            $description = "Purchase order <b>" . $pur_orders->pur_order_number . " - " . $pur_orders->pur_order_name . "</b> has been deleted.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'po',
                 'rel_id' => $id,
@@ -5495,12 +5497,12 @@ function add_po_attachment_activity_log($id, $file_name, $is_create = true)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $pur_orders = $CI->db->get(db_prefix() . 'pur_orders')->row();
-        if(!empty($pur_orders)) {
+        if (!empty($pur_orders)) {
             $is_create_value = $is_create ? 'added' : 'removed';
-            $description = "Attachment <b>".$file_name."</b> has been ".$is_create_value." for purchase order <b>".$pur_orders->pur_order_number." - ".$pur_orders->pur_order_name."</b>.";
+            $description = "Attachment <b>" . $file_name . "</b> has been " . $is_create_value . " for purchase order <b>" . $pur_orders->pur_order_number . " - " . $pur_orders->pur_order_name . "</b>.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'po',
                 'rel_id' => $id,
@@ -5518,11 +5520,11 @@ function add_wo_activity_log($id)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $wo_orders = $CI->db->get(db_prefix() . 'wo_orders')->row();
-        if(!empty($wo_orders)) {
-            $description = "Work order <b>".$wo_orders->wo_order_number." - ".$wo_orders->wo_order_name."</b> has been created.";
+        if (!empty($wo_orders)) {
+            $description = "Work order <b>" . $wo_orders->wo_order_number . " - " . $wo_orders->wo_order_name . "</b> has been created.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'wo',
                 'rel_id' => $id,
@@ -5540,11 +5542,11 @@ function remove_wo_activity_log($id)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $wo_orders = $CI->db->get(db_prefix() . 'wo_orders')->row();
-        if(!empty($wo_orders)) {
-            $description = "Work order <b>".$wo_orders->wo_order_number." - ".$wo_orders->wo_order_name."</b> has been deleted.";
+        if (!empty($wo_orders)) {
+            $description = "Work order <b>" . $wo_orders->wo_order_number . " - " . $wo_orders->wo_order_name . "</b> has been deleted.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'wo',
                 'rel_id' => $id,
@@ -5562,12 +5564,12 @@ function add_wo_attachment_activity_log($id, $file_name, $is_create = true)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $wo_orders = $CI->db->get(db_prefix() . 'wo_orders')->row();
-        if(!empty($wo_orders)) {
+        if (!empty($wo_orders)) {
             $is_create_value = $is_create ? 'added' : 'removed';
-            $description = "Attachment <b>".$file_name."</b> has been ".$is_create_value." for work order <b>".$wo_orders->wo_order_number." - ".$wo_orders->wo_order_name."</b>.";
+            $description = "Attachment <b>" . $file_name . "</b> has been " . $is_create_value . " for work order <b>" . $wo_orders->wo_order_number . " - " . $wo_orders->wo_order_name . "</b>.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'wo',
                 'rel_id' => $id,
@@ -5585,46 +5587,46 @@ function add_order_notes_activity_log($id, $is_create = true)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $notes = $CI->db->get(db_prefix() . 'notes')->row();
-        if(!empty($notes)) {
+        if (!empty($notes)) {
             $module_name = '';
             $rel_id = '';
             $description = '';
             $is_create_value = $is_create ? 'added' : 'removed';
-            if($notes->rel_type == 'purchase_order') {
+            if ($notes->rel_type == 'purchase_order') {
                 $CI->db->where('id', $notes->rel_id);
                 $pur_orders = $CI->db->get(db_prefix() . 'pur_orders')->row();
-                $description = "Notes <b>".$notes->description."</b> has been ".$is_create_value." for purchase order <b>".$pur_orders->pur_order_number." - ".$pur_orders->pur_order_name."</b>.";
+                $description = "Notes <b>" . $notes->description . "</b> has been " . $is_create_value . " for purchase order <b>" . $pur_orders->pur_order_number . " - " . $pur_orders->pur_order_name . "</b>.";
                 $module_name = 'po';
                 $rel_id = $pur_orders->id;
-            } else if($notes->rel_type == 'wo_order') {
+            } else if ($notes->rel_type == 'wo_order') {
                 $CI->db->where('id', $notes->rel_id);
                 $wo_orders = $CI->db->get(db_prefix() . 'wo_orders')->row();
-                $description = "Notes <b>".$notes->description."</b> has been ".$is_create_value." for work order <b>".$wo_orders->wo_order_number." - ".$wo_orders->wo_order_name."</b>.";
+                $description = "Notes <b>" . $notes->description . "</b> has been " . $is_create_value . " for work order <b>" . $wo_orders->wo_order_number . " - " . $wo_orders->wo_order_name . "</b>.";
                 $module_name = 'wo';
                 $rel_id = $wo_orders->id;
-            } else if($notes->rel_type == 'changee_order') {
+            } else if ($notes->rel_type == 'changee_order') {
                 $CI->db->where('id', $notes->rel_id);
                 $co_orders = $CI->db->get(db_prefix() . 'co_orders')->row();
-                $description = "Notes <b>".$notes->description."</b> has been ".$is_create_value." for change order <b>".$co_orders->pur_order_number."</b>.";
+                $description = "Notes <b>" . $notes->description . "</b> has been " . $is_create_value . " for change order <b>" . $co_orders->pur_order_number . "</b>.";
                 $module_name = 'co';
                 $rel_id = $co_orders->id;
-            } else if($notes->rel_type == 'pur_vendor') {
+            } else if ($notes->rel_type == 'pur_vendor') {
                 $CI->db->where('userid', $notes->rel_id);
                 $pur_vendor = $CI->db->get(db_prefix() . 'pur_vendor')->row();
-                $description = "Notes <b>".$notes->description."</b> has been ".$is_create_value." for vendor <b>".$pur_vendor->company."</b>.";
+                $description = "Notes <b>" . $notes->description . "</b> has been " . $is_create_value . " for vendor <b>" . $pur_vendor->company . "</b>.";
                 $module_name = 'ven';
                 $rel_id = $pur_vendor->userid;
-            } else if($notes->rel_type == 'estimate') {
-                $description = "Notes <b>".$notes->description."</b> has been ".$is_create_value." for budget <b>".format_estimate_number($notes->rel_id)."</b>.";
+            } else if ($notes->rel_type == 'estimate') {
+                $description = "Notes <b>" . $notes->description . "</b> has been " . $is_create_value . " for budget <b>" . format_estimate_number($notes->rel_id) . "</b>.";
                 $module_name = 'bud';
                 $rel_id = $notes->rel_id;
-            } else if($notes->rel_type == 'ticket') {
+            } else if ($notes->rel_type == 'ticket') {
                 $CI->db->where('ticketid', $notes->rel_id);
                 $tickets = $CI->db->get(db_prefix() . 'tickets')->row();
-                $description = "Notes <b>".$notes->description."</b> has been ".$is_create_value." for RFI <b>".$tickets->subject."</b>.";
+                $description = "Notes <b>" . $notes->description . "</b> has been " . $is_create_value . " for RFI <b>" . $tickets->subject . "</b>.";
                 $module_name = 'rfi';
                 $rel_id = $tickets->ticketid;
             } else {
@@ -5632,7 +5634,7 @@ function add_order_notes_activity_log($id, $is_create = true)
                 $rel_id = '';
                 $description = '';
             }
-            if(!empty($description)) {
+            if (!empty($description)) {
                 $CI->db->insert(db_prefix() . 'module_activity_log', [
                     'module_name' => $module_name,
                     'rel_id' => $rel_id,
@@ -5651,47 +5653,47 @@ function update_order_notes_activity_log($id, $old_value, $new_value)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $notes = $CI->db->get(db_prefix() . 'notes')->row();
-        if(!empty($notes)) {
+        if (!empty($notes)) {
             $module_name = '';
             $rel_id = '';
             $description = '';
             $old_value = !empty($old_value) ? $old_value : 'None';
             $new_value = !empty($new_value) ? $new_value : 'None';
-            if($notes->rel_type == 'purchase_order') {
+            if ($notes->rel_type == 'purchase_order') {
                 $CI->db->where('id', $notes->rel_id);
                 $pur_orders = $CI->db->get(db_prefix() . 'pur_orders')->row();
-                $description = "Notes field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in purchase order <b>".$pur_orders->pur_order_number." - ".$pur_orders->pur_order_name."</b>.";
+                $description = "Notes field is updated from <b>" . $old_value . "</b> to <b>" . $new_value . "</b> in purchase order <b>" . $pur_orders->pur_order_number . " - " . $pur_orders->pur_order_name . "</b>.";
                 $module_name = 'po';
                 $rel_id = $pur_orders->id;
-            } else if($notes->rel_type == 'wo_order') {
+            } else if ($notes->rel_type == 'wo_order') {
                 $CI->db->where('id', $notes->rel_id);
                 $wo_orders = $CI->db->get(db_prefix() . 'wo_orders')->row();
-                $description = "Notes field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in work order <b>".$wo_orders->wo_order_number." - ".$wo_orders->wo_order_name."</b>.";
+                $description = "Notes field is updated from <b>" . $old_value . "</b> to <b>" . $new_value . "</b> in work order <b>" . $wo_orders->wo_order_number . " - " . $wo_orders->wo_order_name . "</b>.";
                 $module_name = 'wo';
                 $rel_id = $wo_orders->id;
-            } else if($notes->rel_type == 'changee_order') {
+            } else if ($notes->rel_type == 'changee_order') {
                 $CI->db->where('id', $notes->rel_id);
                 $co_orders = $CI->db->get(db_prefix() . 'co_orders')->row();
-                $description = "Notes field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in change order <b>".$co_orders->pur_order_number."</b>.";
+                $description = "Notes field is updated from <b>" . $old_value . "</b> to <b>" . $new_value . "</b> in change order <b>" . $co_orders->pur_order_number . "</b>.";
                 $module_name = 'co';
                 $rel_id = $co_orders->id;
-            } else if($notes->rel_type == 'pur_vendor') {
+            } else if ($notes->rel_type == 'pur_vendor') {
                 $CI->db->where('userid', $notes->rel_id);
                 $pur_vendor = $CI->db->get(db_prefix() . 'pur_vendor')->row();
-                $description = "Notes field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in vendor <b>".$pur_vendor->company."</b>.";
+                $description = "Notes field is updated from <b>" . $old_value . "</b> to <b>" . $new_value . "</b> in vendor <b>" . $pur_vendor->company . "</b>.";
                 $module_name = 'ven';
                 $rel_id = $pur_vendor->userid;
-            } else if($notes->rel_type == 'estimate') {
-                $description = "Notes field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in budget <b>".format_estimate_number($notes->rel_id)."</b>.";
+            } else if ($notes->rel_type == 'estimate') {
+                $description = "Notes field is updated from <b>" . $old_value . "</b> to <b>" . $new_value . "</b> in budget <b>" . format_estimate_number($notes->rel_id) . "</b>.";
                 $module_name = 'bud';
                 $rel_id = $notes->rel_id;
-            } else if($notes->rel_type == 'ticket') {
+            } else if ($notes->rel_type == 'ticket') {
                 $CI->db->where('ticketid', $notes->rel_id);
                 $tickets = $CI->db->get(db_prefix() . 'tickets')->row();
-                $description = "Notes field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in RFI <b>".$tickets->subject."</b>.";
+                $description = "Notes field is updated from <b>" . $old_value . "</b> to <b>" . $new_value . "</b> in RFI <b>" . $tickets->subject . "</b>.";
                 $module_name = 'rfi';
                 $rel_id = $tickets->ticketid;
             } else {
@@ -5699,7 +5701,7 @@ function update_order_notes_activity_log($id, $old_value, $new_value)
                 $rel_id = '';
                 $description = '';
             }
-            if(!empty($description)) {
+            if (!empty($description)) {
                 $CI->db->insert(db_prefix() . 'module_activity_log', [
                     'module_name' => $module_name,
                     'rel_id' => $rel_id,
@@ -5718,29 +5720,29 @@ function add_order_comments_activity_log($id, $is_create = true)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $pur_comments = $CI->db->get(db_prefix() . 'pur_comments')->row();
-        if(!empty($pur_comments)) {
+        if (!empty($pur_comments)) {
             $module_name = '';
             $rel_id = '';
             $description = '';
             $is_create_value = $is_create ? 'added' : 'removed';
-            if($pur_comments->rel_type == 'pur_order') {
+            if ($pur_comments->rel_type == 'pur_order') {
                 $CI->db->where('id', $pur_comments->rel_id);
                 $pur_orders = $CI->db->get(db_prefix() . 'pur_orders')->row();
-                $description = "Discuss <b>".$pur_comments->content."</b> has been ".$is_create_value." for purchase order <b>".$pur_orders->pur_order_number." - ".$pur_orders->pur_order_name."</b>.";
+                $description = "Discuss <b>" . $pur_comments->content . "</b> has been " . $is_create_value . " for purchase order <b>" . $pur_orders->pur_order_number . " - " . $pur_orders->pur_order_name . "</b>.";
                 $module_name = 'po';
                 $rel_id = $pur_orders->id;
             }
-            if($pur_comments->rel_type == 'wo_order') {
+            if ($pur_comments->rel_type == 'wo_order') {
                 $CI->db->where('id', $pur_comments->rel_id);
                 $wo_orders = $CI->db->get(db_prefix() . 'wo_orders')->row();
-                $description = "Discuss <b>".$pur_comments->content."</b> has been ".$is_create_value." for work order <b>".$wo_orders->wo_order_number." - ".$wo_orders->wo_order_name."</b>.";
+                $description = "Discuss <b>" . $pur_comments->content . "</b> has been " . $is_create_value . " for work order <b>" . $wo_orders->wo_order_number . " - " . $wo_orders->wo_order_name . "</b>.";
                 $module_name = 'wo';
                 $rel_id = $wo_orders->id;
             }
-            if(!empty($description)) {
+            if (!empty($description)) {
                 $CI->db->insert(db_prefix() . 'module_activity_log', [
                     'module_name' => $module_name,
                     'rel_id' => $rel_id,
@@ -5759,30 +5761,30 @@ function update_order_comments_activity_log($id, $old_value, $new_value)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $pur_comments = $CI->db->get(db_prefix() . 'pur_comments')->row();
-        if(!empty($pur_comments)) {
+        if (!empty($pur_comments)) {
             $module_name = '';
             $rel_id = '';
             $description = '';
             $old_value = !empty($old_value) ? $old_value : 'None';
             $new_value = !empty($new_value) ? $new_value : 'None';
-            if($pur_comments->rel_type == 'pur_order') {
+            if ($pur_comments->rel_type == 'pur_order') {
                 $CI->db->where('id', $pur_comments->rel_id);
                 $pur_orders = $CI->db->get(db_prefix() . 'pur_orders')->row();
-                $description = "Discuss field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in purchase order <b>".$pur_orders->pur_order_number." - ".$pur_orders->pur_order_name."</b>.";
+                $description = "Discuss field is updated from <b>" . $old_value . "</b> to <b>" . $new_value . "</b> in purchase order <b>" . $pur_orders->pur_order_number . " - " . $pur_orders->pur_order_name . "</b>.";
                 $module_name = 'po';
                 $rel_id = $pur_orders->id;
             }
-            if($pur_comments->rel_type == 'wo_order') {
+            if ($pur_comments->rel_type == 'wo_order') {
                 $CI->db->where('id', $pur_comments->rel_id);
                 $wo_orders = $CI->db->get(db_prefix() . 'wo_orders')->row();
-                $description = "Discuss field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in work order <b>".$wo_orders->wo_order_number." - ".$wo_orders->wo_order_name."</b>.";
+                $description = "Discuss field is updated from <b>" . $old_value . "</b> to <b>" . $new_value . "</b> in work order <b>" . $wo_orders->wo_order_number . " - " . $wo_orders->wo_order_name . "</b>.";
                 $module_name = 'wo';
                 $rel_id = $wo_orders->id;
             }
-            if(!empty($description)) {
+            if (!empty($description)) {
                 $CI->db->insert(db_prefix() . 'module_activity_log', [
                     'module_name' => $module_name,
                     'rel_id' => $rel_id,
@@ -5801,53 +5803,53 @@ function add_order_status_activity_log($id)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $pur_approval_details = $CI->db->get(db_prefix() . 'pur_approval_details')->row();
-        if(!empty($pur_approval_details)) {
+        if (!empty($pur_approval_details)) {
             $module_name = '';
             $rel_id = '';
             $description = '';
-            if($pur_approval_details->rel_type == 'pur_order') {
+            if ($pur_approval_details->rel_type == 'pur_order') {
                 $CI->db->where('id', $pur_approval_details->rel_id);
                 $pur_orders = $CI->db->get(db_prefix() . 'pur_orders')->row();
-                if(empty($pur_approval_details->approve)) {
-                    $description = "An approval request has been created for purchase order <b>".$pur_orders->pur_order_number." - ".$pur_orders->pur_order_name."</b> by <b>".get_last_action_full_name($pur_approval_details->sender)."</b>.";
-                } else if($pur_approval_details->approve == 2) {
-                    $description = "Purchase order <b>".$pur_orders->pur_order_number." - ".$pur_orders->pur_order_name."</b> has been approved by <b>".get_last_action_full_name($pur_approval_details->staff_approve)."</b>.";
-                } else if($pur_approval_details->approve == 3) {
-                    $description = "Purchase order <b>".$pur_orders->pur_order_number." - ".$pur_orders->pur_order_name."</b> has been rejected by <b>".get_last_action_full_name($pur_approval_details->staff_approve)."</b>.";
+                if (empty($pur_approval_details->approve)) {
+                    $description = "An approval request has been created for purchase order <b>" . $pur_orders->pur_order_number . " - " . $pur_orders->pur_order_name . "</b> by <b>" . get_last_action_full_name($pur_approval_details->sender) . "</b>.";
+                } else if ($pur_approval_details->approve == 2) {
+                    $description = "Purchase order <b>" . $pur_orders->pur_order_number . " - " . $pur_orders->pur_order_name . "</b> has been approved by <b>" . get_last_action_full_name($pur_approval_details->staff_approve) . "</b>.";
+                } else if ($pur_approval_details->approve == 3) {
+                    $description = "Purchase order <b>" . $pur_orders->pur_order_number . " - " . $pur_orders->pur_order_name . "</b> has been rejected by <b>" . get_last_action_full_name($pur_approval_details->staff_approve) . "</b>.";
                 }
                 $module_name = 'po';
                 $rel_id = $pur_orders->id;
             }
-            if($pur_approval_details->rel_type == 'wo_order') {
+            if ($pur_approval_details->rel_type == 'wo_order') {
                 $CI->db->where('id', $pur_approval_details->rel_id);
                 $wo_orders = $CI->db->get(db_prefix() . 'wo_orders')->row();
-                if(empty($pur_approval_details->approve)) {
-                    $description = "An approval request has been created for work order <b>".$wo_orders->wo_order_number." - ".$wo_orders->wo_order_name."</b> by <b>".get_last_action_full_name($pur_approval_details->sender)."</b>.";
-                } else if($pur_approval_details->approve == 2) {
-                    $description = "Work order <b>".$wo_orders->wo_order_number." - ".$wo_orders->wo_order_name."</b> has been approved by <b>".get_last_action_full_name($pur_approval_details->staff_approve)."</b>.";
-                } else if($pur_approval_details->approve == 3) {
-                    $description = "Work order <b>".$wo_orders->wo_order_number." - ".$wo_orders->wo_order_name."</b> has been rejected by <b>".get_last_action_full_name($pur_approval_details->staff_approve)."</b>.";
+                if (empty($pur_approval_details->approve)) {
+                    $description = "An approval request has been created for work order <b>" . $wo_orders->wo_order_number . " - " . $wo_orders->wo_order_name . "</b> by <b>" . get_last_action_full_name($pur_approval_details->sender) . "</b>.";
+                } else if ($pur_approval_details->approve == 2) {
+                    $description = "Work order <b>" . $wo_orders->wo_order_number . " - " . $wo_orders->wo_order_name . "</b> has been approved by <b>" . get_last_action_full_name($pur_approval_details->staff_approve) . "</b>.";
+                } else if ($pur_approval_details->approve == 3) {
+                    $description = "Work order <b>" . $wo_orders->wo_order_number . " - " . $wo_orders->wo_order_name . "</b> has been rejected by <b>" . get_last_action_full_name($pur_approval_details->staff_approve) . "</b>.";
                 }
                 $module_name = 'wo';
                 $rel_id = $wo_orders->id;
             }
-            if($pur_approval_details->rel_type == 'pur_request') {
+            if ($pur_approval_details->rel_type == 'pur_request') {
                 $CI->db->where('id', $pur_approval_details->rel_id);
                 $pur_request = $CI->db->get(db_prefix() . 'pur_request')->row();
-                if(empty($pur_approval_details->approve)) {
-                    $description = "An approval request has been created for purchase request <b>".$pur_request->pur_rq_code."</b> by <b>".get_last_action_full_name($pur_approval_details->sender)."</b>.";
-                } else if($pur_approval_details->approve == 2) {
-                    $description = "Purchase request <b>".$pur_request->pur_rq_code."</b> has been approved by <b>".get_last_action_full_name($pur_approval_details->staff_approve)."</b>.";
-                } else if($pur_approval_details->approve == 3) {
-                    $description = "Purchase request <b>".$pur_request->pur_rq_code."</b> has been rejected by <b>".get_last_action_full_name($pur_approval_details->staff_approve)."</b>.";
+                if (empty($pur_approval_details->approve)) {
+                    $description = "An approval request has been created for purchase request <b>" . $pur_request->pur_rq_code . "</b> by <b>" . get_last_action_full_name($pur_approval_details->sender) . "</b>.";
+                } else if ($pur_approval_details->approve == 2) {
+                    $description = "Purchase request <b>" . $pur_request->pur_rq_code . "</b> has been approved by <b>" . get_last_action_full_name($pur_approval_details->staff_approve) . "</b>.";
+                } else if ($pur_approval_details->approve == 3) {
+                    $description = "Purchase request <b>" . $pur_request->pur_rq_code . "</b> has been rejected by <b>" . get_last_action_full_name($pur_approval_details->staff_approve) . "</b>.";
                 }
                 $module_name = 'pr';
                 $rel_id = $pur_request->id;
             }
-            if(!empty($description)) {
+            if (!empty($description)) {
                 $CI->db->insert(db_prefix() . 'module_activity_log', [
                     'module_name' => $module_name,
                     'rel_id' => $rel_id,
@@ -5884,51 +5886,51 @@ function update_order_approval_status_activity_log($id, $to_status, $rel_type)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
-        if($to_status == 1) {
+    if (!empty($id)) {
+        if ($to_status == 1) {
             $to_status_name = _l('purchase_draft');
-        } else if($to_status == 2) {
+        } else if ($to_status == 2) {
             $to_status_name = _l('purchase_approved');
-        } else if($to_status == 3) {
+        } else if ($to_status == 3) {
             $to_status_name = _l('pur_rejected');
         } else {
             $to_status_name = _l('purchase_draft');
         }
-        if($rel_type == 'pur_order') {
+        if ($rel_type == 'pur_order') {
             $CI->db->where('id', $id);
             $pur_orders = $CI->db->get(db_prefix() . 'pur_orders')->row();
             $from_status = $pur_orders->approve_status;
-            if($from_status == 1) {
+            if ($from_status == 1) {
                 $from_status_name = _l('purchase_draft');
-            } else if($from_status == 2) {
+            } else if ($from_status == 2) {
                 $from_status_name = _l('purchase_approved');
-            } else if($from_status == 3) {
+            } else if ($from_status == 3) {
                 $from_status_name = _l('pur_rejected');
             } else {
                 $from_status_name = _l('purchase_draft');
             }
-            $description = "An approval status is updated from <b>".$from_status_name."</b> to <b>".$to_status_name."</b> in purchase order <b>".$pur_orders->pur_order_number." - ".$pur_orders->pur_order_name."</b>.";
+            $description = "An approval status is updated from <b>" . $from_status_name . "</b> to <b>" . $to_status_name . "</b> in purchase order <b>" . $pur_orders->pur_order_number . " - " . $pur_orders->pur_order_name . "</b>.";
             $module_name = 'po';
             $rel_id = $pur_orders->id;
         }
-        if($rel_type == 'wo_order') {
+        if ($rel_type == 'wo_order') {
             $CI->db->where('id', $id);
             $wo_orders = $CI->db->get(db_prefix() . 'wo_orders')->row();
             $from_status = $wo_orders->approve_status;
-            if($from_status == 1) {
+            if ($from_status == 1) {
                 $from_status_name = _l('purchase_draft');
-            } else if($from_status == 2) {
+            } else if ($from_status == 2) {
                 $from_status_name = _l('purchase_approved');
-            } else if($from_status == 3) {
+            } else if ($from_status == 3) {
                 $from_status_name = _l('pur_rejected');
             } else {
                 $from_status_name = _l('purchase_draft');
             }
-            $description = "An approval status is updated from <b>".$from_status_name."</b> to <b>".$to_status_name."</b> in work order <b>".$wo_orders->wo_order_number." - ".$wo_orders->wo_order_name."</b>.";
+            $description = "An approval status is updated from <b>" . $from_status_name . "</b> to <b>" . $to_status_name . "</b> in work order <b>" . $wo_orders->wo_order_number . " - " . $wo_orders->wo_order_name . "</b>.";
             $module_name = 'wo';
             $rel_id = $wo_orders->id;
         }
-        if(!empty($description)) {
+        if (!empty($description)) {
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => $module_name,
                 'rel_id' => $rel_id,
@@ -6088,13 +6090,13 @@ function update_po_activity_log($id, $field, $old_value, $new_value)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $pur_orders = $CI->db->get(db_prefix() . 'pur_orders')->row();
-        if(!empty($pur_orders)) {
+        if (!empty($pur_orders)) {
             $old_value = !empty($old_value) ? $old_value : 'None';
             $new_value = !empty($new_value) ? $new_value : 'None';
-            $description = "".$field." field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in purchase order <b>".$pur_orders->pur_order_number." - ".$pur_orders->pur_order_name."</b>.";
+            $description = "" . $field . " field is updated from <b>" . $old_value . "</b> to <b>" . $new_value . "</b> in purchase order <b>" . $pur_orders->pur_order_number . " - " . $pur_orders->pur_order_name . "</b>.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'po',
                 'rel_id' => $pur_orders->id,
@@ -6245,13 +6247,13 @@ function update_wo_activity_log($id, $field, $old_value, $new_value)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $wo_orders = $CI->db->get(db_prefix() . 'wo_orders')->row();
-        if(!empty($wo_orders)) {
+        if (!empty($wo_orders)) {
             $old_value = !empty($old_value) ? $old_value : 'None';
             $new_value = !empty($new_value) ? $new_value : 'None';
-            $description = "".$field." field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in work order <b>".$wo_orders->wo_order_number." - ".$wo_orders->wo_order_name."</b>.";
+            $description = "" . $field . " field is updated from <b>" . $old_value . "</b> to <b>" . $new_value . "</b> in work order <b>" . $wo_orders->wo_order_number . " - " . $wo_orders->wo_order_name . "</b>.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'wo',
                 'rel_id' => $wo_orders->id,
@@ -6269,57 +6271,57 @@ function add_order_item_activity_log($id, $rel_type, $is_create = true)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $module_name = '';
         $rel_id = '';
         $description = '';
         $is_create_value = $is_create ? 'added' : 'removed';
-        if($rel_type == 'pur_order') {
+        if ($rel_type == 'pur_order') {
             $CI->db->where('id', $id);
             $pur_order_detail = $CI->db->get(db_prefix() . 'pur_order_detail')->row();
-            if(!empty($pur_order_detail)) {
+            if (!empty($pur_order_detail)) {
                 $CI->db->where('id', $pur_order_detail->pur_order);
                 $pur_orders = $CI->db->get(db_prefix() . 'pur_orders')->row();
                 $CI->db->where('id', $pur_order_detail->item_code);
                 $items = $CI->db->get(db_prefix() . 'items')->row();
-                if(!empty($items)) {
-                    $description = "Item <b>".$items->commodity_code." ".$items->description."</b> has been ".$is_create_value." for purchase order <b>".$pur_orders->pur_order_number." - ".$pur_orders->pur_order_name."</b>.";
+                if (!empty($items)) {
+                    $description = "Item <b>" . $items->commodity_code . " " . $items->description . "</b> has been " . $is_create_value . " for purchase order <b>" . $pur_orders->pur_order_number . " - " . $pur_orders->pur_order_name . "</b>.";
                     $module_name = 'po';
                     $rel_id = $pur_orders->id;
                 }
             }
         }
-        if($rel_type == 'wo_order') {
+        if ($rel_type == 'wo_order') {
             $CI->db->where('id', $id);
             $wo_order_detail = $CI->db->get(db_prefix() . 'wo_order_detail')->row();
-            if(!empty($wo_order_detail)) {
+            if (!empty($wo_order_detail)) {
                 $CI->db->where('id', $wo_order_detail->wo_order);
                 $wo_orders = $CI->db->get(db_prefix() . 'wo_orders')->row();
                 $CI->db->where('id', $wo_order_detail->item_code);
                 $items = $CI->db->get(db_prefix() . 'items')->row();
-                if(!empty($items)) {
-                    $description = "Item <b>".$items->commodity_code." ".$items->description."</b> has been ".$is_create_value." for work order <b>".$wo_orders->wo_order_number." - ".$wo_orders->wo_order_name."</b>.";
+                if (!empty($items)) {
+                    $description = "Item <b>" . $items->commodity_code . " " . $items->description . "</b> has been " . $is_create_value . " for work order <b>" . $wo_orders->wo_order_number . " - " . $wo_orders->wo_order_name . "</b>.";
                     $module_name = 'wo';
                     $rel_id = $wo_orders->id;
                 }
             }
         }
-        if($rel_type == 'pur_request') {
+        if ($rel_type == 'pur_request') {
             $CI->db->where('prd_id', $id);
             $pur_request_detail = $CI->db->get(db_prefix() . 'pur_request_detail')->row();
-            if(!empty($pur_request_detail)) {
+            if (!empty($pur_request_detail)) {
                 $CI->db->where('id', $pur_request_detail->pur_request);
                 $pur_request = $CI->db->get(db_prefix() . 'pur_request')->row();
                 $CI->db->where('id', $pur_request_detail->item_code);
                 $items = $CI->db->get(db_prefix() . 'items')->row();
-                if(!empty($items)) {
-                    $description = "Item <b>".$items->commodity_code." ".$items->description."</b> has been ".$is_create_value." for purchase request <b>".$pur_request->pur_rq_code."</b>.";
+                if (!empty($items)) {
+                    $description = "Item <b>" . $items->commodity_code . " " . $items->description . "</b> has been " . $is_create_value . " for purchase request <b>" . $pur_request->pur_rq_code . "</b>.";
                     $module_name = 'pr';
                     $rel_id = $pur_request->id;
                 }
             }
         }
-        if(!empty($description)) {
+        if (!empty($description)) {
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => $module_name,
                 'rel_id' => $rel_id,
@@ -6340,7 +6342,7 @@ function update_order_item_activity_log($new_data, $rel_type)
     $base_currency = $CI->currencies_model->get_base_currency();
     $default_project = get_default_project();
     $old_data = array();
-    if($rel_type == 'pur_order') {
+    if ($rel_type == 'pur_order') {
         $pur_order_detail = $CI->db->where('id', $new_data['id'])
             ->get(db_prefix() . 'pur_order_detail')
             ->row();
@@ -6349,7 +6351,7 @@ function update_order_item_activity_log($new_data, $rel_type)
         }
         $old_data = (array) $pur_order_detail;
     }
-    if($rel_type == 'wo_order') {
+    if ($rel_type == 'wo_order') {
         $wo_order_detail = $CI->db->where('id', $new_data['id'])
             ->get(db_prefix() . 'wo_order_detail')
             ->row();
@@ -6358,7 +6360,7 @@ function update_order_item_activity_log($new_data, $rel_type)
         }
         $old_data = (array) $wo_order_detail;
     }
-    if($rel_type == 'pur_request') {
+    if ($rel_type == 'pur_request') {
         $pur_request_detail = $CI->db->where('prd_id', $new_data['id'])
             ->get(db_prefix() . 'pur_request_detail')
             ->row();
@@ -6427,7 +6429,7 @@ function update_order_item_activity_log($new_data, $rel_type)
         'total' => _l('pur_subtotal_after_tax'),
         'total_money' => _l('total'),
     ];
-    if($rel_type == 'pur_request') {
+    if ($rel_type == 'pur_request') {
         $field_map = [
             'item_code' => _l('Uniclass Code'),
             'description' => _l('description'),
@@ -6470,34 +6472,34 @@ function update_order_item_activity_log($new_data, $rel_type)
         $module_name = '';
         $rel_id = '';
         $description = '';
-        if($rel_type == 'pur_order') {
+        if ($rel_type == 'pur_order') {
             $CI->db->where('id', $old_data['pur_order']);
             $pur_orders = $CI->db->get(db_prefix() . 'pur_orders')->row();
             $CI->db->where('id', $new_data['item_name']);
             $items = $CI->db->get(db_prefix() . 'items')->row();
-            $description = "".$field_map[$field]." field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> for item <b>".$items->commodity_code." ".$items->description."</b> in purchase order <b>".$pur_orders->pur_order_number." - ".$pur_orders->pur_order_name."</b>.";
+            $description = "" . $field_map[$field] . " field is updated from <b>" . $old_value . "</b> to <b>" . $new_value . "</b> for item <b>" . $items->commodity_code . " " . $items->description . "</b> in purchase order <b>" . $pur_orders->pur_order_number . " - " . $pur_orders->pur_order_name . "</b>.";
             $module_name = 'po';
             $rel_id = $pur_orders->id;
         }
-        if($rel_type == 'wo_order') {
+        if ($rel_type == 'wo_order') {
             $CI->db->where('id', $old_data['wo_order']);
             $wo_orders = $CI->db->get(db_prefix() . 'wo_orders')->row();
             $CI->db->where('id', $new_data['item_name']);
             $items = $CI->db->get(db_prefix() . 'items')->row();
-            $description = "".$field_map[$field]." field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> for item <b>".$items->commodity_code." ".$items->description."</b> in work order <b>".$wo_orders->wo_order_number." - ".$wo_orders->wo_order_name."</b>.";
+            $description = "" . $field_map[$field] . " field is updated from <b>" . $old_value . "</b> to <b>" . $new_value . "</b> for item <b>" . $items->commodity_code . " " . $items->description . "</b> in work order <b>" . $wo_orders->wo_order_number . " - " . $wo_orders->wo_order_name . "</b>.";
             $module_name = 'wo';
             $rel_id = $wo_orders->id;
         }
-        if($rel_type == 'pur_request') {
+        if ($rel_type == 'pur_request') {
             $CI->db->where('id', $old_data['pur_request']);
             $pur_request = $CI->db->get(db_prefix() . 'pur_request')->row();
             $CI->db->where('id', $new_data['item_code']);
             $items = $CI->db->get(db_prefix() . 'items')->row();
-            $description = "".$field_map[$field]." field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> for item <b>".$items->commodity_code." ".$items->description."</b> in purchase request <b>".$pur_request->pur_rq_code."</b>.";
+            $description = "" . $field_map[$field] . " field is updated from <b>" . $old_value . "</b> to <b>" . $new_value . "</b> for item <b>" . $items->commodity_code . " " . $items->description . "</b> in purchase request <b>" . $pur_request->pur_rq_code . "</b>.";
             $module_name = 'pr';
             $rel_id = $pur_request->id;
         }
-        if(!empty($description)) {
+        if (!empty($description)) {
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => $module_name,
                 'rel_id' => $rel_id,
@@ -6515,12 +6517,12 @@ function add_pr_activity_log($id, $is_create = true)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $pur_request = $CI->db->get(db_prefix() . 'pur_request')->row();
-        if(!empty($pur_request)) {
+        if (!empty($pur_request)) {
             $is_create_value = $is_create ? 'created' : 'deleted';
-            $description = "Purchase request <b>".$pur_request->pur_rq_code."</b> has been ".$is_create_value.".";
+            $description = "Purchase request <b>" . $pur_request->pur_rq_code . "</b> has been " . $is_create_value . ".";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'pr',
                 'rel_id' => $id,
@@ -6538,12 +6540,12 @@ function add_pr_attachment_activity_log($id, $file_name, $is_create = true)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $pur_request = $CI->db->get(db_prefix() . 'pur_request')->row();
-        if(!empty($pur_request)) {
+        if (!empty($pur_request)) {
             $is_create_value = $is_create ? 'added' : 'removed';
-            $description = "Attachment <b>".$file_name."</b> has been ".$is_create_value." for purchase request <b>".$pur_request->pur_rq_code."</b>.";
+            $description = "Attachment <b>" . $file_name . "</b> has been " . $is_create_value . " for purchase request <b>" . $pur_request->pur_rq_code . "</b>.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'pr',
                 'rel_id' => $id,
@@ -6653,13 +6655,13 @@ function update_pr_activity_log($id, $field, $old_value, $new_value)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('id', $id);
         $pur_request = $CI->db->get(db_prefix() . 'pur_request')->row();
-        if(!empty($pur_request)) {
+        if (!empty($pur_request)) {
             $old_value = !empty($old_value) ? $old_value : 'None';
             $new_value = !empty($new_value) ? $new_value : 'None';
-            $description = "".$field." field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in purchase request <b>".$pur_request->pur_rq_code."</b>.";
+            $description = "" . $field . " field is updated from <b>" . $old_value . "</b> to <b>" . $new_value . "</b> in purchase request <b>" . $pur_request->pur_rq_code . "</b>.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'pr',
                 'rel_id' => $pur_request->id,
@@ -6677,12 +6679,12 @@ function add_vendor_activity_log($id, $is_create = true)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('userid', $id);
         $pur_vendor = $CI->db->get(db_prefix() . 'pur_vendor')->row();
-        if(!empty($pur_vendor)) {
+        if (!empty($pur_vendor)) {
             $is_create_value = $is_create ? 'created' : 'deleted';
-            $description = "Vendor <b>".$pur_vendor->company."</b> has been ".$is_create_value.".";
+            $description = "Vendor <b>" . $pur_vendor->company . "</b> has been " . $is_create_value . ".";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'ven',
                 'rel_id' => $id,
@@ -6700,21 +6702,21 @@ function add_vendor_contact_activity_log($id, $is_create = true)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->select(
             db_prefix() . 'pur_contacts.firstname,' .
-            db_prefix() . 'pur_contacts.lastname,' .
-            db_prefix() . 'pur_contacts.userid,' .
-            db_prefix() . 'pur_vendor.company'
+                db_prefix() . 'pur_contacts.lastname,' .
+                db_prefix() . 'pur_contacts.userid,' .
+                db_prefix() . 'pur_vendor.company'
         );
         $CI->db->from(db_prefix() . 'pur_contacts');
         $CI->db->join(db_prefix() . 'pur_vendor', db_prefix() . 'pur_vendor.userid = ' . db_prefix() . 'pur_contacts.userid', 'left');
         $CI->db->where(db_prefix() . 'pur_contacts.id', $id);
         $CI->db->group_by(db_prefix() . 'pur_contacts.id');
         $pur_contacts = $CI->db->get()->row();
-        if(!empty($pur_contacts)) {
+        if (!empty($pur_contacts)) {
             $is_create_value = $is_create ? 'created' : 'deleted';
-            $description = "Vendor contact <b>".$pur_contacts->firstname." ".$pur_contacts->lastname." (".$pur_contacts->company.")</b> has been ".$is_create_value.".";
+            $description = "Vendor contact <b>" . $pur_contacts->firstname . " " . $pur_contacts->lastname . " (" . $pur_contacts->company . ")</b> has been " . $is_create_value . ".";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'ven',
                 'rel_id' => $pur_contacts->userid,
@@ -6731,68 +6733,68 @@ function add_vendor_contact_activity_log($id, $is_create = true)
 function get_package_items_amount_sum($package_id)
 {
     $CI = &get_instance();
-    
+
     $CI->db->select(
         db_prefix() . 'itemable.qty,' .
-        db_prefix() . 'itemable.rate,' .
-        db_prefix() . 'itemable.unit_id,' .
-        db_prefix() . 'itemable.item_code,' .
-        db_prefix() . 'itemable.long_description,' .
-        db_prefix() . 'itemable.sub_head,' .
-        db_prefix() . 'itemable.area,' .
-        db_prefix() . 'estimate_package_items_info.*'
+            db_prefix() . 'itemable.rate,' .
+            db_prefix() . 'itemable.unit_id,' .
+            db_prefix() . 'itemable.item_code,' .
+            db_prefix() . 'itemable.long_description,' .
+            db_prefix() . 'itemable.sub_head,' .
+            db_prefix() . 'itemable.area,' .
+            db_prefix() . 'estimate_package_items_info.*'
     );
     $CI->db->from(db_prefix() . 'estimate_package_items_info');
     $CI->db->join(db_prefix() . 'itemable', db_prefix() . 'itemable.id = ' . db_prefix() . 'estimate_package_items_info.item_id', 'left');
     $CI->db->where('package_id', $package_id);
     $CI->db->group_by(db_prefix() . 'estimate_package_items_info.id');
     $package_items = $CI->db->get()->result_array();
-    
+
     $total_amount = 0;
-    
+
     foreach ($package_items as $key => $item) {
         $item_qty = !empty($item['qty']) ? number_format($item['qty'], 2, '.', '') : 0.00;
         $item_rate = !empty($item['rate']) ? number_format($item['rate'], 2, '.', '') : 0.00;
         $item_amount = number_format($item_qty * $item_rate, 2, '.', '');
-        
+
         // Add to total amount
         $total_amount += (float)$item_amount;
     }
-    
+
     return $total_amount;
 }
 
 function get_package_rate_values($package_id)
 {
     $CI = &get_instance();
-    
+
     $CI->db->select(
         db_prefix() . 'itemable.qty,' .
-        db_prefix() . 'itemable.rate,' .
-        db_prefix() . 'itemable.unit_id,' .
-        db_prefix() . 'itemable.item_code,' .
-        db_prefix() . 'itemable.long_description,' .
-        db_prefix() . 'itemable.sub_head,' .
-        db_prefix() . 'itemable.area,' .
-        db_prefix() . 'estimate_package_items_info.*'
+            db_prefix() . 'itemable.rate,' .
+            db_prefix() . 'itemable.unit_id,' .
+            db_prefix() . 'itemable.item_code,' .
+            db_prefix() . 'itemable.long_description,' .
+            db_prefix() . 'itemable.sub_head,' .
+            db_prefix() . 'itemable.area,' .
+            db_prefix() . 'estimate_package_items_info.*'
     );
     $CI->db->from(db_prefix() . 'estimate_package_items_info');
     $CI->db->join(db_prefix() . 'itemable', db_prefix() . 'itemable.id = ' . db_prefix() . 'estimate_package_items_info.item_id', 'left');
     $CI->db->where('package_id', $package_id);
     $CI->db->group_by(db_prefix() . 'estimate_package_items_info.id');
     $package_items = $CI->db->get()->result_array();
-    
+
     $package_rates = [];
     $total_sum = 0;
-    
+
     foreach ($package_items as $key => $item) {
         $package_rate_name_attr = "items[$key][package_rate]";
         $package_rate_value = !empty($item['package_rate']) ? (float)$item['package_rate'] : 0;
-        
+
         $package_rates[] = $package_rate_name_attr;
         $total_sum += $package_rate_value;
     }
-    
+
     return [
         'total_sum' => $total_sum
     ];
@@ -6855,20 +6857,20 @@ function update_all_vendor_fields_activity_log($id, $new_data)
         $old_value = $old_data[$field] ?? '';
         $new_value = $new_data[$field] ?? '';
         if ($field === 'category') {
-            if(!empty($old_value)) {
+            if (!empty($old_value)) {
                 $old_value_query = $CI->db->select('category_name')
-                ->where_in('id', explode(",", $old_value))
-                ->from(db_prefix() . 'pur_vendor_cate')
-                ->get()
-                ->result_array();
+                    ->where_in('id', explode(",", $old_value))
+                    ->from(db_prefix() . 'pur_vendor_cate')
+                    ->get()
+                    ->result_array();
                 $old_value = !empty($old_value_query) ? implode(', ', array_column($old_value_query, 'category_name')) : '';
             }
-            if(!empty($new_value)) {
+            if (!empty($new_value)) {
                 $new_value_query = $CI->db->select('category_name')
-                ->where_in('id', explode(",", $new_value))
-                ->from(db_prefix() . 'pur_vendor_cate')
-                ->get()
-                ->result_array();
+                    ->where_in('id', explode(",", $new_value))
+                    ->from(db_prefix() . 'pur_vendor_cate')
+                    ->get()
+                    ->result_array();
                 $new_value = !empty($new_value_query) ? implode(', ', array_column($new_value_query, 'category_name')) : '';
             }
         }
@@ -6887,13 +6889,13 @@ function update_vendor_activity_log($id, $field, $old_value, $new_value)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('userid', $id);
         $pur_vendor = $CI->db->get(db_prefix() . 'pur_vendor')->row();
-        if(!empty($pur_vendor)) {
+        if (!empty($pur_vendor)) {
             $old_value = !empty($old_value) ? $old_value : 'None';
             $new_value = !empty($new_value) ? $new_value : 'None';
-            $description = "".$field." field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in vendor <b>".$pur_vendor->company."</b>.";
+            $description = "" . $field . " field is updated from <b>" . $old_value . "</b> to <b>" . $new_value . "</b> in vendor <b>" . $pur_vendor->company . "</b>.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'ven',
                 'rel_id' => $id,
@@ -6971,22 +6973,22 @@ function update_vendor_contact_activity_log($id, $field, $old_value, $new_value)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->select(
             db_prefix() . 'pur_contacts.firstname,' .
-            db_prefix() . 'pur_contacts.lastname,' .
-            db_prefix() . 'pur_contacts.userid,' .
-            db_prefix() . 'pur_vendor.company'
+                db_prefix() . 'pur_contacts.lastname,' .
+                db_prefix() . 'pur_contacts.userid,' .
+                db_prefix() . 'pur_vendor.company'
         );
         $CI->db->from(db_prefix() . 'pur_contacts');
         $CI->db->join(db_prefix() . 'pur_vendor', db_prefix() . 'pur_vendor.userid = ' . db_prefix() . 'pur_contacts.userid', 'left');
         $CI->db->where(db_prefix() . 'pur_contacts.id', $id);
         $CI->db->group_by(db_prefix() . 'pur_contacts.id');
         $pur_contacts = $CI->db->get()->row();
-        if(!empty($pur_contacts)) {
+        if (!empty($pur_contacts)) {
             $old_value = !empty($old_value) ? $old_value : 'None';
             $new_value = !empty($new_value) ? $new_value : 'None';
-            $description = "".$field." field is updated from <b>".$old_value."</b> to <b>".$new_value."</b> in vendor contact <b>".$pur_contacts->firstname." ".$pur_contacts->lastname." (".$pur_contacts->company.")</b>.";
+            $description = "" . $field . " field is updated from <b>" . $old_value . "</b> to <b>" . $new_value . "</b> in vendor contact <b>" . $pur_contacts->firstname . " " . $pur_contacts->lastname . " (" . $pur_contacts->company . ")</b>.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'ven',
                 'rel_id' => $pur_contacts->userid,
@@ -7004,12 +7006,12 @@ function add_vendor_attachment_activity_log($id, $file_name, $is_create = true)
 {
     $CI = &get_instance();
     $default_project = get_default_project();
-    if(!empty($id)) {
+    if (!empty($id)) {
         $CI->db->where('userid', $id);
         $pur_vendor = $CI->db->get(db_prefix() . 'pur_vendor')->row();
-        if(!empty($pur_vendor)) {
+        if (!empty($pur_vendor)) {
             $is_create_value = $is_create ? 'added' : 'removed';
-            $description = "Attachment <b>".$file_name."</b> has been ".$is_create_value." for vendor <b>".$pur_vendor->company."</b>.";
+            $description = "Attachment <b>" . $file_name . "</b> has been " . $is_create_value . " for vendor <b>" . $pur_vendor->company . "</b>.";
             $CI->db->insert(db_prefix() . 'module_activity_log', [
                 'module_name' => 'ven',
                 'rel_id' => $id,
@@ -7066,4 +7068,37 @@ function handle_order_shop_drawings_attachments_array($path)
         return $uploaded_files;
     }
     return false;
+}
+
+/**
+ * Get all vendors
+ * @return array
+ */
+function get_all_vendors()
+{
+    $CI = &get_instance();
+
+    // Assuming you have a vendors table
+    $CI->db->select('userid, company, vendor_code, phonenumber');
+    $CI->db->from('tblpur_vendor'); // Update with your actual table name
+    $CI->db->where('active', 1);
+    $CI->db->order_by('company', 'asc');
+
+    return $CI->db->get()->result_array();
+}
+
+/**
+ * Get vendor by ID
+ * @param int $vendor_id
+ * @return array|null
+ */
+function get_vendor_by_id($vendor_id)
+{
+    $CI = &get_instance();
+
+    $CI->db->select('userid, company, vendor_code, phonenumber');
+    $CI->db->from('tblpur_vendor'); // Update with your actual table name
+    $CI->db->where('userid', $vendor_id);
+
+    return $CI->db->get()->row_array();
 }

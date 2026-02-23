@@ -2239,7 +2239,6 @@ class Vendors_portal extends App_Controller
         if (!is_vendor_logged_in() && !is_staff_logged_in()) {
             redirect(site_url('purchase/authentication_vendor/login'));
         }
-
         $data['title'] = _l('purchase_tender');
         $data['purchase_tender'] = $this->purchase_model->get_purchase_tender_by_vendor(get_vendor_user_id());
 
