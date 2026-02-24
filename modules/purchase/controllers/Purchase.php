@@ -17607,8 +17607,17 @@ class purchase extends AdminController
         $this->load->model('currencies_model');
         $data['title'] = _l('cashflow');
         $data['base_currency'] = $this->currencies_model->get_base_currency();
-        $data['cashflow_data'] = $this->purchase_model->calculate_cashflow();
         $this->load->view('cashflow/manage', $data);
+    }
+
+    public function get_cashflow_data()
+    {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+        }
+        $data = $this->purchase_model->calculate_cashflow();
+        echo json_encode($data);
+        die;
     }
 
     /**

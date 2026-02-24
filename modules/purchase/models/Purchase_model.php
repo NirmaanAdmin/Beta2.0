@@ -28924,33 +28924,82 @@ class Purchase_model extends App_Model
 
     public function calculate_cashflow()
     {
+        $data = $this->input->post();
         $cashflow_data = array();
         $timelines_values = array(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100);
         $cumulative_values = array(0, 3, 10, 15, 27, 42, 60, 75, 90, 95, 100);
-        $default_total_months = 42;
-        $default_month = '2026-01-01';
-        $default_cum_value = 407;
+        $default_total_months = !empty($data['total_months']) ? $data['total_months'] : 42;
+        $order_start_date = !empty($data['start_date']) ? date('Y-m-01', strtotime($data['start_date'])) : '2026-01-01';
+        $order_end_date = !empty($data['start_date']) ? date('Y-m-t', strtotime($data['start_date'])) : '2026-01-31';
+        $default_cum_value = !empty($data['budgeted']) ? $data['budgeted'] : 4070000000;
         $previous_cumulative_value = 0;
+        $previous_cumulative_cashflow = 0;
         foreach ($timelines_values as $index => $timeline) {
             $cumulative = $cumulative_values[$index];
             $months_cal = max(1, round(($default_total_months * $timeline) / 100));
-            $months_cal_name = ($months_cal == 1) ? date('M-y', strtotime($default_month)) : date('M-y', strtotime("+{$months_cal} months", strtotime($default_month)));
+            $months_cal_name = ($months_cal == 1) ? date('M-y', strtotime($order_start_date)) : date('M-y', strtotime("+{$months_cal} months", strtotime($order_start_date)));
             $cumulative_cashflow_value = ($default_cum_value * $cumulative) / 100;
             if ($index == 0) {
                 $monthly_cashflow_value = $cumulative_cashflow_value;
+                $actual_cumulative_cashflow = $this->get_total_order_amount_for_interval($order_start_date, $order_end_date);
+                $forecast_monthly_cashflow = $actual_cumulative_cashflow;
             } else {
                 $monthly_cashflow_value = $cumulative_cashflow_value - $previous_cumulative_value;
+                $order_end_date = date('Y-m-t', strtotime("+{$months_cal} months", strtotime($order_start_date)));
+                $actual_cumulative_cashflow = $this->get_total_order_amount_for_interval($order_start_date, $order_end_date);
+                $forecast_monthly_cashflow = $actual_cumulative_cashflow - $previous_cumulative_cashflow;
             }
             $previous_cumulative_value = $cumulative_cashflow_value;
+            $previous_cumulative_cashflow = $actual_cumulative_cashflow;
+            $actual_forecast_percentage = ($forecast_monthly_cashflow / $default_cum_value) * 100;
             $cashflow_data[$index] = array(
                 'timeline' => $timeline,
                 'cumulative_cashflow' => $cumulative,
                 'months_cal' => $months_cal,
                 'months_cal_name' => $months_cal_name,
                 'cumulative_cashflow_value' => $cumulative_cashflow_value,
-                'monthly_cashflow_value' => $monthly_cashflow_value
+                'monthly_cashflow_value' => $monthly_cashflow_value,
+                'actual_cumulative_cashflow' => $actual_cumulative_cashflow,
+                'forecast_monthly_cashflow' => $forecast_monthly_cashflow,
+                'actual_forecast_percentage' => $actual_forecast_percentage
             );
         }
         return $cashflow_data;
+    }
+
+    public function get_total_order_amount_for_interval($order_start_date, $order_end_date)
+    {
+        $total_amount = 0;
+        $this->db->select('SUM(total) as total');
+        $this->db->from(db_prefix() . 'pur_orders');
+        $this->db->where('order_date >=', $order_start_date);
+        $this->db->where('order_date <=', $order_end_date);
+        $this->db->where('approve_status', 2);
+        $pur_orders = $this->db->get()->row();
+        if(!empty($pur_orders)) {
+            $total_amount = $total_amount + $pur_orders->total;
+        }
+
+        $this->db->select('SUM(total) as total');
+        $this->db->from(db_prefix() . 'wo_orders');
+        $this->db->where('order_date >=', $order_start_date);
+        $this->db->where('order_date <=', $order_end_date);
+        $this->db->where('approve_status', 2);
+        $wo_orders = $this->db->get()->row();
+        if(!empty($wo_orders)) {
+            $total_amount = $total_amount + $wo_orders->total;
+        }
+
+        $this->db->select('SUM(total) as total');
+        $this->db->from(db_prefix() . 'co_orders');
+        $this->db->where('order_date >=', $order_start_date);
+        $this->db->where('order_date <=', $order_end_date);
+        $this->db->where('approve_status', 2);
+        $co_orders = $this->db->get()->row();
+        if(!empty($co_orders)) {
+            $total_amount = $total_amount + $co_orders->total;
+        }
+
+        return $total_amount;
     }
 }
