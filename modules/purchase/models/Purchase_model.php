@@ -28990,7 +28990,7 @@ class Purchase_model extends App_Model
             $total_amount = $total_amount + $wo_orders->total;
         }
 
-        $this->db->select('SUM(total) as total');
+        $this->db->select('SUM(co_value) as total');
         $this->db->from(db_prefix() . 'co_orders');
         $this->db->where('order_date >=', $order_start_date);
         $this->db->where('order_date <=', $order_end_date);
