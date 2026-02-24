@@ -17631,4 +17631,24 @@ class purchase extends AdminController
             echo json_encode(['error' => $e->getMessage()]);
         }
     }
+
+    public function copy_public_link_pur_tender($id)
+    {
+        $pur_tender = $this->purchase_model->get_pur_tender($id);
+        $copylink = '';
+        if ($pur_tender) {
+            if ($pur_tender->hash != '' && $pur_tender->hash != null) {
+                $copylink = site_url('purchase/vendors_portal/pur_tender/' . $id . '/' . $pur_tender->hash);
+            } else {
+                $hash = app_generate_hash();
+                $copylink = site_url('purchase/vendors_portal/pur_tender/' . $id . '/' . $hash);
+                $this->db->where('id', $id);
+                $this->db->update(db_prefix() . 'pur_tender', ['hash' => $hash,]);
+            }
+        }
+
+        echo json_encode([
+            'copylink' => $copylink,
+        ]);
+    }
 }

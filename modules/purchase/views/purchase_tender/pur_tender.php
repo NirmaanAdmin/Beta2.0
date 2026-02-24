@@ -160,8 +160,18 @@
                         echo render_select('group_pur', $commodity_groups_pur_tender, array('id', 'name'), 'Budget Head', $selected);
                         ?>
                       </div>
-
-
+                      <div class="col-md-3 form-group">
+                        <?php $order_date = (isset($pur_tender) && $pur_tender->issue_date != null ? _d($pur_tender->issue_date) : _d(date('Y-m-d')));
+                        echo render_date_input('issue_date', 'issue_date', $order_date); ?>
+                      </div>
+                      <div class="col-md-3 form-group" style="clear: both;">
+                        <?php $order_date = (isset($pur_tender) ? _d($pur_tender->quote_date) : '');
+                        echo render_date_input('quote_date', 'Quote Date', $order_date); ?>
+                      </div>
+                       <div class="col-md-3 form-group">
+                        <?php $order_date = (isset($pur_tender) ? _d($pur_tender->closure_date) : '');
+                        echo render_date_input('closure_date', 'Closure Date', $order_date); ?>
+                      </div>
 
                     </div>
                   </div>

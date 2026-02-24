@@ -1122,6 +1122,35 @@
 
 
 <script>
+  function copy_public_link(pur_order) {
+    "use strict";
+    var link = $('#link_public').val();
+    if (link != '') {
+      var copyText = document.getElementById("link_public");
+      copyText.select();
+      copyText.setSelectionRange(0, 99999)
+      document.execCommand("copy");
+      alert_float('success', 'Copied!');
+
+    } else {
+      $.post(admin_url + 'purchase/copy_public_link_pur_tender/' + pur_order).done(function(reponse) {
+        reponse = JSON.parse(reponse);
+        if (reponse.copylink != '') {
+          $('#link_public').val(reponse.copylink);
+
+        }
+
+        if ($('#link_public').val() == reponse.copylink) {
+          var copyText = document.getElementById("link_public");
+          copyText.select();
+          copyText.setSelectionRange(0, 99999)
+          document.execCommand("copy");
+          alert_float('success', 'Created!');
+        }
+      });
+    }
+  }
+
   function send_request_approve(id) {
     "use strict";
     var data = {};

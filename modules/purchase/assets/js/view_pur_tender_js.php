@@ -178,6 +178,7 @@ function accept_action() {
 
 function copy_public_link(pur_order){
   "use strict";
+  alert_float('warning','Copying link, please wait!');
   var link = $('#link_public').val();
   if(link != ''){
     var copyText = document.getElementById("link_public");
