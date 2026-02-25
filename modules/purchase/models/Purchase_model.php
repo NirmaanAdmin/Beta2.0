@@ -28938,6 +28938,39 @@ class Purchase_model extends App_Model
         $default_cum_value = $data['budgeted'];
         $previous_cumulative_value = 0;
         $previous_cumulative_cashflow = 0;
+        $order_tracker_query = "
+            SELECT po.order_date, (po.subtotal + IFNULL(co_sum.co_total, 0)) AS total_rev_contract_value
+            FROM tblpur_orders po
+            LEFT JOIN (
+                SELECT po_order_id, SUM(co_value) AS co_total
+                FROM tblco_orders
+                WHERE po_order_id IS NOT NULL
+                GROUP BY po_order_id
+            ) AS co_sum ON co_sum.po_order_id = po.id
+            WHERE po.approve_status = 2
+
+            UNION ALL
+
+            SELECT wo.order_date, (wo.subtotal + IFNULL(co_sum2.co_total, 0)) AS total_rev_contract_value
+            FROM tblwo_orders wo
+            LEFT JOIN (
+                SELECT wo_order_id, SUM(co_value) AS co_total
+                FROM tblco_orders
+                WHERE wo_order_id IS NOT NULL
+                GROUP BY wo_order_id
+            ) AS co_sum2 ON co_sum2.wo_order_id = wo.id
+            WHERE wo.approve_status = 2
+
+            UNION ALL
+
+            SELECT (CASE 
+                WHEN t.order_date IS NULL OR t.order_date = '0000-00-00'
+                THEN DATE_FORMAT(CURDATE(), '%Y-01-01')
+                ELSE t.order_date
+            END) AS order_date, (t.total + IFNULL(t.co_total, 0)) AS total_rev_contract_value
+            FROM tblpur_order_tracker t
+        ";
+        $order_tracker_result = $this->db->query($order_tracker_query)->result_array();
         foreach ($timelines_values as $index => $timeline) {
             $cumulative = $cumulative_values[$index];
             $months_cal = max(1, round(($default_total_months * $timeline) / 100));
@@ -28945,12 +28978,32 @@ class Purchase_model extends App_Model
             $cumulative_cashflow_value = ($default_cum_value * $cumulative) / 100;
             if ($index == 0) {
                 $monthly_cashflow_value = $cumulative_cashflow_value;
-                $actual_cumulative_cashflow = $this->get_total_order_amount_for_interval($order_start_date, $order_end_date);
+                $actual_cumulative_cashflow = 0;
+                if (!empty($order_tracker_result)) {
+                    $actual_cumulative_cashflow = array_sum(
+                        array_column(
+                            array_filter($order_tracker_result, function ($row) use ($order_start_date, $order_end_date) {
+                                return $row['order_date'] >= $order_start_date && $row['order_date'] <= $order_end_date;
+                            }),
+                            'total_rev_contract_value'
+                        )
+                    );
+                }
                 $actual_monthly_cashflow = $actual_cumulative_cashflow;
             } else {
                 $monthly_cashflow_value = $cumulative_cashflow_value - $previous_cumulative_value;
                 $order_end_date = date('Y-m-t', strtotime("+{$months_cal} months", strtotime($order_start_date)));
-                $actual_cumulative_cashflow = $this->get_total_order_amount_for_interval($order_start_date, $order_end_date);
+                $actual_cumulative_cashflow = 0;
+                if (!empty($order_tracker_result)) {
+                    $actual_cumulative_cashflow = array_sum(
+                        array_column(
+                            array_filter($order_tracker_result, function ($row) use ($order_start_date, $order_end_date) {
+                                return $row['order_date'] >= $order_start_date && $row['order_date'] <= $order_end_date;
+                            }),
+                            'total_rev_contract_value'
+                        )
+                    );
+                }
                 $actual_monthly_cashflow = $actual_cumulative_cashflow - $previous_cumulative_cashflow;
             }
             $previous_cumulative_value = $cumulative_cashflow_value;
@@ -28969,41 +29022,5 @@ class Purchase_model extends App_Model
             );
         }
         return $cashflow_data;
-    }
-
-    public function get_total_order_amount_for_interval($order_start_date, $order_end_date)
-    {
-        $total_amount = 0;
-        $this->db->select('SUM(total) as total');
-        $this->db->from(db_prefix() . 'pur_orders');
-        $this->db->where('order_date >=', $order_start_date);
-        $this->db->where('order_date <=', $order_end_date);
-        $this->db->where('approve_status', 2);
-        $pur_orders = $this->db->get()->row();
-        if(!empty($pur_orders)) {
-            $total_amount = $total_amount + $pur_orders->total;
-        }
-
-        $this->db->select('SUM(total) as total');
-        $this->db->from(db_prefix() . 'wo_orders');
-        $this->db->where('order_date >=', $order_start_date);
-        $this->db->where('order_date <=', $order_end_date);
-        $this->db->where('approve_status', 2);
-        $wo_orders = $this->db->get()->row();
-        if(!empty($wo_orders)) {
-            $total_amount = $total_amount + $wo_orders->total;
-        }
-
-        $this->db->select('SUM(co_value) as total');
-        $this->db->from(db_prefix() . 'co_orders');
-        $this->db->where('order_date >=', $order_start_date);
-        $this->db->where('order_date <=', $order_end_date);
-        $this->db->where('approve_status', 2);
-        $co_orders = $this->db->get()->row();
-        if(!empty($co_orders)) {
-            $total_amount = $total_amount + $co_orders->total;
-        }
-
-        return $total_amount;
     }
 }
