@@ -1095,8 +1095,9 @@ if ($estimate->currency != 0) {
                                     <tr>
                                        <td><?php echo $sr_no++; ?></td>
                                        <td><?php echo $val['subject'] ?></td>
-                                       <td><?php echo date('d M, Y', strtotime($val['date'])); ?></td>
                                        <td><?php echo get_department_by_id($val['department']); ?></td>
+                                       <td><?php echo date('d M, Y', strtotime($val['date'])); ?></td>
+                                       
                                        <td>
                                           <?php $url   = admin_url('forms/form/' . $val['formid']).'?tab=settings'; ?>
                                           <a href="<?php echo $url; ?>" target="_blank" class="btn btn-default btn-icon" data-toggle="tooltip" data-placement="top" title="<?php echo _l('View'); ?>"><i class="fa fa-eye "></i></a>
