@@ -1883,11 +1883,11 @@ class Warehouse_model extends App_Model
 		}
 
 		if (!empty($co_exist)) {
-			$sql = 'select item_code as commodity_code, ' . db_prefix() . 'co_order_detail.description, ' . db_prefix() . 'co_order_detail.unit_id, unit_price, quantity as quantities, ' . db_prefix() . 'co_order_detail.tax as tax, into_money, (' . db_prefix() . 'co_order_detail.total-' . db_prefix() . 'co_order_detail.into_money) as tax_money, ' . db_prefix() . 'co_order_detail.total as goods_money, tax_rate, tax_value, ' . db_prefix() . 'co_order_detail.id as id, delivery_date, ' . db_prefix() . 'co_order_detail.area as area from ' . db_prefix() . 'co_order_detail
+			$sql = 'select item_code as commodity_code, ' . db_prefix() . 'co_order_detail.description, ' . db_prefix() . 'co_order_detail.unit_id, unit_price, quantity as quantities, ' . db_prefix() . 'co_order_detail.tax as tax, into_money, (' . db_prefix() . 'co_order_detail.total-' . db_prefix() . 'co_order_detail.into_money) as tax_money, ' . db_prefix() . 'co_order_detail.total as goods_money, tax_rate, tax_value, ' . db_prefix() . 'co_order_detail.id as id, ' . db_prefix() . 'co_orders.delivery_date as delivery_date, ' . db_prefix() . 'co_order_detail.area as area from ' . db_prefix() . 'co_order_detail
 			left join ' . db_prefix() . 'co_orders on ' . db_prefix() . 'co_orders.id =  ' . db_prefix() . 'co_order_detail.pur_order
 			left join ' . db_prefix() . 'items on ' . db_prefix() . 'co_order_detail.item_code =  ' . db_prefix() . 'items.id
 			left join ' . db_prefix() . 'taxes on ' . db_prefix() . 'taxes.id = ' . db_prefix() . 'co_order_detail.tax where ' . db_prefix() . 'co_orders.po_order_id = ' . $pur_order . ' and ' . db_prefix() . 'co_order_detail.tender_item = 1
-			GROUP BY ' . db_prefix() . 'co_order_detail.id';
+			GROUP BY ' . db_prefix() . 'co_order_detail.item_code, ' . db_prefix() . 'co_order_detail.description';
 			$co_results = $this->db->query($sql)->result_array();
 			if (!empty($co_results)) {
 				foreach ($co_results as $key => $value) {
@@ -21410,11 +21410,11 @@ class Warehouse_model extends App_Model
 		}
 
 		if (!empty($co_exist)) {
-			$sql = 'select item_code as commodity_code, ' . db_prefix() . 'co_order_detail.description, ' . db_prefix() . 'co_order_detail.unit_id, unit_price, quantity as quantities, ' . db_prefix() . 'co_order_detail.tax as tax, into_money, (' . db_prefix() . 'co_order_detail.total-' . db_prefix() . 'co_order_detail.into_money) as tax_money, ' . db_prefix() . 'co_order_detail.total as goods_money, tax_rate, tax_value, ' . db_prefix() . 'co_order_detail.id as id, delivery_date, ' . db_prefix() . 'co_order_detail.area as area from ' . db_prefix() . 'co_order_detail
+			$sql = 'select item_code as commodity_code, ' . db_prefix() . 'co_order_detail.description, ' . db_prefix() . 'co_order_detail.unit_id, unit_price, quantity as quantities, ' . db_prefix() . 'co_order_detail.tax as tax, into_money, (' . db_prefix() . 'co_order_detail.total-' . db_prefix() . 'co_order_detail.into_money) as tax_money, ' . db_prefix() . 'co_order_detail.total as goods_money, tax_rate, tax_value, ' . db_prefix() . 'co_order_detail.id as id, ' . db_prefix() . 'co_orders.delivery_date as delivery_date, ' . db_prefix() . 'co_order_detail.area as area from ' . db_prefix() . 'co_order_detail
 			left join ' . db_prefix() . 'co_orders on ' . db_prefix() . 'co_orders.id =  ' . db_prefix() . 'co_order_detail.pur_order
 			left join ' . db_prefix() . 'items on ' . db_prefix() . 'co_order_detail.item_code =  ' . db_prefix() . 'items.id
 			left join ' . db_prefix() . 'taxes on ' . db_prefix() . 'taxes.id = ' . db_prefix() . 'co_order_detail.tax where ' . db_prefix() . 'co_orders.po_order_id = ' . $pur_order . ' and ' . db_prefix() . 'co_order_detail.tender_item = 1
-			GROUP BY ' . db_prefix() . 'co_order_detail.id';
+			GROUP BY ' . db_prefix() . 'co_order_detail.item_code, ' . db_prefix() . 'co_order_detail.description';
 			$co_results = $this->db->query($sql)->result_array();
 			if (!empty($co_results)) {
 				foreach ($co_results as $key => $value) {
