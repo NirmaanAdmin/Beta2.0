@@ -28924,14 +28924,18 @@ class Purchase_model extends App_Model
 
     public function calculate_cashflow()
     {
+        $module_name = 'cashflow';
         $data = $this->input->post();
+        update_module_filter($module_name, 'total_months', !empty($data['total_months']) ? $data['total_months'] : NULL);
+        update_module_filter($module_name, 'start_date', !empty($data['start_date']) ? $data['start_date'] : NULL);
+        update_module_filter($module_name, 'budgeted', !empty($data['budgeted']) ? $data['budgeted'] : NULL);
         $cashflow_data = array();
         $timelines_values = array(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100);
         $cumulative_values = array(0, 3, 10, 15, 27, 42, 60, 75, 90, 95, 100);
-        $default_total_months = !empty($data['total_months']) ? $data['total_months'] : 42;
-        $order_start_date = !empty($data['start_date']) ? date('Y-m-01', strtotime($data['start_date'])) : '2026-01-01';
-        $order_end_date = !empty($data['start_date']) ? date('Y-m-t', strtotime($data['start_date'])) : '2026-01-31';
-        $default_cum_value = !empty($data['budgeted']) ? $data['budgeted'] : 4070000000;
+        $default_total_months = $data['total_months'];
+        $order_start_date = date('Y-m-01', strtotime($data['start_date']));
+        $order_end_date = date('Y-m-t', strtotime($data['start_date']));
+        $default_cum_value = $data['budgeted'];
         $previous_cumulative_value = 0;
         $previous_cumulative_cashflow = 0;
         foreach ($timelines_values as $index => $timeline) {
@@ -28942,16 +28946,16 @@ class Purchase_model extends App_Model
             if ($index == 0) {
                 $monthly_cashflow_value = $cumulative_cashflow_value;
                 $actual_cumulative_cashflow = $this->get_total_order_amount_for_interval($order_start_date, $order_end_date);
-                $forecast_monthly_cashflow = $actual_cumulative_cashflow;
+                $actual_monthly_cashflow = $actual_cumulative_cashflow;
             } else {
                 $monthly_cashflow_value = $cumulative_cashflow_value - $previous_cumulative_value;
                 $order_end_date = date('Y-m-t', strtotime("+{$months_cal} months", strtotime($order_start_date)));
                 $actual_cumulative_cashflow = $this->get_total_order_amount_for_interval($order_start_date, $order_end_date);
-                $forecast_monthly_cashflow = $actual_cumulative_cashflow - $previous_cumulative_cashflow;
+                $actual_monthly_cashflow = $actual_cumulative_cashflow - $previous_cumulative_cashflow;
             }
             $previous_cumulative_value = $cumulative_cashflow_value;
             $previous_cumulative_cashflow = $actual_cumulative_cashflow;
-            $actual_forecast_percentage = ($forecast_monthly_cashflow / $default_cum_value) * 100;
+            $actual_forecast_percentage = ($actual_monthly_cashflow / $default_cum_value) * 100;
             $cashflow_data[$index] = array(
                 'timeline' => $timeline,
                 'cumulative_cashflow' => $cumulative,
@@ -28960,7 +28964,7 @@ class Purchase_model extends App_Model
                 'cumulative_cashflow_value' => $cumulative_cashflow_value,
                 'monthly_cashflow_value' => $monthly_cashflow_value,
                 'actual_cumulative_cashflow' => $actual_cumulative_cashflow,
-                'forecast_monthly_cashflow' => $forecast_monthly_cashflow,
+                'actual_monthly_cashflow' => $actual_monthly_cashflow,
                 'actual_forecast_percentage' => $actual_forecast_percentage
             );
         }

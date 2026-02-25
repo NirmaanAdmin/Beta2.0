@@ -1,5 +1,6 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
 <?php init_head(); ?>
+<?php $module_name = 'cashflow'; ?>
 <div id="wrapper">
    <div class="content">
       <div class="row">
@@ -7,13 +8,25 @@
             <div class="panel-body">
                <div class="row">
                   <div class="col-md-3">
-                     <?php echo render_input('total_months', _l('Total months'), 42, 'number'); ?>
+                     <?php
+                     $total_months_type_filter = get_module_filter($module_name, 'total_months');
+                     $total_months_type_filter_val = !empty($total_months_type_filter) ?  $total_months_type_filter->filter_value : 42;
+                     echo render_input('total_months', _l('Total months'), $total_months_type_filter_val, 'number'); 
+                     ?>
                   </div>
                   <div class="col-md-3">
-                     <?php echo render_date_input('start_date', _l('Start date'), '01-01-2026'); ?>
+                     <?php
+                     $start_date_type_filter = get_module_filter($module_name, 'start_date');
+                     $start_date_type_filter_val = !empty($start_date_type_filter) ?  $start_date_type_filter->filter_value : '01-01-2026'; 
+                     echo render_date_input('start_date', _l('Start date'), $start_date_type_filter_val); 
+                     ?>
                   </div>
                   <div class="col-md-3">
-                     <?php echo render_input('budgeted', _l('Budgeted'), 4070000000, 'number'); ?>
+                     <?php
+                     $budgeted_type_filter = get_module_filter($module_name, 'budgeted');
+                     $budgeted_type_filter_val = !empty($budgeted_type_filter) ?  $budgeted_type_filter->filter_value : 4070000000; 
+                     echo render_input('budgeted', _l('Budgeted'), $budgeted_type_filter_val, 'number'); 
+                     ?>
                   </div>
                </div>
             </div>
@@ -39,9 +52,9 @@
                         <th><?php echo _l('Months'); ?></th>
                         <th><?php echo _l('Actual/Forecast %'); ?></th>
                         <th><?php echo _l('Month'); ?></th>
-                        <th><?php echo _l('Monthly Cashflow ('.$base_currency->name.')'); ?></th>
-                        <th><?php echo _l('Cumulative Cashflow ('.$base_currency->name.')'); ?></th>
-                        <th><?php echo _l('Forecast Monthly Cashflow'); ?></th>
+                        <th><?php echo _l('Monthly Cashflow Planned ('.$base_currency->name.')'); ?></th>
+                        <th><?php echo _l('Cumulative Cashflow Planned ('.$base_currency->name.')'); ?></th>
+                        <th><?php echo _l('Actual Monthly Cashflow'); ?></th>
                         <th><?php echo _l('Actual Cumulative Cashflow'); ?></th>
                      </thead>
                      <tbody>
@@ -78,14 +91,14 @@
             var tbody = '';
             var months_cal_name = [];
             var monthly_cashflow_value = [];
-            var forecast_monthly_cashflow = [];
+            var actual_monthly_cashflow = [];
             var cumulative_cashflow_value = [];
             var actual_cumulative_cashflow = [];
             if (Array.isArray(data) && data.length > 0) {
                $.each(data, function(i, row){
                   months_cal_name.push(row.months_cal_name);
                   monthly_cashflow_value.push(parseFloat(row.monthly_cashflow_value) || 0);
-                  forecast_monthly_cashflow.push(parseFloat(row.forecast_monthly_cashflow) || 0);
+                  actual_monthly_cashflow.push(parseFloat(row.actual_monthly_cashflow) || 0);
                   cumulative_cashflow_value.push(parseFloat(row.cumulative_cashflow_value) || 0);
                   actual_cumulative_cashflow.push(parseFloat(row.actual_cumulative_cashflow) || 0);
                   tbody += '<tr>';
@@ -96,7 +109,7 @@
                   tbody += '<td>'+row.months_cal_name+'</td>';
                   tbody += '<td>'+format_money(row.monthly_cashflow_value)+'</td>';
                   tbody += '<td>'+format_money(row.cumulative_cashflow_value)+'</td>';
-                  tbody += '<td>'+format_money(row.forecast_monthly_cashflow)+'</td>';
+                  tbody += '<td>'+format_money(row.actual_monthly_cashflow)+'</td>';
                   tbody += '<td>'+format_money(row.actual_cumulative_cashflow)+'</td>';
                   tbody += '</tr>';
                });
@@ -106,7 +119,7 @@
             render_cashflow_chart(
                months_cal_name,
                monthly_cashflow_value,
-               forecast_monthly_cashflow,
+               actual_monthly_cashflow,
                cumulative_cashflow_value,
                actual_cumulative_cashflow
             );
@@ -116,7 +129,7 @@
    function render_cashflow_chart(
       months_cal_name,
       monthly_cashflow_value,
-      forecast_monthly_cashflow,
+      actual_monthly_cashflow,
       cumulative_cashflow_value,
       actual_cumulative_cashflow
    ) {
@@ -136,8 +149,8 @@
                },
                {
                   type: 'bar',
-                  label: 'Forecast Monthly Cashflow',
-                  data: forecast_monthly_cashflow,
+                  label: 'Actual Monthly Cashflow',
+                  data: actual_monthly_cashflow,
                   backgroundColor: '#00A300'
                },
                {
