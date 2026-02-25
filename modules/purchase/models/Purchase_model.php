@@ -28938,6 +28938,7 @@ class Purchase_model extends App_Model
         $default_cum_value = $data['budgeted'];
         $previous_cumulative_value = 0;
         $previous_cumulative_cashflow = 0;
+        $default_project = get_default_project();
         $order_tracker_query = "
             SELECT po.order_date, (po.subtotal + IFNULL(co_sum.co_total, 0)) AS total_rev_contract_value
             FROM tblpur_orders po
@@ -28947,7 +28948,7 @@ class Purchase_model extends App_Model
                 WHERE po_order_id IS NOT NULL
                 GROUP BY po_order_id
             ) AS co_sum ON co_sum.po_order_id = po.id
-            WHERE po.approve_status = 2
+            WHERE po.approve_status = 2 AND project = $default_project
 
             UNION ALL
 
@@ -28959,7 +28960,7 @@ class Purchase_model extends App_Model
                 WHERE wo_order_id IS NOT NULL
                 GROUP BY wo_order_id
             ) AS co_sum2 ON co_sum2.wo_order_id = wo.id
-            WHERE wo.approve_status = 2
+            WHERE wo.approve_status = 2 AND project = $default_project
 
             UNION ALL
 
@@ -28969,6 +28970,7 @@ class Purchase_model extends App_Model
                 ELSE t.order_date
             END) AS order_date, (t.total + IFNULL(t.co_total, 0)) AS total_rev_contract_value
             FROM tblpur_order_tracker t
+            WHERE project = $default_project
         ";
         $order_tracker_result = $this->db->query($order_tracker_query)->result_array();
         foreach ($timelines_values as $index => $timeline) {
