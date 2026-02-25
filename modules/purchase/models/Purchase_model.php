@@ -29023,4 +29023,11 @@ class Purchase_model extends App_Model
         }
         return $cashflow_data;
     }
+
+    public function get_qor_by_po($po_id){
+        $this->db->select('*');
+        $this->db->from('tblforms');
+        $this->db->where('pur_order_id', $po_id);
+        return $this->db->get()->result_array();
+    }
 }

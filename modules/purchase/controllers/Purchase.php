@@ -1618,6 +1618,7 @@ class purchase extends AdminController
         $data['changes'] = $this->purchase_model->get_po_changes($id);
         $data['payment_certificate'] = $this->purchase_model->get_all_po_payment_certificate($id);
         $data['bills_data'] = $this->purchase_model->get_bills_data($id);
+        $data['qor'] = $this->purchase_model->get_qor_by_po($id);
         if ($to_return == false) {
             $this->load->view('purchase_order/pur_order_preview', $data);
         } else {
@@ -17659,5 +17660,69 @@ class purchase extends AdminController
         echo json_encode([
             'copylink' => $copylink,
         ]);
+    }
+
+    public function add_quality_report($po_wo_id = false)
+    {
+        $this->load->model('forms_model');
+        if ($this->input->post()) {
+            $data = $this->input->post();
+            $data['message'] = html_purify($this->input->post('message', false));
+            $id              = $this->forms_model->add($data, get_staff_user_id());
+            if ($id) {
+                set_alert('success', _l('new_form_added_successfully', $id));
+                redirect(admin_url('purchase/purchase_order/' . $po_wo_id));
+            }
+        }
+        // Load necessary models
+        $this->load->model('knowledge_base_model');
+        $this->load->model('departments_model');
+        $check_po_wo_id = check_po_wo_id($po_wo_id);
+
+        
+        if($check_po_wo_id['table'] == 'pur_orders'){
+            $data['form_name'] = 'Quality Observation - ' . $check_po_wo_id['data']->pur_order_number . ' - ' . $check_po_wo_id['data']->pur_order_name;
+            $data['selected_dept'] = $check_po_wo_id['data']->department;
+            $data['po_id'] = $po_wo_id;
+            $data['vendor_id'] = $check_po_wo_id['data']->vendor;
+        } elseif($check_po_wo_id['table'] == 'work_orders'){
+        }
+
+        $data['departments']        = $this->departments_model->get();
+        $data['predefined_replies'] = $this->forms_model->get_predefined_reply();
+        $data['priorities']         = $this->forms_model->get_priority();
+        $data['services']           = $this->forms_model->get_service();
+        
+        $whereStaff                 = [];
+        if (get_option('access_forms_to_none_staff_members') == 0) {
+            $whereStaff['is_not_staff'] = 0;
+        }
+        $data['staff']     = $this->staff_model->get('', $whereStaff);
+        $data['articles']  = $this->knowledge_base_model->get();
+        $data['bodyclass'] = 'form';
+        $data['title']     = _l('New Quality Report');
+
+        if ($this->input->get('project_id') && $this->input->get('project_id') > 0) {
+            // request from project area to create new form
+            $data['project_id'] = $this->input->get('project_id');
+            $data['userid']     = get_client_id_by_project_id($data['project_id']);
+            if (total_rows(db_prefix() . 'contacts', ['active' => 1, 'userid' => $data['userid']]) == 1) {
+                $contact = $this->clients_model->get_contacts($data['userid']);
+                if (isset($contact[0])) {
+                    $data['contact'] = $contact[0];
+                }
+            }
+        } elseif ($this->input->get('contact_id') && $this->input->get('contact_id') > 0 && $this->input->get('userid')) {
+            $contact_id = $this->input->get('contact_id');
+            if (total_rows(db_prefix() . 'contacts', ['active' => 1, 'id' => $contact_id]) == 1) {
+                $contact = $this->clients_model->get_contact($contact_id);
+                if ($contact) {
+                    $data['contact'] = (array) $contact;
+                }
+            }
+        }
+        $data['projects'] = $this->projects_model->get_items();
+        add_admin_forms_js_assets();
+        $this->load->view('quality_reports/add', $data);
     }
 }

@@ -7266,3 +7266,46 @@ function get_quotation_approval_button($quotation_id, $approve_status, $quotatio
 
     return $html;
 }
+
+/**
+ * Check if an ID is a Purchase Order ID or Work Order ID and return detailed information
+ * 
+ * @param int $id The ID to check
+ * @return array|false Returns array with type and data, or false if not found
+ */
+function check_po_wo_id($id) {
+    // Validate input
+    if (empty($id) || !is_numeric($id)) {
+        return false;
+    }
+    
+    $CI =& get_instance();
+    
+    // Check if it's a Purchase Order
+    $CI->db->select('pur_order_name,pur_order_number,department,vendor');
+    $CI->db->where('id', $id);
+    $po_query = $CI->db->get('tblpur_orders');
+    
+    if ($po_query->num_rows() > 0) {
+        return [
+            'type' => 'PO',
+            'data' => $po_query->row(),
+            'table' => 'pur_orders'
+        ];
+    }
+    
+    // Check if it's a Work Order
+    $CI->db->where('id', $id);
+    $wo_query = $CI->db->get('tblwo_orders');
+    
+    if ($wo_query->num_rows() > 0) {
+        return [
+            'type' => 'WO',
+            'data' => $wo_query->row(),
+            'table' => 'wo_orders'
+        ];
+    }
+    
+    // ID not found in either table
+    return false;
+}

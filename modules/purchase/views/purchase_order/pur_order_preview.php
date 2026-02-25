@@ -55,6 +55,11 @@ if ($estimate->currency != 0) {
                      </a>
                   </li>
                   <li role="presentation">
+                     <a href="#quality" aria-controls="quality" role="tab" data-toggle="tab">
+                        <?php echo _l('Quality'); ?>
+                     </a>
+                  </li>
+                  <li role="presentation">
                      <a href="#tab_activity" aria-controls="tab_activity" role="tab" data-toggle="tab">
                         <?php echo _l('invoice_view_activity_tooltip'); ?>
                      </a>
@@ -181,8 +186,8 @@ if ($estimate->currency != 0) {
             <div class="col-md-8">
                <div class="btn-group pull-right">
                   <a href="javascript:void(0)" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-file-pdf"></i><?php if (is_mobile()) {
-                     echo ' PDF';
-                  } ?> <span class="caret"></span></a>
+                                                                                                                                                                                          echo ' PDF';
+                                                                                                                                                                                       } ?> <span class="caret"></span></a>
                   <ul class="dropdown-menu dropdown-menu-right">
                      <li class="hidden-xs"><a href="<?php echo admin_url('purchase/purorder_pdf/' . $estimate->id . '?output_type=I'); ?>"><?php echo _l('view_pdf'); ?></a></li>
                      <li class="hidden-xs"><a href="<?php echo admin_url('purchase/purorder_pdf/' . $estimate->id . '?output_type=I'); ?>" target="_blank"><?php echo _l('view_pdf_in_new_window'); ?></a></li>
@@ -262,40 +267,40 @@ if ($estimate->currency != 0) {
                   <select name="status" id="status" class="selectpicker pull-right mright10" onchange="change_status_pur_order(this,<?php echo ($estimate->id); ?>); return false;" data-live-search="true" data-width="35%" data-none-selected-text="<?php echo _l('pur_change_status_to'); ?>">
                      <option value=""></option>
                      <option value="1" class="<?php if ($estimate->approve_status == 1) {
-                        echo 'hide';
-                     } ?>"><?php echo _l('purchase_draft'); ?></option>
+                                                   echo 'hide';
+                                                } ?>"><?php echo _l('purchase_draft'); ?></option>
                      <option value="2" class="<?php if ($estimate->approve_status == 2) {
-                        echo 'hide';
-                     } ?>"><?php echo _l('purchase_approved'); ?></option>
+                                                   echo 'hide';
+                                                } ?>"><?php echo _l('purchase_approved'); ?></option>
                      <option value="3" class="<?php if ($estimate->approve_status == 3) {
-                        echo 'hide';
-                     } ?>"><?php echo _l('pur_rejected'); ?></option>
+                                                   echo 'hide';
+                                                } ?>"><?php echo _l('pur_rejected'); ?></option>
                      <option value="4" class="<?php if ($estimate->approve_status == 4) {
-                        echo 'hide';
-                     } ?>"><?php echo _l('pur_canceled'); ?></option>
+                                                   echo 'hide';
+                                                } ?>"><?php echo _l('pur_canceled'); ?></option>
                   </select>
                <?php } ?>
                <div class="pull-right" style="margin-right: 10px;font-size: 18px;margin-top: 4px;">
                   <a href="#" onclick="small_table_full_view(); return false;">
                      <i class="fa fa-expand" style="color: #000000 !important;"></i></a>
+               </div>
+               <div class="col-md-12 padr_div_0">
+                  <br>
+                  <div class="pull-right _buttons  ">
+                     <a href="javascript:void(0)" onclick="copy_public_link(<?php echo pur_html_entity_decode($estimate->id); ?>); return false;" class="btn btn-warning btn-with-tooltip mleft10" data-toggle="tooltip" title="<?php if ($estimate->hash == '') {
+                                                                                                                                                                                                                                    echo _l('create_public_link');
+                                                                                                                                                                                                                                 } else {
+                                                                                                                                                                                                                                    echo _l('copy_public_link');
+                                                                                                                                                                                                                                 } ?>" data-placement="bottom"><i class="fa fa-clone "></i></a>
                   </div>
-                  <div class="col-md-12 padr_div_0">
-                     <br>
-                     <div class="pull-right _buttons  ">
-                        <a href="javascript:void(0)" onclick="copy_public_link(<?php echo pur_html_entity_decode($estimate->id); ?>); return false;" class="btn btn-warning btn-with-tooltip mleft10" data-toggle="tooltip" title="<?php if ($estimate->hash == '') {
-                           echo _l('create_public_link');
-                        } else {
-                           echo _l('copy_public_link');
-                        } ?>" data-placement="bottom"><i class="fa fa-clone "></i></a>
-                     </div>
-                     <div class="pull-right col-md-6">
-                        <?php if ($estimate->hash != '' && $estimate->hash != null) {
-                           echo render_input('link_public', '', site_url('purchase/vendors_portal/pur_order/' . $estimate->id . '/' . $estimate->hash));
-                        } else {
-                           echo render_input('link_public', '', '');
-                        } ?>
-                     </div>
+                  <div class="pull-right col-md-6">
+                     <?php if ($estimate->hash != '' && $estimate->hash != null) {
+                        echo render_input('link_public', '', site_url('purchase/vendors_portal/pur_order/' . $estimate->id . '/' . $estimate->hash));
+                     } else {
+                        echo render_input('link_public', '', '');
+                     } ?>
                   </div>
+               </div>
             </div>
 
          </div>
@@ -556,18 +561,18 @@ if ($estimate->currency != 0) {
                                           </td>
                                           <td class="description" align="left">
                                              <div style="width: 250px"><span><strong><?php
-                                             $item = get_item_hp($es['item_code']);
-                                             if (isset($item) && isset($item->commodity_code) && isset($item->description)) {
-                                                echo pur_html_entity_decode($item->commodity_code . ' - ' . $item->description);
-                                             } else {
-                                                echo pur_html_entity_decode($es['item_name']);
-                                             }
-                                             ?></strong>
-                                             </span>
-                                             <?php
-                                             if ($es['non_budget_item'] == 1) { ?>
-                                                <br><span style="display: block;font-size: 10px;font-style: italic;"><?php echo _l('this_is_non_budgeted_item'); ?></span>
-                                             <?php } ?>
+                                                                                       $item = get_item_hp($es['item_code']);
+                                                                                       if (isset($item) && isset($item->commodity_code) && isset($item->description)) {
+                                                                                          echo pur_html_entity_decode($item->commodity_code . ' - ' . $item->description);
+                                                                                       } else {
+                                                                                          echo pur_html_entity_decode($es['item_name']);
+                                                                                       }
+                                                                                       ?></strong>
+                                                </span>
+                                                <?php
+                                                if ($es['non_budget_item'] == 1) { ?>
+                                                   <br><span style="display: block;font-size: 10px;font-style: italic;"><?php echo _l('this_is_non_budgeted_item'); ?></span>
+                                                <?php } ?>
                                              </div>
                                           </td>
                                           <td align="left">
@@ -595,14 +600,14 @@ if ($estimate->currency != 0) {
                                              <?php
                                              if ($es['is_co']) { ?>
                                                 <br><span style="display: block;">Amendment: <?php echo $es['amendment_qty']; ?>
-                                             <?php } ?>
+                                                <?php } ?>
                                           </td>
                                           <td align="right">
                                              <?php echo app_format_money($es['unit_price'], $base_currency->symbol); ?>
                                              <?php
                                              if ($es['is_co']) { ?>
                                                 <br><span style="display: block;">Amendment: <?php echo $es['amendment_rate']; ?>
-                                             <?php } ?>
+                                                <?php } ?>
                                           </td>
                                           <td align="right"><?php echo app_format_money($es['into_money'], $base_currency->symbol); ?></td>
                                           <?php if (get_option('show_purchase_tax_column') == 1) { ?>
@@ -1001,7 +1006,7 @@ if ($estimate->currency != 0) {
                                     <?php } ?>
                                  <?php } ?>
                                  <?php if (has_permission('payment_certificate', '', 'delete') || is_admin()) { ?>
-                                    <a href="<?php echo admin_url('purchase/delete_payment_certificate/' . $pay['id']); ?>" 
+                                    <a href="<?php echo admin_url('purchase/delete_payment_certificate/' . $pay['id']); ?>"
                                        class="btn btn-danger btn-icon delete_payment_cert">
                                        <i class="fa fa-remove"></i>
                                     </a>
@@ -1068,7 +1073,43 @@ if ($estimate->currency != 0) {
                   </table>
                <?php } ?>
             </div>
+            <div role="tabpanel" class="tab-pane ptop10" id="quality">
+               <div class="row">
+                  <div class="col-md-12">
+                     <div class="quality-feed">
+                        <a href="<?php echo admin_url('purchase/add_quality_report/' . $estimate->id); ?>" target="_blank" class="btn btn-success pull-right"><i class="fa fa-plus"></i><?php echo ' ' . _l('Add'); ?></a>
 
+
+                           <div class="clearfix"></div>
+                           <table class="table dt-table">
+                              <thead>
+                                 <th>#</th>
+                                 <th><?php echo _l('Subject'); ?></th>
+                                 <th><?php echo _l('Departement'); ?></th>
+                                 <th><?php echo _l('Date'); ?></th>
+                                 <th><?php echo _l('Options'); ?></th>
+                              </thead>
+                              <tbody>
+                                 <?php $sr_no = 1; foreach ($qor as $val) { ?>
+
+                                    <tr>
+                                       <td><?php echo $sr_no++; ?></td>
+                                       <td><?php echo $val['subject'] ?></td>
+                                       <td><?php echo date('d M, Y', strtotime($val['date'])); ?></td>
+                                       <td><?php echo get_department_by_id($val['department']); ?></td>
+                                       <td>
+                                          <?php $url   = admin_url('forms/form/' . $val['formid']).'?tab=settings'; ?>
+                                          <a href="<?php echo $url; ?>" target="_blank" class="btn btn-default btn-icon" data-toggle="tooltip" data-placement="top" title="<?php echo _l('View'); ?>"><i class="fa fa-eye "></i></a>
+                                       </td>
+                                    </tr>
+                                 <?php $sr_no++; } ?>
+                              </tbody>
+                           </table>
+                        </div>
+                     
+                  </div>
+               </div>
+            </div>
 
          </div>
       </div>
@@ -1316,7 +1357,7 @@ if ($estimate->currency != 0) {
             cancelButtonText: 'Cancel'
          }).then((result) => {
             if (result.isConfirmed) {
-              window.location.href = url;
+               window.location.href = url;
             }
          });
       });
@@ -1351,26 +1392,26 @@ if ($estimate->currency != 0) {
    }
    var fnServerParams;
    fnServerParams = {
-      "po_id" : '[name="_attachment_sale_id"]',
+      "po_id": '[name="_attachment_sale_id"]',
    }
-   initDataTable('.table-po-bills', admin_url + 'purchase/table_po_bills', false, false, fnServerParams, [1,'desc']);
+   initDataTable('.table-po-bills', admin_url + 'purchase/table_po_bills', false, false, fnServerParams, [1, 'desc']);
 
-   function send_bill_bifurcation_approve(id, rel_type){
-     "use strict";
-     var data = {};
-     data.rel_id = id;
-     data.rel_type = rel_type;
-     $("body").append('<div class="dt-loader"></div>');
-       $.post(admin_url + 'purchase/send_bill_bifurcation_approve', data).done(function(response){
-           response = JSON.parse(response);
-           $("body").find('.dt-loader').remove();
-           if (response.success === true || response.success == 'true') {
-               alert_float('success', response.message);
-               window.location.reload();
-           }else{
-             alert_float('warning', response.message);
-               window.location.reload();
-           }
-       });
+   function send_bill_bifurcation_approve(id, rel_type) {
+      "use strict";
+      var data = {};
+      data.rel_id = id;
+      data.rel_type = rel_type;
+      $("body").append('<div class="dt-loader"></div>');
+      $.post(admin_url + 'purchase/send_bill_bifurcation_approve', data).done(function(response) {
+         response = JSON.parse(response);
+         $("body").find('.dt-loader').remove();
+         if (response.success === true || response.success == 'true') {
+            alert_float('success', response.message);
+            window.location.reload();
+         } else {
+            alert_float('warning', response.message);
+            window.location.reload();
+         }
+      });
    }
 </script>
