@@ -29025,6 +29025,74 @@ class Purchase_model extends App_Model
                 'predicted_monthly_cashflow' => 0
             );
         }
+
+        $lastActualIndex = null;
+        $lastActualValue = 0.0;
+        foreach ($cashflow_data as $i => $row) {
+            $actual = (float)$row['actual_cumulative_cashflow'];
+            if ($actual > 0) {
+                $cashflow_data[$i]['predicted_cumulative_cashflow'] = round($actual, 2);
+                $lastActualIndex = $i;
+                $lastActualValue = $actual;
+            } else {
+                $cashflow_data[$i]['predicted_cumulative_cashflow'] = 0.0;
+            }
+        }
+        if ($lastActualIndex === null) {
+            $lastActualIndex = 0;
+            $lastActualValue = 0.0;
+            $cashflow_data[0]['predicted_cumulative_cashflow'] = 0.0;
+        }
+        $lastIndex = count($cashflow_data) - 1;
+        $lastRowActual = (float)$cashflow_data[$lastIndex]['actual_cumulative_cashflow'];
+        $endTarget = ($lastRowActual > 0) ? $lastRowActual : $default_cum_value;
+        if ($lastActualValue >= $endTarget) {
+            $prev = $lastActualValue;
+            for ($i = $lastActualIndex + 1; $i < count($cashflow_data); $i++) {
+                $cashflow_data[$i]['predicted_cumulative_cashflow'] = round($prev, 2);
+            }
+        } else {
+            $remaining = $endTarget - $lastActualValue;
+            $startPct = (float)$cashflow_data[$lastActualIndex]['cumulative_cashflow'];
+            $den = 100.0 - $startPct;
+            if ($den <= 0) $den = 1.0;
+            $prevPred = $lastActualValue;
+            for ($i = $lastActualIndex + 1; $i < count($cashflow_data); $i++) {
+                $actual = (float)$cashflow_data[$i]['actual_cumulative_cashflow'];
+                if ($actual > 0) {
+                    $pred = $actual;
+                } else {
+                    $pctNow = (float)$cashflow_data[$i]['cumulative_cashflow'];
+                    $t = ($pctNow - $startPct) / $den;
+                    if ($t < 0) $t = 0;
+                    if ($t > 1) $t = 1;
+                    $pred = $lastActualValue + ($remaining * $t);
+                }
+                if ($pred < $prevPred) $pred = $prevPred;
+                $prevPred = $pred;
+                $cashflow_data[$i]['predicted_cumulative_cashflow'] = round($pred, 2);
+            }
+        }
+        if ($lastRowActual > 0) {
+            $cashflow_data[$lastIndex]['predicted_cumulative_cashflow'] = round($lastRowActual, 2);
+        } else {
+            $cashflow_data[$lastIndex]['predicted_cumulative_cashflow'] = round($default_cum_value, 2);
+        }
+
+        $prevPredCum = null;
+        foreach ($cashflow_data as $i => $row) {
+            $curPredCum = (float)$cashflow_data[$i]['predicted_cumulative_cashflow'];
+            if ($prevPredCum === null) {
+                $cashflow_data[$i]['predicted_monthly_cashflow'] = round($curPredCum, 2);
+            } else {
+                $cashflow_data[$i]['predicted_monthly_cashflow'] = round($curPredCum - $prevPredCum, 2);
+                if($cashflow_data[$i]['predicted_monthly_cashflow'] < 0) {
+                    $cashflow_data[$i]['predicted_monthly_cashflow'] = 0;
+                }
+            }
+            $prevPredCum = $curPredCum;
+        }
+        
         return $cashflow_data;
     }
 
