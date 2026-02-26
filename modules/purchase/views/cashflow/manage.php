@@ -56,6 +56,8 @@
                         <th><?php echo _l('Cumulative Cashflow Planned ('.$base_currency->name.')'); ?></th>
                         <th><?php echo _l('Actual Monthly Cashflow'); ?></th>
                         <th><?php echo _l('Actual Cumulative Cashflow'); ?></th>
+                        <th><?php echo _l('Predicted Cumulative Cashflow'); ?></th>
+                        <th><?php echo _l('Predicted Monthly Cashflow'); ?></th>
                      </thead>
                      <tbody>
                      </tbody>
@@ -94,6 +96,8 @@
             var actual_monthly_cashflow = [];
             var cumulative_cashflow_value = [];
             var actual_cumulative_cashflow = [];
+            var predicted_cumulative_cashflow = [];
+            var predicted_monthly_cashflow = [];
             if (Array.isArray(data) && data.length > 0) {
                $.each(data, function(i, row){
                   months_cal_name.push(row.months_cal_name);
@@ -101,6 +105,8 @@
                   actual_monthly_cashflow.push(parseFloat(row.actual_monthly_cashflow) || 0);
                   cumulative_cashflow_value.push(parseFloat(row.cumulative_cashflow_value) || 0);
                   actual_cumulative_cashflow.push(parseFloat(row.actual_cumulative_cashflow) || 0);
+                  predicted_cumulative_cashflow.push(parseFloat(row.predicted_cumulative_cashflow) || 0);
+                  predicted_monthly_cashflow.push(parseFloat(row.predicted_monthly_cashflow) || 0);
                   tbody += '<tr>';
                   tbody += '<td>'+row.timeline+'%</td>';
                   tbody += '<td>'+row.cumulative_cashflow+'%</td>';
@@ -111,6 +117,8 @@
                   tbody += '<td>'+format_money(row.cumulative_cashflow_value)+'</td>';
                   tbody += '<td>'+format_money(row.actual_monthly_cashflow)+'</td>';
                   tbody += '<td>'+format_money(row.actual_cumulative_cashflow)+'</td>';
+                  tbody += '<td>'+format_money(row.predicted_cumulative_cashflow)+'</td>';
+                  tbody += '<td>'+format_money(row.predicted_monthly_cashflow)+'</td>';
                   tbody += '</tr>';
                });
 
@@ -121,7 +129,9 @@
                monthly_cashflow_value,
                actual_monthly_cashflow,
                cumulative_cashflow_value,
-               actual_cumulative_cashflow
+               actual_cumulative_cashflow,
+               predicted_cumulative_cashflow,
+               predicted_monthly_cashflow
             );
       });
    }
@@ -131,7 +141,9 @@
       monthly_cashflow_value,
       actual_monthly_cashflow,
       cumulative_cashflow_value,
-      actual_cumulative_cashflow
+      actual_cumulative_cashflow,
+      predicted_cumulative_cashflow,
+      predicted_monthly_cashflow
    ) {
       var ctx = document.getElementById('cashflowChart').getContext('2d');
       if (cashflowChart !== null) {
@@ -170,6 +182,25 @@
                   backgroundColor: '#A300A3',
                   tension: 0.3,
                   fill: false
+               },
+               {
+                  type: 'line',
+                  label: 'Predicted Cumulative Cashflow',
+                  data: predicted_cumulative_cashflow,
+                  borderColor: '#8B4000',
+                  backgroundColor: '#8B4000',
+                  tension: 0.3,
+                  fill: false
+               },
+               {
+                  type: 'line',
+                  label: 'Predicted Monthly Cashflow',
+                  data: predicted_monthly_cashflow,
+                  borderColor: '#FFC000',
+                  backgroundColor: '#FFC000',
+                  tension: 0.3,
+                  fill: false,
+                  hidden: true
                }
             ]
          },
