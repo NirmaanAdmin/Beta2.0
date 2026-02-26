@@ -29018,7 +29018,7 @@ class Purchase_model extends App_Model
                 'months_cal_name' => $months_cal_name,
                 'cumulative_cashflow_value' => $cumulative_cashflow_value,
                 'monthly_cashflow_value' => $monthly_cashflow_value,
-                'actual_cumulative_cashflow' => $actual_cumulative_cashflow,
+                'actual_cumulative_cashflow' => ($actual_monthly_cashflow == 0) ? 0 : $actual_cumulative_cashflow,
                 'actual_monthly_cashflow' => $actual_monthly_cashflow,
                 'actual_forecast_percentage' => $actual_forecast_percentage
             );
