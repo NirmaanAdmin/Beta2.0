@@ -9996,6 +9996,7 @@ class purchase extends AdminController
         $data['activity'] = $this->purchase_model->get_wo_activity($id);
         $data['changes'] = $this->purchase_model->get_change_wo_order($id);
         $data['payment_certificate'] = $this->purchase_model->get_all_wo_payment_certificate($id);
+        $data['qor'] = $this->purchase_model->get_qor_by_wo($id);
         if ($to_return == false) {
             $this->load->view('work_order/wo_order_preview', $data);
         } else {
@@ -17662,7 +17663,8 @@ class purchase extends AdminController
         ]);
     }
 
-    public function add_quality_report($po_wo_id = false)
+
+    public function add_quality_report($po_wo_id = false,$po_or_wo)
     {
         $this->load->model('forms_model');
         if ($this->input->post()) {
@@ -17677,15 +17679,22 @@ class purchase extends AdminController
         // Load necessary models
         $this->load->model('knowledge_base_model');
         $this->load->model('departments_model');
-        $check_po_wo_id = check_po_wo_id($po_wo_id);
+        // $check_po_wo_id = check_po_wo_id($po_wo_id);
 
         
-        if($check_po_wo_id['table'] == 'pur_orders'){
-            $data['form_name'] = 'Quality Observation - ' . $check_po_wo_id['data']->pur_order_number . ' - ' . $check_po_wo_id['data']->pur_order_name;
-            $data['selected_dept'] = $check_po_wo_id['data']->department;
+        if($po_or_wo == 'pur_orders'){
+            $po_data = get_po_data($po_wo_id);
+
+            $data['form_name'] = 'Quality Observation - ' . $po_data['data']->pur_order_number . ' - ' . $po_data['data']->pur_order_name;
+            $data['selected_dept'] = $po_data['data']->department;
             $data['po_id'] = $po_wo_id;
-            $data['vendor_id'] = $check_po_wo_id['data']->vendor;
-        } elseif($check_po_wo_id['table'] == 'work_orders'){
+            $data['vendor_id'] = $po_data['data']->vendor;
+        } elseif($po_or_wo == 'work_order'){
+            $wo_data= get_wo_data($po_wo_id);
+            $data['form_name'] = 'Quality Observation - ' . $wo_data['data']->wo_order_number . ' - ' . $wo_data['data']->wo_order_name;
+            $data['selected_dept'] = $wo_data['data']->department;
+            $data['wo_id'] = $po_wo_id;
+            $data['vendor_id'] = $wo_data['data']->vendor;
         }
 
         $data['departments']        = $this->departments_model->get();

@@ -29102,4 +29102,11 @@ class Purchase_model extends App_Model
         $this->db->where('pur_order_id', $po_id);
         return $this->db->get()->result_array();
     }
+
+    public function get_qor_by_wo($wo_id){
+        $this->db->select('*');
+        $this->db->from('tblforms');
+        $this->db->where('wo_order_id', $wo_id);
+        return $this->db->get()->result_array();
+    }
 }

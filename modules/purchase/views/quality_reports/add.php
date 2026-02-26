@@ -6,8 +6,12 @@
         
         ?>
         <input type="hidden" name="form_type" value="qor">
+        <?php if(isset($po_id)) { ?>
         <input type="hidden" name="pur_order_id" value="<?php echo $po_id; ?>">
-
+        <?php } ?>
+        <?php if(isset($wo_id)) { ?>
+        <input type="hidden" name="wo_order_id" value="<?php echo $wo_id; ?>">
+        <?php } ?>
         <div class="row">
             <div class="col-md-12">
                 <div class="tw-flex tw-items-center tw-mb-2">

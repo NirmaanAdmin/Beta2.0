@@ -1077,7 +1077,7 @@ if ($estimate->currency != 0) {
                <div class="row">
                   <div class="col-md-12">
                      <div class="quality-feed">
-                        <a href="<?php echo admin_url('purchase/add_quality_report/' . $estimate->id); ?>" target="_blank" class="btn btn-success pull-right"><i class="fa fa-plus"></i><?php echo ' ' . _l('Add'); ?></a>
+                        <a href="<?php echo admin_url('purchase/add_quality_report/' . $estimate->id .'/pur_orders'); ?>" target="_blank" class="btn btn-success pull-right"><i class="fa fa-plus"></i><?php echo ' ' . _l('Add'); ?></a>
 
 
                            <div class="clearfix"></div>

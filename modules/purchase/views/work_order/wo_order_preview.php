@@ -55,6 +55,11 @@ if ($estimate->currency != 0) {
                      </a>
                   </li>
                   <li role="presentation">
+                     <a href="#quality" aria-controls="quality" role="tab" data-toggle="tab">
+                        <?php echo _l('Quality'); ?>
+                     </a>
+                  </li>
+                  <li role="presentation">
                      <a href="#tab_activity" aria-controls="tab_activity" role="tab" data-toggle="tab">
                         <?php echo _l('invoice_view_activity_tooltip'); ?>
                      </a>
@@ -568,7 +573,7 @@ if ($estimate->currency != 0) {
                                                    </strong>
                                                 </span>
                                                 <?php
-                                                if($es['non_budget_item'] == 1) { ?>
+                                                if ($es['non_budget_item'] == 1) { ?>
                                                    <br><span style="display: block;font-size: 10px;font-style: italic;"><?php echo _l('this_is_non_tendor_item'); ?></span>
                                                 <?php } ?>
                                              </div>
@@ -598,14 +603,14 @@ if ($estimate->currency != 0) {
                                              <?php
                                              if ($es['is_co']) { ?>
                                                 <br><span style="display: block;">Amendment: <?php echo $es['amendment_qty']; ?>
-                                             <?php } ?>
+                                                <?php } ?>
                                           </td>
                                           <td align="right">
                                              <?php echo app_format_money($es['unit_price'], $base_currency->symbol); ?>
                                              <?php
                                              if ($es['is_co']) { ?>
                                                 <br><span style="display: block;">Amendment: <?php echo $es['amendment_rate']; ?>
-                                             <?php } ?>
+                                                <?php } ?>
                                           </td>
                                           <td align="right"><?php echo app_format_money($es['into_money'], $base_currency->symbol); ?></td>
                                           <?php if (get_option('show_purchase_tax_column') == 1) { ?>
@@ -1007,7 +1012,7 @@ if ($estimate->currency != 0) {
                                     <?php } ?>
                                  <?php } ?>
                                  <?php if (has_permission('payment_certificate', '', 'delete') || is_admin()) { ?>
-                                    <a href="<?php echo admin_url('purchase/delete_payment_certificate/' . $pay['id']); ?>" 
+                                    <a href="<?php echo admin_url('purchase/delete_payment_certificate/' . $pay['id']); ?>"
                                        class="btn btn-danger btn-icon delete_payment_cert">
                                        <i class="fa fa-remove"></i>
                                     </a>
@@ -1074,6 +1079,47 @@ if ($estimate->currency != 0) {
                      <tbody></tbody>
                   </table>
                <?php } ?>
+            </div>
+
+            <div role="tabpanel" class="tab-pane ptop10" id="quality">
+               <div class="row">
+                  <div class="col-md-12">
+                     <div class="quality-feed">
+                        <a href="<?php echo admin_url('purchase/add_quality_report/' . $estimate->id.'/work_order'); ?>" target="_blank" class="btn btn-success pull-right"><i class="fa fa-plus"></i><?php echo ' ' . _l('Add'); ?></a>
+
+
+                        <div class="clearfix"></div>
+                        <table class="table dt-table">
+                           <thead>
+                              <th>#</th>
+                              <th><?php echo _l('Subject'); ?></th>
+                              <th><?php echo _l('Departement'); ?></th>
+                              <th><?php echo _l('Date'); ?></th>
+                              <th><?php echo _l('Options'); ?></th>
+                           </thead>
+                           <tbody>
+                              <?php $sr_no = 1;
+                              foreach ($qor as $val) { ?>
+
+                                 <tr>
+                                    <td><?php echo $sr_no++; ?></td>
+                                    <td><?php echo $val['subject'] ?></td>
+                                    <td><?php echo get_department_by_id($val['department']); ?></td>
+                                    <td><?php echo date('d M, Y', strtotime($val['date'])); ?></td>
+
+                                    <td>
+                                       <?php $url   = admin_url('forms/form/' . $val['formid']) . '?tab=settings'; ?>
+                                       <a href="<?php echo $url; ?>" target="_blank" class="btn btn-default btn-icon" data-toggle="tooltip" data-placement="top" title="<?php echo _l('View'); ?>"><i class="fa fa-eye "></i></a>
+                                    </td>
+                                 </tr>
+                              <?php $sr_no++;
+                              } ?>
+                           </tbody>
+                        </table>
+                     </div>
+
+                  </div>
+               </div>
             </div>
 
          </div>
@@ -1319,7 +1365,7 @@ if ($estimate->currency != 0) {
             cancelButtonText: 'Cancel'
          }).then((result) => {
             if (result.isConfirmed) {
-              window.location.href = url;
+               window.location.href = url;
             }
          });
       });
@@ -1354,26 +1400,26 @@ if ($estimate->currency != 0) {
    }
    var fnServerParams;
    fnServerParams = {
-      "wo_id" : '[name="_attachment_sale_id"]',
+      "wo_id": '[name="_attachment_sale_id"]',
    }
-   initDataTable('.table-po-bills', admin_url + 'purchase/table_po_bills', false, false, fnServerParams, [1,'desc']);
+   initDataTable('.table-po-bills', admin_url + 'purchase/table_po_bills', false, false, fnServerParams, [1, 'desc']);
 
-   function send_bill_bifurcation_approve(id, rel_type){
-     "use strict";
-     var data = {};
-     data.rel_id = id;
-     data.rel_type = rel_type;
-     $("body").append('<div class="dt-loader"></div>');
-       $.post(admin_url + 'purchase/send_bill_bifurcation_approve', data).done(function(response){
-           response = JSON.parse(response);
-           $("body").find('.dt-loader').remove();
-           if (response.success === true || response.success == 'true') {
-               alert_float('success', response.message);
-               window.location.reload();
-           }else{
-             alert_float('warning', response.message);
-               window.location.reload();
-           }
-       });
+   function send_bill_bifurcation_approve(id, rel_type) {
+      "use strict";
+      var data = {};
+      data.rel_id = id;
+      data.rel_type = rel_type;
+      $("body").append('<div class="dt-loader"></div>');
+      $.post(admin_url + 'purchase/send_bill_bifurcation_approve', data).done(function(response) {
+         response = JSON.parse(response);
+         $("body").find('.dt-loader').remove();
+         if (response.success === true || response.success == 'true') {
+            alert_float('success', response.message);
+            window.location.reload();
+         } else {
+            alert_float('warning', response.message);
+            window.location.reload();
+         }
+      });
    }
 </script>
