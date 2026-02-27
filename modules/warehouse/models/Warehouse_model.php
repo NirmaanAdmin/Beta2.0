@@ -1884,9 +1884,16 @@ class Warehouse_model extends App_Model
 
 		if (!empty($co_exist)) {
 			$sql = 'select item_code as commodity_code, ' . db_prefix() . 'co_order_detail.description, ' . db_prefix() . 'co_order_detail.unit_id, unit_price, quantity as quantities, ' . db_prefix() . 'co_order_detail.tax as tax, into_money, (' . db_prefix() . 'co_order_detail.total-' . db_prefix() . 'co_order_detail.into_money) as tax_money, ' . db_prefix() . 'co_order_detail.total as goods_money, tax_rate, tax_value, ' . db_prefix() . 'co_order_detail.id as id, ' . db_prefix() . 'co_orders.delivery_date as delivery_date, ' . db_prefix() . 'co_order_detail.area as area from ' . db_prefix() . 'co_order_detail
-			left join ' . db_prefix() . 'co_orders on ' . db_prefix() . 'co_orders.id =  ' . db_prefix() . 'co_order_detail.pur_order
+			left join ' . db_prefix() . 'co_orders 
+		    on ' . db_prefix() . 'co_orders.id = ' . db_prefix() . 'co_order_detail.pur_order
+		    AND ' . db_prefix() . 'co_orders.id = (
+		        SELECT MAX(id)
+		        FROM ' . db_prefix() . 'co_orders
+		        WHERE approve_status = 2
+		        AND po_order_id = ' . (int)$pur_order . '
+		    )
 			left join ' . db_prefix() . 'items on ' . db_prefix() . 'co_order_detail.item_code =  ' . db_prefix() . 'items.id
-			left join ' . db_prefix() . 'taxes on ' . db_prefix() . 'taxes.id = ' . db_prefix() . 'co_order_detail.tax where ' . db_prefix() . 'co_orders.po_order_id = ' . $pur_order . ' and ' . db_prefix() . 'co_order_detail.tender_item = 1
+			left join ' . db_prefix() . 'taxes on ' . db_prefix() . 'taxes.id = ' . db_prefix() . 'co_order_detail.tax where ' . db_prefix() . 'co_order_detail.tender_item = 1 and ' . db_prefix() . 'co_orders.id IS NOT NULL
 			GROUP BY ' . db_prefix() . 'co_order_detail.item_code, ' . db_prefix() . 'co_order_detail.description';
 			$co_results = $this->db->query($sql)->result_array();
 			if (!empty($co_results)) {
@@ -21411,9 +21418,16 @@ class Warehouse_model extends App_Model
 
 		if (!empty($co_exist)) {
 			$sql = 'select item_code as commodity_code, ' . db_prefix() . 'co_order_detail.description, ' . db_prefix() . 'co_order_detail.unit_id, unit_price, quantity as quantities, ' . db_prefix() . 'co_order_detail.tax as tax, into_money, (' . db_prefix() . 'co_order_detail.total-' . db_prefix() . 'co_order_detail.into_money) as tax_money, ' . db_prefix() . 'co_order_detail.total as goods_money, tax_rate, tax_value, ' . db_prefix() . 'co_order_detail.id as id, ' . db_prefix() . 'co_orders.delivery_date as delivery_date, ' . db_prefix() . 'co_order_detail.area as area from ' . db_prefix() . 'co_order_detail
-			left join ' . db_prefix() . 'co_orders on ' . db_prefix() . 'co_orders.id =  ' . db_prefix() . 'co_order_detail.pur_order
+			left join ' . db_prefix() . 'co_orders 
+		    on ' . db_prefix() . 'co_orders.id = ' . db_prefix() . 'co_order_detail.pur_order
+		    AND ' . db_prefix() . 'co_orders.id = (
+		        SELECT MAX(id)
+		        FROM ' . db_prefix() . 'co_orders
+		        WHERE approve_status = 2
+		        AND po_order_id = ' . (int)$pur_order . '
+		    )
 			left join ' . db_prefix() . 'items on ' . db_prefix() . 'co_order_detail.item_code =  ' . db_prefix() . 'items.id
-			left join ' . db_prefix() . 'taxes on ' . db_prefix() . 'taxes.id = ' . db_prefix() . 'co_order_detail.tax where ' . db_prefix() . 'co_orders.po_order_id = ' . $pur_order . ' and ' . db_prefix() . 'co_order_detail.tender_item = 1
+			left join ' . db_prefix() . 'taxes on ' . db_prefix() . 'taxes.id = ' . db_prefix() . 'co_order_detail.tax where ' . db_prefix() . 'co_order_detail.tender_item = 1 and ' . db_prefix() . 'co_orders.id IS NOT NULL
 			GROUP BY ' . db_prefix() . 'co_order_detail.item_code, ' . db_prefix() . 'co_order_detail.description';
 			$co_results = $this->db->query($sql)->result_array();
 			if (!empty($co_results)) {
@@ -23796,6 +23810,14 @@ class Warehouse_model extends App_Model
 	{
 		$updated_co_quantity = 0;
 		$non_break_description = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $description));
+		$latest_co_subquery = "(SELECT MAX(id) FROM " . db_prefix() . "co_orders WHERE approve_status = 2";
+	    if ($type == "pur_orders") {
+	        $latest_co_subquery .= " AND po_order_id = " . (int)$order_id;
+	    }
+	    if ($type == "wo_orders") {
+	        $latest_co_subquery .= " AND wo_order_id = " . (int)$order_id;
+	    }
+	    $latest_co_subquery .= ")";
 		$this->db->select(
 			db_prefix() . 'co_order_detail.*, 
 		    (
@@ -23811,14 +23833,11 @@ class Warehouse_model extends App_Model
                 '<br />', ''),
             '<br/>', '') AS non_break_description
         ");
-		$this->db->join(db_prefix() . 'co_orders', db_prefix() . 'co_orders.id = ' . db_prefix() . 'co_order_detail.pur_order', 'left');
-		if ($type == "pur_orders") {
-			$this->db->where(db_prefix() . 'co_orders.po_order_id', $order_id);
-		}
-		if ($type == "wo_orders") {
-			$this->db->where(db_prefix() . 'co_orders.wo_order_id', $order_id);
-		}
-		$this->db->where(db_prefix() . 'co_orders.approve_status', 2);
+		$this->db->join(
+	        db_prefix() . 'co_orders',
+	        db_prefix() . "co_orders.id = $latest_co_subquery",
+	        'left'
+	    );
 		$this->db->where(db_prefix() . 'co_order_detail.item_code', $item_code);
 		$this->db->group_by(db_prefix() . 'co_order_detail.id');
 		$this->db->having('non_break_description', $non_break_description);
@@ -23973,11 +23992,18 @@ class Warehouse_model extends App_Model
 		}
 
 		if (!empty($co_exist)) {
-			$sql = 'select item_code as commodity_code, ' . db_prefix() . 'co_order_detail.description, ' . db_prefix() . 'co_order_detail.unit_id, unit_price, quantity as quantities, ' . db_prefix() . 'co_order_detail.tax as tax, into_money, (' . db_prefix() . 'co_order_detail.total-' . db_prefix() . 'co_order_detail.into_money) as tax_money, ' . db_prefix() . 'co_order_detail.total as goods_money, tax_rate, tax_value, ' . db_prefix() . 'co_order_detail.id as id, delivery_date, ' . db_prefix() . 'co_order_detail.area as area from ' . db_prefix() . 'co_order_detail
-			left join ' . db_prefix() . 'co_orders on ' . db_prefix() . 'co_orders.id =  ' . db_prefix() . 'co_order_detail.pur_order
+			$sql = 'select item_code as commodity_code, ' . db_prefix() . 'co_order_detail.description, ' . db_prefix() . 'co_order_detail.unit_id, unit_price, quantity as quantities, ' . db_prefix() . 'co_order_detail.tax as tax, into_money, (' . db_prefix() . 'co_order_detail.total-' . db_prefix() . 'co_order_detail.into_money) as tax_money, ' . db_prefix() . 'co_order_detail.total as goods_money, tax_rate, tax_value, ' . db_prefix() . 'co_order_detail.id as id, ' . db_prefix() . 'co_orders.delivery_date as delivery_date, ' . db_prefix() . 'co_order_detail.area as area from ' . db_prefix() . 'co_order_detail
+			left join ' . db_prefix() . 'co_orders 
+		    on ' . db_prefix() . 'co_orders.id = ' . db_prefix() . 'co_order_detail.pur_order
+		    AND ' . db_prefix() . 'co_orders.id = (
+		        SELECT MAX(id)
+		        FROM ' . db_prefix() . 'co_orders
+		        WHERE approve_status = 2
+		        AND wo_order_id = ' . (int)$wo_order . '
+		    )
 			left join ' . db_prefix() . 'items on ' . db_prefix() . 'co_order_detail.item_code =  ' . db_prefix() . 'items.id
-			left join ' . db_prefix() . 'taxes on ' . db_prefix() . 'taxes.id = ' . db_prefix() . 'co_order_detail.tax where ' . db_prefix() . 'co_orders.wo_order_id = ' . $wo_order . ' and ' . db_prefix() . 'co_order_detail.tender_item = 1
-			GROUP BY ' . db_prefix() . 'co_order_detail.id';
+			left join ' . db_prefix() . 'taxes on ' . db_prefix() . 'taxes.id = ' . db_prefix() . 'co_order_detail.tax where ' . db_prefix() . 'co_order_detail.tender_item = 1 and ' . db_prefix() . 'co_orders.id IS NOT NULL
+			GROUP BY ' . db_prefix() . 'co_order_detail.item_code, ' . db_prefix() . 'co_order_detail.description';
 			$co_results = $this->db->query($sql)->result_array();
 			if (!empty($co_results)) {
 				foreach ($co_results as $key => $value) {
@@ -24554,11 +24580,18 @@ class Warehouse_model extends App_Model
 		}
 
 		if (!empty($co_exist)) {
-			$sql = 'select item_code as commodity_code, ' . db_prefix() . 'co_order_detail.description, ' . db_prefix() . 'co_order_detail.unit_id, unit_price, quantity as quantities, ' . db_prefix() . 'co_order_detail.tax as tax, into_money, (' . db_prefix() . 'co_order_detail.total-' . db_prefix() . 'co_order_detail.into_money) as tax_money, ' . db_prefix() . 'co_order_detail.total as goods_money, tax_rate, tax_value, ' . db_prefix() . 'co_order_detail.id as id, delivery_date, ' . db_prefix() . 'co_order_detail.area as area from ' . db_prefix() . 'co_order_detail
-			left join ' . db_prefix() . 'co_orders on ' . db_prefix() . 'co_orders.id =  ' . db_prefix() . 'co_order_detail.pur_order
+			$sql = 'select item_code as commodity_code, ' . db_prefix() . 'co_order_detail.description, ' . db_prefix() . 'co_order_detail.unit_id, unit_price, quantity as quantities, ' . db_prefix() . 'co_order_detail.tax as tax, into_money, (' . db_prefix() . 'co_order_detail.total-' . db_prefix() . 'co_order_detail.into_money) as tax_money, ' . db_prefix() . 'co_order_detail.total as goods_money, tax_rate, tax_value, ' . db_prefix() . 'co_order_detail.id as id, ' . db_prefix() . 'co_orders.delivery_date as delivery_date, ' . db_prefix() . 'co_order_detail.area as area from ' . db_prefix() . 'co_order_detail
+			left join ' . db_prefix() . 'co_orders 
+		    on ' . db_prefix() . 'co_orders.id = ' . db_prefix() . 'co_order_detail.pur_order
+		    AND ' . db_prefix() . 'co_orders.id = (
+		        SELECT MAX(id)
+		        FROM ' . db_prefix() . 'co_orders
+		        WHERE approve_status = 2
+		        AND wo_order_id = ' . (int)$wo_order . '
+		    )
 			left join ' . db_prefix() . 'items on ' . db_prefix() . 'co_order_detail.item_code =  ' . db_prefix() . 'items.id
-			left join ' . db_prefix() . 'taxes on ' . db_prefix() . 'taxes.id = ' . db_prefix() . 'co_order_detail.tax where ' . db_prefix() . 'co_orders.wo_order_id = ' . $wo_order . ' and ' . db_prefix() . 'co_order_detail.tender_item = 1
-			GROUP BY ' . db_prefix() . 'co_order_detail.id';
+			left join ' . db_prefix() . 'taxes on ' . db_prefix() . 'taxes.id = ' . db_prefix() . 'co_order_detail.tax where ' . db_prefix() . 'co_order_detail.tender_item = 1 and ' . db_prefix() . 'co_orders.id IS NOT NULL
+			GROUP BY ' . db_prefix() . 'co_order_detail.item_code, ' . db_prefix() . 'co_order_detail.description';
 			$co_results = $this->db->query($sql)->result_array();
 			if (!empty($co_results)) {
 				foreach ($co_results as $key => $value) {
