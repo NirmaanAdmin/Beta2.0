@@ -5,4 +5,6 @@ $html = <<<EOF
 $bill_bifurcation
 </div>
 EOF;
+$html = mb_convert_encoding($html, 'UTF-8', 'UTF-8');
+$pdf->SetPageOrientation('L', true);
 $pdf->writeHTML($html, true, false, true, false, '');

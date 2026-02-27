@@ -25464,9 +25464,13 @@ class Purchase_model extends App_Model
             foreach ($pur_bill_detail as $pkey => $pvalue) {
                 $default_purchase_bill_rows = get_default_purchase_bill_rows();
                 $item_name = pur_get_item_variatiom($pvalue['item_code']);
+                $pvalue_description = pur_html_entity_decode($pvalue['description']);
+                if (strlen($pvalue_description) > 500) {
+                    $pvalue_description = substr($pvalue_description, 0, 500) . '...';
+                }
                 $html .= '<tr class="pay_cert_title">
                   <td>'.$item_name.'</td>
-                  <td colspan="3">'.pur_html_entity_decode($pvalue['description']).'</td>
+                  <td colspan="3">'.pur_html_entity_decode($pvalue_description).'</td>
                   <td>'.app_format_money($pvalue['unit_price'], $base_currency->symbol).'</td>
                   <td>'.$pvalue['quantity'].'</td>
                 </tr>';
@@ -25496,14 +25500,16 @@ class Purchase_model extends App_Model
                     if ($bill_hold_percentage > 0) {
                         $billed_amount = $gbbvalue['billed_quantity'] * (($pvalue['unit_price'] * $bill_hold_percentage) / 100);
                     }
-                    $html .= '<tr class="pay_cert_value">
-                      <td>'.pur_html_entity_decode($gbbvalue['item_description']).'</td>
-                      <td>' . $gbbvalue['bill_percentage'] . '%</td>
-                      <td>'.app_format_money($bill_unit_price, $base_currency->symbol).'</td>
-                      <td>' . $gbbvalue['hold'] . '%</td>
-                      <td>' . $gbbvalue['billed_quantity'] . '</td>
-                      <td>'.app_format_money($billed_amount, $base_currency->symbol).'</td>
-                    </tr>';
+                    if($billed_amount > 0) {
+                        $html .= '<tr class="pay_cert_value">
+                          <td>'.pur_html_entity_decode($gbbvalue['item_description']).'</td>
+                          <td>' . $gbbvalue['bill_percentage'] . '%</td>
+                          <td>'.app_format_money($bill_unit_price, $base_currency->symbol).'</td>
+                          <td>' . $gbbvalue['hold'] . '%</td>
+                          <td>' . $gbbvalue['billed_quantity'] . '</td>
+                          <td>'.app_format_money($billed_amount, $base_currency->symbol).'</td>
+                        </tr>';
+                    }
                 }
                 if(!empty($payment_certificates)) {
                     foreach ($payment_certificates as $pckey => $pcvalue) {
@@ -25542,14 +25548,16 @@ class Purchase_model extends App_Model
                             if ($bill_hold_percentage > 0) {
                                 $billed_amount = $gbbvalue['billed_quantity'] * (($pvalue['unit_price'] * $bill_hold_percentage) / 100);
                             }
-                            $html .= '<tr class="pay_cert_value">
-                              <td>'.pur_html_entity_decode($gbbvalue['item_description']).'</td>
-                              <td>' . $bill_percentage . '%</td>
-                              <td>'.app_format_money($bill_unit_price, $base_currency->symbol).'</td>
-                              <td>' . $gbbvalue['hold'] . '%</td>
-                              <td>' . $gbbvalue['billed_quantity'] . '</td>
-                              <td>'.app_format_money($billed_amount, $base_currency->symbol).'</td>
-                            </tr>';
+                            if($billed_amount > 0) {
+                                $html .= '<tr class="pay_cert_value">
+                                  <td>'.pur_html_entity_decode($gbbvalue['item_description']).'</td>
+                                  <td>' . $bill_percentage . '%</td>
+                                  <td>'.app_format_money($bill_unit_price, $base_currency->symbol).'</td>
+                                  <td>' . $gbbvalue['hold'] . '%</td>
+                                  <td>' . $gbbvalue['billed_quantity'] . '</td>
+                                  <td>'.app_format_money($billed_amount, $base_currency->symbol).'</td>
+                                </tr>';
+                            }
                         }
                     }
                 }
