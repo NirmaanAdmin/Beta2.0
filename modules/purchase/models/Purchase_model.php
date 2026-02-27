@@ -28939,6 +28939,8 @@ class Purchase_model extends App_Model
         $previous_cumulative_value = 0;
         $previous_cumulative_cashflow = 0;
         $default_project = get_default_project();
+        $current_month_start = strtotime(date('Y-m-01'));
+        $last_projected_month_start = 0;
         $order_tracker_query = "
             SELECT po.order_date, (po.subtotal + IFNULL(co_sum.co_total, 0)) AS total_rev_contract_value
             FROM tblpur_orders po
@@ -28976,36 +28978,32 @@ class Purchase_model extends App_Model
         foreach ($timelines_values as $index => $timeline) {
             $cumulative = $cumulative_values[$index];
             $months_cal = max(1, round(($default_total_months * $timeline) / 100));
+            if ($months_cal == 1) {
+                $calculated_month_date = strtotime($order_start_date);
+            } else {
+                $calculated_month_date = strtotime("+{$months_cal} months", strtotime($order_start_date));
+            }
             $months_cal_name = ($months_cal == 1) ? date('M-y', strtotime($order_start_date)) : date('M-y', strtotime("+{$months_cal} months", strtotime($order_start_date)));
+            $last_projected_month_start = strtotime(date('Y-m-01', $calculated_month_date));
             $cumulative_cashflow_value = ($default_cum_value * $cumulative) / 100;
+            $order_end_date = date('Y-m-t', $calculated_month_date);
+            $actual_cumulative_cashflow = 0;
+            if (!empty($order_tracker_result)) {
+                $actual_cumulative_cashflow = array_sum(
+                    array_column(
+                        array_filter($order_tracker_result, function ($row) use ($order_start_date, $order_end_date) {
+                            return $row['order_date'] >= $order_start_date &&
+                                   $row['order_date'] <= $order_end_date;
+                        }),
+                        'total_rev_contract_value'
+                    )
+                );
+            }
             if ($index == 0) {
-                $monthly_cashflow_value = $cumulative_cashflow_value;
-                $actual_cumulative_cashflow = 0;
-                if (!empty($order_tracker_result)) {
-                    $actual_cumulative_cashflow = array_sum(
-                        array_column(
-                            array_filter($order_tracker_result, function ($row) use ($order_start_date, $order_end_date) {
-                                return $row['order_date'] >= $order_start_date && $row['order_date'] <= $order_end_date;
-                            }),
-                            'total_rev_contract_value'
-                        )
-                    );
-                }
+                $monthly_cashflow_value  = $cumulative_cashflow_value;
                 $actual_monthly_cashflow = $actual_cumulative_cashflow;
             } else {
-                $monthly_cashflow_value = $cumulative_cashflow_value - $previous_cumulative_value;
-                $order_end_date = date('Y-m-t', strtotime("+{$months_cal} months", strtotime($order_start_date)));
-                $actual_cumulative_cashflow = 0;
-                if (!empty($order_tracker_result)) {
-                    $actual_cumulative_cashflow = array_sum(
-                        array_column(
-                            array_filter($order_tracker_result, function ($row) use ($order_start_date, $order_end_date) {
-                                return $row['order_date'] >= $order_start_date && $row['order_date'] <= $order_end_date;
-                            }),
-                            'total_rev_contract_value'
-                        )
-                    );
-                }
+                $monthly_cashflow_value  = $cumulative_cashflow_value - $previous_cumulative_value;
                 $actual_monthly_cashflow = $actual_cumulative_cashflow - $previous_cumulative_cashflow;
             }
             $previous_cumulative_value = $cumulative_cashflow_value;
@@ -29024,6 +29022,15 @@ class Purchase_model extends App_Model
                 'predicted_cumulative_cashflow' => 0,
                 'predicted_monthly_cashflow' => 0
             );
+        }
+
+        $expected_finish_month = 0;
+        if ($last_projected_month_start > $current_month_start) {
+            $current_year  = date('Y', $current_month_start);
+            $current_month = date('n', $current_month_start);
+            $last_year     = date('Y', $last_projected_month_start);
+            $last_month    = date('n', $last_projected_month_start);
+            $expected_finish_month = (($last_year - $current_year) * 12) + ($last_month - $current_month);
         }
 
         $lastActualIndex = null;
@@ -29092,8 +29099,11 @@ class Purchase_model extends App_Model
             }
             $prevPredCum = $curPredCum;
         }
-        
-        return $cashflow_data;
+
+        return [
+            'cashflow_data' => $cashflow_data, 
+            'expected_finish_month' => $expected_finish_month
+        ];
     }
 
     public function get_qor_by_po($po_id){

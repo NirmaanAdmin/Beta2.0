@@ -1,6 +1,21 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
 <?php init_head(); ?>
 <?php $module_name = 'cashflow'; ?>
+<style>
+   .n_width {
+      width: 25% !important;
+   }
+   .n1_width {
+      width: 30% !important;
+   }
+   .dashboard_stat_title {
+      font-size: 19px;
+      font-weight: bold;
+   }
+   .dashboard_stat_value {
+      font-size: 19px;
+   }
+</style>
 <div id="wrapper">
    <div class="content">
       <div class="row">
@@ -34,6 +49,44 @@
          <div class="panel_s mbot10">
             <div class="panel-body">
                <div class="row">
+                  <div class="col-md-12 mtop20">
+                     <div class="row">
+                        <div class="quick-stats-invoices col-md-3 tw-mb-2 sm:tw-mb-0 n_width">
+                          <div class="top_stats_wrapper">
+                            <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                              <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                <span class="tw-truncate dashboard_stat_title">Average Monthly Cashflow</span>
+                              </div>
+                              <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                            </div>
+                            <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                              <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                <span class="tw-truncate dashboard_stat_value average_monthly_cashflow"></span>
+                              </div>
+                              <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="quick-stats-invoices col-md-3 tw-mb-2 sm:tw-mb-0 n1_width">
+                          <div class="top_stats_wrapper">
+                            <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                              <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                <span class="tw-truncate dashboard_stat_title">Expected finish month based on current speed</span>
+                              </div>
+                              <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                            </div>
+                            <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                              <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                <span class="tw-truncate dashboard_stat_value expected_finish_month"></span>
+                              </div>
+                              <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                            </div>
+                          </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="row mtop20">
                   <div class="col-md-12">
                      <div style="width: 100%; height: 550px;">
                        <canvas id="cashflowChart"></canvas>
@@ -98,8 +151,10 @@
             var actual_cumulative_cashflow = [];
             var predicted_cumulative_cashflow = [];
             var predicted_monthly_cashflow = [];
-            if (Array.isArray(data) && data.length > 0) {
-               $.each(data, function(i, row){
+            var sum_actual_cashflow = 0;
+            var count_positive = 0;
+            if (Array.isArray(data.cashflow_data) && data.cashflow_data.length > 0) {
+               $.each(data.cashflow_data, function(i, row){
                   months_cal_name.push(row.months_cal_name);
                   monthly_cashflow_value.push(parseFloat(row.monthly_cashflow_value) || 0);
                   actual_monthly_cashflow.push(parseFloat(row.actual_monthly_cashflow) || 0);
@@ -107,6 +162,11 @@
                   actual_cumulative_cashflow.push(parseFloat(row.actual_cumulative_cashflow) || 0);
                   predicted_cumulative_cashflow.push(parseFloat(row.predicted_cumulative_cashflow) || 0);
                   predicted_monthly_cashflow.push(parseFloat(row.predicted_monthly_cashflow) || 0);
+                  var actualValue = parseFloat(row.actual_monthly_cashflow) || 0;
+                  if (actualValue > 0) {
+                     sum_actual_cashflow += actualValue;
+                     count_positive++;
+                  }
                   tbody += '<tr>';
                   tbody += '<td>'+row.timeline+'%</td>';
                   tbody += '<td>'+row.cumulative_cashflow+'%</td>';
@@ -133,6 +193,9 @@
                predicted_cumulative_cashflow,
                predicted_monthly_cashflow
             );
+            var average_monthly_cashflow = count_positive > 0 ? (sum_actual_cashflow / count_positive) : 0;
+            $('.average_monthly_cashflow').text(format_money(average_monthly_cashflow));
+            $('.expected_finish_month').text(data.expected_finish_month);
       });
    }
 
