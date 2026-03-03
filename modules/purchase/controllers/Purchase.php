@@ -15199,6 +15199,8 @@ class purchase extends AdminController
         $pur_bill_row_template = '';
         $pur_bill_row_model = '';
         $pur_pc_bill_row_model = '';
+        $this->load->model('changee/changee_model');
+        $this->changee_model->update_pur_bills_co_items($id);
 
         $data['base_currency'] = $this->currencies_model->get_base_currency();
 
