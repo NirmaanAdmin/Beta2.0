@@ -21604,6 +21604,8 @@ class Purchase_model extends App_Model
     public function get_pur_bill_detail($pur_bill)
     {
         $this->db->where('pur_bill', $pur_bill);
+        $this->db->order_by('manual_pur_bill', 'ASC');
+        $this->db->order_by('id', 'ASC');
         $pur_bill_details = $this->db->get(db_prefix() . 'pur_bill_details')->result_array();
 
         foreach ($pur_bill_details as $key => $detail) {
