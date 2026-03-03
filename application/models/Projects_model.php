@@ -2782,7 +2782,26 @@ class Projects_model extends App_Model
         return $result;
     }
 
-    public function create_project_directory_row_template($name = '', $com_con_name = '', $address = '', $fullnameinput = '',$designation = '', $contact = '', $email_account = '', $item_key = '')
+    public function get_items_vendors_portal()
+    {
+        $result = array();
+        $projects = $this->db->query('select id, name, (SELECT GROUP_CONCAT(' . db_prefix() . 'project_members.staff_id SEPARATOR ",") FROM ' . db_prefix() . 'project_members WHERE ' . db_prefix() . 'project_members.project_id=' . db_prefix() . 'projects.id) as member_list from ' . db_prefix() . 'projects')->result_array();
+
+        if (!empty($projects)) {
+            foreach ($projects as $key => $value) {
+                // Admin condition removed - all projects are now included
+                $result[] = $value;
+            }
+            if (!empty($result)) {
+                $result = array_values($result);
+            }
+        }
+
+        return $result;
+    }
+
+
+    public function create_project_directory_row_template($name = '', $com_con_name = '', $address = '', $fullnameinput = '', $designation = '', $contact = '', $email_account = '', $item_key = '')
     {
         $row = '';
         $is_template = ($name == '');
@@ -2813,7 +2832,7 @@ class Projects_model extends App_Model
         // $selectedvendors = !empty($vendors) ? (is_array($vendors) ? $vendors : explode(",", $vendors)) : [];
 
         // Position
-        
+
         $row .= '<td class="com_con_name">' . render_input($name_com_con_name, '', $com_con_name, '', ['placeholder' => 'Company/Consultant Name']) . '</td>';
         $row .= '<td class="address">' . render_input($name_address, '', $address, '', ['placeholder' => 'Address']) . '</td>';
         // if ($vendors < 0) {

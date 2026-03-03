@@ -40,6 +40,8 @@ class Vendors_portal extends App_Controller
         }
 
         $this->load->model('purchase_model');
+        $this->load->model('forms_model');
+        $this->load->model('projects_model');
     }
 
     public function layout($notInThemeViewFiles = false)
@@ -596,7 +598,7 @@ class Vendors_portal extends App_Controller
                         $item_name = pur_get_item_variatiom($quote_detail['item_code']);
                     }
 
-                    $pur_quotation_row_template .= $this->purchase_model->create_quotation_row_template('items[' . $index_quote . ']',  $item_name,$quote_detail['description'], $quote_detail['area'], '', $quote_detail['quantity'], $unit_name, $quote_detail['unit_price'], $taxname, $quote_detail['item_code'], $quote_detail['unit_id'], $quote_detail['tax_rate'],  $quote_detail['total_money'], $quote_detail['discount_%'], $quote_detail['discount_money'], $quote_detail['total'], $quote_detail['into_money'], $quote_detail['tax'], $quote_detail['tax_value'], $quote_detail['id'], true, $currency_rate, $to_currency);
+                    $pur_quotation_row_template .= $this->purchase_model->create_quotation_row_template('items[' . $index_quote . ']',  $item_name, $quote_detail['description'], $quote_detail['area'], '', $quote_detail['quantity'], $unit_name, $quote_detail['unit_price'], $taxname, $quote_detail['item_code'], $quote_detail['unit_id'], $quote_detail['tax_rate'],  $quote_detail['total_money'], $quote_detail['discount_%'], $quote_detail['discount_money'], $quote_detail['total'], $quote_detail['into_money'], $quote_detail['tax'], $quote_detail['tax_value'], $quote_detail['id'], true, $currency_rate, $to_currency);
                 }
             }
 
@@ -637,8 +639,8 @@ class Vendors_portal extends App_Controller
         }
 
         // $data['pur_tender'] = $this->purchase_model->get_purchase_tender_by_vendor(get_vendor_user_id());
-                    // echo '<pre>'; print_r($estimate); die;
-         if($purchase_tender_id > 0){
+        // echo '<pre>'; print_r($estimate); die;
+        if ($purchase_tender_id > 0) {
             $data['pur_tender'][] = (array) $this->purchase_model->get_pur_tender($purchase_tender_id);
         }
 
@@ -663,7 +665,7 @@ class Vendors_portal extends App_Controller
         $data['commodity_groups_pur'] = $this->purchase_model->get_commodity_group_add_commodity();
         $data['sub_groups_pur'] = $this->purchase_model->get_sub_group();
         $data['area_pur'] = $this->purchase_model->get_area();
-        $purchase_tender= isset($_GET['purchase_tender']) ? $_GET['purchase_tender'] : null;
+        $purchase_tender = isset($_GET['purchase_tender']) ? $_GET['purchase_tender'] : null;
         if (!empty($purchase_tender)) {
             $purchase_tender_detail = $this->purchase_model->get_purchase_tender($purchase_tender);
             if (!empty($purchase_tender_detail)) {
@@ -889,7 +891,7 @@ class Vendors_portal extends App_Controller
         $data['items'] = $this->purchase_model->get_items();
         $data['title'] = $title;
         $data['attachments'] = $this->purchase_model->get_purchase_attachments('pur_order', $id);
-
+        $data['qor'] = $this->purchase_model->get_qor_by_po($id);
         $this->data($data);
         $this->view('vendor_portal/pur_order');
         $this->layout();
@@ -2253,12 +2255,12 @@ class Vendors_portal extends App_Controller
 
     public function coppy_pur_tender($pur_tender)
     {
-        
+
         $this->load->model('currencies_model');
-       
-        $pur_tender_detail = $this->purchase_model->get_pur_tender_detail_in_estimate($pur_tender); 
+
+        $pur_tender_detail = $this->purchase_model->get_pur_tender_detail_in_estimate($pur_tender);
         $purchase_tender = $this->purchase_model->get_purchase_tender($pur_tender);
-   
+
         $base_currency = $this->currencies_model->get_base_currency();
         $taxes = [];
         $tax_val = [];
@@ -2297,14 +2299,14 @@ class Vendors_portal extends App_Controller
                     $item_name = pur_get_item_variatiom($item['item_code']);
                 }
 
-                $list_item .= $this->purchase_model->create_quotation_row_template('newitems[' . $index_quote . ']',  $item_name, $item['description'], $item['area'], $item['image'], $item['quantity'], $unit_name, $item['unit_price'], $taxname, $item['item_code'], $item['unit_id'], $item['tax_rate'],  $item['total'], '', '', $item['total'], $item['into_money'], $item['tax'], $item['tax_value'], $index_quote, true, $currency_rate, $to_currency,$item);
+                $list_item .= $this->purchase_model->create_quotation_row_template('newitems[' . $index_quote . ']',  $item_name, $item['description'], $item['area'], $item['image'], $item['quantity'], $unit_name, $item['unit_price'], $taxname, $item['item_code'], $item['unit_id'], $item['tax_rate'],  $item['total'], '', '', $item['total'], $item['into_money'], $item['tax'], $item['tax_value'], $index_quote, true, $currency_rate, $to_currency, $item);
             }
         }
 
 
         $taxes_data = $this->purchase_model->get_html_tax_pur_tender($pur_tender);
         $tax_html = $taxes_data['html'];
-      
+
         echo json_encode([
             'result' => $pur_tender_detail,
             'subtotal' => app_format_money(round($subtotal, 2), ''),
@@ -2315,5 +2317,223 @@ class Vendors_portal extends App_Controller
             'currency' => $to_currency,
             'currency_rate' => $currency_rate,
         ]);
+    }
+
+    public function view_quality_report($id)
+    {
+
+
+
+        $data['form']         = $this->forms_model->get_form_by_id($id);
+        $data['merged_forms'] = $this->forms_model->get_merged_forms_by_primary_id($id);
+
+        if (!$data['form']) {
+            blank_page(_l('form_not_found'));
+        }
+
+
+        if ($this->input->post()) {
+            $returnToFormList = false;
+            $data               = $this->input->post();
+
+            if (isset($data['form_add_response_and_back_to_list'])) {
+                $returnToFormList = true;
+                unset($data['form_add_response_and_back_to_list']);
+            }
+
+            $data['message'] = html_purify($this->input->post('message', false));
+            $replyid         = $this->forms_model->add_reply($data, $id, get_staff_user_id());
+
+            if ($replyid) {
+                set_alert('success', _l('replied_to_form_successfully', $id));
+            }
+            if (!$returnToFormList) {
+                redirect(admin_url('forms/form/' . $id));
+            } else {
+                set_form_open(0, $id);
+                redirect(admin_url('forms'));
+            }
+        }
+        // Load necessary models
+        $this->load->model('knowledge_base_model');
+        $this->load->model('departments_model');
+
+        $data['statuses']                       = $this->forms_model->get_form_status();
+        $data['statuses']['callback_translate'] = 'form_status_translate';
+
+        $data['departments']        = $this->departments_model->get();
+        $data['predefined_replies'] = $this->forms_model->get_predefined_reply();
+        $data['priorities']         = $this->forms_model->get_priority();
+        $data['services']           = $this->forms_model->get_service();
+        $whereStaff                 = [];
+        if (get_option('access_forms_to_none_staff_members') == 0) {
+            $whereStaff['is_not_staff'] = 0;
+        }
+        $data['staff']                = $this->staff_model->get('', $whereStaff);
+        $data['articles']             = $this->knowledge_base_model->get();
+        $data['form_replies']       = $this->forms_model->get_form_replies($id);
+        $data['bodyclass']            = 'top-tabs form single-form';
+        $data['title']                = $data['form']->subject;
+        $data['form']->form_notes = $this->misc_model->get_notes($id, 'form');
+        $data['projects'] = $this->projects_model->get_items_vendors_portal();
+        $data['form_listing'] = $this->forms_model->get_form_listing();
+        add_admin_forms_js_assets();
+        $this->data($data);
+        $this->view('vendor_portal/view_quality_report');
+        $this->layout();
+    }
+
+    public function find_form_design($form_type, $form_id = 0)
+    {
+
+        if ($form_type == "dpr") {
+            $dpr_row_template = $this->forms_model->create_dpr_row_template();
+            if ($form_id != 0) {
+                $dpr_form = $this->forms_model->get_dpr_form($form_id);
+                $dpr_form_detail = $this->forms_model->get_dpr_form_detail($form_id);
+                if (!empty($dpr_form_detail)) {
+                    $index_order = 0;
+                    foreach ($dpr_form_detail as $value) {
+                        $index_order++;
+                        $dpr_row_template .= $this->forms_model->create_dpr_row_template(
+                            'items[' . $index_order . ']',
+                            $value['location'],
+                            $value['agency'],
+                            $value['type'],
+                            $value['work_execute'],
+                            $value['material_consumption'],
+                            $value['machinery'],
+                            $value['skilled'],
+                            $value['unskilled'],
+                            $value['depart'],
+                            $value['total'],
+                            $value['male'],
+                            $value['female'],
+                            true,
+                            $value['id']
+                        );
+                    }
+                }
+                $data['dpr_form'] = $dpr_form;
+            }
+            $data['dpr_row_template'] = $dpr_row_template;
+            $this->load->view('admin/forms/form_design/dpr', $data);
+        } elseif ($form_type == "qcr") {
+            $qcr_row_template = $this->forms_model->create_qcr_row_template();
+            if ($form_id != 0) {
+                $qcr_form = $this->forms_model->get_qcr_form($form_id);
+                $qcr_form_detail = $this->forms_model->get_qcr_form_detail($form_id);
+                if (!empty($qcr_form_detail)) {
+                    $index_order = 0;
+                    foreach ($qcr_form_detail as $value) {
+                        $index_order++;
+                        $qcr_row_template .= $this->forms_model->create_qcr_row_template(
+                            'items[' . $index_order . ']',
+                            $value['date'],
+                            $value['floor'],
+                            $value['location'],
+                            $value['observation'],
+                            $value['category'],
+                            $value['photograph'],
+                            $value['compliance_photograph'],
+                            $value['compliance_detail'],
+                            $value['status'],
+                            $value['remarks'],
+                            true,
+                            $value['id'],
+                            $value,
+                        );
+                    }
+                }
+                $data['qcr_form'] = $qcr_form;
+            }
+            $data['qcr_row_template'] = $qcr_row_template;
+            $this->load->view('admin/forms/form_design/qcr', $data);
+        } else {
+            $formConfigs = [
+                'apc' => ['has_attachments' => true],
+                'wpc' => ['has_attachments' => true],
+                'mfa' => ['has_attachments' => false],
+                'mlg' => ['has_attachments' => true],
+                'msh' => ['has_attachments' => true],
+                'sca' => ['has_attachments' => true],
+                'esc' => ['has_attachments' => true],
+                'cfwas' => ['has_attachments' => true],
+                'cflc' => ['has_attachments' => true],
+                'facc' => ['has_attachments' => true],
+                'cosc' => ['has_attachments' => true],
+                'qor'  => ['has_attachments' => true],
+            ];
+
+            if (isset($formConfigs[$form_type])) {
+                $this->handleCommonForm(
+                    $form_type,
+                    $formConfigs[$form_type]['has_attachments'],
+                    $form_id
+                );
+            } else {
+                show_error('Invalid form type specified.');
+            }
+        }
+    }
+
+    private function handleCommonForm($form_type, $has_attachments, $form_id)
+    {
+        $form_items = $this->forms_model->get_form_items($form_type);
+        $data = [];
+        $data['isedit'] = 0;
+        if ($form_id != 0) {
+
+            $getFormMethod = "get_{$form_type}_form";
+            $data["{$form_type}_form"] = $this->forms_model->$getFormMethod($form_id);
+
+            $getDetailMethod = "get_{$form_type}_form_detail";
+            $data["{$form_type}_form_detail"] = $this->forms_model->$getDetailMethod($form_id);
+
+            if ($has_attachments) {
+                $getAttachmentsMethod = "get_{$form_type}_form_attachments";
+                $data["{$form_type}_attachments"] = $this->forms_model->$getAttachmentsMethod($form_id);
+            }
+            $data['isedit'] = 1;
+            $data['form_id'] = $form_id;
+        }
+        $data['form_items'] = $form_items;
+        $this->load->view("admin/forms/form_design/{$form_type}", $data);
+    }
+
+    public function update_single_form_settings()
+    {
+        
+        if ($this->input->post()) {
+            $this->session->mark_as_flash('active_tab');
+            $this->session->mark_as_flash('active_tab_settings');
+
+            if ($this->input->post('merge_form_ids') !== 0) {
+                $formsToMerge = explode(',', $this->input->post('merge_form_ids'));
+
+                $alreadyMergedForms = $this->forms_model->get_already_merged_forms($formsToMerge);
+                if (count($alreadyMergedForms) > 0) {
+                    echo json_encode([
+                        'success' => false,
+                        'message' => _l('cannot_merge_forms_with_ids', implode(',', $alreadyMergedForms)),
+                    ]);
+
+                    die();
+                }
+            }
+            // $data = $this->input->post();
+            // dd($data);
+            $success = $this->forms_model->update_single_form_settings($this->input->post());
+            if ($success) {
+                $this->session->set_flashdata('active_tab', true);
+                $this->session->set_flashdata('active_tab_settings', true);
+                
+                set_alert('success', _l('form_settings_updated_successfully'));
+            }
+            echo json_encode([
+                'success' => $success,
+            ]);
+            die();
+        }
     }
 }
