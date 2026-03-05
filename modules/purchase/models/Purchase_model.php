@@ -25455,8 +25455,6 @@ class Purchase_model extends App_Model
             <tbody>
                 <tr class="pay_cert_title">
                   <td>' . _l('Uniclass Code') . '</td>
-                  <td>' . _l('unit_price') . '</td>
-                  <td>' . _l('Ordered Quantity') . '</td>
                 </tr>';
 
         if(!empty($pur_bill_detail)) {
@@ -25473,8 +25471,6 @@ class Purchase_model extends App_Model
                     <br />
                     <b>'._l('Description').':</b> '.pur_html_entity_decode($pvalue_description).'
                   </td>
-                  <td>'.app_format_money($pvalue['unit_price'], $base_currency->symbol).'</td>
-                  <td>'.$pvalue['quantity'].'</td>
                 </tr>';
             }
         }
