@@ -25451,27 +25451,114 @@ class Purchase_model extends App_Model
         </table>
         <br>';
 
-        $html .= '<table class="table" style="width: 100%" border="1" style="font-size:12px">
-            <tbody>
-                <tr class="pay_cert_title">
-                  <td>' . _l('Uniclass Code') . '</td>
-                </tr>';
-
+        $pur_bills_bifurcation_exist = array();
+        $pur_pc_bills_bifurcation_exist = array();
         if(!empty($pur_bill_detail)) {
+            $pur_bill_detail_ids = array_column($pur_bill_detail, 'id');
+            $this->db->where_in('bill_item_id', $pur_bill_detail_ids);
+            $this->db->where('billed_quantity >', 0);
+            $this->db->where('bill_percentage >', 0);
+            $this->db->order_by('id', 'asc');
+            $pur_bills_bifurcation_exist = $this->db->get(db_prefix() . 'pur_bills_bifurcation')->result_array();
+            $this->db->where_in('bill_item_id', $pur_bill_detail_ids);
+            $this->db->where('billed_quantity >', 0);
+            $this->db->order_by('id', 'asc');
+            $pur_pc_bills_bifurcation_exist = $this->db->get(db_prefix() . 'pur_pc_bills_bifurcation')->result_array();
+        }
+        $payment_certificates = $this->get_all_bill_payment_certificates($id);
+
+        $html .= '<table class="table" style="width: 100%" border="1" style="font-size:12px">
+        <tbody>
+        <tr class="pay_cert_title">
+          <td>' . _l('Uniclass Code') . '</td>';
+          if(!empty($pur_bills_bifurcation_exist)) {
+            $html .= '<td>' . _l('Bill Description') . '</td>';
+            $html .= '<td>' . _l('bill_percentage') . '</td>';
+            $html .= '<td>' . _l('Bill Unit Price') . '</td>';
+          }
+          if(!empty($pur_pc_bills_bifurcation_exist) && !empty($payment_certificates)) {
+            foreach ($payment_certificates as $pckey => $pcvalue) {
+                $html .= '<td>' . _l('Qty (PC-'.($pckey + 1).')') . '</td>';
+                $html .= '<td>' . _l('Amount (PC-'.($pckey + 1).')') . '</td>';
+            }
+          }
+        $html .= '</tr>';
+
+        if (!empty($pur_bill_detail)) {
             foreach ($pur_bill_detail as $pkey => $pvalue) {
+                $bill_item_id = $pvalue['id'];
                 $item_name = pur_get_item_variatiom($pvalue['item_code']);
                 $pvalue_description = pur_html_entity_decode($pvalue['description']);
                 if (strlen($pvalue_description) > 500) {
                     $pvalue_description = substr($pvalue_description, 0, 500) . '...';
                 }
-                $html .= '<tr class="pay_cert_value">
-                  <td>
-                    '.$item_name.'
-                    <br />
-                    <br />
-                    <b>'._l('Description').':</b> '.pur_html_entity_decode($pvalue_description).'
-                  </td>
-                </tr>';
+                $pur_bills_bifurcation_items = [];
+                if (!empty($pur_bills_bifurcation_exist)) {
+                    $pur_bills_bifurcation_items = array_values(
+                        array_filter($pur_bills_bifurcation_exist, function ($row) use ($bill_item_id) {
+                            return $row['bill_item_id'] == $bill_item_id;
+                        })
+                    );
+                }
+                $rowspan = max(count($pur_bills_bifurcation_items), 1);
+                if (!empty($pur_bills_bifurcation_items)) {
+                    foreach ($pur_bills_bifurcation_items as $pbkey => $pbvalue) {
+                        $bill_unit_price = ($pvalue['unit_price'] * $pbvalue['bill_percentage']) / 100;
+                        if ($pbkey == 0) {
+                            $html .= '<tr class="pay_cert_value">
+                                <td rowspan="'.$rowspan.'">
+                                    '.$item_name.'
+                                    <br /><br />
+                                    <b>'._l('Description').':</b> '.$pvalue_description.'
+                                </td>
+                                <td>'.$pbvalue['item_description'].'</td>';
+                        } else {
+                            $html .= '<tr class="pay_cert_value">
+                                <td>'.$pbvalue['item_description'].'</td>';
+                        }
+                        $html .= '<td>'.$pbvalue['bill_percentage'].'%</td>';
+                        $html .= '<td>'.app_format_money($bill_unit_price, $base_currency->symbol).'</td>';
+                        if(!empty($pur_pc_bills_bifurcation_exist) && !empty($payment_certificates)) {
+                            foreach ($payment_certificates as $pckey => $pcvalue) {
+                                $pc_id = $pcvalue['id'];
+                                $item_id = $pbvalue['item_id'];
+                                $pur_pc_bills_bifurcation_items = array_values(
+                                    array_filter($pur_pc_bills_bifurcation_exist, function ($row) use ($bill_item_id, $pc_id, $item_id) {
+                                        return ($row['bill_item_id'] == $bill_item_id && $row['pc_id'] == $pc_id && $row['item_id'] == $item_id);
+                                    })
+                                );
+                                if(!empty($pur_pc_bills_bifurcation_items)) {
+                                    foreach ($pur_pc_bills_bifurcation_items as $gbbkey => $gbbvalue) {
+                                        $bill_hold_percentage = $pbvalue['bill_percentage'] - $gbbvalue['hold'];
+                                        $billed_amount = 0;
+                                        if ($bill_hold_percentage > 0) {
+                                            $billed_amount = $gbbvalue['billed_quantity'] * (($pvalue['unit_price'] * $bill_hold_percentage) / 100);
+                                        }
+                                        $html .= '<td>' . $gbbvalue['billed_quantity'] . '</td>';
+                                        $html .= '<td>'.app_format_money($billed_amount, $base_currency->symbol).'</td>';
+                                    }
+                                } else {
+                                    $html .= '<td>' . number_format(0, 4) . '</td>';
+                                    $html .= '<td>'.app_format_money(0, $base_currency->symbol).'</td>';
+                                }
+                            }
+                        }
+                        $html .= '</tr>';
+                    }
+                } else {
+                    $html .= '<tr class="pay_cert_value">
+                        <td rowspan="1">
+                            '.$item_name.'
+                            <br /><br />
+                            <b>'._l('Description').':</b> '.$pvalue_description.'
+                        </td>';
+                        if(!empty($pur_bills_bifurcation_exist)) {
+                            $html .= '<td></td>';
+                            $html .= '<td></td>';
+                        }
+                        $html .= '<td></td>';
+                    $html .= '</tr>';
+                }
             }
         }
 
