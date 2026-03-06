@@ -60,6 +60,11 @@ if ($estimate->currency != 0) {
                      </a>
                   </li>
                   <li role="presentation">
+                     <a href="#checklist" aria-controls="checklist" role="tab" data-toggle="tab">
+                        <?php echo _l('Checklist'); ?>
+                     </a>
+                  </li>
+                  <li role="presentation">
                      <a href="#tab_activity" aria-controls="tab_activity" role="tab" data-toggle="tab">
                         <?php echo _l('invoice_view_activity_tooltip'); ?>
                      </a>
@@ -1099,7 +1104,9 @@ if ($estimate->currency != 0) {
                            </thead>
                            <tbody>
                               <?php $sr_no = 1;
-                              foreach ($qor as $val) { ?>
+                              foreach ($qor as $val) { 
+                                  if ($val['form_type'] === 'qor' || $val['form_type'] === 'qcr') {
+                                    ?>
 
                                  <tr>
                                     <td><?php echo $sr_no++; ?></td>
@@ -1113,6 +1120,7 @@ if ($estimate->currency != 0) {
                                     </td>
                                  </tr>
                               <?php $sr_no++;
+                                  }
                               } ?>
                            </tbody>
                         </table>
@@ -1121,7 +1129,51 @@ if ($estimate->currency != 0) {
                   </div>
                </div>
             </div>
+            
 
+            <div role="tabpanel" class="tab-pane ptop10" id="checklist">
+               <div class="row">
+                  <div class="col-md-12">
+                     <div class="checklist-feed">
+                        <a href="<?php echo admin_url('purchase/add_checklist/' . $estimate->id.'/work_order'); ?>" target="_blank" class="btn btn-success pull-right"><i class="fa fa-plus"></i><?php echo ' ' . _l('Add'); ?></a>
+
+
+                        <div class="clearfix"></div>
+                        <table class="table dt-table">
+                           <thead>
+                              <th>#</th>
+                              <th><?php echo _l('Subject'); ?></th>
+                              <th><?php echo _l('Departement'); ?></th>
+                              <th><?php echo _l('Date'); ?></th>
+                              <th><?php echo _l('Options'); ?></th>
+                           </thead>
+                           <tbody>
+                              <?php $sr_no = 1;
+                              foreach ($qor as $val) { 
+                                 if ($val['form_type'] !== 'qor' && $val['form_type'] !== 'qcr') {
+                                 ?>
+                                 
+                                 <tr>
+                                    <td><?php echo $sr_no++; ?></td>
+                                    <td><?php echo $val['subject'] ?></td>
+                                    <td><?php echo get_department_by_id($val['department']); ?></td>
+                                    <td><?php echo date('d M, Y', strtotime($val['date'])); ?></td>
+
+                                    <td>
+                                       <?php $url   = admin_url('forms/form/' . $val['formid']) . '?tab=settings'; ?>
+                                       <a href="<?php echo $url; ?>" target="_blank" class="btn btn-default btn-icon" data-toggle="tooltip" data-placement="top" title="<?php echo _l('View'); ?>"><i class="fa fa-eye "></i></a>
+                                    </td>
+                                 </tr>
+                              <?php $sr_no++;
+                                 }
+                              } ?>
+                           </tbody>
+                        </table>
+                     </div>
+
+                  </div>
+               </div>
+            </div>
          </div>
       </div>
    </div>

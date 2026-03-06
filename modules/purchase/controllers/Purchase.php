@@ -17666,7 +17666,7 @@ class purchase extends AdminController
     }
 
 
-    public function add_quality_report($po_wo_id = false,$po_or_wo)
+    public function add_quality_report($po_wo_id = false, $po_or_wo)
     {
         $this->load->model('forms_model');
         if ($this->input->post()) {
@@ -17683,16 +17683,16 @@ class purchase extends AdminController
         $this->load->model('departments_model');
         // $check_po_wo_id = check_po_wo_id($po_wo_id);
 
-        
-        if($po_or_wo == 'pur_orders'){
+
+        if ($po_or_wo == 'pur_orders') {
             $po_data = get_po_data($po_wo_id);
 
             $data['form_name'] = 'Quality Observation - ' . $po_data['data']->pur_order_number . ' - ' . $po_data['data']->pur_order_name;
             $data['selected_dept'] = $po_data['data']->department;
             $data['po_id'] = $po_wo_id;
             $data['vendor_id'] = $po_data['data']->vendor;
-        } elseif($po_or_wo == 'work_order'){
-            $wo_data= get_wo_data($po_wo_id);
+        } elseif ($po_or_wo == 'work_order') {
+            $wo_data = get_wo_data($po_wo_id);
             $data['form_name'] = 'Quality Observation - ' . $wo_data['data']->wo_order_number . ' - ' . $wo_data['data']->wo_order_name;
             $data['selected_dept'] = $wo_data['data']->department;
             $data['wo_id'] = $po_wo_id;
@@ -17703,7 +17703,7 @@ class purchase extends AdminController
         $data['predefined_replies'] = $this->forms_model->get_predefined_reply();
         $data['priorities']         = $this->forms_model->get_priority();
         $data['services']           = $this->forms_model->get_service();
-        
+
         $whereStaff                 = [];
         if (get_option('access_forms_to_none_staff_members') == 0) {
             $whereStaff['is_not_staff'] = 0;
@@ -17735,5 +17735,82 @@ class purchase extends AdminController
         $data['projects'] = $this->projects_model->get_items();
         add_admin_forms_js_assets();
         $this->load->view('quality_reports/add', $data);
+    }
+
+    public function add_checklist($po_wo_id = false, $po_or_wo)
+    {
+        $this->load->model('forms_model');
+        if ($this->input->post()) {
+            $data = $this->input->post();
+            $data['message'] = html_purify($this->input->post('message', false));
+            $id              = $this->forms_model->add($data, get_staff_user_id());
+            if ($id) {
+                set_alert('success', _l('new_form_added_successfully', $id));
+                if($data['pur_order_id'] != ''){
+                    redirect(admin_url('purchase/purchase_order/' . $po_wo_id));
+                }elseif ($data['wo_order_id'] != '') {
+                    redirect(admin_url('purchase/work_order/' . $data['wo_order_id']));
+                }
+               
+            }
+        }
+        // Load necessary models
+        $this->load->model('knowledge_base_model');
+        $this->load->model('departments_model');
+        // $check_po_wo_id = check_po_wo_id($po_wo_id);
+
+
+        if ($po_or_wo == 'pur_orders') {
+            $po_data = get_po_data($po_wo_id);
+
+            $data['selected_dept'] = $po_data['data']->department;
+            $data['po_id'] = $po_wo_id;
+            $data['vendor_id'] = $po_data['data']->vendor;
+        } elseif ($po_or_wo == 'work_order') {
+            $wo_data = get_wo_data($po_wo_id);
+            $data['selected_dept'] = $wo_data['data']->department;
+            $data['wo_id'] = $po_wo_id;
+        }
+
+        $data['departments']        = $this->departments_model->get();
+        $data['predefined_replies'] = $this->forms_model->get_predefined_reply();
+        $data['priorities']         = $this->forms_model->get_priority();
+        $data['services']           = $this->forms_model->get_service();
+
+        $whereStaff                 = [];
+        if (get_option('access_forms_to_none_staff_members') == 0) {
+            $whereStaff['is_not_staff'] = 0;
+        }
+        $data['staff']     = $this->staff_model->get('', $whereStaff);
+        $data['articles']  = $this->knowledge_base_model->get();
+        $data['bodyclass'] = 'form';
+        $data['title']     = _l('New Checklist');
+
+        if ($this->input->get('project_id') && $this->input->get('project_id') > 0) {
+            // request from project area to create new form
+            $data['project_id'] = $this->input->get('project_id');
+            $data['userid']     = get_client_id_by_project_id($data['project_id']);
+            if (total_rows(db_prefix() . 'contacts', ['active' => 1, 'userid' => $data['userid']]) == 1) {
+                $contact = $this->clients_model->get_contacts($data['userid']);
+                if (isset($contact[0])) {
+                    $data['contact'] = $contact[0];
+                }
+            }
+        } elseif ($this->input->get('contact_id') && $this->input->get('contact_id') > 0 && $this->input->get('userid')) {
+            $contact_id = $this->input->get('contact_id');
+            if (total_rows(db_prefix() . 'contacts', ['active' => 1, 'id' => $contact_id]) == 1) {
+                $contact = $this->clients_model->get_contact($contact_id);
+                if ($contact) {
+                    $data['contact'] = (array) $contact;
+                }
+            }
+        }
+        $data['projects'] = $this->projects_model->get_items();
+        $data['form_listing'] = $this->forms_model->get_form_listing();
+        unset($data['form_listing'][0]);
+
+        $data['form_listing'] = array_values($data['form_listing']);
+        add_admin_forms_js_assets();
+        $this->load->view('checklists/add', $data);
     }
 }
