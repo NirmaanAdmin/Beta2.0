@@ -25556,6 +25556,12 @@ class Purchase_model extends App_Model
                             $html .= '<td></td>';
                             $html .= '<td></td>';
                         }
+                        if(!empty($pur_pc_bills_bifurcation_exist) && !empty($payment_certificates)) {
+                            foreach ($payment_certificates as $pckey => $pcvalue) {
+                                $html .= '<td></td>';
+                                $html .= '<td></td>';
+                            }
+                        }
                         $html .= '<td></td>';
                     $html .= '</tr>';
                 }
