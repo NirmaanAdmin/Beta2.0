@@ -22,16 +22,16 @@ $aColumns = [
     '1',
     db_prefix() . 'expenses.id as id',
     db_prefix() . 'expenses_categories.name as category_name',
-    db_prefix() . 'expenses.amount as amount',
+    db_prefix() . 'expenses.vendor as vendor',
     db_prefix() . 'expenses.expense_name as expense_name',
     2,
     db_prefix() . 'expenses.date as date',
+    db_prefix() . 'expenses.amount as amount',
     db_prefix() . 'projects.name as project_name',
     '(CASE WHEN ' . db_prefix() . 'expenses.vbt_id IS NOT NULL THEN 2 ELSE 3 END) as converted',
     db_prefix() . 'expenses.vbt_id as vbt_id',
     db_prefix() . 'expenses.reference_no as reference_no',
     db_prefix() . 'expenses.paymentmode as paymentmode',
-    db_prefix() . 'expenses.vendor as vendor',
     1,
 ];
 
@@ -224,6 +224,8 @@ foreach ($rResult as $aRow) {
 
     $row[] = $categoryOutput;
 
+    $row[] = '<a href="' . admin_url('purchase/vendor/' . $aRow['vendor']) . '">' . e($aRow['vendor_name']) . '</a>';
+
     $total = $aRow['amount'];
     $tmpTotal = $total;
     if ($aRow['tax'] != 0) {
@@ -234,7 +236,6 @@ foreach ($rResult as $aRow) {
         $tax = get_tax_by_id($aRow['tax2']);
         $total += ($tmpTotal / 100 * $tax->taxrate);
     }
-    $row[] = app_format_money($total, $aRow['currency_name']);
     $row[] = '<a href="' . admin_url('expenses/list_expenses/' . $aRow['id']) . '" onclick="init_expense(' . $aRow['id'] . ');return false;">' . e($aRow['expense_name']) . '</a>';
     $expense_files = get_all_expense_files($aRow['id']);
     if(!empty($expense_files)) {
@@ -247,6 +248,7 @@ foreach ($rResult as $aRow) {
         $row[] = '';
     }
     $row[] = date('d M, Y', strtotime($aRow['date']));
+    $row[] = app_format_money($total, $aRow['currency_name']);
     $row[] = '<a href="' . admin_url('projects/view/' . $aRow['project_id']) . '">' . e($aRow['project_name']) . '</a>';
 
     if($aRow['converted'] == 2) {
@@ -273,8 +275,6 @@ foreach ($rResult as $aRow) {
         }
     }
     $row[] = $paymentModeOutput;
-
-    $row[] = '<a href="' . admin_url('purchase/vendor/' . $aRow['vendor']) . '">' . e($aRow['vendor_name']) . '</a>';
 
     $pdf = '';
     $pdf = '<div class="btn-group display-flex">';

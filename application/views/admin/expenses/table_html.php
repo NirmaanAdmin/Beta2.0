@@ -172,16 +172,16 @@ if ($withBulkActions === true && $hasPermission) { ?>
         </th>
         <th><?php echo _l('the_number_sign'); ?></th>
         <th><?php echo _l('expense_dt_table_heading_category'); ?></th>
-        <th><?php echo _l('expense_dt_table_heading_amount'); ?></th>
+        <th>Vendor</th>
         <th><?php echo _l('expense_name'); ?></th>
         <th><?php echo _l('receipt'); ?></th>
         <th><?php echo _l('expense_dt_table_heading_date'); ?></th>
+        <th><?php echo _l('expense_dt_table_heading_amount'); ?></th>
         <th><?php echo _l('project'); ?></th>
         <th>Converted?</th>
         <th><?php echo _l('invoice'); ?></th>
         <th><?php echo _l('expense_dt_table_heading_reference_no'); ?></th>
         <th><?php echo _l('expense_dt_table_heading_payment_mode'); ?></th>
-        <th>Vendor</th>
         <th>Options</th>
       </tr>
     </thead>
@@ -191,11 +191,11 @@ if ($withBulkActions === true && $hasPermission) { ?>
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
       <td class="total_expense_amount"></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
       <td></td>
       <td></td>
       <td></td>
