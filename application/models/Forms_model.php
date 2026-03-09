@@ -1117,12 +1117,33 @@ class Forms_model extends App_Model
                     $new_order = $data['items'];
                     unset($data['items']);
                 }
+            } elseif ($data['form_type'] == "wpr") {
+                $wpr_form = [];
+                unset(
+                    $data['permit_no'],
+                    $data['date_issued'],
+                    $data['isedit'],
+                    $data['type_of_work'],
+                    $data['area'],
+                    $data['agency'],
+                    $data['pic'],
+                    $data['start_time'],
+                    $data['end_time'],
+                    $data['risk_level'],
+                    $data['safety_measures'],
+                    $data['permit_status'],
+                    $data['remarks'],
+                );
+                $new_order = [];
+                if (isset($data['newitems'])) {
+                    $new_order = $data['newitems'];
+                    unset($data['newitems']);
+                }
             }
         }
 
         // $data['message'] = remove_emojis($data['message']);
         $data = hooks()->apply_filters('before_form_created', $data, $admin);
-
         $this->db->insert(db_prefix() . 'forms', $data);
         $formid = $this->db->insert_id();
         if ($formid) {
@@ -1640,6 +1661,35 @@ class Forms_model extends App_Model
                         }
                     }
                 }
+            } elseif ($data['form_type'] == "wpr") {
+                if (isset($wpr_form)) {
+                    if (!empty($wpr_form)) {
+                        $wpr_form['form_id'] = $formid;
+                        $this->db->insert(db_prefix() . $data['form_type'] . '_form', $wpr_form);
+                    }
+                }
+                if (isset($new_order)) {
+                    if (!empty($new_order)) {
+                        foreach ($new_order as $key => $value) {
+                            $dt_data = [];
+                            $dt_data['form_id'] = $formid;
+                            $dt_data['permit_no'] = $value['permit_no'];
+                            $dt_data['date_issued'] = $value['date_issued'];
+                            $dt_data['type_of_work'] = $value['type_of_work'];
+                            $dt_data['area'] = $value['area'];
+                            $dt_data['agency'] = $value['agency'];
+                            $dt_data['pic'] = $value['pic'];
+                            $dt_data['start_time'] = $value['start_time'];
+                            $dt_data['end_time'] = $value['end_time'];
+                            $dt_data['risk_level'] = $value['risk_level'];
+                            $dt_data['safety_measures'] = $value['safety_measures'];
+                            $dt_data['permit_status'] = $value['permit_status'];
+                            $dt_data['remarks'] = $value['remarks'];
+                            $this->db->insert(db_prefix() . $data['form_type'] . '_form_detail', $dt_data);
+                            $qcr_detail_id = $this->db->insert_id();
+                        }
+                    }
+                }
             }
             handle_tags_save($tags, $formid, 'form');
 
@@ -1902,7 +1952,7 @@ class Forms_model extends App_Model
         if ($data['duedate'] != '') {
             $data['duedate'] = to_sql_date($data['duedate']);
         }
-
+       
         if ($formBeforeUpdate->form_type == "dpr") {
             $dpr_form = array();
             $dpr_form['client_id'] = $data['client_id'];
@@ -2203,6 +2253,41 @@ class Forms_model extends App_Model
             if (isset($data['items'])) {
                 $update_order = $data['items'];
                 unset($data['items']);
+            }
+        } elseif ($formBeforeUpdate->form_type == "wpr") {
+            $wpr_form = [];
+            unset(
+                $data['permit_no'],
+                $data['date_issued'],
+                $data['isedit'],
+                $data['type_of_work'],
+                $data['area'],
+                $data['agency'],
+                $data['pic'],
+                $data['start_time'],
+                $data['end_time'],
+                $data['risk_level'],
+                $data['safety_measures'],
+                $data['permit_status'],
+                $data['remarks'],
+            );
+            $new_order = [];
+            if (isset($data['newitems'])) {
+
+                $new_order = $data['newitems'];
+                unset($data['newitems']);
+            }
+
+            $update_order = [];
+            if (isset($data['items'])) {
+                $update_order = $data['items'];
+                unset($data['items']);
+            }
+
+            $remove_order = [];
+            if (isset($data['removed_items'])) {
+                $remove_order = $data['removed_items'];
+                unset($data['removed_items']);
             }
         }
 
@@ -3028,6 +3113,79 @@ class Forms_model extends App_Model
                             }
                         }
                         $sr++;
+                    }
+                }
+            }
+        } elseif ($formBeforeUpdate->form_type == "wpr") {
+            if (isset($wpr_form)) {
+                if (!empty($wpr_form)) {
+                    $this->db->where('form_id', $data['formid']);
+                    $this->db->update(db_prefix() . $formBeforeUpdate->form_type . '_form', $wpr_form);
+                    if ($this->db->affected_rows() > 0) {
+                        $affectedRows++;
+                    }
+                }
+            }
+
+            if (isset($new_order)) {
+                if (!empty($new_order)) {
+                    foreach ($new_order as $key => $value) {
+                        $dt_data = [];
+                        $dt_data['form_id'] = $data['formid'];
+                        $dt_data['permit_no'] = $value['permit_no'];
+                        $dt_data['date_issued'] = $value['date_issued'];
+                        $dt_data['type_of_work'] = $value['type_of_work'];
+                        $dt_data['area'] = $value['area'];
+                        $dt_data['agency'] = $value['agency'];
+                        $dt_data['pic'] = $value['pic'];
+                        $dt_data['start_time'] = $value['start_time'];
+                        $dt_data['end_time'] = $value['end_time'];
+                        $dt_data['risk_level'] = $value['risk_level'];
+                        $dt_data['safety_measures'] = $value['safety_measures'];
+                        $dt_data['permit_status'] = $value['permit_status'];
+                        $dt_data['remarks'] = $value['remarks'];
+                        $this->db->insert(db_prefix() . $formBeforeUpdate->form_type . '_form_detail', $dt_data);
+                        $new_insert_id = $this->db->insert_id();
+                        if ($new_insert_id) {
+                            $affectedRows++;
+                        }
+                    }
+                }
+            }
+
+            if (isset($update_order)) {
+                if (!empty($update_order)) {
+                    foreach ($update_order as $key => $value) {
+                        $dt_data = [];
+                        $dt_data['form_id'] = $data['formid'];
+                        $dt_data['permit_no'] = $value['permit_no'];
+                        $dt_data['date_issued'] = $value['date_issued'];
+                        $dt_data['type_of_work'] = $value['type_of_work'];
+                        $dt_data['area'] = $value['area'];
+                        $dt_data['agency'] = $value['agency'];
+                        $dt_data['pic'] = $value['pic'];
+                        $dt_data['start_time'] = $value['start_time'];
+                        $dt_data['end_time'] = $value['end_time'];
+                        $dt_data['risk_level'] = $value['risk_level'];
+                        $dt_data['safety_measures'] = $value['safety_measures'];
+                        $dt_data['permit_status'] = $value['permit_status'];
+                        $dt_data['remarks'] = $value['remarks'];
+                        $this->db->where('id', $value['id']);
+                        $this->db->update(db_prefix() . $formBeforeUpdate->form_type . '_form_detail', $dt_data);
+                        if ($this->db->affected_rows() > 0) {
+                            $affectedRows++;
+                        }
+                    }
+                }
+            }
+
+            if (isset($remove_order)) {
+                if (!empty($remove_order)) {
+                    foreach ($remove_order as $key => $value) {
+                        $this->db->where('id', $value);
+                        if ($this->db->delete(db_prefix() . $formBeforeUpdate->form_type . '_form_detail')) {
+                            $affectedRows++;
+                        }
                     }
                 }
             }
@@ -4406,21 +4564,21 @@ class Forms_model extends App_Model
 
     public function get_progress_report_type()
     {
-        $this->db->order_by('id', 'ASC'); 
+        $this->db->order_by('id', 'ASC');
         $query = $this->db->get(db_prefix() . 'progress_report_type');
         return $query->result_array();
     }
 
     public function get_progress_report_sub_type()
     {
-        $this->db->order_by('id', 'ASC'); 
+        $this->db->order_by('id', 'ASC');
         $query = $this->db->get(db_prefix() . 'progress_report_sub_type');
         return $query->result_array();
     }
 
     public function get_progress_report_machinary()
     {
-        $this->db->order_by('id', 'ASC'); 
+        $this->db->order_by('id', 'ASC');
         $query = $this->db->get(db_prefix() . 'progress_report_machinary');
         return $query->result_array();
     }
@@ -4520,16 +4678,16 @@ class Forms_model extends App_Model
         $result = array();
         $dpr_form_detail = $this->get_dpr_form_detail($id);
 
-        if(!empty($dpr_form_detail)) {
+        if (!empty($dpr_form_detail)) {
             $unique_sub_types = array_values(array_unique(array_column($dpr_form_detail, 'sub_type')));
-            if(!empty($unique_sub_types)) {
+            if (!empty($unique_sub_types)) {
                 foreach ($unique_sub_types as $key => $value) {
                     $sub_type_array = array();
                     $this->db->where('id', $value);
                     $progress_report_sub_type = $this->db->get(db_prefix() . 'progress_report_sub_type')->row();
                     $sub_type_array['name'] = $progress_report_sub_type->name;
 
-                    $sub_type_filtered = array_filter($dpr_form_detail, function($item) use ($value) {
+                    $sub_type_filtered = array_filter($dpr_form_detail, function ($item) use ($value) {
                         return $item['sub_type'] == $value;
                     });
                     $sub_type_array['male'] = !empty($sub_type_filtered) ? array_sum(array_column($sub_type_filtered, 'male')) : 0;
@@ -4540,14 +4698,14 @@ class Forms_model extends App_Model
                     $result[] = $sub_type_array;
 
                     $unique_type = array_values(array_unique(array_column($sub_type_filtered, 'type')));
-                    if(!empty($unique_type)) {
+                    if (!empty($unique_type)) {
                         foreach ($unique_type as $ukey => $uvalue) {
                             $type_array = array();
                             $this->db->where('id', $uvalue);
                             $progress_report_type = $this->db->get(db_prefix() . 'progress_report_type')->row();
                             $type_array['name'] = $progress_report_type->name;
 
-                            $type_filtered = array_filter($sub_type_filtered, function($item) use ($value, $uvalue) {
+                            $type_filtered = array_filter($sub_type_filtered, function ($item) use ($value, $uvalue) {
                                 return $item['sub_type'] == $value && $item['type'] == $uvalue;
                             });
                             $type_array['male'] = !empty($type_filtered) ? array_sum(array_column($type_filtered, 'male')) : 0;
@@ -4570,16 +4728,16 @@ class Forms_model extends App_Model
         $result = array();
         $dpr_form_detail = $this->get_dpr_form_detail($id);
 
-        if(!empty($dpr_form_detail)) {
+        if (!empty($dpr_form_detail)) {
             $unique_machinery = array_values(array_unique(array_column($dpr_form_detail, 'machinery')));
-            if(!empty($unique_machinery)) {
+            if (!empty($unique_machinery)) {
                 $unique_machinery = array_values(array_filter($unique_machinery));
                 foreach ($unique_machinery as $key => $value) {
                     $machinery_array = array();
                     $this->db->where('id', $value);
                     $progress_report_machinary = $this->db->get(db_prefix() . 'progress_report_machinary')->row();
                     $machinery_array['name'] = $progress_report_machinary->name;
-                    $machinery_filtered = array_filter($dpr_form_detail, function($item) use ($value) {
+                    $machinery_filtered = array_filter($dpr_form_detail, function ($item) use ($value) {
                         return $item['machinery'] == $value;
                     });
                     $machinery_array['total'] = !empty($machinery_filtered) ? array_sum(array_column($machinery_filtered, 'total_machinery')) : 0;
@@ -4661,11 +4819,11 @@ class Forms_model extends App_Model
         }
 
         // 6. Convert values to Chart.js compatible datasets
-        $total_workforce_datasets = array_map(function($label) use ($total_workforce_values) {
+        $total_workforce_datasets = array_map(function ($label) use ($total_workforce_values) {
             return ['label' => $label, 'data' => array_values($total_workforce_values[$label])];
         }, array_keys($total_workforce_values));
 
-        $stacked_labor_datasets = array_map(function($label) use ($stacked_labor_values) {
+        $stacked_labor_datasets = array_map(function ($label) use ($stacked_labor_values) {
             return ['label' => $label, 'data' => array_values($stacked_labor_values[$label])];
         }, array_keys($stacked_labor_values));
 
@@ -4757,5 +4915,76 @@ class Forms_model extends App_Model
         $this->db->where('formid', $id);
         $query = $this->db->get(db_prefix() . 'forms');
         return $query->row();
+    }
+
+    public function create_wpr_row_template($name = '', $permit_no = '', $date_issued = '', $type_of_work = '', $area = '', $agency = '', $pic = '', $start_time = '', $end_time = '', $risk_level = '', $safety_measures = '', $permit_status = '', $remarks = '', $is_edit = false, $item_key = '', $value = [])
+    {
+        $row = '';
+        $name_permit_no = 'permit_no';
+        $name_date_issued = 'date_issued';
+        $name_type_of_work = 'type_of_work';
+        $name_area = 'area';
+        $name_agency = 'agency';
+        $name_pic = 'pic';
+        $name_start_time = 'start_time';
+        $name_end_time = 'end_time';
+        $name_risk_level = 'risk_level';
+        $name_safety_measures = 'safety_measures';
+        $name_permit_status = 'permit_status';
+        $name_remarks = 'remarks';
+
+        if ($name == '') {
+            $row .= '<tr class="main">';
+            $manual = true;
+        } else {
+            $manual = false;
+            $row .= '<tr><input type="hidden" class="ids" name="' . $name . '[id]" value="' . $item_key . '">';
+            $name_permit_no = $name . '[permit_no]';
+            $name_date_issued = $name . '[date_issued]';
+            $name_type_of_work = $name . '[type_of_work]';
+            $name_area = $name . '[area]';
+            $name_agency = $name . '[agency]';
+            $name_pic = $name . '[pic]';
+            $name_start_time = $name . '[start_time]';
+            $name_end_time = $name . '[end_time]';
+            $name_risk_level = $name . '[risk_level]';
+            $name_safety_measures = $name . '[safety_measures]';
+            $name_permit_status = $name . '[permit_status]';
+            $name_remarks = $name . '[remarks]';
+        }
+
+
+        $row .= '<td class="permit_no">' . render_input($name_permit_no, '', $permit_no) . '</td>';
+        $row .= '<td class="date_issued">' . render_input($name_date_issued, '', $date_issued, 'date') . '</td>';
+        $row .= '<td class="type_of_work">' . render_input($name_type_of_work, '', $type_of_work) . '</td>';
+        $row .= '<td class="area">' . render_input($name_area, '', $area) . '</td>';
+        $row .= '<td class="agency">' . get_vendor($name_agency, $agency) . '</td>';
+        $row .= '<td class="pic">' . render_input($name_pic, '', $pic) . '</td>';
+        $row .= '<td class="start_time">' . render_input($name_start_time, '', $start_time, 'time') . '</td>';
+        $row .= '<td class="end_time">' . render_input($name_end_time, '', $end_time, 'time') . '</td>';
+        $row .= '<td class="risk_level">' . get_wpr_risk_level($name_risk_level, $risk_level) . '</td>';
+        $row .= '<td class="safety_measures">' . render_input($name_safety_measures, '', $safety_measures) . '</td>';
+        $row .= '<td class="permit_status">' . get_wpr_status($name_permit_status, $permit_status) . '</td>';
+        $row .= '<td class="remarks">' . render_textarea($name_remarks, '', $remarks, ['rows' => 2, 'placeholder' => _l('Remarks')]) . '</td>';
+        if ($name == '') {
+            $row .= '<td><button type="button" class="btn pull-right btn-info wpr-add-item-to-table"><i class="fa fa-check"></i></button></td>';
+        } else {
+            $row .= '<td><a href="#" class="btn btn-danger pull-right" onclick="wpr_delete_item(this,' . $item_key . ',\'.invoice-item\'); return false;"><i class="fa fa-trash"></i></a></td>';
+        }
+
+        $row .= '</tr>';
+        return $row;
+    }
+
+    public function get_wpr_form($form_id)
+    {
+        $this->db->where('form_id', $form_id);
+        return $this->db->get(db_prefix() . 'wpr_form')->row();
+    }
+
+    public function get_wpr_form_detail($form_id)
+    {
+        $this->db->where('form_id', $form_id);
+        return $this->db->get(db_prefix() . 'wpr_form_detail')->result_array();
     }
 }

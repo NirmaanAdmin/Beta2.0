@@ -637,6 +637,40 @@ function get_qcr_status($name_status, $status)
     ];
     return render_select($name_status, $result, array('id', 'name'), '', $status);
 }
+function get_wpr_status($name_status, $status)
+{
+    $result = array();
+    $result = [
+        [
+            'id' => 1,
+            'name' => 'Close',
+        ],
+        [
+            'id' => 2,
+            'name' => 'Open',
+        ]
+    ];
+    return render_select($name_status, $result, array('id', 'name'), '', $status);
+}
+function get_wpr_risk_level($name_risk_level, $risk_level)
+{
+    $result = array();
+    $result = [
+        [
+            'id' => 1,
+            'name' => 'Low',
+        ],
+        [
+            'id' => 2,
+            'name' => 'Medium',
+        ],
+        [
+            'id' => 3,
+            'name' => 'High',
+        ]
+    ];
+    return render_select($name_risk_level, $result, array('id', 'name'), '', $risk_level);
+}
 function get_qcr_category_by_id($category_id)
 {
     $category = '';

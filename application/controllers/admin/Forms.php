@@ -886,6 +886,7 @@ class Forms extends AdminController
                 'facc' => ['has_attachments' => true],
                 'cosc' => ['has_attachments' => true],
                 'qor'  => ['has_attachments' => true],
+                'wpr'  => ['has_attachments' => false],
             ];
 
             if (isset($formConfigs[$form_type])) {
@@ -918,9 +919,63 @@ class Forms extends AdminController
             }
             $data['isedit'] = 1;
             $data['form_id'] = $form_id;
+            $wpr_row_template = $this->forms_model->create_wpr_row_template();
+
+            $wpr_form = $this->forms_model->get_wpr_form($form_id);
+            $wpr_form_detail = $this->forms_model->get_wpr_form_detail($form_id);
+            if (!empty($wpr_form_detail)) {
+                $index_order = 0;
+                foreach ($wpr_form_detail as $value) {
+                    $index_order++;
+                    $wpr_row_template .= $this->forms_model->create_wpr_row_template(
+                        'items[' . $index_order . ']',
+                        $value['permit_no'],
+                        $value['date_issued'],
+                        $value['type_of_work'],
+                        $value['area'],
+                        $value['agency'],
+                        $value['pic'],
+                        $value['start_time'],
+                        $value['end_time'],
+                        $value['risk_level'],
+                        $value['safety_measures'],
+                        $value['permit_status'],
+                        $value['remarks'],
+                        true,
+                        $value['id']
+                    );
+                }
+            }
+            $data['wpr_form'] = $wpr_form;
+        } else {
+            if ($form_type == 'wpr') {
+                $wpr_row_template = $this->forms_model->create_wpr_row_template();
+            }
         }
         $data['form_items'] = $form_items;
+
+        $data['wpr_row_template'] = $wpr_row_template;
         $this->load->view("admin/forms/form_design/{$form_type}", $data);
+    }
+
+    public function get_wpr_row_template()
+    {
+        $name = $this->input->post('name');
+        $permit_no = $this->input->post('permit_no');
+        $date_issued = $this->input->post('date_issued');
+        $type_of_work = $this->input->post('type_of_work');
+        $area = $this->input->post('area');
+        $agency = $this->input->post('agency');
+        $pic = $this->input->post('pic');
+        $start_time = $this->input->post('start_time');
+        $end_time = $this->input->post('end_time');
+        $risk_level = $this->input->post('risk_level');
+        $safety_measures = $this->input->post('safety_measures');
+        $permit_status = $this->input->post('permit_status');
+        $remarks = $this->input->post('remarks');
+        $item_key = $this->input->post('item_key');
+
+        echo $this->forms_model->create_wpr_row_template($name, $permit_no, $date_issued, $type_of_work, $area, $agency, $pic, $start_time, $end_time, $risk_level, $safety_measures, $permit_status, $remarks, false, $item_key);
     }
 
     public function get_qcr_row_template()
