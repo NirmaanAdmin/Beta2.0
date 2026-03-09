@@ -29,12 +29,12 @@
                                         <i class="<?php echo get_mime_class($avalue['filetype']); ?>"></i> <a
                                             href="<?php echo site_url('download/file/expense/' . $avalue['id']); ?>"><?php echo e($avalue['file_name']); ?></a>
                                     </div>
-                                    <?php if ($avalue['staffid'] == get_staff_user_id() || is_admin()) { ?>
+                                    <?php /* if ($avalue['staffid'] == get_staff_user_id() || is_admin()) { */ ?>
                                         <div class="col-md-2 text-right">
                                             <a href="<?php echo admin_url('expenses/delete_expense_attachment/' . $avalue['id']); ?>"
                                                 class="text-danger _delete"><i class="fa fa fa-times"></i></a>
                                         </div>
-                                    <?php } ?>
+                                    <?php /* } */ ?>
                                 </div>
                             <?php } ?>
                         <?php } ?>

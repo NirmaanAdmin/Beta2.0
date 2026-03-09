@@ -479,7 +479,7 @@ class Expenses extends AdminController
         $this->db->where('rel_type', 'expense');
         $file = $this->db->get(db_prefix() . 'files')->row();
 
-        if ($file->staffid == get_staff_user_id() || is_admin()) {
+        // if ($file->staffid == get_staff_user_id() || is_admin()) {
             $success = $this->expenses_model->delete_expense_attachment($file->rel_id, $id);
             if ($success) {
                 set_alert('success', _l('deleted', _l('expense_receipt')));
@@ -491,9 +491,9 @@ class Expenses extends AdminController
             } else {
                 redirect(admin_url('expenses/list_expenses/' . $file->rel_id));
             }
-        } else {
-            access_denied('expenses');
-        }
+        // } else {
+        //     access_denied('expenses');
+        // }
     }
 
     public function applied_to_invoice()
@@ -714,5 +714,199 @@ class Expenses extends AdminController
             'success' => true,
             'options' => $orders
         ));
+    }
+
+    public function import_file_xlsx_expense()
+    {
+        if (!is_admin() && !has_permission('expenses', '', 'create')) {
+            access_denied(_l('expenses'));
+        }
+        if (!class_exists('XLSXReader_fin')) {
+            require_once(FCPATH . 'assets/plugins/XLSXReader/XLSXReader.php');
+        }
+        require_once(FCPATH . 'assets/plugins/XLSXWriter/xlsxwriter.class.php');
+        $total_row_false = 0;
+        $total_rows_data = 0;
+        $dataerror = 0;
+        $total_row_success = 0;
+        $total_rows_data_error = 0;
+        $filename = '';
+
+        if (isset($_FILES['file_csv']['name']) && $_FILES['file_csv']['name'] != '') {
+            $path_before = FCPATH . 'FILE_ERROR_EXPENSE' . get_staff_user_id() . '.xlsx';
+            if (file_exists($path_before)) {
+                unlink(FCPATH . 'FILE_ERROR_EXPENSE' . get_staff_user_id() . '.xlsx');
+            }
+            if (isset($_FILES['file_csv']['name']) && $_FILES['file_csv']['name'] != '') {
+                $tmpFilePath = $_FILES['file_csv']['tmp_name'];
+                if (!empty($tmpFilePath) && $tmpFilePath != '') {
+                    $tmpDir = TEMP_FOLDER . '/' . time() . uniqid() . '/';
+                    if (!file_exists(TEMP_FOLDER)) {
+                        mkdir(TEMP_FOLDER, 0755);
+                    }
+                    if (!file_exists($tmpDir)) {
+                        mkdir($tmpDir, 0755);
+                    }
+                    $newFilePath = $tmpDir . $_FILES['file_csv']['name'];
+                    if (move_uploaded_file($tmpFilePath, $newFilePath)) {
+                        $writer_header = array(
+                            _l('Vendors') => 'string',
+                            _l('dt_expense_description') => 'string',
+                            _l('expense_category') => 'string',
+                            _l('expense_add_edit_date') => 'string',
+                            _l('expense_add_edit_amount') => 'string',
+                            _l('payment_mode') => 'string',
+                            _l('error') => 'string',
+                        );
+
+                        $widths_arr = array();
+                        for ($i = 1; $i <= count($writer_header); $i++) {
+                            $widths_arr[] = 40;
+                        }
+                        $writer = new XLSXWriter();
+                        $writer->writeSheetHeader('Sheet1', $writer_header,  $col_options = ['widths' => $widths_arr]);
+                        $xlsx = new XLSXReader_fin($newFilePath);
+                        $sheetNames = $xlsx->getSheetNames();
+                        $data = $xlsx->getSheetData($sheetNames[1]);
+                        $total_rows = 0;
+                        $total_row_false = 0;
+
+                        for ($row = 1; $row < count($data); $row++) {
+                            $total_rows++;
+                            $rd = array();
+                            $flag = 0;
+                            $flag2 = 0;
+                            $string_error = '';
+                            $flag_id_vendor_id;
+                            $flag_id_expense_category;
+                            $flag_id_payment_mode;
+
+                            $value_vendor = isset($data[$row][0]) ? $data[$row][0] : '';
+                            $value_description = isset($data[$row][1]) ? $data[$row][1] : '';
+                            $value_expense_category = isset($data[$row][2]) ? $data[$row][2] : '';
+                            $value_expense_date = isset($data[$row][3]) ? $data[$row][3] : '';
+                            $value_amount = isset($data[$row][4]) ? $data[$row][4] : '';
+                            $value_payment_mode = isset($data[$row][5]) ? $data[$row][5] : '';
+
+                            if (!empty($value_vendor)) {
+                                $this->db->like('company', $value_vendor);
+                                $result = $this->db->get(db_prefix() . 'pur_vendor')->row();
+                                if (empty($result)) {
+                                    $flag_id_vendor_id = 0;
+                                } else {
+                                    $flag_id_vendor_id = $result->userid;
+                                }
+                            }
+
+                            if (empty($value_description)) {
+                                $string_error .= _l('description_of_services') . ' ' . _l('does_not_exist');
+                                $flag2 = 1;
+                            }
+
+                            if (empty($value_expense_category)) {
+                                $string_error .= _l('expense_category') . ' ' . _l('does_not_exist');
+                                $flag2 = 1;
+                            } else {
+                                $this->db->like('name', $value_expense_category);
+                                $result = $this->db->get(db_prefix() . 'expenses_categories')->row();
+                                if (empty($result)) {
+                                    $string_error .= _l('expense_category') . ' ' . _l('does_not_exist');
+                                    $flag2 = 1;
+                                } else {
+                                    $flag_id_expense_category = $result->id;
+                                }
+                            }
+
+                            if (!empty($value_expense_date)) {
+                                if (is_numeric($value_expense_date)) {
+                                    $unix_timestamp = ($value_expense_date - 25569) * 86400;
+                                    $value_expense_date = date('Y-m-d', $unix_timestamp);
+                                } else {
+                                    $value_expense_date = date('Y-m-d', strtotime($value_expense_date));
+                                }
+                            }
+
+                            if (empty($value_amount)) {
+                                $value_amount = 0.00;
+                            } else {
+                                $value_amount = str_replace(",", "", $value_amount);
+                                $value_amount = floatval($value_amount);
+                            }
+
+                            if (!empty($value_payment_mode)) {
+                                $this->db->like('name', $value_payment_mode);
+                                $result = $this->db->get(db_prefix() . 'payment_modes')->row();
+                                if (empty($result)) {
+                                    $flag_id_payment_mode = NULL;
+                                } else {
+                                    $flag_id_payment_mode = $result->id;
+                                }
+                            }
+
+                            if (($flag == 1) || $flag2 == 1) {
+                                //write error file
+                                $writer->writeSheetRow('Sheet1', [
+                                    $value_vendor,
+                                    $value_description,
+                                    $value_expense_category,
+                                    $value_expense_date,
+                                    $value_amount,
+                                    $value_payment_mode,
+                                    $string_error,
+                                ]);
+                                $total_row_false++;
+                            }
+
+                            if ($flag == 0 && $flag2 == 0) {
+                                $rd = array();
+                                $rd['vendor'] = !empty($flag_id_vendor_id) ? $flag_id_vendor_id : 0;
+                                $rd['expense_name'] = !empty($value_description) ? $value_description : NULL;
+                                $rd['note'] = '';
+                                $rd['category'] = !empty($flag_id_expense_category) ? $flag_id_expense_category : 0;
+                                $rd['date'] = !empty($value_expense_date) ? $value_expense_date : date('d-m-Y');
+                                $rd['amount'] = !empty($value_amount) ? $value_amount : 0.00;
+                                $rd['clientid'] = '';
+                                $rd['project_id'] = get_default_project();
+                                $rd['currency'] = 3;
+                                $rd['tax'] = '';
+                                $rd['tax2'] = '';
+                                $rd['paymentmode'] = !empty($flag_id_payment_mode) ? $flag_id_payment_mode : NULL;
+                                $rd['reference_no'] = '';
+                                $rd['repeat_every'] = '';
+                                $rd['repeat_every_custom'] = '1';
+                                $rd['repeat_type_custom'] = 'day';
+                                $rows[] = $rd;
+                                $this->expenses_model->add($rd);
+                            }
+                        }
+
+                        $total_rows = $total_rows;
+                        $total_row_success = isset($rows) ? count($rows) : 0;
+                        $dataerror = '';
+                        $message = 'Not enought rows for importing';
+
+                        if ($total_row_false != 0) {
+                            if (!file_exists(FCPATH . 'uploads/expenses/import_vendor_billing_tracker_error/')) {
+                                mkdir(FCPATH . 'uploads/expenses/import_vendor_billing_tracker_error/', 0755, true);
+                            }
+                            $filename = 'Import_item_error_' . get_staff_user_id() . '_' . strtotime(date('Y-m-d H:i:s')) . '.xlsx';
+                            $writer->writeToFile(str_replace($filename, 'uploads/expenses/import_vendor_billing_tracker_error/' . $filename, $filename));
+                        }
+                    }
+                } else {
+                    set_alert('warning', _l('import_upload_failed'));
+                }
+            }
+        }
+        echo json_encode([
+            'message'           => $message,
+            'total_row_success' => $total_row_success,
+            'total_row_false'   => $total_row_false,
+            'total_rows'        => $total_rows,
+            'site_url'          => site_url(),
+            'staff_id'          => get_staff_user_id(),
+            'filename'          => 'uploads/expenses/import_vendor_billing_tracker_error/' . $filename,
+
+        ]);
     }
 }

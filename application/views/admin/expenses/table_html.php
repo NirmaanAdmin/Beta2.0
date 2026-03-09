@@ -153,13 +153,25 @@ if ($withBulkActions === true && $hasPermission) { ?>
        <?php } ?>
     </select>
   </div>
-</div>
-
-<div class="row">
   <div class="col-md-1 form-group">
     <a href="javascript:void(0)" class="btn btn-info btn-icon reset_all_ot_filters">
       <?php echo _l('reset_filter'); ?>
     </a>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-offset-9 col-md-3">
+    <div style="display: flex;align-items: end;padding: 0px;">
+      <?php echo form_open_multipart(admin_url('expenses/import_file_xlsx_expense'), array('id' => 'import_form')); ?>
+      <?php echo render_input('file_csv', 'choose_excel_file', '', 'file'); ?>
+      <div class="form-group">
+        <button id="uploadfile" type="button" class="btn btn-info import" onclick="return uploadfilecsv(this);"><?php echo _l('import'); ?></button>
+        <a href="<?php echo site_url('uploads/expenses/file_sample/Sample_expense_item_en.xlsx') ?>" class="btn btn-primary">Template</a>
+      </div>
+      <?php echo form_close(); ?>
+    </div>
+    <div class="form-group" id="file_upload_response"></div>
   </div>
 </div>
 
@@ -173,7 +185,7 @@ if ($withBulkActions === true && $hasPermission) { ?>
         <th><?php echo _l('the_number_sign'); ?></th>
         <th><?php echo _l('expense_dt_table_heading_category'); ?></th>
         <th>Vendor</th>
-        <th><?php echo _l('expense_name'); ?></th>
+        <th><?php echo _l('dt_expense_description'); ?></th>
         <th><?php echo _l('receipt'); ?></th>
         <th><?php echo _l('expense_dt_table_heading_date'); ?></th>
         <th><?php echo _l('expense_dt_table_heading_amount'); ?></th>

@@ -295,13 +295,13 @@
                                             </a>
                                         </div>
 
-                                        <?php if ($avalue['staffid'] == get_staff_user_id() || is_admin()) { ?>
+                                        <?php /* if ($avalue['staffid'] == get_staff_user_id() || is_admin()) { */ ?>
                                             <a class="_delete text-danger" href="<?php echo admin_url('expenses/delete_expense_attachment/' . $avalue['id'] . '/' . 'preview'); ?>" class="text-danger"><i class="fa fa fa-times"></i></a>
                                             <a class="text-danger mleft5" href="<?php echo site_url('download/preview_image?path=' . protected_file_url_by_path($path) . '&type=' . $avalue['filetype']); ?>"
                                                download>
                                                <i class="fa fa-solid fa-download"></i>
                                             </a>
-                                        <?php } ?>
+                                        <?php /* } */ ?>
                                     </div>
                                 <?php } ?>
                             <?php } ?>
