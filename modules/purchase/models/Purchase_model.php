@@ -25507,9 +25507,11 @@ class Purchase_model extends App_Model
                         if ($pbkey == 0) {
                             $html .= '<tr class="pay_cert_value">
                                 <td rowspan="'.$rowspan.'">
+                                    <b>
                                     '.$item_name.'
                                     <br /><br />
-                                    <b>'._l('Description').':</b> '.$pvalue_description.'
+                                    '._l('Description').': '.$pvalue_description.'
+                                    </b>
                                 </td>
                                 <td>'.$pbvalue['item_description'].'</td>';
                         } else {
@@ -25548,9 +25550,11 @@ class Purchase_model extends App_Model
                 } else {
                     $html .= '<tr class="pay_cert_value">
                         <td rowspan="1">
+                            <b>
                             '.$item_name.'
                             <br /><br />
-                            <b>'._l('Description').':</b> '.$pvalue_description.'
+                            '._l('Description').': '.$pvalue_description.'
+                            </b>
                         </td>';
                         if(!empty($pur_bills_bifurcation_exist)) {
                             $html .= '<td></td>';
