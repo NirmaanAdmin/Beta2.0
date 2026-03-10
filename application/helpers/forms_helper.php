@@ -820,3 +820,18 @@ function get_progress_report_machinary_name($machinery)
     $result = $CI->db->get(db_prefix() . 'progress_report_machinary')->result_array();
     return !empty($result) ? $result[0]['name'] : '';
 }
+
+function check_formid_is_wpr($formid)
+{
+
+    $CI = &get_instance();
+    // Use your DB prefix helper (Perfex = db_prefix())
+    $table = db_prefix() . 'wpr_form_detail';
+
+    // Count how many rows match this formid
+    $count = $CI->db
+        ->where('form_id', $formid)
+        ->count_all_results($table);
+
+    return $count > 0;
+}
