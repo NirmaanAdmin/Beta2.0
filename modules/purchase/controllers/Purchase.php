@@ -17813,4 +17813,9 @@ class purchase extends AdminController
         add_admin_forms_js_assets();
         $this->load->view('checklists/add', $data);
     }
+
+    public function pur_bills_export_csv($id)
+    {
+        $this->purchase_model->pur_bills_export_csv($id);
+    }
 }

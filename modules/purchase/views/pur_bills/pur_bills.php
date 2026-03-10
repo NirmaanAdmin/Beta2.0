@@ -195,6 +195,11 @@
 			                <?php $this->load->view('purchase/item_include/main_item_select'); ?>
 			              </div>
 			            </div>
+			            <div class="row mbot15" align="right">
+			                <div class="col-md-12">
+			            		<a href="<?php echo admin_url('purchase/pur_bills_export_csv/' . $pur_bill->id); ?>" class="btn btn-success"><?php echo _l('Export to CSV'); ?></a>
+			            	</div>
+			            </div>
 				        <div class="row">
 				        	<div class="col-md-12">
 				        		<div class="table-responsive s_table ">

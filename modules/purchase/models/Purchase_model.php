@@ -25467,7 +25467,7 @@ class Purchase_model extends App_Model
         }
         $payment_certificates = $this->get_all_bill_payment_certificates($id);
 
-        $html .= '<table class="table" style="width: 100%" border="1" style="font-size:12px">
+        $html .= '<table class="table main_bill_bifurcation_table" style="width: 100%" border="1" style="font-size:12px">
         <tbody>
         <tr class="pay_cert_title">
           <td>' . _l('Uniclass Code') . '</td>';
@@ -29134,5 +29134,69 @@ class Purchase_model extends App_Model
         $this->db->from('tblforms');
         $this->db->where('wo_order_id', $wo_id);
         return $this->db->get()->result_array();
+    }
+
+    public function pur_bills_export_csv($id)
+    {
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename=Bill_Bifurcation_Export.csv');
+        $output = fopen('php://output', 'w');
+
+        $bill_bifurcation_html = $this->get_bill_bifurcation_pdf_html($id);
+        libxml_use_internal_errors(true);
+        $dom = new DOMDocument();
+        $dom->loadHTML('<?xml encoding="UTF-8">' . $bill_bifurcation_html);
+        $xpath = new DOMXPath($dom);
+        $table = $xpath->query("//table[contains(@class,'main_bill_bifurcation_table')]")->item(0);
+        if (!$table) {
+            fclose($output);
+            exit;
+        }
+        $rows = $xpath->query(".//tr", $table);
+        $rowspanMap = [];
+
+        foreach ($rows as $rowIndex => $row) {
+            $cells = $xpath->query("./th|./td", $row);
+            $rowData = [];
+            $colIndex = 0;
+            while (isset($rowspanMap[$colIndex])) {
+                $rowData[$colIndex] = $rowspanMap[$colIndex]['value'];
+                $rowspanMap[$colIndex]['count']--;
+                if ($rowspanMap[$colIndex]['count'] <= 0) {
+                    unset($rowspanMap[$colIndex]);
+                }
+                $colIndex++;
+            }
+            foreach ($cells as $cell) {
+                while (isset($rowspanMap[$colIndex])) {
+                    $rowData[$colIndex] = $rowspanMap[$colIndex]['value'];
+                    $rowspanMap[$colIndex]['count']--;
+                    if ($rowspanMap[$colIndex]['count'] <= 0) {
+                        unset($rowspanMap[$colIndex]);
+                    }
+                    $colIndex++;
+                }
+                $value = $cell->textContent;
+                $value = str_replace('₹', '', $value);
+                $value = str_replace(',', '', $value);
+                $value = trim(preg_replace('/\s+/', ' ', $value));
+                $rowspan = (int)$cell->getAttribute('rowspan');
+                $rowData[$colIndex] = $value;
+                if ($rowspan > 1) {
+                    $rowspanMap[$colIndex] = [
+                        'value' => $value,
+                        'count' => $rowspan - 1
+                    ];
+                }
+                $colIndex++;
+            }
+            ksort($rowData);
+            if (!empty($rowData)) {
+                fputcsv($output, $rowData);
+            }
+        }
+        
+        fclose($output);
+        exit;
     }
 }
