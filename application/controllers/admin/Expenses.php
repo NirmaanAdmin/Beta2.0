@@ -560,7 +560,7 @@ class Expenses extends AdminController
         $expense_name = !empty($expense_data['expense_name']) ? $expense_data['expense_name'] : $expense->expense_name;
         $amount = !empty($expense_data['amount']) ? $expense_data['amount'] : $expense->amount;
         $expense_date = (!empty($expense_data['date']) && $expense_data['date'] != '0000-00-00')
-        ? $expense_data['date'] : date('Y-m-d');
+        ? date('Y-m-d', strtotime($expense_data['date'])) : $expense->date;
         $project_id = !empty($expense_data['project_id']) ? $expense_data['project_id'] : $expense->project_id;
         $pur_order = NULL;
         $wo_order = NULL;
@@ -583,7 +583,7 @@ class Expenses extends AdminController
         $vendor_submitted_amount = $vendor_submitted_amount_without_tax + $vendor_submitted_tax_amount;
 
         $input['invoice_number'] = $invoice_number;
-        $input['vendor_invoice_number'] = NULL;
+        $input['vendor_invoice_number'] = !empty($expense->bill_number) ? $expense->bill_number : NULL;
         $input['vendor'] = !empty($expense->vendor) ? $expense->vendor : 0;
         $input['group_pur'] = !empty($group_pur) ? $group_pur : 0;
         $input['description_services'] = !empty($expense_name) ? $expense_name : '';

@@ -30,6 +30,7 @@ $aColumns = [
     db_prefix() . 'projects.name as project_name',
     '(CASE WHEN ' . db_prefix() . 'expenses.vbt_id IS NOT NULL THEN 2 ELSE 3 END) as converted',
     db_prefix() . 'expenses.vbt_id as vbt_id',
+    db_prefix() . 'expenses.bill_number as bill_number',
     db_prefix() . 'expenses.reference_no as reference_no',
     db_prefix() . 'expenses.paymentmode as paymentmode',
     1,
@@ -264,6 +265,8 @@ foreach ($rResult as $aRow) {
     } else {
         $row[] = '';
     }
+
+    $row[] = $aRow['bill_number'];
 
     $row[] = e($aRow['reference_no']);
 

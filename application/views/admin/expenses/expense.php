@@ -71,6 +71,8 @@
                         }
                         ?>
                         <?php echo render_date_input('date', 'expense_add_edit_date', $value, $date_attrs);
+                        $bill_number = (isset($expense) ? $expense->bill_number : ''); ?>
+                        <?php echo render_input('bill_number', 'bill_number', $bill_number);
                         $value = (isset($expense) ? $expense->amount : ''); ?>
                         <?php echo render_input('amount', 'expense_add_edit_amount', $value, 'number');
                         $hide_billable_options = 'hide';
