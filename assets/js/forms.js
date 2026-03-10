@@ -208,7 +208,69 @@ $(function () {
         }
       }
     });
+    // WPR validation when editing
+    var formType = $('select[name="form_type"]').val();
 
+    if (formType == 'wpr') {
+
+      var rows = $('.dpr_body tr');
+
+      if (rows.length <= 1) {
+        alert_float('warning', 'Please add at least one Work Permit record.');
+        errors = true;
+      } else {
+
+        rows.slice(1).each(function () {
+
+          var row = $(this);
+
+          // inputs + textarea (ignore hidden)
+          row.find('input:visible:enabled:not([type="hidden"]), textarea:visible:enabled').each(function () {
+
+            var value = $.trim($(this).val());
+
+            if (value === '') {
+              errors = true;
+              $(this).css('border', '1px solid red');
+            } else {
+              $(this).css('border', '');
+            }
+
+          });
+
+          // selectpicker validation
+          row.find('select.selectpicker:enabled').each(function () {
+
+            var value = $(this).val();
+
+            if (!value || value.length === 0) {
+
+              errors = true;
+
+              $(this)
+                .closest('.bootstrap-select')
+                .find('.dropdown-toggle')
+                .css('border', '1px solid red');
+
+            } else {
+
+              $(this)
+                .closest('.bootstrap-select')
+                .find('.dropdown-toggle')
+                .css('border', '');
+
+            }
+
+          });
+
+        });
+
+        if (errors) {
+          alert_float('danger', 'Please fill all required fields in Work Permit Register.');
+        }
+
+      }
+    }
     if (errors == true) {
       return;
     }

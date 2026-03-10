@@ -40,15 +40,16 @@
     .laber-type .dropdown-toggle {
         width: 90px !important;
     }
+
     img.images_w_table {
-      width: 116px;
-      height: 73px;
-   }
+        width: 116px;
+        height: 73px;
+    }
 </style>
 <div class="col-md-12">
     <hr class="hr-panel-separator" />
 </div>
-<?php  echo form_hidden('isedit'); ?>
+<?php echo form_hidden('isedit'); ?>
 <div class="col-md-12 invoice-item">
     <div class="table-responsive">
         <table class="table wpr-items-table items table-main-dpr-edit has-calculations no-mtop">
@@ -92,7 +93,7 @@
                     </th>
                     <th class="daily_report_head daily_center">
                         <span class="daily_report_label">Remarks</span>
-                    </th>                    
+                    </th>
                     <th class="daily_report_head daily_center">
                         <span class="daily_report_label"></span>
                     </th>
@@ -121,7 +122,7 @@
 
             $('.dpr_body').append(table_row);
 
-            init_selectpicker(); 
+            init_selectpicker();
             pur_clear_item_preview_values();
             $('body').find('#items-warning').remove();
             $("body").find('.dt-loader').remove();
@@ -152,7 +153,8 @@
             risk_level: risk_level,
             safety_measures: safety_measures,
             permit_status: permit_status,
-            remarks: remarks
+            remarks: remarks,
+            item_key: item_key
         });
         jQuery.ajaxSetup({
             async: true
@@ -189,17 +191,94 @@
         previewArea.find('select').val('').selectpicker('refresh');
     }
 
-    function wpr_delete_item(row, itemid, parent){
+    function wpr_delete_item(row, itemid, parent) {
         "use strict";
 
-      $(row).parents('tr').addClass('animated fadeOut', function() {
-         setTimeout(function() {
-            $(row).parents('tr').remove();
-            pur_calculate_total();
-         }, 50);
-      });
-      if (itemid && $('input[name="isedit"]').length > 0) {
-         $(parent + ' #removed-items').append(hidden_input('removed_items[]', itemid));
-      }
+        $(row).parents('tr').addClass('animated fadeOut', function() {
+            setTimeout(function() {
+                $(row).parents('tr').remove();
+                pur_calculate_total();
+            }, 50);
+        });
+        if (itemid && $('input[name="isedit"]').length > 0) {
+            $(parent + ' #removed-items').append(hidden_input('removed_items[]', itemid));
+        }
     }
+    $(document).on('submit', '#new_form_form', function(e) {
+        "use strict";
+
+        var formType = $('select[name="form_type"]').val();
+
+        if (formType != 'wpr') {
+            return true;
+        }
+
+        var isValid = true;
+        var rows = $('.dpr_body tr');
+        var submitBtn = $(this).find('button[type="submit"]');
+
+        if (rows.length <= 1) {
+
+            alert_float('warning', 'Please add at least one Work Permit record.');
+
+            submitBtn.button('reset').prop('disabled', false);
+
+            e.preventDefault();
+            return false;
+        }
+
+        rows.slice(1).each(function() {
+
+            var row = $(this);
+
+            row.find('input:visible:enabled, textarea:visible:enabled').each(function() {
+
+                var value = $.trim($(this).val());
+
+                if (value === '') {
+                    isValid = false;
+                    $(this).css('border', '1px solid red');
+                } else {
+                    $(this).css('border', '');
+                }
+
+            });
+
+            row.find('select.selectpicker:enabled').each(function() {
+
+                var value = $(this).val();
+
+                if (!value || value.length === 0) {
+
+                    isValid = false;
+
+                    $(this)
+                        .closest('.bootstrap-select')
+                        .find('.dropdown-toggle')
+                        .css('border', '1px solid red');
+
+                } else {
+
+                    $(this)
+                        .closest('.bootstrap-select')
+                        .find('.dropdown-toggle')
+                        .css('border', '');
+
+                }
+
+            });
+
+        });
+
+        if (!isValid) {
+
+            alert_float('danger', 'Please fill all required fields in Work Permit Register.');
+
+            submitBtn.button('reset').prop('disabled', false);
+
+            e.preventDefault();
+            return false;
+        }
+
+    });
 </script>
