@@ -407,35 +407,15 @@
                                 <hr class="no-mtop" />
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <?php echo render_input('subject', 'form_settings_subject', $form->subject); ?>
-
-                                        <div class="form-group projects-wrapper">
+                                        <div class="col-md-12">
+                                            <?php echo render_input('subject', 'form_settings_subject', $form->subject); ?>
+                                        </div>
+                                        <div class="col-md-6 form-group projects-wrapper">
                                             <?php
                                             echo render_select('project_id', $projects, array('id', 'name'), 'project', $form->project_id, array('required' => 'true'));
                                             ?>
                                         </div>
-
-                                        <?php echo render_select('department', $departments, ['departmentid', 'name'], 'form_settings_departments', $form->department); ?>
-
-                                        <div class="form-group select-placeholder">
-                                            <select name="form_type" class="selectpicker no-margin" data-width="100%" id="form_type" data-none-selected-text="None selected" data-live-search="true" disabled>
-                                                <option value=""></option>
-                                                <?php
-                                                // $form_listing = get_form_listing(); 
-                                                foreach ($form_listing as $group_id => $_items) { ?>
-                                                    <optgroup data-group-id="<?php echo $_items['id']; ?>" label="<?php echo $_items['name']; ?>">
-                                                        <?php
-                                                        foreach ($_items['options'] as $item) { ?>
-                                                            <option value="<?php echo $item['id']; ?>" <?php echo ($item['id'] == $form->form_type) ? 'selected' : ''; ?>><?php echo $item['name']; ?></option>
-                                                        <?php } ?>
-                                                    </optgroup>
-                                                <?php } ?>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-
-                                        <div class="form-group select-placeholder">
+                                        <div class="col-md-6 form-group select-placeholder">
                                             <label for="assigned" class="control-label">
                                                 <?php echo _l('form_settings_assign_to'); ?>
                                             </label>
@@ -460,6 +440,69 @@
                                                 <?php
                                                 } ?>
                                             </select>
+                                        </div>
+
+                                        <div class="col-md-6" style="clear: both;">
+                                            <?php echo render_select('department', $departments, ['departmentid', 'name'], 'form_settings_departments', $form->department); ?>
+                                        </div>
+                                        <div class="col-md-6 form-group select-placeholder">
+                                            <label for="form_type" class="control-label"></label>
+                                            <select name="form_type" class="selectpicker no-margin" data-width="100%" id="form_type" data-none-selected-text="None selected" data-live-search="true" disabled>
+                                                <option value=""></option>
+                                                <?php
+                                                // $form_listing = get_form_listing(); 
+                                                foreach ($form_listing as $group_id => $_items) { ?>
+                                                    <optgroup data-group-id="<?php echo $_items['id']; ?>" label="<?php echo $_items['name']; ?>">
+                                                        <?php
+                                                        foreach ($_items['options'] as $item) { ?>
+                                                            <option value="<?php echo $item['id']; ?>" <?php echo ($item['id'] == $form->form_type) ? 'selected' : ''; ?>><?php echo $item['name']; ?></option>
+                                                        <?php } ?>
+                                                    </optgroup>
+                                                <?php } ?>
+                                            </select>
+                                        </div>
+
+                                    </div>
+                                    <div class="col-md-6">
+
+                                        <div class="row">
+                                            <div class="form-group col-md-6">
+                                                <?php
+                                                $pr_orders = get_pr_order();
+                                                $selected_pur = '';
+                                                if (isset($form) && $form->pur_order_id != 0 && !empty($form->pur_order_id)) {
+                                                    $selected_pur = $form->pur_order_id;
+                                                }
+                                                ?>
+                                                <label for="pur_order_id"><?php echo _l('reference_purchase_order'); ?></label>
+                                                <select name="pur_order_id" id="pur_order_id" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
+                                                    <option value=""></option>
+                                                    <?php foreach ($pr_orders as $pr_order) { ?>
+                                                        <option value="<?php echo html_entity_decode($pr_order['id']); ?>" <?php echo ($selected_pur == $pr_order['id']) ? 'selected' : ''; ?>>
+                                                            <?php echo html_entity_decode($pr_order['pur_order_number'] . ' - ' . $pr_order['pur_order_name'] . ' - ' . get_vendor_name($pr_order['vendor'])); ?>
+                                                        </option>
+                                                    <?php } ?>
+                                                </select>
+                                            </div>
+
+                                            <div class="form-group col-md-6">
+                                                <?php
+                                                $wo_orders = get_wo_order();
+                                                $selected_wo = '';
+                                                if (isset($form) && $form->wo_order_id != 0 && !empty($form->wo_order_id)) {
+                                                    $selected_wo = $form->wo_order_id;
+                                                }
+                                                ?>
+                                                <label for="wo_order_id"><?php echo _l('reference_work_order'); ?></label>
+                                                <select name="wo_order_id" id="wo_order_id" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
+                                                    <option value=""></option>
+                                                    <?php foreach ($wo_orders as $wo_order) { ?>
+                                                        <option value="<?php echo html_entity_decode($wo_order['id']); ?>" <?php echo ($selected_wo == $wo_order['id']) ? 'selected' : ''; ?>>
+                                                            <?php echo html_entity_decode($wo_order['wo_order_number'] . ' - ' . $wo_order['wo_order_name'] . ' - ' . get_vendor_name($wo_order['vendor'])); ?>
+                                                        </option>
+                                                    <?php } ?>
+                                                </select>
+                                            </div>
                                         </div>
                                         <div class="row">
                                             <div class="col-md-6">
@@ -910,6 +953,82 @@
             $('.selectpicker').selectpicker('refresh');
         });
     }
+    $(document).ready(function() {
+        // Function to handle disabling/enabling selects
+        function handleSelectDisable() {
+            var purOrderValue = $('#pur_order_id').val();
+            var woOrderValue = $('#wo_order_id').val();
+
+            // If both have values on page load
+            if (purOrderValue && woOrderValue) {
+                // Clear both and enable both (or handle as per your requirement)
+                $('#pur_order_id, #wo_order_id').val('').selectpicker('refresh');
+                $('#pur_order_id, #wo_order_id').prop('disabled', false).selectpicker('refresh');
+            }
+            // If only purchase order is selected
+            else if (purOrderValue) {
+                $('#wo_order_id').prop('disabled', true).selectpicker('refresh');
+                $('#pur_order_id').prop('disabled', false).selectpicker('refresh');
+            }
+            // If only work order is selected
+            else if (woOrderValue) {
+                $('#pur_order_id').prop('disabled', true).selectpicker('refresh');
+                $('#wo_order_id').prop('disabled', false).selectpicker('refresh');
+            }
+            // If none are selected
+            else {
+                $('#pur_order_id, #wo_order_id').prop('disabled', false).selectpicker('refresh');
+            }
+        }
+
+        // Initial check on page load
+        handleSelectDisable();
+
+        // Handle purchase order change
+        $('#pur_order_id').on('changed.bs.select', function(e, clickedIndex, isSelected, previousValue) {
+            var currentValue = $(this).val();
+
+            if (currentValue) {
+                // If purchase order is selected, disable work order
+                $('#wo_order_id').prop('disabled', true).selectpicker('refresh');
+            } else {
+                // If purchase order is deselected, enable work order if it's empty
+                if (!$('#wo_order_id').val()) {
+                    $('#wo_order_id').prop('disabled', false).selectpicker('refresh');
+                }
+            }
+        });
+
+        // Handle work order change
+        $('#wo_order_id').on('changed.bs.select', function(e, clickedIndex, isSelected, previousValue) {
+            var currentValue = $(this).val();
+
+            if (currentValue) {
+                // If work order is selected, disable purchase order
+                $('#pur_order_id').prop('disabled', true).selectpicker('refresh');
+            } else {
+                // If work order is deselected, enable purchase order if it's empty
+                if (!$('#pur_order_id').val()) {
+                    $('#pur_order_id').prop('disabled', false).selectpicker('refresh');
+                }
+            }
+        });
+
+        // Optional: Handle manual clearing if needed
+        $('#pur_order_id, #wo_order_id').on('click', function() {
+            var $this = $(this);
+            var currentValue = $this.val();
+            var otherSelect = $this.attr('id') === 'pur_order_id' ? '#wo_order_id' : '#pur_order_id';
+
+            // If this select is being cleared and the other is disabled
+            if (!currentValue && $(otherSelect).is(':disabled')) {
+                // Only enable the other if it's empty
+                if (!$(otherSelect).val()) {
+                    $(otherSelect).prop('disabled', false).selectpicker('refresh');
+                }
+            }
+        });
+    });
 </script>
 </body>
 
