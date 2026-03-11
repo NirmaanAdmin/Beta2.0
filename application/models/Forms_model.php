@@ -1139,6 +1139,76 @@ class Forms_model extends App_Model
                     $new_order = $data['newitems'];
                     unset($data['newitems']);
                 }
+            } elseif ($data['form_type'] == "arf") {
+                $arf_form = [];
+                $arf_form['report_no'] = $data['report_no'];
+                $arf_form['date_of_report'] = $data['date_of_report'];
+                $arf_form['date_time_accident'] = $data['date_time_accident'];
+                $arf_form['location'] = $data['location'];
+                $arf_form['department_site'] = $data['department_site'];
+                $arf_form['name'] = $data['name'];
+                $arf_form['age_gender'] = $data['age_gender'];
+                $arf_form['designation'] = $data['designation'];
+                $arf_form['emp_id'] = $data['emp_id'];
+                $arf_form['nature_of_emp'] = $data['nature_of_emp'];
+                $arf_form['detailed_description'] = $data['detailed_description'];
+                $arf_form['equipment_tools_involved'] = $data['equipment_tools_involved'];
+                $arf_form['weather_environmental_conditions'] = $data['weather_environmental_conditions'];
+                $arf_form['type_of_injury_damage'] = $data['type_of_injury_damage'];
+                $arf_form['body_part_affected'] = $data['body_part_affected'];
+                $arf_form['severity'] = $data['severity'];
+                $arf_form['property_damage'] = $data['property_damage'];
+                $arf_form['first_aid_provided'] = $data['first_aid_provided'];
+                $arf_form['medical_treatment_details'] = $data['medical_treatment_details'];
+                $arf_form['hospital_clinic_name'] = $data['hospital_clinic_name'];
+                $arf_form['time_taken_to_respond'] = $data['time_taken_to_respond'];
+                $arf_form['name_s'] = $data['name_s'];
+                $arf_form['contact_information'] = $data['contact_information'];
+                $arf_form['immediate_cause'] = $data['immediate_cause'];
+                $arf_form['underlying_cause'] = $data['underlying_cause'];
+                $arf_form['human_equipment_environmental_factors'] = $data['human_equipment_environmental_factors'];
+                $arf_form['actions_to_prevent_recurrence'] = $data['actions_to_prevent_recurrence'];
+                $arf_form['responsible_person'] = $data['responsible_person'];
+                $arf_form['target_date'] = $data['target_date'];
+                $arf_form['reported_by'] = $data['reported_by'];
+                $arf_form['reviewed_by'] = $data['reviewed_by'];
+                $arf_form['approved_by'] = $data['approved_by'];
+                $arf_form['approved_date'] = $data['approved_date'];
+                unset(
+                    $data['report_no'],
+                    $data['date_of_report'],
+                    $data['date_time_accident'],
+                    $data['location'],
+                    $data['department_site'],
+                    $data['name'],
+                    $data['age_gender'],
+                    $data['designation'],
+                    $data['emp_id'],
+                    $data['nature_of_emp'],
+                    $data['detailed_description'],
+                    $data['equipment_tools_involved'],
+                    $data['weather_environmental_conditions'],
+                    $data['type_of_injury_damage'],
+                    $data['body_part_affected'],
+                    $data['severity'],
+                    $data['property_damage'],
+                    $data['first_aid_provided'],
+                    $data['medical_treatment_details'],
+                    $data['hospital_clinic_name'],
+                    $data['time_taken_to_respond'],
+                    $data['name_s'],
+                    $data['contact_information'],
+                    $data['immediate_cause'],
+                    $data['underlying_cause'],
+                    $data['human_equipment_environmental_factors'],
+                    $data['actions_to_prevent_recurrence'],
+                    $data['responsible_person'],
+                    $data['target_date'],
+                    $data['reported_by'],
+                    $data['reviewed_by'],
+                    $data['approved_by'],
+                    $data['approved_date'],
+                );
             }
         }
 
@@ -1690,6 +1760,13 @@ class Forms_model extends App_Model
                         }
                     }
                 }
+            } elseif ($data['form_type'] == "arf") {
+                if (isset($arf_form)) {
+                    if (!empty($arf_form)) {
+                        $arf_form['form_id'] = $formid;
+                        $this->db->insert(db_prefix() . $data['form_type'] . '_form', $arf_form);
+                    }
+                }
             }
             handle_tags_save($tags, $formid, 'form');
 
@@ -1952,7 +2029,7 @@ class Forms_model extends App_Model
         if ($data['duedate'] != '') {
             $data['duedate'] = to_sql_date($data['duedate']);
         }
-       
+
         if ($formBeforeUpdate->form_type == "dpr") {
             $dpr_form = array();
             $dpr_form['client_id'] = $data['client_id'];
@@ -2289,6 +2366,76 @@ class Forms_model extends App_Model
                 $remove_order = $data['removed_items'];
                 unset($data['removed_items']);
             }
+        } elseif ($formBeforeUpdate->form_type == "arf") {
+            $arf_form = [];
+            $arf_form['report_no'] = $data['report_no'];
+            $arf_form['date_of_report'] = $data['date_of_report'];
+            $arf_form['date_time_accident'] = $data['date_time_accident'];
+            $arf_form['location'] = $data['location'];
+            $arf_form['department_site'] = $data['department_site'];
+            $arf_form['name'] = $data['name'];
+            $arf_form['age_gender'] = $data['age_gender'];
+            $arf_form['designation'] = $data['designation'];
+            $arf_form['emp_id'] = $data['emp_id'];
+            $arf_form['nature_of_emp'] = $data['nature_of_emp'];
+            $arf_form['detailed_description'] = $data['detailed_description'];
+            $arf_form['equipment_tools_involved'] = $data['equipment_tools_involved'];
+            $arf_form['weather_environmental_conditions'] = $data['weather_environmental_conditions'];
+            $arf_form['type_of_injury_damage'] = $data['type_of_injury_damage'];
+            $arf_form['body_part_affected'] = $data['body_part_affected'];
+            $arf_form['severity'] = $data['severity'];
+            $arf_form['property_damage'] = $data['property_damage'];
+            $arf_form['first_aid_provided'] = $data['first_aid_provided'];
+            $arf_form['medical_treatment_details'] = $data['medical_treatment_details'];
+            $arf_form['hospital_clinic_name'] = $data['hospital_clinic_name'];
+            $arf_form['time_taken_to_respond'] = $data['time_taken_to_respond'];
+            $arf_form['name_s'] = $data['name_s'];
+            $arf_form['contact_information'] = $data['contact_information'];
+            $arf_form['immediate_cause'] = $data['immediate_cause'];
+            $arf_form['underlying_cause'] = $data['underlying_cause'];
+            $arf_form['human_equipment_environmental_factors'] = $data['human_equipment_environmental_factors'];
+            $arf_form['actions_to_prevent_recurrence'] = $data['actions_to_prevent_recurrence'];
+            $arf_form['responsible_person'] = $data['responsible_person'];
+            $arf_form['target_date'] = $data['target_date'];
+            $arf_form['reported_by'] = $data['reported_by'];
+            $arf_form['reviewed_by'] = $data['reviewed_by'];
+            $arf_form['approved_by'] = $data['approved_by'];
+            $arf_form['approved_date'] = $data['approved_date'];
+            unset(
+                $data['report_no'],
+                $data['date_of_report'],
+                $data['date_time_accident'],
+                $data['location'],
+                $data['department_site'],
+                $data['name'],
+                $data['age_gender'],
+                $data['designation'],
+                $data['emp_id'],
+                $data['nature_of_emp'],
+                $data['detailed_description'],
+                $data['equipment_tools_involved'],
+                $data['weather_environmental_conditions'],
+                $data['type_of_injury_damage'],
+                $data['body_part_affected'],
+                $data['severity'],
+                $data['property_damage'],
+                $data['first_aid_provided'],
+                $data['medical_treatment_details'],
+                $data['hospital_clinic_name'],
+                $data['time_taken_to_respond'],
+                $data['name_s'],
+                $data['contact_information'],
+                $data['immediate_cause'],
+                $data['underlying_cause'],
+                $data['human_equipment_environmental_factors'],
+                $data['actions_to_prevent_recurrence'],
+                $data['responsible_person'],
+                $data['target_date'],
+                $data['reported_by'],
+                $data['reviewed_by'],
+                $data['approved_by'],
+                $data['approved_date'],
+            );
         }
 
         $this->db->where('formid', $data['formid']);
@@ -3189,8 +3336,17 @@ class Forms_model extends App_Model
                     }
                 }
             }
+        } elseif ($formBeforeUpdate->form_type == "arf") {
+            if (isset($arf_form)) {
+                if (!empty($arf_form)) {
+                    $this->db->where('form_id', $data['formid']);
+                    $this->db->update(db_prefix() . $formBeforeUpdate->form_type . '_form', $arf_form);
+                    if ($this->db->affected_rows() > 0) {
+                        $affectedRows++;
+                    }
+                }
+            }
         }
-
         $sendAssignedEmail = false;
 
         $current_assigned = $formBeforeUpdate->assigned;
@@ -4008,6 +4164,16 @@ class Forms_model extends App_Model
     {
         $this->db->where('form_id', $form_id);
         return $this->db->get(db_prefix() . 'wpc_form')->row();
+    }
+    public function get_arf_form($form_id)
+    {
+        $this->db->where('form_id', $form_id);
+        return $this->db->get(db_prefix() . 'arf_form')->row();
+    }
+    public function get_arf_form_detail($form_id)
+    {
+        $this->db->where('form_id', $form_id);
+        return $this->db->get(db_prefix() . 'arf_form_detail')->result_array();
     }
 
     public function get_wpc_form_detail($form_id)
