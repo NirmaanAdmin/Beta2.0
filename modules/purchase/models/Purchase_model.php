@@ -28940,7 +28940,111 @@ class Purchase_model extends App_Model
 
     public function calculate_cashflow()
     {
-        
+        $module_name = 'cashflow';
+        $data = $this->input->post();
+        update_module_filter($module_name, 'total_months', !empty($data['total_months']) ? $data['total_months'] : NULL);
+        update_module_filter($module_name, 'start_date', !empty($data['start_date']) ? $data['start_date'] : NULL);
+        update_module_filter($module_name, 'budgeted', !empty($data['budgeted']) ? $data['budgeted'] : NULL);
+        $industry_standard_scurve = array();
+        $actual_spending_on_project = array();
+        $timelines_percentages = array(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100);
+        $cumulative_cashflow_percentages = array(0, 3, 10, 15, 27, 42, 60, 75, 90, 95, 100);
+        $default_total_months = $data['total_months'];
+        $start_date = date('Y-m-01', strtotime($data['start_date']));
+        $end_date = date('Y-m-t', strtotime($data['start_date']));
+        $default_budgeted = $data['budgeted'];
+        $default_project = get_default_project();
+        $previous_incremental_percentage = 0;
+
+        foreach ($timelines_percentages as $index => $timeline) {
+            $cumulative_cashflow_percentage = $cumulative_cashflow_percentages[$index];
+            $months_cal = max(1, round(($default_total_months * $timeline) / 100));
+            if($index == 0) {
+                $incremental_percentage = 0;
+            } else {
+                $incremental_percentage = $months_cal - $previous_incremental_percentage;
+            }
+            $previous_incremental_percentage = $months_cal;
+            $budget_value = ($default_budgeted * $cumulative_cashflow_percentage) / 100;
+
+            $industry_standard_scurve[$index] = array(
+                'timelines_percentage' => $timeline,
+                'cumulative_cashflow_percentage' => $cumulative_cashflow_percentage,
+                'months_cal' => $months_cal,
+                'incremental_percentage' => $incremental_percentage,
+                'budget_value' => $budget_value
+            );
+        }
+
+        $order_tracker_query = "
+            SELECT po.order_date, (po.subtotal + IFNULL(co_sum.co_total, 0)) AS total_rev_contract_value
+            FROM tblpur_orders po
+            LEFT JOIN (
+                SELECT po_order_id, SUM(co_value) AS co_total
+                FROM tblco_orders
+                WHERE po_order_id IS NOT NULL
+                GROUP BY po_order_id
+            ) AS co_sum ON co_sum.po_order_id = po.id
+            WHERE po.approve_status = 2 AND project = $default_project
+
+            UNION ALL
+
+            SELECT wo.order_date, (wo.subtotal + IFNULL(co_sum2.co_total, 0)) AS total_rev_contract_value
+            FROM tblwo_orders wo
+            LEFT JOIN (
+                SELECT wo_order_id, SUM(co_value) AS co_total
+                FROM tblco_orders
+                WHERE wo_order_id IS NOT NULL
+                GROUP BY wo_order_id
+            ) AS co_sum2 ON co_sum2.wo_order_id = wo.id
+            WHERE wo.approve_status = 2 AND project = $default_project
+
+            UNION ALL
+
+            SELECT (CASE 
+                WHEN t.order_date IS NULL OR t.order_date = '0000-00-00'
+                THEN DATE_FORMAT(CURDATE(), '%Y-01-01')
+                ELSE t.order_date
+            END) AS order_date, (t.total + IFNULL(t.co_total, 0)) AS total_rev_contract_value
+            FROM tblpur_order_tracker t
+            WHERE project = $default_project
+        ";
+        $order_tracker_result = $this->db->query($order_tracker_query)->result_array();
+
+        foreach ($timelines_percentages as $index => $timeline) {
+            $months_cal = $industry_standard_scurve[$index]['months_cal'];
+            $order_start_date = $start_date;
+            if ($months_cal == 1) {
+                $calculated_month_date = strtotime($order_start_date);
+            } else {
+                $calculated_month_date = strtotime("+{$months_cal} months", strtotime($order_start_date));
+            }
+            $order_end_date = date('Y-m-t', $calculated_month_date);
+            $actual_cumulative_cashflow = 0;
+            if (!empty($order_tracker_result)) {
+                $actual_cumulative_cashflow = array_sum(
+                    array_column(
+                        array_filter($order_tracker_result, function ($row) use ($order_start_date, $order_end_date) {
+                            return $row['order_date'] >= $order_start_date &&
+                                   $row['order_date'] <= $order_end_date;
+                        }),
+                        'total_rev_contract_value'
+                    )
+                );
+            }
+            $actual_cum_percentage = ($actual_cumulative_cashflow / $default_budgeted) * 100;
+
+            $actual_spending_on_project[$index] = array(
+                'months_cal' => $months_cal,
+                'actual_cum_percentage' => $actual_cum_percentage,
+                'actual_cum_amount' => $actual_cumulative_cashflow
+            );
+        }
+
+        return [
+            'industry_standard_scurve' => $industry_standard_scurve,
+            'actual_spending_on_project' => $actual_spending_on_project
+        ];
     }
 
     public function get_qor_by_po($po_id){

@@ -46,6 +46,62 @@
                </div>
             </div>
          </div>
+         <div class="panel_s mbot10">
+            <div class="panel-body">
+               <div class="row">
+                  <div class="col-md-12">
+                     <div class="horizontal-tabs">
+                        <ul class="nav nav-tabs nav-tabs-horizontal mbot15" role="tablist">
+                           <li role="presentation" class="active">
+                            <a href="#cashflow_forecast_table" aria-controls="cashflow_forecast_table" role="tab" id="tab_cashflow_forecast_table" data-toggle="tab">
+                              CASHFLOW FORECAST TABLE
+                            </a>
+                           </li>
+                           <li role="presentation">
+                            <a href="#industry_standard_scurve" aria-controls="industry_standard_scurve" role="tab" id="tab_industry_standard_scurve" data-toggle="tab">
+                              INDUSTRY STANDARD S-CURVE
+                            </a>
+                           </li>
+                           <li role="presentation">
+                            <a href="#actual_spending_on_project" aria-controls="actual_spending_on_project" role="tab" id="tab_actual_spending_on_project" data-toggle="tab">
+                              ACTUAL SPENDING ON PROJECT
+                            </a>
+                           </li>
+                        </ul>
+                     </div>
+                  </div>
+
+                  <div class="tab-content">
+                     <div role="tabpanel" class="col-md-12 tab-pane cashflow-pane active" id="cashflow_forecast_table">
+                     </div>
+                     <div role="tabpanel" class="col-md-12 tab-pane cashflow-pane" id="industry_standard_scurve">
+                        <table class="table dt-table industry_standard_scurve_table border">
+                           <thead>
+                              <th><?php echo _l('Timeline %'); ?></th>
+                              <th><?php echo _l('Cumulative Cashflow %'); ?></th>
+                              <th><?php echo _l('Months'); ?></th>
+                              <th><?php echo _l('Incremental %'); ?></th>
+                              <th><?php echo _l('Budget'); ?></th>
+                           </thead>
+                           <tbody>
+                           </tbody>
+                        </table>
+                     </div>
+                     <div role="tabpanel" class="col-md-12 tab-pane cashflow-pane" id="actual_spending_on_project">
+                        <table class="table dt-table actual_spending_on_project_table border">
+                           <thead>
+                              <th><?php echo _l('Month #'); ?></th>
+                              <th><?php echo _l('Actual Cum. %'); ?></th>
+                              <th><?php echo _l('Actual Cum. Amount'); ?></th>
+                           </thead>
+                           <tbody>
+                           </tbody>
+                        </table>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
       </div>
    </div>
 </div>
@@ -70,6 +126,29 @@
          budgeted: budgeted
         }, function(response){
             var data = JSON.parse(response);
+            var industry_standard_tbody = '';
+            if (Array.isArray(data.industry_standard_scurve) && data.industry_standard_scurve.length > 0) {
+               $.each(data.industry_standard_scurve, function(i, row){
+                  industry_standard_tbody += '<tr>';
+                  industry_standard_tbody += '<td>'+row.timelines_percentage+'%</td>';
+                  industry_standard_tbody += '<td>'+row.cumulative_cashflow_percentage+'%</td>';
+                  industry_standard_tbody += '<td>'+row.months_cal+'</td>';
+                  industry_standard_tbody += '<td>'+parseFloat(row.incremental_percentage).toFixed(2)+'%</td>';
+                  industry_standard_tbody += '<td>'+format_money(row.budget_value)+'</td>';
+               });
+            }
+            $('.industry_standard_scurve_table tbody').html(industry_standard_tbody);
+
+            var actual_spending_tbody = '';
+            if (Array.isArray(data.actual_spending_on_project) && data.actual_spending_on_project.length > 0) {
+               $.each(data.actual_spending_on_project, function(i, row){
+                  actual_spending_tbody += '<tr>';
+                  actual_spending_tbody += '<td>'+row.months_cal+'</td>';
+                  actual_spending_tbody += '<td>'+parseFloat(row.actual_cum_percentage).toFixed(2)+'%</td>';
+                  actual_spending_tbody += '<td>'+format_money(row.actual_cum_amount)+'</td>';
+               });
+            }
+            $('.actual_spending_on_project_table tbody').html(actual_spending_tbody);
       });
    }
 </script>
