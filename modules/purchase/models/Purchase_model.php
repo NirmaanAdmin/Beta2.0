@@ -28962,9 +28962,9 @@ class Purchase_model extends App_Model
             if($index == 0) {
                 $incremental_percentage = 0;
             } else {
-                $incremental_percentage = $months_cal - $previous_incremental_percentage;
+                $incremental_percentage = $cumulative_cashflow_percentage - $previous_incremental_percentage;
             }
-            $previous_incremental_percentage = $months_cal;
+            $previous_incremental_percentage = $cumulative_cashflow_percentage;
             $budget_value = ($default_budgeted * $cumulative_cashflow_percentage) / 100;
 
             $industry_standard_scurve[$index] = array(
