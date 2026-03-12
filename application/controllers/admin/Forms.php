@@ -887,7 +887,8 @@ class Forms extends AdminController
                 'cosc' => ['has_attachments' => true],
                 'qor'  => ['has_attachments' => true],
                 'wpr'  => ['has_attachments' => false],
-                'arf'  => ['has_attachments' => false]
+                'arf'  => ['has_attachments' => false],
+                'st'  => ['has_attachments' => false]
             ];
 
             if (isset($formConfigs[$form_type])) {
@@ -906,7 +907,7 @@ class Forms extends AdminController
 
         $form_items = $this->forms_model->get_form_items($form_type);
         $data = [];
-        $wpr_row_template = '';
+        $wpr_row_template = $st_row_template ='';
         $data['isedit'] = 0;
         if ($form_id != 0) {
 
@@ -951,15 +952,38 @@ class Forms extends AdminController
                     }
                 }
                 $data['wpr_form'] = $wpr_form;
+            } elseif ($form_type == 'st') {
+               $st_row_template = $this->forms_model->create_st_row_template();
+
+                $st_form = $this->forms_model->get_st_form($form_id);
+                $st_form_detail = $this->forms_model->get_st_form_detail($form_id);
+                if (!empty($st_form_detail)) {
+                    $index_order = 0;
+                    foreach ($st_form_detail as $value) {
+                        $index_order++;
+                        $st_row_template .= $this->forms_model->create_st_row_template(
+                            'items[' . $index_order . ']',
+                            $value['name_staff'],
+                            $value['contractor'],
+                            $value['signature'],
+                            true,
+                            $value['id']
+                        );
+                    }
+                }
+                $data['st_form'] = $st_form;
             }
         } else {
             if ($form_type == 'wpr') {
                 $wpr_row_template = $this->forms_model->create_wpr_row_template();
+            } elseif ($form_type == 'st') {
+               $st_row_template = $this->forms_model->create_st_row_template();
             }
         }
         $data['form_items'] = $form_items;
 
         $data['wpr_row_template'] = $wpr_row_template;
+        $data['st_row_template'] = $st_row_template;
         $this->load->view("admin/forms/form_design/{$form_type}", $data);
     }
 
@@ -1601,6 +1625,49 @@ class Forms extends AdminController
 
         try {
             $pdf = form_pdf_wpr($form);
+        } catch (Exception $e) {
+            $message = $e->getMessage();
+            echo $message;
+            if (strpos($message, 'Unable to get the size of the image') !== false) {
+                show_pdf_unable_to_get_image_size_error();
+            }
+            die;
+        }
+
+        $type = 'I';
+
+        if ($this->input->get('output_type')) {
+            $type = $this->input->get('output_type');
+        }
+
+        if ($this->input->get('print')) {
+            $type = 'D';
+        }
+
+        $pdf->Output(mb_strtoupper(slug_it($form->subject)) . '.pdf', $type);
+    }
+
+    public function get_st_row_template()
+    {
+        $name = $this->input->post('name');
+        $name_staff = $this->input->post('name_staff');
+        $contractor = $this->input->post('contractor');
+        $signature = $this->input->post('signature');
+        $item_key = $this->input->post('item_key');
+
+        echo $this->forms_model->create_st_row_template($name, $name_staff, $contractor, $signature, false, $item_key);
+    }
+
+    public function pdf_st($id)
+    {
+        if (!$id) {
+            redirect(admin_url('forms'));
+        }
+
+        $form = $this->forms_model->get_form_by_id($id);
+
+        try {
+            $pdf = form_pdf_st($form);
         } catch (Exception $e) {
             $message = $e->getMessage();
             echo $message;

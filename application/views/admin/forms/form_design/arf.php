@@ -212,18 +212,18 @@
                 </tr>
 
                 <td colspan="4">
-                        <div class="form-grid">
+                    <div class="form-grid">
 
-                            <?php echo render_input('reported_by', 'Reported by (Name & Signature)', isset($arf_form->reported_by) ? $arf_form->reported_by : '', 'text'); ?>
+                        <?php echo render_input('reported_by', 'Reported by (Name & Signature)', isset($arf_form->reported_by) ? $arf_form->reported_by : '', 'text'); ?>
 
-                            <?php echo render_input('reviewed_by', 'Reviewed by:', isset($arf_form->reviewed_by) ? $arf_form->reviewed_by : '', 'text'); ?>
+                        <?php echo render_input('reviewed_by', 'Reviewed by:', isset($arf_form->reviewed_by) ? $arf_form->reviewed_by : '', 'text'); ?>
 
-                            <?php echo render_input('approved_by', 'Approved by: ', isset($arf_form->approved_by) ? $arf_form->approved_by : '', 'text'); ?>
+                        <?php echo render_input('approved_by', 'Approved by: ', isset($arf_form->approved_by) ? $arf_form->approved_by : '', 'text'); ?>
 
-                            <?php echo render_input('approved_date', 'Date: ', isset($arf_form->approved_date) ? $arf_form->approved_date : '', 'date'); ?>
+                        <?php echo render_input('approved_date', 'Date: ', isset($arf_form->approved_date) ? $arf_form->approved_date : '', 'date'); ?>
 
-                        </div>
-                    </td>
+                    </div>
+                </td>
 
             </thead>
 
@@ -265,71 +265,4 @@
             return false;
         });
     });
-    let addMoreAttachmentsInputKey = 2;
-
-    // Handle adding attachments
-    $("body").on("click", ".add_more_attachments_apc", function() {
-        if ($(this).hasClass("disabled")) {
-            return false;
-        }
-
-        const itemIndex = $(this).data("item"); // Fetch the current item index
-        if (typeof itemIndex === "undefined") {
-            console.error("Item index is undefined. Please ensure the data-item attribute is set correctly.");
-            return;
-        }
-
-        const parentContainer = $(this).closest(".attachment_new");
-        const newAttachment = parentContainer.clone();
-
-        // Update the name attribute with the correct item and attachment index
-        newAttachment
-            .find("input[type='file']")
-            .attr(
-                "name",
-                `items[${itemIndex}][attachments_new][${addMoreAttachmentsInputKey}]`
-            )
-            .val("");
-
-        // Replace the "+" button with a "-" button for removing
-        newAttachment.find(".fa").removeClass("fa-plus").addClass("fa-minus");
-        newAttachment
-            .find("button")
-            .removeClass("add_more_attachments_apc")
-            .addClass("remove_attachment")
-            .removeClass("btn-default")
-            .addClass("btn-danger");
-
-        // Append the new attachment container after the current one
-        parentContainer.after(newAttachment);
-
-        // Increment the attachment key for unique naming
-        addMoreAttachmentsInputKey++;
-    });
-
-    // Handle removing an attachment
-    $("body").on("click", ".remove_attachment", function() {
-        // Remove the parent `.attachment_new` container
-        $(this).closest(".attachment_new").remove();
-        // Reset addMoreAttachmentsInputKey based on the number of existing attachments
-        resetAttachmentKeys();
-    });
-
-    // Function to recalculate and reset attachment keys
-    function resetAttachmentKeys() {
-        addMoreAttachmentsInputKey = 1; // Reset the counter
-        $(".attachment_new").each(function() {
-            const itemIndex = $(this).find(".add_more_attachments_apc").data("item");
-
-            // Update the file input's name with the new sequential key
-            $(this)
-                .find("input[type='file']")
-                .attr(
-                    "name",
-                    `items[${itemIndex}][attachments_new][${addMoreAttachmentsInputKey}]`
-                );
-
-            addMoreAttachmentsInputKey++; // Increment for the next attachment
-        });
-    }
 </script>

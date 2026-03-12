@@ -1209,6 +1209,30 @@ class Forms_model extends App_Model
                     $data['approved_by'],
                     $data['approved_date'],
                 );
+            } elseif ($data['form_type'] == "st") {
+                $st_form = [];
+
+                $st_form['training_given_by'] = $data['training_given_by'];
+                $st_form['no_of_participants'] = $data['no_of_participants'];
+                $st_form['date'] = $data['date'];
+                $st_form['name_footer'] = $data['name_footer'];
+                $st_form['designation'] = $data['designation'];
+                unset(
+                    $data['training_given_by'],
+                    $data['no_of_participants'],
+                    $data['date'],
+                    $data['name_staff'],
+                    $data['contractor'],
+                    $data['signature'],
+                    $data['name_footer'],
+                    $data['designation'],
+                );
+
+                $new_order = [];
+                if (isset($data['newitems'])) {
+                    $new_order = $data['newitems'];
+                    unset($data['newitems']);
+                }
             }
         }
 
@@ -1765,6 +1789,26 @@ class Forms_model extends App_Model
                     if (!empty($arf_form)) {
                         $arf_form['form_id'] = $formid;
                         $this->db->insert(db_prefix() . $data['form_type'] . '_form', $arf_form);
+                    }
+                }
+            } elseif ($data['form_type'] == "st") {
+                if (isset($st_form)) {
+                    if (!empty($st_form)) {
+                        $st_form['form_id'] = $formid;
+                        $this->db->insert(db_prefix() . $data['form_type'] . '_form', $st_form);
+                    }
+                }
+                if (isset($new_order)) {
+                    if (!empty($new_order)) {
+                        foreach ($new_order as $key => $value) {
+                            $dt_data = [];
+                            $dt_data['form_id'] = $formid;
+                            $dt_data['name_staff'] = $value['name_staff'];
+                            $dt_data['contractor'] = $value['contractor'];
+                            $dt_data['signature'] = $value['signature'];
+                            $this->db->insert(db_prefix() . $data['form_type'] . '_form_detail', $dt_data);
+                            $qcr_detail_id = $this->db->insert_id();
+                        }
                     }
                 }
             }
@@ -2436,6 +2480,41 @@ class Forms_model extends App_Model
                 $data['approved_by'],
                 $data['approved_date'],
             );
+        } elseif ($formBeforeUpdate->form_type == "st") {
+            $st_form = [];
+            $st_form['training_given_by'] = $data['training_given_by'];
+            $st_form['no_of_participants'] = $data['no_of_participants'];
+            $st_form['date'] = $data['date'];
+            $st_form['name_footer'] = $data['name_footer'];
+            $st_form['designation'] = $data['designation'];
+            unset(
+                $data['training_given_by'],
+                $data['no_of_participants'],
+                $data['date'],
+                $data['name_staff'],
+                $data['contractor'],
+                $data['signature'],
+                $data['name_footer'],
+                $data['designation']
+            );
+
+            $new_order = [];
+            if (isset($data['newitems'])) {
+                $new_order = $data['newitems'];
+                unset($data['newitems']);
+            }
+
+            $update_order = [];
+            if (isset($data['items'])) {
+                $update_order = $data['items'];
+                unset($data['items']);
+            }
+
+            $remove_order = [];
+            if (isset($data['removed_items'])) {
+                $remove_order = $data['removed_items'];
+                unset($data['removed_items']);
+            }
         }
 
         $this->db->where('formid', $data['formid']);
@@ -3343,6 +3422,61 @@ class Forms_model extends App_Model
                     $this->db->update(db_prefix() . $formBeforeUpdate->form_type . '_form', $arf_form);
                     if ($this->db->affected_rows() > 0) {
                         $affectedRows++;
+                    }
+                }
+            }
+        } elseif ($formBeforeUpdate->form_type == "st") {
+            if (isset($st_form)) {
+                if (!empty($st_form)) {
+                    $this->db->where('form_id', $data['formid']);
+                    $this->db->update(db_prefix() . $formBeforeUpdate->form_type . '_form', $st_form);
+                    if ($this->db->affected_rows() > 0) {
+                        $affectedRows++;
+                    }
+                }
+            }
+
+            if (isset($new_order)) {
+                if (!empty($new_order)) {
+                    foreach ($new_order as $key => $value) {
+                        $dt_data = [];
+                        $dt_data['form_id'] = $data['formid'];
+                        $dt_data['name_staff'] = $value['name_staff'];
+                        $dt_data['contractor'] = $value['contractor'];
+                        $dt_data['signature'] = $value['signature'];
+                        $this->db->insert(db_prefix() . $formBeforeUpdate->form_type . '_form_detail', $dt_data);
+                        $new_insert_id = $this->db->insert_id();
+                        if ($new_insert_id) {
+                            $affectedRows++;
+                        }
+                    }
+                }
+            }
+
+            if (isset($update_order)) {
+                if (!empty($update_order)) {
+                    foreach ($update_order as $key => $value) {
+                        $dt_data = [];
+                        $dt_data['form_id'] = $data['formid'];
+                        $dt_data['name_staff'] = $value['name_staff'];
+                        $dt_data['contractor'] = $value['contractor'];
+                        $dt_data['signature'] = $value['signature'];
+                        $this->db->where('id', $value['id']);
+                        $this->db->update(db_prefix() . $formBeforeUpdate->form_type . '_form_detail', $dt_data);
+                        if ($this->db->affected_rows() > 0) {
+                            $affectedRows++;
+                        }
+                    }
+                }
+            }
+
+            if (isset($remove_order)) {
+                if (!empty($remove_order)) {
+                    foreach ($remove_order as $key => $value) {
+                        $this->db->where('id', $value);
+                        if ($this->db->delete(db_prefix() . $formBeforeUpdate->form_type . '_form_detail')) {
+                            $affectedRows++;
+                        }
                     }
                 }
             }
@@ -5152,5 +5286,51 @@ class Forms_model extends App_Model
     {
         $this->db->where('form_id', $form_id);
         return $this->db->get(db_prefix() . 'wpr_form_detail')->result_array();
+    }
+
+
+    public function create_st_row_template($name = '', $staff = '', $contractor = '', $signature = '', $is_edit = false, $item_key = '', $value = [])
+    {
+        $row = '';
+        $name_staff = 'name_staff';
+        $name_contractor = 'contractor';
+        $name_signature = 'signature';
+
+        if ($name == '') {
+            $row .= '<tr class="main">';
+            $manual = true;
+        } else {
+            $manual = false;
+            $row .= '<tr><input type="hidden" class="ids" name="' . $name . '[id]" value="' . $item_key . '">';
+            $name_staff = $name . '[name_staff]';
+            $name_contractor = $name . '[contractor]';
+            $name_signature = $name . '[signature]';
+        }
+
+
+        $row .= '<td class="staff_name">' . render_input($name_staff, '', $staff) . '</td>';
+        $row .= '<td class="contractor">' . get_vendor($name_contractor, $contractor) . '</td>';
+        $row .= '<td class="signature">' . render_input($name_signature, '', $signature) . '</td>';
+
+        if ($name == '') {
+            $row .= '<td><button type="button" class="btn pull-right btn-info st-add-item-to-table"><i class="fa fa-check"></i></button></td>';
+        } else {
+            $row .= '<td><a href="#" class="btn btn-danger pull-right" onclick="st_delete_item(this,' . $item_key . ',\'.invoice-item\'); return false;"><i class="fa fa-trash"></i></a></td>';
+        }
+
+        $row .= '</tr>';
+        return $row;
+    }
+
+    public function get_st_form($form_id)
+    {
+        $this->db->where('form_id', $form_id);
+        return $this->db->get(db_prefix() . 'st_form')->row();
+    }
+
+    public function get_st_form_detail($form_id)
+    {
+        $this->db->where('form_id', $form_id);
+        return $this->db->get(db_prefix() . 'st_form_detail')->result_array();
     }
 }
