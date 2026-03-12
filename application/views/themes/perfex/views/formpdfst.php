@@ -102,6 +102,16 @@ if (!empty($st_details)) {
         $formhtml .= '</tr>';
     }
 }
+
+$formhtml .='<tr>
+                <th colspan="4" class="daily_report_head">
+                    <span class="daily_report_label" style="display: ruby;">Name :</span><span class="daily_report_label" style="display: ruby;">'.$st_data->name_footer. ' </span>
+                </th>
+                <th colspan="5" class="daily_report_head">
+                    <span class="daily_report_label" style="display: ruby;">Designation :</span><span class="daily_report_label" style="display: ruby;">'.$st_data->designation. '</span>
+                </th>
+
+            </tr>';
 $formhtml .= '</tbody>';
 $formhtml .= '</table>';
 $formhtml .= '<link href="' . module_dir_url(PURCHASE_MODULE_NAME, 'assets/css/pur_order_pdf.css') . '"  rel="stylesheet" type="text/css" />';
