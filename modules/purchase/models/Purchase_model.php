@@ -28945,25 +28945,23 @@ class Purchase_model extends App_Model
         update_module_filter($module_name, 'total_months', !empty($data['total_months']) ? $data['total_months'] : NULL);
         update_module_filter($module_name, 'start_date', !empty($data['start_date']) ? $data['start_date'] : NULL);
         update_module_filter($module_name, 'budgeted', !empty($data['budgeted']) ? $data['budgeted'] : NULL);
+        $cashflow_forecast = array();
         $industry_standard_scurve = array();
         $actual_spending_on_project = array();
         $timelines_percentages = array(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100);
         $cumulative_cashflow_percentages = array(0, 3, 10, 15, 27, 42, 60, 75, 90, 95, 100);
+        $periods = array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
         $default_total_months = $data['total_months'];
         $start_date = date('Y-m-01', strtotime($data['start_date']));
         $end_date = date('Y-m-t', strtotime($data['start_date']));
         $default_budgeted = $data['budgeted'];
         $default_project = get_default_project();
-        $previous_incremental_percentage = 0;
 
+        $previous_incremental_percentage = 0;
         foreach ($timelines_percentages as $index => $timeline) {
             $cumulative_cashflow_percentage = $cumulative_cashflow_percentages[$index];
             $months_cal = max(1, round(($default_total_months * $timeline) / 100));
-            if($index == 0) {
-                $incremental_percentage = 0;
-            } else {
-                $incremental_percentage = $cumulative_cashflow_percentage - $previous_incremental_percentage;
-            }
+            $incremental_percentage = $cumulative_cashflow_percentage - $previous_incremental_percentage;
             $previous_incremental_percentage = $cumulative_cashflow_percentage;
             $budget_value = ($default_budgeted * $cumulative_cashflow_percentage) / 100;
 
@@ -29001,11 +28999,13 @@ class Purchase_model extends App_Model
 
             UNION ALL
 
-            SELECT (CASE 
-                WHEN t.order_date IS NULL OR t.order_date = '0000-00-00'
-                THEN DATE_FORMAT(CURDATE(), '%Y-01-01')
-                ELSE t.order_date
-            END) AS order_date, (t.total + IFNULL(t.co_total, 0)) AS total_rev_contract_value
+            SELECT 
+                CASE 
+                    WHEN t.order_date IS NULL OR t.order_date = '0000-00-00'
+                    THEN DATE_ADD('2022-07-01', INTERVAL FLOOR(RAND() * DATEDIFF('2026-01-01','2022-07-01')) DAY)
+                    ELSE t.order_date
+                END AS order_date,
+                (t.total + IFNULL(t.co_total, 0)) AS total_rev_contract_value
             FROM tblpur_order_tracker t
             WHERE project = $default_project
         ";
@@ -29033,17 +29033,153 @@ class Purchase_model extends App_Model
                 );
             }
             $actual_cum_percentage = ($actual_cumulative_cashflow / $default_budgeted) * 100;
-
             $actual_spending_on_project[$index] = array(
                 'months_cal' => $months_cal,
                 'actual_cum_percentage' => $actual_cum_percentage,
                 'actual_cum_amount' => $actual_cumulative_cashflow
             );
         }
+        if(!empty($actual_spending_on_project)) {
+            $actual_cum_amount = array_column($actual_spending_on_project, 'actual_cum_amount');
+            $last_spending_on_project = 0;
+            for ($i = 1; $i < count($actual_cum_amount); $i++) {
+                if ($actual_cum_amount[$i] != $actual_cum_amount[$i - 1]) {
+                    $last_spending_on_project = $i;
+                }
+            }
+            $actual_spending_on_project = array_slice($actual_spending_on_project, 0, $last_spending_on_project + 1);
+            $actual_spending_on_project = array_values($actual_spending_on_project);
+        }
+
+        $previous_planned_cum_cf = 0;
+        $previous_forecast_cum_cf = 0;
+        $previous_forecast_percentage = 0;
+        foreach ($periods as $index => $period) {
+            $months_cal = $industry_standard_scurve[$index]['months_cal'];
+            $months_cal_name = ($months_cal == 1) ? date('M-y', strtotime($start_date)) : date('M-y', strtotime("+{$months_cal} months", strtotime($start_date)));
+            $cumulative_cashflow_percentage = $industry_standard_scurve[$index]['cumulative_cashflow_percentage'];
+            if ($index == 0) {
+                $planned_monthly_cf = ($cumulative_cashflow_percentage * $default_budgeted) / 100;
+                $planned_cum_cf = $planned_monthly_cf;
+            } else {
+                $prev_plan = $industry_standard_scurve[$index - 1]['cumulative_cashflow_percentage'];
+                $planned_monthly_cf = (($cumulative_cashflow_percentage - $prev_plan) * $default_budgeted) / 100;
+                $planned_cum_cf = $previous_planned_cum_cf + $planned_monthly_cf;
+            }
+            $actual_row = array_values(array_filter(
+                $actual_spending_on_project,
+                function ($r) use ($months_cal) {
+                    return $r['months_cal'] == $months_cal;
+                }
+            ));
+            $actual_percentage = !empty($actual_row) ? $actual_row[0]['actual_cum_percentage'] : null;
+            if ($index == 0) {
+                $forecast_percentage = $actual_percentage !== null ? $actual_percentage : 0;
+            } else {
+                $prev_plan = $industry_standard_scurve[$index - 1]['cumulative_cashflow_percentage'];
+                $plan_percentage = $cumulative_cashflow_percentage;
+                if ($actual_percentage !== null) {
+                    $forecast_percentage = $actual_percentage;
+                } else {
+                    $forecast_percentage =
+                    $previous_forecast_percentage +
+                    (($plan_percentage - $prev_plan) / (100 - $prev_plan)) *
+                    (100 - $previous_forecast_percentage);
+                }
+            }
+            $forecast_percentage = ($forecast_percentage < 0.5) ? 0 : $forecast_percentage;
+            $forecast_monthly_cf = (($forecast_percentage - $previous_forecast_percentage) * $default_budgeted) / 100;
+            $forecast_cum_cf = $forecast_monthly_cf + $previous_forecast_cum_cf;
+            $variance = $planned_monthly_cf - $forecast_monthly_cf;
+            if ($variance > 0) {
+                $status = "Behind";
+            } elseif ($variance < 0) {
+                $status = "Ahead";
+            } else {
+                $status = "-";
+            }
+
+            $cashflow_forecast[$index] = array(
+                'period' => $period,
+                'months_cal_name' => $months_cal_name,
+                'months_cal' => $months_cal,
+                'cumulative_cashflow_percentage' => $cumulative_cashflow_percentage,
+                'planned_monthly_cf' => $planned_monthly_cf,
+                'planned_cum_cf' => $planned_cum_cf,
+                'actual_forecast_percentage' => $forecast_percentage,
+                'forecast_monthly_cf' => $forecast_monthly_cf,
+                'forecast_cum_cf' => $forecast_cum_cf,
+                'variance' => $variance,
+                'status' => $status,
+                'actual_period' => !empty($actual_row) ? 1 : 0
+            );
+
+            $previous_planned_cum_cf = $planned_cum_cf;
+            $previous_forecast_cum_cf = $forecast_cum_cf;
+            $previous_forecast_percentage = $forecast_percentage;
+        }
+
+        $last_actual_period_array = end(array_filter($cashflow_forecast, function ($row) {
+            return $row['actual_period'] == 1;
+        }));
+
+        $current_speed_ratio = 0;
+        if(!empty($last_actual_period_array)) {
+            if($last_actual_period_array['cumulative_cashflow_percentage'] > 0) {
+                $current_speed_ratio = ($last_actual_period_array['actual_forecast_percentage'] / $last_actual_period_array['cumulative_cashflow_percentage']) * 100;
+            }
+        }
+
+        foreach ($cashflow_forecast as $index => $period) {
+            if ($period['actual_period'] == 1) {
+                $realistic_month = $period['months_cal'];
+                $realistic_calendar_month = $period['months_cal_name'];
+            } elseif (!empty($last_actual_period_array) && $current_speed_ratio > 0) {
+                $realistic_month =
+                $last_actual_period_array['months_cal'] +
+                (
+                    (($period['months_cal'] - $last_actual_period_array['months_cal'])
+                    / $current_speed_ratio) * 100
+                );
+                $realistic_calendar_month = date(
+                    'M-y',
+                    strtotime('+' . (round($realistic_month, 0) - 1) . ' months', strtotime($start_date))
+                );
+            } else {
+                $realistic_month = $period['months_cal'];
+                $realistic_calendar_month = $period['months_cal_name'];
+            }
+            $delay_vs_plan = $realistic_month - $period['months_cal'];
+
+            $cashflow_forecast[$index]['realistic_month'] = $realistic_month;
+            $cashflow_forecast[$index]['realistic_calendar_month'] = $realistic_calendar_month;
+            $cashflow_forecast[$index]['delay_vs_plan'] = $delay_vs_plan;
+        }
+
+        $last_actual_period_month = !empty($last_actual_period_array) ? $last_actual_period_array['months_cal'] : 0;
+        $planned_cum_percentage = !empty($last_actual_period_array) ? $last_actual_period_array['cumulative_cashflow_percentage'] : 0;
+        $actual_cum_percentage = !empty($last_actual_period_array) ? $last_actual_period_array['actual_forecast_percentage'] : 0;
+        $delay_indicator = $planned_cum_percentage - $actual_cum_percentage;
+        $remaining_budget_to_spend = ((100 - $actual_cum_percentage) / 100) * $default_budgeted;
+        $remaining_months = $default_total_months - $last_actual_period_month;
+        $projected_total_duration = end($cashflow_forecast)['realistic_month'];
+        $projected_completion_date = end($cashflow_forecast)['realistic_calendar_month'];
+        $total_delay = end($cashflow_forecast)['delay_vs_plan'];
 
         return [
             'industry_standard_scurve' => $industry_standard_scurve,
-            'actual_spending_on_project' => $actual_spending_on_project
+            'actual_spending_on_project' => $actual_spending_on_project,
+            'cashflow_forecast' => $cashflow_forecast,
+            'last_actual_period_month' => $last_actual_period_month,
+            'planned_cum_percentage' => $planned_cum_percentage,
+            'actual_cum_percentage' => $actual_cum_percentage,
+            'delay_indicator' => $delay_indicator,
+            'remaining_budget_to_spend' => $remaining_budget_to_spend,
+            'remaining_months' => $remaining_months,
+            'current_speed_ratio' => $current_speed_ratio,
+            'projected_total_duration' => $projected_total_duration,
+            'projected_completion_date' => $projected_completion_date,
+            'total_delay' => $total_delay,
         ];
     }
 

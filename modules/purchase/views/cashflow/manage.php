@@ -53,7 +53,7 @@
                      <div class="horizontal-tabs">
                         <ul class="nav nav-tabs nav-tabs-horizontal mbot15" role="tablist">
                            <li role="presentation" class="active">
-                            <a href="#cashflow_forecast_table" aria-controls="cashflow_forecast_table" role="tab" id="tab_cashflow_forecast_table" data-toggle="tab">
+                            <a href="#cashflow_forecast" aria-controls="cashflow_forecast" role="tab" id="tab_cashflow_forecast" data-toggle="tab">
                               CASHFLOW FORECAST TABLE
                             </a>
                            </li>
@@ -72,16 +72,126 @@
                   </div>
 
                   <div class="tab-content">
-                     <div role="tabpanel" class="col-md-12 tab-pane cashflow-pane active" id="cashflow_forecast_table">
+                     <div role="tabpanel" class="col-md-12 tab-pane cashflow-pane active" id="cashflow_forecast">
+                        <table class="table dt-table cashflow_forecast_table border">
+                           <thead>
+                              <tr>
+                                 <th><?php echo _l('Period'); ?></th>
+                                 <th><?php echo _l('Calendar Month'); ?></th>
+                                 <th><?php echo _l('S-Curve Month #'); ?></th>
+                                 <th><?php echo _l('Planned Cum. %'); ?></th>
+                                 <th><?php echo _l('Planned Monthly CF'); ?></th>
+                                 <th><?php echo _l('Planned Cum. CF'); ?></th>
+                                 <th><?php echo _l('Actual/Forecast %'); ?></th>
+                                 <th><?php echo _l('Forecast Monthly CF'); ?></th>
+                                 <th><?php echo _l('Forecast Cum. CF'); ?></th>
+                                 <th><?php echo _l('Variance (Plan vs Forecast)'); ?></th>
+                                 <th><?php echo _l('Status'); ?></th>
+                                 <th><?php echo _l('Realistic Month # (At Current Pace)'); ?></th>
+                                 <th><?php echo _l('Realistic Calendar Month'); ?></th>
+                                 <th><?php echo _l('Delay vs Plan (Months)'); ?></th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                           </tbody>
+                        </table>
+                        <div class="col-md-8 col-md-offset-4 mtop15">
+                           <table class="table text-right">
+                              <tbody>
+                                 <tr>
+                                    <td>
+                                       <span class="bold">
+                                          Last Actual Period Month :
+                                       </span>
+                                    </td>
+                                    <td class="last_actual_period_month"></td>
+                                 </tr>
+                                 <tr>
+                                    <td>
+                                       <span class="bold">
+                                          Planned Cum % at Month <span class="last_actual_period_month"></span> :
+                                       </span>
+                                    </td>
+                                    <td class="planned_cum_percentage"></td>
+                                 </tr>
+                                 <tr>
+                                    <td>
+                                       <span class="bold">
+                                          Actual Cum % at Month <span class="last_actual_period_month"></span> :
+                                       </span>
+                                    </td>
+                                    <td class="actual_cum_percentage"></td>
+                                 </tr>
+                                 <tr>
+                                    <td>
+                                       <span class="bold">
+                                          Delay Indicator (Plan - Actual) :
+                                       </span>
+                                    </td>
+                                    <td class="delay_indicator"></td>
+                                 </tr>
+                                 <tr>
+                                    <td>
+                                       <span class="bold">
+                                          Remaining Budget to Spend :
+                                       </span>
+                                    </td>
+                                    <td class="remaining_budget_to_spend"></td>
+                                 </tr>
+                                 <tr>
+                                    <td>
+                                       <span class="bold">
+                                          Remaining Months :
+                                       </span>
+                                    </td>
+                                    <td class="remaining_months"></td>
+                                 </tr>
+                                 <tr>
+                                    <td>
+                                       <span class="bold">
+                                          Current Speed Ratio :
+                                       </span>
+                                    </td>
+                                    <td class="current_speed_ratio"></td>
+                                 </tr>
+                                 <tr>
+                                    <td>
+                                       <span class="bold">
+                                          Projected Total Duration (Months) :
+                                       </span>
+                                    </td>
+                                    <td class="projected_total_duration"></td>
+                                 </tr>
+                                 <tr>
+                                    <td>
+                                       <span class="bold">
+                                          Projected Completion Date :
+                                       </span>
+                                    </td>
+                                    <td class="projected_completion_date"></td>
+                                 </tr>
+                                 <tr>
+                                    <td>
+                                       <span class="bold">
+                                          Total Delay (Months) :
+                                       </span>
+                                    </td>
+                                    <td class="total_delay"></td>
+                                 </tr>
+                              </tbody>
+                           </table>
+                        </div>
                      </div>
                      <div role="tabpanel" class="col-md-12 tab-pane cashflow-pane" id="industry_standard_scurve">
                         <table class="table dt-table industry_standard_scurve_table border">
                            <thead>
-                              <th><?php echo _l('Timeline %'); ?></th>
-                              <th><?php echo _l('Cumulative Cashflow %'); ?></th>
-                              <th><?php echo _l('Months'); ?></th>
-                              <th><?php echo _l('Incremental %'); ?></th>
-                              <th><?php echo _l('Budget'); ?></th>
+                              <tr>
+                                 <th><?php echo _l('Timeline %'); ?></th>
+                                 <th><?php echo _l('Cumulative Cashflow %'); ?></th>
+                                 <th><?php echo _l('Months'); ?></th>
+                                 <th><?php echo _l('Incremental %'); ?></th>
+                                 <th><?php echo _l('Budget'); ?></th>
+                              </tr>
                            </thead>
                            <tbody>
                            </tbody>
@@ -90,9 +200,11 @@
                      <div role="tabpanel" class="col-md-12 tab-pane cashflow-pane" id="actual_spending_on_project">
                         <table class="table dt-table actual_spending_on_project_table border">
                            <thead>
-                              <th><?php echo _l('Month #'); ?></th>
-                              <th><?php echo _l('Actual Cum. %'); ?></th>
-                              <th><?php echo _l('Actual Cum. Amount'); ?></th>
+                              <tr>
+                                 <th><?php echo _l('Month #'); ?></th>
+                                 <th><?php echo _l('Actual Cum. %'); ?></th>
+                                 <th><?php echo _l('Actual Cum. Amount'); ?></th>
+                              </tr>
                            </thead>
                            <tbody>
                            </tbody>
@@ -149,6 +261,39 @@
                });
             }
             $('.actual_spending_on_project_table tbody').html(actual_spending_tbody);
+
+            var cashflow_forecast_tbody = '';
+            if (Array.isArray(data.cashflow_forecast) && data.cashflow_forecast.length > 0) {
+               $.each(data.cashflow_forecast, function(i, row){
+                  cashflow_forecast_tbody += '<tr>';
+                  cashflow_forecast_tbody += '<td>'+row.period+'</td>';
+                  cashflow_forecast_tbody += '<td>'+row.months_cal_name+'</td>';
+                  cashflow_forecast_tbody += '<td>'+row.months_cal+'</td>';
+                  cashflow_forecast_tbody += '<td>'+parseFloat(row.cumulative_cashflow_percentage).toFixed(2)+'%</td>';
+                  cashflow_forecast_tbody += '<td>'+format_money(row.planned_monthly_cf)+'</td>';
+                  cashflow_forecast_tbody += '<td>'+format_money(row.planned_cum_cf)+'</td>';
+                  cashflow_forecast_tbody += '<td>'+parseFloat(row.actual_forecast_percentage).toFixed(2)+'%</td>';
+                  cashflow_forecast_tbody += '<td>'+format_money(row.forecast_monthly_cf)+'</td>';
+                  cashflow_forecast_tbody += '<td>'+format_money(row.forecast_cum_cf)+'</td>';
+                  cashflow_forecast_tbody += '<td>'+format_money(row.variance)+'</td>';
+                  cashflow_forecast_tbody += '<td>'+row.status+'</td>';
+                  cashflow_forecast_tbody += '<td>'+parseFloat(row.realistic_month).toFixed(2)+'</td>';
+                  cashflow_forecast_tbody += '<td>'+row.realistic_calendar_month+'</td>';
+                  cashflow_forecast_tbody += '<td>'+parseFloat(row.delay_vs_plan).toFixed(2)+'</td>';
+               });
+            }
+            $('.cashflow_forecast_table tbody').html(cashflow_forecast_tbody);
+
+            $('.last_actual_period_month').html(data.last_actual_period_month);
+            $('.planned_cum_percentage').html(parseFloat(data.planned_cum_percentage).toFixed(2)+'%');
+            $('.actual_cum_percentage').html(parseFloat(data.actual_cum_percentage).toFixed(2)+'%');
+            $('.delay_indicator').html(parseFloat(data.delay_indicator).toFixed(2)+'%');
+            $('.remaining_budget_to_spend').html(format_money(data.remaining_budget_to_spend));
+            $('.remaining_months').html(data.remaining_months);
+            $('.current_speed_ratio').html(parseFloat(data.current_speed_ratio).toFixed(2)+'%');
+            $('.projected_total_duration').html(parseFloat(data.projected_total_duration).toFixed(2));
+            $('.projected_completion_date').html(data.projected_completion_date);
+            $('.total_delay').html(parseFloat(data.total_delay).toFixed(2));
       });
    }
 </script>
