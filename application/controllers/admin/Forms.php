@@ -888,7 +888,8 @@ class Forms extends AdminController
                 'qor'  => ['has_attachments' => true],
                 'wpr'  => ['has_attachments' => false],
                 'arf'  => ['has_attachments' => false],
-                'st'  => ['has_attachments' => false]
+                'st'  => ['has_attachments' => false],
+                'krp'  => ['has_attachments' => false]
             ];
 
             if (isset($formConfigs[$form_type])) {
@@ -984,6 +985,8 @@ class Forms extends AdminController
 
         $data['wpr_row_template'] = $wpr_row_template;
         $data['st_row_template'] = $st_row_template;
+        $this->load->model('departments_model');
+        $data['departments'] = $this->departments_model->get();
         $this->load->view("admin/forms/form_design/{$form_type}", $data);
     }
 
@@ -1668,6 +1671,38 @@ class Forms extends AdminController
 
         try {
             $pdf = form_pdf_st($form);
+        } catch (Exception $e) {
+            $message = $e->getMessage();
+            echo $message;
+            if (strpos($message, 'Unable to get the size of the image') !== false) {
+                show_pdf_unable_to_get_image_size_error();
+            }
+            die;
+        }
+
+        $type = 'I';
+
+        if ($this->input->get('output_type')) {
+            $type = $this->input->get('output_type');
+        }
+
+        if ($this->input->get('print')) {
+            $type = 'D';
+        }
+
+        $pdf->Output(mb_strtoupper(slug_it($form->subject)) . '.pdf', $type);
+    }
+
+    public function pdf_krp($id)
+    {
+        if (!$id) {
+            redirect(admin_url('forms'));
+        }
+
+        $form = $this->forms_model->get_form_by_id($id);
+
+        try {
+            $pdf = form_pdf_krp($form);
         } catch (Exception $e) {
             $message = $e->getMessage();
             echo $message;

@@ -225,6 +225,7 @@ return App_table::find('forms')
                     $check_formid_is_qcr = chcek_formid_is_qcr($aRow['formid']);
                     $check_formid_is_qor = check_formid_is_qor($aRow['formid']);
                     $check_formis_is_st = check_formid_is_st($aRow['formid']);
+                    $check_formis_is_krp = check_formid_is_krp($aRow['formid']);
                     if ($check_formid_is_qcr > 0) {
                         $_data = '<div class="btn-group mright5">
                        <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ><i class="fa fa-file-pdf"></i><span class="caret"></span></a>
@@ -261,9 +262,16 @@ return App_table::find('forms')
                            <li><a href="' . admin_url('forms/pdf_st/' . $aRow['formid']) . '" download>' . _l('download') . '</a></li>
                         </ul>
                         </div>';
-                    }
-                    
-                    else {
+                    } elseif ($check_formis_is_krp > 0) {
+                        $_data = '<div class="btn-group mright5">
+                        <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ><i class="fa fa-file-pdf"></i><span class="caret"></span></a>
+                        <ul class="dropdown-menu dropdown-menu-right">
+                           <li class="hidden-xs"><a href="' . admin_url('forms/pdf_krp/' . $aRow['formid'] . '?output_type=I') . '">' . _l('view_pdf') . '</a></li>
+                           <li class="hidden-xs"><a href="' . admin_url('forms/pdf_krp/' . $aRow['formid'] . '?output_type=I') . '" target="_blank">' . _l('view_pdf_in_new_window') . '</a></li>
+                           <li><a href="' . admin_url('forms/pdf_krp/' . $aRow['formid']) . '" download>' . _l('download') . '</a></li>
+                        </ul>
+                        </div>';
+                    } else {
                         $_data = '';
                     }
                 } else {

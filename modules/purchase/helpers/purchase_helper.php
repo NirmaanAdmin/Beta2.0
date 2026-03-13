@@ -3486,6 +3486,17 @@ function get_vendor_name_by_id($vendor_id)
 
     return $vendor->company;
 }
+function get_department_name_by_id($department_id)
+{
+    $CI = &get_instance();
+    $department = $CI->db->select('*')
+        ->where('departmentid', $department_id)
+        ->from(db_prefix() . 'departments')
+        ->get()
+        ->row();
+
+    return $department->name;
+}
 function format_pdf_vendor_info($vendor_id)
 {
     $html = '';

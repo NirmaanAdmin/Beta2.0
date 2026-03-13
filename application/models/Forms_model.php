@@ -1233,6 +1233,46 @@ class Forms_model extends App_Model
                     $new_order = $data['newitems'];
                     unset($data['newitems']);
                 }
+            } elseif ($data['form_type'] == "krp") {
+                $krp_form = [];
+                $krp_form['sr_no'] = $data['sr_no'];
+                $krp_form['name_of_contractor'] = $data['name_of_contractor'];
+                $krp_form['name_of_key_receiver'] = $data['name_of_key_receiver'];
+                $krp_form['key_receiver_contact_number'] = $data['key_receiver_contact_number'];
+                $krp_form['key_number'] = $data['key_number'];
+                $krp_form['location'] = $data['location'];
+                $krp_form['valid_from'] = $data['valid_from'];
+                $krp_form['valid_to'] = $data['valid_to'];
+                $krp_form['total_hours'] = $data['total_hours'];
+                $krp_form['key_return_date_time'] = $data['key_return_date_time'];
+                $krp_form['department_key_permit'] = $data['department_key_permit'];
+                $krp_form['job_description'] = $data['job_description'];
+                $krp_form['name_of_equipment_used'] = $data['name_of_equipment_used'];
+                $krp_form['name_of_issuer'] = $data['name_of_issuer'];
+                $krp_form['name_of_issuer_athorizer'] = $data['name_of_issuer_athorizer'];
+                $krp_form['name_of_receiver'] = $data['name_of_receiver'];
+                $krp_form['permit_closer'] = $data['permit_closer'];
+                
+                unset(
+                    $data['sr_no'],
+                    $data['name_of_contractor'],
+                    $data['name_of_key_receiver'],
+                    $data['key_receiver_contact_number'],
+                    $data['key_number'],
+                    $data['location'],
+                    $data['valid_from'],
+                    $data['valid_to'],
+                    $data['total_hours'],
+                    $data['key_return_date_time'],
+                    $data['department_key_permit'],
+                    $data['job_description'],
+                    $data['name_of_equipment_used'],
+                    $data['name_of_issuer'],
+                    $data['name_of_issuer_athorizer'],
+                    $data['name_of_receiver'],
+                    $data['permit_closer'],
+
+                );
             }
         }
 
@@ -1809,6 +1849,13 @@ class Forms_model extends App_Model
                             $this->db->insert(db_prefix() . $data['form_type'] . '_form_detail', $dt_data);
                             $qcr_detail_id = $this->db->insert_id();
                         }
+                    }
+                }
+            } elseif ($data['form_type'] == "krp") {
+                if (isset($krp_form)) {
+                    if (!empty($krp_form)) {
+                        $krp_form['form_id'] = $formid;
+                        $this->db->insert(db_prefix() . $data['form_type'] . '_form', $krp_form);
                     }
                 }
             }
@@ -2515,6 +2562,46 @@ class Forms_model extends App_Model
                 $remove_order = $data['removed_items'];
                 unset($data['removed_items']);
             }
+        } elseif ($formBeforeUpdate->form_type == "krp") {
+           $krp_form = [];
+                $krp_form['sr_no'] = $data['sr_no'];
+                $krp_form['name_of_contractor'] = $data['name_of_contractor'];
+                $krp_form['name_of_key_receiver'] = $data['name_of_key_receiver'];
+                $krp_form['key_receiver_contact_number'] = $data['key_receiver_contact_number'];
+                $krp_form['key_number'] = $data['key_number'];
+                $krp_form['location'] = $data['location'];
+                $krp_form['valid_from'] = $data['valid_from'];
+                $krp_form['valid_to'] = $data['valid_to'];
+                $krp_form['total_hours'] = $data['total_hours'];
+                $krp_form['key_return_date_time'] = $data['key_return_date_time'];
+                $krp_form['department_key_permit'] = $data['department_key_permit'];
+                $krp_form['job_description'] = $data['job_description'];
+                $krp_form['name_of_equipment_used'] = $data['name_of_equipment_used'];
+                $krp_form['name_of_issuer'] = $data['name_of_issuer'];
+                $krp_form['name_of_issuer_athorizer'] = $data['name_of_issuer_athorizer'];
+                $krp_form['name_of_receiver'] = $data['name_of_receiver'];
+                $krp_form['permit_closer'] = $data['permit_closer'];
+                
+                unset(
+                    $data['sr_no'],
+                    $data['name_of_contractor'],
+                    $data['name_of_key_receiver'],
+                    $data['key_receiver_contact_number'],
+                    $data['key_number'],
+                    $data['location'],
+                    $data['valid_from'],
+                    $data['valid_to'],
+                    $data['total_hours'],
+                    $data['key_return_date_time'],
+                    $data['department_key_permit'],
+                    $data['job_description'],
+                    $data['name_of_equipment_used'],
+                    $data['name_of_issuer'],
+                    $data['name_of_issuer_athorizer'],
+                    $data['name_of_receiver'],
+                    $data['permit_closer'],
+
+                );
         }
 
         $this->db->where('formid', $data['formid']);
@@ -3477,6 +3564,16 @@ class Forms_model extends App_Model
                         if ($this->db->delete(db_prefix() . $formBeforeUpdate->form_type . '_form_detail')) {
                             $affectedRows++;
                         }
+                    }
+                }
+            }
+        } elseif ($formBeforeUpdate->form_type == "krp") {
+            if (isset($krp_form)) {
+                if (!empty($krp_form)) {
+                    $this->db->where('form_id', $data['formid']);
+                    $this->db->update(db_prefix() . $formBeforeUpdate->form_type . '_form', $krp_form);
+                    if ($this->db->affected_rows() > 0) {
+                        $affectedRows++;
                     }
                 }
             }
@@ -5332,5 +5429,16 @@ class Forms_model extends App_Model
     {
         $this->db->where('form_id', $form_id);
         return $this->db->get(db_prefix() . 'st_form_detail')->result_array();
+    }
+
+    public function get_krp_form($form_id)
+    {
+        $this->db->where('form_id', $form_id);
+        return $this->db->get(db_prefix() . 'krp_form')->row();
+    }
+    public function get_krp_form_detail($form_id)
+    {
+        $this->db->where('form_id', $form_id);
+        return $this->db->get(db_prefix() . 'krp_form_detail')->result_array();
     }
 }
