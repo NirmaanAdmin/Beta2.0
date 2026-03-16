@@ -7330,3 +7330,48 @@ function get_wo_data($id)
     // ID not found in either table
     return false;
 }
+function resize_image_for_pdf($path) {
+
+// Check if file exists
+if (!file_exists($path) || !is_file($path)) {
+    return false;
+}
+
+// Check if it is a valid image
+$image_info = @getimagesize($path);
+if ($image_info === false) {
+    return false;
+}
+
+$max_width  = 300;
+$max_height = 200;
+
+$width  = $image_info[0];
+$height = $image_info[1];
+
+// Calculate resize ratio
+$ratio = min($max_width / $width, $max_height / $height);
+
+$new_width  = (int)($width * $ratio);
+$new_height = (int)($height * $ratio);
+
+// Create image from file
+$src = imagecreatefromstring(file_get_contents($path));
+if (!$src) {
+    return false;
+}
+
+$tmp = imagecreatetruecolor($new_width, $new_height);
+
+imagecopyresampled($tmp, $src, 0, 0, 0, 0, $new_width, $new_height, $width, $height);
+
+$temp_path = sys_get_temp_dir() . '/pdf_img_' . uniqid() . '.jpg';
+
+imagejpeg($tmp, $temp_path, 75);
+
+imagedestroy($src);
+imagedestroy($tmp);
+
+return $temp_path;
+
+}

@@ -5621,7 +5621,13 @@ class Purchase_model extends App_Model
             if (!empty($row['image'])) {
                 $item_base_url = base_url('uploads/purchase/pur_order/' . $row['pur_order'] . '/' . $row['id'] . '/' . $row['image']);
                 // $full_item_image = '<img class="images_w_table" src="' . $item_base_url . '" alt="' . $row['image'] . '" >';
-                $full_item_image = '<img src="' . FCPATH . 'uploads/purchase/pur_order/' . $row['pur_order'] . '/' . $row['id'] . '/' . $row['image'] . '" width="70" height="50">';
+                // $full_item_image = '<img src="' . FCPATH . 'uploads/purchase/pur_order/' . $row['pur_order'] . '/' . $row['id'] . '/' . $row['image'] . '" width="70" height="50">';
+
+                $image_path = FCPATH . 'uploads/purchase/pur_order/' . $row['pur_order'] . '/' . $row['id'] . '/' . $row['image'];
+
+            $resized = resize_image_for_pdf($image_path);
+                
+            $full_item_image = '<img src="'.$resized.'" width="70" height="50">';
             }
             // $serial_no = !empty($row['serial_no']) ? $row['serial_no'] : $sr++;
             $serial_no = $row['serial_no'];
