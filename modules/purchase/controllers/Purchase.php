@@ -17666,7 +17666,7 @@ class purchase extends AdminController
     }
 
 
-    public function add_quality_report($po_wo_id = false, $po_or_wo)
+    public function add_quality_report($po_wo_id = false, $po_or_wo = false)
     {
         $this->load->model('forms_model');
         if ($this->input->post()) {
@@ -17737,7 +17737,7 @@ class purchase extends AdminController
         $this->load->view('quality_reports/add', $data);
     }
 
-    public function add_checklist($po_wo_id = false, $po_or_wo)
+    public function add_checklist($po_wo_id = false, $po_or_wo= false)
     {
         $this->load->model('forms_model');
         if ($this->input->post()) {
