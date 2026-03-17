@@ -80,7 +80,7 @@
 
                         <span class="daily_report_label">Date :
 
-                            <input type="date" class="form-control" name="date" style="width:30%;" value="<?= !empty($st_form->date) ? date('Y-m-d\TH:i', strtotime($st_form->date)) : '' ?>">
+                            <input type="date" class="form-control" name="date" style="width:30%;" value="<?= !empty($wpf_form->date) ? date('Y-m-d\TH:i', strtotime($wpf_form->date)) : '' ?>">
 
                         </span>
                     </th>
@@ -88,7 +88,7 @@
 
                         <span class="daily_report_label">Permit No. :
 
-                            <input type="text" class="form-control" name="permit_no" style="width:50%;" value="<?= !empty($st_form->permit_no) ? $st_form->permit_no : '' ?>">
+                            <input type="text" class="form-control" name="permit_no" style="width:50%;" value="<?= !empty($wpf_form->permit_no) ? $wpf_form->permit_no : '' ?>">
 
                         </span>
                     </th>
@@ -96,16 +96,16 @@
 
                 <tr>
                     <th colspan="4" class="daily_report_head">
-                        <span class="daily_report_label" style="display: ruby;">Person Name undertaking work :</span><span class="daily_report_label" style="display: ruby;"> <input type="text" id="person_name" name="person_name" class="form-control" style="width:40%;" value="<?php echo isset($st_form->person_name) ? $st_form->person_name : '' ?>"></span>
+                        <span class="daily_report_label" style="display: ruby;">Person Name undertaking work :</span><span class="daily_report_label" style="display: ruby;"> <input type="text" id="person_name" name="person_name" class="form-control" style="width:40%;" value="<?php echo isset($wpf_form->person_name) ? $wpf_form->person_name : '' ?>"></span>
                     </th>
                     <th colspan="5" class="daily_report_head">
-                        <span class="daily_report_label" style="display: ruby;">EHS PERSON :</span><span class="daily_report_label" style="display: ruby;"> <input type="text" id="no_of_participants" name="ehs_person" class="form-control" style="width:40%;" value="<?php echo isset($st_form->ehs_person) ? $st_form->ehs_person : '' ?>"></span>
+                        <span class="daily_report_label" style="display: ruby;">EHS PERSON :</span><span class="daily_report_label" style="display: ruby;"> <input type="text" id="no_of_participants" name="ehs_person" class="form-control" style="width:40%;" value="<?php echo isset($wpf_form->ehs_person) ? $wpf_form->ehs_person : '' ?>"></span>
                     </th>
 
                 </tr>
                 <tr>
                     <th colspan="4" class="daily_report_head">
-                        <span class="daily_report_label" style="display: ruby;">Contractor :</span><span class="daily_report_label" style="display: ruby;"> <?php echo render_select('name_of_contractor', get_vendor_list_for_forms(), array('userid', 'company'), '', isset($st_form->name_of_contractor) ? $st_form->name_of_contractor : ''); ?></span>
+                        <span class="daily_report_label" style="display: ruby;">Contractor :</span><span class="daily_report_label" style="display: ruby;"> <?php echo render_select('name_of_contractor', get_vendor_list_for_forms(), array('userid', 'company'), '', isset($wpf_form->name_of_contractor) ? $wpf_form->name_of_contractor : ''); ?></span>
                     </th>
                     <th colspan="5" class="daily_report_head">
                         <span class="daily_report_label">Project Name & Address : <span class="view_project_name"></span></span>
@@ -114,20 +114,20 @@
                 </tr>
                 <tr>
                     <th colspan="4" class="daily_report_head">
-                        <span class="daily_report_label" style="display: ruby;">Risk :</span><span class="daily_report_label" style="display: ruby;"> <?php echo render_select('risk', get_risk_level(), array('id', 'name'), '', isset($st_form->risk) ? $st_form->risk : ''); ?></span>
+                        <span class="daily_report_label" style="display: ruby;">Risk :</span><span class="daily_report_label" style="display: ruby;"> <?php echo render_select('risk', get_risk_level(), array('id', 'name'), '', isset($wpf_form->risk) ? $wpf_form->risk : ''); ?></span>
                     </th>
                     <th colspan="5" class="daily_report_head">
-                        <span class="daily_report_label" style="display: ruby;">NUMBER OF WORKMEN :</span><span class="daily_report_label" style="display: ruby;"> <input type="number" id="no_of_workmen" name="no_of_workmen" class="form-control" style="width:40%;" value="<?php echo isset($st_form->no_of_workmen) ? $st_form->no_of_workmen : '' ?>"></span>
+                        <span class="daily_report_label" style="display: ruby;">NUMBER OF WORKMEN :</span><span class="daily_report_label" style="display: ruby;"> <input type="number" id="no_of_workmen" name="no_of_workmen" class="form-control" style="width:40%;" value="<?php echo isset($wpf_form->no_of_workmen) ? $wpf_form->no_of_workmen : '' ?>"></span>
                     </th>
 
                 </tr>
 
                 <tr>
                     <th colspan="4" class="daily_report_head">
-                        <span class="daily_report_label" style="display: ruby;">Permit From (Time &Date) :</span><span class="daily_report_label" style="display: ruby;"> <input type="datetime-local" id="permit_from" name="permit_from" class="form-control" style="width:40%;" value="<?php echo isset($st_form->permit_from) ? $st_form->permit_from : '' ?>"></span>
+                        <span class="daily_report_label" style="display: ruby;">Permit From (Time &Date) :</span><span class="daily_report_label" style="display: ruby;"> <input type="datetime-local" id="permit_from" name="permit_from" class="form-control" style="width:40%;" value="<?php echo isset($wpf_form->permit_from) ? $wpf_form->permit_from : '' ?>"></span>
                     </th>
                     <th colspan="5" class="daily_report_head">
-                        <span class="daily_report_label" style="display: ruby;">To (Time & Date) :</span><span class="daily_report_label" style="display: ruby;"> <input type="datetime-local" id="permit_to" name="permit_to" class="form-control" style="width:40%;" value="<?php echo isset($st_form->permit_to) ? $st_form->permit_to : '' ?>"></span>
+                        <span class="daily_report_label" style="display: ruby;">To (Time & Date) :</span><span class="daily_report_label" style="display: ruby;"> <input type="datetime-local" id="permit_to" name="permit_to" class="form-control" style="width:40%;" value="<?php echo isset($wpf_form->permit_to) ? $wpf_form->permit_to : '' ?>"></span>
                     </th>
 
                 </tr>
@@ -136,44 +136,44 @@
                     <th colspan="2" class="text-center">
                         <div class="ppe-box">
                             <img src="<?php echo site_url('assets/images/wpf/labour.png'); ?>">
-                            <input type="checkbox" name="ppe_labour" value="1" <?= !empty($st_form->ppe_labour) ? 'checked' : '' ?>>
+                            <input type="checkbox" name="ppe_labour" value="1" <?= !empty($wpf_form->ppe_labour) ? 'checked' : '' ?>>
                         </div>
                     </th>
 
                     <th colspan="2" class="text-center">
                         <div class="ppe-box">
                             <img src="<?php echo site_url('assets/images/wpf/safety.png'); ?>">
-                            <input type="checkbox" name="ppe_safety" value="1" <?= !empty($st_form->ppe_safety) ? 'checked' : '' ?>>
+                            <input type="checkbox" name="ppe_safety" value="1" <?= !empty($wpf_form->ppe_safety) ? 'checked' : '' ?>>
                         </div>
                     </th>
 
                     <th colspan="2" class="text-center">
                         <div class="ppe-box">
                             <img src="<?php echo site_url('assets/images/wpf/face-mask.png'); ?>">
-                            <input type="checkbox" name="ppe_mask" value="1" <?= !empty($st_form->ppe_mask) ? 'checked' : '' ?>>
+                            <input type="checkbox" name="ppe_mask" value="1" <?= !empty($wpf_form->ppe_mask) ? 'checked' : '' ?>>
                         </div>
                     </th>
 
                     <th colspan="2" class="text-center">
                         <div class="ppe-box">
                             <img src="<?php echo site_url('assets/images/wpf/high-visibility-vest.png'); ?>">
-                            <input type="checkbox" name="ppe_vest" value="1" <?= !empty($st_form->ppe_vest) ? 'checked' : '' ?>>
+                            <input type="checkbox" name="ppe_vest" value="1" <?= !empty($wpf_form->ppe_vest) ? 'checked' : '' ?>>
                         </div>
                     </th>
 
                     <th colspan="1" class="text-center">
                         <div class="ppe-box">
                             <img src="<?php echo site_url('assets/images/wpf/boot.png'); ?>">
-                            <input type="checkbox" name="ppe_boot" value="1" <?= !empty($st_form->ppe_boot) ? 'checked' : '' ?>>
+                            <input type="checkbox" name="ppe_boot" value="1" <?= !empty($wpf_form->ppe_boot) ? 'checked' : '' ?>>
                         </div>
                     </th>
                 </tr>
                 <tr>
                     <th colspan="4" class="daily_report_head">
-                        <span class="daily_report_label" style="display: ruby;">Work to be done :</span><span class="daily_report_label" style="display: ruby;"><textarea class="daily_report_label" name="work_to_be_done" id="work_to_be_done"><?php echo isset($st_form->work_to_be_done) ? $st_form->work_to_be_done : '' ?></textarea></span>
+                        <span class="daily_report_label" style="display: ruby;">Work to be done :</span><span class="daily_report_label" style="display: ruby;"><textarea class="daily_report_label" name="work_to_be_done" id="work_to_be_done"><?php echo isset($wpf_form->work_to_be_done) ? $wpf_form->work_to_be_done : '' ?></textarea></span>
                     </th>
                     <th colspan="5" class="daily_report_head">
-                        <span class="daily_report_label" style="display: ruby;">Tools / equipment to be used (e.g. hand tools, power tools, mechanical tools etc.) :</span><span class="daily_report_label" style="display: ruby;"><textarea class="daily_report_label" name="tools_equipment" id="tools_equipment"><?php echo isset($st_form->tools_equipment) ? $st_form->tools_equipment : '' ?></textarea></span>
+                        <span class="daily_report_label" style="display: ruby;">Tools / equipment to be used (e.g. hand tools, power tools, mechanical tools etc.) :</span><span class="daily_report_label" style="display: ruby;"><textarea class="daily_report_label" name="tools_equipment" id="tools_equipment"><?php echo isset($wpf_form->tools_equipment) ? $wpf_form->tools_equipment : '' ?></textarea></span>
                     </th>
                 </tr>
                 <tr>
@@ -204,14 +204,93 @@
 
             <tr>
                 <th colspan="4" class="daily_report_head">
-                    <span class="daily_report_label" style="display: ruby;">Name :</span><span class="daily_report_label" style="display: ruby;"> <input type="text" id="name_footer" name="name_footer" class="form-control" style="width:40%;" value="<?php echo isset($st_form->name_footer) ? $st_form->name_footer : '' ?>"></span>
+                    <span class="daily_report_label" style="display: ruby;">Personal Protective Equipment (PPE) appropriate to the task:</span><span class="daily_report_label" style="display: ruby;"> <input type="text" id="personal_protective_equipment" name="personal_protective_equipment" class="form-control" style="width:40%;" value="<?php echo isset($wpf_form->personal_protective_equipment) ? $wpf_form->personal_protective_equipment : '' ?>"></span>
                 </th>
                 <th colspan="5" class="daily_report_head">
-                    <span class="daily_report_label" style="display: ruby;">Designation :</span><span class="daily_report_label" style="display: ruby;"> <input type="text" id="designation" name="designation" class="form-control" style="width:40%;" value="<?php echo isset($st_form->designation) ? $st_form->designation : '' ?>"></span>
+                    <span class="daily_report_label" style="display: ruby;">Fire extinguisher(s) located at:</span><span class="daily_report_label" style="display: ruby;"> <input type="text" id="fire_extinguisher_location" name="fire_extinguisher_location" class="form-control" style="width:40%;" value="<?php echo isset($wpf_form->fire_extinguisher_location) ? $wpf_form->fire_extinguisher_location : '' ?>"></span>
+                </th>
+
+            </tr>
+            <tr>
+                <th colspan="9" class="daily_report_head" style="text-align: center;">
+                    <span class="daily_report_label">ACKNOWLEDGEMENT OF WORK - CONTRACTOR</span>
+                </th>
+            </tr>
+            <tr>
+                <th colspan="9" class="daily_report_head">
+                    <span class="daily_report_label">The contractor acknowledges that the job will be performed in line with the precautions listed above, that all proposed work has been discussed with the Site Representative,and that the Site Representative will be informed of any incidents</span>
+                </th>
+            </tr>
+            <tr>
+                <th colspan="5" class="daily_report_head">
+                    <span class="daily_report_label" style="display: ruby;">Name Of Issuer :</span><span class="daily_report_label" style="display: ruby;"> <input type="text" id="name_of_issuer" name="name_of_issuer" class="form-control" style="width:40%;" value="<?php echo isset($wpf_form->name_of_issuer) ? $wpf_form->name_of_issuer : '' ?>"></span>
+                </th>
+                <th colspan="4" class="daily_report_head">
+                    <span class="daily_report_label" style="display: ruby;">Date and Time :</span><span class="daily_report_label" style="display: ruby;"> <input type="datetime-local" id="date_time_1" name="date_time_1" class="form-control" style="width:40%;" value="<?php echo isset($wpf_form->date_time_1) ? $wpf_form->date_time_1 : '' ?>"></span>
+                </th>
+
+            </tr>
+            <tr>
+                <th colspan="9" class="daily_report_head">
+                    <span class="daily_report_label">The Site Representative witnesses the Contractor's signature and advises the contractor of any changes in site conditions</span>
+                </th>
+            </tr>
+
+            <tr>
+                <th colspan="5" class="daily_report_head">
+                    <span class="daily_report_label" style="display: ruby;">Name Of Accepter :</span><span class="daily_report_label" style="display: ruby;"> <input type="text" id="name_of_accepter" name="name_of_accepter" class="form-control" style="width:40%;" value="<?php echo isset($wpf_form->name_of_accepter) ? $wpf_form->name_of_accepter : '' ?>"></span>
+                </th>
+                <th colspan="4" class="daily_report_head">
+                    <span class="daily_report_label" style="display: ruby;">Date and Time :</span><span class="daily_report_label" style="display: ruby;"> <input type="datetime-local" id="date_time_2" name="date_time_2" class="form-control" style="width:40%;" value="<?php echo isset($wpf_form->date_time_2) ? $wpf_form->date_time_2 : '' ?>"></span>
+                </th>
+
+            </tr>
+            <tr>
+                <th colspan="9" class="daily_report_head" style="text-align: center;">
+                    <span class="daily_report_label">WORK CLEARANCE CLOSE OUT - CONTRACTOR</span>
+                </th>
+            </tr>
+            <tr>
+                <th colspan="9" class="daily_report_head">
+                    <span class="daily_report_label">The contractor acknowledges that the job has been completed / suspended and the site has been left in a safe and satisfactory conditions</span>
+                </th>
+            </tr>
+            <tr>
+                <th colspan="5" class="daily_report_head">
+                    <span class="daily_report_label" style="display: ruby;">Name Of Issuer :</span><span class="daily_report_label" style="display: ruby;"> <input type="text" id="name_of_issuer_2" name="name_of_issuer_2" class="form-control" style="width:40%;" value="<?php echo isset($wpf_form->name_of_issuer_2) ? $wpf_form->name_of_issuer_2 : '' ?>"></span>
+                </th>
+                <th colspan="4" class="daily_report_head">
+                    <span class="daily_report_label" style="display: ruby;">Date and Time :</span><span class="daily_report_label" style="display: ruby;"> <input type="datetime-local" id="date_time_3" name="date_time_3" class="form-control" style="width:40%;" value="<?php echo isset($wpf_form->date_time_3) ? $wpf_form->date_time_3 : '' ?>"></span>
                 </th>
 
             </tr>
 
+            <tr>
+                <th colspan="9" class="daily_report_head">
+                    <span class="daily_report_label">The Site Representative acknowledges that the job has been completed / suspended</span>
+                </th>
+            </tr>
+
+            <tr>
+                <th colspan="5" class="daily_report_head">
+                    <span class="daily_report_label" style="display: ruby;">Name Of Accepter :</span><span class="daily_report_label" style="display: ruby;"> <input type="text" id="name_of_accepter_2" name="name_of_accepter_2" class="form-control" style="width:40%;" value="<?php echo isset($wpf_form->name_of_accepter_2) ? $wpf_form->name_of_accepter_2 : '' ?>"></span>
+                </th>
+                <th colspan="4" class="daily_report_head">
+                    <span class="daily_report_label" style="display: ruby;">Date and Time :</span><span class="daily_report_label" style="display: ruby;"> <input type="datetime-local" id="date_time_4" name="date_time_4" class="form-control" style="width:40%;" value="<?php echo isset($wpf_form->date_time_4) ? $wpf_form->date_time_4 : '' ?>"></span>
+                </th>
+
+            </tr>
+
+             <tr>
+                <th colspan="9" class="daily_report_head">
+                    <span class="daily_report_label">Nate :- Kindly Attached the checklist If Doing Hot Work, Height Work, Lifting Work, Excavation Work, Height Work, Night Work, Electric Work Etc,  </span>
+                </th>
+            </tr>
+            <tr>
+                <th colspan="9" class="daily_report_head">
+                    <span class="daily_report_label" style="display: ruby;">Remarks :</span><span class="daily_report_label" style="display: ruby;"><textarea class="daily_report_label" name="remarks_footer" id="remarks_footer"><?php echo isset($wpf_form->remarks_footer) ? $wpf_form->remarks_footer : '' ?></textarea></span>
+                </th>
+            </tr>
         </table>
 
     </div>
@@ -226,16 +305,16 @@
     });
 
 
-    $(document).on('click', '.st-add-item-to-table', function(event) {
+    $(document).on('click', '.wpf-add-item-to-table', function(event) {
         "use strict";
 
         var data = 'undefined';
-        data = typeof(data) == 'undefined' || data == 'undefined' ? st_get_item_preview_values() : data;
+        data = typeof(data) == 'undefined' || data == 'undefined' ? wpf_get_item_preview_values() : data;
         var table_row = '';
         var item_key = lastAddedItemKey ? lastAddedItemKey += 1 : $("body").find('.st-items-table tbody .item').length + 1;
         lastAddedItemKey = item_key;
 
-        st_get_item_row_template('newitems[' + item_key + ']', data.name_staff, data.contractor, data.signature, item_key).done(function(output) {
+        wpf_get_item_row_template('newitems[' + item_key + ']', data.hazards, data.controls, data.remark, item_key).done(function(output) {
             table_row += output;
 
             $('.dpr_body').append(table_row);
@@ -251,18 +330,18 @@
         return false;
     });
 
-    function st_get_item_row_template(name, name_staff, contractor, signature, item_key) {
+    function wpf_get_item_row_template(name, hazards, controls, remark, item_key) {
         "use strict";
 
         jQuery.ajaxSetup({
             async: false
         });
 
-        var d = $.post(admin_url + 'forms/get_st_row_template', {
+        var d = $.post(admin_url + 'forms/get_wpf_row_template', {
             name: name,
-            name_staff: name_staff,
-            contractor: contractor,
-            signature: signature,
+            hazards: hazards,
+            controls: controls,
+            remark: remark,
             item_key: item_key
         });
         jQuery.ajaxSetup({
@@ -271,13 +350,13 @@
         return d;
     }
 
-    function st_get_item_preview_values() {
+    function wpf_get_item_preview_values() {
         "use strict";
 
         var response = {};
-        response.name_staff = $('.st-items-table input[name="name_staff"]').val();
-        response.contractor = $('.st-items-table select[name="contractor"]').selectpicker('val');
-        response.signature = $('.st-items-table input[name="signature"]').val();
+        response.hazards = $('.wpf-items-table input[name="hazards"]').val();
+        response.controls = $('.wpf-items-table input[name="controls"]').val();
+        response.remark = $('.wpf-items-table input[name="remark"]').val();
         return response;
     }
 
@@ -290,7 +369,7 @@
         previewArea.find('select').val('').selectpicker('refresh');
     }
 
-    function st_delete_item(row, itemid, parent) {
+    function wpf_delete_item(row, itemid, parent) {
         "use strict";
 
         $(row).parents('tr').addClass('animated fadeOut', function() {

@@ -1252,7 +1252,7 @@ class Forms_model extends App_Model
                 $krp_form['name_of_issuer_athorizer'] = $data['name_of_issuer_athorizer'];
                 $krp_form['name_of_receiver'] = $data['name_of_receiver'];
                 $krp_form['permit_closer'] = $data['permit_closer'];
-                
+
                 unset(
                     $data['sr_no'],
                     $data['name_of_contractor'],
@@ -1273,6 +1273,74 @@ class Forms_model extends App_Model
                     $data['permit_closer'],
 
                 );
+            } elseif ($data['form_type'] == "wpf") {
+                $wpf_form = [];
+
+                $wpf_form['date'] = $data['date'];
+                $wpf_form['permit_no'] = $data['permit_no'];
+                $wpf_form['person_name'] = $data['person_name'];
+                $wpf_form['ehs_person'] = $data['ehs_person'];
+                $wpf_form['name_of_contractor'] = $data['name_of_contractor'];
+                $wpf_form['risk'] = $data['risk'];
+                $wpf_form['no_of_workmen'] = $data['no_of_workmen'];
+                $wpf_form['permit_from'] = $data['permit_from'];
+                $wpf_form['permit_to'] = $data['permit_to'];
+                $wpf_form['ppe_labour'] = $data['ppe_labour'];
+                $wpf_form['ppe_safety'] = $data['ppe_safety'];
+                $wpf_form['ppe_mask'] = $data['ppe_mask'];
+                $wpf_form['ppe_vest'] = $data['ppe_vest'];
+                $wpf_form['ppe_boot'] = $data['ppe_boot'];
+                $wpf_form['work_to_be_done'] = $data['work_to_be_done'];
+                $wpf_form['tools_equipment'] = $data['tools_equipment'];
+                $wpf_form['personal_protective_equipment'] = $data['personal_protective_equipment'];
+                $wpf_form['fire_extinguisher_location'] = $data['fire_extinguisher_location'];
+                $wpf_form['name_of_issuer'] = $data['name_of_issuer'];
+                $wpf_form['date_time_1'] = $data['date_time_1'];
+                $wpf_form['name_of_accepter'] = $data['name_of_accepter'];
+                $wpf_form['date_time_2'] = $data['date_time_2'];
+                $wpf_form['name_of_issuer_2'] = $data['name_of_issuer_2'];
+                $wpf_form['date_time_3'] = $data['date_time_3'];
+                $wpf_form['name_of_accepter_2'] = $data['name_of_accepter_2'];
+                $wpf_form['date_time_4'] = $data['date_time_4'];
+                $wpf_form['remarks_footer'] = $data['remarks_footer'];
+                unset(
+                    $data['date'],
+                    $data['permit_no'],
+                    $data['person_name'],
+                    $data['ehs_person'],
+                    $data['name_of_contractor'],
+                    $data['risk'],
+                    $data['no_of_workmen'],
+                    $data['permit_from'],
+                    $data['permit_to'],
+                    $data['ppe_labour'],
+                    $data['ppe_safety'],
+                    $data['ppe_mask'],
+                    $data['ppe_vest'],
+                    $data['ppe_boot'],
+                    $data['work_to_be_done'],
+                    $data['tools_equipment'],
+                    $data['personal_protective_equipment'],
+                    $data['fire_extinguisher_location'],
+                    $data['name_of_issuer'],
+                    $data['date_time_1'],
+                    $data['name_of_accepter'],
+                    $data['date_time_2'],
+                    $data['name_of_issuer_2'],
+                    $data['date_time_3'],
+                    $data['name_of_accepter_2'],
+                    $data['date_time_4'],
+                    $data['remarks_footer'],
+                    $data['hazards'],
+                    $data['controls'],
+                    $data['remark'],
+                );
+
+                $new_order = [];
+                if (isset($data['newitems'])) {
+                    $new_order = $data['newitems'];
+                    unset($data['newitems']);
+                }
             }
         }
 
@@ -1856,6 +1924,26 @@ class Forms_model extends App_Model
                     if (!empty($krp_form)) {
                         $krp_form['form_id'] = $formid;
                         $this->db->insert(db_prefix() . $data['form_type'] . '_form', $krp_form);
+                    }
+                }
+            } elseif ($data['form_type'] == "wpf") {
+                if (isset($wpf_form)) {
+                    if (!empty($wpf_form)) {
+                        $wpf_form['form_id'] = $formid;
+                        $this->db->insert(db_prefix() . $data['form_type'] . '_form', $wpf_form);
+                    }
+                }
+                if (isset($new_order)) {
+                    if (!empty($new_order)) {
+                        foreach ($new_order as $key => $value) {
+                            $dt_data = [];
+                            $dt_data['form_id'] = $formid;
+                            $dt_data['hazards'] = $value['hazards'];
+                            $dt_data['controls'] = $value['controls'];
+                            $dt_data['remark'] = $value['remark'];
+                            $this->db->insert(db_prefix() . $data['form_type'] . '_form_detail', $dt_data);
+                            $wpf_detail_id = $this->db->insert_id();
+                        }
                     }
                 }
             }
@@ -2563,45 +2651,125 @@ class Forms_model extends App_Model
                 unset($data['removed_items']);
             }
         } elseif ($formBeforeUpdate->form_type == "krp") {
-           $krp_form = [];
-                $krp_form['sr_no'] = $data['sr_no'];
-                $krp_form['name_of_contractor'] = $data['name_of_contractor'];
-                $krp_form['name_of_key_receiver'] = $data['name_of_key_receiver'];
-                $krp_form['key_receiver_contact_number'] = $data['key_receiver_contact_number'];
-                $krp_form['key_number'] = $data['key_number'];
-                $krp_form['location'] = $data['location'];
-                $krp_form['valid_from'] = $data['valid_from'];
-                $krp_form['valid_to'] = $data['valid_to'];
-                $krp_form['total_hours'] = $data['total_hours'];
-                $krp_form['key_return_date_time'] = $data['key_return_date_time'];
-                $krp_form['department_key_permit'] = $data['department_key_permit'];
-                $krp_form['job_description'] = $data['job_description'];
-                $krp_form['name_of_equipment_used'] = $data['name_of_equipment_used'];
-                $krp_form['name_of_issuer'] = $data['name_of_issuer'];
-                $krp_form['name_of_issuer_athorizer'] = $data['name_of_issuer_athorizer'];
-                $krp_form['name_of_receiver'] = $data['name_of_receiver'];
-                $krp_form['permit_closer'] = $data['permit_closer'];
-                
-                unset(
-                    $data['sr_no'],
-                    $data['name_of_contractor'],
-                    $data['name_of_key_receiver'],
-                    $data['key_receiver_contact_number'],
-                    $data['key_number'],
-                    $data['location'],
-                    $data['valid_from'],
-                    $data['valid_to'],
-                    $data['total_hours'],
-                    $data['key_return_date_time'],
-                    $data['department_key_permit'],
-                    $data['job_description'],
-                    $data['name_of_equipment_used'],
-                    $data['name_of_issuer'],
-                    $data['name_of_issuer_athorizer'],
-                    $data['name_of_receiver'],
-                    $data['permit_closer'],
+            $krp_form = [];
+            $krp_form['sr_no'] = $data['sr_no'];
+            $krp_form['name_of_contractor'] = $data['name_of_contractor'];
+            $krp_form['name_of_key_receiver'] = $data['name_of_key_receiver'];
+            $krp_form['key_receiver_contact_number'] = $data['key_receiver_contact_number'];
+            $krp_form['key_number'] = $data['key_number'];
+            $krp_form['location'] = $data['location'];
+            $krp_form['valid_from'] = $data['valid_from'];
+            $krp_form['valid_to'] = $data['valid_to'];
+            $krp_form['total_hours'] = $data['total_hours'];
+            $krp_form['key_return_date_time'] = $data['key_return_date_time'];
+            $krp_form['department_key_permit'] = $data['department_key_permit'];
+            $krp_form['job_description'] = $data['job_description'];
+            $krp_form['name_of_equipment_used'] = $data['name_of_equipment_used'];
+            $krp_form['name_of_issuer'] = $data['name_of_issuer'];
+            $krp_form['name_of_issuer_athorizer'] = $data['name_of_issuer_athorizer'];
+            $krp_form['name_of_receiver'] = $data['name_of_receiver'];
+            $krp_form['permit_closer'] = $data['permit_closer'];
 
-                );
+            unset(
+                $data['sr_no'],
+                $data['name_of_contractor'],
+                $data['name_of_key_receiver'],
+                $data['key_receiver_contact_number'],
+                $data['key_number'],
+                $data['location'],
+                $data['valid_from'],
+                $data['valid_to'],
+                $data['total_hours'],
+                $data['key_return_date_time'],
+                $data['department_key_permit'],
+                $data['job_description'],
+                $data['name_of_equipment_used'],
+                $data['name_of_issuer'],
+                $data['name_of_issuer_athorizer'],
+                $data['name_of_receiver'],
+                $data['permit_closer'],
+
+            );
+        } elseif ($formBeforeUpdate->form_type == "wpf") {
+            $wpf_form = [];
+
+            $wpf_form['date'] = $data['date'];
+            $wpf_form['permit_no'] = $data['permit_no'];
+            $wpf_form['person_name'] = $data['person_name'];
+            $wpf_form['ehs_person'] = $data['ehs_person'];
+            $wpf_form['name_of_contractor'] = $data['name_of_contractor'];
+            $wpf_form['risk'] = $data['risk'];
+            $wpf_form['no_of_workmen'] = $data['no_of_workmen'];
+            $wpf_form['permit_from'] = $data['permit_from'];
+            $wpf_form['permit_to'] = $data['permit_to'];
+            $wpf_form['ppe_labour'] = $data['ppe_labour'];
+            $wpf_form['ppe_safety'] = $data['ppe_safety'];
+            $wpf_form['ppe_mask'] = $data['ppe_mask'];
+            $wpf_form['ppe_vest'] = $data['ppe_vest'];
+            $wpf_form['ppe_boot'] = $data['ppe_boot'];
+            $wpf_form['work_to_be_done'] = $data['work_to_be_done'];
+            $wpf_form['tools_equipment'] = $data['tools_equipment'];
+            $wpf_form['personal_protective_equipment'] = $data['personal_protective_equipment'];
+            $wpf_form['fire_extinguisher_location'] = $data['fire_extinguisher_location'];
+            $wpf_form['name_of_issuer'] = $data['name_of_issuer'];
+            $wpf_form['date_time_1'] = $data['date_time_1'];
+            $wpf_form['name_of_accepter'] = $data['name_of_accepter'];
+            $wpf_form['date_time_2'] = $data['date_time_2'];
+            $wpf_form['name_of_issuer_2'] = $data['name_of_issuer_2'];
+            $wpf_form['date_time_3'] = $data['date_time_3'];
+            $wpf_form['name_of_accepter_2'] = $data['name_of_accepter_2'];
+            $wpf_form['date_time_4'] = $data['date_time_4'];
+            $wpf_form['remarks_footer'] = $data['remarks_footer'];
+            unset(
+                $data['date'],
+                $data['permit_no'],
+                $data['person_name'],
+                $data['ehs_person'],
+                $data['name_of_contractor'],
+                $data['risk'],
+                $data['no_of_workmen'],
+                $data['permit_from'],
+                $data['permit_to'],
+                $data['ppe_labour'],
+                $data['ppe_safety'],
+                $data['ppe_mask'],
+                $data['ppe_vest'],
+                $data['ppe_boot'],
+                $data['work_to_be_done'],
+                $data['tools_equipment'],
+                $data['personal_protective_equipment'],
+                $data['fire_extinguisher_location'],
+                $data['name_of_issuer'],
+                $data['date_time_1'],
+                $data['name_of_accepter'],
+                $data['date_time_2'],
+                $data['name_of_issuer_2'],
+                $data['date_time_3'],
+                $data['name_of_accepter_2'],
+                $data['date_time_4'],
+                $data['remarks_footer'],
+                $data['hazards'],
+                $data['controls'],
+                $data['remark'],
+            );
+
+            $new_order = [];
+            if (isset($data['newitems'])) {
+                $new_order = $data['newitems'];
+                unset($data['newitems']);
+            }
+
+            $update_order = [];
+            if (isset($data['items'])) {
+                $update_order = $data['items'];
+                unset($data['items']);
+            }
+
+            $remove_order = [];
+            if (isset($data['removed_items'])) {
+                $remove_order = $data['removed_items'];
+                unset($data['removed_items']);
+            }
         }
 
         $this->db->where('formid', $data['formid']);
@@ -3574,6 +3742,61 @@ class Forms_model extends App_Model
                     $this->db->update(db_prefix() . $formBeforeUpdate->form_type . '_form', $krp_form);
                     if ($this->db->affected_rows() > 0) {
                         $affectedRows++;
+                    }
+                }
+            }
+        } elseif ($formBeforeUpdate->form_type == "wpf") {
+            if (isset($wpf_form)) {
+                if (!empty($wpf_form)) {
+                    $this->db->where('form_id', $data['formid']);
+                    $this->db->update(db_prefix() . $formBeforeUpdate->form_type . '_form', $wpf_form);
+                    if ($this->db->affected_rows() > 0) {
+                        $affectedRows++;
+                    }
+                }
+            }
+
+            if (isset($new_order)) {
+                if (!empty($new_order)) {
+                    foreach ($new_order as $key => $value) {
+                        $dt_data = [];
+                        $dt_data['form_id'] = $data['formid'];
+                        $dt_data['hazards'] = $value['hazards'];
+                        $dt_data['controls'] = $value['controls'];
+                        $dt_data['remark'] = $value['remark'];
+                        $this->db->insert(db_prefix() . $formBeforeUpdate->form_type . '_form_detail', $dt_data);
+                        $new_insert_id = $this->db->insert_id();
+                        if ($new_insert_id) {
+                            $affectedRows++;
+                        }
+                    }
+                }
+            }
+
+            if (isset($update_order)) {
+                if (!empty($update_order)) {
+                    foreach ($update_order as $key => $value) {
+                        $dt_data = [];
+                        $dt_data['form_id'] = $data['formid'];
+                        $dt_data['hazards'] = $value['hazards'];
+                        $dt_data['controls'] = $value['controls'];
+                        $dt_data['remark'] = $value['remark'];
+                        $this->db->where('id', $value['id']);
+                        $this->db->update(db_prefix() . $formBeforeUpdate->form_type . '_form_detail', $dt_data);
+                        if ($this->db->affected_rows() > 0) {
+                            $affectedRows++;
+                        }
+                    }
+                }
+            }
+
+            if (isset($remove_order)) {
+                if (!empty($remove_order)) {
+                    foreach ($remove_order as $key => $value) {
+                        $this->db->where('id', $value);
+                        if ($this->db->delete(db_prefix() . $formBeforeUpdate->form_type . '_form_detail')) {
+                            $affectedRows++;
+                        }
                     }
                 }
             }
@@ -5461,16 +5684,28 @@ class Forms_model extends App_Model
         }
 
 
-        $row .= '<td class="hazards">' . render_input($name_hazards, '', $hazards) . '</td>';
-        $row .= '<td class="controls">' . render_input($name_controls, '', $controls) . '</td>';
-        $row .= '<td class="remark">' . render_input($name_remark, '', $remark) . '</td>';
+        $row .= '<td colspan="3" class="hazards">' . render_input($name_hazards, '', $hazards) . '</td>';
+        $row .= '<td colspan="3" class="controls">' . render_input($name_controls, '', $controls) . '</td>';
+        $row .= '<td colspan="2" class="remark">' . render_input($name_remark, '', $remark) . '</td>';
         if ($name == '') {
-            $row .= '<td><button type="button" class="btn pull-right btn-info wpf-add-item-to-table"><i class="fa fa-check"></i></button></td>';
+            $row .= '<td colspan="1"><button type="button" class="btn pull-right btn-info wpf-add-item-to-table"><i class="fa fa-check"></i></button></td>';
         } else {
-            $row .= '<td><a href="#" class="btn btn-danger pull-right" onclick="st_delete_item(this,' . $item_key . ',\'.invoice-item\'); return false;"><i class="fa fa-trash"></i></a></td>';
+            $row .= '<td colspan="1"><a href="#" class="btn btn-danger pull-right" onclick="wpf_delete_item(this,' . $item_key . ',\'.invoice-item\'); return false;"><i class="fa fa-trash"></i></a></td>';
         }
 
         $row .= '</tr>';
         return $row;
+    }
+
+    public function get_wpf_form($form_id)
+    {
+        $this->db->where('form_id', $form_id);
+        return $this->db->get(db_prefix() . 'wpf_form')->row();
+    }
+
+    public function get_wpf_form_detail($form_id)
+    {
+        $this->db->where('form_id', $form_id);
+        return $this->db->get(db_prefix() . 'wpf_form_detail')->result_array();
     }
 }

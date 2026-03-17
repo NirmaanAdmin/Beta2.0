@@ -974,6 +974,26 @@ class Forms extends AdminController
                     }
                 }
                 $data['st_form'] = $st_form;
+            } elseif ($form_type == 'wpf') {
+               $wpf_row_template = $this->forms_model->create_wpf_row_template();
+
+                $wpf_form = $this->forms_model->get_wpf_form($form_id);
+                $wpf_form_detail = $this->forms_model->get_wpf_form_detail($form_id);
+                if (!empty($wpf_form_detail)) {
+                    $index_order = 0;
+                    foreach ($wpf_form_detail as $value) {
+                        $index_order++;
+                        $wpf_row_template .= $this->forms_model->create_wpf_row_template(
+                            'items[' . $index_order . ']',
+                            $value['hazards'],
+                            $value['controls'],
+                            $value['remark'],
+                            true,
+                            $value['id']
+                        );
+                    }
+                }
+                $data['wpf_form'] = $wpf_form;
             }
         } else {
             if ($form_type == 'wpr') {
@@ -1727,5 +1747,16 @@ class Forms extends AdminController
         }
 
         $pdf->Output(mb_strtoupper(slug_it($form->subject)) . '.pdf', $type);
+    }
+
+    public function get_wpf_row_template()
+    {
+        $name = $this->input->post('name');
+        $hazards = $this->input->post('hazards');
+        $controls = $this->input->post('controls');
+        $remark = $this->input->post('remark');
+        $item_key = $this->input->post('item_key');
+
+        echo $this->forms_model->create_wpf_row_template($name, $hazards, $controls, $remark, false, $item_key);
     }
 }
