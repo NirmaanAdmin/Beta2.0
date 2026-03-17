@@ -34,7 +34,7 @@ $formhtml .= '
 </tr>';
 $formhtml .= '<tr>
                     <th colspan="3" class="daily_report_head">
-                        <span class="daily_report_label">Project: <span class="view_project_name">' . $form_data->project_id . '</span></span>
+                        <span class="daily_report_label">Project: <span class="view_project_name">' . get_project_name_by_id($form_data->project_id) . '</span></span>
                     </th>
                     <th colspan="3" class="daily_report_head">
                         <span class="daily_report_label">Date :
