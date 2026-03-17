@@ -7330,48 +7330,89 @@ function get_wo_data($id)
     // ID not found in either table
     return false;
 }
-function resize_image_for_pdf($path) {
+function resize_image_for_pdf($path)
+{
+    // Check if file exists
+    if (!file_exists($path) || !is_file($path)) {
+        return false;
+    }
 
-// Check if file exists
-if (!file_exists($path) || !is_file($path)) {
-    return false;
-}
+    // Get image info
+    $image_info = @getimagesize($path);
+    if ($image_info === false) {
+        return false;
+    }
 
-// Check if it is a valid image
-$image_info = @getimagesize($path);
-if ($image_info === false) {
-    return false;
-}
+    $max_width  = 300;
+    $max_height = 200;
 
-$max_width  = 300;
-$max_height = 200;
+    $width  = $image_info[0];
+    $height = $image_info[1];
+    $mime   = $image_info['mime'];
 
-$width  = $image_info[0];
-$height = $image_info[1];
+    // Create source image
+    switch ($mime) {
+        case 'image/jpeg':
+            $src = imagecreatefromjpeg($path);
+            break;
 
-// Calculate resize ratio
-$ratio = min($max_width / $width, $max_height / $height);
+        case 'image/png':
+            $src = imagecreatefrompng($path);
+            break;
 
-$new_width  = (int)($width * $ratio);
-$new_height = (int)($height * $ratio);
+        case 'image/gif':
+            $src = imagecreatefromgif($path);
+            break;
 
-// Create image from file
-$src = imagecreatefromstring(file_get_contents($path));
-if (!$src) {
-    return false;
-}
+        default:
+            return false;
+    }
 
-$tmp = imagecreatetruecolor($new_width, $new_height);
+    if (!$src) {
+        return false;
+    }
 
-imagecopyresampled($tmp, $src, 0, 0, 0, 0, $new_width, $new_height, $width, $height);
+    // Resize ratio
+    $ratio = min($max_width / $width, $max_height / $height);
+    $new_width  = (int)($width * $ratio);
+    $new_height = (int)($height * $ratio);
 
-$temp_path = sys_get_temp_dir() . '/pdf_img_' . uniqid() . '.jpg';
+    $tmp = imagecreatetruecolor($new_width, $new_height);
 
-imagejpeg($tmp, $temp_path, 75);
+    // Transparency handling
+    if ($mime == 'image/png' || $mime == 'image/gif') {
+        imagecolortransparent(
+            $tmp,
+            imagecolorallocatealpha($tmp, 0, 0, 0, 127)
+        );
+        imagealphablending($tmp, false);
+        imagesavealpha($tmp, true);
+    }
 
-imagedestroy($src);
-imagedestroy($tmp);
+    imagecopyresampled($tmp, $src, 0, 0, 0, 0, $new_width, $new_height, $width, $height);
 
-return $temp_path;
+    // ✅ Capture image output directly (NO file saving)
+    ob_start();
 
+    switch ($mime) {
+        case 'image/jpeg':
+            imagejpeg($tmp, null, 75);
+            break;
+
+        case 'image/png':
+            imagepng($tmp);
+            break;
+
+        case 'image/gif':
+            imagegif($tmp);
+            break;
+    }
+
+    $image_data = ob_get_clean();
+
+    imagedestroy($src);
+    imagedestroy($tmp);
+
+    // ✅ Return base64 string
+    return 'data:' . $mime . ';base64,' . base64_encode($image_data);
 }

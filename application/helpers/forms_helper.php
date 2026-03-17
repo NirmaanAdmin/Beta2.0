@@ -865,3 +865,23 @@ function check_formid_is_krp($formid)
 
     return $count > 0;
 }
+
+function get_risk_level()
+{
+    $result = array();
+    $result = [
+        [
+            'id' => 1,
+            'name' => 'Low',
+        ],
+        [
+            'id' => 2,
+            'name' => 'Medium',
+        ],
+        [
+            'id' => 3,
+            'name' => 'High',
+        ]
+    ];
+    return $result;
+}

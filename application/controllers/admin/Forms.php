@@ -889,7 +889,8 @@ class Forms extends AdminController
                 'wpr'  => ['has_attachments' => false],
                 'arf'  => ['has_attachments' => false],
                 'st'  => ['has_attachments' => false],
-                'krp'  => ['has_attachments' => false]
+                'krp'  => ['has_attachments' => false],
+                'wpf'  => ['has_attachments' => false],
             ];
 
             if (isset($formConfigs[$form_type])) {
@@ -979,12 +980,15 @@ class Forms extends AdminController
                 $wpr_row_template = $this->forms_model->create_wpr_row_template();
             } elseif ($form_type == 'st') {
                $st_row_template = $this->forms_model->create_st_row_template();
+            } elseif ($form_type == 'wpf') {
+                $wpf_row_template = $this->forms_model->create_wpf_row_template();
             }
         }
         $data['form_items'] = $form_items;
 
         $data['wpr_row_template'] = $wpr_row_template;
         $data['st_row_template'] = $st_row_template;
+        $data['wpf_row_template'] = $wpf_row_template;
         $this->load->model('departments_model');
         $data['departments'] = $this->departments_model->get();
         $this->load->view("admin/forms/form_design/{$form_type}", $data);

@@ -5441,4 +5441,36 @@ class Forms_model extends App_Model
         $this->db->where('form_id', $form_id);
         return $this->db->get(db_prefix() . 'krp_form_detail')->result_array();
     }
+
+    public function create_wpf_row_template($name = '', $hazards = '', $controls = '', $remark = '', $is_edit = false, $item_key = '', $value = [])
+    {
+        $row = '';
+        $name_hazards = 'hazards';
+        $name_controls = 'controls';
+        $name_remark = 'remark';
+
+        if ($name == '') {
+            $row .= '<tr class="main">';
+            $manual = true;
+        } else {
+            $manual = false;
+            $row .= '<tr><input type="hidden" class="ids" name="' . $name . '[id]" value="' . $item_key . '">';
+            $name_hazards = $name . '[hazards]';
+            $name_controls = $name . '[controls]';
+            $name_remark = $name . '[remark]';
+        }
+
+
+        $row .= '<td class="hazards">' . render_input($name_hazards, '', $hazards) . '</td>';
+        $row .= '<td class="controls">' . render_input($name_controls, '', $controls) . '</td>';
+        $row .= '<td class="remark">' . render_input($name_remark, '', $remark) . '</td>';
+        if ($name == '') {
+            $row .= '<td><button type="button" class="btn pull-right btn-info wpf-add-item-to-table"><i class="fa fa-check"></i></button></td>';
+        } else {
+            $row .= '<td><a href="#" class="btn btn-danger pull-right" onclick="st_delete_item(this,' . $item_key . ',\'.invoice-item\'); return false;"><i class="fa fa-trash"></i></a></td>';
+        }
+
+        $row .= '</tr>';
+        return $row;
+    }
 }
