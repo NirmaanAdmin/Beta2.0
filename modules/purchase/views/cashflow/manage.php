@@ -5,9 +5,6 @@
    .n_width {
       width: 25% !important;
    }
-   .n1_width {
-      width: 30% !important;
-   }
    .dashboard_stat_title {
       font-size: 19px;
       font-weight: bold;
@@ -46,6 +43,82 @@
                </div>
             </div>
          </div>
+
+         <div class="panel_s mbot10">
+            <div class="panel-body">
+               <div class="row">
+                  <div class="col-md-12 mtop20">
+                     <div class="row">
+                        <div class="quick-stats-invoices col-md-3 tw-mb-2 sm:tw-mb-0 n_width">
+                          <div class="top_stats_wrapper">
+                            <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                              <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                <span class="tw-truncate dashboard_stat_title">Speed Ratio</span>
+                              </div>
+                              <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                            </div>
+                            <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                              <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                <span class="tw-truncate dashboard_stat_value speed_ratio"></span>
+                              </div>
+                              <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="quick-stats-invoices col-md-3 tw-mb-2 sm:tw-mb-0 n_width">
+                          <div class="top_stats_wrapper">
+                            <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                              <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                <span class="tw-truncate dashboard_stat_title">Budget Spent</span>
+                              </div>
+                              <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                            </div>
+                            <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                              <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                <span class="tw-truncate dashboard_stat_value budget_spent"></span>
+                              </div>
+                              <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="quick-stats-invoices col-md-3 tw-mb-2 sm:tw-mb-0 n_width">
+                          <div class="top_stats_wrapper">
+                            <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                              <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                <span class="tw-truncate dashboard_stat_title">On-Time Finish</span>
+                              </div>
+                              <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                            </div>
+                            <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                              <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                <span class="tw-truncate dashboard_stat_value on_time_finish"></span>
+                              </div>
+                              <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="quick-stats-invoices col-md-3 tw-mb-2 sm:tw-mb-0 n_width">
+                          <div class="top_stats_wrapper">
+                            <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
+                              <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                <span class="tw-truncate dashboard_stat_title">Realistic Finish</span>
+                              </div>
+                              <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                            </div>
+                            <div class="tw-text-neutral-800 mtop15 tw-flex tw-items-center tw-justify-between">
+                              <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
+                                <span class="tw-truncate dashboard_stat_value realistic_finish"></span>
+                              </div>
+                              <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
+                            </div>
+                          </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+
          <div class="panel_s mbot10">
             <div class="panel-body">
                <div class="row">
@@ -247,6 +320,7 @@
                   industry_standard_tbody += '<td>'+row.months_cal+'</td>';
                   industry_standard_tbody += '<td>'+parseFloat(row.incremental_percentage).toFixed(2)+'%</td>';
                   industry_standard_tbody += '<td>'+format_money(row.budget_value)+'</td>';
+                  industry_standard_tbody += '</tr>';
                });
             }
             $('.industry_standard_scurve_table tbody').html(industry_standard_tbody);
@@ -258,6 +332,7 @@
                   actual_spending_tbody += '<td>'+row.months_cal+'</td>';
                   actual_spending_tbody += '<td>'+parseFloat(row.actual_cum_percentage).toFixed(2)+'%</td>';
                   actual_spending_tbody += '<td>'+format_money(row.actual_cum_amount)+'</td>';
+                  actual_spending_tbody += '</tr>';
                });
             }
             $('.actual_spending_on_project_table tbody').html(actual_spending_tbody);
@@ -280,9 +355,31 @@
                   cashflow_forecast_tbody += '<td>'+parseFloat(row.realistic_month).toFixed(2)+'</td>';
                   cashflow_forecast_tbody += '<td>'+row.realistic_calendar_month+'</td>';
                   cashflow_forecast_tbody += '<td>'+parseFloat(row.delay_vs_plan).toFixed(2)+'</td>';
+                  cashflow_forecast_tbody += '</tr>';
                });
+               cashflow_forecast_tbody += '<tr style="font-weight: bold;">';
+               cashflow_forecast_tbody += '<td>Totals</td>';
+               cashflow_forecast_tbody += '<td></td>';
+               cashflow_forecast_tbody += '<td></td>';
+               cashflow_forecast_tbody += '<td></td>';
+               cashflow_forecast_tbody += '<td>'+format_money(data.total_planned_monthly_cf)+'</td>';
+               cashflow_forecast_tbody += '<td></td>';
+               cashflow_forecast_tbody += '<td></td>';
+               cashflow_forecast_tbody += '<td>'+format_money(data.total_forecast_monthly_cf)+'</td>';
+               cashflow_forecast_tbody += '<td></td>';
+               cashflow_forecast_tbody += '<td></td>';
+               cashflow_forecast_tbody += '<td>FINISH →</td>';
+               cashflow_forecast_tbody += '<td>'+parseFloat(data.projected_total_duration).toFixed(2)+'</td>';
+               cashflow_forecast_tbody += '<td>'+data.projected_completion_date+'</td>';
+               cashflow_forecast_tbody += '<td>'+parseFloat(data.total_delay).toFixed(2)+'</td>';
+               cashflow_forecast_tbody += '</tr>';
             }
             $('.cashflow_forecast_table tbody').html(cashflow_forecast_tbody);
+
+            $('.speed_ratio').html(parseFloat(data.current_speed_ratio).toFixed(2)+'%');
+            $('.budget_spent').html(format_money(data.total_budget_spent));
+            $('.on_time_finish').html(data.on_time_finish);
+            $('.realistic_finish').html(data.projected_completion_date);
 
             $('.last_actual_period_month').html(data.last_actual_period_month);
             $('.planned_cum_percentage').html(parseFloat(data.planned_cum_percentage).toFixed(2)+'%');

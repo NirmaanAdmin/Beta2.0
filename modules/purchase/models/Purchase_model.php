@@ -29024,6 +29024,7 @@ class Purchase_model extends App_Model
         ";
         $order_tracker_result = $this->db->query($order_tracker_query)->result_array();
 
+        $total_budget_spent = 0;
         foreach ($timelines_percentages as $index => $timeline) {
             $months_cal = $industry_standard_scurve[$index]['months_cal'];
             $order_start_date = $start_date;
@@ -29046,6 +29047,8 @@ class Purchase_model extends App_Model
                 );
             }
             $actual_cum_percentage = ($actual_cumulative_cashflow / $default_budgeted) * 100;
+            $total_budget_spent = $actual_cumulative_cashflow;
+
             $actual_spending_on_project[$index] = array(
                 'months_cal' => $months_cal,
                 'actual_cum_percentage' => $actual_cum_percentage,
@@ -29144,24 +29147,27 @@ class Purchase_model extends App_Model
         }
 
         foreach ($cashflow_forecast as $index => $period) {
-            if ($period['actual_period'] == 1) {
-                $realistic_month = $period['months_cal'];
-                $realistic_calendar_month = $period['months_cal_name'];
-            } elseif (!empty($last_actual_period_array) && $current_speed_ratio > 0) {
+            if (!empty($last_actual_period_array) && $current_speed_ratio > 0 && $period['actual_period'] == 0) {
                 $realistic_month =
                 $last_actual_period_array['months_cal'] +
                 (
                     (($period['months_cal'] - $last_actual_period_array['months_cal'])
                     / $current_speed_ratio) * 100
                 );
-                $realistic_calendar_month = date(
-                    'M-y',
-                    strtotime('+' . (round($realistic_month, 0) - 1) . ' months', strtotime($start_date))
-                );
+            } else if($period['months_cal'] == $default_total_months) {
+                if ($period['cumulative_cashflow_percentage'] > 0 && $period['actual_forecast_percentage'] > 0
+                ) {
+                    $realistic_month = $period['months_cal'] / ($period['actual_forecast_percentage'] / $period['cumulative_cashflow_percentage']);
+                } else {
+                    $realistic_month = $period['months_cal'];
+                }
             } else {
                 $realistic_month = $period['months_cal'];
-                $realistic_calendar_month = $period['months_cal_name'];
             }
+            $realistic_calendar_month = date(
+                'M-y',
+                strtotime('+' . (round($realistic_month) - 1) . ' months', strtotime($start_date))
+            );
             $delay_vs_plan = $realistic_month - $period['months_cal'];
 
             $cashflow_forecast[$index]['realistic_month'] = $realistic_month;
@@ -29169,12 +29175,15 @@ class Purchase_model extends App_Model
             $cashflow_forecast[$index]['delay_vs_plan'] = $delay_vs_plan;
         }
 
+        $total_planned_monthly_cf = array_sum(array_column($cashflow_forecast, 'planned_monthly_cf'));
+        $total_forecast_monthly_cf = array_sum(array_column($cashflow_forecast, 'forecast_monthly_cf'));
+        $on_time_finish = end($cashflow_forecast)['months_cal_name'];
         $last_actual_period_month = !empty($last_actual_period_array) ? $last_actual_period_array['months_cal'] : 0;
         $planned_cum_percentage = !empty($last_actual_period_array) ? $last_actual_period_array['cumulative_cashflow_percentage'] : 0;
         $actual_cum_percentage = !empty($last_actual_period_array) ? $last_actual_period_array['actual_forecast_percentage'] : 0;
         $delay_indicator = $planned_cum_percentage - $actual_cum_percentage;
         $remaining_budget_to_spend = ((100 - $actual_cum_percentage) / 100) * $default_budgeted;
-        $remaining_months = $default_total_months - $last_actual_period_month;
+        $remaining_months = $default_total_months - end($cashflow_forecast)['months_cal'];
         $projected_total_duration = end($cashflow_forecast)['realistic_month'];
         $projected_completion_date = end($cashflow_forecast)['realistic_calendar_month'];
         $total_delay = end($cashflow_forecast)['delay_vs_plan'];
@@ -29183,6 +29192,10 @@ class Purchase_model extends App_Model
             'industry_standard_scurve' => $industry_standard_scurve,
             'actual_spending_on_project' => $actual_spending_on_project,
             'cashflow_forecast' => $cashflow_forecast,
+            'total_planned_monthly_cf' => $total_planned_monthly_cf,
+            'total_forecast_monthly_cf' => $total_forecast_monthly_cf,
+            'total_budget_spent' => $total_budget_spent,
+            'on_time_finish' => $on_time_finish,
             'last_actual_period_month' => $last_actual_period_month,
             'planned_cum_percentage' => $planned_cum_percentage,
             'actual_cum_percentage' => $actual_cum_percentage,
