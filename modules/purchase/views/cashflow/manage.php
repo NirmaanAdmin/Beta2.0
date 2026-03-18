@@ -454,6 +454,7 @@
                   data: charts_forecast_cum_cf,
                   borderColor: '#097969',
                   backgroundColor: '#097969',
+                  borderDash: [5, 5],
                   tension: 0.3,
                   fill: false
                }
