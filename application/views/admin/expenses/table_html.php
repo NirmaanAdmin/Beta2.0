@@ -17,7 +17,7 @@ if ($withBulkActions === true && $hasPermission) { ?>
   ?>
   <div class="col-md-3 form-group">
     <label for="expense_category"><?php echo _l('expense_category'); ?></label>
-    <select name="expense_category[]" id="expense_category" class="selectpicker" data-live-search="true" multiple="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
+    <select name="expense_category[]" id="expense_category" class="selectpicker" data-live-search="true" multiple="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>" data-actions-box="true">
       <?php foreach ($categories as $s) { ?>
         <option value="<?php echo pur_html_entity_decode($s['id']); ?>"
           <?php if (in_array($s['id'], $expense_category_filter_val)) {
@@ -35,7 +35,7 @@ if ($withBulkActions === true && $hasPermission) { ?>
 
   <div class="col-md-3 form-group">
     <label for="payment_mode"><?php echo _l('payment_mode'); ?></label>
-    <select name="payment_mode[]" id="payment_mode" class="selectpicker" data-live-search="true" multiple="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
+    <select name="payment_mode[]" id="payment_mode" class="selectpicker" data-live-search="true" multiple="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>" data-actions-box="true">
       <?php foreach ($payment_modes as $mode) { ?>
         <option value="<?php echo pur_html_entity_decode($mode['id']); ?>"
           <?php if (in_array($mode['id'], $payment_mode_filter_val)) {
@@ -53,7 +53,7 @@ if ($withBulkActions === true && $hasPermission) { ?>
   ?>
   <div class="col-md-3 form-group">
     <label for="vendor"><?php echo _l('Vendor'); ?></label>
-    <select name="vendor[]" id="vendor" class="selectpicker" data-live-search="true" multiple="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
+    <select name="vendor[]" id="vendor" class="selectpicker" data-live-search="true" multiple="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>" data-actions-box="true">
       <?php foreach ($vendors as $vendor) { ?>
         <option value="<?php echo pur_html_entity_decode($vendor['userid']); ?>"
           <?php if (in_array($vendor['userid'], $vendor_filter_val)) {
