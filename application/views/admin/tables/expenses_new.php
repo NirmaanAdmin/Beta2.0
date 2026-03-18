@@ -21,16 +21,16 @@ $hasPermissionDelete = staff_can('delete', 'expenses');
 $aColumns = [
     '1',
     db_prefix() . 'expenses.id as id',
+    db_prefix() . 'expenses.vbt_id as vbt_id',
+    db_prefix() . 'expenses.bill_number as bill_number',
     db_prefix() . 'expenses_categories.name as category_name',
     db_prefix() . 'expenses.vendor as vendor',
     db_prefix() . 'expenses.expense_name as expense_name',
-    2,
     db_prefix() . 'expenses.date as date',
     db_prefix() . 'expenses.amount as amount',
     db_prefix() . 'projects.name as project_name',
     '(CASE WHEN ' . db_prefix() . 'expenses.vbt_id IS NOT NULL THEN 2 ELSE 3 END) as converted',
-    db_prefix() . 'expenses.vbt_id as vbt_id',
-    db_prefix() . 'expenses.bill_number as bill_number',
+    2,
     db_prefix() . 'expenses.reference_no as reference_no',
     db_prefix() . 'expenses.paymentmode as paymentmode',
     1,
@@ -207,6 +207,14 @@ foreach ($rResult as $aRow) {
     $row[] = '<div class="checkbox"><input type="checkbox" value="' . $aRow['id'] . '"><label></label></div>';
     $row[] = '<a href="' . admin_url('expenses/list_expenses/' . $aRow['id']) . '" onclick="init_expense(' . $aRow['id'] . ');return false;">' . $sr++ . '</a>';
 
+    if (!empty($aRow['vbt_id'])) {
+        $row[] = '<a href="' . admin_url('purchase/purchase_invoice/' . $aRow['vbt_id']) . '" target="_blank">' .$aRow['invoice_number'] . '</a>';
+    } else {
+        $row[] = '';
+    }
+
+    $row[] = $aRow['bill_number'];
+
     $categoryOutput = '<a href="' . admin_url('expenses/list_expenses/' . $aRow['id']) . '" onclick="init_expense(' . $aRow['id'] . ');return false;">' . e($aRow['category_name']) . '</a>';
 
     if ($aRow['recurring'] == 1) {
@@ -238,16 +246,6 @@ foreach ($rResult as $aRow) {
         $total += ($tmpTotal / 100 * $tax->taxrate);
     }
     $row[] = '<a href="' . admin_url('expenses/list_expenses/' . $aRow['id']) . '" onclick="init_expense(' . $aRow['id'] . ');return false;">' . e($aRow['expense_name']) . '</a>';
-    $expense_files = get_all_expense_files($aRow['id']);
-    if(!empty($expense_files)) {
-        $expense_files_listed = '';
-        foreach ($expense_files as $ekey => $evalue) {
-            $expense_files_listed .= '<a href="' . site_url('download/file/expense/' . $evalue['id']) . '">' . e($evalue['file_name']) . '</a><br>';
-        }
-        $row[] = $expense_files_listed;
-    } else {
-        $row[] = '';
-    }
     $row[] = date('d M, Y', strtotime($aRow['date']));
     $row[] = app_format_money($total, $aRow['currency_name']);
     $row[] = '<a href="' . admin_url('projects/view/' . $aRow['project_id']) . '">' . e($aRow['project_name']) . '</a>';
@@ -260,13 +258,16 @@ foreach ($rResult as $aRow) {
         $row[] = '';
     }
 
-    if (!empty($aRow['vbt_id'])) {
-        $row[] = '<a href="' . admin_url('purchase/purchase_invoice/' . $aRow['vbt_id']) . '" target="_blank">' .$aRow['invoice_number'] . '</a>';
+    $expense_files = get_all_expense_files($aRow['id']);
+    if(!empty($expense_files)) {
+        $expense_files_listed = '';
+        foreach ($expense_files as $ekey => $evalue) {
+            $expense_files_listed .= '<a href="' . site_url('download/file/expense/' . $evalue['id']) . '">' . e($evalue['file_name']) . '</a><br>';
+        }
+        $row[] = $expense_files_listed;
     } else {
         $row[] = '';
     }
-
-    $row[] = $aRow['bill_number'];
 
     $row[] = e($aRow['reference_no']);
 

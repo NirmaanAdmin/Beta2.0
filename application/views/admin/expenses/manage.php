@@ -465,7 +465,7 @@
       "converted": "[name='converted']",
     };
 
-    initDataTable('.table-expenses', admin_url + 'expenses/table_expenses', [], [0], Params, [6, 'desc']);
+    initDataTable('.table-expenses', admin_url + 'expenses/table_expenses', [], [0], Params, [7, 'desc']);
 
     // initDataTable('.table-expenses', admin_url + 'expenses/table', [0], [0], {},
     //     <?php echo hooks()->apply_filters('expenses_table_default_order', json_encode([6, 'desc'])); ?>)
