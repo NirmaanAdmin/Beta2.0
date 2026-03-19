@@ -83,10 +83,11 @@
                 </tr>
                 <tr>
                     <th colspan="9" class="daily_report_head">
+                        <?php $des_of_findings = isset($ncr_form->des_of_findings) ? $ncr_form->des_of_findings : ''; ?>
                         <span class="daily_report_label" style="display: ruby;"><?php echo render_textarea(
                                                                                     'des_of_findings',
                                                                                     '',
-                                                                                    '',
+                                                                                    $des_of_findings,
                                                                                     ['id' => 'des_of_findings'], // IMPORTANT
                                                                                     [],
                                                                                     '',
@@ -97,14 +98,14 @@
 
                 <tr>
                     <th colspan="3" class="daily_report_head">
-
-                        <span class="daily_report_label" style="display: ruby;">Location of Non-Conformance:</span><span class="daily_report_label" style="display: ruby;"><?php echo render_select('area', [], ['id', 'area_name'], '', ''); ?></span>
+                        <?php $area = isset($ncr_form->area) ? $ncr_form->area : ''; ?>
+                        <input type="hidden" id="selected_area" value="<?= $area ?>">
+                        <span class="daily_report_label" style="display: ruby;">Location of Non-Conformance:</span><span 
+                        class="daily_report_label" style="display: ruby;"><?php echo render_select('area', [], ['id', 'area_name'], '', ''); ?></span>
 
                     </th>
 
                     <th colspan="3" class="daily_report_head">
-                        <!-- <span class="daily_report_label" style="display: ruby;">Total Hours :</span><span class="daily_report_label" style="display: ruby;"> <input type="text" id="total_hours" name="total_hours" class="form-control" style="width:40%;" value="<?php echo isset($ncr_form->total_hours) ? $ncr_form->total_hours : '' ?>"></span> -->
-
                         <span class="daily_report_label">NCR Type :</span>
 
                         <label>
@@ -131,7 +132,7 @@
                         <span class="daily_report_label" style="display: ruby;">Assessor (s) :</span><span class="daily_report_label" style="display: ruby;"> <input type="text" id="assessor" name="assessor" class="form-control" style="width:40%;" value="<?php echo isset($ncr_form->assessor) ? $ncr_form->assessor : '' ?>"></span>
                     </th>
                     <th colspan="3" class="daily_report_head">
-                        <span class="daily_report_label" style="display: ruby;">Assessee :</span><span class="daily_report_label" style="display: ruby;"> Contractor- <?php echo render_select('name_of_contractor', get_vendor_list_for_forms(), array('userid', 'company'), '', isset($wpf_form->name_of_contractor) ? $wpf_form->name_of_contractor : ''); ?></span>
+                        <span class="daily_report_label" style="display: ruby;">Assessee :</span><span class="daily_report_label" style="display: ruby;"> Contractor - <?php echo render_select('name_of_contractor', get_vendor_list_for_forms(), array('userid', 'company'), '', isset($ncr_form->name_of_contractor) ? $ncr_form->name_of_contractor : ''); ?></span>
                     </th>
                     <th colspan="3" class="daily_report_head">
                         <span class="daily_report_label" style="display: ruby;">Date :</span><span class="daily_report_label" style="display: ruby;"> <input type="date" id="date" name="date" class="form-control" style="width:40%;" value="<?php echo isset($ncr_form->date) ? $ncr_form->date : '' ?>"></span>
@@ -143,7 +144,7 @@
                         <span class="daily_report_label" style="display: ruby;">Immediate action to rectify the work (Correction) :</span><span class="daily_report_label" style="display: ruby;"> <textarea class="daily_report_label" name="immediate_action" id="immediate_action"><?php echo isset($ncr_form->immediate_action) ? $ncr_form->immediate_action : '' ?></textarea></span>
                     </th>
                     <th colspan="4" class="daily_report_head">
-                        <span class="daily_report_label" style="display: ruby;">Investigation (Root Cause, Extent of Problem, Impact of Problem):</span><span class="daily_report_label" style="display: ruby;"> <textarea class="daily_report_label" name="investigation" id="investigation"><?php echo isset($ncr_form->investigation) ? $ncr_form->investigation : '' ?></textarea></span>
+                        <span class="daily_report_label" style="display: ruby;">Investigation (Root Cause, Extent of Problem, Impact of Problem) :</span><span class="daily_report_label" style="display: ruby;"> <textarea class="daily_report_label" name="investigation" id="investigation"><?php echo isset($ncr_form->investigation) ? $ncr_form->investigation : '' ?></textarea></span>
                     </th>
                 </tr>
 

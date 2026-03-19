@@ -269,8 +269,17 @@
                             height: 250,
                             min_height: 200,
                             max_height: 500,
-                            resize: true, // ✅ allow resize
-                            autoresize_bottom_margin: 20
+                            resize: true,
+                            autoresize_bottom_margin: 20,
+                            setup: function(editor) {
+                                editor.on('init', function() {
+                                    var value = $('#des_of_findings').val();
+                                    console.log(value);
+                                    if (value) {
+                                        editor.setContent(value); // ✅ force set (extra safety)
+                                    }
+                                });
+                            }
                         });
 
                     }, 200);

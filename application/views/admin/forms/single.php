@@ -941,14 +941,78 @@
         find_form_design(form_type);
     }
 
+    // function find_form_design(form_type) {
+    //     var form_id = $('input[name="formid"]').val();
+    //     $.post(admin_url + 'forms/find_form_design/' + form_type + '/' + form_id).done(function(response) {
+    //         $('.view_form_design').html('');
+    //         $('.view_form_design').html(response);
+    //         $('.view_project_name').html('');
+    //         var project_name = $('#project_id option:selected').text();
+    //         $('.view_project_name').html(project_name);
+    //         $('.selectpicker').selectpicker('refresh');
+    //     });
+    // }
+
     function find_form_design(form_type) {
         var form_id = $('input[name="formid"]').val();
         $.post(admin_url + 'forms/find_form_design/' + form_type + '/' + form_id).done(function(response) {
             $('.view_form_design').html('');
             $('.view_form_design').html(response);
+            setTimeout(function() {
+
+                // Remove old instance (important when reloading)
+                if (typeof tinymce !== 'undefined') {
+                    tinymce.remove('#des_of_findings');
+                }
+
+                // Init editor with resize enabled
+                init_editor('#des_of_findings', {
+                    height: 250,
+                    min_height: 200,
+                    max_height: 500,
+                    resize: true,
+                    autoresize_bottom_margin: 20,
+                    setup: function(editor) {
+                        editor.on('init', function() {
+                            var value = $('#des_of_findings').val();
+                            console.log(value);
+                            if (value) {
+                                editor.setContent(value); // ✅ force set (extra safety)
+                            }
+                        });
+                    }
+                });
+
+            }, 200);
             $('.view_project_name').html('');
             var project_name = $('#project_id option:selected').text();
             $('.view_project_name').html(project_name);
+            var project_id = $('#project_id').val();
+            if (project_id != '') {
+                $.post(admin_url + 'forms/get_areas_by_project', {
+                    project_id: project_id
+                }).done(function(response) {
+
+                    var areas = JSON.parse(response);
+                    var selected_area = $('#selected_area').val(); // ✅ get stored value
+
+                    var html = '<option value=""></option>';
+
+                    $.each(areas, function(i, area) {
+
+                        var selected = (selected_area == area.id) ? 'selected' : '';
+
+                        html += '<option value="' + area.id + '" ' + selected + '>' +
+                            area.area_name + '</option>';
+                    });
+
+                    $('select[name="area"]').html(html);
+                    $('select[name="area"]').selectpicker('refresh');
+                });
+            } else {
+                $('select[name="area"]').html('<option value=""></option>');
+                $('select[name="area"]').selectpicker('refresh');
+            }
             $('.selectpicker').selectpicker('refresh');
         });
     }
