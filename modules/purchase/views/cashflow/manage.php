@@ -12,6 +12,23 @@
    .dashboard_stat_value {
       font-size: 19px;
    }
+   .btn-outline-info {
+      background-color: transparent !important;
+      color: #03a9f4 !important;
+      border: 1px solid #03a9f4 !important;
+   }
+   .btn-outline-info:hover {
+      background-color: #03a9f4 !important;
+      color: #fff !important;
+   }
+   .chart_btn {
+      transition: all 0.2s ease;
+   }
+   .chart_btn.active {
+      background-color: #03a9f4 !important;
+      color: #fff !important;
+      border-color: #03a9f4 !important;
+   }
 </style>
 <div id="wrapper">
    <div class="content">
@@ -117,8 +134,10 @@
                   </div>
                </div>
                <div class="row mtop20">
-                  <div class="col-md-12">
-                     <a href="javascript:void(0)" id="toggleChartBtn" class="btn btn-info pull-right mbot10 display-block">View Realistic Charts</a>
+                  <div class="col-md-12 mbot20">
+                     <a href="javascript:void(0)" id="scurve" class="btn btn-outline-info pull-left display-block chart_btn">S-Curve (Cumulative)</a>
+                     <a href="javascript:void(0)" id="realistic" class="btn btn-outline-info pull-left display-block mleft10 chart_btn">Realistic (Month)</a>
+                     <a href="javascript:void(0)" id="monthly_cashflow" class="btn btn-outline-info pull-left display-block mleft10 chart_btn">Monthly Cashflow</a>
                   </div>
                   <div class="col-md-12">
                      <div style="width: 100%; height: 600px;">
@@ -304,22 +323,18 @@
 <?php init_tail(); ?>
 <script>
    var cashflowChart = null;
-   var currentMode = 'normal';
+   var currentMode = 'scurve';
    $(document).ready(function() {
       "use strict";
-      load_cashflow_data('normal');
+      load_cashflow_data('scurve');
       $("body").on('change', 'input[name="total_months"], input[name="start_date"], input[name="budgeted"]', function() {
-         load_cashflow_data('normal');
+         load_cashflow_data('scurve');
       });
-      $("body").on('click', '#toggleChartBtn', function() {
-         if (currentMode === 'normal') {
-            currentMode = 'realistic';
-            $(this).text('View Normal Charts');
-         } else {
-            currentMode = 'normal';
-            $(this).text('View Realistic Charts');
-         }
-         load_cashflow_data(currentMode);
+      $("body").on('click', '.chart_btn', function() {
+         var mode = $(this).attr('id');
+         load_cashflow_data(mode);
+         $('.chart_btn').removeClass('btn-info active').addClass('btn-outline-info');
+         $(this).removeClass('btn-outline-info').addClass('btn-info active');
       });
    });
 
@@ -446,9 +461,16 @@
       if (cashflowChart !== null) {
          cashflowChart.destroy();
       }
-      var all_months_name = mode == 'normal' ? months_cal_name : realistic_months_cal_name;
+      var all_months_name = '';
+      if(mode == 'scurve') {
+         all_months_name = months_cal_name;
+      } else if(mode == 'realistic') {
+         all_months_name = realistic_months_cal_name;
+      } else {
+         all_months_name = months_cal_name;
+      }
       var all_datasets = [];
-      if (mode == 'normal') {
+      if (mode == 'scurve') {
          all_datasets.push({
             type: 'line',
             label: 'Planned S-Curve',
@@ -477,7 +499,7 @@
             tension: 0.3,
             fill: false
          });
-      } else {
+      } else if(mode == 'realistic') {
          all_datasets.push({
             type: 'line',
             label: 'Realistic (Current Pace)',
@@ -488,6 +510,8 @@
             tension: 0.3,
             fill: false
          });
+      } else {
+         all_datasets = [];
       }
       cashflowChart = new Chart(ctx, {
          data: {
