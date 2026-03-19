@@ -59,7 +59,7 @@
                         <span class="daily_report_label">Project Name & Address : <span class="view_project_name"></span></span>
                     </th>
                     <th colspan="4" class="daily_report_head">
-                        <span class="daily_report_label" style="display: ruby;">NCR No :</span><span class="daily_report_label" style="display: ruby;"> <input type="text" id="ncr_no" name="ncr_no" class="form-control" style="width:40%;" value="<?php echo isset($ncr_form->ncr_no) ? $ncr_form->ncr_no : '' ?>"></span>
+                        <span class="daily_report_label" style="display: ruby;">NCR No :</span><span class="daily_report_label" style="display: ruby;"> <input type="text" id="ncr_no" name="ncr_no" class="form-control" style="width:40%;" readonly value="<?php echo isset($ncr_form->ncr_no) ? $ncr_form->ncr_no : '' ?>"></span>
                     </th>
                 </tr>
 
@@ -100,8 +100,8 @@
                     <th colspan="3" class="daily_report_head">
                         <?php $area = isset($ncr_form->area) ? $ncr_form->area : ''; ?>
                         <input type="hidden" id="selected_area" value="<?= $area ?>">
-                        <span class="daily_report_label" style="display: ruby;">Location of Non-Conformance:</span><span 
-                        class="daily_report_label" style="display: ruby;"><?php echo render_select('area', [], ['id', 'area_name'], '', ''); ?></span>
+                        <span class="daily_report_label" style="display: ruby;">Location of Non-Conformance:</span><span
+                            class="daily_report_label" style="display: ruby;"><?php echo render_select('area', [], ['id', 'area_name'], '', ''); ?></span>
 
                     </th>
 
@@ -379,5 +379,58 @@
         $('.view_project_name').html(project_name);
 
 
+    });
+
+    function getDeptCode(text) {
+        if (!text) return '';
+
+        text = text.trim();
+
+        // If multiple words → take initials
+        if (text.includes(' ')) {
+            return text.split(' ')
+                .map(w => w.charAt(0))
+                .join('')
+                .substring(0, 3)
+                .toUpperCase();
+        }
+
+        // Single word → first 3 letters
+        return text.substring(0, 3).toUpperCase();
+    }
+
+    function getProjectCode(text) {
+        if (!text) return '';
+        return text.trim().substring(0, 3).toUpperCase();
+    }
+
+    function generateNCRNo() {
+        let deptText = $('#department_ncr option:selected').text();
+        let projectText = $('#project_id option:selected').text();
+
+        let deptCode = getDeptCode(deptText);
+        let projectCode = getProjectCode(projectText);
+
+        if (!deptCode || !projectCode) return;
+
+        // 🔥 AJAX to get next running number
+        $.post(admin_url + 'forms/get_next_ncr_number', {
+            dept: deptCode,
+            project: projectCode
+        }).done(function(response) {
+            let num = response ? parseInt(response) : 1;
+
+            // format 01, 02, 03
+            let formattedNum = String(num).padStart(2, '0');
+
+            let ncrNo = `${deptCode}-BIL-${projectCode}-${formattedNum}`;
+
+            $('#ncr_no').val(ncrNo);
+        });
+    }
+
+    // Trigger on change
+    $('#department_ncr, #project_id').on('change', function() {
+        generateNCRNo();
     });
 </script>

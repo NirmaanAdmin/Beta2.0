@@ -1835,4 +1835,20 @@ class Forms extends AdminController
 
         $pdf->Output(mb_strtoupper(slug_it($form->subject)) . '.pdf', $type);
     }
+
+   public function get_next_ncr_number()
+{
+    $this->db->select('ncr_no');
+    $this->db->order_by('id', 'DESC');
+    $this->db->limit(1);
+    $last = $this->db->get('tblncr_form')->row();
+
+    if ($last && !empty($last->ncr_no) && preg_match('/-(\d+)$/', $last->ncr_no, $matches)) {
+        $next = intval($matches[1]) + 1;
+    } else {
+        $next = 1;
+    }
+
+    echo $next;
+}
 }
