@@ -118,6 +118,9 @@
                </div>
                <div class="row mtop20">
                   <div class="col-md-12">
+                     <a href="javascript:void(0)" id="toggleChartBtn" class="btn btn-info pull-right mbot10 display-block">View Realistic Charts</a>
+                  </div>
+                  <div class="col-md-12">
                      <div style="width: 100%; height: 600px;">
                        <canvas id="cashflowChart"></canvas>
                      </div>
@@ -301,15 +304,26 @@
 <?php init_tail(); ?>
 <script>
    var cashflowChart = null;
+   var currentMode = 'normal';
    $(document).ready(function() {
       "use strict";
-      load_cashflow_data();
+      load_cashflow_data('normal');
       $("body").on('change', 'input[name="total_months"], input[name="start_date"], input[name="budgeted"]', function() {
-         load_cashflow_data();
+         load_cashflow_data('normal');
+      });
+      $("body").on('click', '#toggleChartBtn', function() {
+         if (currentMode === 'normal') {
+            currentMode = 'realistic';
+            $(this).text('View Normal Charts');
+         } else {
+            currentMode = 'normal';
+            $(this).text('View Realistic Charts');
+         }
+         load_cashflow_data(currentMode);
       });
    });
 
-   function load_cashflow_data() {
+   function load_cashflow_data(mode) {
       var total_months = $('input[name="total_months"]').val();
       var start_date   = $('input[name="start_date"]').val();
       var budgeted     = $('input[name="budgeted"]').val();
@@ -324,6 +338,7 @@
             var charts_planned_cum_cf = [];
             var charts_actual_spending = [];
             var charts_forecast_cum_cf = [];
+            var realistic_months_cal_name = [];
             if (Array.isArray(data.industry_standard_scurve) && data.industry_standard_scurve.length > 0) {
                $.each(data.industry_standard_scurve, function(i, row){
                   industry_standard_tbody += '<tr>';
@@ -354,6 +369,7 @@
             if (Array.isArray(data.cashflow_forecast) && data.cashflow_forecast.length > 0) {
                $.each(data.cashflow_forecast, function(i, row){
                   months_cal_name.push(row.months_cal_name);
+                  realistic_months_cal_name.push(row.realistic_calendar_month);
                   charts_planned_cum_cf.push(parseFloat(row.planned_cum_cf) || 0);
                   charts_forecast_cum_cf.push(parseFloat(row.forecast_cum_cf) || 0);
                   cashflow_forecast_tbody += '<tr>';
@@ -408,7 +424,9 @@
             $('.projected_completion_date').html(data.projected_completion_date);
             $('.total_delay').html(parseFloat(data.total_delay).toFixed(2));
             render_cashflow_chart(
+               mode,
                months_cal_name,
+               realistic_months_cal_name,
                charts_planned_cum_cf,
                charts_actual_spending,
                charts_forecast_cum_cf
@@ -417,7 +435,9 @@
    }
 
    function render_cashflow_chart(
+      mode,
       months_cal_name,
+      realistic_months_cal_name,
       charts_planned_cum_cf,
       charts_actual_spending,
       charts_forecast_cum_cf
@@ -426,39 +446,53 @@
       if (cashflowChart !== null) {
          cashflowChart.destroy();
       }
+      var all_months_name = mode == 'normal' ? months_cal_name : realistic_months_cal_name;
+      var all_datasets = [];
+      if (mode == 'normal') {
+         all_datasets.push({
+            type: 'line',
+            label: 'Planned S-Curve',
+            data: charts_planned_cum_cf,
+            borderColor: '#0000FF',
+            backgroundColor: '#0000FF',
+            tension: 0.3,
+            fill: false
+         },
+         {
+            type: 'line',
+            label: 'Actual Spending',
+            data: charts_actual_spending,
+            borderColor: '#FFBF00',
+            backgroundColor: '#FFBF00',
+            tension: 0.3,
+            fill: false
+         },
+         {
+            type: 'line',
+            label: 'Forecast (Accelerated)',
+            data: charts_forecast_cum_cf,
+            borderColor: '#097969',
+            backgroundColor: '#097969',
+            borderDash: [5, 5],
+            tension: 0.3,
+            fill: false
+         });
+      } else {
+         all_datasets.push({
+            type: 'line',
+            label: 'Realistic (Current Pace)',
+            data: charts_planned_cum_cf,
+            borderColor: '#FF0000',
+            backgroundColor: '#FF0000',
+            borderDash: [5, 5],
+            tension: 0.3,
+            fill: false
+         });
+      }
       cashflowChart = new Chart(ctx, {
          data: {
-            labels: months_cal_name,
-            datasets: [
-               {
-                  type: 'line',
-                  label: 'Planned S-Curve',
-                  data: charts_planned_cum_cf,
-                  borderColor: '#0000FF',
-                  backgroundColor: '#0000FF',
-                  tension: 0.3,
-                  fill: false
-               },
-               {
-                  type: 'line',
-                  label: 'Actual Spending',
-                  data: charts_actual_spending,
-                  borderColor: '#FFBF00',
-                  backgroundColor: '#FFBF00',
-                  tension: 0.3,
-                  fill: false
-               },
-               {
-                  type: 'line',
-                  label: 'Forecast (Accelerated)',
-                  data: charts_forecast_cum_cf,
-                  borderColor: '#097969',
-                  backgroundColor: '#097969',
-                  borderDash: [5, 5],
-                  tension: 0.3,
-                  fill: false
-               }
-            ]
+            labels: all_months_name,
+            datasets: all_datasets
          },
          options: {
             responsive: true,
