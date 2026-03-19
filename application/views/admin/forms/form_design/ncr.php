@@ -206,7 +206,7 @@
                 <?php if ($isedit && !empty($ncr_form_detail)) : ?>
                     <?php foreach ($ncr_form_detail as $i => $detail) : ?>
                         <div class="section">
-                            <h4>Quality Observtion Photo Section <span class="secIndex"><?php echo $i + 1; ?></span>
+                            <h4>NON-CONFORMANCE Photo Section <span class="secIndex"><?php echo $i + 1; ?></span>
                                 <a href="javascript:void(0);" class="btn btn-danger removeSection pull-right" style="margin-bottom:10px;"><i class="fa fa-trash"></i></a>
                             </h4>
                             <table class="table qor-items-table items table-main-qor-edit has-calculations no-mtop">
@@ -277,7 +277,7 @@
 </div>
 <template id="sectionTemplate">
     <div class="section">
-        <h4>Quality Observtion Photo Section <span class="secIndex"></span>
+        <h4>NON-CONFORMANCE Photo Section <span class="secIndex"></span>
             <a href="javascript:void(0);" class="btn btn-danger removeSection pull-right" style="margin-bottom:10px;"><i class="fa fa-trash"></i></a>
         </h4>
         <table class="table qor-items-table items table-main-qor-edit has-calculations no-mtop">
