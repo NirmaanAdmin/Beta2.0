@@ -7416,3 +7416,16 @@ function resize_image_for_pdf($path)
     // ✅ Return base64 string
     return 'data:' . $mime . ';base64,' . base64_encode($image_data);
 }
+
+
+function get_area_ncr_name_by_id($area_id)
+{
+    $CI = &get_instance();
+    $area = $CI->db->select('*')
+        ->where('id', $area_id)
+        ->from(db_prefix() . 'area')
+        ->get()
+        ->row();
+
+    return $area->area_name;
+}

@@ -357,3 +357,8 @@ function form_pdf_wpf($form, $tag = '')
 {
     return app_pdf('form', LIBSPATH . 'pdf/Form_pdf_wpf', $form, $tag);
 }
+
+function form_pdf_ncr($form, $tag = '')
+{
+    return app_pdf('form', LIBSPATH . 'pdf/Form_pdf_ncr', $form, $tag);
+}
