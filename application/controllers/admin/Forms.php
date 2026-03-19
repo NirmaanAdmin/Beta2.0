@@ -891,6 +891,7 @@ class Forms extends AdminController
                 'st'  => ['has_attachments' => false],
                 'krp'  => ['has_attachments' => false],
                 'wpf'  => ['has_attachments' => false],
+                'ncr' => ['has_attachments' => true],
             ];
 
             if (isset($formConfigs[$form_type])) {
@@ -909,7 +910,7 @@ class Forms extends AdminController
 
         $form_items = $this->forms_model->get_form_items($form_type);
         $data = [];
-        $wpr_row_template = $st_row_template ='';
+        $wpr_row_template = $st_row_template = '';
         $data['isedit'] = 0;
         if ($form_id != 0) {
 
@@ -955,7 +956,7 @@ class Forms extends AdminController
                 }
                 $data['wpr_form'] = $wpr_form;
             } elseif ($form_type == 'st') {
-               $st_row_template = $this->forms_model->create_st_row_template();
+                $st_row_template = $this->forms_model->create_st_row_template();
 
                 $st_form = $this->forms_model->get_st_form($form_id);
                 $st_form_detail = $this->forms_model->get_st_form_detail($form_id);
@@ -975,7 +976,7 @@ class Forms extends AdminController
                 }
                 $data['st_form'] = $st_form;
             } elseif ($form_type == 'wpf') {
-               $wpf_row_template = $this->forms_model->create_wpf_row_template();
+                $wpf_row_template = $this->forms_model->create_wpf_row_template();
 
                 $wpf_form = $this->forms_model->get_wpf_form($form_id);
                 $wpf_form_detail = $this->forms_model->get_wpf_form_detail($form_id);
@@ -999,7 +1000,7 @@ class Forms extends AdminController
             if ($form_type == 'wpr') {
                 $wpr_row_template = $this->forms_model->create_wpr_row_template();
             } elseif ($form_type == 'st') {
-               $st_row_template = $this->forms_model->create_st_row_template();
+                $st_row_template = $this->forms_model->create_st_row_template();
             } elseif ($form_type == 'wpf') {
                 $wpf_row_template = $this->forms_model->create_wpf_row_template();
             }
@@ -1011,6 +1012,7 @@ class Forms extends AdminController
         $data['wpf_row_template'] = $wpf_row_template;
         $this->load->model('departments_model');
         $data['departments'] = $this->departments_model->get();
+        $data['area_list'] = $this->forms_model->get_area();
         $this->load->view("admin/forms/form_design/{$form_type}", $data);
     }
 
@@ -1790,5 +1792,15 @@ class Forms extends AdminController
         }
 
         $pdf->Output(mb_strtoupper(slug_it($form->subject)) . '.pdf', $type);
+    }
+
+    public function get_areas_by_project()
+    {
+        $project_id = $this->input->post('project_id');
+
+        $this->db->where('project', $project_id);
+        $areas = $this->db->get(db_prefix() . 'area')->result_array();
+
+        echo json_encode($areas);
     }
 }

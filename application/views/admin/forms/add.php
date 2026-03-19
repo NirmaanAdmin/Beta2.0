@@ -257,9 +257,45 @@
                 $.post(admin_url + 'forms/find_form_design/' + form_type).done(function(response) {
                     $('.view_form_design').html('');
                     $('.view_form_design').html(response);
+                    setTimeout(function() {
+
+                        // Remove old instance (important when reloading)
+                        if (typeof tinymce !== 'undefined') {
+                            tinymce.remove('#des_of_findings');
+                        }
+
+                        // Init editor with resize enabled
+                        init_editor('#des_of_findings', {
+                            height: 250,
+                            min_height: 200,
+                            max_height: 500,
+                            resize: true, // ✅ allow resize
+                            autoresize_bottom_margin: 20
+                        });
+
+                    }, 200);
                     $('.view_project_name').html('');
                     var project_name = $('#project_id option:selected').text();
                     $('.view_project_name').html(project_name);
+                    var project_id = $('#project_id').val();
+                    if (project_id != '') {
+                        $.post(admin_url + 'forms/get_areas_by_project', {
+                            project_id: project_id
+                        }).done(function(response) {
+                            var areas = JSON.parse(response);
+
+                            var html = '<option value=""></option>';
+                            $.each(areas, function(i, area) {
+                                html += '<option value="' + area.id + '">' + area.area_name + '</option>';
+                            });
+
+                            $('select[name="area"]').html(html);
+                            $('select[name="area"]').selectpicker('refresh'); // important if using bootstrap select
+                        });
+                    } else {
+                        $('select[name="area"]').html('<option value=""></option>');
+                        $('select[name="area"]').selectpicker('refresh');
+                    }
                     $('.selectpicker').selectpicker('refresh');
                 });
             }

@@ -1341,6 +1341,59 @@ class Forms_model extends App_Model
                     $new_order = $data['newitems'];
                     unset($data['newitems']);
                 }
+            } elseif ($data['form_type'] == "ncr") {
+                $ncr_form = [];
+                $ncr_form['ncr_no'] = $data['ncr_no'];
+                $ncr_form['department_ncr'] = $data['department_ncr'];
+                $ncr_form['activity'] = $data['activity'];
+                $ncr_form['system_ref'] = $data['system_ref'];
+                $ncr_form['des_of_findings'] = $data['des_of_findings'];
+                $ncr_form['area'] = $data['area'];
+                $ncr_form['ncr_type'] = $data['ncr_type'];
+                $ncr_form['reference_document_clause_no'] = $data['reference_document_clause_no'];
+                $ncr_form['assessor'] = $data['assessor'];
+                $ncr_form['name_of_contractor'] = $data['name_of_contractor'];
+                $ncr_form['date'] = $data['date'];
+                $ncr_form['immediate_action'] = $data['immediate_action'];
+                $ncr_form['investigation'] = $data['investigation'];
+                $ncr_form['corrective_action'] = $data['corrective_action'];
+                $ncr_form['resp'] = $data['resp'];
+                $ncr_form['target_date'] = $data['target_date'];
+                $ncr_form['followup_report'] = $data['followup_report'];
+                $ncr_form['nc'] = $data['nc'];
+                $ncr_form['assessor_footer'] = $data['assessor_footer'];
+                $ncr_form['footer_date_1'] = $data['footer_date_1'];
+                $ncr_form['reviewed_by'] = $data['reviewed_by'];
+                $ncr_form['footer_date_2'] = $data['footer_date_2'];
+                unset(
+                    $data['ncr_no'],
+                    $data['department_ncr'],
+                    $data['activity'],
+                    $data['system_ref'],
+                    $data['des_of_findings'],
+                    $data['area'],
+                    $data['ncr_type'],
+                    $data['reference_document_clause_no'],
+                    $data['assessor'],
+                    $data['name_of_contractor'],
+                    $data['date'],
+                    $data['immediate_action'],
+                    $data['investigation'],
+                    $data['corrective_action'],
+                    $data['resp'],
+                    $data['target_date'],
+                    $data['followup_report'],
+                    $data['nc'],
+                    $data['assessor_footer'],
+                    $data['footer_date_1'],
+                    $data['reviewed_by'],
+                    $data['footer_date_2'],
+                );
+                $new_order = [];
+                if (isset($data['comments'])) {
+                    $new_order = $data['comments'];
+                    unset($data['comments']);
+                }
             }
         }
 
@@ -1943,6 +1996,41 @@ class Forms_model extends App_Model
                             $dt_data['remark'] = $value['remark'];
                             $this->db->insert(db_prefix() . $data['form_type'] . '_form_detail', $dt_data);
                             $wpf_detail_id = $this->db->insert_id();
+                        }
+                    }
+                }
+            } elseif ($data['form_type'] == "ncr") {
+                if (isset($ncr_form)) {
+                    if (!empty($ncr_form)) {
+                        $ncr_form['form_id'] = $formid;
+                        $this->db->insert(db_prefix() . $data['form_type'] . '_form', $ncr_form);
+                    }
+                }
+                if (isset($new_order)) {
+                    if (!empty($new_order)) {
+                        $sr = 1;
+                        foreach ($new_order as $key => $value) {
+                            $dt_data = [];
+                            $dt_data['form_id'] = $formid;
+                            $dt_data['comments'] = $value;
+                            $this->db->insert(db_prefix() . $data['form_type'] . '_form_detail', $dt_data);
+                            $insert_id = $this->db->insert_id();
+                            $iuploadedFiles = handle_qor_item_attachment_array('ncrattachments', $formid, $insert_id, $sr);
+
+                            if ($iuploadedFiles && is_array($iuploadedFiles)) {
+                                if (!empty($iuploadedFiles)) {
+                                    foreach ($iuploadedFiles as $file) {
+                                        $idata = [
+                                            'form_id' =>  $formid,
+                                            'form_detail_id' =>  $file['item_id'],
+                                            'file_name' => $file['file_name'],
+                                            'filetype' => $file['filetype'],
+                                        ];
+                                        $this->db->insert(db_prefix() . 'ncrattachments', $idata);
+                                    }
+                                }
+                            }
+                            $sr++;
                         }
                     }
                 }
@@ -2770,6 +2858,59 @@ class Forms_model extends App_Model
                 $remove_order = $data['removed_items'];
                 unset($data['removed_items']);
             }
+        } elseif ($formBeforeUpdate->form_type == "ncr") {
+            $ncr_form = [];
+                $ncr_form['ncr_no'] = $data['ncr_no'];
+                $ncr_form['department_ncr'] = $data['department_ncr'];
+                $ncr_form['activity'] = $data['activity'];
+                $ncr_form['system_ref'] = $data['system_ref'];
+                $ncr_form['des_of_findings'] = $data['des_of_findings'];
+                $ncr_form['area'] = $data['area'];
+                $ncr_form['ncr_type'] = $data['ncr_type'];
+                $ncr_form['reference_document_clause_no'] = $data['reference_document_clause_no'];
+                $ncr_form['assessor'] = $data['assessor'];
+                $ncr_form['name_of_contractor'] = $data['name_of_contractor'];
+                $ncr_form['date'] = $data['date'];
+                $ncr_form['immediate_action'] = $data['immediate_action'];
+                $ncr_form['investigation'] = $data['investigation'];
+                $ncr_form['corrective_action'] = $data['corrective_action'];
+                $ncr_form['resp'] = $data['resp'];
+                $ncr_form['target_date'] = $data['target_date'];
+                $ncr_form['followup_report'] = $data['followup_report'];
+                $ncr_form['nc'] = $data['nc'];
+                $ncr_form['assessor_footer'] = $data['assessor_footer'];
+                $ncr_form['footer_date_1'] = $data['footer_date_1'];
+                $ncr_form['reviewed_by'] = $data['reviewed_by'];
+                $ncr_form['footer_date_2'] = $data['footer_date_2'];
+                unset(
+                    $data['ncr_no'],
+                    $data['department_ncr'],
+                    $data['activity'],
+                    $data['system_ref'],
+                    $data['des_of_findings'],
+                    $data['area'],
+                    $data['ncr_type'],
+                    $data['reference_document_clause_no'],
+                    $data['assessor'],
+                    $data['name_of_contractor'],
+                    $data['date'],
+                    $data['immediate_action'],
+                    $data['investigation'],
+                    $data['corrective_action'],
+                    $data['resp'],
+                    $data['target_date'],
+                    $data['followup_report'],
+                    $data['nc'],
+                    $data['assessor_footer'],
+                    $data['footer_date_1'],
+                    $data['reviewed_by'],
+                    $data['footer_date_2'],
+                );
+                $new_order = [];
+                if (isset($data['comments'])) {
+                    $new_order = $data['comments'];
+                    unset($data['comments']);
+                }
         }
 
         $this->db->where('formid', $data['formid']);
@@ -3800,7 +3941,81 @@ class Forms_model extends App_Model
                     }
                 }
             }
-        }
+        } elseif ($formBeforeUpdate->form_type == "ncr") {
+            if (isset($ncr_form)) {
+                if (!empty($ncr_form)) {
+                    $this->db->where('form_id', $data['formid']);
+                    $this->db->update(db_prefix() . $formBeforeUpdate->form_type . '_form', $ncr_form);
+                    if ($this->db->affected_rows() > 0) {
+                        $affectedRows++;
+                    }
+                }
+            }
+            $existing_details = $this->get_ncr_form_detail($data['formid']); // current DB rows
+
+            $existing_count = count($existing_details);
+            $new_count = count($new_order);
+
+            // Update existing ones
+            for ($i = 0; $i < $existing_count; $i++) {
+                if (isset($new_order[$i])) {
+                    $update_data = [
+                        'comments' => $new_order[$i]
+                    ];
+                    $this->db->where('id', $existing_details[$i]['id']);
+                    $this->db->update(db_prefix() . $formBeforeUpdate->form_type . '_form_detail', $update_data);
+                    if ($this->db->affected_rows() > 0) {
+                        $affectedRows++;
+                    }
+                    $iuploadedFiles = handle_qor_item_attachment_array('ncrattachments', $existing_details[$i]['form_id'], $existing_details[$i]['id'], $i);
+
+                    if ($iuploadedFiles && is_array($iuploadedFiles)) {
+                        if (!empty($iuploadedFiles)) {
+                            foreach ($iuploadedFiles as $file) {
+                                $idata = [
+                                    'form_id' =>  $existing_details[$i]['form_id'],
+                                    'form_detail_id' =>  $file['item_id'],
+                                    'file_name' => $file['file_name'],
+                                    'filetype' => $file['filetype'],
+                                ];
+                                $this->db->insert(db_prefix() . 'ncrattachments', $idata);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Insert new ones
+            if ($new_count > $existing_count) {
+                for ($i = $existing_count; $i < $new_count; $i++) {
+                    $insert_data = [
+                        'form_id' => $data['formid'],
+                        'comments' => $new_order[$i]
+                    ];
+                    $this->db->insert(db_prefix() . $formBeforeUpdate->form_type . '_form_detail', $insert_data);
+                    $new_insert_id = $this->db->insert_id();
+                    if ($new_insert_id) {
+                        $affectedRows++;
+                    }
+
+                    $iuploadedFiles = handle_qor_item_attachment_array('ncrattachments', $data['formid'], $new_insert_id, $i);
+
+                    if ($iuploadedFiles && is_array($iuploadedFiles)) {
+                        if (!empty($iuploadedFiles)) {
+                            foreach ($iuploadedFiles as $file) {
+                                $idata = [
+                                    'form_id' =>  $data['formid'],
+                                    'form_detail_id' =>  $file['item_id'],
+                                    'file_name' => $file['file_name'],
+                                    'filetype' => $file['filetype'],
+                                ];
+                                $this->db->insert(db_prefix() . 'ncrattachments', $idata);
+                            }
+                        }
+                    }
+                }
+            }
+        } 
         $sendAssignedEmail = false;
 
         $current_assigned = $formBeforeUpdate->assigned;
@@ -5707,5 +5922,28 @@ class Forms_model extends App_Model
     {
         $this->db->where('form_id', $form_id);
         return $this->db->get(db_prefix() . 'wpf_form_detail')->result_array();
+    }
+
+    public function get_area()
+    {
+        $this->db->order_by('id', 'ASC');
+        $query = $this->db->get(db_prefix() . 'area');
+        return $query->result_array();
+    }
+
+    public function get_ncr_form($form_id)
+    {
+        $this->db->where('form_id', $form_id);
+        return $this->db->get(db_prefix() . 'ncr_form')->row();
+    }
+    public function get_ncr_form_detail($form_id)
+    {
+        $this->db->where('form_id', $form_id);
+        return $this->db->get(db_prefix() . 'ncr_form_detail')->result_array();
+    }
+    public function get_ncr_form_attachments($id)
+    {
+        $this->db->where('form_id', $id);
+        return $this->db->get(db_prefix() . 'ncrattachments')->result_array();
     }
 }
