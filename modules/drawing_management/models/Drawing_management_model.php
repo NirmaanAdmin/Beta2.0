@@ -1355,7 +1355,7 @@ class drawing_management_model extends app_model
 		$root = rtrim(DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER, '/') . '/temps/bulk_downloads/' . $folder_name;
 		drawing_dmg_create_folder($root);
 
-		$data_child = $this->get_item('', 'id IN (' . $id_lever_1 . ')', 'id, name, filetype, parent_id, pdf_attachment');
+		$data_child = $this->get_item('', 'parent_id IN (' . $id_lever_1 . ')', 'id, name, filetype, parent_id, pdf_attachment');
 		if (!$data_child) {
 			return;
 		}
