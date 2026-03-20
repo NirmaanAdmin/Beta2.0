@@ -135,7 +135,7 @@
                </div>
                <div class="row mtop20">
                   <div class="col-md-12 mbot20">
-                     <a href="javascript:void(0)" id="scurve" class="btn btn-outline-info pull-left display-block chart_btn">S-Curve (Cumulative)</a>
+                     <a href="javascript:void(0)" id="scurve" class="btn btn-outline-info pull-left display-block chart_btn active">S-Curve (Cumulative)</a>
                      <a href="javascript:void(0)" id="realistic" class="btn btn-outline-info pull-left display-block mleft10 chart_btn">Realistic (Month)</a>
                      <a href="javascript:void(0)" id="monthly_cashflow" class="btn btn-outline-info pull-left display-block mleft10 chart_btn">Monthly Cashflow</a>
                   </div>
@@ -350,10 +350,13 @@
             var data = JSON.parse(response);
             var industry_standard_tbody = '';
             var months_cal_name = [];
+            var realistic_months_cal_name = [];
             var charts_planned_cum_cf = [];
             var charts_actual_spending = [];
             var charts_forecast_cum_cf = [];
-            var realistic_months_cal_name = [];
+            var charts_planned_monthly_cf = [];
+            var charts_current_cum_amount = [];
+            var charts_forecast_monthly_cf = [];
             if (Array.isArray(data.industry_standard_scurve) && data.industry_standard_scurve.length > 0) {
                $.each(data.industry_standard_scurve, function(i, row){
                   industry_standard_tbody += '<tr>';
@@ -371,6 +374,7 @@
             if (Array.isArray(data.actual_spending_on_project) && data.actual_spending_on_project.length > 0) {
                $.each(data.actual_spending_on_project, function(i, row){
                   charts_actual_spending.push(parseFloat(row.actual_cum_amount) || 0);
+                  charts_current_cum_amount.push(parseFloat(row.current_cum_amount) || 0);
                   actual_spending_tbody += '<tr>';
                   actual_spending_tbody += '<td>'+row.months_cal+'</td>';
                   actual_spending_tbody += '<td>'+parseFloat(row.actual_cum_percentage).toFixed(2)+'%</td>';
@@ -387,6 +391,8 @@
                   realistic_months_cal_name.push(row.realistic_calendar_month);
                   charts_planned_cum_cf.push(parseFloat(row.planned_cum_cf) || 0);
                   charts_forecast_cum_cf.push(parseFloat(row.forecast_cum_cf) || 0);
+                  charts_planned_monthly_cf.push(parseFloat(row.planned_monthly_cf) || 0);
+                  charts_forecast_monthly_cf.push(parseFloat(row.forecast_monthly_cf) || 0);
                   cashflow_forecast_tbody += '<tr>';
                   cashflow_forecast_tbody += '<td>'+row.period+'</td>';
                   cashflow_forecast_tbody += '<td>'+row.months_cal_name+'</td>';
@@ -444,7 +450,10 @@
                realistic_months_cal_name,
                charts_planned_cum_cf,
                charts_actual_spending,
-               charts_forecast_cum_cf
+               charts_forecast_cum_cf,
+               charts_planned_monthly_cf,
+               charts_current_cum_amount,
+               charts_forecast_monthly_cf
             );
       });
    }
@@ -455,14 +464,17 @@
       realistic_months_cal_name,
       charts_planned_cum_cf,
       charts_actual_spending,
-      charts_forecast_cum_cf
+      charts_forecast_cum_cf,
+      charts_planned_monthly_cf,
+      charts_current_cum_amount,
+      charts_forecast_monthly_cf
    ) {
       var ctx = document.getElementById('cashflowChart').getContext('2d');
       if (cashflowChart !== null) {
          cashflowChart.destroy();
       }
       var all_months_name = '';
-      if(mode == 'scurve') {
+      if(mode == 'scurve' || mode == 'monthly_cashflow') {
          all_months_name = months_cal_name;
       } else if(mode == 'realistic') {
          all_months_name = realistic_months_cal_name;
@@ -507,6 +519,34 @@
             borderColor: '#FF0000',
             backgroundColor: '#FF0000',
             borderDash: [5, 5],
+            tension: 0.3,
+            fill: false
+         });
+      } else if(mode == 'monthly_cashflow') {
+         all_datasets.push({
+            type: 'line',
+            label: 'Planned Monthly',
+            data: charts_planned_monthly_cf,
+            borderColor: '#0000FF',
+            backgroundColor: '#0000FF',
+            tension: 0.3,
+            fill: false
+         },
+         {
+            type: 'line',
+            label: 'Actual Monthly',
+            data: charts_current_cum_amount,
+            borderColor: '#FFBF00',
+            backgroundColor: '#FFBF00',
+            tension: 0.3,
+            fill: false
+         },
+         {
+            type: 'line',
+            label: 'Forecast Monthly',
+            data: charts_forecast_monthly_cf,
+            borderColor: '#097969',
+            backgroundColor: '#097969',
             tension: 0.3,
             fill: false
          });

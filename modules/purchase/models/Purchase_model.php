@@ -29025,6 +29025,7 @@ class Purchase_model extends App_Model
         $order_tracker_result = $this->db->query($order_tracker_query)->result_array();
 
         $total_budget_spent = 0;
+        $current_cum_amount = 0;
         foreach ($timelines_percentages as $index => $timeline) {
             $months_cal = $industry_standard_scurve[$index]['months_cal'];
             $order_start_date = $start_date;
@@ -29048,12 +29049,15 @@ class Purchase_model extends App_Model
             }
             $actual_cum_percentage = ($actual_cumulative_cashflow / $default_budgeted) * 100;
             $total_budget_spent = $actual_cumulative_cashflow;
+            $current_cum_amount = $actual_cumulative_cashflow - $current_cum_amount;
 
             $actual_spending_on_project[$index] = array(
                 'months_cal' => $months_cal,
                 'actual_cum_percentage' => $actual_cum_percentage,
-                'actual_cum_amount' => $actual_cumulative_cashflow
+                'actual_cum_amount' => $actual_cumulative_cashflow,
+                'current_cum_amount' => $current_cum_amount
             );
+            $current_cum_amount = $actual_cumulative_cashflow;
         }
         if(!empty($actual_spending_on_project)) {
             $actual_cum_amount = array_column($actual_spending_on_project, 'actual_cum_amount');
