@@ -362,3 +362,8 @@ function form_pdf_ncr($form, $tag = '')
 {
     return app_pdf('form', LIBSPATH . 'pdf/Form_pdf_ncr', $form, $tag);
 }
+
+function form_pdf_sf($form, $tag = '')
+{
+    return app_pdf('form', LIBSPATH . 'pdf/Form_pdf_sf', $form, $tag);
+}

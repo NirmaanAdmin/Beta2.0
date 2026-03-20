@@ -1394,6 +1394,42 @@ class Forms_model extends App_Model
                     $new_order = $data['comments'];
                     unset($data['comments']);
                 }
+            } elseif ($data['form_type'] == "sf") {
+                $sf_form = [];
+                $sf_form['sr_no'] = $data['sr_no'];
+                $sf_form['date'] = $data['date'];
+                $sf_form['name_of_employee'] = $data['name_of_employee'];
+                $sf_form['gender'] = $data['gender'];
+                $sf_form['age'] = $data['age'];
+                $sf_form['name_of_company'] = $data['name_of_company'];
+                $sf_form['sub_contractor'] = $data['sub_contractor'];
+                $sf_form['aadhar_number'] = $data['aadhar_number'];
+                $sf_form['emp_name'] = $data['emp_name'];
+                $sf_form['present_address'] = $data['present_address'];
+                $sf_form['mobile_number'] = $data['mobile_number'];
+                $sf_form['parmanent_address'] = $data['parmanent_address'];
+                $sf_form['mobile_number_2'] = $data['mobile_number_2'];
+                $sf_form['designation'] = $data['designation'];
+                $sf_form['relation_phone'] = $data['relation_phone'];
+                $st_form['relation'] = $data['relation'];
+                unset(
+                    $data['sr_no'],
+                    $data['date'],
+                    $data['name_of_employee'],
+                    $data['gender'],
+                    $data['age'],
+                    $data['name_of_company'],
+                    $data['sub_contractor'],
+                    $data['aadhar_number'],
+                    $data['emp_name'],
+                    $data['present_address'],
+                    $data['mobile_number'],
+                    $data['parmanent_address'],
+                    $data['mobile_number_2'],
+                    $data['designation'],
+                    $data['relation_phone'],
+                    $data['relation']
+                );
             }
         }
 
@@ -2032,6 +2068,13 @@ class Forms_model extends App_Model
                             }
                             $sr++;
                         }
+                    }
+                }
+            } elseif ($data['form_type'] == "sf") {
+                if (isset($sf_form)) {
+                    if (!empty($sf_form)) {
+                        $sf_form['form_id'] = $formid;
+                        $this->db->insert(db_prefix() . $data['form_type'] . '_form', $sf_form);
                     }
                 }
             }
@@ -2860,57 +2903,93 @@ class Forms_model extends App_Model
             }
         } elseif ($formBeforeUpdate->form_type == "ncr") {
             $ncr_form = [];
-                $ncr_form['ncr_no'] = $data['ncr_no'];
-                $ncr_form['department_ncr'] = $data['department_ncr'];
-                $ncr_form['activity'] = $data['activity'];
-                $ncr_form['system_ref'] = $data['system_ref'];
-                $ncr_form['des_of_findings'] = $data['des_of_findings'];
-                $ncr_form['area'] = $data['area'];
-                $ncr_form['ncr_type'] = $data['ncr_type'];
-                $ncr_form['reference_document_clause_no'] = $data['reference_document_clause_no'];
-                $ncr_form['assessor'] = $data['assessor'];
-                $ncr_form['name_of_contractor'] = $data['name_of_contractor'];
-                $ncr_form['date'] = $data['date'];
-                $ncr_form['immediate_action'] = $data['immediate_action'];
-                $ncr_form['investigation'] = $data['investigation'];
-                $ncr_form['corrective_action'] = $data['corrective_action'];
-                $ncr_form['resp'] = $data['resp'];
-                $ncr_form['target_date'] = $data['target_date'];
-                $ncr_form['followup_report'] = $data['followup_report'];
-                $ncr_form['nc'] = $data['nc'];
-                $ncr_form['assessor_footer'] = $data['assessor_footer'];
-                $ncr_form['footer_date_1'] = $data['footer_date_1'];
-                $ncr_form['reviewed_by'] = $data['reviewed_by'];
-                $ncr_form['footer_date_2'] = $data['footer_date_2'];
-                unset(
-                    $data['ncr_no'],
-                    $data['department_ncr'],
-                    $data['activity'],
-                    $data['system_ref'],
-                    $data['des_of_findings'],
-                    $data['area'],
-                    $data['ncr_type'],
-                    $data['reference_document_clause_no'],
-                    $data['assessor'],
-                    $data['name_of_contractor'],
-                    $data['date'],
-                    $data['immediate_action'],
-                    $data['investigation'],
-                    $data['corrective_action'],
-                    $data['resp'],
-                    $data['target_date'],
-                    $data['followup_report'],
-                    $data['nc'],
-                    $data['assessor_footer'],
-                    $data['footer_date_1'],
-                    $data['reviewed_by'],
-                    $data['footer_date_2'],
-                );
-                $new_order = [];
-                if (isset($data['comments'])) {
-                    $new_order = $data['comments'];
-                    unset($data['comments']);
-                }
+            $ncr_form['ncr_no'] = $data['ncr_no'];
+            $ncr_form['department_ncr'] = $data['department_ncr'];
+            $ncr_form['activity'] = $data['activity'];
+            $ncr_form['system_ref'] = $data['system_ref'];
+            $ncr_form['des_of_findings'] = $data['des_of_findings'];
+            $ncr_form['area'] = $data['area'];
+            $ncr_form['ncr_type'] = $data['ncr_type'];
+            $ncr_form['reference_document_clause_no'] = $data['reference_document_clause_no'];
+            $ncr_form['assessor'] = $data['assessor'];
+            $ncr_form['name_of_contractor'] = $data['name_of_contractor'];
+            $ncr_form['date'] = $data['date'];
+            $ncr_form['immediate_action'] = $data['immediate_action'];
+            $ncr_form['investigation'] = $data['investigation'];
+            $ncr_form['corrective_action'] = $data['corrective_action'];
+            $ncr_form['resp'] = $data['resp'];
+            $ncr_form['target_date'] = $data['target_date'];
+            $ncr_form['followup_report'] = $data['followup_report'];
+            $ncr_form['nc'] = $data['nc'];
+            $ncr_form['assessor_footer'] = $data['assessor_footer'];
+            $ncr_form['footer_date_1'] = $data['footer_date_1'];
+            $ncr_form['reviewed_by'] = $data['reviewed_by'];
+            $ncr_form['footer_date_2'] = $data['footer_date_2'];
+            unset(
+                $data['ncr_no'],
+                $data['department_ncr'],
+                $data['activity'],
+                $data['system_ref'],
+                $data['des_of_findings'],
+                $data['area'],
+                $data['ncr_type'],
+                $data['reference_document_clause_no'],
+                $data['assessor'],
+                $data['name_of_contractor'],
+                $data['date'],
+                $data['immediate_action'],
+                $data['investigation'],
+                $data['corrective_action'],
+                $data['resp'],
+                $data['target_date'],
+                $data['followup_report'],
+                $data['nc'],
+                $data['assessor_footer'],
+                $data['footer_date_1'],
+                $data['reviewed_by'],
+                $data['footer_date_2'],
+            );
+            $new_order = [];
+            if (isset($data['comments'])) {
+                $new_order = $data['comments'];
+                unset($data['comments']);
+            }
+        } elseif ($formBeforeUpdate->form_type == "sf") {
+            $sf_form = [];
+            $sf_form['sr_no'] = $data['sr_no'];
+            $sf_form['date'] = $data['date'];
+            $sf_form['name_of_employee'] = $data['name_of_employee'];
+            $sf_form['gender'] = $data['gender'];
+            $sf_form['age'] = $data['age'];
+            $sf_form['name_of_company'] = $data['name_of_company'];
+            $sf_form['sub_contractor'] = $data['sub_contractor'];
+            $sf_form['aadhar_number'] = $data['aadhar_number'];
+            $sf_form['emp_name'] = $data['emp_name'];
+            $sf_form['present_address'] = $data['present_address'];
+            $sf_form['mobile_number'] = $data['mobile_number'];
+            $sf_form['parmanent_address'] = $data['parmanent_address'];
+            $sf_form['mobile_number_2'] = $data['mobile_number_2'];
+            $sf_form['designation'] = $data['designation'];
+            $sf_form['relation_phone'] = $data['relation_phone'];
+            $sf_form['relation'] = $data['relation'];
+            unset(
+                $data['sr_no'],
+                $data['date'],
+                $data['name_of_employee'],
+                $data['gender'],
+                $data['age'],
+                $data['name_of_company'],
+                $data['sub_contractor'],
+                $data['aadhar_number'],
+                $data['emp_name'],
+                $data['present_address'],
+                $data['mobile_number'],
+                $data['parmanent_address'],
+                $data['mobile_number_2'],
+                $data['designation'],
+                $data['relation_phone'],
+                $data['relation']
+            );
         }
 
         $this->db->where('formid', $data['formid']);
@@ -4015,7 +4094,17 @@ class Forms_model extends App_Model
                     }
                 }
             }
-        } 
+        } elseif ($formBeforeUpdate->form_type == "sf") {
+            if (isset($sf_form)) {
+                if (!empty($sf_form)) {
+                    $this->db->where('form_id', $data['formid']);
+                    $this->db->update(db_prefix() . $formBeforeUpdate->form_type . '_form', $sf_form);
+                    if ($this->db->affected_rows() > 0) {
+                        $affectedRows++;
+                    }
+                }
+            }
+        }
         $sendAssignedEmail = false;
 
         $current_assigned = $formBeforeUpdate->assigned;
@@ -5945,5 +6034,15 @@ class Forms_model extends App_Model
     {
         $this->db->where('form_id', $id);
         return $this->db->get(db_prefix() . 'ncrattachments')->result_array();
+    }
+    public function get_sf_form($form_id)
+    {
+        $this->db->where('form_id', $form_id);
+        return $this->db->get(db_prefix() . 'sf_form')->row();
+    }
+    public function get_sf_form_detail($form_id)
+    {
+        $this->db->where('form_id', $form_id);
+        return $this->db->get(db_prefix() . 'sf_form_detail')->result_array();
     }
 }
