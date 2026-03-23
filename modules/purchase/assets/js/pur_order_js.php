@@ -782,8 +782,9 @@
     $('.adjustment').html(format_money(adjustment));
     $('.wh-subtotal').html(format_money(subtotal) + hidden_input('total_mn', accounting.toFixed(subtotal, app.options.decimal_places)));
     $('.wh-total').html(format_money(total) + hidden_input('grand_total', accounting.toFixed(total, app.options.decimal_places)));
-    subtotal_value_order_detail(subtotal);
-    subtotal_amount_order_detail(subtotal);
+    var subtotal_with_discount = subtotal - total_discount_calculated;
+    subtotal_value_order_detail(subtotal_with_discount);
+    subtotal_amount_order_detail(subtotal_with_discount);
 
     $(document).trigger('purchase-quotation-total-calculated');
 
