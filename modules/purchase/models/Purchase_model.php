@@ -18837,7 +18837,7 @@ class Purchase_model extends App_Model
             $wo_description_title = _l('Order Tracker Description');
         }
 
-        $html .= '<table class="table" style="width: 100%" border="1" style="font-size:13px">
+        $html .= '<table class="table" style="width: 100%" border="1" style="font-size:12px">
             <tbody>
                 <tr>
                   <td class="cert_title">' . _l('payment_certificate_no') . '</td>
@@ -18879,7 +18879,7 @@ class Purchase_model extends App_Model
         </table>
         <br>';
 
-        $html .= '<table class="table" style="width: 100%" border="1" style="font-size:12px">
+        $html .= '<table class="table" style="width: 100%" border="1" style="font-size:11px">
             <tbody>
                 <tr class="pay_cert_title">
                   <td style="width:5%">' . _l('serial_no') . '</td>
