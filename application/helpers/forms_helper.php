@@ -928,3 +928,36 @@ function check_formid_is_sf($formid)
 
     return $count > 0;
 }
+function get_item_status_lse_listing()
+{
+    $result = array();
+    $result = [
+        [
+            'id' => '1',
+            'name' => 'Yes',
+        ],
+        [
+            'id' => '2',
+            'name' => 'No',
+        ],
+        [
+            'id' => '3',
+            'name' => 'NA',
+        ]
+    ];
+    return $result;
+}
+function check_formid_is_lse($formid)
+{
+
+    $CI = &get_instance();
+    // Use your DB prefix helper (Perfex = db_prefix())
+    $table = db_prefix() . 'lse_form';
+
+    // Count how many rows match this formid
+    $count = $CI->db
+        ->where('form_id', $formid)
+        ->count_all_results($table);
+
+    return $count > 0;
+}

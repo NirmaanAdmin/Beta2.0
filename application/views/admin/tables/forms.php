@@ -229,6 +229,7 @@ return App_table::find('forms')
                     $check_formis_is_wpf = check_formid_is_wpf($aRow['formid']);
                     $check_formis_is_ncr = check_formid_is_ncr($aRow['formid']);
                     $check_formis_is_sf = check_formid_is_sf($aRow['formid']);
+                    $check_formis_is_lse = check_formid_is_lse($aRow['formid']);
                     if ($check_formid_is_qcr > 0) {
                         $_data = '<div class="btn-group mright5">
                        <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ><i class="fa fa-file-pdf"></i><span class="caret"></span></a>
@@ -299,6 +300,15 @@ return App_table::find('forms')
                            <li class="hidden-xs"><a href="' . admin_url('forms/pdf_sf/' . $aRow['formid'] . '?output_type=I') . '">' . _l('view_pdf') . '</a></li>
                            <li class="hidden-xs"><a href="' . admin_url('forms/pdf_sf/' . $aRow['formid'] . '?output_type=I') . '" target="_blank">' . _l('view_pdf_in_new_window') . '</a></li>
                            <li><a href="' . admin_url('forms/pdf_sf/' . $aRow['formid']) . '" download>' . _l('download') . '</a></li>
+                        </ul>
+                        </div>';
+                    } elseif ($check_formis_is_lse > 0) {
+                        $_data = '<div class="btn-group mright5">
+                        <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ><i class="fa fa-file-pdf"></i><span class="caret"></span></a>
+                        <ul class="dropdown-menu dropdown-menu-right">
+                           <li class="hidden-xs"><a href="' . admin_url('forms/pdf_lse/' . $aRow['formid'] . '?output_type=I') . '">' . _l('view_pdf') . '</a></li>
+                           <li class="hidden-xs"><a href="' . admin_url('forms/pdf_lse/' . $aRow['formid'] . '?output_type=I') . '" target="_blank">' . _l('view_pdf_in_new_window') . '</a></li>
+                           <li><a href="' . admin_url('forms/pdf_lse/' . $aRow['formid']) . '" download>' . _l('download') . '</a></li>
                         </ul>
                         </div>';
                     } else {
