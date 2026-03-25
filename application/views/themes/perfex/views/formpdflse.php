@@ -46,7 +46,7 @@ if ($shift == 1) {
 $formhtml .= '
 <table width="100%" cellpadding="6" border="1" style="border-collapse:collapse;">
 <tr>
-    <td width="50%"><b>Name of Project:</b> ' . ($data->project_name ?? '') . '</td>
+    <td width="50%"><b>Name of Project:</b>' . get_project_name_by_id($form_data->project_id) . '</td>
     <td width="50%"><b>Work Location:</b> ' . ($lse_data->location ?? '') . '</td>
 </tr>
 <tr>

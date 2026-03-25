@@ -1451,6 +1451,27 @@ class Forms_model extends App_Model
                     $new_order = $data['items'];
                     unset($data['items']);
                 }
+            } elseif ($data['form_type'] == "wah") {
+                $wah_form = [];
+                $wah_form['fn'] = $data['fn'];
+                $wah_form['rev_no'] = $data['rev_no'];
+                $wah_form['date'] = $data['date'];
+                $wah_form['location'] = $data['location'];
+                $wah_form['sub_contractor'] = $data['sub_contractor'];
+                $wah_form['datetime'] = $data['datetime'];
+                $wah_form['shift'] = $data['shift'];
+                unset($data['fn']);
+                unset($data['rev_no']);
+                unset($data['date']);
+                unset($data['location']);
+                unset($data['sub_contractor']);
+                unset($data['datetime']);
+                unset($data['shift']);
+                $new_order = [];
+                if (isset($data['items'])) {
+                    $new_order = $data['items'];
+                    unset($data['items']);
+                }
             }
         }
 
@@ -2103,6 +2124,28 @@ class Forms_model extends App_Model
                     if (!empty($lse_form)) {
                         $lse_form['form_id'] = $formid;
                         $this->db->insert(db_prefix() . $data['form_type'] . '_form', $lse_form);
+                    }
+                }
+                if (isset($new_order)) {
+                    if (!empty($new_order)) {
+                        $sr = 1;
+                        foreach ($new_order as $key => $value) {
+                            $dt_data = [];
+                            $dt_data['form_id'] = $formid;
+                            $dt_data['items'] = $sr;
+                            $dt_data['description'] = $value['status'] ?? null;
+                            $dt_data['remarks'] = $value['remarks'] ?? null;
+
+                            $this->db->insert(db_prefix() . $data['form_type'] . '_form_detail', $dt_data);
+                            $sr++;
+                        }
+                    }
+                }
+            } elseif ($data['form_type'] == "wah") {
+                if (isset($wah_form)) {
+                    if (!empty($wah_form)) {
+                        $wah_form['form_id'] = $formid;
+                        $this->db->insert(db_prefix() . $data['form_type'] . '_form', $wah_form);
                     }
                 }
                 if (isset($new_order)) {
@@ -3034,6 +3077,27 @@ class Forms_model extends App_Model
                 $data['relation']
             );
         } elseif ($formBeforeUpdate->form_type == "lse") {
+            $lse_form = [];
+            $lse_form['fn'] = $data['fn'];
+            $lse_form['rev_no'] = $data['rev_no'];
+            $lse_form['date'] = $data['date'];
+            $lse_form['location'] = $data['location'];
+            $lse_form['sub_contractor'] = $data['sub_contractor'];
+            $lse_form['datetime'] = $data['datetime'];
+            $lse_form['shift'] = $data['shift'];
+            unset($data['fn']);
+            unset($data['rev_no']);
+            unset($data['date']);
+            unset($data['location']);
+            unset($data['sub_contractor']);
+            unset($data['datetime']);
+            unset($data['shift']);
+            $update_order = [];
+            if (isset($data['items'])) {
+                $update_order = $data['items'];
+                unset($data['items']);
+            }
+        } elseif ($formBeforeUpdate->form_type == "wah") {
             $lse_form = [];
             $lse_form['fn'] = $data['fn'];
             $lse_form['rev_no'] = $data['rev_no'];
@@ -4169,6 +4233,35 @@ class Forms_model extends App_Model
                 }
             }
         } elseif ($formBeforeUpdate->form_type == "lse") {
+            if (isset($lse_form)) {
+                if (!empty($lse_form)) {
+                    $this->db->where('form_id', $data['formid']);
+                    $this->db->update(db_prefix() . $formBeforeUpdate->form_type . '_form', $lse_form);
+                    if ($this->db->affected_rows() > 0) {
+                        $affectedRows++;
+                    }
+                }
+            }
+
+            if (isset($update_order)) {
+                if (!empty($update_order)) {
+                    $sr = 1;
+                    foreach ($update_order as $key => $value) {
+                        $dt_data = [];
+                        $dt_data['form_id'] = $data['formid'];
+                        $dt_data['items'] = $sr;
+                        $dt_data['description'] = $value['status'] ?? null;
+                        $dt_data['remarks'] = $value['remarks'] ?? null;
+                        $this->db->where('id', $value['id']);
+                        $this->db->update(db_prefix() . $formBeforeUpdate->form_type . '_form_detail', $dt_data);
+                        if ($this->db->affected_rows() > 0) {
+                            $affectedRows++;
+                        }
+                        $sr++;
+                    }
+                }
+            }
+        } elseif ($formBeforeUpdate->form_type == "wah") {
             if (isset($lse_form)) {
                 if (!empty($lse_form)) {
                     $this->db->where('form_id', $data['formid']);
@@ -6148,5 +6241,15 @@ class Forms_model extends App_Model
     {
         $this->db->where('form_id', $form_id);
         return $this->db->get(db_prefix() . 'lse_form_detail')->result_array();
+    }
+    public function get_wah_form($form_id)
+    {
+        $this->db->where('form_id', $form_id);
+        return $this->db->get(db_prefix() . 'wah_form')->row();
+    }
+    public function get_wah_form_detail($form_id)
+    {
+        $this->db->where('form_id', $form_id);
+        return $this->db->get(db_prefix() . 'wah_form_detail')->result_array();
     }
 }
