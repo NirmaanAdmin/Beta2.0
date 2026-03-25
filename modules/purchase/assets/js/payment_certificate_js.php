@@ -419,16 +419,11 @@
 
 	function payment_certificate_request_approval_status(id, status) {
 		"use strict";
-		var note = $('textarea[name="reason"]').val();
-		if (note.length > 15) {
-			alert_float('warning', 'Note must not exceed 15 characters.');
-			return false;
-		}
 		var data = {};
 		data.rel_id = id;
 		data.rel_type = 'po_payment_certificate';
 		data.approve = status;
-		data.note = note;
+		data.note = $('textarea[name="reason"]').val();
 		$.post(admin_url + 'purchase/payment_certificate_request/' + id, data).done(function(response) {
 			response = JSON.parse(response);
 			if (response.success === true || response.success == 'true') {
