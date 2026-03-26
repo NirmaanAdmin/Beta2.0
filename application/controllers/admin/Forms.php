@@ -874,27 +874,28 @@ class Forms extends AdminController
             $this->load->view('admin/forms/form_design/qcr', $data);
         } else {
             $formConfigs = [
-                'apc' => ['has_attachments' => true],
-                'wpc' => ['has_attachments' => true],
-                'mfa' => ['has_attachments' => false],
-                'mlg' => ['has_attachments' => true],
-                'msh' => ['has_attachments' => true],
-                'sca' => ['has_attachments' => true],
-                'esc' => ['has_attachments' => true],
+                'apc'   => ['has_attachments' => true],
+                'wpc'   => ['has_attachments' => true],
+                'mfa'   => ['has_attachments' => false],
+                'mlg'   => ['has_attachments' => true],
+                'msh'   => ['has_attachments' => true],
+                'sca'   => ['has_attachments' => true],
+                'esc'   => ['has_attachments' => true],
                 'cfwas' => ['has_attachments' => true],
-                'cflc' => ['has_attachments' => true],
-                'facc' => ['has_attachments' => true],
-                'cosc' => ['has_attachments' => true],
-                'qor'  => ['has_attachments' => true],
-                'wpr'  => ['has_attachments' => false],
-                'arf'  => ['has_attachments' => false],
-                'st'  => ['has_attachments' => false],
-                'krp'  => ['has_attachments' => false],
-                'wpf'  => ['has_attachments' => false],
-                'ncr' => ['has_attachments' => true],
-                'sf' => ['has_attachments' => false],
-                'lse' => ['has_attachments' => false],
-                'wah' => ['has_attachments' => false],
+                'cflc'  => ['has_attachments' => true],
+                'facc'  => ['has_attachments' => true],
+                'cosc'  => ['has_attachments' => true],
+                'qor'   => ['has_attachments' => true],
+                'wpr'   => ['has_attachments' => false],
+                'arf'   => ['has_attachments' => false],
+                'st'    => ['has_attachments' => false],
+                'krp'   => ['has_attachments' => false],
+                'wpf'   => ['has_attachments' => false],
+                'ncr'   => ['has_attachments' => true],
+                'sf'    => ['has_attachments' => false],
+                'lse'   => ['has_attachments' => false],
+                'wah'   => ['has_attachments' => false],
+                'hw'    => ['has_attachmenta' => false]
             ];
 
             if (isset($formConfigs[$form_type])) {
@@ -1929,6 +1930,38 @@ class Forms extends AdminController
 
         try {
             $pdf = form_pdf_wah($form);
+        } catch (Exception $e) {
+            $message = $e->getMessage();
+            echo $message;
+            if (strpos($message, 'Unable to get the size of the image') !== false) {
+                show_pdf_unable_to_get_image_size_error();
+            }
+            die;
+        }
+
+        $type = 'I';
+
+        if ($this->input->get('output_type')) {
+            $type = $this->input->get('output_type');
+        }
+
+        if ($this->input->get('print')) {
+            $type = 'D';
+        }
+
+        $pdf->Output(mb_strtoupper(slug_it($form->subject)) . '.pdf', $type);
+    }
+
+    public function pdf_hw($id)
+    {
+        if (!$id) {
+            redirect(admin_url('forms'));
+        }
+
+        $form = $this->forms_model->get_form_by_id($id);
+
+        try {
+            $pdf = form_pdf_hw($form);
         } catch (Exception $e) {
             $message = $e->getMessage();
             echo $message;

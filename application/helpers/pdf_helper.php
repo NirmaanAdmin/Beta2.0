@@ -377,3 +377,8 @@ function form_pdf_wah($form, $tag = '')
 {
     return app_pdf('form', LIBSPATH . 'pdf/Form_pdf_wah', $form, $tag);
 }
+function form_pdf_hw($form, $tag = '')
+{
+    return app_pdf('form', LIBSPATH . 'pdf/Form_pdf_hw', $form, $tag);
+}
+
