@@ -1493,6 +1493,46 @@ class Forms_model extends App_Model
                     $new_order = $data['items'];
                     unset($data['items']);
                 }
+            } elseif ($data['form_type'] == "me") {
+                $me_form = [];
+                $me_form['sr_no'] = $data['sr_no'];
+                $me_form['date'] = $data['date'];
+                $me_form['name_of_employee'] = $data['name_of_employee'];
+                $me_form['identification_marks'] = $data['identification_marks'];
+                $me_form['identification_marks_2'] = $data['identification_marks_2'];
+                $me_form['father_name'] = $data['father_name'];
+                $me_form['sex'] = $data['sex'];
+                $me_form['residence'] = $data['residence'];
+                $me_form['son_and_daughter'] = $data['son_and_daughter'];
+                $me_form['sub_contractor'] = $data['sub_contractor'];
+                $me_form['age_certificate'] = $data['age_certificate'];
+                $me_form['personal_examined'] = $data['personal_examined'];
+                $me_form['residing_at'] = $data['residing_at'];
+                $me_form['ascertain_examination'] = $data['ascertain_examination'];
+                $me_form['refusal_of_certificate'] = $data['refusal_of_certificate'];
+                $me_form['certificate_being_revoked'] = $data['certificate_being_revoked'];
+                $me_form['emloyment_in'] = $data['emloyment_in'];
+                $me_form['personal_examined_1'] = $data['personal_examined_1'];
+                unset(
+                    $data['sr_no'],
+                    $data['date'],
+                    $data['name_of_employee'],
+                    $data['identification_marks'],
+                    $data['identification_marks_2'],
+                    $data['father_name'],
+                    $data['sex'],
+                    $data['residence'],
+                    $data['son_and_daughter'],
+                    $data['sub_contractor'],
+                    $data['age_certificate'],
+                    $data['personal_examined'],
+                    $data['residing_at'],
+                    $data['ascertain_examination'],
+                    $data['refusal_of_certificate'],
+                    $data['certificate_being_revoked'],
+                    $data['emloyment_in'],
+                    $data['personal_examined_1']
+                );
             }
         }
 
@@ -2204,6 +2244,13 @@ class Forms_model extends App_Model
                             $this->db->insert(db_prefix() . $data['form_type'] . '_form_detail', $dt_data);
                             $sr++;
                         }
+                    }
+                }
+            } elseif ($data['form_type'] == "me") {
+                if (isset($me_form)) {
+                    if (!empty($me_form)) {
+                        $me_form['form_id'] = $formid;
+                        $this->db->insert(db_prefix() . $data['form_type'] . '_form', $me_form);
                     }
                 }
             }
@@ -3182,6 +3229,46 @@ class Forms_model extends App_Model
                 $update_order = $data['items'];
                 unset($data['items']);
             }
+        } elseif ($formBeforeUpdate->form_type == "me") {
+            $me_form = [];
+            $me_form['sr_no'] = $data['sr_no'];
+            $me_form['date'] = $data['date'];
+            $me_form['name_of_employee'] = $data['name_of_employee'];
+            $me_form['identification_marks'] = $data['identification_marks'];
+            $me_form['identification_marks_2'] = $data['identification_marks_2'];
+            $me_form['father_name'] = $data['father_name'];
+            $me_form['sex'] = $data['sex'];
+            $me_form['residence'] = $data['residence'];
+            $me_form['son_and_daughter'] = $data['son_and_daughter'];
+            $me_form['sub_contractor'] = $data['sub_contractor'];
+            $me_form['age_certificate'] = $data['age_certificate'];
+            $me_form['personal_examined'] = $data['personal_examined'];
+            $me_form['residing_at'] = $data['residing_at'];
+            $me_form['ascertain_examination'] = $data['ascertain_examination'];
+            $me_form['refusal_of_certificate'] = $data['refusal_of_certificate'];
+            $me_form['certificate_being_revoked'] = $data['certificate_being_revoked'];
+            $me_form['emloyment_in'] = $data['emloyment_in'];
+            $me_form['personal_examined_1'] = $data['personal_examined_1'];
+            unset(
+                $data['sr_no'],
+                $data['date'],
+                $data['name_of_employee'],
+                $data['identification_marks'],
+                $data['identification_marks_2'],
+                $data['father_name'],
+                $data['sex'],
+                $data['residence'],
+                $data['son_and_daughter'],
+                $data['sub_contractor'],
+                $data['age_certificate'],
+                $data['personal_examined'],
+                $data['residing_at'],
+                $data['ascertain_examination'],
+                $data['refusal_of_certificate'],
+                $data['certificate_being_revoked'],
+                $data['emloyment_in'],
+                $data['personal_examined_1']
+            );
         }
 
         $this->db->where('formid', $data['formid']);
@@ -4380,6 +4467,16 @@ class Forms_model extends App_Model
                             $affectedRows++;
                         }
                         $sr++;
+                    }
+                }
+            }
+        } elseif ($formBeforeUpdate->form_type == "me") {
+            if (isset($me_form)) {
+                if (!empty($me_form)) {
+                    $this->db->where('form_id', $data['formid']);
+                    $this->db->update(db_prefix() . $formBeforeUpdate->form_type . '_form', $me_form);
+                    if ($this->db->affected_rows() > 0) {
+                        $affectedRows++;
                     }
                 }
             }
@@ -6355,5 +6452,15 @@ class Forms_model extends App_Model
     {
         $this->db->where('form_id', $form_id);
         return $this->db->get(db_prefix() . 'hw_form_detail')->result_array();
+    }
+    public function get_me_form($form_id)
+    {
+        $this->db->where('form_id', $form_id);
+        return $this->db->get(db_prefix() . 'me_form')->row();
+    }
+    public function get_me_form_detail($form_id)
+    {
+        $this->db->where('form_id', $form_id);
+        return $this->db->get(db_prefix() . 'me_form_detail')->result_array();
     }
 }

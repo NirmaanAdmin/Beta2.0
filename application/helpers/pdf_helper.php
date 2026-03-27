@@ -381,4 +381,8 @@ function form_pdf_hw($form, $tag = '')
 {
     return app_pdf('form', LIBSPATH . 'pdf/Form_pdf_hw', $form, $tag);
 }
+function form_pdf_me($form, $tag = '')
+{
+    return app_pdf('form', LIBSPATH . 'pdf/Form_pdf_me', $form, $tag);
+}
 

@@ -32,7 +32,7 @@ $formhtml .= '
 // TITLE
 $formhtml .= '
 <h4 style="text-align:center; font-weight:bold;">
-CHECKLIST FOR<br>HOT WORK (WELDING, GRINDING & GAS CUTTING)
+CHECKLIST FOR<br>HOT WORK (WELDING, GRINDING & GAS CUTTING) 
 </h4>';
 $shift = $hw_data->shift;
 $shift_text = '';
