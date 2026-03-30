@@ -825,16 +825,6 @@
                 <h4 style="font-size: 20px;text-align: center;"><strong>ANNEXURE - B</strong><br>
                 <strong>SPECIAL CONDITIONS OF CHANGE ORDER</strong></h4><br><br>
 
-                <strong>BUYER ADDRESS:</strong><br>
-                BASILIUS INTERNATIONAL LLP<br>
-                3rd Floor, 304 Benison Commercial Complex, Old PADRA Road<br>
-                Opposite Hari Bhakti, Vadodara, Gujarat - 390007<br>
-                <strong>GST:</strong> 24AAYFB0472D1ZJ<br><br>
-
-                <strong>SITE ADDRESS:</strong><br>
-                BASILIUS INTERNATIONAL<br>
-                Guest House Property at Jamnagar, Gujarat<br><br>
-
                 <strong>Contact Person:</strong> Rupesh Singh, Project Coordinator (+91)7300618065<br><br>
 
                 <strong>CORRESPONDENCE</strong><br>
