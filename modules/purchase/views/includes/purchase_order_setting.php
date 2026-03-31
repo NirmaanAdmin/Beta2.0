@@ -51,6 +51,8 @@
   <?php echo render_textarea('billing_company_address','billing_company_address',get_option('billing_company_address', true), ['rows' => 7]); ?>
 
   <?php echo render_input('billing_company_zipcode','billing_company_zipcode',get_option('billing_company_zipcode', true),'text'); ?>
+
+  <?php echo render_input('billing_company_vat','billing_company_vat',get_option('billing_company_vat', true),'text'); ?>
 </div>
 
 <div class="col-md-6">
@@ -86,6 +88,8 @@
   <?php echo render_textarea('pur_company_address','pur_company_address',get_option('pur_company_address', true), ['rows' => 7]); ?>
 
   <?php echo render_input('pur_company_zipcode','pur_company_zipcode',get_option('pur_company_zipcode', true),'text'); ?>
+
+  <?php echo render_input('pur_company_vat','pur_company_vat',get_option('pur_company_vat', true),'text'); ?>
 </div>
 
 <div class="col-md-6">

@@ -4936,199 +4936,41 @@ class Purchase_model extends App_Model
             $rs++;
         }
 
-        $this->db->where('name', 'billing_company_address');
-        $this->db->where('project', $default_project);
-        $this->db->update(db_prefix() . 'options', [
-            'value' => $data['billing_company_address'],
-        ]);
-        if ($this->db->affected_rows() > 0) {
-            $rs++;
-        } else {
-            $this->db->insert(db_prefix() . 'options', [
-                'name' => 'billing_company_address',
-                'value' => $data['billing_company_address'],
-                'project' => $default_project,
-            ]);
-            $rs++;
-        }
-
-        $this->db->where('name', 'billing_company_city');
-        $this->db->where('project', $default_project);
-        $this->db->update(db_prefix() . 'options', [
-            'value' => $data['billing_company_city'],
-        ]);
-        if ($this->db->affected_rows() > 0) {
-            $rs++;
-        } else {
-            $this->db->insert(db_prefix() . 'options', [
-                'name' => 'billing_company_city',
-                'value' => $data['billing_company_city'],
-                'project' => $default_project,
-            ]);
-            $rs++;
-        }
-
-        $this->db->where('name', 'billing_company_state');
-        $this->db->where('project', $default_project);
-        $this->db->update(db_prefix() . 'options', [
-            'value' => $data['billing_company_state'],
-        ]);
-        if ($this->db->affected_rows() > 0) {
-            $rs++;
-        } else {
-            $this->db->insert(db_prefix() . 'options', [
-                'name' => 'billing_company_state',
-                'value' => $data['billing_company_state'],
-                'project' => $default_project,
-            ]);
+        $options = [
+            'billing_company_address'       => $data['billing_company_address'],
+            'billing_company_city'          => $data['billing_company_city'],
+            'billing_company_state'         => $data['billing_company_state'],
+            'billing_company_zipcode'       => $data['billing_company_zipcode'],
+            'billing_company_country_text'  => $data['billing_company_country_text'],
+            'billing_company_country_code'  => $data['billing_company_country_code'],
+            'billing_company_vat'           => $data['billing_company_vat'],
+            'pur_company_address'           => $data['pur_company_address'],
+            'pur_company_city'              => $data['pur_company_city'],
+            'pur_company_state'             => $data['pur_company_state'],
+            'pur_company_zipcode'           => $data['pur_company_zipcode'],
+            'pur_company_country_text'      => $data['pur_company_country_text'],
+            'pur_company_country_code'      => $data['pur_company_country_code'],
+            'pur_company_vat'               => $data['pur_company_vat'],
+        ];
+        foreach ($options as $name => $value) {
+            $this->db->where('name', $name);
+            $this->db->where('project', $default_project);
+            $exists = $this->db->get(db_prefix() . 'options')->row();
+            if ($exists) {
+                $this->db->where('name', $name);
+                $this->db->where('project', $default_project);
+                $this->db->update(db_prefix() . 'options', [
+                    'value' => $value,
+                ]);
+            } else {
+                $this->db->insert(db_prefix() . 'options', [
+                    'name'    => $name,
+                    'value'   => $value,
+                    'project' => $default_project,
+                ]);
+            }
             $rs++;
         }
-
-        $this->db->where('name', 'billing_company_zipcode');
-        $this->db->where('project', $default_project);
-        $this->db->update(db_prefix() . 'options', [
-            'value' => $data['billing_company_zipcode'],
-        ]);
-        if ($this->db->affected_rows() > 0) {
-            $rs++;
-        } else {
-            $this->db->insert(db_prefix() . 'options', [
-                'name' => 'billing_company_zipcode',
-                'value' => $data['billing_company_zipcode'],
-                'project' => $default_project,
-            ]);
-            $rs++;
-        }
-
-        $this->db->where('name', 'billing_company_country_text');
-        $this->db->where('project', $default_project);
-        $this->db->update(db_prefix() . 'options', [
-            'value' => $data['billing_company_country_text'],
-        ]);
-        if ($this->db->affected_rows() > 0) {
-            $rs++;
-        } else {
-            $this->db->insert(db_prefix() . 'options', [
-                'name' => 'billing_company_country_text',
-                'value' => $data['billing_company_country_text'],
-                'project' => $default_project,
-            ]);
-            $rs++;
-        }
-
-        $this->db->where('name', 'billing_company_country_code');
-        $this->db->where('project', $default_project);
-        $this->db->update(db_prefix() . 'options', [
-            'value' => $data['billing_company_country_code'],
-        ]);
-        if ($this->db->affected_rows() > 0) {
-            $rs++;
-        } else {
-            $this->db->insert(db_prefix() . 'options', [
-                'name' => 'billing_company_country_code',
-                'value' => $data['billing_company_country_code'],
-                'project' => $default_project,
-            ]);
-            $rs++;
-        }
-
-        $this->db->where('name', 'pur_company_address');
-        $this->db->where('project', $default_project);
-        $this->db->update(db_prefix() . 'options', [
-            'value' => $data['pur_company_address'],
-        ]);
-        if ($this->db->affected_rows() > 0) {
-            $rs++;
-        } else {
-            $this->db->insert(db_prefix() . 'options', [
-                'name' => 'pur_company_address',
-                'value' => $data['pur_company_address'],
-                'project' => $default_project,
-            ]);
-            $rs++;
-        }
-
-
-        $this->db->where('name', 'pur_company_city');
-        $this->db->where('project', $default_project);
-        $this->db->update(db_prefix() . 'options', [
-            'value' => $data['pur_company_city'],
-        ]);
-        if ($this->db->affected_rows() > 0) {
-            $rs++;
-        } else {
-            $this->db->insert(db_prefix() . 'options', [
-                'name' => 'pur_company_city',
-                'value' => $data['pur_company_city'],
-                'project' => $default_project,
-            ]);
-            $rs++;
-        }
-
-        $this->db->where('name', 'pur_company_state');
-        $this->db->where('project', $default_project);
-        $this->db->update(db_prefix() . 'options', [
-            'value' => $data['pur_company_state'],
-        ]);
-        if ($this->db->affected_rows() > 0) {
-            $rs++;
-        } else {
-            $this->db->insert(db_prefix() . 'options', [
-                'name' => 'pur_company_state',
-                'value' => $data['pur_company_state'],
-                'project' => $default_project,
-            ]);
-            $rs++;
-        }
-
-        $this->db->where('name', 'pur_company_zipcode');
-        $this->db->where('project', $default_project);
-        $this->db->update(db_prefix() . 'options', [
-            'value' => $data['pur_company_zipcode'],
-        ]);
-        if ($this->db->affected_rows() > 0) {
-            $rs++;
-        } else {
-            $this->db->insert(db_prefix() . 'options', [
-                'name' => 'pur_company_zipcode',
-                'value' => $data['pur_company_zipcode'],
-                'project' => $default_project,
-            ]);
-            $rs++;
-        }
-
-        $this->db->where('name', 'pur_company_country_text');
-        $this->db->where('project', $default_project);
-        $this->db->update(db_prefix() . 'options', [
-            'value' => $data['pur_company_country_text'],
-        ]);
-        if ($this->db->affected_rows() > 0) {
-            $rs++;
-        } else {
-            $this->db->insert(db_prefix() . 'options', [
-                'name' => 'pur_company_country_text',
-                'value' => $data['pur_company_country_text'],
-                'project' => $default_project,
-            ]);
-            $rs++;
-        }
-
-        $this->db->where('name', 'pur_company_country_code');
-        $this->db->where('project', $default_project);
-        $this->db->update(db_prefix() . 'options', [
-            'value' => $data['pur_company_country_code'],
-        ]);
-        if ($this->db->affected_rows() > 0) {
-            $rs++;
-        } else {
-            $this->db->insert(db_prefix() . 'options', [
-                'name' => 'pur_company_country_code',
-                'value' => $data['pur_company_country_code'],
-                'project' => $default_project,
-            ]);
-            $rs++;
-        }
-
 
         $this->db->where('rel_id', 0);
         $this->db->where('rel_type', 'po_logo');

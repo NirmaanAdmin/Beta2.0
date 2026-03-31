@@ -508,7 +508,7 @@ if (!function_exists('format_organization_info')) {
     function format_organization_info()
     {
         $format = get_option('company_info_format');
-        $vat    = get_option('company_vat');
+        $vat    = get_option('billing_company_vat', true);
         $pan    = get_option('company_pan');
 
         $format = _info_format_replace('company_name', '<b style="color:black" class="company-name-formatted">' . get_option('invoice_company_name') . '</b>', $format);
@@ -530,7 +530,7 @@ if (!function_exists('format_organization_info')) {
         $shipping_format = '';
         if(get_option('pur_company_address', true)) {
             $shipping_format = get_option('company_info_format');
-            $vat    = get_option('company_vat');
+            $vat    = get_option('pur_company_vat', true);
             $pan    = get_option('company_pan');
 
             $shipping_format = _info_format_replace('company_name', '', $shipping_format);
