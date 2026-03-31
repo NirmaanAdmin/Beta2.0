@@ -1533,6 +1533,76 @@ class Forms_model extends App_Model
                     $data['emloyment_in'],
                     $data['personal_examined_1']
                 );
+            } elseif ($data['form_type'] == "vtf") {
+                $vtf_form = [];
+                $vtf_form['date'] = $data['date'];
+                $vtf_form['name_of_employee'] = $data['name_of_employee'];
+                $vtf_form['son_of'] = $data['son_of'];
+                $vtf_form['working_under'] = $data['working_under'];
+                $vtf_form['area'] = $data['area'];
+                $vtf_form['department_vtf'] = $data['department_vtf'];
+                $vtf_form['weight'] = $data['weight'];
+                $vtf_form['height'] = $data['height'];
+                $vtf_form['vision'] = $data['vision'];
+                $vtf_form['color_vision'] = $data['color_vision'];
+                $vtf_form['pulse'] = $data['pulse'];
+                $vtf_form['bp'] = $data['bp'];
+                $vtf_form['blood_group'] = $data['blood_group'];
+                $vtf_form['vertigo_fits'] = $data['vertigo_fits'];
+                $vtf_form['gait'] = $data['gait'];
+                $vtf_form['giddiness'] = $data['giddiness'];
+                $vtf_form['other_height_related_disease'] = $data['other_height_related_disease'];
+                $vtf_form['hearing'] = $data['hearing'];
+                $vtf_form['blood_p_be'] = $data['blood_p_be'];
+                $vtf_form['blood_p_af'] = $data['blood_p_af'];
+                $vtf_form['blood_p_dev'] = $data['blood_p_dev'];
+                $vtf_form['pulse_before_test'] = $data['pulse_before_test'];
+                $vtf_form['pulse_after_test'] = $data['pulse_after_test'];
+                $vtf_form['pulse_deviation_observed'] = $data['pulse_deviation_observed'];
+                $vtf_form['no'] = $data['no'];
+                $vtf_form['date_pass'] = $data['date_pass'];
+                $vtf_form['name'] = $data['name'];
+                $vtf_form['age'] = $data['age'];
+                $vtf_form['father_name'] = $data['father_name'];
+                $vtf_form['designation'] = $data['designation'];
+                $vtf_form['mobile_no'] = $data['mobile_no'];
+                $vtf_form['valid_from'] = $data['valid_from'];
+                $vtf_form['valid_to'] = $data['valid_to'];
+                unset(
+                    $data['date'],
+                    $data['name_of_employee'],
+                    $data['son_of'],
+                    $data['working_under'],
+                    $data['area'],
+                    $data['department_vtf'],
+                    $data['weight'],
+                    $data['height'],
+                    $data['vision'],
+                    $data['color_vision'],
+                    $data['pulse'],
+                    $data['bp'],
+                    $data['blood_group'],
+                    $data['vertigo_fits'],
+                    $data['gait'],
+                    $data['giddiness'],
+                    $data['other_height_related_disease'],
+                    $data['hearing'],
+                    $data['blood_p_be'],
+                    $data['blood_p_af'],
+                    $data['blood_p_dev'],
+                    $data['pulse_before_test'],
+                    $data['pulse_after_test'],
+                    $data['pulse_deviation_observed'],
+                    $data['no'],
+                    $data['date_pass'],
+                    $data['name'],
+                    $data['age'],
+                    $data['father_name'],
+                    $data['designation'],
+                    $data['mobile_no'],
+                    $data['valid_from'],
+                    $data['valid_to'],
+                );
             }
         }
 
@@ -2251,6 +2321,13 @@ class Forms_model extends App_Model
                     if (!empty($me_form)) {
                         $me_form['form_id'] = $formid;
                         $this->db->insert(db_prefix() . $data['form_type'] . '_form', $me_form);
+                    }
+                }
+            } elseif ($data['form_type'] == "vtf") {
+                if (isset($vtf_form)) {
+                    if (!empty($vtf_form)) {
+                        $vtf_form['form_id'] = $formid;
+                        $this->db->insert(db_prefix() . $data['form_type'] . '_form', $vtf_form);
                     }
                 }
             }
@@ -3268,6 +3345,76 @@ class Forms_model extends App_Model
                 $data['certificate_being_revoked'],
                 $data['emloyment_in'],
                 $data['personal_examined_1']
+            );
+        } elseif ($formBeforeUpdate->form_type == "vtf") {
+            $vtf_form = [];
+            $vtf_form['date'] = $data['date'];
+            $vtf_form['name_of_employee'] = $data['name_of_employee'];
+            $vtf_form['son_of'] = $data['son_of'];
+            $vtf_form['working_under'] = $data['working_under'];
+            $vtf_form['area'] = $data['area'];
+            $vtf_form['department_vtf'] = $data['department_vtf'];
+            $vtf_form['weight'] = $data['weight'];
+            $vtf_form['height'] = $data['height'];
+            $vtf_form['vision'] = $data['vision'];
+            $vtf_form['color_vision'] = $data['color_vision'];
+            $vtf_form['pulse'] = $data['pulse'];
+            $vtf_form['bp'] = $data['bp'];
+            $vtf_form['blood_group'] = $data['blood_group'];
+            $vtf_form['vertigo_fits'] = $data['vertigo_fits'];
+            $vtf_form['gait'] = $data['gait'];
+            $vtf_form['giddiness'] = $data['giddiness'];
+            $vtf_form['other_height_related_disease'] = $data['other_height_related_disease'];
+            $vtf_form['hearing'] = $data['hearing'];
+            $vtf_form['blood_p_be'] = $data['blood_p_be'];
+            $vtf_form['blood_p_af'] = $data['blood_p_af'];
+            $vtf_form['blood_p_dev'] = $data['blood_p_dev'];
+            $vtf_form['pulse_before_test'] = $data['pulse_before_test'];
+            $vtf_form['pulse_after_test'] = $data['pulse_after_test'];
+            $vtf_form['pulse_deviation_observed'] = $data['pulse_deviation_observed'];
+            $vtf_form['no'] = $data['no'];
+            $vtf_form['date_pass'] = $data['date_pass'];
+            $vtf_form['name'] = $data['name'];
+            $vtf_form['age'] = $data['age'];
+            $vtf_form['father_name'] = $data['father_name'];
+            $vtf_form['designation'] = $data['designation'];
+            $vtf_form['mobile_no'] = $data['mobile_no'];
+            $vtf_form['valid_from'] = $data['valid_from'];
+            $vtf_form['valid_to'] = $data['valid_to'];
+            unset(
+                $data['date'],
+                $data['name_of_employee'],
+                $data['son_of'],
+                $data['working_under'],
+                $data['area'],
+                $data['department_vtf'],
+                $data['weight'],
+                $data['height'],
+                $data['vision'],
+                $data['color_vision'],
+                $data['pulse'],
+                $data['bp'],
+                $data['blood_group'],
+                $data['vertigo_fits'],
+                $data['gait'],
+                $data['giddiness'],
+                $data['other_height_related_disease'],
+                $data['hearing'],
+                $data['blood_p_be'],
+                $data['blood_p_af'],
+                $data['blood_p_dev'],
+                $data['pulse_before_test'],
+                $data['pulse_after_test'],
+                $data['pulse_deviation_observed'],
+                $data['no'],
+                $data['date_pass'],
+                $data['name'],
+                $data['age'],
+                $data['father_name'],
+                $data['designation'],
+                $data['mobile_no'],
+                $data['valid_from'],
+                $data['valid_to'],
             );
         }
 
@@ -4475,6 +4622,16 @@ class Forms_model extends App_Model
                 if (!empty($me_form)) {
                     $this->db->where('form_id', $data['formid']);
                     $this->db->update(db_prefix() . $formBeforeUpdate->form_type . '_form', $me_form);
+                    if ($this->db->affected_rows() > 0) {
+                        $affectedRows++;
+                    }
+                }
+            }
+        } elseif ($formBeforeUpdate->form_type == "vtf") {
+            if (isset($vtf_form)) {
+                if (!empty($vtf_form)) {
+                    $this->db->where('form_id', $data['formid']);
+                    $this->db->update(db_prefix() . $formBeforeUpdate->form_type . '_form', $vtf_form);
                     if ($this->db->affected_rows() > 0) {
                         $affectedRows++;
                     }
@@ -6462,5 +6619,15 @@ class Forms_model extends App_Model
     {
         $this->db->where('form_id', $form_id);
         return $this->db->get(db_prefix() . 'me_form_detail')->result_array();
+    }
+    public function get_vtf_form($form_id)
+    {
+        $this->db->where('form_id', $form_id);
+        return $this->db->get(db_prefix() . 'vtf_form')->row();
+    }
+    public function get_vtf_form_detail($form_id)
+    {
+        $this->db->where('form_id', $form_id);
+        return $this->db->get(db_prefix() . 'vtf_form_detail')->result_array();
     }
 }

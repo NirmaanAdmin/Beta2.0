@@ -43,7 +43,7 @@ $formhtml .= '</tr>';
 
 // DEPARTMENT
 $formhtml .= '<tr>';
-$formhtml .= '<td colspan="6"><b>Department:</b> EHS (Environment, Health & Safety)</td>';
+$formhtml .= '<td colspan="6"><b>Department:</b>'. get_department_name_by_id($ncr_data->department_ncr) .'</td>';
 $formhtml .= '</tr>';
 
 // ACTIVITY + SYSTEM REF + DATE
