@@ -5985,7 +5985,10 @@ class Forms_model extends App_Model
         $this->db->select('fc.id AS category_id, fc.name AS category_name, fo.form_id, fo.name AS form_name');
         $this->db->from('tblform_categories fc');
         $this->db->join('tblform_options fo', 'fc.id = fo.category_id', 'left');
-        $this->db->order_by('fc.sort_order, fo.sort_order'); // Add sort_order fields if needed
+
+        // Alphabetical order
+        $this->db->order_by('fc.name', 'ASC');
+        $this->db->order_by('fo.name', 'ASC');
 
         $query = $this->db->get();
         $result = array();
@@ -6001,10 +6004,13 @@ class Forms_model extends App_Model
                 );
             }
 
-            $result[$category_id]['options'][] = array(
-                'id' => $row['form_id'],
-                'name' => $row['form_name']
-            );
+            // Avoid pushing null options (important for LEFT JOIN)
+            if (!empty($row['form_id'])) {
+                $result[$category_id]['options'][] = array(
+                    'id' => $row['form_id'],
+                    'name' => $row['form_name']
+                );
+            }
         }
 
         return array_values($result);
