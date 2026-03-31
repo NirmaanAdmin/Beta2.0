@@ -18051,7 +18051,7 @@ class Purchase_model extends App_Model
                 $expenses_input['vendor'] = $pur_invoices->vendor;
                 $expenses_input['amount'] = $pur_invoices->final_certified_amount;
                 if (isset($expense_category)) {
-                    $expenses_input['category'] = $expense_category;
+                    // $expenses_input['category'] = $expense_category;
                 }
                 $this->db->where('id', $expenses->id);
                 $this->db->update('tblexpenses', $expenses_input);
