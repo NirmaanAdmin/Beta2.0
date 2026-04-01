@@ -687,8 +687,7 @@
 
                 <strong>Price Escalation:</strong> The agreed amount shall remain fixed for this project. No escalation shall be paid in contract duration and for this project for any reason whatsoever. Price shall be valid for 6 Months from the date of Sign of CO.<br><br>
 
-                <strong>Destination:</strong> M/s BASILIUS INTERNATIONAL<br>
-                3rd Floor, 304, Benison Commercial Complex, Old Padra Road, Opposite Hari Bhakti, Vadodara, Gujarat – 390007<br><br>
+                <strong>Destination:</strong> M/s BASILIUS INTERNATIONAL<br><br>
 
                 <strong>Delivery Schedule:</strong> Within 65 to 70 days from the date of receipt of confirm order.<br><br>
 
@@ -761,13 +760,17 @@
                 <strong>Contact Person:</strong> Rupesh Singh, Project Coordinator (+91)7300618065<br><br>
 
                 <strong>CORRESPONDENCE</strong><br>
-                Acknowledgment of this Change Order, invoices, and commercial correspondence shall be sent by courier to the above address, attention Rupesh, with a scanned copy sent by mail to <strong>bgj.project@basilius.in</strong>.<br>
-                All telephone communications and email correspondence for coordination purposes shall be addressed to our Project Head, M/s Basilius International (<strong>bgj.project@basilius.in</strong>), +91 7300618065.<br>
-                All documents should be sent to the following correspondence address:<br><br>
+                Acknowledgment of this Change Order, invoices, and commercial correspondence shall be sent by courier to the above address, attention Rupesh, with a scanned copy sent by mail to <strong>' . ($default_project == 8 ? 'abh.project@basilius.in' : 'bgj.project@basilius.in') . '</strong>.<br>
+                All telephone communications and email correspondence for coordination purposes shall be addressed to our Project Head, M/s Basilius International (<strong>' . ($default_project == 8 ? 'abh.project@basilius.in' : 'bgj.project@basilius.in') . '</strong>).<br>
+                ' . ($default_project != 8 
+                  ?
+                    'All documents should be sent to the following correspondence address:<br><br>
 
-                Mr. Rupesh Singh: Project Coordinator: +91 7300618065<br>
-                Address: BASILIUS INTERNATIONAL LLP<br>
-                Guest House Property at Jamnagar, Gujarat<br><br>
+                    Mr. Rupesh Singh: Project Coordinator: +91 7300618065<br>
+                    Address: BASILIUS INTERNATIONAL LLP<br>
+                    Guest House Property at Jamnagar, Gujarat<br><br>'
+                  : '<br>'
+                ) . '
 
                 <strong>WARRANTY:</strong> 18 months from date of Installation.<br><br>
 
