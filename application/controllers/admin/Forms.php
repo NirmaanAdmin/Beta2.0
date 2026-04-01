@@ -898,6 +898,7 @@ class Forms extends AdminController
                 'hw'    => ['has_attachmenta' => false],
                 'me'    => ['has_attachments' => false],
                 'vtf'   => ['has_attachments' => false],
+                'rccb'  => ['has_attachments' => false]
             ];
 
             if (isset($formConfigs[$form_type])) {
@@ -1001,6 +1002,30 @@ class Forms extends AdminController
                     }
                 }
                 $data['wpf_form'] = $wpf_form;
+            } elseif ($form_type == 'rccb') {
+                $rccb_row_template = $this->forms_model->create_rccb_row_template();
+
+                $rccb_form = $this->forms_model->get_rccb_form($form_id);
+                $rccb_form_detail = $this->forms_model->get_rccb_form_detail($form_id);
+                if (!empty($rccb_form_detail)) {
+                    $index_order = 0;
+                    foreach ($rccb_form_detail as $value) {
+                        $index_order++;
+                        $rccb_row_template .= $this->forms_model->create_rccb_row_template(
+                            'items[' . $index_order . ']',
+                            $value['location'],
+                            $value['rccb'],
+                            $value['connected'],
+                            $value['date_of_testing'],
+                            $value['sensitivity_of_rccb'],
+                            $value['test_remarks'],
+                            $value['electrical'],
+                            true,
+                            $value['id']
+                        );
+                    }
+                }
+                $data['rccb_form'] = $rccb_form;
             }
         } else {
             if ($form_type == 'wpr') {
@@ -1009,6 +1034,8 @@ class Forms extends AdminController
                 $st_row_template = $this->forms_model->create_st_row_template();
             } elseif ($form_type == 'wpf') {
                 $wpf_row_template = $this->forms_model->create_wpf_row_template();
+            } elseif ($form_type == 'rccb') {
+                $rccb_row_template = $this->forms_model->create_rccb_row_template();
             }
         }
         $data['form_items'] = $form_items;
@@ -1016,6 +1043,7 @@ class Forms extends AdminController
         $data['wpr_row_template'] = $wpr_row_template;
         $data['st_row_template'] = $st_row_template;
         $data['wpf_row_template'] = $wpf_row_template;
+        $data['rccb_row_template'] = $rccb_row_template;
         $this->load->model('departments_model');
         $data['departments'] = $this->departments_model->get();
         $data['area_list'] = $this->forms_model->get_area();
@@ -2027,6 +2055,51 @@ class Forms extends AdminController
 
         try {
             $pdf = form_pdf_vtf($form);
+        } catch (Exception $e) {
+            $message = $e->getMessage();
+            echo $message;
+            if (strpos($message, 'Unable to get the size of the image') !== false) {
+                show_pdf_unable_to_get_image_size_error();
+            }
+            die;
+        }
+
+        $type = 'I';
+
+        if ($this->input->get('output_type')) {
+            $type = $this->input->get('output_type');
+        }
+
+        if ($this->input->get('print')) {
+            $type = 'D';
+        }
+
+        $pdf->Output(mb_strtoupper(slug_it($form->subject)) . '.pdf', $type);
+    }
+    public function get_rccb_row_template()
+    {
+        $name = $this->input->post('name');
+        $location = $this->input->post('location');
+        $rccb = $this->input->post('rccb');
+        $connected = $this->input->post('connected');
+        $date_of_testing = $this->input->post('date_of_testing');
+        $sensitivity_of_rccb = $this->input->post('sensitivity_of_rccb');
+        $test_remarks = $this->input->post('test_remarks');
+        $electrical = $this->input->post('electrical');
+        $item_key = $this->input->post('item_key');
+
+        echo $this->forms_model->create_rccb_row_template($name, $location, $rccb, $connected, $date_of_testing, $sensitivity_of_rccb, $test_remarks, $electrical, false, $item_key);
+    }
+    public function pdf_rccb($id)
+    {
+        if (!$id) {
+            redirect(admin_url('forms'));
+        }
+
+        $form = $this->forms_model->get_form_by_id($id);
+
+        try {
+            $pdf = form_pdf_rccb($form);
         } catch (Exception $e) {
             $message = $e->getMessage();
             echo $message;

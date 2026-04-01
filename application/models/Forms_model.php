@@ -1603,6 +1603,27 @@ class Forms_model extends App_Model
                     $data['valid_from'],
                     $data['valid_to'],
                 );
+            } elseif ($data['form_type'] == "rccb") {
+                $rccb_form = [];
+                $rccb_form['name_of_contractor'] = $data['name_of_contractor'];
+                $rccb_form['date'] = $data['date'];
+                unset(
+                    $data['location'],
+                    $data['rccb'],
+                    $data['isedit'],
+                    $data['connected'],
+                    $data['date_of_testing'],
+                    $data['sensitivity_of_rccb'],
+                    $data['test_remarks'],
+                    $data['electrical'],
+                    $data['name_of_contractor'],
+                    $data['date'],
+                );
+                $new_order = [];
+                if (isset($data['newitems'])) {
+                    $new_order = $data['newitems'];
+                    unset($data['newitems']);
+                }
             }
         }
 
@@ -2328,6 +2349,30 @@ class Forms_model extends App_Model
                     if (!empty($vtf_form)) {
                         $vtf_form['form_id'] = $formid;
                         $this->db->insert(db_prefix() . $data['form_type'] . '_form', $vtf_form);
+                    }
+                }
+            } elseif ($data['form_type'] == "rccb") {
+                if (isset($rccb_form)) {
+                    if (!empty($rccb_form)) {
+                        $rccb_form['form_id'] = $formid;
+                        $this->db->insert(db_prefix() . $data['form_type'] . '_form', $rccb_form);
+                    }
+                }
+                if (isset($new_order)) {
+                    if (!empty($new_order)) {
+                        foreach ($new_order as $key => $value) {
+                            $dt_data = [];
+                            $dt_data['form_id'] = $formid;
+                            $dt_data['location'] = $value['location'];
+                            $dt_data['rccb'] = $value['rccb'];
+                            $dt_data['connected'] = $value['connected'];
+                            $dt_data['date_of_testing'] = $value['date_of_testing'];
+                            $dt_data['sensitivity_of_rccb'] = $value['sensitivity_of_rccb'];
+                            $dt_data['test_remarks'] = $value['test_remarks'];
+                            $dt_data['electrical'] = $value['electrical'];
+                            $this->db->insert(db_prefix() . $data['form_type'] . '_form_detail', $dt_data);
+                            $qcr_detail_id = $this->db->insert_id();
+                        }
                     }
                 }
             }
@@ -3416,6 +3461,39 @@ class Forms_model extends App_Model
                 $data['valid_from'],
                 $data['valid_to'],
             );
+        } elseif ($formBeforeUpdate->form_type == "rccb") {
+            $rccb_form = [];
+            $rccb_form['name_of_contractor'] = $data['name_of_contractor'];
+            $rccb_form['date'] = $data['date'];
+            unset(
+                $data['location'],
+                $data['rccb'],
+                $data['isedit'],
+                $data['connected'],
+                $data['date_of_testing'],
+                $data['sensitivity_of_rccb'],
+                $data['test_remarks'],
+                $data['electrical'],
+                $data['name_of_contractor'],
+                $data['date'],
+            );
+            $new_order = [];
+            if (isset($data['newitems'])) {
+                $new_order = $data['newitems'];
+                unset($data['newitems']);
+            }
+
+            $update_order = [];
+            if (isset($data['items'])) {
+                $update_order = $data['items'];
+                unset($data['items']);
+            }
+
+            $remove_order = [];
+            if (isset($data['removed_items'])) {
+                $remove_order = $data['removed_items'];
+                unset($data['removed_items']);
+            }
         }
 
         $this->db->where('formid', $data['formid']);
@@ -4634,6 +4712,69 @@ class Forms_model extends App_Model
                     $this->db->update(db_prefix() . $formBeforeUpdate->form_type . '_form', $vtf_form);
                     if ($this->db->affected_rows() > 0) {
                         $affectedRows++;
+                    }
+                }
+            }
+        } elseif ($formBeforeUpdate->form_type == "rccb") {
+            if (isset($rccb_form)) {
+                if (!empty($rccb_form)) {
+                    $this->db->where('form_id', $data['formid']);
+                    $this->db->update(db_prefix() . $formBeforeUpdate->form_type . '_form', $rccb_form);
+                    if ($this->db->affected_rows() > 0) {
+                        $affectedRows++;
+                    }
+                }
+            }
+
+            if (isset($new_order)) {
+                if (!empty($new_order)) {
+                    foreach ($new_order as $key => $value) {
+                        $dt_data = [];
+                        $dt_data['form_id'] = $data['formid'];
+                        $dt_data['location'] = $value['location'];
+                        $dt_data['rccb'] = $value['rccb'];
+                        $dt_data['connected'] = $value['connected'];
+                        $dt_data['date_of_testing'] = $value['date_of_testing'];
+                        $dt_data['sensitivity_of_rccb'] = $value['sensitivity_of_rccb'];
+                        $dt_data['test_remarks'] = $value['test_remarks'];
+                        $dt_data['electrical'] = $value['electrical'];
+                        $this->db->insert(db_prefix() . $formBeforeUpdate->form_type . '_form_detail', $dt_data);
+                        $new_insert_id = $this->db->insert_id();
+                        if ($new_insert_id) {
+                            $affectedRows++;
+                        }
+                    }
+                }
+            }
+
+            if (isset($update_order)) {
+                if (!empty($update_order)) {
+                    foreach ($update_order as $key => $value) {
+                        $dt_data = [];
+                        $dt_data['form_id'] = $data['formid'];
+                        $dt_data['location'] = $value['location'];
+                        $dt_data['rccb'] = $value['rccb'];
+                        $dt_data['connected'] = $value['connected'];
+                        $dt_data['date_of_testing'] = $value['date_of_testing'];
+                        $dt_data['sensitivity_of_rccb'] = $value['sensitivity_of_rccb'];
+                        $dt_data['test_remarks'] = $value['test_remarks'];
+                        $dt_data['electrical'] = $value['electrical'];
+                        $this->db->where('id', $value['id']);
+                        $this->db->update(db_prefix() . $formBeforeUpdate->form_type . '_form_detail', $dt_data);
+                        if ($this->db->affected_rows() > 0) {
+                            $affectedRows++;
+                        }
+                    }
+                }
+            }
+
+            if (isset($remove_order)) {
+                if (!empty($remove_order)) {
+                    foreach ($remove_order as $key => $value) {
+                        $this->db->where('id', $value);
+                        if ($this->db->delete(db_prefix() . $formBeforeUpdate->form_type . '_form_detail')) {
+                            $affectedRows++;
+                        }
                     }
                 }
             }
@@ -6635,5 +6776,60 @@ class Forms_model extends App_Model
     {
         $this->db->where('form_id', $form_id);
         return $this->db->get(db_prefix() . 'vtf_form_detail')->result_array();
+    }
+
+    public function create_rccb_row_template($name = '', $location = '', $rccb = '', $connected = '', $date_of_testing = '', $sensitivity_of_rccb = '', $test_remarks = '', $electrical = '', $is_edit = false, $item_key = '', $value = [])
+    {
+        $row = '';
+        $name_location = 'location';
+        $name_rccb = 'rccb';
+        $name_connected = 'connected';
+        $name_date_of_testing = 'date_of_testing';
+        $name_sensitivity_of_rccb = 'sensitivity_of_rccb';
+        $name_test_remarks = 'test_remarks';
+        $name_electrical = 'electrical';
+
+        if ($name == '') {
+            $row .= '<tr class="main">';
+            $manual = true;
+        } else {
+            $manual = false;
+            $row .= '<tr><input type="hidden" class="ids" name="' . $name . '[id]" value="' . $item_key . '">';
+            $name_location = $name . '[location]';
+            $name_rccb = $name . '[rccb]';
+            $name_connected = $name . '[connected]';
+            $name_date_of_testing = $name . '[date_of_testing]';
+            $name_sensitivity_of_rccb = $name . '[sensitivity_of_rccb]';
+            $name_test_remarks = $name . '[test_remarks]';
+            $name_electrical = $name . '[electrical]';
+        }
+
+
+        $row .= '<td colspan="1" class="location">' . render_input($name_location, '', $location) . '</td>';
+        $row .= '<td colspan="1" class="rccb">' . render_input($name_rccb, '', $rccb) . '</td>';
+        $row .= '<td colspan="1" class="connected">' . render_input($name_connected, '', $connected) . '</td>';
+        $row .= '<td colspan="1" class="date_of_testing">' . render_input($name_date_of_testing, '', $date_of_testing, 'date') . '</td>';
+        $row .= '<td colspan="1" class="sensitivity_of_rccb">' . render_input($name_sensitivity_of_rccb, '', $sensitivity_of_rccb) . '</td>';
+        $row .= '<td colspan="1" class="test_remarks">' . render_input($name_test_remarks, '', $test_remarks) . '</td>';
+        $row .= '<td colspan="1" class="electrical">' . render_input($name_electrical, '', $electrical) . '</td>';
+        if ($name == '') {
+            $row .= '<td colspan="1"><button type="button" class="btn pull-right btn-info rccb-add-item-to-table"><i class="fa fa-check"></i></button></td>';
+        } else {
+            $row .= '<td colspan="1"><a href="#" class="btn btn-danger pull-right" onclick="rccb_delete_item(this,' . $item_key . ',\'.invoice-item\'); return false;"><i class="fa fa-trash"></i></a></td>';
+        }
+
+        $row .= '</tr>';
+        return $row;
+    }
+
+    public function get_rccb_form($form_id)
+    {
+        $this->db->where('form_id', $form_id);
+        return $this->db->get(db_prefix() . 'rccb_form')->row();
+    }
+    public function get_rccb_form_detail($form_id)
+    {
+        $this->db->where('form_id', $form_id);
+        return $this->db->get(db_prefix() . 'rccb_form_detail')->result_array();
     }
 }

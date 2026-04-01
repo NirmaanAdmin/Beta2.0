@@ -389,4 +389,8 @@ function form_pdf_vtf($form, $tag = '')
 {
     return app_pdf('form', LIBSPATH . 'pdf/Form_pdf_vtf', $form, $tag);
 }
+function form_pdf_rccb($form, $tag = '')
+{
+    return app_pdf('form', LIBSPATH . 'pdf/Form_pdf_rccb', $form, $tag);
+}
 
