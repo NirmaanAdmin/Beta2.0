@@ -756,6 +756,7 @@ class Expenses extends AdminController
                             _l('expense_add_edit_date') => 'string',
                             _l('expense_add_edit_amount') => 'string',
                             _l('payment_mode') => 'string',
+                            _l('bill_number') => 'string',
                             _l('error') => 'string',
                         );
 
@@ -787,6 +788,7 @@ class Expenses extends AdminController
                             $value_expense_date = isset($data[$row][3]) ? $data[$row][3] : '';
                             $value_amount = isset($data[$row][4]) ? $data[$row][4] : '';
                             $value_payment_mode = isset($data[$row][5]) ? $data[$row][5] : '';
+                            $value_bill_number = isset($data[$row][6]) ? $data[$row][6] : '';
 
                             if (!empty($value_vendor)) {
                                 $this->db->like('company', $value_vendor);
@@ -852,6 +854,7 @@ class Expenses extends AdminController
                                     $value_expense_date,
                                     $value_amount,
                                     $value_payment_mode,
+                                    $value_bill_number,
                                     $string_error,
                                 ]);
                                 $total_row_false++;
@@ -875,6 +878,7 @@ class Expenses extends AdminController
                                 $rd['repeat_every'] = '';
                                 $rd['repeat_every_custom'] = '1';
                                 $rd['repeat_type_custom'] = 'day';
+                                $rd['bill_number'] = !empty($value_bill_number) ? $value_bill_number : NULL;
                                 $rows[] = $rd;
                                 $this->expenses_model->add($rd);
                             }
