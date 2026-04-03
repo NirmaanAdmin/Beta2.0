@@ -157,10 +157,13 @@ return App_table::find('forms')
 
         $output  = $result['output'];
         $rResult = $result['rResult'];
-
+        $srNo = 1;
         foreach ($rResult as $aRow) {
+
+
             $row = [];
             for ($i = 0; $i < count($aColumns); $i++) {
+                
                 if (strpos($aColumns[$i], 'as') !== false && !isset($aRow[$aColumns[$i]])) {
                     $_data = $aRow[strafter($aColumns[$i], 'as ')];
                 } else {
@@ -182,6 +185,8 @@ return App_table::find('forms')
                             $_data .= '<a href="' . admin_url('profile/' . $aRow['assigned']) . '" data-toggle="tooltip" title="' . e(get_staff_full_name($aRow['assigned'])) . '" class="pull-left mright5">' . staff_profile_image($aRow['assigned'], [
                                 'staff-profile-image-xs',
                             ]) . '</a>';
+                        } elseif ($aColumns[$i] == 'formid') {
+                            $_data = $srNo++;
                         } else {
                             $_data = e($_data);
                         }
@@ -263,7 +268,7 @@ return App_table::find('forms')
                         </ul>
                         </div>';
                     } elseif ($check_formis_is_st > 0) {
-                       $_data = '<div class="btn-group mright5">
+                        $_data = '<div class="btn-group mright5">
                         <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ><i class="fa fa-file-pdf"></i><span class="caret"></span></a>
                         <ul class="dropdown-menu dropdown-menu-right">
                            <li class="hidden-xs"><a href="' . admin_url('forms/pdf_st/' . $aRow['formid'] . '?output_type=I') . '">' . _l('view_pdf') . '</a></li>

@@ -1033,3 +1033,335 @@ function check_formid_is_rccb($formid)
 
     return $count > 0;
 }
+
+function get_ground_floor_items()
+{
+    $result = array();
+    $result = [
+        [
+            'id' => 1,
+            'name' => 'Main Lobby Area',
+        ],
+        [
+            'id' => 2,
+            'name' => 'Lobby Porch Area',
+        ],
+        [
+            'id' => 3,
+            'name' => 'Lobby Washroom',
+        ],
+        [
+            'id' => 4,
+            'name' => 'Conference Room',
+        ],
+        [
+            'id' => 5,
+            'name' => 'Waiting Hall',
+        ],
+        [
+            'id' => 6,
+            'name' => 'Yoga Room',
+        ],
+        [
+            'id' => 7,
+            'name' => 'GYM Room',
+        ],
+        [
+            'id' => 8,
+            'name' => 'Salon',
+        ],
+        [
+            'id' => 9,
+            'name' => 'Spa Room Area',
+        ],
+        [
+            'id' => 10,
+            'name' => 'AHU Room',
+        ],
+        [
+            'id' => 11,
+            'name' => 'Pool Washroom Male',
+        ],
+        [
+            'id' => 12,
+            'name' => 'Pool Washroom Female',
+        ],
+        [
+            'id' => 13,
+            'name' => 'Swimming Pool Area',
+        ],
+        [
+            'id' => 14,
+            'name' => 'Medical Room',
+        ],
+        [
+            'id' => 15,
+            'name' => 'Pump Room',
+        ],
+        [
+            'id' => 16,
+            'name' => 'VMS Room',
+        ],
+        [
+            'id' => 17,
+            'name' => 'Driver Room 1 &2',
+        ],
+        [
+            'id' => 18,
+            'name' => 'Drom Room',
+        ],
+        [
+            'id' => 19,
+            'name' => 'Security Time Office',
+        ],
+        [
+            'id' => 20,
+            'name' => 'Receiving Area',
+        ],
+        [
+            'id' => 21,
+            'name' => 'Maintenance Room',
+        ],
+        [
+            'id' => 22,
+            'name' => 'Dry Store',
+        ],
+        [
+            'id' => 23,
+            'name' => 'Laundry',
+        ],
+        [
+            'id' => 24,
+            'name' => 'HK Office',
+        ],
+        [
+            'id' => 25,
+            'name' => 'Uniform Room',
+        ],
+        [
+            'id' => 26,
+            'name' => 'Staff Washroom Male',
+        ],
+        [
+            'id' => 27,
+            'name' => 'Staff Washroom Female',
+        ],
+        [
+            'id' => 28,
+            'name' => 'Staff Kitchen Cafeteria',
+        ],
+        [
+            'id' => 29,
+            'name' => 'Banquet Hall',
+        ],
+        [
+            'id' => 30,
+            'name' => 'Furniture Store',
+        ],
+        [
+            'id' => 31,
+            'name' => 'Equipment Store',
+        ],
+        [
+            'id' => 32,
+            'name' => 'Main Kitchen Area',
+        ],
+        [
+            'id' => 33,
+            'name' => 'Service Road',
+        ],
+        [
+            'id' => 34,
+            'name' => 'Main Gate Suryadham',
+        ]
+    ];
+    return $result;
+}
+
+function get_ug_floor_items()
+{
+    $result = array();
+    $result = [
+        [
+            'id' => 1,
+            'name' => 'Main Gate Ramp',
+        ],
+        [
+            'id' => 2,
+            'name' => 'AHU Room',
+        ],
+        [
+            'id' => 3,
+            'name' => 'Conference Room',
+        ],
+        [
+            'id' => 4,
+            'name' => 'English Study Room',
+        ],
+        [
+            'id' => 5,
+            'name' => 'Waiting Room',
+        ],
+        [
+            'id' => 6,
+            'name' => 'Informal Dining room',
+        ],
+        [
+            'id' => 7,
+            'name' => 'English Dining room',
+        ],
+        [
+            'id' => 8,
+            'name' => 'Juice Bar',
+        ],
+        [
+            'id' => 9,
+            'name' => 'UG Relaxation Lounge 1',
+        ],
+        [
+            'id' => 10,
+            'name' => 'UG Relaxation Lounge 2',
+        ],
+        [
+            'id' => 11,
+            'name' => 'UG Washroom Male',
+        ],
+        [
+            'id' => 12,
+            'name' => 'UG Washroom Female',
+        ],
+        [
+            'id' => 13,
+            'name' => 'Main Kitchen Area',
+        ],
+        [
+            'id' => 14,
+            'name' => 'Pantry Area',
+        ],
+        [
+            'id' => 15,
+            'name' => 'Theatre Room & Washroom',
+        ],
+        [
+            'id' => 16,
+            'name' => 'Game Room',
+        ],
+        [
+            'id' => 17,
+            'name' => 'UG Water Body Area',
+        ]
+    ];
+    return $result;
+}
+
+function get_service_floor_items()
+{
+    $result = array();
+    $result = [
+        [
+            'id' => 1,
+            'name' => 'Service Floor Area',
+        ],
+        [
+            'id' => 2,
+            'name' => 'Staircase',
+        ],
+        [
+            'id' => 3,
+            'name' => 'Terrace',
+        ],
+        [
+            'id' => 4,
+            'name' => 'Shaft & Panel',
+        ]
+    ];
+    return $result;
+}
+
+function get_first_floor_items()
+{
+    $result = array();
+    $result = [
+        [
+            'id' => 1,
+            'name' => 'Room No.1',
+        ],
+        [
+            'id' => 2,
+            'name' => 'Room No.2',
+        ],
+        [
+            'id' => 3,
+            'name' => 'Room No.3',
+        ],
+        [
+            'id' => 4,
+            'name' => 'Room No.4',
+        ],
+        [
+            'id' => 5,
+            'name' => 'Room No.5',
+        ],
+        [
+            'id' => 6,
+            'name' => 'Room No.6',
+        ],
+        [
+            'id' => 7,
+            'name' => 'Room No.7',
+        ],
+        [
+            'id' => 8,
+            'name' => 'Room No.8',
+        ],
+        [
+            'id' => 9,
+            'name' => 'Pantry Area',
+        ],
+        [
+            'id' => 10,
+            'name' => 'Basilius Office',
+        ]
+    ];
+    return $result;
+}
+
+function get_second_floor_items()
+{
+    $result = array();
+    $result = [
+        [
+            'id' => 1,
+            'name' => 'Room No.9',
+        ],
+        [
+            'id' => 2,
+            'name' => 'Room No.10',
+        ],
+        [
+            'id' => 3,
+            'name' => 'Room No.11',
+        ],
+        [
+            'id' => 4,
+            'name' => 'Room No.12',
+        ],
+        [
+            'id' => 5,
+            'name' => 'Room No.14',
+        ],
+        [
+            'id' => 6,
+            'name' => 'Inventory Office',
+        ],
+        [
+            'id' => 7,
+            'name' => 'HK Pantry',
+        ],
+        [
+            'id' => 8,
+            'name' => 'Servant Room',
+        ]
+    ];
+    return $result;
+}
