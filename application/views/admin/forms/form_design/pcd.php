@@ -55,11 +55,21 @@
         <table class="table rccb-items-table items table-main-dpr-edit has-calculations no-mtop">
             <thead>
                 <tr>
-                    <th colspan="8" class="daily_report_activity">RCCB/ELCB Test Register</th>
+                    <th colspan="8" class="daily_report_activity">Pest Control Details</th>
                 </tr>
                 <tr>
-                    <th colspan="8" class="daily_report_head">
+                    <th colspan="5" class="daily_report_head">
                         <span class="daily_report_label">Project Name & Address : <span class="view_project_name"></span></span>
+                    </th>
+                    <th colspan="5" class="daily_report_head">
+                        Month & Year:
+                        <input type="month"
+                            id="date"
+                            name="date"
+                            class="form-control"
+                            style="width:40%;"
+                            value="<?php echo date('Y-m'); ?>"
+                            readonly>
                     </th>
 
                 </tr>
@@ -463,6 +473,401 @@
                             ?>
                         </tbody>
                     </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="horizontal-scrollable-tabs preview-tabs-top">
+        <div class="scroller arrow-left"><i class="fa fa-angle-left"></i></div>
+        <div class="scroller arrow-right"><i class="fa fa-angle-right"></i></div>
+        <div class="horizontal-tabs">
+            <ul class="nav nav-tabs nav-tabs-horizontal mbot15" role="tablist">
+                <li role="presentation" class="active">
+                    <a href="#ground_floor_dates" aria-controls="ground_floor_dates" role="tab" data-toggle="tab">
+                        <?php echo _l('Ground Floor'); ?>
+                    </a>
+                </li>
+                <li role="presentation">
+                    <a href="#ug_floor_dates" aria-controls="ug_floor_dates" role="tab" data-toggle="tab">
+                        <?php echo _l('UG Floor'); ?>
+                    </a>
+                </li>
+                <li role="presentation">
+                    <a href="#service_floor_dates" aria-controls="service_floor_dates" role="tab" data-toggle="tab">
+                        <?php echo _l('Service Floor'); ?>
+                    </a>
+                </li>
+                <li role="presentation">
+                    <a href="#first_floor_dates" aria-controls="first_floor_dates" role="tab" data-toggle="tab">
+                        <?php echo _l('First Floor'); ?>
+                    </a>
+                </li>
+                <li role="presentation">
+                    <a href="#second_floor_dates" aria-controls="second_floor_dates" role="tab" data-toggle="tab">
+                        <?php echo _l('Second Floor'); ?>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="tab-content">
+        <div role="tabpanel" class="tab-pane ptop10 active" id="ground_floor_dates">
+            <div id="estimate-preview">
+                <div class="row">
+
+                    <!-- SCROLL WRAPPER -->
+                    <div style="overflow-x:auto; width:100%;">
+
+                        <table class="table ground-floor-table items has-calculations no-mtop table-bordered" style="min-width:1200px;">
+
+                            <thead>
+                                <tr>
+                                    <th style="min-width:150px;">Location</th>
+
+                                    <?php
+                                    $currentMonth = date('m');
+                                    $currentYear  = date('Y');
+                                    $totalDays = cal_days_in_month(CAL_GREGORIAN, $currentMonth, $currentYear);
+
+                                    for ($d = 1; $d <= $totalDays; $d++):
+                                        $fullDate = date('d-m-Y', strtotime("$currentYear-$currentMonth-$d"));
+                                    ?>
+                                        <th style="min-width:100px; text-align:center;">
+                                            <?= $fullDate ?>
+                                        </th>
+                                    <?php endfor; ?>
+                                </tr>
+                            </thead>
+
+                            <tbody class="ground_floor_body">
+                                <?php
+                                $form_items = get_ground_floor_items();
+                                $sr = 1;
+
+                                foreach ($form_items as $key => $value):
+                                ?>
+                                    <tr>
+                                        <td style="min-width:150px;">
+                                            <?= $value['name'] ?>
+                                            <input type="hidden" name="groundflooritems[<?= $sr ?>][location]" value="<?= $value['name'] ?>">
+                                        </td>
+
+                                        <?php for ($d = 1; $d <= $totalDays; $d++):
+                                            $date = date('Y-m-d', strtotime("$currentYear-$currentMonth-$d"));
+                                        ?>
+                                            <td style="min-width:80px;">
+                                                <select
+                                                    name="groundflooritems[<?= $sr ?>][dates][<?= $date ?>]"
+                                                    class="form-control input-sm"
+                                                    style="width:90px;">
+
+                                                    <option value="">--</option>
+                                                    <option value="1">Done</option>
+                                                    <option value="2">NOT REQUIRED</option>
+                                                    <option value="3">ABSENT</option>
+
+                                                </select>
+                                            </td>
+                                        <?php endfor; ?>
+                                    </tr>
+                                <?php
+                                    $sr++;
+                                endforeach;
+                                ?>
+                            </tbody>
+
+                        </table>
+                    </div>
+                    <!-- END SCROLL -->
+
+                </div>
+            </div>
+        </div>
+        <div role="tabpanel" class="tab-pane ptop10" id="ug_floor_dates">
+            <div id="estimate-preview">
+                <div class="row">
+
+                    <!-- SCROLL WRAPPER -->
+                    <div style="overflow-x:auto; width:100%;">
+
+                        <table class="table ground-floor-table items has-calculations no-mtop table-bordered" style="min-width:1200px;">
+
+                            <thead>
+                                <tr>
+                                    <th style="min-width:150px;">Location</th>
+
+                                    <?php
+                                    $currentMonth = date('m');
+                                    $currentYear  = date('Y');
+                                    $totalDays = cal_days_in_month(CAL_GREGORIAN, $currentMonth, $currentYear);
+
+                                    for ($d = 1; $d <= $totalDays; $d++):
+                                        $fullDate = date('d-m-Y', strtotime("$currentYear-$currentMonth-$d"));
+                                    ?>
+                                        <th style="min-width:100px; text-align:center;">
+                                            <?= $fullDate ?>
+                                        </th>
+                                    <?php endfor; ?>
+                                </tr>
+                            </thead>
+
+                            <tbody class="ground_floor_body">
+                                <?php
+                                $form_items = get_ug_floor_items();
+                                $sr = 1;
+
+                                foreach ($form_items as $key => $value):
+                                ?>
+                                    <tr>
+                                        <td style="min-width:150px;">
+                                            <?= $value['name'] ?>
+                                            <input type="hidden" name="ugflooritems[<?= $sr ?>][location]" value="<?= $value['name'] ?>">
+                                        </td>
+
+                                        <?php for ($d = 1; $d <= $totalDays; $d++):
+                                            $date = date('Y-m-d', strtotime("$currentYear-$currentMonth-$d"));
+                                        ?>
+                                            <td style="min-width:80px;">
+                                                <select
+                                                    name="ugflooritems[<?= $sr ?>][dates][<?= $date ?>]"
+                                                    class="form-control input-sm"
+                                                    style="width:90px;">
+
+                                                    <option value="">--</option>
+                                                    <option value="1">Done</option>
+                                                    <option value="2">NOT REQUIRED</option>
+                                                    <option value="3">ABSENT</option>
+
+                                                </select>
+                                            </td>
+                                        <?php endfor; ?>
+                                    </tr>
+                                <?php
+                                    $sr++;
+                                endforeach;
+                                ?>
+                            </tbody>
+
+                        </table>
+                    </div>
+                    <!-- END SCROLL -->
+
+                </div>
+            </div>
+        </div>
+        <div role="tabpanel" class="tab-pane ptop10" id="service_floor_dates">
+            <div id="estimate-preview">
+                <div class="row">
+
+                    <!-- SCROLL WRAPPER -->
+                    <div style="overflow-x:auto; width:100%;">
+
+                        <table class="table ground-floor-table items has-calculations no-mtop table-bordered" style="min-width:1200px;">
+
+                            <thead>
+                                <tr>
+                                    <th style="min-width:150px;">Location</th>
+
+                                    <?php
+                                    $currentMonth = date('m');
+                                    $currentYear  = date('Y');
+                                    $totalDays = cal_days_in_month(CAL_GREGORIAN, $currentMonth, $currentYear);
+
+                                    for ($d = 1; $d <= $totalDays; $d++):
+                                        $fullDate = date('d-m-Y', strtotime("$currentYear-$currentMonth-$d"));
+                                    ?>
+                                        <th style="min-width:100px; text-align:center;">
+                                            <?= $fullDate ?>
+                                        </th>
+                                    <?php endfor; ?>
+                                </tr>
+                            </thead>
+
+                            <tbody class="ground_floor_body">
+                                <?php
+                                $form_items = get_service_floor_items();
+                                $sr = 1;
+
+                                foreach ($form_items as $key => $value):
+                                ?>
+                                    <tr>
+                                        <td style="min-width:150px;">
+                                            <?= $value['name'] ?>
+                                            <input type="hidden" name="serviceflooritems[<?= $sr ?>][location]" value="<?= $value['name'] ?>">
+                                        </td>
+
+                                        <?php for ($d = 1; $d <= $totalDays; $d++):
+                                            $date = date('Y-m-d', strtotime("$currentYear-$currentMonth-$d"));
+                                        ?>
+                                            <td style="min-width:80px;">
+                                                <select
+                                                    name="serviceflooritems[<?= $sr ?>][dates][<?= $date ?>]"
+                                                    class="form-control input-sm"
+                                                    style="width:90px;">
+
+                                                    <option value="">--</option>
+                                                    <option value="1">Done</option>
+                                                    <option value="2">NOT REQUIRED</option>
+                                                    <option value="3">ABSENT</option>
+
+                                                </select>
+                                            </td>
+                                        <?php endfor; ?>
+                                    </tr>
+                                <?php
+                                    $sr++;
+                                endforeach;
+                                ?>
+                            </tbody>
+
+                        </table>
+                    </div>
+                    <!-- END SCROLL -->
+
+                </div>
+            </div>
+        </div>
+         <div role="tabpanel" class="tab-pane ptop10" id="first_floor_dates">
+            <div id="estimate-preview">
+                <div class="row">
+
+                    <!-- SCROLL WRAPPER -->
+                    <div style="overflow-x:auto; width:100%;">
+
+                        <table class="table ground-floor-table items has-calculations no-mtop table-bordered" style="min-width:1200px;">
+
+                            <thead>
+                                <tr>
+                                    <th style="min-width:150px;">Location</th>
+
+                                    <?php
+                                    $currentMonth = date('m');
+                                    $currentYear  = date('Y');
+                                    $totalDays = cal_days_in_month(CAL_GREGORIAN, $currentMonth, $currentYear);
+
+                                    for ($d = 1; $d <= $totalDays; $d++):
+                                        $fullDate = date('d-m-Y', strtotime("$currentYear-$currentMonth-$d"));
+                                    ?>
+                                        <th style="min-width:100px; text-align:center;">
+                                            <?= $fullDate ?>
+                                        </th>
+                                    <?php endfor; ?>
+                                </tr>
+                            </thead>
+
+                            <tbody class="ground_floor_body">
+                                <?php
+                                $form_items = get_first_floor_items();
+                                $sr = 1;
+
+                                foreach ($form_items as $key => $value):
+                                ?>
+                                    <tr>
+                                        <td style="min-width:150px;">
+                                            <?= $value['name'] ?>
+                                            <input type="hidden" name="firstflooritems[<?= $sr ?>][location]" value="<?= $value['name'] ?>">
+                                        </td>
+
+                                        <?php for ($d = 1; $d <= $totalDays; $d++):
+                                            $date = date('Y-m-d', strtotime("$currentYear-$currentMonth-$d"));
+                                        ?>
+                                            <td style="min-width:80px;">
+                                                <select
+                                                    name="firstflooritems[<?= $sr ?>][dates][<?= $date ?>]"
+                                                    class="form-control input-sm"
+                                                    style="width:90px;">
+
+                                                    <option value="">--</option>
+                                                    <option value="1">Done</option>
+                                                    <option value="2">NOT REQUIRED</option>
+                                                    <option value="3">ABSENT</option>
+
+                                                </select>
+                                            </td>
+                                        <?php endfor; ?>
+                                    </tr>
+                                <?php
+                                    $sr++;
+                                endforeach;
+                                ?>
+                            </tbody>
+
+                        </table>
+                    </div>
+                    <!-- END SCROLL -->
+
+                </div>
+            </div>
+        </div>
+        <div role="tabpanel" class="tab-pane ptop10" id="second_floor_dates">
+            <div id="estimate-preview">
+                <div class="row">
+
+                    <!-- SCROLL WRAPPER -->
+                    <div style="overflow-x:auto; width:100%;">
+
+                        <table class="table ground-floor-table items has-calculations no-mtop table-bordered" style="min-width:1200px;">
+
+                            <thead>
+                                <tr>
+                                    <th style="min-width:150px;">Location</th>
+
+                                    <?php
+                                    $currentMonth = date('m');
+                                    $currentYear  = date('Y');
+                                    $totalDays = cal_days_in_month(CAL_GREGORIAN, $currentMonth, $currentYear);
+
+                                    for ($d = 1; $d <= $totalDays; $d++):
+                                        $fullDate = date('d-m-Y', strtotime("$currentYear-$currentMonth-$d"));
+                                    ?>
+                                        <th style="min-width:100px; text-align:center;">
+                                            <?= $fullDate ?>
+                                        </th>
+                                    <?php endfor; ?>
+                                </tr>
+                            </thead>
+
+                            <tbody class="ground_floor_body">
+                                <?php
+                                $form_items = get_first_floor_items();
+                                $sr = 1;
+
+                                foreach ($form_items as $key => $value):
+                                ?>
+                                    <tr>
+                                        <td style="min-width:150px;">
+                                            <?= $value['name'] ?>
+                                            <input type="hidden" name="secondflooritems[<?= $sr ?>][location]" value="<?= $value['name'] ?>">
+                                        </td>
+
+                                        <?php for ($d = 1; $d <= $totalDays; $d++):
+                                            $date = date('Y-m-d', strtotime("$currentYear-$currentMonth-$d"));
+                                        ?>
+                                            <td style="min-width:80px;">
+                                                <select
+                                                    name="secondflooritems[<?= $sr ?>][dates][<?= $date ?>]"
+                                                    class="form-control input-sm"
+                                                    style="width:90px;">
+
+                                                    <option value="">--</option>
+                                                    <option value="1">Done</option>
+                                                    <option value="2">NOT REQUIRED</option>
+                                                    <option value="3">ABSENT</option>
+
+                                                </select>
+                                            </td>
+                                        <?php endfor; ?>
+                                    </tr>
+                                <?php
+                                    $sr++;
+                                endforeach;
+                                ?>
+                            </tbody>
+
+                        </table>
+                    </div>
+                    <!-- END SCROLL -->
+
                 </div>
             </div>
         </div>

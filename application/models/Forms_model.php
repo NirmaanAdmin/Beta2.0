@@ -1624,6 +1624,44 @@ class Forms_model extends App_Model
                     $new_order = $data['newitems'];
                     unset($data['newitems']);
                 }
+            } elseif ($data['form_type'] == "pcd") {
+                $pcd_form = [];
+                $pcd_form['date'] = $data['date'];
+                unset(
+                    $data['date'],
+                    $data['location'],
+                    $data['treatment_type'],
+                    $data['chemical_used'],
+                    $data['area_in_charge'],
+                    $data['technician'],
+                    $data['dates'],
+                    $data['isedit'],
+                );
+                $groundflooritems = [];
+                if (isset($data['groundflooritems'])) {
+                    $groundflooritems = $data['groundflooritems'];
+                    unset($data['groundflooritems']);
+                }
+                $ugflooritems = [];
+                if (isset($data['ugflooritems'])) {
+                    $ugflooritems = $data['ugflooritems'];
+                    unset($data['ugflooritems']);
+                }
+                $serviceflooritems = [];
+                if (isset($data['serviceflooritems'])) {
+                    $serviceflooritems = $data['serviceflooritems'];
+                    unset($data['serviceflooritems']);
+                }
+                $firstflooritems = [];
+                if (isset($data['firstflooritems'])) {
+                    $firstflooritems = $data['firstflooritems'];
+                    unset($data['firstflooritems']);
+                }
+                $secondflooritems = [];
+                if (isset($data['secondflooritems'])) {
+                    $secondflooritems = $data['secondflooritems'];
+                    unset($data['secondflooritems']);
+                }
             }
         }
 
@@ -2372,6 +2410,65 @@ class Forms_model extends App_Model
                             $dt_data['electrical'] = $value['electrical'];
                             $this->db->insert(db_prefix() . $data['form_type'] . '_form_detail', $dt_data);
                             $qcr_detail_id = $this->db->insert_id();
+                        }
+                    }
+                }
+            } elseif ($data['form_type'] == "pcd") {
+
+                // ✅ Insert Main Form
+                if (!empty($pcd_form)) {
+                    $pcd_form['form_id'] = $formid;
+                    $this->db->insert(db_prefix() . 'pcd_form', $pcd_form);
+                }
+
+                // ✅ All floors in one array
+                $floors = [
+                    'ground'  => $groundflooritems,
+                    'ug'      => $ugflooritems,
+                    'service' => $serviceflooritems,
+                    'first'   => $firstflooritems,
+                    'second'  => $secondflooritems,
+                ];
+
+                // ✅ Loop floors
+                foreach ($floors as $floor_name => $items) {
+
+                    if (!empty($items)) {
+
+                        foreach ($items as $item) {
+
+                            // Common data
+                            $location        = $item['location'];
+                            $treatment_type  = $item['treatment_type'];
+                            $chemical_used   = $item['chemical_used'];
+                            $area_in_charge  = $item['area_in_charge'];
+                            $technician      = $item['technician'];
+
+                            // ✅ Loop dates (MOST IMPORTANT 🔥)
+                            if (!empty($item['dates'])) {
+
+                                foreach ($item['dates'] as $date => $value) {
+
+                                    // Skip empty values (optional)
+                                    if ($value === '' || $value === null) {
+                                        continue;
+                                    }
+
+                                    $dt_data = [];
+                                    $dt_data['form_id']         = $formid;
+                                    $dt_data['floor']           = $floor_name;
+                                    $dt_data['location']        = $location;
+                                    $dt_data['date']            = $date;
+                                    $dt_data['value']           = $value;
+
+                                    $dt_data['treatment_type']  = $treatment_type;
+                                    $dt_data['chemical_used']   = $chemical_used;
+                                    $dt_data['area_in_charge']  = $area_in_charge;
+                                    $dt_data['technician']      = $technician;
+
+                                    $this->db->insert(db_prefix() . 'pcd_form_detail', $dt_data);
+                                }
+                            }
                         }
                     }
                 }
