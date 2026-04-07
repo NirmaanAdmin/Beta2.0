@@ -2862,30 +2862,36 @@ function get_ordered_quantity($pur_order = null, $wo_order = null, $description 
      * STEP 1: CHECK IF CHANGE ORDER EXISTS
      * ========================================================= */
     if ($has_pur_order) {
-        $CI->db->reset_query();
-        $CI->db->from(db_prefix() . 'co_orders');
-        $CI->db->where('po_order_id', (int)$pur_order);
-        $co_exists = $CI->db->count_all_results();
 
-        if ($co_exists > 0) {
-            // 👉 ALWAYS USE CHANGE ORDER DATA
+        // Get latest CO ID
+        $latest_co = $CI->db
+            ->select('id')
+            ->from(db_prefix() . 'co_orders')
+            ->where('po_order_id', (int)$pur_order)
+            ->order_by('id', 'DESC') // or use created_date if available
+            ->limit(1)
+            ->get()
+            ->row();
+
+        if (!empty($latest_co)) {
+
+            // 👉 ALWAYS USE LATEST CHANGE ORDER DATA
             $CI->db->reset_query();
 
             $CI->db->select('cod.quantity');
             $CI->db->from(db_prefix() . 'co_order_detail cod');
-            $CI->db->join(db_prefix() . 'co_orders co', 'co.id = cod.pur_order', 'inner');
-            $CI->db->where('co.po_order_id', (int)$pur_order);
+            $CI->db->where('cod.pur_order', (int)$latest_co->id);
 
             if ($description !== null) {
                 $CI->db->select("
+                REPLACE(
                     REPLACE(
                         REPLACE(
-                            REPLACE(
-                                REPLACE(cod.description, '\\r', ''),
-                            '\\n', ''),
-                        '<br />', ''),
-                    '<br/>', '') AS non_break_description
-                ", false);
+                            REPLACE(cod.description, '\\r', ''),
+                        '\\n', ''),
+                    '<br />', ''),
+                '<br/>', '') AS non_break_description
+            ", false);
             }
 
             if (!empty($commodity_code)) {
