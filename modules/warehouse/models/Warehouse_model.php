@@ -1501,49 +1501,6 @@ class Warehouse_model extends App_Model
 					$this->db->insert(db_prefix() . 'stock_reconciliation_detail', $value);
 				}
 			}
-
-			// if ($stock_updated_reconciliation_id) {
-			// 	$get_stock_reconciliation_details_data = $this->get_stock_reconciliation_detail($stock_updated_reconciliation_id);
-
-			// 	// Function to normalize description
-			// 	function normalizeDescription($description)
-			// 	{
-			// 		return strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $description));
-			// 	}
-
-			// 	// Loop through inventory receipts
-			// 	foreach ($inventory_receipts as $receipt) {
-			// 		// Normalize receipt description
-			// 		$normalized_receipt_desc = normalizeDescription($receipt['description']);
-
-			// 		// Find matching item in stock reconciliation data
-			// 		foreach ($get_stock_reconciliation_details_data as $reconciliation_item) {
-			// 			// Normalize reconciliation description
-			// 			$normalized_reconciliation_desc = normalizeDescription($reconciliation_item['description']);
-
-			// 			// Check if commodity_code, commodity_name, and normalized description match
-			// 			if (
-			// 				$reconciliation_item['commodity_code'] == $receipt['commodity_code'] &&
-			// 				$reconciliation_item['commodity_name'] == $receipt['commodity_name'] &&
-			// 				$normalized_reconciliation_desc == $normalized_receipt_desc
-			// 			) {
-
-			// 				// Calculate new received_quantity (existing + quantities from receipt)
-			// 				$quantities_to_add = !empty($receipt['quantities']) ? $receipt['quantities'] : 0;
-			// 				$new_received_quantity = $reconciliation_item['received_quantity'] + $quantities_to_add;
-
-			// 				// Update the database
-			// 				$this->db->where('id', $reconciliation_item['id']);
-			// 				$this->db->update(db_prefix() . 'stock_reconciliation_detail', [
-			// 					'received_quantity' => $new_received_quantity
-			// 				]);
-
-			// 				// Break inner loop once match is found
-			// 				break;
-			// 			}
-			// 		}
-			// 	}
-			// }
 			if ($stock_updated_reconciliation_id) {
 
 				$get_stock_reconciliation_details_data = $this->get_stock_reconciliation_detail($stock_updated_reconciliation_id);
@@ -4313,6 +4270,78 @@ class Warehouse_model extends App_Model
 
 
 				$this->db->insert(db_prefix() . 'goods_delivery_detail', $goods_delivery);
+
+				// ✅ UPDATE STOCK RECONCILIATION DETAIL (FOR DELIVERY)
+
+				if (!empty($data['pr_order_id']) || !empty($data['wo_order_id'])) {
+
+					// Get reconciliation ID
+					if (!empty($data['pr_order_id'])) {
+						$this->db->where('pr_order_id', $data['pr_order_id']);
+					} elseif (!empty($data['wo_order_id'])) {
+						$this->db->where('wo_order_id', $data['wo_order_id']);
+					}
+
+					$stock_reconciliation = $this->db->get(db_prefix() . 'stock_reconciliation')->row();
+
+					if ($stock_reconciliation) {
+
+						$reconciliation_id = $stock_reconciliation->id;
+
+						// Normalize description
+						$normalizeDescription = function ($description) {
+							return strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $description));
+						};
+
+						$normalized_delivery_desc = $normalizeDescription($goods_delivery['description']);
+
+						// Get reconciliation details
+						$this->db->where('goods_delivery_id', $reconciliation_id);
+						$reconciliation_items = $this->db->get(db_prefix() . 'stock_reconciliation_detail')->result_array();
+
+						foreach ($reconciliation_items as $item) {
+
+							$normalized_reconciliation_desc = $normalizeDescription($item['description']);
+
+							if (
+								$item['commodity_code'] == $goods_delivery['commodity_code'] &&
+								$item['commodity_name'] == $goods_delivery['commodity_name'] &&
+								$normalized_reconciliation_desc == $normalized_delivery_desc
+							) {
+
+								// ✅ Prepare JSON values
+								$issued_quantities_json = $goods_delivery['quantities_json'];
+								$quantities_array = json_decode($issued_quantities_json, true);
+
+								$reconciliation_date_arr = [];
+								$return_quantity_arr     = [];
+								$used_quantity_arr       = [];
+
+								foreach ($quantities_array as $key => $value) {
+									$reconciliation_date_arr[$key] = date('d-m-Y');
+									$return_quantity_arr[$key]     = "0";
+									$used_quantity_arr[$key]       = "0"; // same as issued
+								}
+
+								// Encode JSON
+								$reconciliation_date_json = json_encode($reconciliation_date_arr);
+								$return_quantity_json     = json_encode($return_quantity_arr);
+								$used_quantity_json       = json_encode($used_quantity_arr);
+
+								// ✅ Update
+								$this->db->where('id', $item['id']);
+								$this->db->update(db_prefix() . 'stock_reconciliation_detail', [
+									'issued_quantities'   => $issued_quantities_json,
+									'reconciliation_date' => $reconciliation_date_json,
+									'return_quantity'     => $return_quantity_json,
+									'used_quantity'       => $used_quantity_json,
+								]);
+
+								break;
+							}
+						}
+					}
+				}
 			}
 			/*write log*/
 			$data_log = [];
@@ -23811,13 +23840,13 @@ class Warehouse_model extends App_Model
 		$updated_co_quantity = 0;
 		$non_break_description = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $description));
 		$latest_co_subquery = "(SELECT MAX(id) FROM " . db_prefix() . "co_orders WHERE approve_status = 2";
-	    if ($type == "pur_orders") {
-	        $latest_co_subquery .= " AND po_order_id = " . (int)$order_id;
-	    }
-	    if ($type == "wo_orders") {
-	        $latest_co_subquery .= " AND wo_order_id = " . (int)$order_id;
-	    }
-	    $latest_co_subquery .= ")";
+		if ($type == "pur_orders") {
+			$latest_co_subquery .= " AND po_order_id = " . (int)$order_id;
+		}
+		if ($type == "wo_orders") {
+			$latest_co_subquery .= " AND wo_order_id = " . (int)$order_id;
+		}
+		$latest_co_subquery .= ")";
 		$this->db->select(
 			db_prefix() . 'co_order_detail.*, 
 		    (
@@ -23834,10 +23863,10 @@ class Warehouse_model extends App_Model
             '<br/>', '') AS non_break_description
         ");
 		$this->db->join(
-	        db_prefix() . 'co_orders',
-	        db_prefix() . "co_orders.id = $latest_co_subquery",
-	        'left'
-	    );
+			db_prefix() . 'co_orders',
+			db_prefix() . "co_orders.id = $latest_co_subquery",
+			'left'
+		);
 		$this->db->where(db_prefix() . 'co_order_detail.item_code', $item_code);
 		$this->db->group_by(db_prefix() . 'co_order_detail.id');
 		$this->db->having('non_break_description', $non_break_description);
