@@ -1143,6 +1143,13 @@ class Warehouse_model extends App_Model
 				$data['file_name'] = $file['file_name'];
 				$data['filetype']  = $file['filetype'];
 				$this->db->insert(db_prefix() . 'invetory_files', $data);
+				$invetory_file_id = $this->db->insert_id();
+				if($related == 'goods_receipt') {
+					create_goods_receipt_attachments_in_documents($invetory_file_id);
+				}
+				if($related == 'goods_delivery') {
+					create_goods_delivery_attachments_in_documents($invetory_file_id);
+				}
 				$file_names[] = $file['file_name'];
 			}
 			// Log the file attachments to activity log
@@ -1327,6 +1334,7 @@ class Warehouse_model extends App_Model
 
 		$this->db->insert(db_prefix() . 'goods_receipt', $data);
 		$insert_id = $this->db->insert_id();
+		create_goods_receipt_in_documents($insert_id);
 		$this->save_invetory_files('goods_receipt', $insert_id);
 		/*insert detail*/
 		if ($insert_id) {
@@ -4207,6 +4215,7 @@ class Warehouse_model extends App_Model
 
 		$this->db->insert(db_prefix() . 'goods_delivery', $data);
 		$insert_id = $this->db->insert_id();
+		create_goods_delivery_in_documents($insert_id);
 		$this->save_invetory_files('goods_delivery', $insert_id);
 		/*update save note*/
 		if (isset($insert_id)) {
@@ -7969,6 +7978,7 @@ class Warehouse_model extends App_Model
 	public function delete_goods_receipt($id)
 	{
 		remove_stock_received_activity_log($id);
+		delete_goods_receipt_in_documents($id);
 		hooks()->do_action('before_goods_receipt_deleted', $id);
 
 		$affected_rows = 0;
@@ -8010,6 +8020,7 @@ class Warehouse_model extends App_Model
 	public function delete_goods_delivery($id)
 	{
 		remove_stock_issue_activity_log($id);
+		delete_goods_delivery_in_documents($id);
 		hooks()->do_action('before_goods_delivery_deleted', $id);
 
 		$affected_rows = 0;
@@ -21140,6 +21151,12 @@ class Warehouse_model extends App_Model
 			$other_attachments = list_files(get_upload_path_by_type('inventory') . $attachment->rel_type . '/' . $attachment->rel_id);
 			if (count($other_attachments) == 0) {
 				delete_dir(get_upload_path_by_type('inventory') . $attachment->rel_type . '/' . $attachment->rel_id);
+			}
+			if($attachment->rel_type == 'goods_receipt') {
+				delete_goods_receipt_attachments_in_documents($attachment->id);
+			}
+			if($attachment->rel_type == 'goods_delivery') {
+				delete_goods_delivery_attachments_in_documents($attachment->id);
 			}
 		}
 

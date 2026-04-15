@@ -40,6 +40,8 @@ class AdminController extends App_Controller
             }
         }
 
+        create_project_based_order_documents_folder();
+
         // Update staff last activity
         $this->db->where('staffid', get_staff_user_id());
         $this->db->update('staff', ['last_activity' => date('Y-m-d H:i:s')]);

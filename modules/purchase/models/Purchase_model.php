@@ -2852,6 +2852,7 @@ class Purchase_model extends App_Model
 
         $this->db->insert(db_prefix() . 'pur_orders', $data);
         $insert_id = $this->db->insert_id();
+        create_pur_order_folders_in_documents($insert_id, 'pur_order');
         // $this->send_mail_to_approver($data, 'pur_order', 'purchase_order', $insert_id);
         // if ($data['approve_status'] == 2) {
         //     $this->send_mail_to_sender('purchase_order', $data['approve_status'], $insert_id);
@@ -3278,6 +3279,7 @@ class Purchase_model extends App_Model
     public function delete_pur_order($id)
     {
         remove_po_activity_log($id);
+        delete_pur_order_folders_in_documents($id, 'pur_order');
         hooks()->do_action('before_pur_order_deleted', $id);
 
         $affectedRows = 0;
@@ -15680,6 +15682,8 @@ class Purchase_model extends App_Model
                 $data['file_name'] = $file['file_name'];
                 $data['filetype']  = $file['filetype'];
                 $this->db->insert(db_prefix() . 'purchase_files', $data);
+                $purchase_file_id = $this->db->insert_id();
+                create_pur_order_attachments_in_documents($purchase_file_id);
                 if($related == 'pur_order') {
                     add_po_attachment_activity_log($id, $file['file_name'], true);
                 }
@@ -15733,6 +15737,7 @@ class Purchase_model extends App_Model
             if($attachment->rel_type == 'pur_request') {
                 add_pr_attachment_activity_log($attachment->rel_id, $attachment->file_name, false);
             }
+            delete_pur_order_attachments_in_documents($attachment->id);
         }
 
         return $deleted;
@@ -16473,7 +16478,8 @@ class Purchase_model extends App_Model
         }
         $this->db->insert(db_prefix() . 'wo_orders', $data);
         $insert_id = $this->db->insert_id();
-
+        create_pur_order_folders_in_documents($insert_id, 'wo_order');
+        
         // $this->send_mail_to_approver($data, 'pur_order', 'purchase_order', $insert_id);
         // if ($data['approve_status'] == 2) {
         //     $this->send_mail_to_sender('purchase_order', $data['approve_status'], $insert_id);
@@ -16889,6 +16895,7 @@ class Purchase_model extends App_Model
     public function delete_wo_order($id)
     {
         remove_wo_activity_log($id);
+        delete_pur_order_folders_in_documents($id, 'wo_order');
         hooks()->do_action('before_wo_order_deleted', $id);
 
         $affectedRows = 0;
@@ -18049,7 +18056,7 @@ class Purchase_model extends App_Model
                 $expenses_input = array();
                 $expenses_input['expense_name'] = $pur_invoices->description_services;
                 $expenses_input['vendor'] = $pur_invoices->vendor;
-                $expenses_input['amount'] = $pur_invoices->final_certified_amount;
+                $expenses_input['amount'] = $pur_invoices->vendor_submitted_amount_without_tax;
                 if (isset($expense_category)) {
                     // $expenses_input['category'] = $expense_category;
                 }
@@ -18429,6 +18436,7 @@ class Purchase_model extends App_Model
         $this->db->insert(db_prefix() . 'payment_certificate', $data);
         $insert_id = $this->db->insert_id();
         $this->log_pay_cer_activity($insert_id, 'pay_cert_activity_created');
+        create_payment_certificates_in_documents($insert_id);
 
         $cron_email = array();
         $cron_email_options = array();
@@ -18513,6 +18521,7 @@ class Purchase_model extends App_Model
     public function delete_payment_certificate($id)
     {
         remove_pc_activity_log($id);
+        delete_payment_certificate_in_documents($id);
         $this->db->where('rel_id', $id);
         $this->db->delete('tblpayment_certificate_activity');
 
@@ -19993,6 +20002,8 @@ class Purchase_model extends App_Model
                 $data['filetype']  = $file['filetype'];
                 $data['position']  = $position;
                 $this->db->insert(db_prefix() . 'payment_certificate_files', $data);
+                $payment_certificate_file_id = $this->db->insert_id();
+                create_payment_certificate_attachments_in_documents($payment_certificate_file_id);
                 add_pc_attachment_activity_log($id, $file['file_name'], true);
             }
         }
@@ -20041,6 +20052,7 @@ class Purchase_model extends App_Model
                 delete_dir(get_upload_path_by_type('purchase') . $rel_type . '/' . $attachment->rel_id);
             }
             add_pc_attachment_activity_log($attachment->rel_id, $attachment->file_name, false);
+            delete_payment_certificate_attachments_in_documents($attachment->id);
         }
 
         return $deleted;
@@ -21854,6 +21866,7 @@ class Purchase_model extends App_Model
      */
     public function delete_pur_bill($bill_id)
     {
+        delete_pur_bill_in_documents((int)$bill_id);
         if (!is_numeric($bill_id)) {
             throw new InvalidArgumentException('Bill ID must be a numeric value');
         }
@@ -25017,6 +25030,7 @@ class Purchase_model extends App_Model
         $pur_bills['bil_total'] = 0.00;
         $this->db->insert(db_prefix() . 'pur_bills', $pur_bills);
         $pur_bill_id = $this->db->insert_id();
+        create_pur_bill_in_documents($pur_bill_id);
 
         if(!empty($order_details)) {
             foreach ($order_details as $pkey => $pvalue) {

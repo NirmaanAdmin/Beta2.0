@@ -827,3 +827,909 @@ function create_folder_dmg_activity_log($id)
 	}
 	return true;
 }
+
+function create_project_based_order_documents_folder()
+{
+    $CI = &get_instance();
+    $CI->load->model('document_management/document_management_model');
+    $order_documents_title = 'Order Documents';
+    $CI->db->select('id, name');
+    $CI->db->from(db_prefix() . 'projects');
+    $CI->db->order_by('id', 'asc');
+    $projects = $CI->db->get()->result_array();
+    if (empty($projects)) {
+        return true;
+    }
+    foreach ($projects as $project) {
+        $CI->db->select('id, name');
+        $CI->db->from(db_prefix() . 'dmg_items');
+        $CI->db->where('name', $project['name']);
+        $project_item = $CI->db->get()->row();
+        if (empty($project_item)) {
+            continue;
+        }
+        $CI->db->select('id, name');
+        $CI->db->from(db_prefix() . 'dmg_items');
+        $CI->db->where('name', $order_documents_title);
+        $CI->db->where('parent_id', $project_item->id);
+        $order_documents_item = $CI->db->get()->row();
+        if (empty($order_documents_item)) {
+            $CI->document_management_model->create_item([
+                'parent_id' => $project_item->id,
+                'name' => $order_documents_title,
+            ]);
+        }
+    }
+    return true;
+}
+
+function create_pur_order_folders_in_documents($rel_id, $rel_type)
+{
+	$CI = &get_instance();
+	if (!in_array($rel_type, ['pur_order', 'wo_order'])) {
+        return '';
+    }
+	$default_project = get_default_project();
+	$CI->db->select('id, name');
+    $CI->db->from(db_prefix() . 'dmg_items');
+    $CI->db->where('project_id', $default_project);
+    $default_project_item = $CI->db->get()->row();
+    if(!empty($default_project_item)) {
+    	$CI->db->select('id, name');
+	    $CI->db->from(db_prefix() . 'dmg_items');
+	    $CI->db->where('parent_id', $default_project_item->id);
+	    $CI->db->where('name', 'Order Documents');
+	    $order_documents_item = $CI->db->get()->row();
+	    if(!empty($order_documents_item)) {
+	    	if($rel_type == 'pur_order') {
+	    		$CI->db->where('id', $rel_id);
+        		$order_data = $CI->db->get(db_prefix() . 'pur_orders')->row();
+        		$po_id = $order_data->id;
+        		$wo_id = NULL;
+        		$order_number = $order_data->pur_order_number;
+        		$order_name = $order_data->pur_order_number . " - " . $order_data->pur_order_name;
+	    	} else if($rel_type == 'wo_order') {
+	    		$CI->db->where('id', $rel_id);
+        		$order_data = $CI->db->get(db_prefix() . 'wo_orders')->row();
+        		$wo_id = $order_data->id;
+        		$po_id = NULL;
+        		$order_number = $order_data->wo_order_number;
+        		$order_name = $order_data->wo_order_number . " - " . $order_data->wo_order_name;
+	    	} else {
+	    		$order_data = array();
+	    		$po_id = NULL;
+	    		$wo_id = NULL;
+	    		$order_number = NULL;
+	    		$order_name = NULL;
+	    	}
+	    	if(!empty($order_data)) {
+	    		$CI->db->select('id, name');
+				$CI->db->from(db_prefix() . 'dmg_items');
+				$CI->db->where('rel_id', $rel_id);
+				$CI->db->where('rel_type', $rel_type);
+				$CI->db->order_by('id', 'ASC');
+				$CI->db->limit(1);
+				$pur_order_folder = $CI->db->get()->row();
+				if(empty($pur_order_folder)) {
+			    	$pur_order_folder_id = $CI->document_management_model->create_item([
+		                'parent_id' => $order_documents_item->id,
+		                'name' => $order_name,
+		                'po_id' => $po_id,
+		                'wo_id' => $wo_id,
+		                'rel_id' => $rel_id,
+		                'rel_type' => $rel_type,
+		            ]);
+		            if($pur_order_folder_id) {
+		            	$CI->document_management_model->create_item([
+			                'parent_id' => $pur_order_folder_id,
+			                'name' => $order_number.'.pdf',
+			                'filetype' => 'application/pdf',
+			                'po_id' => $po_id,
+		                	'wo_id' => $wo_id,
+			                'rel_id' => $rel_id,
+			                'rel_type' => $rel_type,
+			            ]);
+		            }
+		            return $pur_order_folder_id;
+		        } else {
+		        	return $pur_order_folder->id;
+		        }
+	        }
+	    }
+    }
+    return '';
+}
+
+function delete_pur_order_folders_in_documents($rel_id, $rel_type)
+{
+	$CI = &get_instance();
+	if (!in_array($rel_type, ['pur_order', 'wo_order'])) {
+        return true;
+    }
+	if($rel_type == 'pur_order') {
+		$CI->db->where('po_id', $rel_id);
+		$CI->db->delete(db_prefix() . 'dmg_items');
+	    return true;
+	} else if($rel_type == 'wo_order') {
+		$CI->db->where('wo_id', $rel_id);
+		$CI->db->delete(db_prefix() . 'dmg_items');
+	    return true;
+	} else {
+    	return true;
+    }
+}
+
+function create_pur_order_attachments_in_documents($purchase_file_id)
+{
+	$CI = &get_instance();
+	$CI->db->where('id', $purchase_file_id);
+	$purchase_file = $CI->db->get(db_prefix() . 'purchase_files')->row();
+	if(!empty($purchase_file)) {
+	    $rel_id = $purchase_file->rel_id;
+	    $rel_type = $purchase_file->rel_type;
+		$pur_order_folder_id = create_pur_order_folders_in_documents($rel_id, $rel_type);
+		if(!empty($pur_order_folder_id)) {
+			$order_attachments_title = 'Order Attachments';
+			$CI->db->select('id, name');
+			$CI->db->from(db_prefix() . 'dmg_items');
+			$CI->db->where('parent_id', $pur_order_folder_id);
+			$CI->db->where('name', $order_attachments_title);
+			$pur_order_attachments = $CI->db->get()->row();
+			if(empty($pur_order_attachments)) {
+				$pur_order_attachments_folder_id = $CI->document_management_model->create_item([
+		            'parent_id' => $pur_order_folder_id,
+		            'name' => $order_attachments_title,
+		            'po_id' => $rel_type == 'pur_order' ? $rel_id : NULL,
+		            'wo_id' => $rel_type == 'wo_order' ? $rel_id : NULL,
+		            'rel_id' => $rel_id,
+		            'rel_type' => $rel_type,
+		        ]);
+			} else {
+				$pur_order_attachments_folder_id = $pur_order_attachments->id;
+			}
+			$CI->document_management_model->create_item([
+		        'parent_id' => $pur_order_attachments_folder_id,
+		        'name' => $purchase_file->file_name,
+		        'filetype' => $purchase_file->filetype,
+		        'po_id' => $rel_type == 'pur_order' ? $rel_id : NULL,
+	            'wo_id' => $rel_type == 'wo_order' ? $rel_id : NULL,
+		        'rel_id' => $purchase_file->id,
+		        'rel_type' => 'pur_order_attachment',
+		    ]);
+		}
+	}
+	return '';
+}
+
+function delete_pur_order_attachments_in_documents($id)
+{
+	$CI = &get_instance();
+	$CI->db->where('rel_id', $id);
+	$CI->db->where('rel_type', 'pur_order_attachment');
+	$CI->db->delete(db_prefix() . 'dmg_items');
+	return true;
+}
+
+function create_payment_certificates_in_documents($payment_certificate_id)
+{
+	$CI = &get_instance();
+	$CI->db->where('id', $payment_certificate_id);
+	$payment_certificate = $CI->db->get(db_prefix() . 'payment_certificate')->row();
+	if(!empty($payment_certificate)) {
+		if(!empty($payment_certificate->po_id)) {
+			$rel_id = $payment_certificate->po_id;
+	    	$rel_type = 'pur_order';
+		} else if(!empty($payment_certificate->wo_id)) {
+			$rel_id = $payment_certificate->wo_id;
+	    	$rel_type = 'wo_order';
+		} else {
+			$rel_id = NULL;
+	    	$rel_type = NULL;
+		}
+		if(!empty($rel_id) && !empty($rel_type)) {
+			$pur_order_folder_id = create_pur_order_folders_in_documents($rel_id, $rel_type);
+			if(!empty($pur_order_folder_id)) {
+				$payment_certificate_title = 'Payment certificates';
+				$CI->db->select('id, name');
+				$CI->db->from(db_prefix() . 'dmg_items');
+				$CI->db->where('parent_id', $pur_order_folder_id);
+				$CI->db->where('name', $payment_certificate_title);
+				$payment_certificate_item = $CI->db->get()->row();
+				if(empty($payment_certificate_item)) {
+					$payment_certificate_item_folder_id = $CI->document_management_model->create_item([
+			            'parent_id' => $pur_order_folder_id,
+			            'name' => $payment_certificate_title,
+			            'po_id' => $rel_type == 'pur_order' ? $rel_id : NULL,
+			            'wo_id' => $rel_type == 'wo_order' ? $rel_id : NULL,
+			            'rel_id' => $rel_id,
+			            'rel_type' => $rel_type,
+			        ]);
+			    } else {
+			    	$payment_certificate_item_folder_id = $payment_certificate_item->id;
+			    }
+			    $CI->db->select('id, name');
+				$CI->db->from(db_prefix() . 'dmg_items');
+				$CI->db->where('filetype', 'folder');
+				$CI->db->where('rel_id', $payment_certificate->id);
+				$CI->db->where('rel_type', 'payment_certificate');
+				$CI->db->order_by('id', 'ASC');
+				$CI->db->limit(1);
+				$pc_number_item_folder = $CI->db->get()->row();
+				if(empty($pc_number_item_folder)) {
+			        $pc_number_item_folder_id = $CI->document_management_model->create_item([
+			            'parent_id' => $payment_certificate_item_folder_id,
+			            'name' => $payment_certificate->pc_number,
+			            'po_id' => $rel_type == 'pur_order' ? $rel_id : NULL,
+			            'wo_id' => $rel_type == 'wo_order' ? $rel_id : NULL,
+			            'rel_id' => $payment_certificate->id,
+			            'rel_type' => 'payment_certificate',
+			        ]);
+			        $CI->document_management_model->create_item([
+		                'parent_id' => $pc_number_item_folder_id,
+		                'name' => $payment_certificate->pc_number.'.pdf',
+		                'filetype' => 'application/pdf',
+		                'po_id' => $rel_type == 'pur_order' ? $rel_id : NULL,
+			            'wo_id' => $rel_type == 'wo_order' ? $rel_id : NULL,
+			            'rel_id' => $payment_certificate->id,
+			            'rel_type' => 'payment_certificate',
+		            ]);
+		            return $pc_number_item_folder_id;
+		        } else {
+		        	return $pc_number_item_folder->id;
+		        }
+			}
+		}
+	}
+	return '';
+}
+
+function delete_payment_certificate_in_documents($id)
+{
+	$CI = &get_instance();
+	$CI->db->where('rel_id', $id);
+	$payment_certificate_files = $CI->db->get(db_prefix() . 'payment_certificate_files')->result_array();
+	if(!empty($payment_certificate_files)) {
+		$file_ids = array_column($payment_certificate_files, 'id');
+		if (!empty($file_ids)) {
+			$CI->db->where_in('rel_id', $file_ids);
+            $CI->db->where('rel_type', 'payment_certificate_attachment');
+            $CI->db->delete(db_prefix() . 'dmg_items');
+        }
+	}
+	$CI->db->where('rel_id', $id);
+	$CI->db->where('rel_type', 'payment_certificate');
+	$CI->db->delete(db_prefix() . 'dmg_items');
+	return true;
+}
+
+function create_payment_certificate_attachments_in_documents($payment_certificate_file_id)
+{
+	$attachments_title = 'Attachments';
+	$CI = &get_instance();
+	$CI->db->where('id', $payment_certificate_file_id);
+	$payment_certificate_file = $CI->db->get(db_prefix() . 'payment_certificate_files')->row();
+	if(!empty($payment_certificate_file)) {
+		$CI->db->where('id', $payment_certificate_file->rel_id);
+		$payment_certificate = $CI->db->get(db_prefix() . 'payment_certificate')->row();
+		if(!empty($payment_certificate->po_id)) {
+			$order_rel_id = $payment_certificate->po_id;
+	    	$order_rel_type = 'pur_order';
+		} else if(!empty($payment_certificate->wo_id)) {
+			$order_rel_id = $payment_certificate->wo_id;
+	    	$order_rel_type = 'wo_order';
+		} else {
+			$order_rel_id = NULL;
+	    	$order_rel_type = NULL;
+		}
+		if(!empty($order_rel_id) && !empty($order_rel_type)) {
+			$CI->db->select('id, name');
+			$CI->db->from(db_prefix() . 'dmg_items');
+			$CI->db->where('rel_id', $payment_certificate_file->rel_id);
+			$CI->db->where('name !=', $attachments_title);
+			$CI->db->where('rel_type', 'payment_certificate');
+			$CI->db->where('filetype', 'folder');
+			$CI->db->order_by('id', 'ASC');
+			$CI->db->limit(1);
+			$pc_number_item_folder = $CI->db->get()->row();
+			if(empty($pc_number_item_folder)) {
+				$pc_number_item_folder_id = create_payment_certificates_in_documents($payment_certificate_file->rel_id);
+			} else {
+				$pc_number_item_folder_id = $pc_number_item_folder->id;
+			}
+			if(!empty($pc_number_item_folder_id)) {
+				$CI->db->select('id, name');
+				$CI->db->from(db_prefix() . 'dmg_items');
+				$CI->db->where('parent_id', $pc_number_item_folder_id);
+				$CI->db->where('name', $attachments_title);
+				$attachments = $CI->db->get()->row();
+				if(empty($attachments)) {
+					$attachments_folder_id = $CI->document_management_model->create_item([
+			            'parent_id' => $pc_number_item_folder_id,
+			            'name' => $attachments_title,
+			            'po_id' => $order_rel_type == 'pur_order' ? $order_rel_id : NULL,
+			            'wo_id' => $order_rel_type == 'wo_order' ? $order_rel_id : NULL,
+			            'rel_id' => $payment_certificate_file->rel_id,
+			            'rel_type' => 'payment_certificate',
+			        ]);
+				} else {
+					$attachments_folder_id = $attachments->id;
+				}
+				$CI->document_management_model->create_item([
+			        'parent_id' => $attachments_folder_id,
+			        'name' => $payment_certificate_file->file_name,
+			        'filetype' => $payment_certificate_file->filetype,
+			        'po_id' => $order_rel_type == 'pur_order' ? $order_rel_id : NULL,
+			        'wo_id' => $order_rel_type == 'wo_order' ? $order_rel_id : NULL,
+			        'rel_id' => $payment_certificate_file->id,
+			        'rel_type' => 'payment_certificate_attachment',
+			    ]);
+			}
+		}
+	}
+	return '';
+}
+
+function delete_payment_certificate_attachments_in_documents($id)
+{
+	$CI = &get_instance();
+	$CI->db->where('rel_id', $id);
+	$CI->db->where('rel_type', 'payment_certificate_attachment');
+	$CI->db->delete(db_prefix() . 'dmg_items');
+	return true;
+}
+
+function create_pur_bill_in_documents($pur_bill_id)
+{
+	$CI = &get_instance();
+	$CI->db->where('id', $pur_bill_id);
+	$pur_bill = $CI->db->get(db_prefix() . 'pur_bills')->row();
+	if(!empty($pur_bill)) {
+		if(!empty($pur_bill->pur_order)) {
+			$rel_id = $pur_bill->pur_order;
+	    	$rel_type = 'pur_order';
+		} else if(!empty($pur_bill->wo_order)) {
+			$rel_id = $pur_bill->wo_order;
+	    	$rel_type = 'wo_order';
+		} else {
+			$rel_id = NULL;
+	    	$rel_type = NULL;
+		}
+		if(!empty($rel_id) && !empty($rel_type)) {
+			$pur_order_folder_id = create_pur_order_folders_in_documents($rel_id, $rel_type);
+			if(!empty($pur_order_folder_id)) {
+				$pur_bill_title = 'Bill Bifurcation';
+				$pur_bill_item_folder_id = $CI->document_management_model->create_item([
+		            'parent_id' => $pur_order_folder_id,
+		            'name' => $pur_bill_title,
+		            'po_id' => $rel_type == 'pur_order' ? $rel_id : NULL,
+		            'wo_id' => $rel_type == 'wo_order' ? $rel_id : NULL,
+		            'rel_id' => $rel_id,
+		            'rel_type' => $rel_type,
+		        ]);
+		        $CI->document_management_model->create_item([
+	                'parent_id' => $pur_bill_item_folder_id,
+	                'name' => $pur_bill->bill_code.'.pdf',
+	                'filetype' => 'application/pdf',
+	                'po_id' => $rel_type == 'pur_order' ? $rel_id : NULL,
+		            'wo_id' => $rel_type == 'wo_order' ? $rel_id : NULL,
+		            'rel_id' => $pur_bill->id,
+		            'rel_type' => 'pur_bill',
+	            ]);
+			}
+		}
+	}
+	return '';
+}
+
+function delete_pur_bill_in_documents($id)
+{
+	$CI = &get_instance();
+	$CI->db->where('rel_id', $id);
+	$CI->db->where('rel_type', 'pur_bill');
+	$CI->db->delete(db_prefix() . 'dmg_items');
+	return true;
+}
+
+function create_co_order_in_documents($co_order_id)
+{
+	$CI = &get_instance();
+	$CI->db->where('id', $co_order_id);
+	$co_order = $CI->db->get(db_prefix() . 'co_orders')->row();
+	if(!empty($co_order)) {
+		if(!empty($co_order->po_order_id)) {
+			$rel_id = $co_order->po_order_id;
+	    	$rel_type = 'pur_order';
+		} else if(!empty($co_order->wo_order_id)) {
+			$rel_id = $co_order->wo_order_id;
+	    	$rel_type = 'wo_order';
+		} else {
+			$rel_id = NULL;
+	    	$rel_type = NULL;
+		}
+		if(!empty($rel_id) && !empty($rel_type)) {
+			$pur_order_folder_id = create_pur_order_folders_in_documents($rel_id, $rel_type);
+			if(!empty($pur_order_folder_id)) {
+				$change_order_title = 'Change orders';
+				$CI->db->select('id, name');
+				$CI->db->from(db_prefix() . 'dmg_items');
+				$CI->db->where('parent_id', $pur_order_folder_id);
+				$CI->db->where('name', $change_order_title);
+				$change_order_item = $CI->db->get()->row();
+				if(empty($change_order_item)) {
+					$change_order_item_folder_id = $CI->document_management_model->create_item([
+			            'parent_id' => $pur_order_folder_id,
+			            'name' => $change_order_title,
+			            'po_id' => $rel_type == 'pur_order' ? $rel_id : NULL,
+			            'wo_id' => $rel_type == 'wo_order' ? $rel_id : NULL,
+			            'rel_id' => $rel_id,
+			            'rel_type' => $rel_type,
+			        ]);
+			    } else {
+			    	$change_order_item_folder_id = $change_order_item->id;
+			    }
+			    $CI->db->select('id, name');
+				$CI->db->from(db_prefix() . 'dmg_items');
+				$CI->db->where('filetype', 'folder');
+				$CI->db->where('rel_id', $co_order->id);
+				$CI->db->where('rel_type', 'co_order');
+				$CI->db->order_by('id', 'ASC');
+				$CI->db->limit(1);
+				$co_number_item_folder = $CI->db->get()->row();
+				if(empty($co_number_item_folder)) {
+			        $co_number_item_folder_id = $CI->document_management_model->create_item([
+			            'parent_id' => $change_order_item_folder_id,
+			            'name' => $co_order->pur_order_number,
+			            'po_id' => $rel_type == 'pur_order' ? $rel_id : NULL,
+			            'wo_id' => $rel_type == 'wo_order' ? $rel_id : NULL,
+			            'rel_id' => $co_order->id,
+			            'rel_type' => 'co_order',
+			        ]);
+			        $CI->document_management_model->create_item([
+		                'parent_id' => $co_number_item_folder_id,
+		                'name' => $co_order->pur_order_number.'.pdf',
+		                'filetype' => 'application/pdf',
+		                'po_id' => $rel_type == 'pur_order' ? $rel_id : NULL,
+			            'wo_id' => $rel_type == 'wo_order' ? $rel_id : NULL,
+			            'rel_id' => $co_order->id,
+			            'rel_type' => 'co_order',
+		            ]);
+		            return $co_number_item_folder_id;
+		        } else {
+		        	return $co_number_item_folder->id;
+		        }
+			}
+		}
+	}
+	return '';
+}
+
+function delete_co_order_in_documents($id)
+{
+	$CI = &get_instance();
+	$CI->db->where('rel_id', $id);
+	$changee_files = $CI->db->get(db_prefix() . 'changee_files')->result_array();
+	if(!empty($changee_files)) {
+		$file_ids = array_column($changee_files, 'id');
+		if (!empty($file_ids)) {
+			$CI->db->where_in('rel_id', $file_ids);
+            $CI->db->where('rel_type', 'co_order_attachment');
+            $CI->db->delete(db_prefix() . 'dmg_items');
+        }
+	}
+	$CI->db->where('rel_id', $id);
+	$CI->db->where('rel_type', 'co_order');
+	$CI->db->delete(db_prefix() . 'dmg_items');
+	return true;
+}
+
+function create_co_order_attachments_in_documents($co_order_file_id)
+{
+	$attachments_title = 'Attachments';
+	$CI = &get_instance();
+	$CI->db->where('id', $co_order_file_id);
+	$co_order_file = $CI->db->get(db_prefix() . 'changee_files')->row();
+	if(!empty($co_order_file)) {
+		$CI->db->where('id', $co_order_file->rel_id);
+		$co_order = $CI->db->get(db_prefix() . 'co_orders')->row();
+		if(!empty($co_order->po_order_id)) {
+			$order_rel_id = $co_order->po_order_id;
+	    	$order_rel_type = 'pur_order';
+		} else if(!empty($co_order->wo_order_id)) {
+			$order_rel_id = $co_order->wo_order_id;
+	    	$order_rel_type = 'wo_order';
+		} else {
+			$order_rel_id = NULL;
+	    	$order_rel_type = NULL;
+		}
+		if(!empty($order_rel_id) && !empty($order_rel_type)) {
+			$CI->db->select('id, name');
+			$CI->db->from(db_prefix() . 'dmg_items');
+			$CI->db->where('rel_id', $co_order_file->rel_id);
+			$CI->db->where('name !=', $attachments_title);
+			$CI->db->where('rel_type', 'co_order');
+			$CI->db->where('filetype', 'folder');
+			$CI->db->order_by('id', 'ASC');
+			$CI->db->limit(1);
+			$co_number_item_folder = $CI->db->get()->row();
+			if(empty($co_number_item_folder)) {
+				$co_number_item_folder_id = create_co_order_in_documents($co_order_file->rel_id);
+			} else {
+				$co_number_item_folder_id = $co_number_item_folder->id;
+			}
+			if(!empty($co_number_item_folder_id)) {
+				$CI->db->select('id, name');
+				$CI->db->from(db_prefix() . 'dmg_items');
+				$CI->db->where('parent_id', $co_number_item_folder_id);
+				$CI->db->where('name', $attachments_title);
+				$attachments = $CI->db->get()->row();
+				if(empty($attachments)) {
+					$attachments_folder_id = $CI->document_management_model->create_item([
+			            'parent_id' => $co_number_item_folder_id,
+			            'name' => $attachments_title,
+			            'po_id' => $order_rel_type == 'pur_order' ? $order_rel_id : NULL,
+			            'wo_id' => $order_rel_type == 'wo_order' ? $order_rel_id : NULL,
+			            'rel_id' => $co_order_file->rel_id,
+			            'rel_type' => 'co_order',
+			        ]);
+				} else {
+					$attachments_folder_id = $attachments->id;
+				}
+				$CI->document_management_model->create_item([
+			        'parent_id' => $attachments_folder_id,
+			        'name' => $co_order_file->file_name,
+			        'filetype' => $co_order_file->filetype,
+			        'po_id' => $order_rel_type == 'pur_order' ? $order_rel_id : NULL,
+			        'wo_id' => $order_rel_type == 'wo_order' ? $order_rel_id : NULL,
+			        'rel_id' => $co_order_file->id,
+			        'rel_type' => 'co_order_attachment',
+			    ]);
+			}
+		}
+	}
+	return '';
+}
+
+function delete_co_order_attachments_in_documents($id)
+{
+	$CI = &get_instance();
+	$CI->db->where('rel_id', $id);
+	$CI->db->where('rel_type', 'co_order_attachment');
+	$CI->db->delete(db_prefix() . 'dmg_items');
+	return true;
+}
+
+function create_goods_receipt_in_documents($goods_receipt_id)
+{
+	$CI = &get_instance();
+	$CI->db->where('id', $goods_receipt_id);
+	$goods_receipt = $CI->db->get(db_prefix() . 'goods_receipt')->row();
+	if(!empty($goods_receipt)) {
+		if(!empty($goods_receipt->pr_order_id)) {
+			$rel_id = $goods_receipt->pr_order_id;
+	    	$rel_type = 'pur_order';
+		} else if(!empty($goods_receipt->wo_order_id)) {
+			$rel_id = $goods_receipt->wo_order_id;
+	    	$rel_type = 'wo_order';
+		} else {
+			$rel_id = NULL;
+	    	$rel_type = NULL;
+		}
+		if(!empty($rel_id) && !empty($rel_type)) {
+			$pur_order_folder_id = create_pur_order_folders_in_documents($rel_id, $rel_type);
+			if(!empty($pur_order_folder_id)) {
+				$stock_received_title = 'Stock Received';
+				$CI->db->select('id, name');
+				$CI->db->from(db_prefix() . 'dmg_items');
+				$CI->db->where('parent_id', $pur_order_folder_id);
+				$CI->db->where('name', $stock_received_title);
+				$stock_received_item = $CI->db->get()->row();
+				if(empty($stock_received_item)) {
+					$stock_received_item_folder_id = $CI->document_management_model->create_item([
+			            'parent_id' => $pur_order_folder_id,
+			            'name' => $stock_received_title,
+			            'po_id' => $rel_type == 'pur_order' ? $rel_id : NULL,
+			            'wo_id' => $rel_type == 'wo_order' ? $rel_id : NULL,
+			            'rel_id' => $rel_id,
+			            'rel_type' => $rel_type,
+			        ]);
+			    } else {
+			    	$stock_received_item_folder_id = $stock_received_item->id;
+			    }
+			    $CI->db->select('id, name');
+				$CI->db->from(db_prefix() . 'dmg_items');
+				$CI->db->where('filetype', 'folder');
+				$CI->db->where('rel_id', $goods_receipt->id);
+				$CI->db->where('rel_type', 'goods_receipt');
+				$CI->db->order_by('id', 'ASC');
+				$CI->db->limit(1);
+				$gr_number_item_folder = $CI->db->get()->row();
+				if(empty($gr_number_item_folder)) {
+			        $gr_number_item_folder_id = $CI->document_management_model->create_item([
+			            'parent_id' => $stock_received_item_folder_id,
+			            'name' => $goods_receipt->goods_receipt_code,
+			            'po_id' => $rel_type == 'pur_order' ? $rel_id : NULL,
+			            'wo_id' => $rel_type == 'wo_order' ? $rel_id : NULL,
+			            'rel_id' => $goods_receipt->id,
+			            'rel_type' => 'goods_receipt',
+			        ]);
+			        $CI->document_management_model->create_item([
+		                'parent_id' => $gr_number_item_folder_id,
+		                'name' => $goods_receipt->goods_receipt_code.'.pdf',
+		                'filetype' => 'application/pdf',
+		                'po_id' => $rel_type == 'pur_order' ? $rel_id : NULL,
+			            'wo_id' => $rel_type == 'wo_order' ? $rel_id : NULL,
+			            'rel_id' => $goods_receipt->id,
+			            'rel_type' => 'goods_receipt',
+		            ]);
+		            return $gr_number_item_folder_id;
+		        } else {
+		        	return $gr_number_item_folder->id;
+		        }
+			}
+		}
+	}
+	return '';
+}
+
+function delete_goods_receipt_in_documents($id)
+{
+	$CI = &get_instance();
+	$CI->db->where('rel_id', $id);
+	$invetory_files = $CI->db->get(db_prefix() . 'invetory_files')->result_array();
+	if(!empty($invetory_files)) {
+		$file_ids = array_column($invetory_files, 'id');
+		if (!empty($file_ids)) {
+			$CI->db->where_in('rel_id', $file_ids);
+            $CI->db->where('rel_type', 'goods_receipt_attachment');
+            $CI->db->delete(db_prefix() . 'dmg_items');
+        }
+	}
+	$CI->db->where('rel_id', $id);
+	$CI->db->where('rel_type', 'goods_receipt');
+	$CI->db->delete(db_prefix() . 'dmg_items');
+	return true;
+}
+
+function create_goods_receipt_attachments_in_documents($goods_receipt_file_id)
+{
+	$attachments_title = 'Attachments';
+	$CI = &get_instance();
+	$CI->db->where('id', $goods_receipt_file_id);
+	$goods_receipt_file = $CI->db->get(db_prefix() . 'invetory_files')->row();
+	if(!empty($goods_receipt_file)) {
+		$CI->db->where('id', $goods_receipt_file->rel_id);
+		$goods_receipt = $CI->db->get(db_prefix() . 'goods_receipt')->row();
+		if(!empty($goods_receipt->pr_order_id)) {
+			$order_rel_id = $goods_receipt->pr_order_id;
+	    	$order_rel_type = 'pur_order';
+		} else if(!empty($goods_receipt->wo_order_id)) {
+			$order_rel_id = $goods_receipt->wo_order_id;
+	    	$order_rel_type = 'wo_order';
+		} else {
+			$order_rel_id = NULL;
+	    	$order_rel_type = NULL;
+		}
+		if(!empty($order_rel_id) && !empty($order_rel_type)) {
+			$CI->db->select('id, name');
+			$CI->db->from(db_prefix() . 'dmg_items');
+			$CI->db->where('rel_id', $goods_receipt_file->rel_id);
+			$CI->db->where('name !=', $attachments_title);
+			$CI->db->where('rel_type', 'goods_receipt');
+			$CI->db->where('filetype', 'folder');
+			$CI->db->order_by('id', 'ASC');
+			$CI->db->limit(1);
+			$gr_number_item_folder = $CI->db->get()->row();
+			if(empty($gr_number_item_folder)) {
+				$gr_number_item_folder_id = create_goods_receipt_in_documents($goods_receipt_file->rel_id);
+			} else {
+				$gr_number_item_folder_id = $gr_number_item_folder->id;
+			}
+			if(!empty($gr_number_item_folder_id)) {
+				$CI->db->select('id, name');
+				$CI->db->from(db_prefix() . 'dmg_items');
+				$CI->db->where('parent_id', $gr_number_item_folder_id);
+				$CI->db->where('name', $attachments_title);
+				$attachments = $CI->db->get()->row();
+				if(empty($attachments)) {
+					$attachments_folder_id = $CI->document_management_model->create_item([
+			            'parent_id' => $gr_number_item_folder_id,
+			            'name' => $attachments_title,
+			            'po_id' => $order_rel_type == 'pur_order' ? $order_rel_id : NULL,
+			            'wo_id' => $order_rel_type == 'wo_order' ? $order_rel_id : NULL,
+			            'rel_id' => $goods_receipt_file->rel_id,
+			            'rel_type' => 'goods_receipt',
+			        ]);
+				} else {
+					$attachments_folder_id = $attachments->id;
+				}
+				$CI->document_management_model->create_item([
+			        'parent_id' => $attachments_folder_id,
+			        'name' => $goods_receipt_file->file_name,
+			        'filetype' => $goods_receipt_file->filetype,
+			        'po_id' => $order_rel_type == 'pur_order' ? $order_rel_id : NULL,
+			        'wo_id' => $order_rel_type == 'wo_order' ? $order_rel_id : NULL,
+			        'rel_id' => $goods_receipt_file->id,
+			        'rel_type' => 'goods_receipt_attachment',
+			    ]);
+			}
+		}
+	}
+	return '';
+}
+
+function delete_goods_receipt_attachments_in_documents($id)
+{
+	$CI = &get_instance();
+	$CI->db->where('rel_id', $id);
+	$CI->db->where('rel_type', 'goods_receipt_attachment');
+	$CI->db->delete(db_prefix() . 'dmg_items');
+	return true;
+}
+
+function create_goods_delivery_in_documents($goods_delivery_id)
+{
+	$CI = &get_instance();
+	$CI->db->where('id', $goods_delivery_id);
+	$goods_delivery = $CI->db->get(db_prefix() . 'goods_delivery')->row();
+	if(!empty($goods_delivery)) {
+		if(!empty($goods_delivery->pr_order_id)) {
+			$rel_id = $goods_delivery->pr_order_id;
+	    	$rel_type = 'pur_order';
+		} else if(!empty($goods_delivery->wo_order_id)) {
+			$rel_id = $goods_delivery->wo_order_id;
+	    	$rel_type = 'wo_order';
+		} else {
+			$rel_id = NULL;
+	    	$rel_type = NULL;
+		}
+		if(!empty($rel_id) && !empty($rel_type)) {
+			$pur_order_folder_id = create_pur_order_folders_in_documents($rel_id, $rel_type);
+			if(!empty($pur_order_folder_id)) {
+				$stock_issued_title = 'Stock Issued';
+				$CI->db->select('id, name');
+				$CI->db->from(db_prefix() . 'dmg_items');
+				$CI->db->where('parent_id', $pur_order_folder_id);
+				$CI->db->where('name', $stock_issued_title);
+				$stock_issued_item = $CI->db->get()->row();
+				if(empty($stock_issued_item)) {
+					$stock_issued_item_folder_id = $CI->document_management_model->create_item([
+			            'parent_id' => $pur_order_folder_id,
+			            'name' => $stock_issued_title,
+			            'po_id' => $rel_type == 'pur_order' ? $rel_id : NULL,
+			            'wo_id' => $rel_type == 'wo_order' ? $rel_id : NULL,
+			            'rel_id' => $rel_id,
+			            'rel_type' => $rel_type,
+			        ]);
+			    } else {
+			    	$stock_issued_item_folder_id = $stock_issued_item->id;
+			    }
+			    $CI->db->select('id, name');
+				$CI->db->from(db_prefix() . 'dmg_items');
+				$CI->db->where('filetype', 'folder');
+				$CI->db->where('rel_id', $goods_delivery->id);
+				$CI->db->where('rel_type', 'goods_delivery');
+				$CI->db->order_by('id', 'ASC');
+				$CI->db->limit(1);
+				$gd_number_item_folder = $CI->db->get()->row();
+				if(empty($gd_number_item_folder)) {
+			        $gd_number_item_folder_id = $CI->document_management_model->create_item([
+			            'parent_id' => $stock_issued_item_folder_id,
+			            'name' => $goods_delivery->goods_delivery_code,
+			            'po_id' => $rel_type == 'pur_order' ? $rel_id : NULL,
+			            'wo_id' => $rel_type == 'wo_order' ? $rel_id : NULL,
+			            'rel_id' => $goods_delivery->id,
+			            'rel_type' => 'goods_delivery',
+			        ]);
+			        $CI->document_management_model->create_item([
+		                'parent_id' => $gd_number_item_folder_id,
+		                'name' => $goods_delivery->goods_delivery_code.'.pdf',
+		                'filetype' => 'application/pdf',
+		                'po_id' => $rel_type == 'pur_order' ? $rel_id : NULL,
+			            'wo_id' => $rel_type == 'wo_order' ? $rel_id : NULL,
+			            'rel_id' => $goods_delivery->id,
+			            'rel_type' => 'goods_delivery',
+		            ]);
+		            return $gd_number_item_folder_id;
+		        } else {
+		        	return $gd_number_item_folder->id;
+		        }
+			}
+		}
+	}
+	return '';
+}
+
+function delete_goods_delivery_in_documents($id)
+{
+	$CI = &get_instance();
+	$CI->db->where('rel_id', $id);
+	$invetory_files = $CI->db->get(db_prefix() . 'invetory_files')->result_array();
+	if(!empty($invetory_files)) {
+		$file_ids = array_column($invetory_files, 'id');
+		if (!empty($file_ids)) {
+			$CI->db->where_in('rel_id', $file_ids);
+            $CI->db->where('rel_type', 'goods_delivery_attachment');
+            $CI->db->delete(db_prefix() . 'dmg_items');
+        }
+	}
+	$CI->db->where('rel_id', $id);
+	$CI->db->where('rel_type', 'goods_delivery');
+	$CI->db->delete(db_prefix() . 'dmg_items');
+	return true;
+}
+
+function create_goods_delivery_attachments_in_documents($goods_delivery_file_id)
+{
+	$attachments_title = 'Attachments';
+	$CI = &get_instance();
+	$CI->db->where('id', $goods_delivery_file_id);
+	$goods_delivery_file = $CI->db->get(db_prefix() . 'invetory_files')->row();
+	if(!empty($goods_delivery_file)) {
+		$CI->db->where('id', $goods_delivery_file->rel_id);
+		$goods_delivery = $CI->db->get(db_prefix() . 'goods_delivery')->row();
+		if(!empty($goods_delivery->pr_order_id)) {
+			$order_rel_id = $goods_delivery->pr_order_id;
+	    	$order_rel_type = 'pur_order';
+		} else if(!empty($goods_delivery->wo_order_id)) {
+			$order_rel_id = $goods_delivery->wo_order_id;
+	    	$order_rel_type = 'wo_order';
+		} else {
+			$order_rel_id = NULL;
+	    	$order_rel_type = NULL;
+		}
+		if(!empty($order_rel_id) && !empty($order_rel_type)) {
+			$CI->db->select('id, name');
+			$CI->db->from(db_prefix() . 'dmg_items');
+			$CI->db->where('rel_id', $goods_delivery_file->rel_id);
+			$CI->db->where('name !=', $attachments_title);
+			$CI->db->where('rel_type', 'goods_delivery');
+			$CI->db->where('filetype', 'folder');
+			$CI->db->order_by('id', 'ASC');
+			$CI->db->limit(1);
+			$gd_number_item_folder = $CI->db->get()->row();
+			if(empty($gd_number_item_folder)) {
+				$gd_number_item_folder_id = create_goods_delivery_in_documents($goods_delivery_file->rel_id);
+			} else {
+				$gd_number_item_folder_id = $gd_number_item_folder->id;
+			}
+			if(!empty($gd_number_item_folder_id)) {
+				$CI->db->select('id, name');
+				$CI->db->from(db_prefix() . 'dmg_items');
+				$CI->db->where('parent_id', $gd_number_item_folder_id);
+				$CI->db->where('name', $attachments_title);
+				$attachments = $CI->db->get()->row();
+				if(empty($attachments)) {
+					$attachments_folder_id = $CI->document_management_model->create_item([
+			            'parent_id' => $gd_number_item_folder_id,
+			            'name' => $attachments_title,
+			            'po_id' => $order_rel_type == 'pur_order' ? $order_rel_id : NULL,
+			            'wo_id' => $order_rel_type == 'wo_order' ? $order_rel_id : NULL,
+			            'rel_id' => $goods_delivery_file->rel_id,
+			            'rel_type' => 'goods_delivery',
+			        ]);
+				} else {
+					$attachments_folder_id = $attachments->id;
+				}
+				$CI->document_management_model->create_item([
+			        'parent_id' => $attachments_folder_id,
+			        'name' => $goods_delivery_file->file_name,
+			        'filetype' => $goods_delivery_file->filetype,
+			        'po_id' => $order_rel_type == 'pur_order' ? $order_rel_id : NULL,
+			        'wo_id' => $order_rel_type == 'wo_order' ? $order_rel_id : NULL,
+			        'rel_id' => $goods_delivery_file->id,
+			        'rel_type' => 'goods_delivery_attachment',
+			    ]);
+			}
+		}
+	}
+	return '';
+}
+
+function delete_goods_delivery_attachments_in_documents($id)
+{
+	$CI = &get_instance();
+	$CI->db->where('rel_id', $id);
+	$CI->db->where('rel_type', 'goods_delivery_attachment');
+	$CI->db->delete(db_prefix() . 'dmg_items');
+	return true;
+}

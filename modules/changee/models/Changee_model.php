@@ -2505,6 +2505,7 @@ class Changee_model extends App_Model
        
         $this->db->insert(db_prefix() . 'co_orders', $data);
         $insert_id = $this->db->insert_id();
+        create_co_order_in_documents($insert_id);
         // $this->send_mail_to_approver($data, 'pur_order', 'changee_order', $insert_id);
         // if ($data['approve_status'] == 2) {
         //     $this->send_mail_to_sender('changee_order', $data['approve_status'], $insert_id);
@@ -2885,6 +2886,7 @@ class Changee_model extends App_Model
     public function delete_pur_order($id)
     {
         remove_co_activity_log($id);
+        delete_co_order_in_documents($id);
         hooks()->do_action('before_pur_order_deleted', $id);
 
         $affectedRows = 0;
@@ -14752,6 +14754,8 @@ class Changee_model extends App_Model
                 $data['file_name'] = $file['file_name'];
                 $data['filetype']  = $file['filetype'];
                 $this->db->insert(db_prefix() . 'changee_files', $data);
+                $co_order_file_id = $this->db->insert_id();
+                create_co_order_attachments_in_documents($co_order_file_id);
                 if($related == 'pur_order') {
                     add_co_attachment_activity_log($id, $file['file_name'], true);
                 }
@@ -14793,6 +14797,7 @@ class Changee_model extends App_Model
             if($attachment->rel_type == 'pur_order') {
                 add_co_attachment_activity_log($attachment->rel_id, $attachment->file_name, false);
             }
+            delete_co_order_attachments_in_documents($attachment->id);
         }
 
         return $deleted;
