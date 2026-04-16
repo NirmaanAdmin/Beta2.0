@@ -12,7 +12,10 @@ if (isset($item)) {
 				<input type="hidden" name="default_parent_id" value="<?php echo htmldecode($parent_id); ?>">
 				<input type="hidden" name="redirect_type" value="<?php echo htmldecode($redirect_type); ?>">
 				<div class="col-md-12">
-					<?php echo render_input('name', 'dmg_name', $item->name); ?>
+					<?php
+					if(empty($item->rel_id) && empty($item->rel_type)) {
+						echo render_input('name', 'dmg_name', $item->name);
+					} ?>
 				</div>
 				<div class="col-md-12">
 					<div class="form-group">

@@ -316,9 +316,12 @@
 
 			<?php
 			if(!$file_locked){ ?>
-				<a href="javascript:void(0)" class="btn btn-primary w100 mtop5 mbot5" onclick="upload_new_version(<?php echo htmldecode($item->id); ?>)">
-					<i class="fa fa-file"></i> <?php echo _l('dmg_upload_new_version'); ?>
-				</a>
+				<?php
+				if(empty($item->rel_id) && empty($item->rel_type)) { ?>
+					<a href="javascript:void(0)" class="btn btn-primary w100 mtop5 mbot5" onclick="upload_new_version(<?php echo htmldecode($item->id); ?>)">
+						<i class="fa fa-file"></i> <?php echo _l('dmg_upload_new_version'); ?>
+					</a>
+				<?php } ?>
 			<?php } ?>
 
 
