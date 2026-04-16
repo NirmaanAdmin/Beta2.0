@@ -467,7 +467,11 @@ class document_management extends AdminController
 		$master_parent_id = '';
 		$id = $this->input->get('id');
 		$data['file'] = $this->document_management_model->get_item($id);
-		$this->load->view('file_managements/preview_file.php', $data);
+		if(!empty($data['file']->rel_id) && !empty($data['file']->rel_type)) {
+			$this->load->view('file_managements/preview_order_document.php', $data);
+		} else {
+			$this->load->view('file_managements/preview_file.php', $data);
+		}
 	}
 
 	/**
