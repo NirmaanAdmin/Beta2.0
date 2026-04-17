@@ -994,18 +994,18 @@ function create_pur_order_attachments_in_documents($purchase_file_id)
 		        'po_id' => $rel_type == 'pur_order' ? $rel_id : NULL,
 	            'wo_id' => $rel_type == 'wo_order' ? $rel_id : NULL,
 		        'rel_id' => $purchase_file->id,
-		        'rel_type' => 'pur_order_attachment',
+		        'rel_type' => $rel_type.'_attachment',
 		    ]);
 		}
 	}
 	return '';
 }
 
-function delete_pur_order_attachments_in_documents($id)
+function delete_pur_order_attachments_in_documents($id, $rel_type)
 {
 	$CI = &get_instance();
 	$CI->db->where('rel_id', $id);
-	$CI->db->where('rel_type', 'pur_order_attachment');
+	$CI->db->where('rel_type', $rel_type.'_attachment');
 	$CI->db->delete(db_prefix() . 'dmg_items');
 	return true;
 }

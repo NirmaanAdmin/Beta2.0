@@ -15737,7 +15737,7 @@ class Purchase_model extends App_Model
             if($attachment->rel_type == 'pur_request') {
                 add_pr_attachment_activity_log($attachment->rel_id, $attachment->file_name, false);
             }
-            delete_pur_order_attachments_in_documents($attachment->id);
+            delete_pur_order_attachments_in_documents($attachment->id, $attachment->rel_type);
         }
 
         return $deleted;
