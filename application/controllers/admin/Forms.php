@@ -900,6 +900,9 @@ class Forms extends AdminController
                 'vtf'   => ['has_attachments' => false],
                 'rccb'  => ['has_attachments' => false],
                 'pcd'   => ['has_attachments' => false],
+                'ehs'   => ['has_attachments' => false],
+                'bljcb'   => ['has_attachments' => false],
+                'exjcb'   => ['has_attachments' => false],
             ];
 
             if (isset($formConfigs[$form_type])) {
