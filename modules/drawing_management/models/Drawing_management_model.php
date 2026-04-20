@@ -1349,13 +1349,18 @@ class drawing_management_model extends app_model
 	 * @param  array $id_lever_1 
 	 * @param  string $save_path  
 	 */
-	public function create_folder_bulk_download($id_lever_1, $folder_name)
+	public function create_folder_bulk_download($id_lever_1, $folder_name, $is_folder = false)
 	{
+	    set_time_limit(0);
+        ini_set('memory_limit', '100000000M');
 		// Create root folder
 		$root = rtrim(DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER, '/') . '/temps/bulk_downloads/' . $folder_name;
 		drawing_dmg_create_folder($root);
 
-		$data_child = $this->get_item('', 'parent_id IN (' . $id_lever_1 . ')', 'id, name, filetype, parent_id, pdf_attachment');
+		$data_child = $this->get_item('', 'id IN (' . $id_lever_1 . ')', 'id, name, filetype, parent_id, pdf_attachment');
+		if($is_folder) {
+			$data_child = $this->get_item('', 'parent_id IN (' . $id_lever_1 . ')', 'id, name, filetype, parent_id, pdf_attachment');
+		}
 		if (!$data_child) {
 			return;
 		}
@@ -1365,7 +1370,7 @@ class drawing_management_model extends app_model
 				// recursion into sub-folder
 				$new_folder = $root . '/' . $value['name'];
 				drawing_dmg_create_folder($new_folder);
-				$this->create_folder_bulk_download($value['id'], $folder_name . '/' . $value['name']);
+				$this->create_folder_bulk_download($value['id'], $folder_name . '/' . $value['name'], true);
 			} else {
 				// 1) copy the original file
 				$sourceFile = rtrim(DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER, '/') . '/files/'
