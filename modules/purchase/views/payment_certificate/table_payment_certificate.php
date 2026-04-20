@@ -39,6 +39,8 @@ $aColumns = [
     1,
     db_prefix() . 'payment_certificate' . '.responsible_person as responsible_person',
     db_prefix() . 'payment_certificate' . '.last_action as last_action',
+    db_prefix() . 'payment_certificate' . '.invoice_ref as invoice_ref',
+    db_prefix() . 'payment_certificate' . '.invoice_date as invoice_date',
 ];
 
 $sIndexColumn = 'id';
@@ -344,6 +346,10 @@ foreach ($rResult as $aRow) {
             if(!empty($aRow['pur_invoice_id'])) {
                 $_data = '<a href="' . admin_url('purchase/purchase_invoice/' . $aRow['pur_invoice_id']) . '" target="_blank">' . $aRow['invoice_number'] . '</a>';
             }
+        } elseif ($aColumns[$i] == 'invoice_ref') {
+            $_data = !empty($aRow['invoice_ref']) ? $aRow['invoice_ref'] : NULL;
+        } elseif ($aColumns[$i] == 'invoice_date') {
+            $_data = !empty($aRow['invoice_date']) ? _d($aRow['invoice_date']) : NULL;
         } else {
             if (strpos($aColumns[$i], 'date_picker_') !== false) {
                 $_data = (strpos($_data, ' ') !== false ? _dt($_data) : _d($_data));

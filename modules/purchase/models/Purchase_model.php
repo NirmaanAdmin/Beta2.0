@@ -27365,6 +27365,8 @@ class Purchase_model extends App_Model
                     $row['options'] = '';
                     $row['responsible_person'] = preg_match_all('/<option[^>]*selected[^>]*>(.*?)<\/option>/', $value[14], $m) ? implode(', ', array_map('trim', $m[1])) : '';
                     $row['last_action_by'] = $value[15];
+                    $row['invoice_ref'] = $value[16];
+                    $row['invoice_date'] = $value[17];
 
                     $result[] = $row;
                 }
@@ -27403,6 +27405,8 @@ class Purchase_model extends App_Model
             'group_pur'                    => _l('group_pur'),
             'this_bill'                    => _l('this_bill'),
             'submission_date'              => _l('submission_date'),
+            'invoice_ref'                  => _l('invoice_ref'),
+            'invoice_date'                 => _l('invoice_date'),
             'approval_status'              => _l('approval_status'),
             'pending_approval'             => _l('pending_approval'),
             'applied_to_vendor_bill'       => _l('applied_to_vendor_bill'),
@@ -27467,6 +27471,8 @@ class Purchase_model extends App_Model
             'group_pur'                    => _l('group_pur'),
             'this_bill'                    => _l('this_bill'),
             'submission_date'              => _l('submission_date'),
+            'invoice_ref'                  => _l('invoice_ref'),
+            'invoice_date'                 => _l('invoice_date'),
             'approval_status'              => _l('approval_status'),
             'pending_approval'             => _l('pending_approval'),
             'applied_to_vendor_bill'       => _l('applied_to_vendor_bill'),
