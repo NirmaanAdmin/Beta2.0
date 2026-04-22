@@ -356,8 +356,8 @@ class Tickets_model extends App_Model
         $ticket = $this->db->get()->row();
         if ($ticket) {
             $ticket->submitter = $ticket->contactid != 0 ?
-            ($ticket->user_firstname . ' ' . $ticket->user_lastname) :
-            $ticket->from_name;
+                ($ticket->user_firstname . ' ' . $ticket->user_lastname) :
+                $ticket->from_name;
 
             if (!($ticket->admin == null || $ticket->admin == 0)) {
                 $ticket->opened_by = $ticket->staff_firstname . ' ' . $ticket->staff_lastname;
@@ -468,8 +468,9 @@ class Tickets_model extends App_Model
         $is_html_stripped = $this->piping === true;
 
         // admin can have html
-        if (!$is_html_stripped && 
-            $admin == null && 
+        if (
+            !$is_html_stripped &&
+            $admin == null &&
             hooks()->apply_filters('ticket_message_without_html_for_non_admin', true)
         ) {
             $data['message'] = _strip_tags($data['message']);
@@ -480,7 +481,7 @@ class Tickets_model extends App_Model
             $data['userid'] = 0;
         }
 
-        if(isset($data['is_consultant'])) {
+        if (isset($data['is_consultant'])) {
             $data['is_consultant'] = 1;
         }
 
@@ -822,10 +823,11 @@ class Tickets_model extends App_Model
         // }
 
         $is_html_stripped = $this->piping === true;
-      
+
         // Admin can have html
-        if (!$is_html_stripped && 
-            $admin == null && 
+        if (
+            !$is_html_stripped &&
+            $admin == null &&
             hooks()->apply_filters('ticket_message_without_html_for_non_admin', true)
         ) {
             $data['message'] = _strip_tags($data['message']);
@@ -1114,7 +1116,7 @@ class Tickets_model extends App_Model
             $data['email'] = null;
         }
 
-        if(empty($data['department'])) {
+        if (empty($data['department'])) {
             $data['department'] = 0;
         }
 
@@ -1456,7 +1458,7 @@ class Tickets_model extends App_Model
             return [
                 'default' => true,
             ];
-        // Not default check if if used in table
+            // Not default check if if used in table
         } elseif (is_reference_in_table('status', db_prefix() . 'tickets', $id)) {
             return [
                 'referenced' => true,
@@ -1770,9 +1772,9 @@ class Tickets_model extends App_Model
         return $staffToNotify;
     }
 
-    public function find_project_contact($project_id) 
+    public function find_project_contact($project_id)
     {
-        $this->db->select(db_prefix() . 'contacts.id as id, '.db_prefix() . 'contacts.userid as userid, CONCAT(firstname," ",lastname) AS full_name', FALSE);
+        $this->db->select(db_prefix() . 'contacts.id as id, ' . db_prefix() . 'contacts.userid as userid, CONCAT(firstname," ",lastname) AS full_name', FALSE);
         $this->db->join(db_prefix() . 'projects', db_prefix() . 'projects.clientid = ' . db_prefix() . 'contacts.userid', 'left');
         $this->db->where(db_prefix() . 'projects.id', $project_id);
         $contacts = $this->db->get(db_prefix() . 'contacts')->result_array();
@@ -1787,7 +1789,7 @@ class Tickets_model extends App_Model
         $this->db->where('project_id', $default_project);
         $this->db->where('parent_id', 0);
         $dms_items = $this->db->get(db_prefix() . 'dms_items')->row();
-        if(!empty($dms_items)) {
+        if (!empty($dms_items)) {
             $this->db->select("
                 id,
                 CASE 
@@ -1804,5 +1806,17 @@ class Tickets_model extends App_Model
             $result = $this->db->get(db_prefix() . 'dms_items')->result_array();
         }
         return $result;
+    }
+
+    public function get_contact_name()
+    {
+        $this->db->select('name');
+        $this->db->from('tbltickets');
+        $this->db->where('name IS NOT NULL');
+        $this->db->where('name != ""');
+        $this->db->group_by('name');
+        $this->db->order_by('name', 'ASC');
+
+       return $result = $this->db->get()->result_array();
     }
 }

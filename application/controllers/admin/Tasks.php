@@ -49,7 +49,7 @@ class Tasks extends AdminController
 
     public function table()
     {
-        $this->app->get_table_data('tasks_new');
+        $this->app->get_table_data('tasks_new'); 
     }
     public function table_tasks_details()
     {

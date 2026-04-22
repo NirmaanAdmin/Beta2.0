@@ -24,28 +24,28 @@ class Tickets extends AdminController
             $status = '';
         }
 
-        $data['table'] = App_table::find('tickets');
+        // $data['table'] = App_table::find('tickets');
 
-        if ($this->input->is_ajax_request()) {
-            if (!$this->input->post('via_ticket')) {
-                $tableParams = [
-                    'status' => $status,
-                    'userid' => $userid,
-                ];
-            } else {
-                // request for othes tickets when single ticket is opened
-                $tableParams = [
-                    'userid'        => $this->input->post('via_ticket_userid'),
-                    'via_ticket' => $this->input->post('via_ticket'),
-                ];
+        // if ($this->input->is_ajax_request()) {
+        //     if (!$this->input->post('via_ticket')) {
+        //         $tableParams = [
+        //             'status' => $status,
+        //             'userid' => $userid,
+        //         ];
+        //     } else {
+        //         // request for othes tickets when single ticket is opened
+        //         $tableParams = [
+        //             'userid'        => $this->input->post('via_ticket_userid'),
+        //             'via_ticket' => $this->input->post('via_ticket'),
+        //         ];
 
-                if ($tableParams['userid'] == 0) {
-                    unset($tableParams['userid']);
-                    $tableParams['by_email'] = $this->input->post('via_ticket_email');
-                }
-            }
-            $data['table']->output($tableParams);
-        }
+        //         if ($tableParams['userid'] == 0) {
+        //             unset($tableParams['userid']);
+        //             $tableParams['by_email'] = $this->input->post('via_ticket_email');
+        //         }
+        //     }
+        //     $data['table']->output($tableParams);
+        // }
 
         $data['chosen_ticket_status']              = $status;
         $data['weekly_tickets_opening_statistics'] = json_encode($this->tickets_model->get_weekly_tickets_opening_statistics());
@@ -57,12 +57,23 @@ class Tickets extends AdminController
         $data['priorities']           = $this->tickets_model->get_priority();
         $data['services']             = $this->tickets_model->get_service();
         $data['ticket_assignees']     = $this->tickets_model->get_tickets_assignes_disctinct();
+        $data['contact_list']         = $this->tickets_model->get_contact_name();
         $data['bodyclass']            = 'tickets-page';
         add_admin_tickets_js_assets();
         $data['default_tickets_list_statuses'] = hooks()->apply_filters('default_tickets_list_statuses', [1, 2, 4]);
+        $data['staff'] = $this->staff_model->get('', ['active' => 1]);
         $this->load->view('admin/tickets/list', $data);
     }
-
+    public function table()
+    {
+        $this->app->get_table_data('tickets_new');
+    }
+    public function table_tasks_details()
+    {
+        if ($this->input->is_ajax_request()) {
+            $this->app->get_table_data('tickets_new');
+        }
+    }
     public function add($userid = false)
     {
         if ($this->input->post()) {
@@ -1038,5 +1049,4 @@ class Tickets extends AdminController
         $pdf_name = mb_strtoupper(slug_it($ticket->subject)) . '.pdf';
         $pdf->Output($pdf_name, $type);
     }
-
 }
