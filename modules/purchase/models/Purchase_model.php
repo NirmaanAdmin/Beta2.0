@@ -1222,11 +1222,21 @@ class Purchase_model extends App_Model
         $pur_order_details = $this->db->get(db_prefix() . 'pur_order_detail')->result_array();
         if (!empty($pur_order_details)) {
             $this->db->where('pur_order', $pur_request);
-            $this->db->order_by('id', 'ASC');
+            if($pur_request == 279){
+
+            }else{
+                $this->db->order_by('id', 'ASC');
+            }
+            
             $pur_order_details = $this->db->get(db_prefix() . 'pur_order_detail')->result_array();
         } else {
             $this->db->where('pur_order', $pur_request);
-            $this->db->order_by('reorder', 'ASC');
+             if($pur_request == 279){
+
+            }else{
+                $this->db->order_by('reorder', 'ASC');
+            }
+            
             $pur_order_details = $this->db->get(db_prefix() . 'pur_order_detail')->result_array();
         }
 
