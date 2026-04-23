@@ -17818,4 +17818,138 @@ class purchase extends AdminController
     {
         $this->purchase_model->pur_bills_export_csv($id);
     }
+
+    public function import_file_xlsx_purchase_commodity_group()
+    {
+        if (!class_exists('XLSXReader_fin')) {
+            require_once(module_dir_path(PURCHASE_MODULE_NAME) . '/assets/plugins/XLSXReader/XLSXReader.php');
+        }
+        require_once(module_dir_path(PURCHASE_MODULE_NAME) . '/assets/plugins/XLSXWriter/xlsxwriter.class.php');
+
+        $total_row_false = 0;
+        $total_rows_data = 0;
+        $dataerror = 0;
+        $total_row_success = 0;
+        $total_rows_data_error = 0;
+        $filename = '';
+
+        if (isset($_FILES['file_csv']['name']) && $_FILES['file_csv']['name'] != '') {
+
+            /*delete file old before export file*/
+            $path_before = COMMODITY_ERROR_PUR . 'FILE_ERROR_PURCHASE_COMMODITY_GROUP' . get_staff_user_id() . '.xlsx';
+            if (file_exists($path_before)) {
+                unlink(COMMODITY_ERROR_PUR . 'FILE_ERROR_PURCHASE_COMMODITY_GROUP' . get_staff_user_id() . '.xlsx');
+            }
+
+            if (isset($_FILES['file_csv']['name']) && $_FILES['file_csv']['name'] != '') {
+                $tmpFilePath = $_FILES['file_csv']['tmp_name'];
+                if (!empty($tmpFilePath) && $tmpFilePath != '') {
+                    $tmpDir = TEMP_FOLDER . '/' . time() . uniqid() . '/';
+                    if (!file_exists(TEMP_FOLDER)) {
+                        mkdir(TEMP_FOLDER, 0755);
+                    }
+                    if (!file_exists($tmpDir)) {
+                        mkdir($tmpDir, 0755);
+                    }
+                    $newFilePath = $tmpDir . $_FILES['file_csv']['name'];
+                    if (move_uploaded_file($tmpFilePath, $newFilePath)) {
+                        $writer_header = array(
+                            _l('commodity_group_code') => 'string',
+                            _l('commodity_group_name') => 'string',
+                            _l('error') => 'string',
+                        );
+
+                        $widths_arr = array();
+                        for ($i = 1; $i <= count($writer_header); $i++) {
+                            $widths_arr[] = 40;
+                        }
+
+                        $writer = new XLSXWriter();
+                        $writer->writeSheetHeader('Sheet1', $writer_header,  $col_options = ['widths' => $widths_arr]);
+
+                        //Reader file
+                        $xlsx = new XLSXReader_fin($newFilePath);
+                        $sheetNames = $xlsx->getSheetNames();
+                        $data = $xlsx->getSheetData($sheetNames[1]);
+
+                        $total_rows = 0;
+                        $total_row_false = 0;
+
+                        for ($row = 1; $row < count($data); $row++) {
+
+                            $total_rows++;
+
+                            $rd = array();
+                            $flag = 0;
+                            $flag2 = 0;
+
+                            $string_error = '';
+
+                            $value_commodity_group_code = isset($data[$row][0]) ? $data[$row][0] : '';
+                            $value_commodity_group_name = isset($data[$row][1]) ? $data[$row][1] : '';
+
+                            if (empty($value_commodity_group_name)) {
+                                $string_error .= _l('commodity_group_name') . ' ' . _l('does_not_exist');
+                                $flag2 = 1;
+                            }
+
+                            if (($flag == 1) || $flag2 == 1) {
+                                //write error file
+                                $writer->writeSheetRow('Sheet1', [
+                                    $value_commodity_group_code,
+                                    $value_commodity_group_name,
+                                    $string_error,
+                                ]);
+                                $total_row_false++;
+                            }
+
+                            if ($flag == 0 && $flag2 == 0) {
+                                $this->db->select_max('order');
+                                $this->db->from(db_prefix() . 'items_groups');
+                                $this->db->where('order IS NOT NULL');
+                                $latest_items_group = $this->db->get()->row();
+                                $next_items_group = !empty($latest_items_group) ? $latest_items_group->order + 1 : 1;
+
+                                $rd = array();
+                                $rd['name'] = $value_commodity_group_name;
+                                $rd['commodity_group_code'] = !empty($value_commodity_group_code) ? $value_commodity_group_code : NULL;
+                                $rd['project_id'] = $this->input->post('project');
+                                $rd['annexure_key'] = 'annexure'.$next_items_group;
+                                $rd['annexure_name'] = 'Annexure - '.$next_items_group;
+                                $rd['order'] = $next_items_group;
+                                $rd['display'] = 1;
+                                $rows[] = $rd;
+                                $this->db->insert(db_prefix() . 'items_groups', $rd);
+                            }
+                        }
+
+                        $total_rows = $total_rows;
+                        $total_row_success = isset($rows) ? count($rows) : 0;
+                        $dataerror = '';
+                        $message = 'Not enought rows for importing';
+
+                        if ($total_row_false != 0) {
+                            if (!file_exists(FCPATH . PURCHASE_IMPORT_PURCHASE_COMMODITY_GROUP_ERROR)) {
+                                mkdir(FCPATH . PURCHASE_IMPORT_PURCHASE_COMMODITY_GROUP_ERROR, 0755, true);
+                            }
+                            $filename = 'Import_item_error_' . get_staff_user_id() . '_' . strtotime(date('Y-m-d H:i:s')) . '.xlsx';
+                            $writer->writeToFile(str_replace($filename, PURCHASE_IMPORT_PURCHASE_COMMODITY_GROUP_ERROR . $filename, $filename));
+                        }
+                    }
+                } else {
+                    set_alert('warning', _l('import_upload_failed'));
+                }
+            }
+        }
+        echo json_encode([
+            'message'           => $message,
+            'total_row_success' => $total_row_success,
+            'total_row_false'   => $total_row_false,
+            'total_rows'        => $total_rows,
+            'site_url'          => site_url(),
+            'staff_id'          => get_staff_user_id(),
+            'filename'          => PURCHASE_IMPORT_PURCHASE_COMMODITY_GROUP_ERROR . $filename,
+
+        ]);
+    }
 }

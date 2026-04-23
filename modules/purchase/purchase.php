@@ -162,6 +162,7 @@ define('PURCHASE_IMPORT_ITEM_ERROR', 'modules/purchase/uploads/import_item_error
 define('PURCHASE_IMPORT_VENDOR_ERROR', 'modules/purchase/uploads/import_vendor_error/');
 define('PURCHASE_IMPORT_VENDOR_BILLING_TRACKER_ERROR', 'modules/purchase/uploads/import_vendor_billing_tracker_error/');
 define('PURCHASE_IMPORT_PURCHASE_AREA_ERROR', 'modules/purchase/uploads/import_purchase_area_error/');
+define('PURCHASE_IMPORT_PURCHASE_COMMODITY_GROUP_ERROR', 'modules/purchase/uploads/import_purchase_commodity_group_error/');
 define('PURCHASE_IMPORT_VENDOR_PAYMENT_TRACKER_ERROR', 'modules/purchase/uploads/import_vendor_payment_tracker_error/');
 
 /**
