@@ -1005,9 +1005,11 @@ function amount_format($num, $type = 1)
 
 function get_all_annexures()
 {
+    $default_project = get_default_project();
     $CI = &get_instance();
     $CI->db->select('*');
     $CI->db->from('tblitems_groups');
+    $CI->db->where('(project_id IS NULL OR project_id = ' . $default_project . ')');
     $CI->db->order_by('id', 'ASC');
     $result = $CI->db->get()->result_array();
     return $result;
