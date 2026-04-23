@@ -2052,6 +2052,9 @@ class Invoices_model extends App_Model
 
             $budgetsummary = !empty($budgetsummary) ? array_values($budgetsummary) : array();
             if(!empty($budgetsummary)) {
+                $budgetsummary = array_values(array_filter($budgetsummary, function ($item) {
+                    return $item['total_cumulative_billing'] != 0;
+                }));
                 usort($budgetsummary, function($a, $b) {
                     return $a['annexure'] <=> $b['annexure'];
                 });
