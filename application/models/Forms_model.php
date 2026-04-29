@@ -6929,4 +6929,17 @@ class Forms_model extends App_Model
         $this->db->where('form_id', $form_id);
         return $this->db->get(db_prefix() . 'rccb_form_detail')->result_array();
     }
+
+
+
+    public function get_pcd_form($form_id)
+    {
+        $this->db->where('form_id', $form_id);
+        return $this->db->get(db_prefix() . 'pcd_form')->row();
+    }
+    public function get_pcd_form_detail($form_id)
+    {
+        $this->db->where('form_id', $form_id);
+        return $this->db->get(db_prefix() . 'pcd_form_detail')->result_array();
+    }
 }

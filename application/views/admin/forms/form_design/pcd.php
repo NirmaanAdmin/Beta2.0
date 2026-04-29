@@ -135,7 +135,7 @@
                             $sr = 1;
 
                             foreach ($form_items as $key => $value):
-                                $id = isset($wah_form_detail) ? $wah_form_detail[$key]['id'] : '';
+                                $id = isset($pcd_form_detail) ? $pcd_form_detail[$key]['id'] : '';
                             ?>
 
                                 <tr>
@@ -150,7 +150,7 @@
                                     <td>
                                         <input type="text"
                                             name="groundflooritems[<?= $sr ?>][treatment_type]"
-                                            value="Spraying"
+                                            value="<?=  $pcd_form_detail[$key]['treatment_type'] ?>"
                                             class="form-control">
                                     </td>
 
@@ -158,7 +158,7 @@
                                     <td>
                                         <input type="text"
                                             name="groundflooritems[<?= $sr ?>][chemical_used]"
-                                            value="Cypermethrin And Propoxure"
+                                            value="<?=  $pcd_form_detail[$key]['chemical_used'] ?>"
                                             class="form-control">
                                     </td>
 
@@ -166,7 +166,7 @@
                                     <td>
                                         <input type="text"
                                             name="groundflooritems[<?= $sr ?>][area_in_charge]"
-                                            value="Rakesh Singh"
+                                            value="<?=  $pcd_form_detail[$key]['area_in_charge'] ?>"
                                             class="form-control">
                                     </td>
 
@@ -174,7 +174,7 @@
                                     <td>
                                         <input type="text"
                                             name="groundflooritems[<?= $sr ?>][technician]"
-                                            value="Vinay Yadav"
+                                            value="<?=  $pcd_form_detail[$key]['technician'] ?>"
                                             class="form-control">
                                     </td>
                                 </tr>
@@ -207,7 +207,7 @@
                             $sr = 1;
 
                             foreach ($form_items as $key => $value):
-                                $id = isset($wah_form_detail) ? $wah_form_detail[$key]['id'] : '';
+                                $id = isset($pcd_form_detail) ? $pcd_form_detail[$key]['id'] : '';
                             ?>
 
                                 <tr>
@@ -222,7 +222,7 @@
                                     <td>
                                         <input type="text"
                                             name="ugflooritems[<?= $sr ?>][treatment_type]"
-                                            value="Spraying"
+                                            value="<?=  $pcd_form_detail[$key]['treatment_type'] ?>"
                                             class="form-control">
                                     </td>
 
@@ -230,7 +230,7 @@
                                     <td>
                                         <input type="text"
                                             name="ugflooritems[<?= $sr ?>][chemical_used]"
-                                            value="Cypermethrin And Propoxure"
+                                            value="<?=  $pcd_form_detail[$key]['chemical_used'] ?>"
                                             class="form-control">
                                     </td>
 
@@ -238,7 +238,7 @@
                                     <td>
                                         <input type="text"
                                             name="ugflooritems[<?= $sr ?>][area_in_charge]"
-                                            value="Rakesh Singh"
+                                            value="<?=  $pcd_form_detail[$key]['area_in_charge'] ?>"
                                             class="form-control">
                                     </td>
 
@@ -246,7 +246,7 @@
                                     <td>
                                         <input type="text"
                                             name="ugflooritems[<?= $sr ?>][technician]"
-                                            value="Vinay Yadav"
+                                            value="<?=  $pcd_form_detail[$key]['technician'] ?>"
                                             class="form-control">
                                     </td>
                                 </tr>
@@ -279,7 +279,7 @@
                             $sr = 1;
 
                             foreach ($form_items as $key => $value):
-                                $id = isset($wah_form_detail) ? $wah_form_detail[$key]['id'] : '';
+                                $id = isset($pcd_form_detail) ? $pcd_form_detail[$key]['id'] : '';
                             ?>
 
                                 <tr>
@@ -294,7 +294,7 @@
                                     <td>
                                         <input type="text"
                                             name="serviceflooritems[<?= $sr ?>][treatment_type]"
-                                            value=""
+                                            value="<?=  $pcd_form_detail[$key]['treatment_type'] ?>"
                                             class="form-control">
                                     </td>
 
@@ -302,7 +302,7 @@
                                     <td>
                                         <input type="text"
                                             name="serviceflooritems[<?= $sr ?>][chemical_used]"
-                                            value=""
+                                            value="<?=  $pcd_form_detail[$key]['chemical_used'] ?>"
                                             class="form-control">
                                     </td>
 
@@ -310,7 +310,7 @@
                                     <td>
                                         <input type="text"
                                             name="serviceflooritems[<?= $sr ?>][area_in_charge]"
-                                            value="Rakesh Singh"
+                                            value="<?=  $pcd_form_detail[$key]['area_in_charge'] ?>"
                                             class="form-control">
                                     </td>
 
@@ -318,7 +318,7 @@
                                     <td>
                                         <input type="text"
                                             name="serviceflooritems[<?= $sr ?>][technician]"
-                                            value="Vinay Yadav"
+                                            value="<?=  $pcd_form_detail[$key]['technician'] ?>"
                                             class="form-control">
                                     </td>
                                 </tr>
@@ -351,7 +351,7 @@
                             $sr = 1;
 
                             foreach ($form_items as $key => $value):
-                                $id = isset($wah_form_detail) ? $wah_form_detail[$key]['id'] : '';
+                                $id = isset($pcd_form_detail) ? $pcd_form_detail[$key]['id'] : '';
                             ?>
 
                                 <tr>
@@ -366,7 +366,7 @@
                                     <td>
                                         <input type="text"
                                             name="firstflooritems[<?= $sr ?>][treatment_type]"
-                                            value="Spraying"
+                                            value=" <?=  $pcd_form_detail[$key]['treatment_type'] ?>"
                                             class="form-control">
                                     </td>
 
@@ -374,7 +374,7 @@
                                     <td>
                                         <input type="text"
                                             name="firstflooritems[<?= $sr ?>][chemical_used]"
-                                            value="Cypermethrin"
+                                            value=" <?=  $pcd_form_detail[$key]['chemical_used'] ?>"
                                             class="form-control">
                                     </td>
 
@@ -382,7 +382,7 @@
                                     <td>
                                         <input type="text"
                                             name="firstflooritems[<?= $sr ?>][area_in_charge]"
-                                            value="Rakesh Singh"
+                                            value=" <?=  $pcd_form_detail[$key]['area_in_charge'] ?>"
                                             class="form-control">
                                     </td>
 
@@ -390,7 +390,7 @@
                                     <td>
                                         <input type="text"
                                             name="firstflooritems[<?= $sr ?>][technician]"
-                                            value="Vinay Yadav"
+                                            value=" <?=  $pcd_form_detail[$key]['technician'] ?>"
                                             class="form-control">
                                     </td>
                                 </tr>
@@ -423,7 +423,7 @@
                             $sr = 1;
 
                             foreach ($form_items as $key => $value):
-                                $id = isset($wah_form_detail) ? $wah_form_detail[$key]['id'] : '';
+                                $id = isset($pcd_form_detail) ? $pcd_form_detail[$key]['id'] : '';
                             ?>
 
                                 <tr>
@@ -438,7 +438,7 @@
                                     <td>
                                         <input type="text"
                                             name="firstflooritems[<?= $sr ?>][treatment_type]"
-                                            value="Spraying"
+                                            value=" <?=  $pcd_form_detail[$key]['treatment_type'] ?>"
                                             class="form-control">
                                     </td>
 
@@ -446,7 +446,7 @@
                                     <td>
                                         <input type="text"
                                             name="firstflooritems[<?= $sr ?>][chemical_used]"
-                                            value="Cypermethrin"
+                                            value=" <?=  $pcd_form_detail[$key]['chemical_used'] ?>"
                                             class="form-control">
                                     </td>
 
@@ -454,7 +454,7 @@
                                     <td>
                                         <input type="text"
                                             name="firstflooritems[<?= $sr ?>][area_in_charge]"
-                                            value="Rakesh Singh"
+                                            value=" <?=  $pcd_form_detail[$key]['area_in_charge'] ?>"
                                             class="form-control">
                                     </td>
 
@@ -462,7 +462,7 @@
                                     <td>
                                         <input type="text"
                                             name="firstflooritems[<?= $sr ?>][technician]"
-                                            value="Vinay Yadav"
+                                            value=" <?=  $pcd_form_detail[$key]['technician'] ?>"
                                             class="form-control">
                                     </td>
                                 </tr>
