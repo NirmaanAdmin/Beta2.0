@@ -1265,3 +1265,85 @@ function amount_to_word($number) {
   $points = ($point) ? "." . $words[$point / 10] . " " .$words[$point = $point % 10] : '';
   return $result  . " Only";
 }
+
+function format_order_based_organization_info($rel_id, $rel_type)
+{
+    $CI = &get_instance();
+    if($rel_type == 'pur_order') {
+        $CI->db->select('*');
+        $CI->db->from(db_prefix() . 'pur_orders');
+        $CI->db->where('id', $rel_id);
+        $order = $CI->db->get()->row();
+    } else if($rel_type == 'wo_order') {
+        $CI->db->select('*');
+        $CI->db->from(db_prefix() . 'wo_orders');
+        $CI->db->where('id', $rel_id);
+        $order = $CI->db->get()->row();
+    } else if($rel_type == 'co_order') {
+        $CI->db->select('*');
+        $CI->db->from(db_prefix() . 'co_orders');
+        $CI->db->where('id', $rel_id);
+        $order = $CI->db->get()->row();
+    } else {
+        return hooks()->apply_filters('organization_info_text', '');
+    }
+
+    $billing_format = '';
+    $billing_format = get_option('company_info_format');
+    $pan = get_option('company_pan');
+    $billing_vat = !empty($order->billing_vat) ? $order->billing_vat : get_option('billing_company_vat', true);
+    $billing_format = _info_format_replace('company_name', '<b style="color:black" class="company-name-formatted">' . get_option('invoice_company_name') . '</b>', $billing_format);
+    $billing_format = _info_format_replace(
+        'street',
+        '<b>Billing: </b>' . (
+            !empty($order->billing_address)
+                ? $order->billing_address
+                : get_option('billing_company_address', true)
+        ),
+        $billing_format
+    );
+    $billing_format = _info_format_replace('city', !empty($order->billing_city) ? $order->billing_city : get_option('billing_company_city', true), $billing_format);
+    $billing_format = _info_format_replace('state', !empty($order->billing_state) ? $order->billing_state : get_option('billing_company_state', true), $billing_format);
+    $billing_format = _info_format_replace('zip_code', !empty($order->billing_zip) ? $order->billing_zip : get_option('billing_company_zipcode', true), $billing_format);
+    $billing_format = _info_format_replace('country_code', !empty($order->billing_country) ? $order->billing_country : get_option('billing_company_country_code', true), $billing_format);
+    $billing_format = _info_format_replace('phone', get_option('invoice_company_phonenumber'), $billing_format);
+    $billing_format = _info_format_replace('vat_number', $billing_vat, $billing_format);
+    $billing_format = _info_format_replace('vat_number_with_label', $billing_vat == '' ? '':_l('company_vat_number') . ': ' . $billing_vat, $billing_format);
+    $billing_format = _info_format_replace('pan_number', $pan, $billing_format);
+    $billing_format = _info_format_replace('pan_number_with_label', $pan == '' ? '':_l('pan') . ': ' . $pan, $billing_format);
+    $billing_format = _maybe_remove_first_and_last_br_tag($billing_format);
+    $billing_format = preg_replace('/\s+/', ' ', $billing_format);
+    $billing_format = trim($billing_format);
+
+    $shipping_format = '';
+    if(!empty($order->shipping_address) || !empty(get_option('pur_company_address', true))) {
+        $shipping_format = get_option('company_info_format');
+        $shipping_vat = !empty($order->shipping_vat) ? $order->shipping_vat : get_option('pur_company_vat', true);
+        $shipping_format = _info_format_replace('company_name', '', $shipping_format);
+        $shipping_format = _info_format_replace(
+            'street',
+            '<br><b>Shipping: </b>' . (
+                !empty($order->shipping_address)
+                    ? $order->shipping_address
+                    : get_option('pur_company_address', true)
+            ),
+            $shipping_format
+        );
+        $shipping_format = _info_format_replace('city', !empty($order->shipping_city) ? $order->shipping_city : get_option('pur_company_city', true), $shipping_format);
+        $shipping_format = _info_format_replace('state', !empty($order->shipping_state) ? $order->shipping_state : get_option('pur_company_state', true), $shipping_format);
+        $shipping_format = _info_format_replace('zip_code', !empty($order->shipping_zip) ? $order->shipping_zip : get_option('pur_company_zipcode', true), $shipping_format);
+        $shipping_format = _info_format_replace('country_code', !empty($order->shipping_country) ? $order->shipping_country : get_option('pur_company_country_code', true), $shipping_format);
+        $shipping_format = _info_format_replace('phone', get_option('invoice_company_phonenumber'), $shipping_format);
+        $shipping_format = _info_format_replace('vat_number', $shipping_vat, $shipping_format);
+        $shipping_format = _info_format_replace('vat_number_with_label', $shipping_vat == '' ? '':_l('company_vat_number') . ': ' . $shipping_vat, $shipping_format);
+        $shipping_format = _info_format_replace('pan_number', $pan, $shipping_format);
+        $shipping_format = _info_format_replace('pan_number_with_label', $pan == '' ? '':_l('pan') . ': ' . $pan, $shipping_format);
+        $shipping_format = _maybe_remove_first_and_last_br_tag($shipping_format);
+        $shipping_format = preg_replace('/\s+/', ' ', $shipping_format);
+        $shipping_format = trim($shipping_format);
+    }
+
+    $final_format = $billing_format.$shipping_format;
+
+    return hooks()->apply_filters('organization_info_text', $final_format);
+}

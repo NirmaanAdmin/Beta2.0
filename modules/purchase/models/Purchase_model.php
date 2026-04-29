@@ -5394,7 +5394,7 @@ class Purchase_model extends App_Model
         <tbody>
           <tr>
             <td>
-                ' . format_organization_info() . '
+                ' . format_order_based_organization_info($pur_order->id, 'pur_order') . '
                  ' . $project_detail . '
             </td>
             <td align="right">
@@ -16123,7 +16123,7 @@ class Purchase_model extends App_Model
         <tbody>
           <tr>
             <td>
-                ' . format_organization_info() . '
+                ' . format_order_based_organization_info($pur_order->id, 'wo_order') . '
                  ' . $project_detail . '
             </td>
             <td align="right">
