@@ -895,7 +895,7 @@ class Forms extends AdminController
                 'sf'    => ['has_attachments' => false],
                 'lse'   => ['has_attachments' => false],
                 'wah'   => ['has_attachments' => false],
-                'hw'    => ['has_attachmenta' => false],
+                'hw'    => ['has_attachments' => false],
                 'me'    => ['has_attachments' => false],
                 'vtf'   => ['has_attachments' => false],
                 'rccb'  => ['has_attachments' => false],
@@ -910,6 +910,7 @@ class Forms extends AdminController
                 'cpjcb'    => ['has_attachments' => false],
                 'bpjcb'    => ['has_attachments' => false],
                 'evjcb'    => ['has_attachments' => false],
+                'bcmjcb'   => ['has_attachments' => false],
             ];
 
             if (isset($formConfigs[$form_type])) {
