@@ -469,7 +469,7 @@ if ($estimate->currency != 0) {
                         </h4>
 
                         <address class="mbot5">
-                           <?php echo format_organization_info(); ?>
+                           <?php echo format_order_based_organization_info($estimate->id, 'co_order'); ?>
                         </address>
 
                         <?php $custom_fields = get_custom_fields('pur_order');

@@ -1000,3 +1000,4 @@ $lang['is_change_order'] = 'Is Change Order?';
 $lang['cashflow'] = 'Cashflow';
 $lang['tender_quotes'] = 'Tender Quotes';
 $lang['total_quotations'] = 'Total Quotations';
+$lang['billing_shipping_information'] = 'Billing & Shipping Information';

@@ -29,6 +29,12 @@
                   ?>
 
                   <?php } ?>
+
+                  <li role="presentation" class="">
+                    <a href="#billing_shipping_information" aria-controls="billing_shipping_information" role="tab" data-toggle="tab">
+                      <?php echo _l('billing_shipping_information'); ?>
+                    </a>
+                  </li>
                 </ul>
               </div>
             </div>
@@ -399,6 +405,126 @@
                 <?php } ?>
               </div>
 
+              <div role="tabpanel" class="tab-pane" id="billing_shipping_information">
+                <div class="row">
+                  <div class="col-md-12">
+                    <h4 class="bold"><?php echo _l('pur_billing_infor'); ?></h4>
+                    <hr class="bold mtop5">
+                  </div>
+                  <div class="col-md-6">
+                    <?php $billing_address = isset($pur_order) ? $pur_order->billing_address : get_option('billing_company_address', true);
+                    if ($billing_address == '') {
+                      $billing_address = get_option('billing_company_address', true);
+                    }
+                    echo render_textarea('billing_address', 'billing_company_address', $billing_address, ['rows' => 7]); ?>
+                    <?php $billing_zip = isset($pur_order) ? $pur_order->billing_zip : get_option('billing_company_zipcode', true);
+                    if ($billing_zip == '') {
+                      $billing_zip = get_option('billing_company_zipcode', true);
+                    }
+                    echo render_input('billing_zip', 'billing_company_zipcode', $billing_zip, 'text'); ?>
+                    <?php $billing_vat = isset($pur_order) ? $pur_order->billing_vat : get_option('billing_company_vat', true);
+                    if ($billing_vat == '') {
+                      $billing_vat = get_option('billing_company_vat', true);
+                    }
+                    echo render_input('billing_vat', 'billing_company_vat', $billing_vat, 'text'); ?>
+                  </div>
+
+                  <div class="col-md-6">
+                    <div class="row">
+                      <div class="col-md-12">
+                        <?php $billing_city = isset($pur_order) ? $pur_order->billing_city : get_option('billing_company_city', true);
+                        if ($billing_city == '') {
+                          $billing_city = get_option('billing_company_city', true);
+                        }
+                        echo render_input('billing_city', 'billing_company_city', $billing_city, 'text'); ?>
+                      </div>
+                      <div class="col-md-12">
+                        <?php $billing_state = isset($pur_order) ? $pur_order->billing_state : get_option('billing_company_state', true);
+                        if ($billing_state == '') {
+                          $billing_state = get_option('billing_company_state', true);
+                        }
+                        echo render_input('billing_state', 'billing_company_state', $billing_state, 'text'); ?>
+                      </div>
+                      <div class="col-md-12">
+                        <?php $billing_country_text = isset($pur_order) ? $pur_order->billing_country_text : get_option('billing_company_country_text', true);
+                        if ($billing_country_text == '') {
+                          $billing_country_text = get_option('billing_company_country_text', true);
+                        }
+                        echo render_input('billing_country_text', 'billing_company_country_text', $billing_country_text, 'text'); ?>
+                      </div>
+                      <div class="col-md-12">
+                        <?php $countries = get_all_countries();
+                        $billing_company_country_code = get_option('billing_company_country_code', true);
+                        $selected = isset($pur_order) ? $pur_order->billing_country : $billing_company_country_code;
+                        if ($selected == '') {
+                          $selected = $billing_company_country_code;
+                        }
+                        echo render_select('billing_country', $countries, array('country_id', array('short_name')), 'billing_company_country_code', $selected, array('data-none-selected-text' => _l('dropdown_non_selected_tex')));
+                        ?>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-12">
+                    <h4 class="bold"><?php echo _l('pur_shipping_infor'); ?></h4>
+                    <hr class="bold mtop5">
+                  </div>
+                  <div class="col-md-6">
+                    <?php $shipping_address = isset($pur_order) ? $pur_order->shipping_address : get_option('pur_company_address', true);
+                    if ($shipping_address == '') {
+                      $shipping_address = get_option('pur_company_address', true);
+                    }
+                    echo render_textarea('shipping_address', 'pur_company_address', $shipping_address, ['rows' => 7]); ?>
+                    <?php $shipping_zip = isset($pur_order) ? $pur_order->shipping_zip : get_option('pur_company_zipcode', true);
+                    if ($shipping_zip == '') {
+                      $shipping_zip = get_option('pur_company_zipcode', true);
+                    }
+                    echo render_input('shipping_zip', 'pur_company_zipcode', $shipping_zip, 'text'); ?>
+                    <?php $shipping_vat = isset($pur_order) ? $pur_order->shipping_vat : get_option('pur_company_vat', true);
+                    if ($shipping_vat == '') {
+                      $shipping_vat = get_option('pur_company_vat', true);
+                    }
+                    echo render_input('shipping_vat', 'pur_company_vat', $shipping_vat, 'text'); ?>
+                  </div>
+
+                  <div class="col-md-6">
+                    <div class="row">
+                      <div class="col-md-12">
+                        <?php $shipping_city = isset($pur_order) ? $pur_order->shipping_city : get_option('pur_company_city', true);
+                        if ($shipping_city == '') {
+                          $shipping_city = get_option('pur_company_city', true);
+                        }
+                        echo render_input('shipping_city', 'pur_company_city', $shipping_city, 'text'); ?>
+                      </div>
+                      <div class="col-md-12">
+                        <?php $shipping_state = isset($pur_order) ? $pur_order->shipping_state : get_option('pur_company_state', true);
+                        if ($shipping_state == '') {
+                          $shipping_state = get_option('pur_company_state', true);
+                        }
+                        echo render_input('shipping_state', 'pur_company_state', $shipping_state, 'text'); ?>
+                      </div>
+                      <div class="col-md-12">
+                        <?php $shipping_country_text = isset($pur_order) ? $pur_order->shipping_country_text : get_option('pur_company_country_text', true);
+                        if ($shipping_country_text == '') {
+                          $shipping_country_text = get_option('pur_company_country_text', true);
+                        }
+                        echo render_input('shipping_country_text', 'pur_company_country_text', $shipping_country_text, 'text'); ?>
+                      </div>
+                      <div class="col-md-12">
+                        <?php $countries = get_all_countries();
+                        $pur_company_country_code = get_option('pur_company_country_code', true);
+                        $selected = isset($pur_order) ? $pur_order->shipping_country : $pur_company_country_code;
+                        if ($selected == '') {
+                          $selected = $pur_company_country_code;
+                        }
+                        echo render_select('shipping_country', $countries, array('country_id', array('short_name')), 'pur_company_country_code', $selected, array('data-none-selected-text' => _l('dropdown_non_selected_tex')));
+                        ?>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 

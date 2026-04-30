@@ -4826,7 +4826,7 @@ class Changee_model extends App_Model
         <tbody>
           <tr>
             <td>
-                ' . format_organization_info() . '
+                ' . format_order_based_organization_info($pur_order->id, 'co_order') . '
                  ' . $project_detail . '
             </td>
             <td style="position: absolute; float: right;">
