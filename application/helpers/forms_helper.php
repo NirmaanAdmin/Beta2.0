@@ -1034,6 +1034,21 @@ function check_formid_is_rccb($formid)
     return $count > 0;
 }
 
+function check_formid_is_bljcb($formid)
+{
+
+    $CI = &get_instance();
+    // Use your DB prefix helper (Perfex = db_prefix())
+    $table = db_prefix() . 'bljcb_form';
+
+    // Count how many rows match this formid
+    $count = $CI->db
+        ->where('form_id', $formid)
+        ->count_all_results($table);
+
+    return $count > 0;
+}
+
 function get_ground_floor_items()
 {
     $result = array();

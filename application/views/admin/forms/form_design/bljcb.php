@@ -49,7 +49,7 @@
     <div class="table-responsive">
         <table class="table dpr-items-table items table-main-dpr-edit has-calculations no-mtop">
 
-            <input type="hidden" name="action" value="apc">
+            <input type="hidden" name="action" value="bljcb">
             <thead>
                 <tr>
                     <th colspan="5" class="daily_report_title">BACKHOE LOADER (JCB) </th>
@@ -59,16 +59,16 @@
                         <span class="daily_report_label">Project: <span class="view_project_name"></span></span>
                     </th>
                     <th colspan="2" class="daily_report_head">
-                        <span class="daily_report_label" style="display: ruby;">Contractor Name :</span><span class="daily_report_label" style="display: ruby;"> <?php echo render_select('name_of_contractor', get_vendor_list_for_forms(), array('userid', 'company'), '', isset($krp_form->name_of_contractor) ? $krp_form->name_of_contractor : ''); ?></span>
+                        <span class="daily_report_label" style="display: ruby;">Contractor Name :</span><span class="daily_report_label" style="display: ruby;"> <?php echo render_select('name_of_contractor', get_vendor_list_for_forms(), array('userid', 'company'), '', isset($bljcb_form->name_of_contractor) ? $bljcb_form->name_of_contractor : ''); ?></span>
                     </th>
                 </tr>
                 <tr>
                     <th colspan="3" class="daily_report_head">
-                        <span class="daily_report_label" style="display: ruby;">Checklist No.: <?php echo render_input('checklist_no', '', isset($esc_form->checklist_no) ? $esc_form->checklist_no : '', 'text', ['style' => 'width:150px;']); ?></span>
+                        <span class="daily_report_label" style="display: ruby;">Checklist No.: <?php echo render_input('checklist_no', '', isset($bljcb_form->checklist_no) ? $bljcb_form->checklist_no : '', 'text', ['style' => 'width:150px;']); ?></span>
                     </th>
                     <th colspan="2" class="daily_report_head">
 
-                        <span class="daily_report_label">Date: </span><input type="datetime-local" class="form-control" name="date" value="<?= isset($esc_form->date) ? date('Y-m-d\TH:i', strtotime($esc_form->date)) : '' ?>">
+                        <span class="daily_report_label">Date: </span><input type="datetime-local" class="form-control" name="date" value="<?= isset($bljcb_form->date) ? date('Y-m-d\TH:i', strtotime($bljcb_form->date)) : '' ?>">
 
                     </th>
                 </tr>
@@ -101,19 +101,19 @@
             <tbody>
                 <?php $sr = 1;
                 foreach ($form_items as $key => $value):
-                    $id = isset($esc_form_detail) ? $esc_form_detail[$key]['id'] : ''; ?>
+                    $id = isset($bljcb_form_detail) ? $bljcb_form_detail[$key]['id'] : ''; ?>
                     <tr class="main">
                         <input type="hidden" class="ids" name="items[<?= $sr ?>][id]" value="<?= $id  ?>">
                         <td><?= $sr ?></td>
                         <td style="font-weight: 600;font-size: 16px;"><?= $value['name'] ?></td>
                         <td>
                             <span class="daily_report_label" style="display: ruby;">
-                                <?php echo render_select('items[' . $sr . '][status]', get_item_status_listing(), array('id', 'name'), '', isset($esc_form_detail) ? $esc_form_detail[$key]['status'] : ''); ?>
+                                <?php echo render_select('items[' . $sr . '][status]', get_item_status_listing(), array('id', 'name'), '', isset($bljcb_form_detail) ? $bljcb_form_detail[$key]['status'] : ''); ?>
                             </span>
                         </td>
                         <td>
                             <span class="daily_report_label" style="display: ruby;">
-                                <?php echo render_input('items[' . $sr . '][remarks]', '', isset($esc_form_detail) ? $esc_form_detail[$key]['remarks'] : '', 'text', ['style' => 'width:150px;']); ?>
+                                <?php echo render_input('items[' . $sr . '][remarks]', '', isset($bljcb_form_detail) ? $bljcb_form_detail[$key]['remarks'] : '', 'text', ['style' => 'width:150px;']); ?>
                             </span>
                         </td>
                     </tr>
@@ -127,7 +127,7 @@
     <div class="row">
         <div class="col-md-6">
             <div class="form-group">
-                <?php echo render_textarea('remarks', 'Remarks', isset($msh_form) ? $msh_form->remarks : '',  ['style' => 'height:267px;resize: none;']); ?>
+                <?php echo render_textarea('remarks', 'Remarks', isset($bljcb_form) ? $bljcb_form->remarks : '',  ['style' => 'height:267px;resize: none;']); ?>
             </div>
         </div>
         <div class="col-md-6">
@@ -141,21 +141,24 @@
             <td class="daily_report_head daily_center">
                 <label>
                     <span class="daily_report_label">FIT</span>
-                    <input type="radio" name="fit_status" value="fit" style="margin-left:10px;">
+                    <input type="radio" name="fit_status" value="fit" style="margin-left:10px;"
+                        <?php echo (isset($bljcb_form->fit_status) && $bljcb_form->fit_status == 'fit') ? 'checked' : ''; ?>>
                 </label>
             </td>
 
             <td class="daily_report_head daily_center">
                 <label>
                     <span class="daily_report_label">PARTIALLY FIT</span>
-                    <input type="radio" name="fit_status" value="partial" style="margin-left:10px;">
+                    <input type="radio" name="fit_status" value="partial" style="margin-left:10px;"
+                        <?php echo (isset($bljcb_form->fit_status) && $bljcb_form->fit_status == 'partial') ? 'checked' : ''; ?>>
                 </label>
             </td>
 
             <td class="daily_report_head daily_center">
                 <label>
                     <span class="daily_report_label">UNFIT</span>
-                    <input type="radio" name="fit_status" value="unfit" style="margin-left:10px;">
+                    <input type="radio" name="fit_status" value="unfit" style="margin-left:10px;"
+                        <?php echo (isset($bljcb_form->fit_status) && $bljcb_form->fit_status == 'unfit') ? 'checked' : ''; ?>>
                 </label>
             </td>
         </tr>
@@ -163,14 +166,14 @@
         <!-- Section Headers -->
         <tr>
             <td colspan="2" class="daily_report_head">
-                <span class="daily_report_label" style="display: ruby;">Inspected By Name: <?php echo render_select('inspected_by', get_staff_list(), array('staffid', 'name'), '', isset($msh_form->inspected_by) ? $msh_form->inspected_by : ''); ?></span>
+                <span class="daily_report_label" style="display: ruby;">Inspected By Name: <?php echo render_select('inspected_by', get_staff_list(), array('staffid', 'name'), '', isset($bljcb_form->inspected_by) ? $bljcb_form->inspected_by : ''); ?></span>
             </td>
             <td class="daily_report_head">
-                <span class="daily_report_label" style="display: ruby;">Reviewed By Name: <?php echo render_select('reviewed_by', get_staff_list(), array('staffid', 'name'), '', isset($msh_form->reviewed_by) ? $msh_form->reviewed_by : ''); ?></span>
+                <span class="daily_report_label" style="display: ruby;">Reviewed By Name: <?php echo render_select('reviewed_by', get_staff_list(), array('staffid', 'name'), '', isset($bljcb_form->reviewed_by) ? $bljcb_form->reviewed_by : ''); ?></span>
             </td>
         </tr>
 
-        
+
     </table>
 </div>
 

@@ -2136,4 +2136,35 @@ class Forms extends AdminController
 
         $pdf->Output(mb_strtoupper(slug_it($form->subject)) . '.pdf', $type);
     }
+    public function pdf_bljcb($id)
+    {
+        if (!$id) {
+            redirect(admin_url('forms'));
+        }
+
+        $form = $this->forms_model->get_form_by_id($id);
+
+        try {
+            $pdf = form_pdf_bljcb($form);
+        } catch (Exception $e) {
+            $message = $e->getMessage();
+            echo $message;
+            if (strpos($message, 'Unable to get the size of the image') !== false) {
+                show_pdf_unable_to_get_image_size_error();
+            }
+            die;
+        }
+
+        $type = 'I';
+
+        if ($this->input->get('output_type')) {
+            $type = $this->input->get('output_type');
+        }
+
+        if ($this->input->get('print')) {
+            $type = 'D';
+        }
+
+        $pdf->Output(mb_strtoupper(slug_it($form->subject)) . '.pdf', $type);
+    }
 }
