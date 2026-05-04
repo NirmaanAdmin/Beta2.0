@@ -242,7 +242,7 @@ return App_table::find('forms')
                     $check_formis_is_rccb = check_formid_is_rccb($aRow['formid']);
                     $check_formis_is_bljcb = check_formid_is_bljcb($aRow['formid']);
                     $check_formis_is_bbmjcb = check_formid_is_bbmjcb($aRow['formid']);
-                    
+                    $check_formis_is_bcmjcb = check_formid_is_bcmjcb($aRow['formid']);
                     if ($check_formid_is_qcr > 0) {
                         $_data = '<div class="btn-group mright5">
                        <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ><i class="fa fa-file-pdf"></i><span class="caret"></span></a>
@@ -385,6 +385,15 @@ return App_table::find('forms')
                            <li class="hidden-xs"><a href="' . admin_url('forms/pdf_bbmjcb/' . $aRow['formid'] . '?output_type=I') . '">' . _l('view_pdf') . '</a></li>
                            <li class="hidden-xs"><a href="' . admin_url('forms/pdf_bbmjcb/' . $aRow['formid'] . '?output_type=I') . '" target="_blank">' . _l('view_pdf_in_new_window') . '</a></li>
                            <li><a href="' . admin_url('forms/pdf_bbmjcb/' . $aRow['formid']) . '" download>' . _l('download') . '</a></li>
+                        </ul>
+                        </div>';
+                    } elseif ($check_formis_is_bcmjcb > 0) {
+                        $_data = '<div class="btn-group mright5">
+                        <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ><i class="fa fa-file-pdf"></i><span class="caret"></span></a>
+                        <ul class="dropdown-menu dropdown-menu-right">
+                           <li class="hidden-xs"><a href="' . admin_url('forms/pdf_bcmjcb/' . $aRow['formid'] . '?output_type=I') . '">' . _l('view_pdf') . '</a></li>
+                           <li class="hidden-xs"><a href="' . admin_url('forms/pdf_bcmjcb/' . $aRow['formid'] . '?output_type=I') . '" target="_blank">' . _l('view_pdf_in_new_window') . '</a></li>
+                           <li><a href="' . admin_url('forms/pdf_bcmjcb/' . $aRow['formid']) . '" download>' . _l('download') . '</a></li>
                         </ul>
                         </div>';
                     } else {

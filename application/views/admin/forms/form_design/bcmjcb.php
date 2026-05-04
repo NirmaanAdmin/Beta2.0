@@ -59,16 +59,16 @@
                         <span class="daily_report_label">Project: <span class="view_project_name"></span></span>
                     </th>
                     <th colspan="2" class="daily_report_head">
-                        <span class="daily_report_label" style="display: ruby;">Contractor Name :</span><span class="daily_report_label" style="display: ruby;"> <?php echo render_select('name_of_contractor', get_vendor_list_for_forms(), array('userid', 'company'), '', isset($krp_form->name_of_contractor) ? $krp_form->name_of_contractor : ''); ?></span>
+                        <span class="daily_report_label" style="display: ruby;">Contractor Name :</span><span class="daily_report_label" style="display: ruby;"> <?php echo render_select('name_of_contractor', get_vendor_list_for_forms(), array('userid', 'company'), '', isset($bcmjcb_form->name_of_contractor) ? $bcmjcb_form->name_of_contractor : ''); ?></span>
                     </th>
                 </tr>
                 <tr>
                     <th colspan="3" class="daily_report_head">
-                        <span class="daily_report_label" style="display: ruby;">Checklist No.: <?php echo render_input('checklist_no', '', isset($esc_form->checklist_no) ? $esc_form->checklist_no : '', 'text', ['style' => 'width:150px;']); ?></span>
+                        <span class="daily_report_label" style="display: ruby;">Checklist No.: <?php echo render_input('checklist_no', '', isset($bcmjcb_form->checklist_no) ? $bcmjcb_form->checklist_no : '', 'text', ['style' => 'width:150px;']); ?></span>
                     </th>
                     <th colspan="2" class="daily_report_head">
 
-                        <span class="daily_report_label">Date: </span><input type="datetime-local" class="form-control" name="date" value="<?= isset($esc_form->date) ? date('Y-m-d\TH:i', strtotime($esc_form->date)) : '' ?>">
+                        <span class="daily_report_label">Date: </span><input type="datetime-local" class="form-control" name="date" value="<?= isset($bcmjcb_form->date) ? date('Y-m-d\TH:i', strtotime($bcmjcb_form->date)) : '' ?>">
 
                     </th>
                 </tr>
@@ -101,19 +101,19 @@
             <tbody>
                 <?php $sr = 1;
                 foreach ($form_items as $key => $value):
-                    $id = isset($esc_form_detail) ? $esc_form_detail[$key]['id'] : ''; ?>
+                    $id = isset($bcmjcb_form_detail) ? $bcmjcb_form_detail[$key]['id'] : ''; ?>
                     <tr class="main">
                         <input type="hidden" class="ids" name="items[<?= $sr ?>][id]" value="<?= $id  ?>">
                         <td><?= $sr ?></td>
                         <td style="font-weight: 600;font-size: 16px;"><?= $value['name'] ?></td>
                         <td>
                             <span class="daily_report_label" style="display: ruby;">
-                                <?php echo render_select('items[' . $sr . '][status]', get_item_status_listing(), array('id', 'name'), '', isset($esc_form_detail) ? $esc_form_detail[$key]['status'] : ''); ?>
+                                <?php echo render_select('items[' . $sr . '][status]', get_item_status_listing(), array('id', 'name'), '', isset($bcmjcb_form_detail) ? $bcmjcb_form_detail[$key]['status'] : ''); ?>
                             </span>
                         </td>
                         <td>
                             <span class="daily_report_label" style="display: ruby;">
-                                <?php echo render_input('items[' . $sr . '][remarks]', '', isset($esc_form_detail) ? $esc_form_detail[$key]['remarks'] : '', 'text', ['style' => 'width:150px;']); ?>
+                                <?php echo render_input('items[' . $sr . '][remarks]', '', isset($bcmjcb_form_detail) ? $bcmjcb_form_detail[$key]['remarks'] : '', 'text', ['style' => 'width:150px;']); ?>
                             </span>
                         </td>
                     </tr>
@@ -141,21 +141,24 @@
             <td class="daily_report_head daily_center">
                 <label>
                     <span class="daily_report_label">FIT</span>
-                    <input type="radio" name="fit_status" value="fit" style="margin-left:10px;">
+                    <input type="radio" name="fit_status" value="fit" style="margin-left:10px;"
+                        <?php echo (isset($bcmjcb_form->fit_status) && $bcmjcb_form->fit_status == 'fit') ? 'checked' : ''; ?>>
                 </label>
             </td>
 
             <td class="daily_report_head daily_center">
                 <label>
                     <span class="daily_report_label">PARTIALLY FIT</span>
-                    <input type="radio" name="fit_status" value="partial" style="margin-left:10px;">
+                    <input type="radio" name="fit_status" value="partial" style="margin-left:10px;"
+                        <?php echo (isset($bcmjcb_form->fit_status) && $bcmjcb_form->fit_status == 'partial') ? 'checked' : ''; ?>>
                 </label>
             </td>
 
             <td class="daily_report_head daily_center">
                 <label>
                     <span class="daily_report_label">UNFIT</span>
-                    <input type="radio" name="fit_status" value="unfit" style="margin-left:10px;">
+                    <input type="radio" name="fit_status" value="unfit" style="margin-left:10px;"
+                        <?php echo (isset($bcmjcb_form->fit_status) && $bcmjcb_form->fit_status == 'unfit') ? 'checked' : ''; ?>>
                 </label>
             </td>
         </tr>
@@ -170,7 +173,7 @@
             </td>
         </tr>
 
-        
+
     </table>
 </div>
 

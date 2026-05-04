@@ -30,11 +30,11 @@ $formhtml .= '
 <table width="100%" cellpadding="6" style="border-collapse:collapse;">
 <tr>
     <td width="50%"><b>Name of Project Name:</b> ' . get_project_name_by_id($form_data->project_id) . '</td>
-    <td width="50%"><b>Contracto Name:</b> ' . (isset($bbmjcb_data->name_of_contractor) ? get_vendor_name_by_id($bbmjcb_data->name_of_contractor) : '') . '</td>
+    <td width="50%"><b>Contracto Name:</b> ' . (isset($bcmjcb_data->name_of_contractor) ? get_vendor_name_by_id($bcmjcb_data->name_of_contractor) : '') . '</td>
 </tr>
 <tr>
-    <td><b>Checklist No.:</b> ' . ($bbmjcb_data->checklist_no ?? '') . '</td>
-    <td><b>Date:</b> ' . (!empty($bbmjcb_data->date) ? date('d M, Y H:i A', strtotime($bbmjcb_data->date)) : '') . '</td>
+    <td><b>Checklist No.:</b> ' . ($bcmjcb_data->checklist_no ?? '') . '</td>
+    <td><b>Date:</b> ' . (!empty($bcmjcb_data->date) ? date('d M, Y H:i A', strtotime($bcmjcb_data->date)) : '') . '</td>
 </tr>
 
 </table><br><br>';
@@ -43,7 +43,7 @@ $formhtml .= '
 <table width="100%" cellpadding="6" border="1" style="border-collapse:collapse;">
 <tr>
     <td width="50%"><b>Equipment Name & Number:</b> </td>
-    <td width="50%">11-<b>BAR BENDING MACHINE</b> &</td>
+    <td width="50%">9-<b>BAR CUTTING MACHINE</b> &</td>
 </tr>
 <tr>
     <td colspan="2"><b>Note:</b> Please write Yes or No in the given box and if some comments write in remarks column.</td>
@@ -73,7 +73,7 @@ $questions = $form_items;
 
 
 $lse_map = [];
-foreach ($bbmjcb_details as $row) {
+foreach ($bcmjcb_details as $row) {
     $lse_map[$row['items']] = $row;
 }
 
@@ -106,10 +106,10 @@ foreach ($questions as $key => $q) {
 
 $formhtml .= '</tbody></table><br>';
 $formhtml .= '<div class="col-md-6" style="text-align:center;">
-    <img src="' . base_url("assets/images/bbmjcb.jpg") . '" alt="">
+    <img src="' . base_url("assets/images/bcmjcb.jpg") . '" alt="">
 </div>';
 $checked_new = '<img src="' . base_url('assets/images/checked.png') . '" width="15">';
-$fit_status = isset($bbmjcb_data->fit_status) ? $bbmjcb_data->fit_status : 0;
+$fit_status = isset($bcmjcb_data->fit_status) ? $bcmjcb_data->fit_status : 0;
 
 $fit = ($fit_status == 'fit') ? $checked_new : '';
 $partial = ($fit_status == 'partial') ? $checked_new : '';
@@ -129,8 +129,8 @@ $formhtml .= '
 </tr>
 
 <tr>
-    <td><b>Name:</b> ' . (isset($bbmjcb_data->inspected_by) ? get_staff_namebyId($bbmjcb_data->inspected_by) : '') . '</td>
-    <td><b>Name:</b> ' . (isset($bbmjcb_data->reviewed_by) ? get_staff_namebyId($bbmjcb_data->reviewed_by) : '') . '</td>
+    <td><b>Name:</b> ' . (isset($bcmjcb_data->inspected_by) ? get_staff_namebyId($bcmjcb_data->inspected_by) : '') . '</td>
+    <td><b>Name:</b> ' . (isset($bcmjcb_data->reviewed_by) ? get_staff_namebyId($bcmjcb_data->reviewed_by) : '') . '</td>
 </tr>
 
 <tr>

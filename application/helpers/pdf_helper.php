@@ -401,4 +401,8 @@ function form_pdf_bbmjcb($form, $tag = '')
 {
     return app_pdf('form', LIBSPATH . 'pdf/Form_pdf_bbmjcb', $form, $tag);
 }
+function form_pdf_bcmjcb($form, $tag = '')
+{
+    return app_pdf('form', LIBSPATH . 'pdf/Form_pdf_bcmjcb', $form, $tag);
+}
 
