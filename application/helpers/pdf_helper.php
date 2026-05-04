@@ -397,4 +397,8 @@ function form_pdf_bljcb($form, $tag = '')
 {
     return app_pdf('form', LIBSPATH . 'pdf/Form_pdf_bljcb', $form, $tag);
 }
+function form_pdf_bbmjcb($form, $tag = '')
+{
+    return app_pdf('form', LIBSPATH . 'pdf/Form_pdf_bbmjcb', $form, $tag);
+}
 

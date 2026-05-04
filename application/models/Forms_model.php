@@ -1684,6 +1684,28 @@ class Forms_model extends App_Model
                     $new_order = $data['items'];
                     unset($data['items']);
                 }
+            } elseif ($data['form_type'] == "bbmjcb") {
+                $bbmjcb_form = [];
+                $bbmjcb_form['date'] = $data['date'];
+                $bbmjcb_form['name_of_contractor'] = $data['name_of_contractor'];
+                $bbmjcb_form['checklist_no'] = $data['checklist_no'];
+                $bbmjcb_form['remarks'] = $data['remarks'];
+                $bbmjcb_form['fit_status'] = $data['fit_status'];
+                $bbmjcb_form['inspected_by'] = $data['inspected_by'];
+                $bbmjcb_form['reviewed_by'] = $data['reviewed_by'];
+                unset($data['date']);
+                unset($data['name_of_contractor']);
+                unset($data['checklist_no']);
+                unset($data['remarks']);
+                unset($data['fit_status']);
+                unset($data['inspected_by']);
+                unset($data['reviewed_by']);
+                unset($data['action']);
+                $new_order = [];
+                if (isset($data['items'])) {
+                    $new_order = $data['items'];
+                    unset($data['items']);
+                }
             }
         }
 
@@ -2499,6 +2521,29 @@ class Forms_model extends App_Model
                     if (!empty($bljcb_form)) {
                         $bljcb_form['form_id'] = $formid;
                         $this->db->insert(db_prefix() . $data['form_type'] . '_form', $bljcb_form);
+                    }
+                }
+                if (isset($new_order)) {
+                    if (!empty($new_order)) {
+                        $sr = 1;
+                        foreach ($new_order as $key => $value) {
+                            $dt_data = [];
+                            $dt_data['form_id'] = $formid;
+                            $dt_data['items'] = $sr;
+                            $dt_data['status'] = $value['status'];
+                            $dt_data['remarks'] = $value['remarks'];
+                            $this->db->insert(db_prefix() . $data['form_type'] . '_form_detail', $dt_data);
+                            $insert_id = $this->db->insert_id();
+
+                            $sr++;
+                        }
+                    }
+                }
+            } elseif ($data['form_type'] == "bbmjcb") {
+                if (isset($bbmjcb_form)) {
+                    if (!empty($bbmjcb_form)) {
+                        $bbmjcb_form['form_id'] = $formid;
+                        $this->db->insert(db_prefix() . $data['form_type'] . '_form', $bbmjcb_form);
                     }
                 }
                 if (isset($new_order)) {
@@ -3646,6 +3691,29 @@ class Forms_model extends App_Model
             $bljcb_form['fit_status'] = $data['fit_status'];
             $bljcb_form['inspected_by'] = $data['inspected_by'];
             $bljcb_form['reviewed_by'] = $data['reviewed_by'];
+            unset($data['date']);
+            unset($data['name_of_contractor']);
+            unset($data['checklist_no']);
+            unset($data['remarks']);
+            unset($data['fit_status']);
+            unset($data['inspected_by']);
+            unset($data['reviewed_by']);
+            unset($data['action']);
+            $update_order = [];
+            if (isset($data['items'])) {
+                $update_order = $data['items'];
+                unset($data['items']);
+            }
+        } elseif ($formBeforeUpdate->form_type == "bbmjcb") {
+
+            $bbmjcb_form = [];
+            $bbmjcb_form['date'] = $data['date'];
+            $bbmjcb_form['name_of_contractor'] = $data['name_of_contractor'];
+            $bbmjcb_form['checklist_no'] = $data['checklist_no'];
+            $bbmjcb_form['remarks'] = $data['remarks'];
+            $bbmjcb_form['fit_status'] = $data['fit_status'];
+            $bbmjcb_form['inspected_by'] = $data['inspected_by'];
+            $bbmjcb_form['reviewed_by'] = $data['reviewed_by'];
             unset($data['date']);
             unset($data['name_of_contractor']);
             unset($data['checklist_no']);
@@ -4948,6 +5016,38 @@ class Forms_model extends App_Model
                 if (!empty($bljcb_form)) {
                     $this->db->where('form_id', $data['formid']);
                     $this->db->update(db_prefix() . $formBeforeUpdate->form_type . '_form', $bljcb_form);
+                    if ($this->db->affected_rows() > 0) {
+                        $affectedRows++;
+                    }
+                }
+            }
+
+
+            if (isset($update_order)) {
+                if (!empty($update_order)) {
+                    $sr = 1;
+                    foreach ($update_order as $key => $value) {
+                        $dt_data = [];
+                        $dt_data['form_id'] = $data['formid'];
+                        $dt_data['items'] = $sr;
+                        $dt_data['status'] = $value['status'];
+                        $dt_data['remarks'] = $value['remarks'];
+                        $this->db->where('id', $value['id']);
+                        $this->db->update(db_prefix() .  $formBeforeUpdate->form_type . '_form_detail', $dt_data);
+                        if ($this->db->affected_rows() > 0) {
+                            $affectedRows++;
+                        }
+                    
+
+                        $sr++;
+                    }
+                }
+            }
+        } elseif ($formBeforeUpdate->form_type == "bbmjcb") {
+            if (isset($bbmjcb_form)) {
+                if (!empty($bbmjcb_form)) {
+                    $this->db->where('form_id', $data['formid']);
+                    $this->db->update(db_prefix() . $formBeforeUpdate->form_type . '_form', $bbmjcb_form);
                     if ($this->db->affected_rows() > 0) {
                         $affectedRows++;
                     }
@@ -7053,5 +7153,16 @@ class Forms_model extends App_Model
     {
         $this->db->where('form_id', $form_id);
         return $this->db->get(db_prefix() . 'bljcb_form_detail')->result_array();
+    }
+     public function get_bbmjcb_form($form_id)
+    {
+        $this->db->where('form_id', $form_id);
+        return $this->db->get(db_prefix() . 'bbmjcb_form')->row();
+    }
+
+    public function get_bbmjcb_form_detail($form_id)
+    {
+        $this->db->where('form_id', $form_id);
+        return $this->db->get(db_prefix() . 'bbmjcb_form_detail')->result_array();
     }
 }
