@@ -1819,4 +1819,11 @@ class Tickets_model extends App_Model
 
        return $result = $this->db->get()->result_array();
     }
+
+    public function get_ticket_reply_attachments($id)
+    {
+        $this->db->where('ticketid', $id);
+        $this->db->where('replyid IS NOT NULL', null, false);
+        return $this->db->get(db_prefix() . 'ticket_attachments')->result_array();
+    }
 }

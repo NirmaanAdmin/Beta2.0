@@ -309,6 +309,16 @@ class Download extends App_Controller
                 }
                 $path = FCPATH . 'modules/warehouse/uploads/purchase_tracker/order_shop_drawings/' . $attachment->view_type . '/' . $attachment->rel_id . '/' . $attachment->file_name;
             }
+        } elseif ($folder_indicator == 'drawing_documents') {
+            if (!$attachmentid) {
+                show_404();
+            }
+            $this->db->where('id', $attachmentid);
+            $attachment = $this->db->get(db_prefix() . 'dms_items')->row();
+            if (!$attachment) {
+                show_404();
+            }
+            $path = FCPATH . 'modules/drawing_management/uploads/files/' . $attachment->parent_id . '/' . $attachment->name;
         } else {
             die('folder not specified');
         }

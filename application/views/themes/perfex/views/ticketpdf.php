@@ -89,11 +89,26 @@ $tickethtml .= '
     <td align="center" width="30%;"><b>Description</b></td>
     <td width="70%;">' . $ticket->message . '</td>
 </tr>';
-$tickethtml .= '
-<tr style="font-size:13px;">
-    <td align="center" width="30%;"><b>' . _l('reference_drawings') . '</b></td>
-    <td width="70%;">' . $ticket->ref_drawing . '</td>
-</tr>';
+if(!empty($ticket->ref_drawing)) {
+    $tickethtml .= '
+    <tr style="font-size:13px;">
+        <td align="center" width="30%;"><b>' . _l('reference_drawings') . '</b></td>
+        <td width="70%;">' . $ticket->ref_drawing . '</td>
+    </tr>';
+}
+if(!empty($ticket_dms_items)) {
+    $dms_items_link = '';
+    foreach ($ticket_dms_items as $dkey => $dvalue) {
+        $dms_items_link .= $dkey > 0 ? '<br>' : '';
+        $document_number = !empty($dvalue['document_number']) ? $dvalue['document_number'].'-' : '';
+        $dms_items_link .= '<br><a href="'.site_url('download/file/drawing_documents/'.$dvalue['id']).'">'.$document_number.$dvalue['name'].'</a>';
+    }
+    $tickethtml .= '
+    <tr style="font-size:13px;">
+        <td align="center" width="30%;"><b>' . _l('Drawings') . '</b></td>
+        <td width="70%;">' . $dms_items_link . '</td>
+    </tr>';
+}
 $tickethtml .= '</tbody>';
 $tickethtml .= '</table>';
 
@@ -107,38 +122,6 @@ $tickethtml .= '
 </tr>';
 $tickethtml .= '</tbody>';
 $tickethtml .= '</table>';
-
-if (!empty($ticket_replies)) {
-    $tickethtml .= '<table width="100%" cellspacing="0" cellpadding="5" border="1">';
-    $tickethtml .= '<tbody>';
-    foreach ($ticket_replies as $reply) {
-        if ($reply['is_consultant'] == 0) {
-            $tickethtml .= '
-            <tr>
-                <td width="100%;" align="left" style="font-size: 14px;">
-                    <b>REPLY BY: </b> ' . $reply['submitter'] . '
-                </td>
-            </tr>
-            <tr>
-                <td width="100%;" align="left" style="font-size: 14px;">
-                    <b>REPLY DATE:</b> ' . date('d/m/y', strtotime($reply['date'])) . '
-                </td>
-            </tr>
-            <tr>
-                <td width="100%;" align="left" style="font-size: 14px;">
-                    <b>Comments/Actions:</b> ' . $reply['message'] . '
-                </td>
-            </tr>
-            <tr>
-                <td width="100%;" align="left" style="font-size: 14px;">
-                    <b>Attachments (if any):</b>
-                </td>
-            </tr>';
-        }
-    }
-    $tickethtml .= '</tbody>';
-    $tickethtml .= '</table>';
-}
 
 $tickethtml .= '<table width="100%" cellspacing="0" cellpadding="5" border="1">';
 $tickethtml .= '<tbody>';
@@ -187,14 +170,10 @@ $pdf->writeHTML($tickethtml, true, false, false, false, '');
 
 // --- COMMENTS (TICKET + REPLIES) SECTION IN PDF ---
 $commenthtml = '<h3 style="text-align:center;">Comments</h3>';
-
 if (!empty($ticket)) {
     $commenthtml .= '<div style="border:1px solid #000; margin-bottom:15px; padding:8px;">';
     $commenthtml .= '<table width="100%" cellpadding="5" cellspacing="0" border="0">';
-
-    // Apply the condition to determine the submitter display
     $submitterDisplay = '';
-
     if ($ticket->admin == null || $ticket->admin == 0) {
         if ($ticket->userid != 0) {
             $submitterDisplay = htmlspecialchars($ticket->submitter);
@@ -204,28 +183,44 @@ if (!empty($ticket)) {
     } else {
         $submitterDisplay = htmlspecialchars($ticket->opened_by);
     }
-
+    $attachments_items_link = '';
+    if(!empty($ticket->attachments)) {
+        $attachments_items_link = '<br>';
+        foreach ($ticket->attachments as $akey => $avalue) {
+            $attachments_items_link .= $akey > 0 ? '<br>' : '';
+            $attachments_items_link .= '<br><a href="'.site_url('download/file/ticket/'.$avalue['id']).'">'.$avalue['file_name'].'</a>';
+        }
+    }
     $commenthtml .= '<tr>
         <td width="25%" valign="top" style="border-right:1px solid #ccc;">
             <b>' . $submitterDisplay . '</b><br>
             <span style="font-size:12px; color:#555;">' . (!empty($ticket->admin) ? 'Staff' : 'Client') . '</span><br>
             <span style="font-size:11px; color:#777;">' . date('d M, Y H:i', strtotime($ticket->date)) . '</span>
         </td>
-        <td width="75%" valign="top" style="font-size:13px;">' . htmlspecialchars(strip_tags($ticket->message)) . '</td>
+        <td width="75%" valign="top" style="font-size:13px;">' . htmlspecialchars(strip_tags($ticket->message)) . $attachments_items_link . '</td>
     </tr>';
-
     $commenthtml .= '</table></div>';
 }
 
 // --- REPLIES LOOP ---
 if (!empty($ticket_replies)) {
+    $commenthtml .= '<h3 style="text-align:center;">Replies</h3>';
     foreach ($ticket_replies as $reply) {
         $role = (!empty($reply['is_consultant']) && $reply['is_consultant'] == 1)
             ? 'Consultant'
             : ((!empty($reply['admin'])) ? 'Staff' : 'Client');
-
         $commenthtml .= '<div style="border:1px solid #000; margin-bottom:15px; padding:8px;">';
         $commenthtml .= '<table width="100%" cellpadding="5" cellspacing="0" border="0">';
+        $attachments_items_link = '';
+        if(!empty($reply_attachments)) {
+            $attachments_items_link = '<br>';
+            foreach ($reply_attachments as $akey => $avalue) {
+                if($avalue['replyid'] == $reply['id']) {
+                    $attachments_items_link .= $akey > 0 ? '<br>' : '';
+                    $attachments_items_link .= '<br><a href="'.site_url('download/file/ticket/'.$avalue['id']).'">'.$avalue['file_name'].'</a>';
+                }
+            }
+        }
         $commenthtml .= '
         <tr>
             <td width="25%" valign="top" style="border-right:1px solid #ccc;">
@@ -233,7 +228,7 @@ if (!empty($ticket_replies)) {
                 <span style="font-size:12px; color:#555;">' . $role . '</span><br>
                 <span style="font-size:11px; color:#777;">' . date('d M, Y H:i', strtotime($reply['date'])) . '</span>
             </td>
-            <td width="75%" valign="top" style="font-size:13px;">' . nl2br(htmlspecialchars(strip_tags($reply['message']))) . '</td>
+            <td width="75%" valign="top" style="font-size:13px;">' . nl2br(htmlspecialchars(strip_tags($reply['message']))) . $attachments_items_link . '</td>
         </tr>';
         $commenthtml .= '</table></div>';
     }
@@ -242,69 +237,3 @@ if (!empty($ticket_replies)) {
 }
 
 $pdf->writeHTML($commenthtml, true, false, false, false, '');
-
-
-
-
-if (!empty($ticket->attachments)) {
-    $formhtml = '';
-    // Add page break before the image grid starts
-    $formhtml .= '<div style="page-break-before: always;"></div>';
-    $formhtml .= '<h2>Photos</h2>';
-
-    // Split into groups of 4 (2x2 grid per page)
-    $chunks = array_chunk($ticket->attachments, 4);
-
-    foreach ($chunks as $chunk_index => $chunk) {
-        // Add page break for all chunks except the first one
-        if ($chunk_index > 0) {
-            $formhtml .= '<div style="page-break-before: always;"></div>';
-        }
-
-        $formhtml .= '<table width="100%" cellspacing="10" cellpadding="0" border="1" style="margin-top: 10px;">';
-
-        // Process images in 2 rows of 2 columns each
-        for ($row = 0; $row < 2; $row++) {
-            $formhtml .= '<tr>';
-
-            for ($col = 0; $col < 2; $col++) {
-                $index = $row * 2 + $col;
-                $formhtml .= '<td width="50%" style="text-align: center; vertical-align: middle; height: 400px; padding: 10px;">';
-
-                if (isset($chunk[$index])) {
-                    $file_path = 'uploads/ticket_attachments/' . $chunk[$index]['ticketid'] . '/' . $chunk[$index]['file_name'];
-
-                    if (file_exists(FCPATH . $file_path)) {
-                        $file_ext = strtolower(pathinfo($chunk[$index]['file_name'], PATHINFO_EXTENSION));
-                        $full_path = FCPATH . $file_path;
-
-                        // Check if it's an image
-                        if (in_array($file_ext, ['jpg', 'jpeg', 'png', 'gif'])) {
-                            try {
-                                $base64 = base64_encode(file_get_contents($full_path));
-                                $mime_type = mime_content_type($full_path);
-                                $formhtml .= '<img src="data:' . $mime_type . ';base64,' . $base64 . '" style="max-width: 100%; max-height: 350px; display: block; margin: 0 auto;">';
-                            } catch (Exception $e) {
-                                $formhtml .= '<div style="color: red;">Error loading image: ' . htmlspecialchars($chunk[$index]['file_name']) . '</div>';
-                            }
-                        } else {
-                            $formhtml .= '<div style="padding: 10px; border: 1px solid #ccc;">File: ' . htmlspecialchars($chunk[$index]['file_name']) . '</div>';
-                        }
-                    } else {
-                        $formhtml .= '<div style="color: red;">File not found: ' . htmlspecialchars($chunk[$index]['file_name']) . '</div>';
-                    }
-                } else {
-                    $formhtml .= '&nbsp;';
-                }
-
-                $formhtml .= '</td>';
-            }
-
-            $formhtml .= '</tr>';
-        }
-
-        $formhtml .= '</table>';
-    }
-}
-
-$pdf->writeHTML($formhtml, true, false, false, false, '');

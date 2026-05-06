@@ -22,6 +22,20 @@ class Ticket_pdf extends App_pdf
         $this->ticket = $ticket;
         $this->subject = $this->ticket->subject;
         $this->ticket_replies  = $this->ci->tickets_model->get_ticket_replies($this->ticket->ticketid);
+        $this->ticket_dms_items = array();
+        if (!empty($ticket->dms_items)) {
+            $dms_items = explode(',', $ticket->dms_items);
+            if (!empty($dms_items)) {
+                $this->ci->load->model('drawing_management/drawing_management_model');
+                foreach ($dms_items as $dms_id) {
+                    $item = $this->ci->drawing_management_model->get_item(trim($dms_id));
+                    if ($item) {
+                        $this->ticket_dms_items[] = (array) $item;
+                    }
+                }
+            }
+        }
+        $this->reply_attachments  = $this->ci->tickets_model->get_ticket_reply_attachments($this->ticket->ticketid);
 
         $this->SetTitle($this->subject);
     }
@@ -32,6 +46,8 @@ class Ticket_pdf extends App_pdf
             'subject' => $this->subject,
             'ticket' => $this->ticket,
             'ticket_replies' => $this->ticket_replies,
+            'ticket_dms_items' => $this->ticket_dms_items,
+            'reply_attachments' => $this->reply_attachments,
         ]);
 
         return $this->build();
