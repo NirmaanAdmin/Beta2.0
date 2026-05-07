@@ -119,55 +119,56 @@
         </div>
     </div>
     <div class="col-md-8">
-        <?php echo form_open_multipart($this->uri->uri_string(), ['id' => 'ticket-reply']); ?>
-        <h4 class="tw-mt-0 tw-font-semibold tw-text-lg tw-text-neutral-700 tw-inline-flex tw-items-center">
-            <?php echo _l('clients_ticket_single_add_reply_heading'); ?>
-        </h4>
-        <div class="panel_s single-ticket-reply-area">
-            <div class="panel-body">
-                <div class="form-group">
-                    <textarea name="message" class="form-control" rows="8" placeholder="Reply"></textarea>
-                    <?php echo form_error('message'); ?>
-                </div>
-                <div class="form-group">
-                    <input type="text" name="name" class="form-control" required placeholder="Name*">
-                </div>
-                 <div class="form-group">
-                    <input type="email" name="email" class="form-control" required placeholder="Email">
-                </div>
+        <?php if($ticket->ticketstatusid != 5) {
+            echo form_open_multipart($this->uri->uri_string(), ['id' => 'ticket-reply']); ?>
+            <h4 class="tw-mt-0 tw-font-semibold tw-text-lg tw-text-neutral-700 tw-inline-flex tw-items-center">
+                <?php echo _l('clients_ticket_single_add_reply_heading'); ?>
+            </h4>
+            <div class="panel_s single-ticket-reply-area">
+                <div class="panel-body">
+                    <div class="form-group">
+                        <textarea name="message" class="form-control" rows="8" placeholder="Reply"></textarea>
+                        <?php echo form_error('message'); ?>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="name" class="form-control" required placeholder="Name*">
+                    </div>
+                     <div class="form-group">
+                        <input type="email" name="email" class="form-control" required placeholder="Email">
+                    </div>
 
-                <div class="attachments_area">
-                    <div class="attachments">
-                        <div class="attachment tw-max-w-md">
-                            <div class="form-group">
-                                <label for="attachment"
-                                    class="control-label"><?php echo _l('clients_ticket_attachments'); ?></label>
-                                <div class="input-group">
-                                    <input type="file"
-                                        extension="<?php echo str_replace(['.', ' '], '', get_option('ticket_attachments_file_extensions')); ?>"
-                                        filesize="<?php echo file_upload_max_size(); ?>" class="form-control"
-                                        name="attachments[0]" accept="<?php echo get_ticket_form_accepted_mimes(); ?>">
-                                    <span class="input-group-btn">
-                                        <button class="btn btn-default add_more_attachments "
-                                            data-max="<?php echo get_option('maximum_allowed_ticket_attachments'); ?>"
-                                            type="button">
-                                            <i class="fa fa-plus"></i>
-                                        </button>
-                                    </span>
+                    <div class="attachments_area">
+                        <div class="attachments">
+                            <div class="attachment tw-max-w-md">
+                                <div class="form-group">
+                                    <label for="attachment"
+                                        class="control-label"><?php echo _l('clients_ticket_attachments'); ?></label>
+                                    <div class="input-group">
+                                        <input type="file"
+                                            extension="<?php echo str_replace(['.', ' '], '', get_option('ticket_attachments_file_extensions')); ?>"
+                                            filesize="<?php echo file_upload_max_size(); ?>" class="form-control"
+                                            name="attachments[0]" accept="<?php echo get_ticket_form_accepted_mimes(); ?>">
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-default add_more_attachments "
+                                                data-max="<?php echo get_option('maximum_allowed_ticket_attachments'); ?>"
+                                                type="button">
+                                                <i class="fa fa-plus"></i>
+                                            </button>
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+                <div class="panel-footer text-right">
+                    <button class="btn btn-primary" type="submit" data-form="#ticket-reply" autocomplete="off"
+                        data-loading-text="<?php echo _l('wait_text'); ?>">
+                        <?php echo _l('ticket_single_add_reply'); ?>
+                    </button>
+                </div>
             </div>
-            <div class="panel-footer text-right">
-                <button class="btn btn-primary" type="submit" data-form="#ticket-reply" autocomplete="off"
-                    data-loading-text="<?php echo _l('wait_text'); ?>">
-                    <?php echo _l('ticket_single_add_reply'); ?>
-                </button>
-            </div>
-        </div>
-        <?php echo form_close(); ?>
+        <?php echo form_close(); } ?>
         <div class="panel_s<?php echo $ticket->admin == null ? ' client-reply' : ''; ?>">
             <div class="panel-heading">
                 <h4 class="panel-title"><?php echo _l('clients_single_ticket_string'); ?></h4>
