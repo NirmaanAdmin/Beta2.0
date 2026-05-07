@@ -848,4 +848,19 @@ class Tickets extends AdminController
         $pdf_name = mb_strtoupper(slug_it($ticket->subject)) . '.pdf';
         $pdf->Output($pdf_name, $type);
     }
+
+    public function bulk_rfi_public_link()
+    {
+        $response = array();
+        $data = $this->input->post();
+        $bulk_html = $this->tickets_model->bulk_rfi_public_link($data);
+        if (!empty($bulk_html)) {
+            $response['success'] = true;
+            $response['bulk_html'] = $bulk_html;
+        } else {
+            $response['success'] = false;
+            $response['message'] = _l('Please select at least one item from the list.');
+        }
+        echo json_encode($response);
+    }
 }

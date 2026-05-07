@@ -103,6 +103,7 @@
                             <a href="#" data-toggle="modal" data-target="#tickets_bulk_actions"
                                 class="bulk-actions-btn table-btn hide"
                                 data-table=".table-tickets"><?php echo _l('bulk_actions'); ?></a>
+                            <a onclick="bulk_rfi_public_link(); return false;" class="bulk-actions-btn table-btn hide" data-table=".table-tickets"><?php echo _l('Bulk Public Link'); ?></a>
                             <div class="clearfix"></div>
                             <div class="panel-table-full">
                                 <?php echo AdminTicketsTableStructure('', true); ?>
@@ -181,6 +182,27 @@
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
+<div class="modal fade" id="bulk_public_link_modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title"><?php echo _l('Bulk Public Link'); ?></h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="view_bulk_public_link">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo _l('close'); ?></button>
+            </div>
+        </div>
+    </div>
+</div>
 <?php init_tail(); ?>
 <script>
     var chart;
@@ -210,6 +232,37 @@
             }
         });
     }
+
+    function bulk_rfi_public_link() {
+     "use strict";
+     var print_id = '';
+     var rows = $('.table-tickets').find('tbody tr');
+     $.each(rows, function() {
+       var checkbox = $($(this).find('td').eq(0)).find('input');
+       if (checkbox.prop('checked') === true) {
+           if (print_id !== '') {
+               print_id += ',';
+           }
+           print_id += checkbox.val();
+       }
+     });
+     if (print_id !== '') {
+       $.post(admin_url + 'tickets/bulk_rfi_public_link', {
+         ids: print_id,
+       }).done(function (response) {
+         response = JSON.parse(response);
+         if (response.success) {
+           $('.view_bulk_public_link').html('');
+           $('.view_bulk_public_link').html(response.bulk_html);
+           $('#bulk_public_link_modal').modal('show');
+         } else {
+           alert_float('danger', response.message);
+         }
+       });
+     } else {
+       alert_float('danger', 'Please select at least one item from the list.');
+     }
+   }
 </script>
 <script>
     var table_rec_task;

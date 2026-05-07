@@ -1826,4 +1826,19 @@ class Tickets_model extends App_Model
         $this->db->where('replyid IS NOT NULL', null, false);
         return $this->db->get(db_prefix() . 'ticket_attachments')->result_array();
     }
+
+    public function bulk_rfi_public_link($data)
+    {
+        $html = '';
+        $final_ids = !empty($data['ids']) ? explode(",", rtrim($data['ids'], ",")) : '';
+        if (!empty($final_ids)) {
+            $this->db->order_by('ticketid', 'DESC');
+            $this->db->where_in('ticketid', $final_ids);
+            $tickets = $this->db->get(db_prefix() . 'tickets')->result_array();
+            foreach ($tickets as $tkey => $tvalue) {
+                $html .= '<p>' .($tkey + 1) . '. ' .'<a href="' . get_ticket_public_url($tvalue) . '" target="_blank">' .get_ticket_public_url($tvalue) .'</a></p>';
+            }
+        }
+        return $html;
+    }
 }
