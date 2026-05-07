@@ -863,4 +863,21 @@ class Tickets extends AdminController
         }
         echo json_encode($response);
     }
+
+    public function bulk_rfi_pdf_download()
+    {
+        $urls = [];
+        $ids = $this->input->get('ids');
+        $final_ids = !empty($ids) ? explode(",", rtrim($ids, ",")) : '';
+        if (!empty($final_ids)) {
+            foreach ($final_ids as $row) {
+                $urls[] = admin_url('tickets/pdf/' . $row);
+            }
+        }
+        echo json_encode([
+            'status' => !empty($urls) ? true : false,
+            'download_urls' => $urls
+        ]);
+        return;
+    }
 }

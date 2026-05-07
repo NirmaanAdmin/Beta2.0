@@ -104,6 +104,7 @@
                                 class="bulk-actions-btn table-btn hide"
                                 data-table=".table-tickets"><?php echo _l('bulk_actions'); ?></a>
                             <a onclick="bulk_rfi_public_link(); return false;" class="bulk-actions-btn table-btn hide" data-table=".table-tickets"><?php echo _l('Bulk Public Link'); ?></a>
+                            <a onclick="bulk_rfi_pdf_download(); return false;" class="bulk-actions-btn table-btn hide" data-table=".table-tickets"><?php echo _l('Bulk PDF Download'); ?></a>
                             <div class="clearfix"></div>
                             <div class="panel-table-full">
                                 <?php echo AdminTicketsTableStructure('', true); ?>
@@ -259,6 +260,46 @@
            alert_float('danger', response.message);
          }
        });
+     } else {
+       alert_float('danger', 'Please select at least one item from the list.');
+     }
+   }
+
+   function bulk_rfi_pdf_download() {
+     "use strict";
+     var print_id = '';
+     var rows = $('.table-tickets').find('tbody tr');
+     $.each(rows, function() {
+       var checkbox = $($(this).find('td').eq(0)).find('input');
+       if (checkbox.prop('checked') === true) {
+           if (print_id !== '') {
+               print_id += ',';
+           }
+           print_id += checkbox.val();
+       }
+     });
+     if (print_id !== '') {
+        $.ajax({
+            url: admin_url + 'tickets/bulk_rfi_pdf_download/?ids='+encodeURIComponent(print_id),
+            type: 'GET',
+            dataType: 'json',   
+            success: function(res) {
+                if (res.status === true) {
+                    var urls = res.download_urls;
+                    var delay = 500;
+                    urls.forEach((url, index) => {
+                        setTimeout(() => {
+                            var a = document.createElement('a');
+                            a.href = url;
+                            a.download = "";
+                            document.body.appendChild(a);
+                            a.click();
+                            a.remove();
+                        }, index * delay);
+                    });
+                }
+            }
+        });
      } else {
        alert_float('danger', 'Please select at least one item from the list.');
      }
