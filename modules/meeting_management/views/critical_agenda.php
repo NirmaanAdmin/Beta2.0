@@ -66,6 +66,7 @@ $module_name = 'critical_mom'; ?>
                     $status_labels = [
                         ['id' => '1', 'name' => 'Open'],
                         ['id' => '2', 'name' => 'Close'],
+                        ['id' => '3', 'name' => 'No Status'],
                     ];
                     echo render_select('status[]', $status_labels, array('id', 'name'), '', $status_type_filter_val, array('data-width' => '100%', 'data-none-selected-text' => _l('Status'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
                     ?>
@@ -125,9 +126,14 @@ $module_name = 'critical_mom'; ?>
                                 <span style="color: rgb(34, 197, 94);">Completed</span>
                             </div>
                             <div class="col-md-2 col-xs-6 md:tw-border-r md:tw-border-solid md:tw-border-neutral-300 last:tw-border-r-0 tw-text-neutral-600 hover:tw-opacity-70 tw-inline-flex tw-items-center">
+                                <span class="tw-font-semibold tw-mr-3 rtl:tw-ml-3 tw-text-lg"><?php echo $no_status; ?></span>
+                                <span style="color: rgb(150, 175, 37);">No Status</span>
+                            </div>
+                            <div class="col-md-2 col-xs-6 md:tw-border-r md:tw-border-solid md:tw-border-neutral-300 last:tw-border-r-0 tw-text-neutral-600 hover:tw-opacity-70 tw-inline-flex tw-items-center">
                                 <span class="tw-font-semibold tw-mr-3 rtl:tw-ml-3 tw-text-lg"><?php echo $total; ?></span>
                                 <span style="color: rgb(3, 169, 244);">Total</span>
                             </div>
+                            
 
                         </div>
                         <hr class="hr-panel-separator" />

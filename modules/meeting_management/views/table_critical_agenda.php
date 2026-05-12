@@ -45,13 +45,26 @@ if ($depts = $this->ci->input->post('department')) {
     $where[] = 'AND department IN (' . implode(',', $depts) . ')';
 }
 if ($stats = $this->ci->input->post('status')) {
-    $where[] = 'AND status IN (' . implode(',', $stats) . ')';
+
+    $status_conditions = [];
+
+    foreach ($stats as $status) {
+
+        // If status = 3 then check NULL and 0
+        if ($status == 3) {
+            $status_conditions[] = '(status IS NULL OR status = 0)';
+        } else {
+            $status_conditions[] = 'status = ' . (int)$status;
+        }
+    }
+
+    $where[] = 'AND (' . implode(' OR ', $status_conditions) . ')';
 }
 if ($prios = $this->ci->input->post('priority')) {
     $where[] = 'AND priority IN (' . implode(',', $prios) . ')';
 }
 
-if($default_project > 0){
+if ($default_project > 0) {
     $where[] = 'AND project_id=' . $default_project;
 }
 

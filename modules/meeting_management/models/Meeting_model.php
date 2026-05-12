@@ -1923,6 +1923,8 @@ class Meeting_model extends App_Model
 
     public function get_total_critical_agenda($type = '')
     {
+        $default_project = get_default_project();
+
         // always count rows
         $this->db->select('COUNT(*) AS total')
             ->from(db_prefix() . 'critical_mom');
@@ -1932,6 +1934,15 @@ class Meeting_model extends App_Model
             $this->db->where('status', 1);
         } elseif ($type === 'completed') {
             $this->db->where('status', 2);
+        } elseif ($type === 'no_status') {
+            $this->db->group_start()
+                ->where('status IS NULL', null, false)
+                ->or_where('status', 0)
+                ->group_end();
+        }
+
+        if ($default_project > 0) {
+            $this->db->where('project_id', $default_project);
         }
 
         $row = $this->db->get()->row();
