@@ -191,7 +191,7 @@ if (isset($invoice->scheduled_email) && $invoice->scheduled_email) { ?>
                     </li>
 
                     <?php
-                    $annexures = get_all_annexures(); ?>
+                    $annexures = get_budget_head_project_wise(); ?>
                     <li role="presentation" class="dropdown">
                         <a href="#" class="dropdown-toggle" id="tab_child_items" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Annexures
@@ -510,7 +510,7 @@ if (isset($invoice->scheduled_email) && $invoice->scheduled_email) { ?>
                 </div>
 
                 <?php
-                $annexures = get_all_annexures();
+                $annexures = get_budget_head_project_wise();
                 $i = 1;
                 foreach ($annexures as $key => $annexure) { ?>
                     <div role="tabpanel" class="tab-pane" id="<?php echo $annexure['annexure_key']; ?>">

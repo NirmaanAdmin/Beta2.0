@@ -1690,7 +1690,7 @@ class Estimates_model extends App_Model
 
     public function get_items_groups($id)
     {
-        $all_annexures = get_all_annexures();
+        $all_annexures = get_budget_head_project_wise();
         $result = array_filter($all_annexures, function ($item) use ($id) {
             return $item['id'] == $id;
         });

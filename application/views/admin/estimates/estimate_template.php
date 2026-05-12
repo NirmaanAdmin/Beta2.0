@@ -390,7 +390,7 @@
                 </li>
 
                 <?php
-                $annexures = get_all_annexures(); ?>
+                $annexures = get_budget_head_project_wise(); ?>
                 <li role="presentation" class="dropdown">
                     <a href="#" class="dropdown-toggle" id="tab_child_items" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <?php echo _l('detailed_costing_technical_assumptions'); ?>
@@ -693,7 +693,7 @@
             <?php } ?>
 
             <?php
-            $annexures = get_all_annexures(); 
+            $annexures = get_budget_head_project_wise(); 
             $i = 1;
             $base_path = get_upload_path_by_type('item_json');
             $jsonFilePath = $base_path . 'tblitems.json';

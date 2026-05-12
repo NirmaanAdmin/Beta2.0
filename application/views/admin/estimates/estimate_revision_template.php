@@ -134,7 +134,7 @@
 	            </a>
 	        </li>
 	        <?php
-	        $annexures = get_all_annexures(); ?>
+	        $annexures = get_budget_head_project_wise(); ?>
 	        <li role="presentation" class="dropdown">
 	            <a href="#" class="dropdown-toggle" id="tab_child_items" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 	                <?php echo _l('detailed_costing_technical_assumptions'); ?>
@@ -397,7 +397,7 @@
         </div>
 
         <?php
-        $annexures = get_all_annexures(); 
+        $annexures = get_budget_head_project_wise(); 
         foreach ($annexures as $key => $annexure) { ?>
             <div role="tabpanel" class="tab-pane detailed-costing-tab" id="revision_<?php echo $unique_id; ?>_<?php echo $annexure['annexure_key']; ?>" data-id="<?php echo $annexure['id']; ?>">
                     <div class="col-md-4">

@@ -279,7 +279,7 @@ $pdf->writeHTML($costplansummary, true, false, false, false, '');
 $detailedcosting = '';
 $detailedcosting .= '<p style="font-weight:bold;">5. '.strtoupper(_l('detailed_costing_technical_assumptions')).'</p>';
 
-$annexures = get_all_annexures();
+$annexures = get_budget_head_project_wise();
 $main_annexure_items = array();
 $estimate_items = $cost_planning_details['estimate_items'];
 if(!empty($estimate_items)) {
