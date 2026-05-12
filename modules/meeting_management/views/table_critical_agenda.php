@@ -33,7 +33,7 @@ $join          = [
     'LEFT JOIN ' . db_prefix() . 'staff       ON ' . db_prefix() . 'staff.staffid       = ' . db_prefix() . 'critical_mom.staff',
 ];
 $where         = [];
-
+$default_project = get_default_project();
 // --- build filters ---
 // if ($from = $this->ci->input->post('from_date')) {
 //     $where[] = 'AND target_date >= "' . date('Y-m-d', strtotime($from)) . '"';
@@ -49,6 +49,10 @@ if ($stats = $this->ci->input->post('status')) {
 }
 if ($prios = $this->ci->input->post('priority')) {
     $where[] = 'AND priority IN (' . implode(',', $prios) . ')';
+}
+
+if($default_project > 0){
+    $where[] = 'AND project_id=' . $default_project;
 }
 
 // persist filters
