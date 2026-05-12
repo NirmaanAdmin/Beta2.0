@@ -47,7 +47,7 @@
  </tbody>
 </table>   
 
-<div class="modal1 fade" id="commodity_group_type" tabindex="-1" role="dialog">
+<div class="modal fade" id="commodity_group_type" tabindex="-1" role="dialog">
     <div class="modal-dialog setting-handsome-table">
       <?php echo form_open_multipart(admin_url('purchase/commodity_group_type'), array('id'=>'add_commodity_group_type')); ?>
       <?php echo form_hidden('commodity_group_type_id'); ?>

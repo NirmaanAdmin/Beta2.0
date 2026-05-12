@@ -53,6 +53,10 @@
 <?php init_tail(); ?>
 <?php if($group == 'inventory' ){
 require 'modules/warehouse/assets/js/inventory_js.php';
+} else if($group == 'commodity_group'){
+require require 'modules/purchase/assets/js/commodity_group_js.php';
+} else if($group == 'sub_group'){
+require 'modules/purchase/assets/js/sub_group_js.php';
 } ?>
 </body>
 </html>

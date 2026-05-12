@@ -33,7 +33,7 @@
  </tbody>
 </table>   
 
-<div class="modal1 fade" id="sub_group_type" tabindex="-1" role="dialog">
+<div class="modal fade" id="sub_group_type" tabindex="-1" role="dialog">
     <div class="modal-dialog setting-handsome-table">
       <?php echo form_open_multipart(admin_url('purchase/sub_group'), array('id'=>'add_sub_group')); ?>
       <?php echo form_hidden('sub_group_type_id'); ?>

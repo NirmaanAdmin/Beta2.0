@@ -101,6 +101,9 @@ class warehouse extends AdminController
 		}
 
 		$data['tabs']['view'] = 'includes/' . $data['group'];
+		if($data['group'] == 'commodity_group' || $data['group'] == 'sub_group') {
+            $data['tabs']['view'] = 'purchase/includes/' . $data['group'];
+        }
 		$data['projects'] = $this->projects_model->get_items();
 
 		$this->load->view('manage_setting', $data);
@@ -409,68 +412,6 @@ class warehouse extends AdminController
 			set_alert('warning', _l('problem_deleting', _l('body_type')));
 		}
 		redirect(admin_url('warehouse/setting?group=bodys'));
-	}
-
-	/**
-	 * commodty group type
-	 * @param  integer $id
-	 * @return redirect
-	 */
-	public function commodity_group_type($id = '')
-	{
-		if ($this->input->post()) {
-			$message = '';
-			$data = $this->input->post();
-
-			if (!$this->input->post('id')) {
-
-				$mess = $this->warehouse_model->add_commodity_group_type($data);
-				if ($mess) {
-					set_alert('success', _l('added_successfully') . _l('commodity_group_type'));
-				} else {
-					set_alert('warning', _l('Add_commodity_group_type_false'));
-				}
-				redirect(admin_url('warehouse/setting?group=commodity_group'));
-			} else {
-				$id = $data['id'];
-				unset($data['id']);
-				$success = $this->warehouse_model->add_commodity_group_type($data, $id);
-				if ($success) {
-					set_alert('success', _l('updated_successfully') . _l('commodity_group_type'));
-				} else {
-					set_alert('warning', _l('updated_commodity_group_type_false'));
-				}
-
-				redirect(admin_url('warehouse/setting?group=commodity_group'));
-			}
-		}
-	}
-
-	/**
-	 * delete commodity group type
-	 * @param  integer $id
-	 * @return redirect
-	 */
-	public function delete_commodity_group_type($id)
-	{
-		if (!$id) {
-			redirect(admin_url('warehouse/setting?group=commodity_group'));
-		}
-
-		if (!has_permission('warehouse', '', 'delete')  &&  !is_admin()) {
-			access_denied('warehouse');
-		}
-
-
-		$response = $this->warehouse_model->delete_commodity_group_type($id);
-		if (is_array($response) && isset($response['referenced'])) {
-			set_alert('warning', _l('is_referenced', _l('commodity_group_type')));
-		} elseif ($response == true) {
-			set_alert('success', _l('deleted', _l('commodity_group_type')));
-		} else {
-			set_alert('warning', _l('problem_deleting', _l('commodity_group_type')));
-		}
-		redirect(admin_url('warehouse/setting?group=commodity_group'));
 	}
 
 	/**
@@ -2323,68 +2264,6 @@ class warehouse extends AdminController
 			'arr_images' => $images_old_value,
 		]);
 		die();
-	}
-
-	/**
-	 * sub group
-	 * @param  integer $id
-	 * @return redirect
-	 */
-	public function sub_group($id = '')
-	{
-		if ($this->input->post()) {
-			$message = '';
-			$data = $this->input->post();
-
-			if (!$this->input->post('id')) {
-
-				$mess = $this->warehouse_model->add_sub_group($data);
-				if ($mess) {
-					set_alert('success', _l('added_successfully') . ' ' . _l('sub_group'));
-				} else {
-					set_alert('warning', _l('Add_sub_group_false'));
-				}
-				redirect(admin_url('warehouse/setting?group=sub_group'));
-			} else {
-				$id = $data['id'];
-				unset($data['id']);
-				$success = $this->warehouse_model->add_sub_group($data, $id);
-				if ($success) {
-					set_alert('success', _l('updated_successfully') . ' ' . _l('sub_group'));
-				} else {
-					set_alert('warning', _l('updated_sub_group_false'));
-				}
-
-				redirect(admin_url('warehouse/setting?group=sub_group'));
-			}
-		}
-	}
-
-	/**
-	 * delete sub group
-	 * @param  integer $id
-	 * @return redirect
-	 */
-	public function delete_sub_group($id)
-	{
-		if (!$id) {
-			redirect(admin_url('warehouse/setting?group=sub_group'));
-		}
-
-		if (!has_permission('warehouse', '', 'delete')  &&  !is_admin()) {
-			access_denied('warehouse');
-		}
-
-
-		$response = $this->warehouse_model->delete_sub_group($id);
-		if (is_array($response) && isset($response['referenced'])) {
-			set_alert('warning', _l('is_referenced', _l('sub_group')));
-		} elseif ($response == true) {
-			set_alert('success', _l('deleted', _l('sub_group')));
-		} else {
-			set_alert('warning', _l('problem_deleting', _l('sub_group')));
-		}
-		redirect(admin_url('warehouse/setting?group=sub_group'));
 	}
 
 	/**
