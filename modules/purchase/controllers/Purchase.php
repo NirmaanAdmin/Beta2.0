@@ -4273,7 +4273,7 @@ class purchase extends AdminController
                 } else {
                     set_alert('warning', _l('Add_commodity_group_type_false'));
                 }
-                redirect(admin_url('purchase/setting?group=commodity_group'));
+                redirect($_SERVER['HTTP_REFERER']);
             } else {
                 $id = $data['commodity_group_type_id'];
                 unset($data['commodity_group_type_id']);
@@ -4283,8 +4283,7 @@ class purchase extends AdminController
                 } else {
                     set_alert('warning', _l('updated_commodity_group_type_false'));
                 }
-
-                redirect(admin_url('purchase/setting?group=commodity_group'));
+                redirect($_SERVER['HTTP_REFERER']);
             }
         }
     }
@@ -4324,12 +4323,12 @@ class purchase extends AdminController
     public function delete_commodity_group_type($id)
     {
         if (!$id) {
-            redirect(admin_url('purchase/setting?group=commodity_group'));
+            redirect($_SERVER['HTTP_REFERER']);
         }
         $budget_head = $this->purchase_model->get_pur_invoice_budget_head($id);
         if (!empty($budget_head)) {
             set_alert('warning', 'This budget head is already linked to a vendor billing tracker.');
-            redirect(admin_url('purchase/setting?group=commodity_group'));
+            redirect($_SERVER['HTTP_REFERER']);
         }
         $response = $this->purchase_model->delete_commodity_group_type($id);
         if (is_array($response) && isset($response['referenced'])) {
@@ -4339,7 +4338,7 @@ class purchase extends AdminController
         } else {
             set_alert('warning', _l('problem_deleting', _l('commodity_group_type')));
         }
-        redirect(admin_url('purchase/setting?group=commodity_group'));
+        redirect($_SERVER['HTTP_REFERER']);
     }
     public function delete_area($id)
     {
@@ -4375,7 +4374,7 @@ class purchase extends AdminController
                 } else {
                     set_alert('warning', _l('Add_sub_group_false'));
                 }
-                redirect(admin_url('purchase/setting?group=sub_group'));
+                redirect($_SERVER['HTTP_REFERER']);
             } else {
                 $id = $data['sub_group_type_id'];
                 unset($data['sub_group_type_id']);
@@ -4385,8 +4384,7 @@ class purchase extends AdminController
                 } else {
                     set_alert('warning', _l('updated_sub_group_false'));
                 }
-
-                redirect(admin_url('purchase/setting?group=sub_group'));
+                redirect($_SERVER['HTTP_REFERER']);
             }
         }
     }
@@ -4399,7 +4397,7 @@ class purchase extends AdminController
     public function delete_sub_group($id)
     {
         if (!$id) {
-            redirect(admin_url('purchase/setting?group=sub_group'));
+            redirect($_SERVER['HTTP_REFERER']);
         }
         $response = $this->purchase_model->delete_sub_group($id);
         if (is_array($response) && isset($response['referenced'])) {
@@ -4409,7 +4407,7 @@ class purchase extends AdminController
         } else {
             set_alert('warning', _l('problem_deleting', _l('sub_group')));
         }
-        redirect(admin_url('purchase/setting?group=sub_group'));
+        redirect($_SERVER['HTTP_REFERER']);
     }
 
     /**
