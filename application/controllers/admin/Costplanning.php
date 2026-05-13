@@ -149,6 +149,12 @@ class Costplanning extends AdminController
     {
         $name    = $this->input->post('name');
         $value = $this->input->post('value');
+        if(empty($value)) {
+            $default_project = get_default_project();
+            $this->db->where('project_id', $default_project);
+            $wh_sub_group = $this->db->get(db_prefix() . 'wh_sub_group')->row();
+            $value = !empty($wh_sub_group) ? $wh_sub_group->id : NULL;
+        }
         echo $this->costplanning_model->get_sub_head_dropdown($name, $value);
     }
 }

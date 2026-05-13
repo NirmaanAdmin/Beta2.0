@@ -794,6 +794,12 @@ class Estimates extends AdminController
     {
         $name    = $this->input->post('name');
         $value = $this->input->post('value');
+        if(empty($value)) {
+            $default_project = get_default_project();
+            $this->db->where('project', $default_project);
+            $area = $this->db->get(db_prefix() . 'area')->row();
+            $value = !empty($area) ? $area->id : NULL;
+        }
         echo get_area_list($name, $value);
     }
 
