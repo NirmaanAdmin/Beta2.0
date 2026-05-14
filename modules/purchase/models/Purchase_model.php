@@ -5335,12 +5335,12 @@ class Purchase_model extends App_Model
         $buyer = '';
         $delivery_person = '';
         $show_image_column = false;
-        $width = 'width: 17%';
+        $width = 'width: 32%';
         // Check if any record has an image
         foreach ($pur_order_detail as $row) {
             if (!empty($row['image'])) {
                 $show_image_column = true;
-                $width = 'width: 10%';
+                $width = 'width: 25%';
                 break;
             }
         }
@@ -5440,7 +5440,6 @@ class Purchase_model extends App_Model
         <thead>
           <tr>
             <th class="thead-dark" align="left" style="width: 3%">' . _l('serial_no') . '</th>
-            <th class="thead-dark" style="width: 15%">' . _l('items') . '</th>
             <th class="thead-dark" align="left" style="' . $width . '">' . _l('item_description') . '</th>
             <th class="thead-dark" align="left" style="width: 10%">' . _l('sub_groups_pur') . '</th>
             <th class="thead-dark" align="left" style="width: 10%">' . _l('area') . '</th>';
@@ -5492,7 +5491,6 @@ class Purchase_model extends App_Model
             }
             $html .= '<tr class="sortable">
             <td style="width: 3%">' . $serial_no . '</td>
-            <td style="width: 15%">' . $items->commodity_code . ' - ' . $items->description . $non_budget_item . '</td>
             <td align="left" style="' . $width . '">' . str_replace("<br />", " ", $row['description']) . '</td>
             <td align="left" style="width: 10%">' . $get_sub_head . '</td>
             <td align="left" style="width: 10%">' . get_area_name_by_id($row['area']) . '</td>';
@@ -16064,12 +16062,12 @@ class Purchase_model extends App_Model
         $buyer = '';
         $delivery_person = '';
         $show_image_column = false;
-        $width = 'width: 31%';
+        $width = 'width: 41%';
         // Check if any record has an image
         foreach ($pur_order_detail as $row) {
             if (!empty($row['image'])) {
                 $show_image_column = true;
-                $width = 'width: 21%';
+                $width = 'width: 31%';
                 break;
             }
         }
@@ -16169,7 +16167,6 @@ class Purchase_model extends App_Model
         <thead>
           <tr>
             <th class="thead-dark" style="width: 3%"></th>
-            <th class="thead-dark" style="width: 10%">' . _l('items') . '</th>
             <th class="thead-dark" align="left" style="' . $width . '">' . _l('item_description') . '</th>
             <th class="thead-dark" align="left" style="width: 9%">' . _l('sub_groups_pur') . '</th>
             <th class="thead-dark" align="left" style="width: 9%">' . _l('area') . '</th>';
@@ -16210,12 +16207,13 @@ class Purchase_model extends App_Model
             $serial_no = $row['serial_no'];
             $html .= '<tr class="sortable" style="font-size: 11px">
             <td style="width: 3%">' . $serial_no . '</td>
-            <td style="width: 10%">' . $items->commodity_code . ' - ' . $items->description . '</td>
-            <td align="left" style="width: 21%">' . str_replace("<br />", " ", $row['description']) . '</td>
+            <td align="left" style="' . $width . '">' . str_replace("<br />", " ", $row['description']) . '</td>
             <td align="left" style="width: 9%">' . $get_sub_head . '</td>
-            <td align="left" style="width: 9%">' . get_area_name_by_id($row['area']) . '</td>
-            <td align="left" style="width: 10%">' . $full_item_image . '</td>
-            <td align="right" style="width: 9%">' . $row['quantity']  . ' ' . $unit_name . '</td>
+            <td align="left" style="width: 9%">' . get_area_name_by_id($row['area']) . '</td>';
+            if ($show_image_column) {
+                $html .= '<td align="left" style="width: 10%">' . $full_item_image . '</td>';
+            }
+            $html .= '<td align="right" style="width: 9%">' . $row['quantity']  . ' ' . $unit_name . '</td>
             <td align="right" style="width: 9%">' . '₹ ' . app_format_money($row['unit_price'], '') . '</td>
             
             <td align="right" style="width: 10%">' . app_format_money($row['tax_rate'], '') . '</td>

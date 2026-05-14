@@ -4871,8 +4871,7 @@ class Changee_model extends App_Model
         $html .=  '<table class="table purorder-item" style="width: 100%">
         <thead>
           <tr>
-            <th class="thead-dark" style="width: 10%;font-size: 11px">' . _l('items') . '</th>
-            <th class="thead-dark" style="width: 32%;font-size: 11px">' . _l('decription') . '</th>
+            <th class="thead-dark" style="width: 42%;font-size: 11px">' . _l('decription') . '</th>
             <th class="thead-dark" align="right" style="width: 8%;font-size: 11px">' . _l('awarded_qty') . '</th>
             <th class="thead-dark" align="right" style="width: 8%;font-size: 11px">' . _l('qty_after_incl_co') . '</th>
             <th class="thead-dark" align="right" style="width: 8%;font-size: 11px">' . _l('awarded_rate') . '</th>
@@ -4935,8 +4934,7 @@ class Changee_model extends App_Model
                 $remarks = '<br>Remarks: '.$row['remarks'];
             }
             $html .= '<tr nobr="true" class="sortable">
-            <td style="width: 10%; font-size: 11px;' . $font_weight . '">' . $items->commodity_code . ' - ' . $items->description . $non_tender . '</td>
-            <td style="width: 32%; font-size: 11px">
+            <td style="width: 42%; font-size: 11px">
                 ' . str_replace("<br />", " ", $row['description']) . '
                 ' . str_replace("<br />", " ", $remarks) . '
             </td>
