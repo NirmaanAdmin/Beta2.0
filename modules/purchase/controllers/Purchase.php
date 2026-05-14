@@ -4325,9 +4325,7 @@ class purchase extends AdminController
         if (!$id) {
             redirect($_SERVER['HTTP_REFERER']);
         }
-        $budget_head = $this->purchase_model->get_pur_invoice_budget_head($id);
-        if (!empty($budget_head)) {
-            set_alert('warning', 'This budget head is already linked to a vendor billing tracker.');
+        if (!$this->purchase_model->find_commodity_group_exist_in_modules($id)) {
             redirect($_SERVER['HTTP_REFERER']);
         }
         $response = $this->purchase_model->delete_commodity_group_type($id);
@@ -4397,6 +4395,9 @@ class purchase extends AdminController
     public function delete_sub_group($id)
     {
         if (!$id) {
+            redirect($_SERVER['HTTP_REFERER']);
+        }
+        if (!$this->purchase_model->find_sub_group_exist_in_modules($id)) {
             redirect($_SERVER['HTTP_REFERER']);
         }
         $response = $this->purchase_model->delete_sub_group($id);
@@ -17902,19 +17903,10 @@ class purchase extends AdminController
                             }
 
                             if ($flag == 0 && $flag2 == 0) {
-                                $this->db->select_max('order');
-                                $this->db->from(db_prefix() . 'items_groups');
-                                $this->db->where('order IS NOT NULL');
-                                $latest_items_group = $this->db->get()->row();
-                                $next_items_group = !empty($latest_items_group) ? $latest_items_group->order + 1 : 1;
-
                                 $rd = array();
                                 $rd['name'] = $value_commodity_group_name;
                                 $rd['commodity_group_code'] = !empty($value_commodity_group_code) ? $value_commodity_group_code : NULL;
                                 $rd['project_id'] = $this->input->post('project');
-                                $rd['annexure_key'] = 'annexure'.$next_items_group;
-                                $rd['annexure_name'] = 'Annexure - '.$next_items_group;
-                                $rd['order'] = $next_items_group;
                                 $rd['display'] = 1;
                                 $rows[] = $rd;
                                 $this->db->insert(db_prefix() . 'items_groups', $rd);
@@ -17949,5 +17941,43 @@ class purchase extends AdminController
             'filename'          => PURCHASE_IMPORT_PURCHASE_COMMODITY_GROUP_ERROR . $filename,
 
         ]);
+    }
+
+    public function active_commodity_group($id)
+    {
+        $this->db->where('id', $id);
+        $this->db->update(db_prefix() . 'items_groups', ['display' => 1]);
+        set_alert('success', 'Budget head activated successfully.');
+        redirect($_SERVER['HTTP_REFERER']);
+    }
+
+    public function deactive_commodity_group($id)
+    {
+        if (!$this->purchase_model->find_commodity_group_exist_in_modules($id)) {
+            redirect($_SERVER['HTTP_REFERER']);
+        }
+        $this->db->where('id', $id);
+        $this->db->update(db_prefix() . 'items_groups', ['display' => 0]);
+        set_alert('success', 'Budget head deactivated successfully.');
+        redirect($_SERVER['HTTP_REFERER']);
+    }
+
+    public function active_sub_group($id)
+    {
+        $this->db->where('id', $id);
+        $this->db->update(db_prefix() . 'wh_sub_group', ['display' => 1]);
+        set_alert('success', 'Budget sub head activated successfully.');
+        redirect($_SERVER['HTTP_REFERER']);
+    }
+
+    public function deactive_sub_group($id)
+    {
+        if (!$this->purchase_model->find_sub_group_exist_in_modules($id)) {
+            redirect($_SERVER['HTTP_REFERER']);
+        }
+        $this->db->where('id', $id);
+        $this->db->update(db_prefix() . 'wh_sub_group', ['display' => 0]);
+        set_alert('success', 'Budget sub head deactivated successfully.');
+        redirect($_SERVER['HTTP_REFERER']);
     }
 }

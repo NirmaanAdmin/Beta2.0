@@ -54,6 +54,44 @@ $(document).on('click', '.delete_commodity_group_type', function(e) {
    });
 });
 
+$(document).on('click', '.active_commodity_group', function(e) {
+   e.preventDefault();
+   var url = $(this).attr('href');
+   Swal.fire({
+      title: 'Are you sure?',
+      text: 'Do you want to activate this budget head?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, activate it!',
+      cancelButtonText: 'Cancel'
+   }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = url;
+      }
+   });
+});
+
+$(document).on('click', '.deactive_commodity_group', function(e) {
+   e.preventDefault();
+   var url = $(this).attr('href');
+   Swal.fire({
+      title: 'Are you sure?',
+      text: 'Do you want to deactivate this budget head?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, deactivate it!',
+      cancelButtonText: 'Cancel'
+   }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = url;
+      }
+   });
+});
+
 function uploadpurchasecommoditygroupfilecsv() {
   "use strict";
   var fileInput = $('#file_csv')[0];

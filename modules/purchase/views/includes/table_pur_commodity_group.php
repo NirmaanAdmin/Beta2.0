@@ -7,6 +7,7 @@ $aColumns = [
     'commodity_group_code',
     'name',
     'project_id',
+    'display',
 ];
 
 $sIndexColumn = 'id';
@@ -34,6 +35,11 @@ foreach ($rResult as $key => $aRow) {
     $row[] = $commodity_group_code;
     $row[] = $name;
     $row[] = get_project_name_by_id($aRow['project_id']);
+    if($aRow['display'] == 1) {
+        $row[] = '<a href="'.admin_url('purchase/deactive_commodity_group/'.$aRow['id']).'" class="btn btn-success deactive_commodity_group">'._l('Active').'</a>';
+    } else {
+        $row[] = '<a href="'.admin_url('purchase/active_commodity_group/'.$aRow['id']).'" class="btn btn-danger active_commodity_group">'._l('Deactive').'</a>';
+    }
 
     $options = '';
 

@@ -4607,9 +4607,19 @@ function get_budget_head_project_wise($id = false)
         $default_project = get_default_project();
         $CI->db->select('*');
         $CI->db->from(db_prefix() . 'items_groups');
+        $CI->db->where('display', 1);
         $CI->db->where('(project_id IS NULL OR project_id = ' . $default_project . ')');
         $CI->db->order_by('id', 'asc');
-        return $CI->db->get()->result_array();
+        $budget_head = $CI->db->get()->result_array();
+        if(!empty($budget_head)) {
+            foreach ($budget_head as $key => &$row) {
+                $num = $key + 1;
+                $row['annexure_key'] = 'annexure' . $num;
+                $row['annexure_name'] = 'Annexure - ' . $num;
+                $row['order'] = $num;
+            }
+        }
+        return $budget_head;
     }
 }
 
@@ -4623,6 +4633,7 @@ function get_budget_sub_head_project_wise($id = false)
         $default_project = get_default_project();
         $CI->db->select('*');
         $CI->db->from(db_prefix() . 'wh_sub_group');
+        $CI->db->where('display', 1);
         $CI->db->where('(project_id IS NULL OR project_id = ' . $default_project . ')');
         $CI->db->order_by('id', 'asc');
         return $CI->db->get()->result_array();

@@ -41,6 +41,7 @@
     <th><?php echo _l('commodity_group_code'); ?></th>
     <th><?php echo _l('commodity_group_name'); ?></th>
     <th><?php echo _l('project'); ?></th>
+    <th><?php echo _l('status'); ?></th>
     <th><?php echo _l('options'); ?></th>
  </thead>
  <tbody>

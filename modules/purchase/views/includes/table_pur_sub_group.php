@@ -8,6 +8,7 @@ $aColumns = [
     'sub_group_name',
     'group_id',
     'project_id',
+    'display',
 ];
 
 $sIndexColumn = 'id';
@@ -45,6 +46,11 @@ foreach ($rResult as $key => $aRow) {
     $row[] = $sub_group_name;
     $row[] = $group_name;
     $row[] = get_project_name_by_id($aRow['project_id']);
+    if($aRow['display'] == 1) {
+        $row[] = '<a href="'.admin_url('purchase/deactive_sub_group/'.$aRow['id']).'" class="btn btn-success deactive_sub_group">'._l('Active').'</a>';
+    } else {
+        $row[] = '<a href="'.admin_url('purchase/active_sub_group/'.$aRow['id']).'" class="btn btn-danger active_sub_group">'._l('Deactive').'</a>';
+    }
 
     $options = '';
 

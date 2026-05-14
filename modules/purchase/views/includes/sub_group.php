@@ -27,6 +27,7 @@
     <th><?php echo _l('sub_group_name'); ?></th>
     <th><?php echo _l('group_name'); ?></th>
     <th><?php echo _l('project'); ?></th>
+    <th><?php echo _l('status'); ?></th>
     <th><?php echo _l('options'); ?></th>
  </thead>
  <tbody>

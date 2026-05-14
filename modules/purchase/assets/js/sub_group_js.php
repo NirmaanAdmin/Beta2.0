@@ -41,4 +41,42 @@ initDataTable('.sub-group-table', admin_url + 'purchase/table_pur_sub_group', []
 $('select[name="select_project"]').on('change', function () {
   sub_group_table.DataTable().ajax.reload();
 });
+
+$(document).on('click', '.active_sub_group', function(e) {
+   e.preventDefault();
+   var url = $(this).attr('href');
+   Swal.fire({
+      title: 'Are you sure?',
+      text: 'Do you want to activate this sub budget head?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, activate it!',
+      cancelButtonText: 'Cancel'
+   }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = url;
+      }
+   });
+});
+
+$(document).on('click', '.deactive_sub_group', function(e) {
+   e.preventDefault();
+   var url = $(this).attr('href');
+   Swal.fire({
+      title: 'Are you sure?',
+      text: 'Do you want to deactivate this sub budget head?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, deactivate it!',
+      cancelButtonText: 'Cancel'
+   }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = url;
+      }
+   });
+});
 </script>

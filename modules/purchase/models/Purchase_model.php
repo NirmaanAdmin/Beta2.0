@@ -29160,4 +29160,150 @@ class Purchase_model extends App_Model
         fclose($output);
         exit;
     }
+
+    public function find_commodity_group_exist_in_modules($id)
+    {
+        $this->db->select('id');
+        $this->db->where('group_pur', $id);
+        $pur_request = $this->db->get(db_prefix() . 'pur_request')->row();
+        if ($pur_request) {
+            set_alert('danger', 'This budget head is already linked with a purchase request.');
+            return false;
+        }
+        $this->db->select('id');
+        $this->db->where('group_pur', $id);
+        $pur_orders = $this->db->get(db_prefix() . 'pur_orders')->row();
+        if ($pur_orders) {
+            set_alert('danger', 'This budget head is already linked with a purchase order.');
+            return false;
+        }
+        $this->db->select('id');
+        $this->db->where('group_pur', $id);
+        $wo_orders = $this->db->get(db_prefix() . 'wo_orders')->row();
+        if ($wo_orders) {
+            set_alert('danger', 'This budget head is already linked with a work order.');
+            return false;
+        }
+        $this->db->select('id');
+        $this->db->where('group_pur', $id);
+        $co_orders = $this->db->get(db_prefix() . 'co_orders')->row();
+        if ($co_orders) {
+            set_alert('danger', 'This budget head is already linked with a change order.');
+            return false;
+        }
+        $this->db->select('id');
+        $this->db->where('group_pur', $id);
+        $pur_estimates = $this->db->get(db_prefix() . 'pur_estimates')->row();
+        if ($pur_estimates) {
+            set_alert('danger', 'This budget head is already linked with a purchase quotations.');
+            return false;
+        }
+        $this->db->select('id');
+        $this->db->where('group_pur', $id);
+        $payment_certificate = $this->db->get(db_prefix() . 'payment_certificate')->row();
+        if ($payment_certificate) {
+            set_alert('danger', 'This budget head is already linked with a payment certificate.');
+            return false;
+        }
+        $this->db->select('id');
+        $this->db->where('group_pur', $id);
+        $pur_order_tracker = $this->db->get(db_prefix() . 'pur_order_tracker')->row();
+        if ($pur_order_tracker) {
+            set_alert('danger', 'This budget head is already linked with a order tracker.');
+            return false;
+        }
+        $this->db->select('id');
+        $this->db->where('group_pur', $id);
+        $pur_invoices = $this->db->get(db_prefix() . 'pur_invoices')->row();
+        if ($pur_invoices) {
+            set_alert('danger', 'This budget head is already linked with a vendor billing tracker.');
+            return false;
+        }
+        $this->db->select('id');
+        $this->db->where('group_id', $id);
+        $wh_sub_group = $this->db->get(db_prefix() . 'wh_sub_group')->row();
+        if ($wh_sub_group) {
+            set_alert('danger', 'This budget head is already linked with a billing sub head.');
+            return false;
+        }
+        $this->db->select('id');
+        $this->db->where('group_pur', $id);
+        $pur_tender = $this->db->get(db_prefix() . 'pur_tender')->row();
+        if ($pur_tender) {
+            set_alert('danger', 'This budget head is already linked with a tendering.');
+            return false;
+        }
+        $this->db->select('id');
+        $this->db->where('rel_type', 'estimate');
+        $this->db->where('annexure', $id);
+        $itemable = $this->db->get(db_prefix() . 'itemable')->row();
+        if ($itemable) {
+            set_alert('danger', 'This budget head is already linked with a cost planning.');
+            return false;
+        }
+        $this->db->select('id');
+        $this->db->where('rel_type', 'invoice');
+        $this->db->where('annexure', $id);
+        $itemable = $this->db->get(db_prefix() . 'itemable')->row();
+        if ($itemable) {
+            set_alert('danger', 'This budget head is already linked with a client invoice.');
+            return false;
+        }
+        return true;
+    }
+
+    public function find_sub_group_exist_in_modules($id)
+    {
+        $this->db->select('id');
+        $this->db->where('sub_groups_pur', $id);
+        $pur_request = $this->db->get(db_prefix() . 'pur_request')->row();
+        if ($pur_request) {
+            set_alert('danger', 'This sub budget head is already linked with a purchase request.');
+            return false;
+        }
+        $this->db->select('id');
+        $this->db->where('sub_groups_pur', $id);
+        $pur_order_detail = $this->db->get(db_prefix() . 'pur_order_detail')->row();
+        if ($pur_order_detail) {
+            set_alert('danger', 'This sub budget head is already linked with a purchase order.');
+            return false;
+        }
+        $this->db->select('id');
+        $this->db->where('sub_groups_pur', $id);
+        $wo_order_detail = $this->db->get(db_prefix() . 'wo_order_detail')->row();
+        if ($wo_order_detail) {
+            set_alert('danger', 'This sub budget head is already linked with a work order.');
+            return false;
+        }
+        $this->db->select('id');
+        $this->db->where('sub_groups_pur', $id);
+        $co_orders = $this->db->get(db_prefix() . 'co_orders')->row();
+        if ($co_orders) {
+            set_alert('danger', 'This sub budget head is already linked with a change order.');
+            return false;
+        }
+        $this->db->select('id');
+        $this->db->where('sub_groups_pur', $id);
+        $pur_estimates = $this->db->get(db_prefix() . 'pur_estimates')->row();
+        if ($pur_estimates) {
+            set_alert('danger', 'This sub budget head is already linked with a purchase quotations.');
+            return false;
+        }
+        $this->db->select('id');
+        $this->db->where('rel_type', 'estimate');
+        $this->db->where('sub_head', $id);
+        $itemable = $this->db->get(db_prefix() . 'itemable')->row();
+        if ($itemable) {
+            set_alert('danger', 'This sub budget head is already linked with a cost planning.');
+            return false;
+        }
+        $this->db->select('id');
+        $this->db->where('sub_groups_pur', $id);
+        $pur_tender = $this->db->get(db_prefix() . 'pur_tender')->row();
+        if ($pur_tender) {
+            set_alert('danger', 'This sub budget head is already linked with a tendering.');
+            return false;
+        }
+        return true;
+    }
 }
