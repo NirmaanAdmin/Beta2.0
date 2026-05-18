@@ -79,4 +79,61 @@ $(document).on('click', '.deactive_sub_group', function(e) {
       }
    });
 });
+
+function uploadpurchasesubgroupfilecsv() {
+  "use strict";
+  var fileInput = $('#file_csv')[0];
+  var file = fileInput.files[0];
+  var project = $('#select_project').val();
+
+  if (!file || file.name.split('.').pop().toLowerCase() !== 'xlsx') {
+    alert_float('warning', "<?php echo _l('_please_select_a_file') ?>");
+    return false;
+  }
+  if(!project) {
+    alert_float('warning', "Please select the project from above filter");
+    return false;
+  }
+  var formData = new FormData();
+  formData.append("file_csv", file);
+  formData.append("project", project);
+
+  if (<?php echo  pur_check_csrf_protection(); ?>) {
+    formData.append(csrfData.token_name, csrfData.hash);
+  }
+
+  $.ajax({
+    url: admin_url + 'purchase/import_file_xlsx_purchase_sub_group',
+    method: 'POST',
+    data: formData,
+    contentType: false,
+    processData: false,
+    success: function(response) {
+        response = JSON.parse(response);
+        $('#file_csv').val(null);
+        $('#file_upload_response').empty();
+
+        $('#file_upload_response').append(
+            `<h4><?php echo _l("_Result") ?></h4>
+            <h5><?php echo _l('import_line_number') ?>: ${response.total_rows}</h5>
+            <h5><?php echo _l('import_line_number_success') ?>: ${response.total_row_success}</h5>
+            <h5><?php echo _l('import_line_number_failed') ?>: ${response.total_row_false}</h5>`
+        );
+        if (response.total_row_false > 0 || response.total_rows_data_error > 0) {
+            $('#file_upload_response').append(
+              `<a href="${site_url + response.filename}" class="btn btn-warning"><?php echo _l('download_file_error') ?></a>`
+            );
+        }
+        if (response.total_rows < 1) {
+          alert_float('warning', response.message);
+        }
+        sub_group_table.DataTable().ajax.reload();
+    },
+    error: function() {
+      alert_float('danger', 'Error uploading file. Please try again.');
+    }
+  });
+  return false;
+}
+
 </script>

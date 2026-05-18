@@ -18,6 +18,23 @@
         ?>
     </div>
 </div>
+
+<hr class="hr-panel-heading" />
+<div class="clearfix"></div>
+<div class="row">
+    <div class="col-md-3">
+        <?php echo form_open_multipart(admin_url('purchase/import_file_xlsx_purchase_sub_group'), array('id' => 'import_form')); ?>
+        <?php echo render_input('file_csv', 'choose_excel_file', '', 'file'); ?>
+        <div class="form-group">
+          <button id="uploadfile" type="button" class="btn btn-info import" onclick="return uploadpurchasesubgroupfilecsv(this);"><?php echo _l('import'); ?></button>
+          <a href="<?php echo site_url('modules/purchase/uploads/file_sample/Sample_purchase_sub_group_item_en.xlsx') ?>" class="btn btn-primary">Template</a>
+        </div>
+        <?php echo form_close(); ?>
+        <div class="form-group" id="file_upload_response" style="padding-left: 20px;">
+        </div>
+    </div>
+</div>
+
 <hr class="hr-panel-heading" />
 <div class="clearfix"></div>
 <table class="table border sub-group-table">

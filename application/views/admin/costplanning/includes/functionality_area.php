@@ -6,6 +6,23 @@
     </a>
 </div>
 <div class="clearfix"></div>
+
+<hr class="hr-panel-heading" />
+<div class="clearfix"></div>
+<div class="row">
+    <div class="col-md-3">
+        <?php echo form_open_multipart(admin_url('estimates/import_file_xlsx_functionality_area'), array('id' => 'import_form')); ?>
+        <?php echo render_input('file_csv', 'choose_excel_file', '', 'file'); ?>
+        <div class="form-group">
+          <button id="uploadfile" type="button" class="btn btn-info import" onclick="return uploadfunctionalityareafilecsv(this);"><?php echo _l('import'); ?></button>
+          <a href="<?php echo site_url('uploads/estimates/file_sample/Sample_functionality_area_en.xlsx') ?>" class="btn btn-primary">Template</a>
+        </div>
+        <?php echo form_close(); ?>
+        <div class="form-group" id="file_upload_response" style="padding-left: 20px;">
+        </div>
+    </div>
+</div>
+
 <hr class="hr-panel-heading" />
 <div class="clearfix"></div>
 <table class="table dt-table">

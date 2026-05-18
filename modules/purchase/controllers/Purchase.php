@@ -17980,4 +17980,141 @@ class purchase extends AdminController
         set_alert('success', 'Budget sub head deactivated successfully.');
         redirect($_SERVER['HTTP_REFERER']);
     }
+
+    /**
+     * import file xlsx sub group
+     * @return json
+     */
+    public function import_file_xlsx_purchase_sub_group()
+    {
+        if (!class_exists('XLSXReader_fin')) {
+            require_once(module_dir_path(PURCHASE_MODULE_NAME) . '/assets/plugins/XLSXReader/XLSXReader.php');
+        }
+        require_once(module_dir_path(PURCHASE_MODULE_NAME) . '/assets/plugins/XLSXWriter/xlsxwriter.class.php');
+
+        $total_row_false = 0;
+        $total_rows_data = 0;
+        $dataerror = 0;
+        $total_row_success = 0;
+        $total_rows_data_error = 0;
+        $filename = '';
+
+        if (isset($_FILES['file_csv']['name']) && $_FILES['file_csv']['name'] != '') {
+
+            /*delete file old before export file*/
+            $path_before = COMMODITY_ERROR_PUR . 'FILE_ERROR_SUB_GROUP' . get_staff_user_id() . '.xlsx';
+            if (file_exists($path_before)) {
+                unlink(COMMODITY_ERROR_PUR . 'FILE_ERROR_SUB_GROUP' . get_staff_user_id() . '.xlsx');
+            }
+
+            if (isset($_FILES['file_csv']['name']) && $_FILES['file_csv']['name'] != '') {
+                $tmpFilePath = $_FILES['file_csv']['tmp_name'];
+                if (!empty($tmpFilePath) && $tmpFilePath != '') {
+                    $tmpDir = TEMP_FOLDER . '/' . time() . uniqid() . '/';
+                    if (!file_exists(TEMP_FOLDER)) {
+                        mkdir(TEMP_FOLDER, 0755);
+                    }
+                    if (!file_exists($tmpDir)) {
+                        mkdir($tmpDir, 0755);
+                    }
+                    $newFilePath = $tmpDir . $_FILES['file_csv']['name'];
+                    if (move_uploaded_file($tmpFilePath, $newFilePath)) {
+                        $writer_header = array(
+                            _l('sub_group_code') => 'string',
+                            _l('sub_group_name') => 'string',
+                            _l('group_name') => 'string',
+                            _l('error') => 'string',
+                        );
+
+                        $widths_arr = array();
+                        for ($i = 1; $i <= count($writer_header); $i++) {
+                            $widths_arr[] = 40;
+                        }
+
+                        $writer = new XLSXWriter();
+                        $writer->writeSheetHeader('Sheet1', $writer_header,  $col_options = ['widths' => $widths_arr]);
+
+                        //Reader file
+                        $xlsx = new XLSXReader_fin($newFilePath);
+                        $sheetNames = $xlsx->getSheetNames();
+                        $data = $xlsx->getSheetData($sheetNames[1]);
+
+                        $total_rows = 0;
+                        $total_row_false = 0;
+
+                        for ($row = 1; $row < count($data); $row++) {
+
+                            $total_rows++;
+
+                            $rd = array();
+                            $flag = 0;
+                            $flag2 = 0;
+                            $string_error = '';
+                            $flag_id_group_id = '';
+
+                            $value_sub_group_code = isset($data[$row][0]) ? $data[$row][0] : '';
+                            $value_sub_group_name = isset($data[$row][1]) ? $data[$row][1] : '';
+                            $value_group_name = isset($data[$row][2]) ? $data[$row][2] : '';
+
+                            if (!empty($value_group_name)) {
+                                $this->db->like('name', $value_group_name);
+                                $result = $this->db->get(db_prefix() . 'items_groups')->row();
+                                if (empty($result)) {
+                                    $string_error .= _l('group_name') . ' ' . _l('does_not_exist');
+                                    $flag2 = 1;
+                                } else {
+                                    $flag_id_group_id = $result->id;
+                                }
+                            }
+
+                            if (($flag == 1) || $flag2 == 1) {
+                                //write error file
+                                $writer->writeSheetRow('Sheet1', [
+                                    $value_sub_group_code,
+                                    $value_sub_group_name,
+                                    $value_group_name,
+                                    $string_error,
+                                ]);
+                                $total_row_false++;
+                            }
+
+                            if ($flag == 0 && $flag2 == 0) {
+                                $rd = array();
+                                $rd['sub_group_code'] = !empty($value_sub_group_code) ? $value_sub_group_code : NULL;
+                                $rd['sub_group_name'] = !empty($value_sub_group_name) ? $value_sub_group_name : NULL;
+                                $rd['group_id'] = !empty($flag_id_group_id) ? $flag_id_group_id : NULL;
+                                $rows[] = $rd;
+                                $this->db->insert(db_prefix() . 'wh_sub_group', $rd);
+                            }
+                        }
+
+                        $total_rows = $total_rows;
+                        $total_row_success = isset($rows) ? count($rows) : 0;
+                        $dataerror = '';
+                        $message = 'Not enought rows for importing';
+
+                        if ($total_row_false != 0) {
+                            if (!file_exists(FCPATH . PURCHASE_IMPORT_SUB_GROUP_ERROR)) {
+                                mkdir(FCPATH . PURCHASE_IMPORT_SUB_GROUP_ERROR, 0755, true);
+                            }
+                            $filename = 'Import_item_error_' . get_staff_user_id() . '_' . strtotime(date('Y-m-d H:i:s')) . '.xlsx';
+                            $writer->writeToFile(str_replace($filename, PURCHASE_IMPORT_SUB_GROUP_ERROR . $filename, $filename));
+                        }
+                    }
+                } else {
+                    set_alert('warning', _l('import_upload_failed'));
+                }
+            }
+        }
+        echo json_encode([
+            'message'           => $message,
+            'total_row_success' => $total_row_success,
+            'total_row_false'   => $total_row_false,
+            'total_rows'        => $total_rows,
+            'site_url'          => site_url(),
+            'staff_id'          => get_staff_user_id(),
+            'filename'          => PURCHASE_IMPORT_SUB_GROUP_ERROR . $filename,
+
+        ]);
+    }
 }
