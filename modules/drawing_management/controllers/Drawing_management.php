@@ -497,26 +497,67 @@ class drawing_management extends AdminController
 	 * download folder
 	 * @param  integer $id
 	 */
+	// public function download_folder($id)
+	// {
+	// 	$data_item = $this->drawing_management_model->get_item($id, '', 'name, filetype');
+	// 	if ($data_item && $data_item->filetype == 'folder') {
+	// 		// Delete folder with old file
+	// 		$delete_old_path = DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/temps/' . $id;
+	// 		if (file_exists($delete_old_path)) {
+	// 			delete_files($delete_old_path, true);
+	// 		}
+	// 		// Create folder and download
+	// 		$root_folder_name = $data_item->name;
+	// 		$this->drawing_management_model->create_folder($id);
+	// 		$this->load->library('zip');
+	// 		$path = DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/temps/' . $id . '/' . $root_folder_name . '/';
+	// 		$this->zip->read_dir($path, false);
+	// 		$this->zip->download($root_folder_name . '.zip');
+	// 		$this->zip->clear_data();
+	// 	}
+	// }
+
 	public function download_folder($id)
 	{
 		$data_item = $this->drawing_management_model->get_item($id, '', 'name, filetype');
+
 		if ($data_item && $data_item->filetype == 'folder') {
-			// Delete folder with old file
-			$delete_old_path = DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/temps/' . $id;
-			if (file_exists($delete_old_path)) {
-				delete_files($delete_old_path, true);
+
+			// Delete old temp folder if exists
+			$temp_path = DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/temps/' . $id;
+			if (file_exists($temp_path)) {
+				delete_files($temp_path, true);
 			}
-			// Create folder and download
+
+			// Create fresh folder structure with all files (main + pdf + other attachments)
 			$root_folder_name = $data_item->name;
 			$this->drawing_management_model->create_folder($id);
+
+			// Prepare Zip
 			$this->load->library('zip');
-			$path = DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/temps/' . $id . '/' . $root_folder_name . '/';
-			$this->zip->read_dir($path, false);
+
+			$source_path = DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/temps/' . $id . '/' . $root_folder_name . '/';
+
+			$this->zip->read_dir($source_path, false);
+
+			// Download the zip file
 			$this->zip->download($root_folder_name . '.zip');
+
+			// Clear zip data
 			$this->zip->clear_data();
+
+			// ==================== DELETE TEMP FOLDER AFTER DOWNLOAD ====================
+			if (file_exists($temp_path)) {
+				delete_files($temp_path, true);
+
+				// Optional: Also remove the empty parent folder
+				if (is_dir($temp_path)) {
+					@rmdir($temp_path);
+				}
+			}
+			// =====================================================================
 		}
 	}
-
 	public function bulk_delete_item()
 	{
 		$id = $this->input->get('id');

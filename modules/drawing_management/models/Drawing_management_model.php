@@ -1275,6 +1275,30 @@ class drawing_management_model extends app_model
 	 * @param  integer $id   
 	 * @param  string $path 
 	 */
+	// public function create_folder($id, $path = '')
+	// {
+	// 	if ($path == '') {
+	// 		$path = DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/temps/' . $id;
+	// 		drawing_dmg_create_folder($path);
+	// 		$path = $path . '/' . drawing_dmg_get_file_name($id);
+	// 		drawing_dmg_create_folder($path);
+	// 	}
+	// 	$data_child = $this->get_item('', 'parent_id = ' . $id, 'id, name, filetype, parent_id');
+	// 	if ($data_child) {
+	// 		foreach ($data_child as $key => $value) {
+	// 			if ($value['filetype'] == 'folder') {
+	// 				$new_path = $path . '/' . $value['name'];
+	// 				drawing_dmg_create_folder($new_path);
+	// 				$this->create_folder($value['id'], $new_path);
+	// 			} else {
+	// 				$path1 = DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/files/' . $value['parent_id'] . '/' . $value['name'];
+	// 				$path2 = $path . '/' . $value['name'];
+	// 				$this->copy_file($path1, $path2);
+	// 			}
+	// 		}
+	// 	}
+	// }
+
 	public function create_folder($id, $path = '')
 	{
 		if ($path == '') {
@@ -1283,22 +1307,52 @@ class drawing_management_model extends app_model
 			$path = $path . '/' . drawing_dmg_get_file_name($id);
 			drawing_dmg_create_folder($path);
 		}
-		$data_child = $this->get_item('', 'parent_id = ' . $id, 'id, name, filetype, parent_id');
+
+		// Updated query to include pdf_attachment
+		$data_child = $this->get_item('', 'parent_id = ' . $id, 'id, name, filetype, parent_id, pdf_attachment');
+
 		if ($data_child) {
-			foreach ($data_child as $key => $value) {
+			foreach ($data_child as $value) {
 				if ($value['filetype'] == 'folder') {
 					$new_path = $path . '/' . $value['name'];
 					drawing_dmg_create_folder($new_path);
 					$this->create_folder($value['id'], $new_path);
 				} else {
-					$path1 = DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/files/' . $value['parent_id'] . '/' . $value['name'];
+					// 1) Copy main file
+					$path1 = DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/files/'
+						. $value['parent_id'] . '/' . $value['name'];
 					$path2 = $path . '/' . $value['name'];
 					$this->copy_file($path1, $path2);
+
+					// 2) Copy PDF attachment if exists
+					if (!empty($value['pdf_attachment'])) {
+						$sourcePdf = rtrim(DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER, '/')
+							. '/pdf_attachments/' . $value['id'] . '/' . $value['pdf_attachment'];
+
+						if (file_exists($sourcePdf)) {
+							$destPdf = $path . '/' . basename($sourcePdf);
+							$this->copy_file($sourcePdf, $destPdf);
+						}
+					}
+
+					// 3) Copy all other attachments
+					$other_attachments = $this->get_other_attachment($value['id']);
+
+					foreach ($other_attachments as $attach) {
+						if (!empty($attach['file_name'])) {
+							$sourceOther = rtrim(DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER, '/')
+								. '/all_attachment/' . $value['id'] . '/' . $attach['file_name'];
+
+							if (file_exists($sourceOther)) {
+								$destOther = $path . '/' . $attach['file_name'];
+								$this->copy_file($sourceOther, $destOther);
+							}
+						}
+					}
 				}
 			}
 		}
 	}
-
 	/**
 	 * check duplicate name
 	 * @param  integer $parent_id 
