@@ -5335,12 +5335,12 @@ class Purchase_model extends App_Model
         $buyer = '';
         $delivery_person = '';
         $show_image_column = false;
-        $width = 'width: 32%';
+        $width = 'width: 42%';
         // Check if any record has an image
         foreach ($pur_order_detail as $row) {
             if (!empty($row['image'])) {
                 $show_image_column = true;
-                $width = 'width: 25%';
+                $width = 'width: 35%';
                 break;
             }
         }
@@ -5441,7 +5441,6 @@ class Purchase_model extends App_Model
           <tr>
             <th class="thead-dark" align="left" style="width: 3%">' . _l('serial_no') . '</th>
             <th class="thead-dark" align="left" style="' . $width . '">' . _l('item_description') . '</th>
-            <th class="thead-dark" align="left" style="width: 10%">' . _l('sub_groups_pur') . '</th>
             <th class="thead-dark" align="left" style="width: 10%">' . _l('area') . '</th>';
 
         if ($show_image_column) {
@@ -5492,7 +5491,6 @@ class Purchase_model extends App_Model
             $html .= '<tr class="sortable">
             <td style="width: 3%">' . $serial_no . '</td>
             <td align="left" style="' . $width . '">' . str_replace("<br />", " ", $row['description']) . '</td>
-            <td align="left" style="width: 10%">' . $get_sub_head . '</td>
             <td align="left" style="width: 10%">' . get_area_name_by_id($row['area']) . '</td>';
 
             if ($show_image_column) {
@@ -16062,12 +16060,12 @@ class Purchase_model extends App_Model
         $buyer = '';
         $delivery_person = '';
         $show_image_column = false;
-        $width = 'width: 41%';
+        $width = 'width: 50%';
         // Check if any record has an image
         foreach ($pur_order_detail as $row) {
             if (!empty($row['image'])) {
                 $show_image_column = true;
-                $width = 'width: 31%';
+                $width = 'width: 40%';
                 break;
             }
         }
@@ -16168,7 +16166,6 @@ class Purchase_model extends App_Model
           <tr>
             <th class="thead-dark" style="width: 3%"></th>
             <th class="thead-dark" align="left" style="' . $width . '">' . _l('item_description') . '</th>
-            <th class="thead-dark" align="left" style="width: 9%">' . _l('sub_groups_pur') . '</th>
             <th class="thead-dark" align="left" style="width: 9%">' . _l('area') . '</th>';
         if ($show_image_column) {
             $html .=  '<th class="thead-dark" align="left" style="width: 10%">' . _l('Image') . '</th>';
@@ -16208,7 +16205,6 @@ class Purchase_model extends App_Model
             $html .= '<tr class="sortable" style="font-size: 11px">
             <td style="width: 3%">' . $serial_no . '</td>
             <td align="left" style="' . $width . '">' . str_replace("<br />", " ", $row['description']) . '</td>
-            <td align="left" style="width: 9%">' . $get_sub_head . '</td>
             <td align="left" style="width: 9%">' . get_area_name_by_id($row['area']) . '</td>';
             if ($show_image_column) {
                 $html .= '<td align="left" style="width: 10%">' . $full_item_image . '</td>';
