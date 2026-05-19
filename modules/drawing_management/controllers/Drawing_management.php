@@ -80,6 +80,7 @@ class drawing_management extends AdminController
 			if ($data['item'] == null) {
 				redirect(admin_url('drawing_management'));
 			}
+			$data['other_attachment'] = $this->drawing_management_model->get_other_attachment($id);
 		}
 		$data['share_id'] = $this->drawing_management_model->get_item_share_to_me(true);
 		$data['file_locked'] = $file_locked;
@@ -245,7 +246,7 @@ class drawing_management extends AdminController
 				}
 				$data['custom_field'] = $custom_field;
 				$data['related_file'] = $related_file;
-				$res = $this->drawing_management_model->update_item($data);  
+				$res = $this->drawing_management_model->update_item($data);   
 				if ($res) {
 					set_alert('success', _l('dmg_updated_successfully'));
 				} else {
@@ -1369,6 +1370,18 @@ class drawing_management extends AdminController
 		redirect($_SERVER['HTTP_REFERER']);
 	}
 
+	public function delete_all_attachment($id){
+		
+		$result =  $this->drawing_management_model->delete_all_attachment($id);
+		if ($result) {
+			set_alert('success', _l('Attachment deleted successfully'));
+		} else {
+			set_alert('danger', _l('Attachment deleted failed'));
+		}
+		
+		redirect($_SERVER['HTTP_REFERER']);
+	}
+
 	public function download_all_rfi_pdf($file_id)
 	{
 	    $rfi_dms_items = get_rfi_dms_items($file_id);
@@ -1385,4 +1398,24 @@ class drawing_management extends AdminController
 	    ]);
 	    return;
 	}
+
+	public function view_other_attachments()
+    {
+        $input = $this->input->post();
+        $attachments = $this->drawing_management_model->view_other_attachments($input);
+        echo json_encode(['result' => $attachments]);
+        die();
+    }
+
+	public function view_other_file($id)
+    {
+		$data['discussion_user_profile_image_url'] = staff_profile_image_url(get_staff_user_id());
+        $data['current_user_is_admin']             = is_admin();
+        $data['file'] = $this->drawing_management_model->get_other_attachment_with_id($id);
+        if (!$data['file']) {
+            header('HTTP/1.0 404 Not Found');
+            die;
+        }
+        $this->load->view('file_managements/preview_other_file.php', $data);
+    }
 }

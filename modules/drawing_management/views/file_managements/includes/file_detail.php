@@ -18,13 +18,13 @@
 			<?php }
 			if ($item->filetype === 'folder') { ?>
 				<h4><?php echo drawing_htmldecode($item->name); ?></h4>
-			<?php } else { 
-				if($item->document_number > 0 && $item->orginal_filename == ''){
+			<?php } else {
+				if ($item->document_number > 0 && $item->orginal_filename == '') {
 					$document_number = $item->document_number . '-' . $item->name;
-				}else{
+				} else {
 					$document_number = $item->name;
 				}
-				?>
+			?>
 				<h4><?php echo drawing_htmldecode($document_number); ?></h4>
 			<?php }
 			?>
@@ -116,16 +116,16 @@
 				<tr>
 					<td class="text-nowrap"><?php echo _l('RFI'); ?></td>
 					<td>
-						<?php 
+						<?php
 						$rfi_dms_items = get_rfi_dms_items($item->id);
-						if(!empty($rfi_dms_items)) {
+						if (!empty($rfi_dms_items)) {
 							foreach ($rfi_dms_items as $rkey => $rvalue) { ?>
-								<a href="<?php echo admin_url('tickets/ticket/'.$rvalue['ticketid'].'?tab=settings'); ?>" target="_blank"><?php echo $rvalue['subject']; ?></a>
-								<a href="<?php echo admin_url('tickets/pdf/'.$rvalue['ticketid'].''); ?>" class="btn btn-primary btn-sm mleft5" title="Download">
-								   <i class="fa fa-download"></i>
+								<a href="<?php echo admin_url('tickets/ticket/' . $rvalue['ticketid'] . '?tab=settings'); ?>" target="_blank"><?php echo $rvalue['subject']; ?></a>
+								<a href="<?php echo admin_url('tickets/pdf/' . $rvalue['ticketid'] . ''); ?>" class="btn btn-primary btn-sm mleft5" title="Download">
+									<i class="fa fa-download"></i>
 								</a>
 								<br>
-							<?php }
+						<?php }
 						}
 						?>
 					</td>
@@ -154,6 +154,45 @@
 					</tr>
 
 				<?php } ?>
+
+				<tr>
+					<td class="text-nowrap"><?php echo _l('Other Attachment'); ?></td>
+
+					<td>
+
+						<?php if (isset($other_attachment) && !empty($other_attachment)) : ?>
+
+							<?php foreach ($other_attachment as $attachment) : ?>
+
+								<?php
+								$file_path = FCPATH .
+									'modules/drawing_management/uploads/all_attachment/' .
+									$item->id . '/' .
+									$attachment['file_name'];
+
+								$download_url = base_url(
+									'modules/drawing_management/uploads/all_attachment/' .
+										$item->id . '/' .
+										rawurlencode($attachment['file_name'])
+								);
+
+								if (file_exists($file_path)) :
+								?>
+
+									<a href="<?php echo $download_url; ?>" class="display-block mbot5" target="_blank" download>
+										<?php echo htmlspecialchars($attachment['file_name']); ?>
+									</a>
+
+								<?php endif; ?>
+
+							<?php endforeach; ?>
+
+						<?php endif; ?>
+
+					</td>
+				</tr>
+
+
 				<tr>
 					<td class="text-nowrap"><?php echo _l('dmg_controlled_document'); ?></td>
 					<td><?php echo ($item->controlled_document == 1 ? 'Yes' : 'No'); ?></td>
@@ -498,6 +537,11 @@
 							<i class="fa fa-eye"></i> <?php echo _l('dmg_view_pdf'); ?>
 						</a>
 					<?php } ?>
+					<?php if (isset($other_attachment) && !empty($other_attachment)) { ?>
+						<a href="javascript:void(0)" class="btn btn-default w100 mtop5 mbot5" onclick="view_other_attachments(<?php echo $item->id; ?>)">
+							<i class="fa fa-eye"></i> <?php echo _l('View Other Attachments'); ?>
+						</a>
+					<?php } ?>
 					<?php if (!(strpos($item->pdf_attachment, '.dwg') === false) || !(strpos($item->pdf_attachment, '.xref') === false)) { ?>
 						<a href="<?php echo admin_url('drawing_management/preview_file_pdf_dwg?id=' . $item->id) ?>" target="_blank" class="btn btn-default w100 mtop5 mbot5">
 							<i class="fa fa-eye"></i> View DWG
@@ -720,5 +764,24 @@
 			</div>
 		</div>
 	</div>
+	<div class="modal fade" id="viewOtherAttachmentModal" tabindex="-1" role="dialog">
+		<div class="modal-dialog" role="document" style="width: 70%;">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title"><?php echo _l('attachment'); ?></h4>
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+				</div>
+				<div class="modal-body">
+					<div class="row">
+						<div class="col-md-12">
+							<div class="view_other_attachment_modal">
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="other_file_data"></div>
 
 <?php } ?>

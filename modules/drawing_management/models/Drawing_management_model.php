@@ -212,7 +212,6 @@ class drawing_management_model extends app_model
 	 */
 	public function update_item($data)
 	{
-
 		if (isset($data['controlled_document'])) {
 			if ($data['controlled_document'] == 'on') {
 				$data['controlled_document'] = 1;
@@ -283,6 +282,46 @@ class drawing_management_model extends app_model
 					}
 				} else {
 					// set_alert('danger', _l('only_dwg_xref_files_allowed'));
+				}
+			}
+
+			if (!empty($_FILES['all_attachment']['name'])) {
+
+				$uploadDir = DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/all_attachment/' . $id . '/';
+
+				// Create directory if it doesn't exist
+				if (!file_exists($uploadDir)) {
+					mkdir($uploadDir, 0777, true);
+				}
+
+				$allowedExtensions = ['pdf', 'doc', 'docx', 'xls', 'xlsx'];
+
+				foreach ($_FILES['all_attachment']['name'] as $key => $fileName) {
+
+					if (empty($fileName)) {
+						continue;
+					}
+
+					$fileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
+
+					// Validate file extension
+					if (in_array(strtolower($fileExtension), $allowedExtensions)) {
+
+						// Only filename + extension
+						$newFileName = $fileName;
+
+						$targetPath = $uploadDir . $newFileName;
+
+						if (move_uploaded_file($_FILES['all_attachment']['tmp_name'][$key], $targetPath)) {
+
+							$insertData = [
+								'dms_id'    => $id,
+								'file_name' => $newFileName,
+							];
+
+							$this->db->insert(db_prefix() . 'dms_attachments', $insertData);
+						}
+					}
 				}
 			}
 			if ($data_item->filetype != 'folder') {
@@ -934,7 +973,7 @@ class drawing_management_model extends app_model
 
 						$old_filename = $file_record->name;
 						$old_filename_original_name = $file_record->orginal_filename;
-						$file_parts   = pathinfo($old_filename); 
+						$file_parts   = pathinfo($old_filename);
 						$basename     = $file_parts['filename'] ?? '';
 						$ext          = isset($file_parts['extension']) ? ('.' . $file_parts['extension']) : '';
 
@@ -1351,14 +1390,14 @@ class drawing_management_model extends app_model
 	 */
 	public function create_folder_bulk_download($id_lever_1, $folder_name, $is_folder = false)
 	{
-	    set_time_limit(0);
-        ini_set('memory_limit', '100000000M');
+		set_time_limit(0);
+		ini_set('memory_limit', '100000000M');
 		// Create root folder
 		$root = rtrim(DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER, '/') . '/temps/bulk_downloads/' . $folder_name;
 		drawing_dmg_create_folder($root);
 
 		$data_child = $this->get_item('', 'id IN (' . $id_lever_1 . ')', 'id, name, filetype, parent_id, pdf_attachment');
-		if($is_folder) {
+		if ($is_folder) {
 			$data_child = $this->get_item('', 'parent_id IN (' . $id_lever_1 . ')', 'id, name, filetype, parent_id, pdf_attachment');
 		}
 		if (!$data_child) {
@@ -3317,6 +3356,33 @@ class drawing_management_model extends app_model
 		}
 	}
 
+	public function delete_all_attachment($id)
+	{
+		$this->db->where('id', $id);
+		$attachment = $this->db->get(db_prefix() . 'dms_attachments')->row();
+
+		if ($attachment) {
+
+			$path = DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER .
+				'/all_attachment/' .
+				$attachment->dms_id . '/' .
+				$attachment->file_name;
+
+			if (file_exists($path)) {
+				unlink($path);
+			}
+
+			$this->db->where('id', $id);
+			$this->db->delete(db_prefix() . 'dms_attachments');
+
+			if ($this->db->affected_rows() > 0) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	public function get_default_dms_project($project_id)
 	{
 		$master_id = 3;
@@ -3327,5 +3393,167 @@ class drawing_management_model extends app_model
 			$master_id = $data->id;
 		}
 		return $master_id;
+	}
+
+	public function get_other_attachment($id)
+	{
+		$this->db->select('*');
+		$this->db->where('dms_id', $id);
+		return $this->db->get(db_prefix() . 'dms_attachments')->result_array();
+	}
+
+	// public function view_other_attachments($input)
+	// {
+	// 	$file_html = '';
+
+	// 	$rel_id = $input['rel_id'];
+
+	// 	$this->db->where('dms_id', $rel_id);
+	// 	$attachments = $this->db->get(db_prefix() . 'dms_attachments')->result_array();
+	// 	if (count($attachments) > 0) {
+
+	// 		$file_html .= '<p class="bold text-muted">' . _l('Other Attachments') . '</p>';
+
+	// 		foreach ($attachments as $f) {
+
+	// 			$file_path = FCPATH .
+	// 				'modules/drawing_management/uploads/all_attachment/' .
+	// 				$f['dms_id'] . '/' .
+	// 				$f['file_name'];
+
+	// 			if (!file_exists($file_path)) {
+	// 				continue;
+	// 			}
+
+	// 			$filetype = pathinfo($f['file_name'], PATHINFO_EXTENSION);
+
+	// 			$href_url = base_url(
+	// 				'modules/drawing_management/uploads/all_attachment/' .
+	// 					$f['dms_id'] . '/' .
+	// 					rawurlencode($f['file_name'])
+	// 			);
+
+	// 			$file_html .= '
+	//         <div class="mbot15 row inline-block full-width" data-attachment-id="' . $f['id'] . '">
+
+	//             <div class="col-md-8">
+
+	//                 <div class="pull-left mright10">
+	//                     <i class="' . get_mime_class($filetype) . '"></i>
+	//                 </div>
+
+	//                 <a href="' . $href_url . '" target="_blank" download>
+	//                     ' . $f['file_name'] . '
+	//                 </a>
+
+	//                 <br />
+
+	//                 <small class="text-muted">
+	//                     .' . $filetype . '
+	//                 </small>
+
+	//             </div>
+
+	//             <div class="col-md-4 text-right">
+
+	//                 <a href="' . admin_url('drawing_management/delete_all_attachment/' . $f['id']) . '" class="text-danger _delete">
+	//                     <i class="fa fa-times"></i>
+	//                 </a>
+
+	//             </div>
+
+	//         </div>';
+	// 		}
+
+	// 		$file_html .= '<hr />';
+	// 	}
+
+	// 	return $file_html;
+	// }
+
+	public function view_other_attachments($input)
+	{
+		$file_html = '';
+
+		$rel_id = $input['rel_id'];
+
+		$this->db->where('dms_id', $rel_id);
+		$attachments = $this->db->get(db_prefix() . 'dms_attachments')->result_array();
+
+		if (count($attachments) > 0) {
+
+			$file_html .= '<p class="bold text-muted">' . _l('Other Attachments') . '</p>';
+
+			foreach ($attachments as $f) {
+
+				$file_path = FCPATH .
+					'modules/drawing_management/uploads/all_attachment/' .
+					$f['dms_id'] . '/' .
+					$f['file_name'];
+
+				if (!file_exists($file_path)) {
+					continue;
+				}
+
+				$filetype = pathinfo($f['file_name'], PATHINFO_EXTENSION);
+
+				$href_url = base_url(
+					'modules/drawing_management/uploads/all_attachment/' .
+						$f['dms_id'] . '/' .
+						rawurlencode($f['file_name'])
+				);
+
+				$file_html .= '
+            <div class="mbot15 row inline-block full-width" data-attachment-id="' . $f['id'] . '">
+
+                <div class="col-md-8">
+
+                    <a name="preview-purinv-btn"
+                       onclick="preview_other_btn(this); return false;"
+                       id="' . $f['id'] . '"
+                       href="Javascript:void(0);"
+                       class="mbot10 mright5 btn btn-success pull-left"
+                       data-toggle="tooltip"
+                       title
+                       data-original-title="' . _l('preview_file') . '">
+                        <i class="fa fa-eye"></i>
+                    </a>
+
+                    <div class="pull-left">
+                        <i class="' . get_mime_class($filetype) . '"></i>
+                    </div>
+
+                    <a href="' . $href_url . '" target="_blank" download>
+                        ' . $f['file_name'] . '
+                    </a>
+
+                    <br />
+
+                    <small class="text-muted">
+                        .' . $filetype . '
+                    </small>
+
+                </div>
+
+                <div class="col-md-4 text-right">
+
+                    <a href="' . admin_url('drawing_management/delete_all_attachment/' . $f['id']) . '" class="text-danger _delete">
+                        <i class="fa fa-times"></i>
+                    </a>
+
+                </div>
+
+            </div>';
+			}
+
+			$file_html .= '<hr />';
+		}
+
+		return $file_html;
+	}
+	public function get_other_attachment_with_id($id)
+	{
+		$this->db->where('id', $id);
+		return $this->db->get(db_prefix() . 'dms_attachments')->row();
 	}
 }

@@ -884,4 +884,40 @@ if (isset($item) && $item->filetype != 'folder' && $edit != 1) {
 			return true;
 		});
 	});
+
+	function view_other_attachments(rel_id, rel_type) {
+		"use strict";
+		$.post(admin_url + 'drawing_management/view_other_attachments', {
+			rel_id: rel_id,
+		}).done(function(response) {
+			response = JSON.parse(response);
+			if (response.result) {
+				$('.view_other_attachment_modal').html(response.result);
+			} else {
+				$('.view_other_attachment_modal').html('');
+			}
+			$('#viewOtherAttachmentModal').modal('show');
+		});
+	}
+
+	function preview_other_btn(invoker) {
+		"use strict";
+		var id = $(invoker).attr('id');
+		view_other_attachments_new(id);
+	}
+
+	function view_other_attachments_new(id) {
+		"use strict";
+		$('#other_file_data').empty();
+		$("#other_file_data").load(admin_url + 'drawing_management/view_other_file/' + id, function(response, status, xhr) {
+			if (status == "error") {
+				alert_float('danger', xhr.statusText);
+			}
+		});
+	}
+
+	function close_modal_preview() {
+		"use strict";
+		$('._project_file').modal('hide');
+	}
 </script>

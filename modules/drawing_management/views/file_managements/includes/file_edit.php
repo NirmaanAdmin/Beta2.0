@@ -174,6 +174,51 @@ if (isset($item)) {
 
 				<?php } ?>
 
+				<div class="col-md-6" style="margin-top: 20px;">
+					Other Attachment
+					<input type="file" name="all_attachment[]" id="all_attachment" class="form-control" accept=".pdf,.doc,.docx,.xls,.xlsx" multiple>
+
+					<?php if (isset($other_attachment) && !empty($other_attachment)) : ?>
+
+						<?php foreach ($other_attachment as $attachment) : ?>
+
+							<div class="col-md-12" style="margin-top: 13px; display: flex; justify-content: space-between; clear: both;">
+
+								<?php
+								$file_path = FCPATH . 'modules/drawing_management/uploads/all_attachment/' . $item->id . '/' . $attachment['file_name'];
+
+								$download_url = base_url(
+									'modules/drawing_management/uploads/all_attachment/' .
+										$item->id . '/' .
+										rawurlencode($attachment['file_name'])
+								);
+
+								$delete_url = admin_url(
+									'drawing_management/delete_all_attachment/' . $attachment['id']
+								);
+
+								if (file_exists($file_path)) :
+								?>
+
+									<a href="<?php echo $download_url; ?>" class="display-block mbot5" target="_blank" download>
+										<?php echo htmlspecialchars($attachment['file_name']); ?>
+									</a>
+
+									<a href="<?php echo $delete_url; ?>" class="text-danger _delete">
+										<?php echo _l('delete'); ?>
+									</a>
+
+								<?php endif; ?>
+
+							</div>
+
+						<?php endforeach; ?>
+
+					<?php endif; ?>
+				</div>
+
+
+
 				<div class="col-md-12">
 					<div class="row">
 						<div class="col-md-6">
