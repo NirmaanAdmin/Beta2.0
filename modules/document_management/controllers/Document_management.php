@@ -9,7 +9,7 @@ use PhpOffice\PhpWord\Shared\Html;
  * document_management
  */
 class document_management extends AdminController
-{ 
+{
 	public function __construct()
 	{
 		parent::__construct();
@@ -70,7 +70,7 @@ class document_management extends AdminController
 		} else {
 			$master_parent_id = $this->document_management_model->get_master_id($id);
 		}
-		
+
 		$data['root_folder'] = $data_root_folder;
 		$file_locked = false;
 
@@ -467,7 +467,7 @@ class document_management extends AdminController
 		$master_parent_id = '';
 		$id = $this->input->get('id');
 		$data['file'] = $this->document_management_model->get_item($id);
-		if(!empty($data['file']->rel_id) && !empty($data['file']->rel_type)) {
+		if (!empty($data['file']->rel_id) && !empty($data['file']->rel_type)) {
 			$this->load->view('file_managements/preview_order_document.php', $data);
 		} else {
 			$this->load->view('file_managements/preview_file.php', $data);
@@ -545,9 +545,43 @@ class document_management extends AdminController
 			$this->document_management_model->create_folder_bulk_download($id, $folder_name);
 			$this->load->library('zip');
 			$this->zip->read_dir($save_path, false);
+			register_shutdown_function([$this, 'delete_temp_folder'], $save_path);
 			$this->zip->download($folder_name . '.zip');
 			$this->zip->clear_data();
 		}
+	}
+
+	/**
+	 * Delete temporary bulk download folder after ZIP is sent
+	 */
+	public function delete_temp_folder($folder_path)
+	{
+		if (is_dir($folder_path)) {
+			$this->delete_directory($folder_path);
+		}
+	}
+
+	/**
+	 * Recursively delete a directory and all its contents
+	 */
+	private function delete_directory($dir)
+	{
+		if (!is_dir($dir)) {
+			return;
+		}
+
+		$files = array_diff(scandir($dir), ['.', '..']);
+
+		foreach ($files as $file) {
+			$path = $dir . '/' . $file;
+			if (is_dir($path)) {
+				$this->delete_directory($path);   // recursive
+			} else {
+				@unlink($path);                   // delete file
+			}
+		}
+
+		@rmdir($dir);                             // delete folder
 	}
 
 	/**
