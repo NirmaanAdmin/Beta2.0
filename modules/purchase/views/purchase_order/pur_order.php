@@ -158,23 +158,21 @@
 
                     <div class="row">
                       <div class="form-group col-md-6">
-
                         <label for="vendor"><?php echo _l('vendor'); ?></label>
                         <select name="vendor" id="vendor" class="selectpicker" <?php if (isset($pur_order)) {
-                                                                                  echo '';
-                                                                                } ?> onchange="estimate_by_vendor(this); return  false;" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
-                          <option value=""></option>
-                          <?php foreach ($vendors as $s) { ?>
-                            <option value="<?php echo pur_html_entity_decode($s['userid']); ?>" <?php if (isset($pur_order) && $pur_order->vendor == $s['userid']) {
-                                                                                                  echo 'selected';
-                                                                                                } else {
-                                                                                                  if (isset($ven) && $ven == $s['userid']) {
-                                                                                                    echo 'selected';
-                                                                                                  }
-                                                                                                } ?>><?php echo pur_html_entity_decode($s['company']); ?></option>
-                          <?php } ?>
+                          echo '';
+                        } ?> onchange="estimate_by_vendor(this); return  false;" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
+                        <option value=""></option>
+                        <?php foreach ($vendors as $s) { ?>
+                          <option value="<?php echo pur_html_entity_decode($s['userid']); ?>" <?php if (isset($pur_order) && $pur_order->vendor == $s['userid']) {
+                            echo 'selected';
+                          } else {
+                            if (isset($ven) && $ven == $s['userid']) {
+                              echo 'selected';
+                            }
+                          } ?>><?php echo pur_html_entity_decode($s['company']); ?></option>
+                        <?php } ?>
                         </select>
-
                       </div>
 
                       <?php
@@ -190,8 +188,8 @@
                           <option value=""></option>
                           <?php foreach ($pur_request as $s) { ?>
                             <option value="<?php echo pur_html_entity_decode($s['id']); ?>" <?php if (isset($pur_order) && $pur_order->pur_request != '' && $pur_order->pur_request == $s['id']) {
-                                                                                              echo 'selected';
-                                                                                            } ?>><?php echo pur_html_entity_decode($s['pur_rq_code'] . ' - ' . $s['pur_rq_name']); ?></option>
+                              echo 'selected';
+                            } ?>><?php echo pur_html_entity_decode($s['pur_rq_code'] . ' - ' . $s['pur_rq_name']); ?></option>
                           <?php } ?>
                         </select>
                       </div>
@@ -201,31 +199,30 @@
                       <div class="col-md-6 form-group">
                         <label for="budget"><?php echo _l('budget'); ?></label>
                         <select name="estimate" id="estimate" class="selectpicker  <?php if (isset($pur_order)) {
-                                                                                      echo 'disabled';
-                                                                                    } ?>" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
-                          <option value=""></option>
-                          <?php foreach ($budgets as $s) { ?>
-                            <option value="<?php echo pur_html_entity_decode($s['id']); ?>" <?php if (isset($pur_order) && $pur_order->estimate != '' && $pur_order->estimate == $s['id']) {
-                                                                                              echo 'selected';
-                                                                                            } ?>>
-                              <?php echo format_estimate_number($s['id']); ?>
-                              <?php echo !empty($s['budget_description']) ? ' - ' . $s['budget_description'] : ''; ?>
-                            </option>
-                          <?php } ?>
+                          echo 'disabled';
+                        } ?>" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
+                        <option value=""></option>
+                        <?php foreach ($budgets as $s) { ?>
+                          <option value="<?php echo pur_html_entity_decode($s['id']); ?>" <?php if (isset($pur_order) && $pur_order->estimate != '' && $pur_order->estimate == $s['id']) {
+                            echo 'selected';
+                          } ?>>
+                          <?php echo format_estimate_number($s['id']); ?>
+                          <?php echo !empty($s['budget_description']) ? ' - ' . $s['budget_description'] : ''; ?>
+                        </option>
+                        <?php } ?>
                         </select>
-
                       </div>
 
                       <div class="col-md-6 form-group">
                         <label for="department"><?php echo _l('department'); ?></label>
                         <select name="department" id="department" class="selectpicker" <?php if (isset($pur_order)) {
-                                                                                        } ?> data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
-                          <option value=""></option>
-                          <?php foreach ($departments as $s) { ?>
-                            <option value="<?php echo pur_html_entity_decode($s['departmentid']); ?>" <?php if (isset($pur_order) && $s['departmentid'] == $pur_order->department) {
-                                                                                                        echo 'selected';
-                                                                                                      } ?>><?php echo pur_html_entity_decode($s['name']); ?></option>
-                          <?php } ?>
+                        } ?> data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
+                        <option value=""></option>
+                        <?php foreach ($departments as $s) { ?>
+                          <option value="<?php echo pur_html_entity_decode($s['departmentid']); ?>" <?php if (isset($pur_order) && $s['departmentid'] == $pur_order->department) {
+                            echo 'selected';
+                          } ?>><?php echo pur_html_entity_decode($s['name']); ?></option>
+                        <?php } ?>
                         </select>
                       </div>
                     </div>
@@ -244,10 +241,10 @@
                           <option value=""></option>
                           <?php foreach ($projects as $s) { ?>
                             <option value="<?php echo pur_html_entity_decode($s['id']); ?>" <?php if (isset($pur_order) && $s['id'] == $pur_order->project) {
-                                                                                              echo 'selected';
-                                                                                            } else if (!isset($pur_order) && $s['id'] == $project_id) {
-                                                                                              echo 'selected';
-                                                                                            } ?>><?php echo pur_html_entity_decode($s['name']); ?></option>
+                              echo 'selected';
+                            } else if (!isset($pur_order) && $s['id'] == $project_id) {
+                              echo 'selected';
+                            } ?>><?php echo pur_html_entity_decode($s['name']); ?></option>
                           <?php } ?>
                         </select>
                       </div>
@@ -429,17 +426,6 @@
                             }
                           }
                           ?>
-                        </select>
-                      </div> -->
-                      <!-- <div class="col-md-6 form-group ">
-                        <label for="sale_invoice"><?php echo _l('sale_invoice'); ?></label>
-                        <select name="sale_invoice" id="sale_invoice" class="selectpicker" onchange="coppy_sale_invoice(); return false;" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
-                          <option value=""></option>
-                          <?php foreach ($invoices as $inv) { ?>
-                            <option value="<?php echo pur_html_entity_decode($inv['id']); ?>" <?php if (isset($pur_order) && $inv['id'] == $pur_order->sale_invoice) {
-                                                                                                echo 'selected';
-                                                                                              } ?>><?php echo format_invoice_number($inv['id']); ?></option>
-                          <?php } ?>
                         </select>
                       </div> -->
                     </div>
@@ -914,10 +900,10 @@
                           </div>
                           <div class="col-md-3">
                             <input type="number" onchange="pur_calculate_total()" data-toggle="tooltip" value="<?php if (isset($pur_order)) {
-                                                                                                                  echo $pur_order->shipping_fee;
-                                                                                                                } else {
-                                                                                                                  echo '0';
-                                                                                                                } ?>" class="form-control pull-left text-right" name="shipping_fee">
+                              echo $pur_order->shipping_fee;
+                            } else {
+                              echo '0';
+                            } ?>" class="form-control pull-left text-right" name="shipping_fee">
                           </div>
                         </div>
                       </td>
