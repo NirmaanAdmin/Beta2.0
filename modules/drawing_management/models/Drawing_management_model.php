@@ -1429,6 +1429,20 @@ class drawing_management_model extends app_model
 						$this->copy_file($sourcePdf, $destPdfPath);
 					}
 				}
+				// 3) NEW: Copy all other attachments from get_other_attachment()
+				$other_attachments = $this->get_other_attachment($value['id']);
+
+				foreach ($other_attachments as $attach) {
+					if (!empty($attach['file_name'])) {
+						$sourceOther = rtrim(DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER, '/')
+							. '/all_attachment/' . $value['id'] . '/' . $attach['file_name'];
+
+						if (file_exists($sourceOther)) {
+							$destOther = $root . '/' . $attach['file_name'];
+							$this->copy_file($sourceOther, $destOther);
+						}
+					}
+				}
 			}
 		}
 	}
