@@ -280,13 +280,21 @@
 											<td><?php echo drawing_htmldecode($log['name']); ?></td>
 											<td>
 												<div class="display-flex">
-													<a href="<?php echo site_url('modules/drawing_management/uploads/log_versions/' . $log['parent_id'] . '/' . $log['name']); ?>" download class="mleft10 mright10" data-toggle="tooltip" data-placement="top" data-original-title="<?php echo _l('dmg_download'); ?>">
+													<!-- <a href="<?php echo site_url('modules/drawing_management/uploads/log_versions/' . $log['parent_id'] . '/' . $log['name']); ?>"  download class="mleft10 mright10" data-toggle="tooltip" data-placement="top" data-original-title="<?php echo _l('dmg_download'); ?>">
+														<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-download-cloud">
+															<polyline points="8 17 12 21 16 17" />
+															<line x1="12" y1="12" x2="12" y2="21" />
+															<path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29" />
+														</svg>
+													</a> -->
+													<a href="<?php echo admin_url('drawing_management/download_bundle/' . $log['parent_id']); ?>"   class="mleft10 mright10" data-toggle="tooltip" data-placement="top" data-original-title="<?php echo _l('dmg_download'); ?>">
 														<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-download-cloud">
 															<polyline points="8 17 12 21 16 17" />
 															<line x1="12" y1="12" x2="12" y2="21" />
 															<path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29" />
 														</svg>
 													</a>
+													
 													<?php if (!$file_locked) { ?>
 														<a href="javascript:void(0)" class="mleft10 mright10" data-toggle="tooltip" data-placement="top" data-original-title="<?php echo _l('dmg_restore'); ?>" onclick="restore_item_version(<?php echo drawing_htmldecode($log['id']); ?>)">
 															<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-refresh-ccw">

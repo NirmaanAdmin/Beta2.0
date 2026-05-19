@@ -239,14 +239,14 @@ class drawing_management extends AdminController
 					$redirect_type = $data['redirect_type'];
 					unset($data['redirect_type']);
 				}
-				$custom_field = ''; 
+				$custom_field = '';
 				$related_file = '';
 				if (isset($data['related_file'])) {
 					$related_file = implode(',', $data['related_file']);
 				}
 				$data['custom_field'] = $custom_field;
 				$data['related_file'] = $related_file;
-				$res = $this->drawing_management_model->update_item($data);   
+				$res = $this->drawing_management_model->update_item($data);
 				if ($res) {
 					set_alert('success', _l('dmg_updated_successfully'));
 				} else {
@@ -481,7 +481,7 @@ class drawing_management extends AdminController
 		$data['file'] = $this->drawing_management_model->get_item($id);
 		$this->load->view('file_managements/preview_file_pdf_dwg.php', $data);
 	}
-	
+
 	public function preview_superseder()
 	{
 		if (!(has_permission('drawing_management_file_management', '', 'view') || has_permission('drawing_management_file_management', '', 'view_own'))) {
@@ -1103,7 +1103,7 @@ class drawing_management extends AdminController
 					$staff_id = get_staff_user_id();
 					$rel_type = 'drawing';
 					$check_proccess = $this->drawing_management_model->get_approve_setting($rel_type, false);
-					$process = ''; 
+					$process = '';
 					if ($check_proccess) {
 						$this->drawing_management_model->send_request_approve($id, $rel_type, $staff_id);
 						set_alert('success', _l('dmg_successful_submission_of_approval_request'));
@@ -1348,74 +1348,150 @@ class drawing_management extends AdminController
 	}
 
 	public function transmittal()
-    {
-        $data['title'] = _l('transmittal');
-        $this->load->view('transmittal/list_transmittal', $data);
-    }
+	{
+		$data['title'] = _l('transmittal');
+		$this->load->view('transmittal/list_transmittal', $data);
+	}
 
-    public function table_transmittal()
-    {
-        $this->app->get_table_data(module_views_path('drawing_management', 'transmittal/table_transmittal'));
-    }
+	public function table_transmittal()
+	{
+		$this->app->get_table_data(module_views_path('drawing_management', 'transmittal/table_transmittal'));
+	}
 
-	public function delete_pdf_attachment($id){
-		
+	public function delete_pdf_attachment($id)
+	{
+
 		$result =  $this->drawing_management_model->delete_pdf_attachment($id);
 		if ($result) {
 			set_alert('success', _l('Attachment deleted successfully'));
 		} else {
 			set_alert('danger', _l('Attachment deleted failed'));
 		}
-		
+
 		redirect($_SERVER['HTTP_REFERER']);
 	}
 
-	public function delete_all_attachment($id){
-		
+	public function delete_all_attachment($id)
+	{
+
 		$result =  $this->drawing_management_model->delete_all_attachment($id);
 		if ($result) {
 			set_alert('success', _l('Attachment deleted successfully'));
 		} else {
 			set_alert('danger', _l('Attachment deleted failed'));
 		}
-		
+
 		redirect($_SERVER['HTTP_REFERER']);
 	}
 
 	public function download_all_rfi_pdf($file_id)
 	{
-	    $rfi_dms_items = get_rfi_dms_items($file_id);
-	    $urls = [];
-	    if (!empty($rfi_dms_items)) {
-	        foreach ($rfi_dms_items as $row) {
-	            $ticket_id = $row['ticketid'];
-	            $urls[] = admin_url('tickets/pdf/' . $ticket_id);
-	        }
-	    }
-	    echo json_encode([
-	        'status' => !empty($urls) ? true : false,
-	        'download_urls' => $urls
-	    ]);
-	    return;
+		$rfi_dms_items = get_rfi_dms_items($file_id);
+		$urls = [];
+		if (!empty($rfi_dms_items)) {
+			foreach ($rfi_dms_items as $row) {
+				$ticket_id = $row['ticketid'];
+				$urls[] = admin_url('tickets/pdf/' . $ticket_id);
+			}
+		}
+		echo json_encode([
+			'status' => !empty($urls) ? true : false,
+			'download_urls' => $urls
+		]);
+		return;
 	}
 
 	public function view_other_attachments()
-    {
-        $input = $this->input->post();
-        $attachments = $this->drawing_management_model->view_other_attachments($input);
-        echo json_encode(['result' => $attachments]);
-        die();
-    }
+	{
+		$input = $this->input->post();
+		$attachments = $this->drawing_management_model->view_other_attachments($input);
+		echo json_encode(['result' => $attachments]);
+		die();
+	}
 
 	public function view_other_file($id)
-    {
+	{
 		$data['discussion_user_profile_image_url'] = staff_profile_image_url(get_staff_user_id());
-        $data['current_user_is_admin']             = is_admin();
-        $data['file'] = $this->drawing_management_model->get_other_attachment_with_id($id);
-        if (!$data['file']) {
-            header('HTTP/1.0 404 Not Found');
-            die;
-        }
-        $this->load->view('file_managements/preview_other_file.php', $data);
-    }
+		$data['current_user_is_admin']             = is_admin();
+		$data['file'] = $this->drawing_management_model->get_other_attachment_with_id($id);
+		if (!$data['file']) {
+			header('HTTP/1.0 404 Not Found');
+			die;
+		}
+		$this->load->view('file_managements/preview_other_file.php', $data);
+	}
+
+	public function download_bundle($id)
+	{
+
+		$this->load->library('zip');
+
+		$item = $this->drawing_management_model->get_item($id);
+
+		if (!$item) {
+			show_404();
+		}
+		$data_log_version = $this->drawing_management_model->get_log_version_by_parent($item->id);
+		foreach ($data_log_version  as $key => $log) {
+
+			$log_path =
+				FCPATH .
+				'modules/drawing_management/uploads/log_versions/' .
+				$log['parent_id'] . '/' .
+				$log['name'];
+
+			if (file_exists($log_path)) {
+				$this->zip->read_file($log_path);
+			}
+		}
+		
+
+
+		/*
+    |--------------------------------------------------------------------------
+    | Other Attachments
+    |--------------------------------------------------------------------------
+    */$attachments = $this->drawing_management_model
+			->get_other_attachment($item->id);
+
+		foreach ($attachments as $attachment) {
+
+			$path =
+				FCPATH .
+				'modules/drawing_management/uploads/all_attachment/' .
+				$item->id . '/' .
+				$attachment['file_name'];
+
+			if (file_exists($path)) {
+				$this->zip->read_file($path);
+			}
+		}
+
+		/*
+    |--------------------------------------------------------------------------
+    | DWG Drawing
+    |--------------------------------------------------------------------------
+    */
+		if (!empty($item->pdf_attachment)) {
+
+			$dwg =
+				FCPATH .
+				'modules/drawing_management/uploads/pdf_attachments/' .
+				$item->id . '/' .
+				$item->pdf_attachment;
+
+			if (file_exists($dwg)) {
+				$this->zip->read_file($dwg);
+			}
+		}
+
+		$zip_name =
+			'drawing_' .
+			$item->id .
+			'_' .
+			date('Ymd_His') .
+			'.zip';
+
+		$this->zip->download($zip_name);
+	}
 }
