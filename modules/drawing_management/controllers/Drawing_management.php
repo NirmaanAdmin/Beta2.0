@@ -564,11 +564,44 @@ class drawing_management extends AdminController
 			$this->drawing_management_model->create_folder_bulk_download($id, $folder_name);
 			$this->load->library('zip');
 			$this->zip->read_dir($save_path, false);
+			register_shutdown_function([$this, 'delete_temp_folder'], $save_path);
 			$this->zip->download($folder_name . '.zip');
 			$this->zip->clear_data();
 		}
 	}
 
+	/**
+	 * Delete temporary bulk download folder after ZIP is sent
+	 */
+	public function delete_temp_folder($folder_path)
+	{
+		if (is_dir($folder_path)) {
+			$this->delete_directory($folder_path);
+		}
+	}
+
+	/**
+	 * Recursively delete a directory and all its contents
+	 */
+	private function delete_directory($dir)
+	{
+		if (!is_dir($dir)) {
+			return;
+		}
+
+		$files = array_diff(scandir($dir), ['.', '..']);
+
+		foreach ($files as $file) {
+			$path = $dir . '/' . $file;
+			if (is_dir($path)) {
+				$this->delete_directory($path);   // recursive
+			} else {
+				@unlink($path);                   // delete file
+			}
+		}
+
+		@rmdir($dir);                             // delete folder
+	}
 	/**
 	 * get folder list
 	 * @return string
@@ -1444,14 +1477,15 @@ class drawing_management extends AdminController
 				$this->zip->read_file($log_path);
 			}
 		}
-		
+
 
 
 		/*
     |--------------------------------------------------------------------------
     | Other Attachments
     |--------------------------------------------------------------------------
-    */$attachments = $this->drawing_management_model
+    */
+		$attachments = $this->drawing_management_model
 			->get_other_attachment($item->id);
 
 		foreach ($attachments as $attachment) {
