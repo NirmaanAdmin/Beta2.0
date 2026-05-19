@@ -1729,7 +1729,7 @@ class purchase extends AdminController
         $data['area_pur'] = get_area_project_wise();
         $this->load->model('invoices_model');
         $data['get_hsn_sac_code'] = $this->invoices_model->get_hsn_sac_code();
-        $data['budgets'] = $this->purchase_model->get_all_estimates();
+        $data['budgets'] = $this->purchase_model->get_all_project_budgets();
         $data['ajaxItems'] = false;
 
         if (total_rows(db_prefix() . 'items') <= ajax_on_total_items()) {
@@ -10101,7 +10101,7 @@ class purchase extends AdminController
         $data['area_pur'] = get_area_project_wise();
         $this->load->model('invoices_model');
         $data['get_hsn_sac_code'] = $this->invoices_model->get_hsn_sac_code();
-        $data['budgets'] = $this->purchase_model->get_all_estimates();
+        $data['budgets'] = $this->purchase_model->get_all_project_budgets();
         $data['ajaxItems'] = false;
 
         if (total_rows(db_prefix() . 'items') <= ajax_on_total_items()) {
@@ -18116,5 +18116,11 @@ class purchase extends AdminController
             'filename'          => PURCHASE_IMPORT_SUB_GROUP_ERROR . $filename,
 
         ]);
+    }
+
+    public function get_budget_packages($estimate_id)
+    {
+        $packages = $this->purchase_model->get_budget_packages($estimate_id);
+        echo json_encode(['result' => $packages]);
     }
 }

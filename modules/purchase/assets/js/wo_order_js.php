@@ -1163,4 +1163,32 @@ function init_po_currency(id, callback) {
     }
 }
 
+change_by_budget();
+function change_by_budget() {
+  "use strict";
+  var estimate = $('select[name="estimate"]').val();
+  var package_select = $('select[name="package_id"]');
+  var package_id = '<?php echo (isset($pur_order) ? $pur_order->package_id : ""); ?>';
+  package_select.empty();
+  package_select.append('<option value=""></option>');
+  if (estimate) {
+    $.post(admin_url + 'purchase/get_budget_packages/' + estimate).done(function(response) {
+      response = JSON.parse(response);
+      if (response.result) {
+        $.each(response.result, function(index, item) {
+          var selected = (package_id == item.id) ? 'selected' : '';
+          package_select.append(
+            '<option value="' + item.id + '" ' + selected + '>'
+            + item.package_name +
+            '</option>'
+          );
+        });
+      }
+      package_select.selectpicker('refresh');
+    });
+  } else {
+    package_select.selectpicker('refresh');
+  }
+}
+
 </script>

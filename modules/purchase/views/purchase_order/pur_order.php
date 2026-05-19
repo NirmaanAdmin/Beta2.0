@@ -198,9 +198,7 @@
                     <div class="row">
                       <div class="col-md-6 form-group">
                         <label for="budget"><?php echo _l('budget'); ?></label>
-                        <select name="estimate" id="estimate" class="selectpicker  <?php if (isset($pur_order)) {
-                          echo 'disabled';
-                        } ?>" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
+                        <select name="estimate" id="estimate" class="selectpicker" onchange="change_by_budget(); return  false;" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
                         <option value=""></option>
                         <?php foreach ($budgets as $s) { ?>
                           <option value="<?php echo pur_html_entity_decode($s['id']); ?>" <?php if (isset($pur_order) && $pur_order->estimate != '' && $pur_order->estimate == $s['id']) {
@@ -227,25 +225,11 @@
                       </div>
                     </div>
 
-                    <?php
-                    $project_id = '';
-                    if ($this->input->get('project')) {
-                      $project_id = $this->input->get('project');
-                    }
-                    ?>
                     <div class="row">
                       <div class="col-md-6 form-group">
-                        <input type="hidden" name="project" id="project_val" value="">
-                        <label for="project"><?php echo _l('project'); ?></label>
-                        <select name="project" id="project" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
-                          <option value=""></option>
-                          <?php foreach ($projects as $s) { ?>
-                            <option value="<?php echo pur_html_entity_decode($s['id']); ?>" <?php if (isset($pur_order) && $s['id'] == $pur_order->project) {
-                              echo 'selected';
-                            } else if (!isset($pur_order) && $s['id'] == $project_id) {
-                              echo 'selected';
-                            } ?>><?php echo pur_html_entity_decode($s['name']); ?></option>
-                          <?php } ?>
+                        <label for="package"><?php echo _l('Package'); ?></label>
+                        <select name="package_id" id="package_id" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
+                        <option value=""></option>
                         </select>
                       </div>
 
@@ -267,6 +251,26 @@
                       <div class="col-md-6">
                         <?php $lead_time_days = (isset($pur_order) ? $pur_order->lead_time_days : 0);
                         echo render_input('lead_time_days', 'lead_time_days', $lead_time_days, 'number'); ?>
+                      </div>
+                      <?php
+                      $project_id = '';
+                      if ($this->input->get('project')) {
+                        $project_id = $this->input->get('project');
+                      }
+                      ?>
+                      <div class="col-md-6 form-group">
+                        <input type="hidden" name="project" id="project_val" value="">
+                        <label for="project"><?php echo _l('project'); ?></label>
+                        <select name="project" id="project" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
+                          <option value=""></option>
+                          <?php foreach ($projects as $s) { ?>
+                            <option value="<?php echo pur_html_entity_decode($s['id']); ?>" <?php if (isset($pur_order) && $s['id'] == $pur_order->project) {
+                              echo 'selected';
+                            } else if (!isset($pur_order) && $s['id'] == $project_id) {
+                              echo 'selected';
+                            } ?>><?php echo pur_html_entity_decode($s['name']); ?></option>
+                          <?php } ?>
+                        </select>
                       </div>
                     </div>
 

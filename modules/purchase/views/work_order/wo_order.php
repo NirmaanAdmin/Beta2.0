@@ -179,7 +179,7 @@
                     <div class="row">
                       <div class="col-md-6 form-group">
                         <label for="budget"><?php echo _l('budget'); ?></label>
-                        <select name="estimate" id="estimate" class="selectpicker  <?php if (isset($wo_order)) { echo 'disabled';} ?>" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
+                        <select name="estimate" id="estimate" class="selectpicker" onchange="change_by_budget(); return  false;" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
                             <option value=""></option>
                             <?php foreach ($budgets as $s) { ?>
                               <option value="<?php echo pur_html_entity_decode($s['id']); ?>" <?php if (isset($wo_order) && $wo_order->estimate != '' && $wo_order->estimate == $s['id']) { echo 'selected';} ?>>
@@ -204,6 +204,28 @@
                       </div>
                     </div>
 
+                    <div class="row">
+                      <div class="col-md-6 form-group">
+                        <label for="package"><?php echo _l('Package'); ?></label>
+                        <select name="package_id" id="package_id" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
+                        <option value=""></option>
+                        </select>
+                      </div>
+
+                      <div class="col-md-6 form-group">
+                        <label for="type"><?php echo _l('type'); ?></label>
+                        <select name="type" id="type" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
+                          <option value=""></option>
+                          <option value="capex" <?php if (isset($wo_order) && $wo_order->type == 'capex') {
+                            echo 'selected';
+                          } ?>><?php echo _l('capex'); ?></option>
+                          <option value="opex" <?php if (isset($wo_order) && $wo_order->type == 'opex') {
+                            echo 'selected';
+                          } ?>><?php echo _l('opex'); ?></option>
+                        </select>
+                      </div>
+                    </div>
+
                     <?php
                     $project_id = '';
                     if ($this->input->get('project')) {
@@ -223,19 +245,6 @@
                               echo 'selected';
                             } ?>><?php echo pur_html_entity_decode($s['name']); ?></option>
                           <?php } ?>
-                        </select>
-                      </div>
-
-                      <div class="col-md-6 form-group">
-                        <label for="type"><?php echo _l('type'); ?></label>
-                        <select name="type" id="type" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
-                          <option value=""></option>
-                          <option value="capex" <?php if (isset($wo_order) && $wo_order->type == 'capex') {
-                            echo 'selected';
-                          } ?>><?php echo _l('capex'); ?></option>
-                          <option value="opex" <?php if (isset($wo_order) && $wo_order->type == 'opex') {
-                            echo 'selected';
-                          } ?>><?php echo _l('opex'); ?></option>
                         </select>
                       </div>
                     </div>

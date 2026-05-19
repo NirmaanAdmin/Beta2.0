@@ -29302,4 +29302,19 @@ class Purchase_model extends App_Model
         }
         return true;
     }
+
+    public function get_all_project_budgets()
+    {
+        $default_project = get_default_project();
+        $this->db->select('id, budget_description');
+        $this->db->where('active', 1);
+        $this->db->where('project_id', $default_project);
+        return $this->db->get(db_prefix() . 'estimates')->result_array();
+    }
+
+    public function get_budget_packages($estimate_id)
+    {
+        $this->db->where('estimate_id', $estimate_id);
+        return $this->db->get(db_prefix() . 'estimate_package_info')->result_array();
+    }
 }
