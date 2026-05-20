@@ -2532,6 +2532,23 @@ class Estimates_model extends App_Model
                 $package_items = $this->db->get()->result_array();
             }
             if (!empty($package_id)) {
+                $package_orders = $this->get_package_orders($package_id);
+                $itemhtml .= '<div class="horizontal-tabs">
+                  <ul class="nav nav-tabs nav-tabs-horizontal mbot15" role="tablist">
+                     <li role="presentation" class="active">
+                        <a href="#package_items" aria-controls="package_items" role="tab" id="tab_package_items" data-toggle="tab">
+                           Items
+                        </a>
+                     </li>
+                     <li role="presentation">
+                        <a href="#package_orders" aria-controls="package_orders" role="tab" id="tab_package_orders" data-toggle="tab">
+                           Orders
+                        </a>
+                     </li>
+                  </ul>
+                </div>';
+                $itemhtml .= '<div class="tab-content">';
+                $itemhtml .= '<div role="tabpanel" class="tab-pane active" id="package_items">';
                 $itemhtml .= '<div class="table-responsive s_table">';
                 $itemhtml .= '<table class="table items">';
                 $itemhtml .= '<thead>
@@ -2673,6 +2690,41 @@ class Estimates_model extends App_Model
                         </tbody>
                     </table>
                 </div>';
+
+                $itemhtml .= '</div>';
+                $itemhtml .= '<div role="tabpanel" class="tab-pane" id="package_orders">';
+                $itemhtml .= '<table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Order</th>
+                        <th>Sub Total</th>
+                    </tr>
+                </thead>';
+                $itemhtml .= '<tbody>';
+                if(!empty($package_orders)) {
+                    foreach ($package_orders as $pkey => $pvalue) {
+                        if($pvalue['type'] == 'po') {
+                            $order_link = '<a href="' . admin_url('purchase/purchase_order/#' . $pvalue['id']) . '" target="_blank">'.$pvalue['order_number']. '</a>';
+                        } else if($pvalue['type'] == 'wo') {
+                            $order_link = '<a href="' . admin_url('purchase/work_order/#' . $pvalue['id']) . '" target="_blank">'.$pvalue['order_number']. '</a>';
+                        } else {
+                            $order_link = '';
+                        }
+                        $itemhtml .= '<tr>
+                            <td>'.($pkey + 1).'</td>
+                            <td>'.$order_link.'</td>
+                            <td>'.app_format_money($pvalue['subtotal'], $base_currency).'</td>
+                        </tr>';
+                    }
+                } else {
+                    $itemhtml .= '<tr>
+                        <td colspan="3">No orders found.</td>
+                    </tr>';
+                }
+                $itemhtml .= '</tbody></table>';
+                $itemhtml .= '</div>';
+                $itemhtml .= '</div>';
             }
         }
 
@@ -3911,5 +3963,20 @@ class Estimates_model extends App_Model
             'total_package' => $total_package,
         ]);
         return true;
+    }
+
+    public function get_package_orders($package_id)
+    {
+        $this->db->select("id, subtotal, pur_order_number as order_number, 'po' as type");
+        $this->db->where('package_id', $package_id);
+        $this->db->order_by('id', 'ASC');
+        $pur_orders = $this->db->get(db_prefix() . 'pur_orders')->result_array();
+
+        $this->db->select("id, subtotal, wo_order_number as order_number, 'wo' as type");
+        $this->db->where('package_id', $package_id);
+        $this->db->order_by('id', 'ASC');
+        $wo_orders = $this->db->get(db_prefix() . 'wo_orders')->result_array();
+
+        return array_merge($pur_orders, $wo_orders);
     }
 }
