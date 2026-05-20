@@ -1019,7 +1019,7 @@
                 (d) Replacement/Rectification: Within 7-10 days if found any damage.<br>
                 (e) All material should be strictly as per applicable standard.<br>
                 (f) Goods shall be packaged properly to ensure safe arrival at the project site.<br>
-                (g) Transportation to the site and transit insurance shall be in your scope.<br>
+                (g) Transportation to the site and transit insurance shall be in client scope.<br>
                 (h) Service / complain response time: Within 48 hours from the time of complaint logged, if required.<br>
                 Supplier shall provide all the documents incl. delivery challan, invoice, materials test certificate/ Declaration of Conformity, Serial no, technical details of the product being supplied being asked by Basilius etc.<br><br>
 
@@ -1170,7 +1170,7 @@
                 (b) Risk in the Goods shall pass to BASILLUS on delivery, whereas the Order includes installation, in which case risk shall not pass to BASILLUS until completion of the installation work.<br><br>
 
                 <strong>8. Price.</strong><br>
-                8.1 The price(s) payable by BASILLUS for Goods and Services, unless otherwise expressly stated in the Order, shall be inclusive, where relevant, of all packing, delivery to Site, off-loading, any license fees, use of any intellectual property for purposes of delivering the Order, installation, testing and commissioning, and all other charges associated with Supplies, GST is included in rates quoted and also included intra-site shifting and resifting whenever required - after off-loading.<br><br>
+                8.1 The price(s) payable by BASILLUS for Goods and Services, unless otherwise expressly stated in the Order, shall be inclusive, where relevant, of all packing, delivery to Site, off-loading, any license fees, use of any intellectual property for purposes of delivering the Order, installation, testing and commissioning, and all other charges associated with Supplies, GST is Exclusive in rates quoted and also included intra-site shifting and resifting whenever required - after off-loading.<br><br>
 
                 <strong>9. Invoice payment.</strong><br>
                 9.1 Subject to the terms of the Order, the Vendor shall, following supply of all or (where agreed by BASILLUS in writing) each accepted (not rejected in accordance with Condition 4) installment of the Goods or Services, submit an invoice, within 10 days, for the price of the Goods and Services supplied in accordance with the Order, the Order number shown overleaf, and any other particulars prescribed in the Order and shall be sent to the address specified in the Order.<br><br>
