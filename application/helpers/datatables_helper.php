@@ -827,18 +827,18 @@ function data_tables_init_union_unawarded($aColumns, $sIndexColumn, $combinedTab
             p.sdeposit_percent,
             p.sdeposit_value,
             p.total_package,
-            IFNULL(SUM(po.total),0) + IFNULL(SUM(wo.total),0) AS awarded_value,
+            IFNULL(SUM(po.subtotal),0) + IFNULL(SUM(wo.subtotal),0) AS awarded_value,
             p.kind,
             p.rli_filter,
             (p.total_package - 
                 (
                     (
-                        SELECT IFNULL(SUM(total),0)
+                        SELECT IFNULL(SUM(subtotal),0)
                         FROM tblpur_orders 
                         WHERE package_id = p.id
                     ) +
                     (
-                        SELECT IFNULL(SUM(total),0)
+                        SELECT IFNULL(SUM(subtotal),0)
                         FROM tblwo_orders 
                         WHERE package_id = p.id
                     )
