@@ -287,14 +287,14 @@
 															<path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29" />
 														</svg>
 													</a> -->
-													<a href="<?php echo admin_url('drawing_management/download_bundle/' . $log['parent_id']); ?>"   class="mleft10 mright10" data-toggle="tooltip" data-placement="top" data-original-title="<?php echo _l('dmg_download'); ?>">
+													<a href="<?php echo admin_url('drawing_management/download_bundle/' . $log['parent_id']); ?>" class="mleft10 mright10" data-toggle="tooltip" data-placement="top" data-original-title="<?php echo _l('dmg_download'); ?>">
 														<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-download-cloud">
 															<polyline points="8 17 12 21 16 17" />
 															<line x1="12" y1="12" x2="12" y2="21" />
 															<path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29" />
 														</svg>
 													</a>
-													
+
 													<?php if (!$file_locked) { ?>
 														<a href="javascript:void(0)" class="mleft10 mright10" data-toggle="tooltip" data-placement="top" data-original-title="<?php echo _l('dmg_restore'); ?>" onclick="restore_item_version(<?php echo drawing_htmldecode($log['id']); ?>)">
 															<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-refresh-ccw">
@@ -323,6 +323,66 @@
 						</td>
 					</tr>
 				<?php } ?>
+				<?php
+				$data_log_old_version = $this->drawing_management_model->get_log_old_version_by_parent($item->id);
+				if (count($data_log_old_version) > 0) { ?>
+					<tr>
+						<td class="text-nowrap" colspan="2">
+							<?php echo _l('Old Revisions'); ?>
+							<table class="table no-mtop table-striped">
+								<thead>
+									<tr>
+										<th class="bold"><?php echo _l('dms_date'); ?></th>
+										<th class="bold"><?php echo _l('dmg_file_name'); ?></th>
+										<th class="bold" width="5%"><?php echo _l('dmg_action'); ?></th>
+									</tr>
+								</thead>
+								<tbody>
+									<?php
+									foreach ($data_log_old_version as $key => $log) { ?>
+										<tr>
+											<td><?php echo _dt($log['dateadded']); ?></td>
+											<td><?php echo drawing_htmldecode($log['name']); ?></td>
+											<td>
+												<div class="display-flex">
+													<a href="<?php echo admin_url('drawing_management/download_bundle_old/' . $log['parent_id']); ?>" class="mleft10 mright10" data-toggle="tooltip" data-placement="top" data-original-title="<?php echo _l('dmg_download'); ?>">
+														<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-download-cloud">
+															<polyline points="8 17 12 21 16 17" />
+															<line x1="12" y1="12" x2="12" y2="21" />
+															<path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29" />
+														</svg>
+													</a>
+
+													<?php if (!$file_locked) { ?>
+														<!-- <a href="javascript:void(0)" class="mleft10 mright10" data-toggle="tooltip" data-placement="top" data-original-title="<?php echo _l('dmg_restore'); ?>" onclick="restore_item_version(<?php echo drawing_htmldecode($log['id']); ?>)">
+															<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-refresh-ccw">
+																<polyline points="1 4 1 10 7 10" />
+																<polyline points="23 20 23 14 17 14" />
+																<path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15" />
+															</svg>
+														</a> -->
+
+														<a href="<?php echo admin_url('drawing_management/delete_log/' . $log['id'] . '/' . $parent_id) ?>" class="mleft10 mright10 _swaldelete" data-toggle="tooltip" data-placement="top" data-original-title="<?php echo _l('dmg_delete'); ?>">
+															<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2">
+																<polyline points="3 6 5 6 21 6" />
+																<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+																<line x1="10" y1="11" x2="10" y2="17" />
+																<line x1="14" y1="11" x2="14" y2="17" />
+															</svg>
+														</a>
+													<?php } ?>
+
+												</div>
+											</td>
+										</tr>
+									<?php } ?>
+								</tbody>
+							</table>
+						</td>
+					</tr>
+				<?php } ?>
+
+
 
 				<?php
 				$data_log = drawing_get_audit_log_file($item->id);
@@ -620,6 +680,12 @@
 							</a>
 						<?php } ?>
 					<?php } ?>
+					<?php
+					if (!$file_locked) { ?>
+						<a href="javascript:void(0)" class="btn btn-warning w100 mtop5 mbot5" onclick="upload_old_version(<?php echo drawing_htmldecode($item->id); ?>)">
+							<i class="fa fa-file"></i> <?php echo _l('Upload Old Version'); ?>
+						</a>
+					<?php } ?>
 					<?php if (!(strpos($item->name, '.pdf') === false)) { ?>
 						<a href="<?php echo admin_url('drawing_management/preview_superseder?id=' . $item->id) ?>"
 							target="_blank"
@@ -676,6 +742,82 @@
 					<button type="button" class="btn btn-default" data-dismiss="modal"><?php echo _l('close'); ?></button>
 					<button type="submit" class="btn btn-primary" onclick="continue_action()"><?php echo _l('dmg_continue'); ?></button>
 				</div>
+				<?php echo form_close(); ?>
+			</div>
+		</div>
+	</div>
+
+	<!-- <div class="modal upload_old_version" id="upload_old_version" tabindex="-1" role="dialog">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title add-title title1"><?php echo _l('Upload Old Version'); ?></h4>
+				</div>
+				<?php echo form_open_multipart(admin_url('drawing_management/upload_old_file/' . $parent_id), array('id' => 'form_upload_file')); ?>
+				<div class="modal-body">
+					<?php
+					$redirect_type = '';
+					if ($share_to_me == 1) {
+						$redirect_type = 'share_to_me';
+					}
+					?>
+					<input type="hidden" id="redirect" name="redirect" value="<?php echo drawing_htmldecode($redirect_type); ?>">
+					<div class="file-form-group file-form-update-version">
+						<input type="file" id="file_version" name="file[]" multiple="">
+						<div class="file-form-preview hide">
+							<ul class="selectedFiles list-group list-group-flush mtop15" id="selectedFiles"></ul>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal"><?php echo _l('close'); ?></button>
+					<button type="submit" class="btn btn-primary" onclick="continue_action()"><?php echo _l('dmg_continue'); ?></button>
+				</div>
+				<?php echo form_close(); ?>
+			</div>
+		</div>
+	</div> -->
+
+	<div class="modal upload_old_version" id="upload_old_version" tabindex="-1" role="dialog">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title add-title title1"><?php echo _l('Upload Old Version'); ?></h4>
+				</div>
+
+				<?php echo form_open_multipart(admin_url('drawing_management/upload_old_file/' . $parent_id), array('id' => 'form_upload_file')); ?>
+
+				<div class="modal-body">
+					<input type="hidden" id="redirect" name="redirect" value="<?php echo drawing_htmldecode($redirect_type); ?>">
+
+					<!-- Old Version Files -->
+					<div class="form-group">
+						<label for="file_version"><?php echo _l('Old Version Files'); ?></label>
+						<input type="file" id="file_version" name="file[]" multiple class="form-control">
+						<div class="file-form-preview hide">
+							<ul class="selectedFiles list-group list-group-flush mtop15" id="selectedOldFiles"></ul>
+						</div>
+					</div>
+
+					<!-- Other Attachments -->
+					<div class="form-group">
+						<label for="other_attachments"><?php echo _l('Other Attachments'); ?></label>
+						<input type="file" id="other_attachments" name="attachments[]" multiple class="form-control">
+						<div class="file-form-preview hide">
+							<ul class="selectedFiles list-group list-group-flush mtop15" id="selectedAttachments"></ul>
+						</div>
+					</div>
+				</div>
+
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal"><?php echo _l('close'); ?></button>
+					<button type="submit" class="btn btn-primary"><?php echo _l('dmg_continue'); ?></button>
+				</div>
+
 				<?php echo form_close(); ?>
 			</div>
 		</div>

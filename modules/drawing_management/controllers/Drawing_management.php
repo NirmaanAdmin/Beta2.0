@@ -1522,10 +1522,10 @@ class drawing_management extends AdminController
 
 
 		/*
-    |--------------------------------------------------------------------------
-    | Other Attachments
-    |--------------------------------------------------------------------------
-    */
+		|--------------------------------------------------------------------------
+		| Other Attachments
+		|--------------------------------------------------------------------------
+		*/
 		$attachments = $this->drawing_management_model
 			->get_other_attachment($item->id);
 
@@ -1543,10 +1543,141 @@ class drawing_management extends AdminController
 		}
 
 		/*
-    |--------------------------------------------------------------------------
-    | DWG Drawing
-    |--------------------------------------------------------------------------
-    */
+		|--------------------------------------------------------------------------
+		| DWG Drawing
+		|--------------------------------------------------------------------------
+		*/
+		if (!empty($item->pdf_attachment)) {
+
+			$dwg =
+				FCPATH .
+				'modules/drawing_management/uploads/pdf_attachments/' .
+				$item->id . '/' .
+				$item->pdf_attachment;
+
+			if (file_exists($dwg)) {
+				$this->zip->read_file($dwg);
+			}
+		}
+
+		$zip_name =
+			'drawing_' .
+			$item->id .
+			'_' .
+			date('Ymd_His') .
+			'.zip';
+
+		$this->zip->download($zip_name);
+	}
+
+	/**
+	 * upload version file
+	 * @param  integer $id
+	 */
+	// public function upload_old_file($id)
+	// {
+	// 	$result =  $this->drawing_management_model->upload_version_old_file($id);
+	// 	if ($result) {
+	// 		set_alert('success', _l('dmg_uploaded_successfully'));
+	// 	} else {
+	// 		set_alert('danger', _l('dmg_upload_failed'));
+	// 	}
+	// 	if ($this->input->post('redirect') == 'share_to_me') {
+	// 		redirect(admin_url('drawing_management?share_to_me=1&id=' . $id));
+	// 	} else {
+	// 		redirect(admin_url('drawing_management?id=' . $id));
+	// 	}
+	// }
+	public function upload_old_file($parent_id)
+	{
+		$totalOldVersion = 0;
+		$totalAttachments = 0;
+
+		// Handle Old Version Files
+		if (isset($_FILES['file']['name']) && !empty($_FILES['file']['name'])) {
+			$_FILES['old_file'] = $_FILES['file'];   // temporary rename for processing
+			$totalOldVersion = $this->drawing_management_model->upload_version_old_file($parent_id); // your existing function
+		}
+
+		// Handle Other Attachments
+		if (isset($_FILES['attachments']['name']) && !empty($_FILES['attachments']['name'])) {
+		$totalAttachments = $this->drawing_management_model->upload_other_attachments($parent_id);
+		}
+
+		// Return response
+		if ($totalOldVersion > 0 || $totalAttachments > 0) {
+			set_alert('success', 'Files uploaded successfully');
+		}
+
+		redirect(admin_url('drawing_management?id=' . $parent_id));
+	}
+
+	public function download_bundle_old($id)
+	{
+
+		$this->load->library('zip');
+
+		$item = $this->drawing_management_model->get_item($id);
+
+		if (!$item) {
+			show_404();
+		}
+		$data_log_version = $this->drawing_management_model->get_log_old_version_by_parent($item->id);
+		foreach ($data_log_version  as $key => $log) {
+
+			$log_path =
+				FCPATH .
+				'modules/drawing_management/uploads/old_versions/' .
+				$log['parent_id'] . '/' .
+				$log['name'];
+
+			if (file_exists($log_path)) {
+				$this->zip->read_file($log_path);
+			}
+		}
+
+		/*
+		|--------------------------------------------------------------------------
+		| Other Attachments
+		|--------------------------------------------------------------------------
+		*/
+		$attachments = $this->drawing_management_model
+			->get_other_attachment($item->id);
+
+		foreach ($attachments as $attachment) {
+
+			$path =
+				FCPATH .
+				'modules/drawing_management/uploads/all_attachment/' .
+				$item->id . '/' .
+				$attachment['file_name'];
+
+			if (file_exists($path)) {
+				$this->zip->read_file($path);
+			}
+		}
+
+		$attachments_old = $this->drawing_management_model
+			->get_other_attachment($item->id);
+
+		foreach ($attachments_old as $attachment) {
+
+			$path =
+				FCPATH .
+				'modules/drawing_management/uploads/all_old_attachment/' .
+				$item->id . '/' .
+				$attachment['file_name'];
+
+			if (file_exists($path)) {
+				$this->zip->read_file($path);
+			}
+		}
+
+		/*
+		|--------------------------------------------------------------------------
+		| DWG Drawing
+		|--------------------------------------------------------------------------
+		*/
 		if (!empty($item->pdf_attachment)) {
 
 			$dwg =

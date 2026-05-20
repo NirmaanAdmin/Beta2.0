@@ -3469,7 +3469,12 @@ class drawing_management_model extends app_model
 		$this->db->where('dms_id', $id);
 		return $this->db->get(db_prefix() . 'dms_attachments')->result_array();
 	}
-
+	public function get_other_old_attachment($id)
+	{
+		$this->db->select('*');
+		$this->db->where('dms_id', $id);
+		return $this->db->get(db_prefix() . 'dms_old_attachments')->result_array();
+	}
 	// public function view_other_attachments($input)
 	// {
 	// 	$file_html = '';
@@ -3623,5 +3628,174 @@ class drawing_management_model extends app_model
 	{
 		$this->db->where('id', $id);
 		return $this->db->get(db_prefix() . 'dms_attachments')->row();
+	}
+	public function upload_version_old_file($id)
+	{
+		$totalUploaded = 0;
+		$data_item = $this->get_item($id);
+
+		if (!$data_item) {
+			return false;
+		}
+
+		$parent_id = $data_item->parent_id;
+		$path = DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/old_versions/' . $parent_id . '/';
+
+		// Check if file(s) are uploaded
+		if (
+			!isset($_FILES['file']['name']) ||
+			empty($_FILES['file']['name']) ||
+			(is_array($_FILES['file']['name']) && count($_FILES['file']['name']) === 0)
+		) {
+			return false;
+		}
+
+		// Convert single file upload to array format
+		if (!is_array($_FILES['file']['name'])) {
+			$_FILES['file']['name']     = [$_FILES['file']['name']];
+			$_FILES['file']['type']     = [$_FILES['file']['type']];
+			$_FILES['file']['tmp_name'] = [$_FILES['file']['tmp_name']];
+			$_FILES['file']['error']    = [$_FILES['file']['error']];
+			$_FILES['file']['size']     = [$_FILES['file']['size']];
+		}
+
+		_file_attachments_index_fix('file');
+
+		for ($i = 0; $i < count($_FILES['file']['name']); $i++) {
+			$tmpFilePath = $_FILES['file']['tmp_name'][$i];
+
+			if (empty($tmpFilePath)) {
+				continue;
+			}
+
+			// Validate upload
+			if (
+				_perfex_upload_error($_FILES['file']['error'][$i]) ||
+				!_upload_extension_allowed($_FILES['file']['name'][$i])
+			) {
+				continue;
+			}
+
+			_maybe_create_upload_path($path);
+
+			// Get safe filename (handles duplicates)
+			$filename = $this->check_duplicate_file_name($parent_id, $_FILES['file']['name'][$i]);
+
+			$newFilePath = $path . $filename;
+
+			if (move_uploaded_file($tmpFilePath, $newFilePath)) {
+
+				// Prepare data for database (using indexed values + final filename)
+				$version_data = [
+					'name'       => $filename,                    // Use final filename
+					'filetype'   => $_FILES['file']['type'][$i],
+					'parent_id'  => $id,                          // As per your original logic
+					// Add more fields if needed, e.g., 'original_name' => $_FILES['file']['name'][$i]
+				];
+
+				// Save record to database
+				$res_vs = $this->create_old_version_file($version_data);
+
+				if ($res_vs) {
+					$totalUploaded++;
+				}
+			}
+		}
+
+		return (bool) $totalUploaded;
+	}
+	public function create_old_version_file($data)
+	{
+		$data['dateadded'] = date('Y-m-d H:i:s');
+		$this->db->insert(db_prefix() . 'dms_file_old_versions', $data);
+		return $this->db->insert_id();
+	}
+	/**
+	 * get log version by parent
+	 * @param  integer $parent_id     
+	 * @param  string $where  
+	 * @param  string $select 
+	 * @return array    
+	 */
+	public function get_log_old_version_by_parent($parent_id, $where = '', $select = '')
+	{
+		if ($select != '') {
+			$this->db->select($select);
+		}
+		if ($where != '') {
+			$this->db->where($where);
+		}
+		$this->db->where('parent_id', $parent_id);
+		$this->db->order_by('dateadded', 'desc');
+		return $this->db->get(db_prefix() . 'dms_file_old_versions')->result_array();
+	}
+
+	public function upload_other_attachments($id)
+	{
+		if (empty($id)) {
+			return false;
+		}
+
+		$uploadDir = DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/all_old_attachment/' . $id . '/';
+
+		// Check if attachments are uploaded
+		if (!isset($_FILES['attachments']['name']) || empty($_FILES['attachments']['name'])) {
+			return false;
+		}
+
+		_maybe_create_upload_path($uploadDir);
+
+		$totalUploaded = 0;
+		$allowedExtensions = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'jpg', 'jpeg', 'png', 'dwg', 'dxf'];
+
+		// Handle both single and multiple files
+		if (!is_array($_FILES['attachments']['name'])) {
+			$_FILES['attachments']['name']     = [$_FILES['attachments']['name']];
+			$_FILES['attachments']['type']     = [$_FILES['attachments']['type']];
+			$_FILES['attachments']['tmp_name'] = [$_FILES['attachments']['tmp_name']];
+			$_FILES['attachments']['error']    = [$_FILES['attachments']['error']];
+			$_FILES['attachments']['size']     = [$_FILES['attachments']['size']];
+		}
+
+		for ($i = 0; $i < count($_FILES['attachments']['name']); $i++) {
+
+			$originalName = $_FILES['attachments']['name'][$i];
+			$tmpName      = $_FILES['attachments']['tmp_name'][$i];
+
+			if (empty($tmpName) || empty($originalName)) {
+				continue;
+			}
+
+			if (_perfex_upload_error($_FILES['attachments']['error'][$i])) {
+				continue;
+			}
+
+			$ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+
+			if (!in_array($ext, $allowedExtensions)) {
+				continue;
+			}
+
+			// Prevent duplicate filenames
+			$newFileName = $this->check_duplicate_file_name($id, $originalName);
+
+			$targetPath = $uploadDir . $newFileName;
+
+			if (move_uploaded_file($tmpName, $targetPath)) {
+
+				$insertData = [
+					'dms_id'     => $id,
+					'file_name'  => $newFileName
+				];
+
+				$this->db->insert(db_prefix() . 'dms_old_attachments', $insertData);
+
+				if ($this->db->affected_rows() > 0) {
+					$totalUploaded++;
+				}
+			}
+		}
+
+		return $totalUploaded;
 	}
 }
