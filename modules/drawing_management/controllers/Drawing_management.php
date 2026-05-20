@@ -1700,4 +1700,21 @@ class drawing_management extends AdminController
 
 		$this->zip->download($zip_name);
 	}
+	/**
+	 * delete log
+	 * @param  integer $id
+	 */
+	public function delete_old_log($id, $parent_id = '')
+	{
+		$result = false;
+		if ($id != '') {
+			$result =  $this->drawing_management_model->delete_log_old_version($id);
+			if ($result) {
+				set_alert('success', _l('dmg_deleted_successfully'));
+			} else {
+				set_alert('danger', _l('dmg_deleted_fail'));
+			}
+		}
+		echo html_entity_decode($result);
+	}
 }

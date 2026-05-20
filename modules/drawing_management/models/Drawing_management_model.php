@@ -3798,4 +3798,28 @@ class drawing_management_model extends app_model
 
 		return $totalUploaded;
 	}
+
+	/**
+	 * delete log version
+	 * @param  integer $id 
+	 * @return boolean     
+	 */
+	public function delete_log_old_version($id, $audit_log = true)
+	{
+		$data_log = $this->get_log_old_version_by_parent($id, '', 'name, parent_id');
+		if ($data_log) {
+			$this->db->where('id', $id);
+			$this->db->delete(db_prefix() . 'dms_file_old_versions');
+			if ($this->db->affected_rows() > 0) {
+				//Delete physiscal file
+				$this->delete_file_item(DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/old_versions/' . $data_log->parent_id . '/' . $data_log->name);
+				// Add audit log
+				if ($audit_log) {
+					$this->add_audit_log($data_log->parent_id, _l('dmg_deleted_version') . ': ' . $data_log->name);
+				}
+				return true;
+			}
+		}
+		return false;
+	}
 }
