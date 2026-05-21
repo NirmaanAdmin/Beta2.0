@@ -11,3 +11,4 @@ RewriteRule ^(.*)$ index.php?/$1 [L,QSA]
 php_value upload_max_filesize 200M
 php_value post_max_size 200M
 php_value memory_limit 512M
+php_value max_input_vars 100000
