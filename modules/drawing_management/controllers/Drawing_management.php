@@ -1717,4 +1717,16 @@ class drawing_management extends AdminController
 		}
 		echo html_entity_decode($result);
 	}
+
+	public function undo_superseder()
+	{
+		if (!(has_permission('drawing_management_file_management', '', 'view') || has_permission('drawing_management_file_management', '', 'view_own'))) {
+			access_denied('drawing_management');
+		}
+		$data['title']                 = _l('dmg_file_management');
+		$master_parent_id = '';
+		$id = $this->input->get('id');
+		$data['file'] = $this->drawing_management_model->get_item($id);
+		$this->load->view('file_managements/undo_file_superseder.php', $data);
+	}
 }

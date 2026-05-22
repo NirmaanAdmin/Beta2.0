@@ -686,14 +686,25 @@
 							<i class="fa fa-file"></i> <?php echo _l('Upload Old Version'); ?>
 						</a>
 					<?php } ?>
-					<?php if (!(strpos($item->name, '.pdf') === false)) { ?>
-						<a href="<?php echo admin_url('drawing_management/preview_superseder?id=' . $item->id) ?>"
-							target="_blank"
-							class="btn btn-default w100 mtop5 mbot5"
-							onclick="return confirm('<?php echo _l('Are you sure you want to supersede this document?'); ?>')">
-							<i class="fa fa-arrow-up"></i> <?php echo _l('Supersede'); ?>
-						</a>
-					<?php } ?>
+					<?php if ($item->superseder == 1) {
+						if (!(strpos($item->name, '.pdf') === false)) { ?>
+							<a href="<?php echo admin_url('drawing_management/undo_superseder?id=' . $item->id) ?>"
+								target="_blank"
+								class="btn btn-default w100 mtop5 mbot5"
+								onclick="return confirm('<?php echo _l('Are you sure you want to undo supersede this document?'); ?>')">
+								<i class="fa fa-arrow-up"></i> <?php echo _l('Undo Supersede'); ?>
+							</a>
+						<?php }
+					} else {
+						if (!(strpos($item->name, '.pdf') === false)) { ?>
+							<a href="<?php echo admin_url('drawing_management/preview_superseder?id=' . $item->id) ?>"
+								target="_blank"
+								class="btn btn-default w100 mtop5 mbot5"
+								onclick="return confirm('<?php echo _l('Are you sure you want to supersede this document?'); ?>')">
+								<i class="fa fa-arrow-up"></i> <?php echo _l('Supersede'); ?>
+							</a>
+					<?php }
+					} ?>
 					<?php
 					if (!$file_locked) {
 						$parameter = $item->id;

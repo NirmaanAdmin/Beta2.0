@@ -1,86 +1,225 @@
 <?php
+
 use setasign\Fpdi\Fpdi;
 
 $folder = 'files';
 $path = DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/' . $folder . '/' . $file->parent_id . '/' . $file->name;
 
 if (is_image($path)) { ?>
-    <img src="<?php echo base_url(DRAWING_MANAGEMENT_PATH . $folder . '/' . $file->parent_id . '/' . $file->name); ?>" class="img img-responsive img_style">
-<?php } elseif (!empty($file->external) && !empty($file->thumbnail_link)) { ?>
-    <img src="<?php echo optimize_dropbox_thumbnail($file->thumbnail_link); ?>" class="img img-responsive">
-<?php } elseif (strpos($file->name, '.pdf') !== false && empty($file->external)) { ?>
 
-    <?php
+    <img
+        src="<?= base_url(DRAWING_MANAGEMENT_PATH . $folder . '/' . $file->parent_id . '/' . $file->name); ?>"
+        class="img img-responsive img_style">
+
+<?php } elseif (!empty($file->external) && !empty($file->thumbnail_link)) { ?>
+
+    <img
+        src="<?= optimize_dropbox_thumbnail($file->thumbnail_link); ?>"
+        class="img img-responsive">
+
+<?php } elseif (strpos(strtolower($file->name), '.pdf') !== false && empty($file->external)) {
+
     $route = admin_url('drawing_management') . '?id=' . $file->id;
+
     $tokenName = $this->security->get_csrf_token_name();
     $token = $this->security->get_csrf_hash();
 
-    // Load required libraries
-    require_once(APPPATH.'third_party/fpdf/fpdf.php');
-    require_once(APPPATH.'third_party/fpdi/autoload.php');
+    require_once(APPPATH . 'third_party/fpdf/fpdf.php');
+    require_once(APPPATH . 'third_party/fpdi/autoload.php');
 
-    // Function to stamp footer
-    function stampFooter($srcPath, $destPath) {
-        $pdf = new Fpdi();
-        try {
-            $pageCount = $pdf->setSourceFile($srcPath);
+    if (!function_exists('stampFooter')) {
 
-            for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
-                $tplId = $pdf->importPage($pageNo);
-                $size = $pdf->getTemplateSize($tplId);
+        function stampFooter($srcPath, $destPath)
+        {
+            try {
 
-                // Create page with same size/orientation as template
-                $pdf->AddPage($size['orientation'], [$size['width'], $size['height']]);
-                $pdf->useTemplate($tplId);
+                $pdf = new Fpdi();
 
-                // Footer image path
-                $footerImg = FCPATH.'assets/images/pdf-footer-logo.png';
-                if (file_exists($footerImg)) {
-                    // Set width and height (small and proportional)
-                    $targetWidth = 50; // 50 mm width
-                    list($imgWidth, $imgHeight) = getimagesize($footerImg);
+                $pageCount = $pdf->setSourceFile($srcPath);
 
-                    $ratio = $imgHeight / $imgWidth;
-                    $targetHeight = $targetWidth * $ratio;
+                for ($page = 1; $page <= $pageCount; $page++) {
 
-                    // Center horizontally
-                    $x = ($size['width'] - $targetWidth) / 2;
-                    // Position slightly above bottom
-                    $y = $size['height'] - $targetHeight - 10;
+                    $tpl = $pdf->importPage($page);
 
-                    // Add the image
-                    $pdf->Image($footerImg, $x, $y, $targetWidth, $targetHeight);
+                    $size = $pdf->getTemplateSize($tpl);
+
+                    $pdf->AddPage(
+                        $size['orientation'],
+                        [$size['width'], $size['height']]
+                    );
+
+                    $pdf->useTemplate($tpl);
+
+                    $footer =
+                        FCPATH .
+                        'assets/images/pdf-footer-logo.png';
+
+                    if (file_exists($footer)) {
+
+                        $targetWidth = 50;
+
+                        list($w, $h) =
+                            getimagesize($footer);
+
+                        $targetHeight =
+                            ($h / $w) * $targetWidth;
+
+                        $x =
+                            ($size['width'] - $targetWidth) / 2;
+
+                        $y =
+                            $size['height'] -
+                            $targetHeight -
+                            10;
+
+                        $pdf->Image(
+                            $footer,
+                            $x,
+                            $y,
+                            $targetWidth,
+                            $targetHeight
+                        );
+                    }
                 }
+
+                $pdf->Output($destPath, 'F');
+
+                return true;
+            } catch (Exception $e) {
+
+                log_message(
+                    'error',
+                    'PDF stamp failed: ' .
+                        $e->getMessage()
+                );
+
+                return false;
+            }
+        }
+    }
+
+    $src =
+        DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER .
+        '/' .
+        $folder .
+        '/' .
+        $file->parent_id .
+        '/' .
+        $file->name;
+
+    $tempStamped =
+        DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER .
+        '/' .
+        $folder .
+        '/' .
+        $file->parent_id .
+        '/temp_' .
+        $file->name;
+
+    /*
+    |--------------------------------------------------------------------------
+    | Backup original PDF
+    |--------------------------------------------------------------------------
+    */
+
+    $backupDir =
+        DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER .
+        '/original_files/' .
+        $file->parent_id;
+
+    $backupFile =
+        $backupDir .
+        '/' .
+        $file->name;
+
+    if (!is_dir($backupDir)) {
+        mkdir($backupDir, 0755, true);
+    }
+
+    if (
+        file_exists($src) &&
+        !file_exists($backupFile)
+    ) {
+        copy($src, $backupFile);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Stamp PDF
+    |--------------------------------------------------------------------------
+    */
+
+    if (
+        !file_exists($tempStamped) ||
+        filemtime($tempStamped) < filemtime($src)
+    ) {
+
+        stampFooter($src, $tempStamped);
+
+        if (file_exists($tempStamped)) {
+
+            // Delete original
+            if (file_exists($src)) {
+                unlink($src);
             }
 
-            // Save the stamped PDF
-            $pdf->Output($destPath, 'F');
-            return true;
-        } catch (Exception $e) {
-            log_message('error', 'PDF stamping failed: ' . $e->getMessage());
-            return false;
+            // Replace original with stamped PDF
+            if (rename($tempStamped, $src)) {
+
+                // Update superseder = 1
+                $CI = &get_instance();
+
+                $CI->db->where('id', $file->id);
+
+                $CI->db->update(
+                    'tbldms_items',
+                    [
+                        'superseder' => 1
+                    ]
+                );
+            }
         }
     }
 
-    // Paths for source and temp destination
-    $src = DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER.'/'.$folder.'/'.$file->parent_id.'/'.$file->name;
-    $tempStamped = DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER.'/'.$folder.'/'.$file->parent_id.'/temp_'.$file->name;
+    $url =
+        base_url(
+            DRAWING_MANAGEMENT_PATH .
+                $folder .
+                '/' .
+                $file->parent_id .
+                '/' .
+                $file->name
+        );
 
-    // Stamp to a temporary file
-    if (stampFooter($src, $tempStamped)) {
-        // Replace original file safely
-        if (file_exists($tempStamped)) {
-            unlink($src); // Delete the original
-            rename($tempStamped, $src); // Rename temp to original
-        }
-    }
+?>
 
-    // Display updated original file
-    $url = base_url(DRAWING_MANAGEMENT_PATH . $folder . '/' . $file->parent_id . '/' . $file->name);
-    ?>
-
-    <iframe src="<?= base_url('pdfjs/web/viewer.html?file=' . $url . '&name=' . $file->name . '&folder=' . $folder . '&parent_id=' . $file->parent_id) . '&back_route=' . $route . '&token_name=' . $tokenName . '&csrf_token=' . $token . '&base_url=' . base_url() ?>" width="100%" height="100%"></iframe>
+    <iframe
+        src="<?= base_url(
+                    'pdfjs/web/viewer.html?file=' .
+                        urlencode($url) .
+                        '&name=' .
+                        urlencode($file->name) .
+                        '&folder=' .
+                        $folder .
+                        '&parent_id=' .
+                        $file->parent_id
+                ) .
+                    '&back_route=' .
+                    urlencode($route) .
+                    '&token_name=' .
+                    urlencode($tokenName) .
+                    '&csrf_token=' .
+                    urlencode($token) .
+                    '&base_url=' .
+                    urlencode(base_url()) ?>"
+        width="100%"
+        height="100%">
+    </iframe>
 
 <?php } else {
-    echo '<p class="text-muted">' . _l('no_preview_available_for_file') . '</p>';
-} ?>
+
+    echo '<p class="text-muted">'
+        . _l('no_preview_available_for_file')
+        . '</p>';
+}
+?>
