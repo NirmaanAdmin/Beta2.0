@@ -437,6 +437,78 @@
       $(this).parents(".shop_drawing").remove();
     });
 
+    $("body").on('dblclick', '.editable_item_code', function () {
+      var span = $(this);
+      var td = span.closest('td');
+      var name_item_name = span.data('name_item_name');
+      var item_code = span.data('item_code');
+      span.html('<i class="fa fa-spinner fa-spin"></i>');
+      $.post(admin_url + 'purchase/load_order_item_code_html', {
+        name_item_name: name_item_name,
+        item_code: item_code
+      }).done(function (response) {
+        span.replaceWith(response);
+        td.find('select').selectpicker('refresh');
+      }).fail(function () {
+        span.html('Error');
+        alert_float('danger', 'Something went wrong');
+      });
+    });
+
+    $("body").on('dblclick', '.editable_sub_head', function () {
+      var span = $(this);
+      var td = span.closest('td');
+      var name_sub_groups_pur = span.data('name_sub_groups_pur');
+      var sub_groups_pur = span.data('sub_groups_pur');
+      span.html('<i class="fa fa-spinner fa-spin"></i>');
+      $.post(admin_url + 'purchase/load_order_sub_head_html', {
+        name_sub_groups_pur: name_sub_groups_pur,
+        sub_groups_pur: sub_groups_pur
+      }).done(function (response) {
+        span.replaceWith(response);
+        td.find('select').selectpicker('refresh');
+      }).fail(function () {
+        span.html('Error');
+        alert_float('danger', 'Something went wrong');
+      });
+    });
+
+    $("body").on('dblclick', '.editable_area', function () {
+      var span = $(this);
+      var td = span.closest('td');
+      var name_area = span.data('name_area');
+      var area = span.data('area');
+      span.html('<i class="fa fa-spinner fa-spin"></i>');
+      $.post(admin_url + 'purchase/load_order_area_html', {
+        name_area: name_area,
+        area: area
+      }).done(function (response) {
+        span.replaceWith(response);
+        td.find('select').selectpicker('refresh');
+      }).fail(function () {
+        span.html('Error');
+        alert_float('danger', 'Something went wrong');
+      });
+    });
+
+    $("body").on('dblclick', '.editable_unit', function () {
+      var span = $(this);
+      var td = span.closest('td');
+      var name_unit_name = span.data('name_unit_name');
+      var unit_name = span.data('unit_name');
+      span.html('<i class="fa fa-spinner fa-spin"></i>');
+      $.post(admin_url + 'purchase/load_order_unit_html', {
+        name_unit_name: name_unit_name,
+        unit_name: unit_name
+      }).done(function (response) {
+        span.replaceWith(response);
+        td.find('select').selectpicker('refresh');
+      }).fail(function () {
+        span.html('Error');
+        alert_float('danger', 'Something went wrong');
+      });
+    });
+
   });
 
   var lastAddedItemKey = null;

@@ -1691,19 +1691,15 @@ class purchase extends AdminController
             $data['tax_data'] = $this->purchase_model->get_html_tax_pur_order($id);
             $title = _l('pur_order_detail');
 
+            $total_pur_order_items = count($data['pur_order_detail']);
             if (count($data['pur_order_detail']) > 0) {
                 $index_order = 0;
                 foreach ($data['pur_order_detail'] as $order_detail) {
                     $index_order++;
                     $unit_name = $order_detail['unit_id'];
                     $taxname = $order_detail['tax_name'];
-                    $item_name = $order_detail['item_name'];
 
-                    if (strlen($item_name) == 0) {
-                        $item_name = pur_get_item_variatiom($order_detail['item_code']);
-                    }
-
-                    $pur_order_row_template .= $this->purchase_model->create_purchase_order_row_template('items[' . $index_order . ']',  $item_name, $order_detail['description'], $order_detail['area'], $order_detail['image'], $order_detail['quantity'], $unit_name, $order_detail['unit_price'], $taxname, $order_detail['item_code'], $order_detail['unit_id'], $order_detail['tax_rate'],  $order_detail['total_money'], $order_detail['discount_%'], $order_detail['discount_money'], $order_detail['total'], $order_detail['into_money'], $order_detail['tax'], $order_detail['tax_value'], $order_detail['id'], true, $currency_rate, $to_currency, $order_detail, false, $order_detail['sub_groups_pur'], $order_detail['serial_no'], $order_detail['non_budget_item']);
+                    $pur_order_row_template .= $this->purchase_model->create_purchase_order_row_template('items[' . $index_order . ']', '', $order_detail['description'], $order_detail['area'], $order_detail['image'], $order_detail['quantity'], $unit_name, $order_detail['unit_price'], $taxname, $order_detail['item_code'], $order_detail['unit_id'], $order_detail['tax_rate'],  $order_detail['total_money'], $order_detail['discount_%'], $order_detail['discount_money'], $order_detail['total'], $order_detail['into_money'], $order_detail['tax'], $order_detail['tax_value'], $order_detail['id'], true, $currency_rate, $to_currency, $order_detail, false, $order_detail['sub_groups_pur'], $order_detail['serial_no'], $order_detail['non_budget_item'], $total_pur_order_items);
                 }
             }
             $is_edit = true;
@@ -10063,19 +10059,15 @@ class purchase extends AdminController
             $data['tax_data'] = $this->purchase_model->get_html_tax_pur_order($id);
             $title = _l('wo_order_detail');
 
+            $total_wo_order_items = count($data['wo_order_detail']);
             if (count($data['wo_order_detail']) > 0) {
                 $index_order = 0;
                 foreach ($data['wo_order_detail'] as $order_detail) {
                     $index_order++;
                     $unit_name = $order_detail['unit_id'];
                     $taxname = $order_detail['tax_name'];
-                    $item_name = $order_detail['item_name'];
 
-                    if (strlen($item_name) == 0) {
-                        $item_name = pur_get_item_variatiom($order_detail['item_code']);
-                    }
-
-                    $wo_order_row_template .= $this->purchase_model->create_wo_order_row_template('items[' . $index_order . ']',  $item_name, $order_detail['description'], $order_detail['area'], $order_detail['image'], $order_detail['quantity'], $unit_name, $order_detail['unit_price'], $taxname, $order_detail['item_code'], $order_detail['unit_id'], $order_detail['tax_rate'],  $order_detail['total_money'], $order_detail['discount_%'], $order_detail['discount_money'], $order_detail['total'], $order_detail['into_money'], $order_detail['tax'], $order_detail['tax_value'], $order_detail['id'], true, $currency_rate, $to_currency, $order_detail, false, $order_detail['sub_groups_pur'], $order_detail['serial_no']);
+                    $wo_order_row_template .= $this->purchase_model->create_wo_order_row_template('items[' . $index_order . ']', '', $order_detail['description'], $order_detail['area'], $order_detail['image'], $order_detail['quantity'], $unit_name, $order_detail['unit_price'], $taxname, $order_detail['item_code'], $order_detail['unit_id'], $order_detail['tax_rate'],  $order_detail['total_money'], $order_detail['discount_%'], $order_detail['discount_money'], $order_detail['total'], $order_detail['into_money'], $order_detail['tax'], $order_detail['tax_value'], $order_detail['id'], true, $currency_rate, $to_currency, $order_detail, false, $order_detail['sub_groups_pur'], $order_detail['serial_no'], $order_detail['non_budget_item'], $total_wo_order_items);
                 }
             }
             $is_edit = true;
@@ -18122,5 +18114,35 @@ class purchase extends AdminController
     {
         $packages = $this->purchase_model->get_budget_packages($estimate_id);
         echo json_encode(['result' => $packages]);
+    }
+
+    public function load_order_item_code_html()
+    {
+        $name_item_name = $this->input->post('name_item_name');
+        $item_code = $this->input->post('item_code');
+        echo pur_get_item_selcted_select($item_code, $name_item_name);
+    }
+
+    public function load_order_sub_head_html()
+    {
+        $name_sub_groups_pur = $this->input->post('name_sub_groups_pur');
+        $sub_groups_pur = $this->input->post('sub_groups_pur');
+        echo get_sub_head_list($name_sub_groups_pur, $sub_groups_pur);
+    }
+
+    public function load_order_area_html()
+    {
+        $name_area = $this->input->post('name_area');
+        $area = $this->input->post('area');
+        $area = !empty($area) ? json_decode($area, true) : array();
+        echo get_area_list($name_area, $area);
+    }
+
+    public function load_order_unit_html()
+    {
+        $units_list = $this->purchase_model->get_units();
+        $name_unit_name = $this->input->post('name_unit_name');
+        $unit_name = $this->input->post('unit_name');
+        echo render_select($name_unit_name, $units_list, ['id', 'label'], '', $unit_name, ['id']);
     }
 }

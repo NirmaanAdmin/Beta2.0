@@ -3188,19 +3188,29 @@ class Purchase_model extends App_Model
                 update_order_item_activity_log($rqd, 'pur_order');
                 $dt_data = [];
                 $dt_data['pur_order'] = $id;
-                $dt_data['item_code'] = $rqd['item_name'];
-                $dt_data['unit_id'] = isset($rqd['unit_name']) ? $rqd['unit_name'] : null;
-                $dt_data['area'] = !empty($rqd['area']) ? implode(',', $rqd['area']) : NULL;
+                if (array_key_exists('item_name', $rqd)) {
+                    $dt_data['item_code'] = $rqd['item_name'];
+                }
+                if (array_key_exists('unit_name', $rqd)) {
+                    $dt_data['unit_id'] = isset($rqd['unit_name']) ? $rqd['unit_name'] : null;
+                }
+                if (array_key_exists('area', $rqd)) {
+                    $dt_data['area'] = !empty($rqd['area']) ? implode(',', $rqd['area']) : NULL;
+                }
                 $dt_data['unit_price'] = $rqd['unit_price'];
                 $dt_data['into_money'] = $rqd['into_money'];
                 $dt_data['total'] = $rqd['total'];
                 $dt_data['tax_value'] = $rqd['tax_value'];
-                $dt_data['item_name'] = $rqd['item_name'];
+                if (array_key_exists('item_name', $rqd)) {
+                    $dt_data['item_name'] = $rqd['item_name'];
+                }
                 $dt_data['total_money'] = $rqd['total_money'];
                 $dt_data['discount_money'] = $rqd['discount_money'];
                 $dt_data['discount_%'] = $rqd['discount'];
                 $dt_data['description'] = nl2br($rqd['item_description']);
-                $dt_data['sub_groups_pur'] = $rqd['sub_groups_pur'];
+                if (array_key_exists('sub_groups_pur', $rqd)) {
+                    $dt_data['sub_groups_pur'] = $rqd['sub_groups_pur'];
+                }
                 $dt_data['serial_no'] = $rqd['serial_no'];
                 $dt_data['non_budget_item'] = !empty($rqd['non_budget_item']) ? $rqd['non_budget_item'] : 0;
 
@@ -11920,10 +11930,8 @@ class Purchase_model extends App_Model
      *
      * @return     string
      */
-    public function create_purchase_order_row_template($name = '', $item_name = '', $item_description = '', $area = '', $image = '', $quantity = '', $unit_name = '', $unit_price = '', $taxname = '',  $item_code = '', $unit_id = '', $tax_rate = '', $total_money = '', $discount = '', $discount_money = '', $total = '', $into_money = '', $tax_id = '', $tax_value = '', $item_key = '', $is_edit = false, $currency_rate = 1, $to_currency = '', $order_detail = array(), $hide_add_button = false, $sub_groups_pur = '', $serial_no = '', $non_budget_item = 0)
+    public function create_purchase_order_row_template($name = '', $item_name = '', $item_description = '', $area = '', $image = '', $quantity = '', $unit_name = '', $unit_price = '', $taxname = '',  $item_code = '', $unit_id = '', $tax_rate = '', $total_money = '', $discount = '', $discount_money = '', $total = '', $into_money = '', $tax_id = '', $tax_value = '', $item_key = '', $is_edit = false, $currency_rate = 1, $to_currency = '', $order_detail = array(), $hide_add_button = false, $sub_groups_pur = '', $serial_no = '', $non_budget_item = 0, $total_pur_order_items = 0)
     {
-
-        $this->load->model('invoice_items_model');
         $row = '';
 
         $name_item_code = 'item_code';
@@ -16800,19 +16808,29 @@ class Purchase_model extends App_Model
                 update_order_item_activity_log($rqd, 'wo_order');
                 $dt_data = [];
                 $dt_data['wo_order'] = $id;
-                $dt_data['item_code'] = $rqd['item_name'];
-                $dt_data['unit_id'] = isset($rqd['unit_name']) ? $rqd['unit_name'] : null;
-                $dt_data['area'] = !empty($rqd['area']) ? implode(',', $rqd['area']) : NULL;
+                if (array_key_exists('item_name', $rqd)) {
+                    $dt_data['item_code'] = $rqd['item_name'];
+                }
+                if (array_key_exists('unit_name', $rqd)) {
+                    $dt_data['unit_id'] = isset($rqd['unit_name']) ? $rqd['unit_name'] : null;
+                }
+                if (array_key_exists('area', $rqd)) {
+                    $dt_data['area'] = !empty($rqd['area']) ? implode(',', $rqd['area']) : NULL;
+                }
                 $dt_data['unit_price'] = $rqd['unit_price'];
                 $dt_data['into_money'] = $rqd['into_money'];
                 $dt_data['total'] = $rqd['total'];
                 $dt_data['tax_value'] = $rqd['tax_value'];
-                $dt_data['item_name'] = $rqd['item_name'];
+                if (array_key_exists('item_name', $rqd)) {
+                    $dt_data['item_name'] = $rqd['item_name'];
+                }
                 $dt_data['total_money'] = $rqd['total_money'];
                 $dt_data['discount_money'] = $rqd['discount_money'];
                 $dt_data['discount_%'] = $rqd['discount'];
                 $dt_data['description'] = nl2br($rqd['item_description']);
-                $dt_data['sub_groups_pur'] = $rqd['sub_groups_pur'];
+                if (array_key_exists('sub_groups_pur', $rqd)) {
+                    $dt_data['sub_groups_pur'] = $rqd['sub_groups_pur'];
+                }
                 $dt_data['serial_no'] = $rqd['serial_no'];
                 $tax_money = 0;
                 $tax_rate_value = 0;
@@ -17172,10 +17190,8 @@ class Purchase_model extends App_Model
         $rs['taxes_val'] = $tax_val_rs;
         return $rs;
     }
-    public function create_wo_order_row_template($name = '', $item_name = '', $item_description = '', $area = '', $image = '', $quantity = '', $unit_name = '', $unit_price = '', $taxname = '',  $item_code = '', $unit_id = '', $tax_rate = '', $total_money = '', $discount = '', $discount_money = '', $total = '', $into_money = '', $tax_id = '', $tax_value = '', $item_key = '', $is_edit = false, $currency_rate = 1, $to_currency = '', $order_detail = array(), $hide_add_button = false, $sub_groups_pur = '', $serial_no = '', $non_budget_item = 0)
+    public function create_wo_order_row_template($name = '', $item_name = '', $item_description = '', $area = '', $image = '', $quantity = '', $unit_name = '', $unit_price = '', $taxname = '',  $item_code = '', $unit_id = '', $tax_rate = '', $total_money = '', $discount = '', $discount_money = '', $total = '', $into_money = '', $tax_id = '', $tax_value = '', $item_key = '', $is_edit = false, $currency_rate = 1, $to_currency = '', $order_detail = array(), $hide_add_button = false, $sub_groups_pur = '', $serial_no = '', $non_budget_item = 0, $total_wo_order_items = 0)
     {
-
-        $this->load->model('invoice_items_model');
         $row = '';
 
         $name_item_code = 'item_code';
