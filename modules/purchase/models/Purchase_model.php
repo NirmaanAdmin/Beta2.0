@@ -18340,49 +18340,18 @@ class Purchase_model extends App_Model
         $result['po_with_co_tax'] = 0;
         $result['po_with_co_total'] = 0;
 
-        // $result = [];
-
-        // 1) Fetch just the latest change order
-        $recent_co = $this->db
-            ->select('co_value, id, subtotal')
-            ->where('po_order_id', $po_id)
-            ->order_by('id', 'DESC')
-            ->limit(1)
-            ->get(db_prefix() . 'co_orders')
-            ->row();
-
-        $co_value                  = 0;
-        $po_co_non_tender_subtotal = 0;
-        $po_subtotal               = 0;
-        if (! empty($pur_order) && isset($pur_order->subtotal)) {
-            $po_subtotal = $pur_order->subtotal
-                - max(0, (float)$pur_order->discount_total);
-        }
-        $co_value = (float)$recent_co->co_value;
-        // 3) If there is a recent change order, grab its co_value and sum its non‑tender lines
-        if ($recent_co) {
-
-            $details = $this->db
-                ->select('into_money_updated')
-                ->where('tender_item', 1)
-                ->where('pur_order',    $recent_co->id)
-                ->get(db_prefix() . 'co_order_detail')
-                ->result_array();
-
-            foreach ($details as $row) {
-                $po_co_non_tender_subtotal += (float)$row['into_money_updated'];
-            }
-        }
+        $this->db->select('id, subtotal, co_value, discount_total');
+        $this->db->where('po_order_id', $po_id);
+        $this->db->order_by('id', 'DESC');
+        $this->db->limit(1);
+        $recent_co = $this->db->get(db_prefix() . 'co_orders')->row();
 
         if ($recent_co) {
-            $result['po_contract_amount'] = $recent_co->subtotal - max(0, (float)$pur_order->discount_total);
+            $po_co_discount = $recent_co->discount_total > 0 ? (float)$recent_co->discount_total : (float)$pur_order->discount_total;
+            $result['po_contract_amount'] = $recent_co->subtotal - max(0, $po_co_discount);
         } else {
-            // 4) Final contract amount = PO net subtotal + this change order + its non‑tender subtotal
-            $result['po_contract_amount'] = $po_subtotal
-                + $co_value
-                + $po_co_non_tender_subtotal;
+            $result['po_contract_amount'] = $pur_order->subtotal - max(0, (float)$pur_order->discount_total);
         }
-
 
         if (empty($payment_certificate_id) && $cal == 1) {
             $this->db->select('id');
@@ -19261,56 +19230,22 @@ class Purchase_model extends App_Model
         $payment_certificate = array();
         $wo_order = $this->get_wo_order($wo_id);
         $result['po_name'] = $wo_order->wo_order_name;
-        $result['po_contract_amount'] = 0;
+        $result['wo_contract_amount'] = 0;
         $result['po_previous'] = 0;
         $result['po_this_bill'] = 0;
         $result['po_comulative'] = 0;
 
-        // $result = [];
-
-        // Fetch subtotal from work order
-        $this->db->select('*');
-        $this->db->where('id', $wo_id);
-        $wo_orders = $this->db->get(db_prefix() . 'wo_orders')->row();
-
-
-        // 1) Fetch just the latest change order
-        $recent_co = $this->db
-            ->select('co_value, id, subtotal')
-            ->where('wo_order_id', $wo_id)
-            ->order_by('id', 'DESC')
-            ->limit(1)
-            ->get(db_prefix() . 'co_orders')
-            ->row();
-
-        $co_value = $wo_co_non_tender_subtotal = $wo_subtotal = 0;
-        // 2) If there is no change order, use the work order subtotal
-        if (! empty($wo_orders) && isset($wo_orders->subtotal)) {
-            $wo_subtotal = $wo_orders->subtotal
-                - max(0, (float)$wo_orders->discount_total);
-        }
-        $co_value = (float)$recent_co->co_value;
-        // 3) If there is a recent change order, grab its co_value and sum its non‑tender lines
-        if ($recent_co) {
-            $details = $this->db
-                ->select('into_money_updated')
-                ->where('tender_item', 1)
-                ->where('pur_order',    $recent_co->id)
-                ->get(db_prefix() . 'co_order_detail')
-                ->result_array();
-
-            foreach ($details as $row) {
-                $wo_co_non_tender_subtotal += (float)$row['into_money_updated'];
-            }
-        }
+        $this->db->select('id, subtotal, co_value, discount_total');
+        $this->db->where('wo_order_id', $wo_id);
+        $this->db->order_by('id', 'DESC');
+        $this->db->limit(1);
+        $recent_co = $this->db->get(db_prefix() . 'co_orders')->row();
 
         if ($recent_co) {
-            $result['wo_contract_amount'] = $recent_co->subtotal - max(0, (float)$wo_orders->discount_total);
+            $wo_co_discount = $recent_co->discount_total > 0 ? (float)$recent_co->discount_total : (float)$wo_order->discount_total;
+            $result['wo_contract_amount'] = $recent_co->subtotal - max(0, $wo_co_discount);
         } else {
-            // 4) Final contract amount = WO net subtotal + this change order + its non‑tender subtotal
-            $result['wo_contract_amount'] = $wo_subtotal
-                + $co_value
-                + $wo_co_non_tender_subtotal;
+            $result['wo_contract_amount'] = $wo_order->subtotal - max(0, (float)$wo_order->discount_total);
         }
 
         if (empty($payment_certificate_id) && $cal == 1) {
