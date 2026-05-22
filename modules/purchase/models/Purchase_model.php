@@ -12061,7 +12061,15 @@ class Purchase_model extends App_Model
             $row .= '<td class="serial_no"></td>';
         }
         // $row .= '<td class="">' . render_textarea($name_item_name, '', $item_name, ['rows' => 2, 'placeholder' => 'Product code name', 'readonly' => true]) . '</td>';
-        $get_selected_item = pur_get_item_selcted_select($item_code, $name_item_name);
+        if($is_edit == true && $total_pur_order_items > PURCHASE_LOADING_ISSUE_ITEMS) {
+            $get_selected_item = '<span class="editable_item_code"
+                data-name_item_name="' . htmlspecialchars($name_item_name, ENT_QUOTES, 'UTF-8') . '"
+                data-item_code="' . htmlspecialchars($item_code, ENT_QUOTES, 'UTF-8') . '">'
+                . (pur_get_item_variatiom($item_code) ?: 'None') .
+            '</span>';
+        } else {
+            $get_selected_item = pur_get_item_selcted_select($item_code, $name_item_name);
+        }
 
         if ($item_code == '') {
             $row .= '<td class="">
@@ -12081,17 +12089,41 @@ class Purchase_model extends App_Model
             $style_description = 'width: 290px; height: 200px';
         }
         $row .= '<td class="">' . render_textarea($name_item_description, '', $item_description, ['rows' => 2, 'placeholder' => _l('item_description'), 'style' => $style_description]) . '</td>';
-        $row .= '<td class="area">' . get_sub_head_list($name_sub_groups_pur, $sub_groups_pur) . '</td>';
-        $row .= '<td class="area">' . get_area_list($name_area, $area) . '</td>';
+        if($is_edit == true && $total_pur_order_items > PURCHASE_LOADING_ISSUE_ITEMS) {
+            $row .= '<td class="sub_head">
+                <span class="editable_sub_head"
+                    data-name_sub_groups_pur="' . htmlspecialchars($name_sub_groups_pur, ENT_QUOTES, 'UTF-8') . '"
+                    data-sub_groups_pur="' . htmlspecialchars($sub_groups_pur, ENT_QUOTES, 'UTF-8') . '">'
+                    . (get_sub_head_name_by_id($sub_groups_pur) ?: 'None') .
+                '</span>
+            </td>';
+            $row .= '<td class="area">
+                <span class="editable_area"
+                    data-name_area="' . htmlspecialchars($name_area, ENT_QUOTES, 'UTF-8') . '"
+                    data-area="' . htmlspecialchars(json_encode($area), ENT_QUOTES, 'UTF-8') . '">'
+                    . (get_area_name_by_id($area) ?: 'None') .
+                '</span>
+            </td>';
+        } else {
+            $row .= '<td class="sub_head">' . get_sub_head_list($name_sub_groups_pur, $sub_groups_pur) . '</td>';
+            $row .= '<td class="area">' . get_area_list($name_area, $area) . '</td>';
+        }
         $row .= '<td class=""><input type="file" extension="' . str_replace(['.', ' '], '', '.png,.jpg,.jpeg') . '" filesize="' . file_upload_max_size() . '" class="form-control" name="' . $name_image . '" accept="' . get_item_form_accepted_mimes() . '">' . $full_item_image . '</td>';
 
-        $units_list = $this->get_units();
-
         $row .= '<td class="quantities">' .
-            render_input($name_quantity, '', $quantity, 'number', $array_qty_attr, [], 'no-margin', $text_right_class) .
+            render_input($name_quantity, '', $quantity, 'number', $array_qty_attr, [], 'no-margin', $text_right_class);
             // render_input($name_unit_name, '', $unit_name, 'text', ['placeholder' => _l('unit'), 'readonly' => true], [], 'no-margin', 'input-transparent text-right pur_input_none') .
-            render_select($name_unit_name, $units_list, ['id', 'label'], '', $unit_name, ['id']) .
-            '</td>';
+        if($is_edit == true && $total_pur_order_items > PURCHASE_LOADING_ISSUE_ITEMS) {
+            $row .= '<br><span class="editable_unit"
+                    data-name_unit_name="' . htmlspecialchars($name_unit_name, ENT_QUOTES, 'UTF-8') . '"
+                    data-unit_name="' . htmlspecialchars($unit_name, ENT_QUOTES, 'UTF-8') . '">'
+                    . (pur_get_unit_name($unit_name) ?: 'None') .
+            '</span>';
+        } else {
+            $units_list = $this->get_units();
+            $row .= render_select($name_unit_name, $units_list, ['id', 'label'], '', $unit_name, ['id']);
+        }
+        $row .= '</td>';
         $row .= '<td class="rate">' . render_input($name_unit_price, '', $unit_price, 'number', $array_rate_attr, [], 'no-margin', $text_right_class);
 
         if ($unit_price != '') {
@@ -17320,7 +17352,15 @@ class Purchase_model extends App_Model
             $row .= '<td class="serial_no"></td>';
         }
         // $row .= '<td class="">' . render_textarea($name_item_name, '', $item_name, ['rows' => 2, 'placeholder' => 'Product code name', 'readonly' => true]) . '</td>';
-        $get_selected_item = pur_get_item_selcted_select($item_code, $name_item_name);
+        if($is_edit == true && $total_wo_order_items > PURCHASE_LOADING_ISSUE_ITEMS) {
+            $get_selected_item = '<span class="editable_item_code"
+                data-name_item_name="' . htmlspecialchars($name_item_name, ENT_QUOTES, 'UTF-8') . '"
+                data-item_code="' . htmlspecialchars($item_code, ENT_QUOTES, 'UTF-8') . '">'
+                . (pur_get_item_variatiom($item_code) ?: 'None') .
+            '</span>';
+        } else {
+            $get_selected_item = pur_get_item_selcted_select($item_code, $name_item_name);
+        }
 
         if ($item_code == '') {
             $row .= '<td class="">
@@ -17340,17 +17380,41 @@ class Purchase_model extends App_Model
             $style_description = 'width: 290px; height: 200px';
         }
         $row .= '<td class="">' . render_textarea($name_item_description, '', $item_description, ['rows' => 2, 'placeholder' => _l('item_description'), 'style' => $style_description]) . '</td>';
-        $row .= '<td class="area">' . get_sub_head_list($name_sub_groups_pur, $sub_groups_pur) . '</td>';
-        $row .= '<td class="area">' . get_area_list($name_area, $area) . '</td>';
+        if($is_edit == true && $total_wo_order_items > PURCHASE_LOADING_ISSUE_ITEMS) {
+            $row .= '<td class="sub_head">
+                <span class="editable_sub_head"
+                    data-name_sub_groups_pur="' . htmlspecialchars($name_sub_groups_pur, ENT_QUOTES, 'UTF-8') . '"
+                    data-sub_groups_pur="' . htmlspecialchars($sub_groups_pur, ENT_QUOTES, 'UTF-8') . '">'
+                    . (get_sub_head_name_by_id($sub_groups_pur) ?: 'None') .
+                '</span>
+            </td>';
+            $row .= '<td class="area">
+                <span class="editable_area"
+                    data-name_area="' . htmlspecialchars($name_area, ENT_QUOTES, 'UTF-8') . '"
+                    data-area="' . htmlspecialchars(json_encode($area), ENT_QUOTES, 'UTF-8') . '">'
+                    . (get_area_name_by_id($area) ?: 'None') .
+                '</span>
+            </td>';
+        } else {
+            $row .= '<td class="sub_head">' . get_sub_head_list($name_sub_groups_pur, $sub_groups_pur) . '</td>';
+            $row .= '<td class="area">' . get_area_list($name_area, $area) . '</td>';
+        }
         $row .= '<td class=""><input type="file" extension="' . str_replace(['.', ' '], '', '.png,.jpg,.jpeg') . '" filesize="' . file_upload_max_size() . '" class="form-control" name="' . $name_image . '" accept="' . get_item_form_accepted_mimes() . '">' . $full_item_image . '</td>';
 
-        $units_list = $this->get_units();
-
         $row .= '<td class="quantities">' .
-            render_input($name_quantity, '', $quantity, 'number', $array_qty_attr, [], 'no-margin', $text_right_class) .
+            render_input($name_quantity, '', $quantity, 'number', $array_qty_attr, [], 'no-margin', $text_right_class);
             // render_input($name_unit_name, '', $unit_name, 'text', ['placeholder' => _l('unit'), 'readonly' => true], [], 'no-margin', 'input-transparent text-right pur_input_none') .
-            render_select($name_unit_name, $units_list, ['id', 'label'], '', $unit_name, ['id']) .
-            '</td>';
+        if($is_edit == true && $total_wo_order_items > PURCHASE_LOADING_ISSUE_ITEMS) {
+            $row .= '<br><span class="editable_unit"
+                    data-name_unit_name="' . htmlspecialchars($name_unit_name, ENT_QUOTES, 'UTF-8') . '"
+                    data-unit_name="' . htmlspecialchars($unit_name, ENT_QUOTES, 'UTF-8') . '">'
+                    . (pur_get_unit_name($unit_name) ?: 'None') .
+            '</span>';
+        } else {
+            $units_list = $this->get_units();
+            $row .= render_select($name_unit_name, $units_list, ['id', 'label'], '', $unit_name, ['id']);
+        }
+        $row .= '</td>';
         $row .= '<td class="rate">' . render_input($name_unit_price, '', $unit_price, 'number', $array_rate_attr, [], 'no-margin', $text_right_class);
 
         if ($unit_price != '') {

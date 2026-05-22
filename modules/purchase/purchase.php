@@ -18,6 +18,7 @@ define('PURCHASE_ORDER_IMPORT_ITEMS_ERROR', 'modules/purchase/uploads/import_ite
 define('PURCHASE_ORDER_IMPORT_ORDER_TRACKER_ERROR', 'modules/purchase/uploads/import_items_order_tracker_error/');
 define('PURCHASE_ORDER_IMPORT_UNAWARDED_TRACKER_ERROR', 'modules/purchase/uploads/import_items_unawarded_tracker_error/');
 define('WORK_ORDER_IMPORT_ITEMS_ERROR', 'modules/purchase/uploads/import_items_wo_order_error/');
+define('PURCHASE_LOADING_ISSUE_ITEMS', 70);
 
 hooks()->add_action('admin_init', 'purchase_permissions');
 hooks()->add_action('app_admin_footer', 'purchase_head_components');
