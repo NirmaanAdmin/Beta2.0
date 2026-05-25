@@ -36,7 +36,7 @@ if(is_image($path)){ ?>
     ?>
    <div style="position: relative; height: 100vh;">
       <iframe id="cadViewer"
-           src="https://sharecad.org/cadframe/load?url=<?php echo base_url(DRAWING_MANAGEMENT_PATH.$folder.'/'.$file->parent_id.'/'.$file->name); ?>?v=<?php echo $rand; ?>"
+           src="https://iframe.sharecad.org/cadframe/load?url=<?php echo base_url(DRAWING_MANAGEMENT_PATH.$folder.'/'.$file->parent_id.'/'.$file->name); ?>?v=<?php echo $rand; ?>"
            style="width: 100%; height: 100%; border: none;"
            allowfullscreen
            webkitallowfullscreen
@@ -48,7 +48,7 @@ if(is_image($path)){ ?>
     ?>
    <div style="position: relative; height: 100vh;">
       <iframe id="cadViewer"
-           src="https://sharecad.org/cadframe/load?url=<?php echo base_url(DRAWING_MANAGEMENT_PATH.$folder.'/'.$file->parent_id.'/'.$file->name); ?>?v=<?php echo $rand; ?>"
+           src="https://iframe.sharecad.org/cadframe/load?url=<?php echo base_url(DRAWING_MANAGEMENT_PATH.$folder.'/'.$file->parent_id.'/'.$file->name); ?>?v=<?php echo $rand; ?>"
            style="width: 100%; height: 100%; border: none;"
            allowfullscreen
            webkitallowfullscreen
