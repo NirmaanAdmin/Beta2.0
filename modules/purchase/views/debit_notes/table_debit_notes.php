@@ -33,6 +33,18 @@ $filter = [];
     array_push($where, 'AND ' . db_prefix() . 'pur_debit_notes.vendorid=' . $this->ci->db->escape_str($vendorid));
 }
 */
+
+if ($this->ci->input->post('order_rel_id')) {
+    $order_rel_id = $this->ci->input->post('order_rel_id');
+    $order_rel_type = $this->ci->input->get('order_rel_type');
+    if($order_rel_type == 'po') {
+        array_push($where, 'AND ' . db_prefix() . 'pur_debit_notes.pur_order=' . $this->ci->db->escape_str($order_rel_id));
+    }
+    if($order_rel_type == 'wo') {
+        array_push($where, 'AND ' . db_prefix() . 'pur_debit_notes.wo_order=' . $this->ci->db->escape_str($order_rel_id));
+    }
+}
+
 if (!has_permission('purchase_debit_notes', '', 'view')) {
     array_push($where, 'AND (' . db_prefix() . 'pur_debit_notes.addedfrom = '.get_staff_user_id().' OR ' . db_prefix() . 'pur_debit_notes.vendorid IN (SELECT vendor_id FROM ' . db_prefix() . 'pur_vendor_admin WHERE staff_id=' . get_staff_user_id() . '))');
 }

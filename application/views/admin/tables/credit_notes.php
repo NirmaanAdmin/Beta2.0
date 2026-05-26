@@ -62,7 +62,18 @@ return App_table::find('credit_notes')
         }
 
         if(get_default_project()) {
-            array_push($where, 'AND ' . db_prefix() . 'creditnotes.project_id = '.get_default_project().'');
+            // array_push($where, 'AND ' . db_prefix() . 'creditnotes.project_id = '.get_default_project().'');
+        }
+
+        if ($this->ci->input->post('order_rel_id')) {
+            $order_rel_id = $this->ci->input->post('order_rel_id');
+            $order_rel_type = $this->ci->input->get('order_rel_type');
+            if($order_rel_type == 'po') {
+                array_push($where, 'AND ' . db_prefix() . 'creditnotes.pur_order=' . $this->ci->db->escape_str($order_rel_id));
+            }
+            if($order_rel_type == 'wo') {
+                array_push($where, 'AND ' . db_prefix() . 'creditnotes.wo_order=' . $this->ci->db->escape_str($order_rel_id));
+            }
         }
 
         // Fix for big queries. Some hosting have max_join_limit

@@ -55,6 +55,16 @@ if ($estimate->currency != 0) {
                      </a>
                   </li>
                   <li role="presentation">
+                     <a href="#credit_note" aria-controls="credit_note" role="tab" data-toggle="tab">
+                        <?php echo _l('credit_notes'); ?>
+                     </a>
+                  </li>
+                  <li role="presentation">
+                     <a href="#debit_note" aria-controls="debit_note" role="tab" data-toggle="tab">
+                        <?php echo _l('pur_debit_note'); ?>
+                     </a>
+                  </li>
+                  <li role="presentation">
                      <a href="#quality" aria-controls="quality" role="tab" data-toggle="tab">
                         <?php echo _l('Quality'); ?>
                      </a>
@@ -1078,6 +1088,40 @@ if ($estimate->currency != 0) {
                   </table>
                <?php } ?>
             </div>
+
+            <div role="tabpanel" class="tab-pane" id="credit_note">
+               <div class="clearfix"></div>
+               <table class="table table-credit-note scroll-responsive">
+                  <thead>
+                     <th><?php echo _l('credit_note_number'); ?></th>
+                     <th><?php echo _l('credit_note_date'); ?></th>
+                     <th><?php echo _l('client'); ?></th>
+                     <th><?php echo _l('credit_note_status'); ?></th>
+                     <th><?php echo _l('project'); ?></th>
+                     <th><?php echo _l('reference_no'); ?></th>
+                     <th><?php echo _l('credit_note_amount'); ?></th>
+                     <th><?php echo _l('credit_note_remaining_credits'); ?></th>
+                  </thead>
+                  <tbody></tbody>
+               </table>
+            </div>
+
+            <div role="tabpanel" class="tab-pane" id="debit_note">
+               <div class="clearfix"></div>
+               <table class="table table-debit-note scroll-responsive">
+                  <thead>
+                     <th><?php echo _l('debit_note_number'); ?></th>
+                     <th><?php echo _l('debit_note_date'); ?></th>
+                     <th><?php echo _l('vendor'); ?></th>
+                     <th><?php echo _l('debit_note_status'); ?></th>
+                     <th><?php echo _l('reference_no'); ?></th>
+                     <th><?php echo _l('debit_note_amount'); ?></th>
+                     <th><?php echo _l('debit_note_remaining_debits'); ?></th>
+                  </thead>
+                  <tbody></tbody>
+               </table>
+            </div>
+            
             <div role="tabpanel" class="tab-pane ptop10" id="quality">
                <div class="row">
                   <div class="col-md-12">
@@ -1451,6 +1495,26 @@ if ($estimate->currency != 0) {
       "po_id": '[name="_attachment_sale_id"]',
    }
    initDataTable('.table-po-bills', admin_url + 'purchase/table_po_bills', false, false, fnServerParams, [1, 'desc']);
+
+   var table_debit_note = $('.table-debit-note');
+   if ($.fn.DataTable.isDataTable('.table-debit-note')) {
+      $('.table-debit-note').DataTable().destroy();
+   }
+   var fnDebitServerParams;
+   fnDebitServerParams = {
+      "order_rel_id": '[name="_attachment_sale_id"]',
+   }
+   initDataTable('.table-debit-note', admin_url + 'purchase/debit_notes_table?order_rel_type=po', false, false, fnDebitServerParams, [0, 'desc']);
+
+   var table_credit_note = $('.table-credit-note');
+   if ($.fn.DataTable.isDataTable('.table-credit-note')) {
+      $('.table-credit-note').DataTable().destroy();
+   }
+   var fncreditServerParams;
+   fncreditServerParams = {
+      "order_rel_id": '[name="_attachment_sale_id"]',
+   }
+   initDataTable('.table-credit-note', admin_url + 'credit_notes/table?order_rel_type=po', false, false, fncreditServerParams, [0, 'desc']);
 
    function send_bill_bifurcation_approve(id, rel_type) {
       "use strict";
