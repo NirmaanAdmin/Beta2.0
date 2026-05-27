@@ -82,12 +82,9 @@ function app_format_number($total, $foce_check_zero_decimals = false)
  * @param  boolean $excludeSymbol   whether to exclude to symbol from the format
  * @return string
  */
-function app_format_money($amount, $currency, $excludeSymbol = false)
+function app_format_money($amount, $currency = 'INR', $excludeSymbol = false)
 {
-    /**
-     *  Check ewhether the amount is numeric and valid
-     */
-
+    // Validate amount
     if (!is_numeric($amount) && $amount != 0) {
         return $amount;
     }
@@ -96,59 +93,64 @@ function app_format_money($amount, $currency, $excludeSymbol = false)
         $amount = 0;
     }
 
-    /**
-     * Check if currency is passed as Object from database or just currency name e.q. USD
-     */
+    // Currency object handling
     if (is_string($currency)) {
         $dbCurrency = get_currency($currency);
-
-        // Check of currency found in case does not exists in database
         if ($dbCurrency) {
             $currency = $dbCurrency;
         } else {
-            $currency = [
-                'symbol'             => $currency,
-                'name'               => $currency,
-                'placement'          => 'before',
-                'decimal_separator'  => get_option('decimal_separator'),
-                'thousand_separator' => get_option('thousand_separator'),
+            $currency = (object) [
+                'symbol'    => $currency,
+                'name'      => $currency,
+                'placement' => 'before',
             ];
-            $currency = (object) $currency;
         }
     }
 
-    /**
-     * Determine the symbol
-     * @var string
-     */
+    // Currency symbol
     $symbol = !$excludeSymbol ? $currency->symbol : '';
 
-    /**
-     * Check decimal places
-     * @var mixed
-     */
-    $d = get_option('remove_decimals_on_zero') == 1 && !is_decimal($amount) ? 0 : get_decimal_places();
+    // Locale mapping
+    $localeMap = [
+        'INR' => 'en_IN',
+        'USD' => 'en_US',
+        'EUR' => 'de_DE',
+        'GBP' => 'en_GB',
+    ];
 
-    /**
-     * Format the amount
-     * @var string
-     */
+    // Detect locale
+    $locale = isset($localeMap[$currency->name]) ? $localeMap[$currency->name] : 'en_IN';
 
-    $amountFormatted = number_format($amount, $d, $currency->decimal_separator, $currency->thousand_separator);
-    $amountFormatted = amount_format($amount);
+    // Create formatter
+    $formatter = new NumberFormatter($locale, NumberFormatter::DECIMAL);
 
-    /**
-     * Maybe add the currency symbol
-     * @var string
-     */
+    // Decimal places
+    $decimalPlaces = get_option('remove_decimals_on_zero') == 1 && floor($amount) == $amount ? 0 : get_decimal_places();
+
+    $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, $decimalPlaces);
+
+    // Format amount
+    $amountFormatted = $formatter->format($amount);
+
+    // Fallback if intl extension fails
+    if ($amountFormatted === false) {
+        $amountFormatted = number_format($amount, $decimalPlaces, '.', ',');
+    }
+
+    // Add currency symbol
     $formattedWithCurrency = $currency->placement === 'after' ? $amountFormatted . '' . $symbol : $symbol . '' . $amountFormatted;
 
-    return hooks()->apply_filters('app_format_money', $formattedWithCurrency, [
-        'amount'         => $amount,
-        'currency'       => $currency,
-        'exclude_symbol' => $excludeSymbol,
-        'decimal_places' => $d,
-    ]);
+    // Return with Perfex hooks
+    return hooks()->apply_filters(
+        'app_format_money',
+        $formattedWithCurrency,
+        [
+            'amount'         => $amount,
+            'currency'       => $currency,
+            'exclude_symbol' => $excludeSymbol,
+            'decimal_places' => $decimalPlaces,
+        ]
+    );
 }
 
 /**
