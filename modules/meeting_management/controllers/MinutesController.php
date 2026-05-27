@@ -59,6 +59,7 @@ class MinutesController extends AdminController
         $data['is_edit'] = $is_edit;
         $data['mom_row_template'] = $mom_row_template;
         $data['projects'] = $this->projects_model->get_items();
+        $data['get_other_party_mom'] = $this->Meeting_model->get_other_party_mom($agenda_id);
 
         // Load the minutes form view (with tasks form and task list added)
         $this->load->view('meeting_management/minutes_form', $data);
@@ -149,7 +150,7 @@ class MinutesController extends AdminController
                 // Existing agenda: update minutes.
                 $this->Meeting_model->save_minutes($agenda_id, $minutes_data);
             }
- 
+
             set_alert('success', _l('meeting_minutes_created_success'));
             redirect(admin_url('meeting_management/minutesController/index/' . $agenda_id));
         }
@@ -534,7 +535,7 @@ class MinutesController extends AdminController
     }
 
     public function critical_agenda()
-    { 
+    {
 
         $data['critical_agenda'] = $this->Meeting_model->get_critical_agenda();
         $data['department'] = $this->Departments_model->get();
@@ -654,7 +655,7 @@ class MinutesController extends AdminController
         // 2. Update in database
         $success = $this->Meeting_model->update_agenda_department($agenda_id, $department_id);
         $message = $success
-            ? _l('department_changed_successfully') 
+            ? _l('department_changed_successfully')
             : _l('department_change_failed');
 
         // 3. Prepare response payload
@@ -1339,5 +1340,28 @@ class MinutesController extends AdminController
         // Close output stream
         fclose($output);
         exit;
+    }
+    public function delete_other_party_mom($id)
+    {
+        $file = $this->Meeting_model->get_other_party_mom_by_id($id);
+
+        if ($file) {
+
+            $path =
+                get_upload_path_by_type('meeting_management') .
+                'other_party_mom/' .
+                $file->meeting_id . '/' .
+                $file->file_name;
+
+            if (file_exists($path)) {
+                unlink($path);
+            }
+
+            $this->db
+                ->where('id', $id)
+                ->delete(db_prefix() . 'other_party_mom');
+        }
+
+        redirect($_SERVER['HTTP_REFERER']);
     }
 }

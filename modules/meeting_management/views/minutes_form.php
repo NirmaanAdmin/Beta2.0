@@ -119,24 +119,78 @@
                   <input type="hidden" name="agenda_id" id="agenda_id" value="<?php echo $agenda_id; ?>">
 
                   <div class="form-group">
-                     <div class="col-md-4" style="padding: 0px;">
+                     <div class="col-md-4" style="padding: 0px;clear: both;">
                         <label for="venu"><?php echo _l('Venue'); ?></label>
-                        <input type="ext" id="venue" name="venue" value="<?php echo isset($minutes) ? $minutes->venue : ''; ?>" class="form-control">
+                        <input type="text" id="venue" name="venue" value="<?php echo isset($minutes) ? $minutes->venue : ''; ?>" class="form-control">
+                     </div>
+                     <div class="col-md-3">
+                        <div class="col-md-12" style="padding:0px;">
+
+                           <?php echo render_input('attachment_other_party', 'Attach Other Party MOM', '', 'file'); ?>
+
+                           <?php if (!empty($get_other_party_mom)) { ?>
+
+                              <div style="margin-top:8px;">
+
+                                 <?php foreach ($get_other_party_mom as $file) {
+
+                                    $file_url =
+                                       base_url(
+                                          'uploads/meeting_management/other_party_mom/' .
+                                             $agenda_id . '/' .
+                                             $file['file_name']
+                                       );
+
+                                    $delete_url =
+                                       admin_url(
+                                          'meeting_management/minutesController/delete_other_party_mom/' .
+                                             $file['id']
+                                       );
+                                 ?>
+
+                                    <div
+                                       style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+
+                                       <a
+                                          href="<?php echo $file_url; ?>"
+                                          target="_blank"
+                                          download
+                                          style="word-break:break-all;">
+                                          <?php echo $file['file_name']; ?>
+                                       </a>
+
+                                       <a
+                                          href="<?php echo $delete_url; ?>"
+                                          onclick="return confirm('Delete attached file?');"
+                                          style="color:red;font-size:18px;text-decoration:none;line-height:1;">
+                                          ✕
+                                       </a>
+
+                                    </div>
+
+                                 <?php } ?>
+
+                              </div>
+
+                           <?php } ?>
+
+                        </div>
                      </div>
                      <?php
                      // if (!$is_edit) { 
                      ?>
-                     <div class="col-md-8">
-                        <div class="col-md-2 pull-right">
+                     <div class="col-md-5">
+                        <div class="col-md-4 pull-right">
                            <div id="dowload_file_sample" style="margin-top: 22px;">
                               <label for="file_csv" class="control-label"> </label>
                               <a href="<?php echo site_url('modules/meeting_management/uploads/file_sample/Sample_import_mom_en.xlsx') ?>" class="btn btn-primary">Template</a>
                            </div>
                         </div>
-                        <div class="col-md-4 pull-right" style="display: flex;align-items: end;padding: 0px;">
+
+                        <div class="col-md-8 pull-right" style="display: flex;align-items: end;padding: 0px;">
                            <?php echo form_open_multipart(admin_url('meeting_management/agendaController/import_file_xlsx_mom_items'), array('id' => 'import_form')); ?>
                            <?php echo form_hidden('leads_import', 'true'); ?>
-                           <?php echo render_input('file_csv', 'choose_excel_file', '', 'file'); ?>
+                           <?php echo render_input('file_csv', 'Import Meeting Minutes', '', 'file'); ?>
 
                            <div class="form-group" style="margin-left: 10px;">
                               <button id="uploadfile" type="button" class="btn btn-info import" onclick="return uploadfilecsv(this);"><?php echo _l('import'); ?></button>
@@ -157,7 +211,9 @@
                      <?php
                      //  } 
                      ?>
-                     <label for="minutes"><?php echo _l('meeting_notes'); ?></label>
+                     <div class="col-md-12 " style="padding: 0px;">
+                        <label for="minutes"><?php echo _l('meeting_notes'); ?></label>
+                     </div>
                      <?php
                      $minutes_val = '';
                      $minutes_val = isset($minutes) ? $minutes->minutes : '';
@@ -179,7 +235,7 @@
                               <th width="1%"></th>
                               <th width="5%">No.</th>
                               <th>Critical</th>
-                              <th >
+                              <th>
                                  <select name="area_head" id="area_head" class="form-control">
                                     <option value="">Select Option</option>
                                     <option value="1" <?php echo ($minutes->area_head == 1) ? 'selected="selected"' : ''; ?>><strong>Area</strong></option>
@@ -188,7 +244,7 @@
                               </th>
 
                               <th style="font-weight: 500;" width="15%"><strong>Description</strong></th>
-                              <th width="15%"><strong >Decision</strong></th>
+                              <th width="15%"><strong>Decision</strong></th>
                               <th width="15%"><strong>Action</strong></th>
                               <th><strong>Action By</strong></th>
                               <th width="7%"><strong>Target Date</strong></th>

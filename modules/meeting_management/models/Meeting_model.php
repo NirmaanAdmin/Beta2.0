@@ -212,6 +212,57 @@ class Meeting_model extends App_Model
         $this->db->insert(db_prefix() . 'meeting_management', $meeting_data);
         $minute_id = $this->db->insert_id();
 
+        $this->db->insert(db_prefix() . 'meeting_management', $meeting_data);
+        $minute_id = $this->db->insert_id();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Upload Other Party MOM
+        |--------------------------------------------------------------------------
+        */
+
+        if (isset($_FILES['attachment_other_party']) && !empty($_FILES['attachment_other_party']['name'])) {
+
+            $related = 'other_party_mom';
+
+            // Create base upload folder
+            if (!is_dir(get_upload_path_by_type('meeting_management'))) {
+                mkdir(get_upload_path_by_type('meeting_management'), 0755);
+            }
+
+            // Create related folder
+            if (!is_dir(get_upload_path_by_type('meeting_management') . $related)) {
+                mkdir(get_upload_path_by_type('meeting_management') . $related, 0755);
+            }
+
+            // Create meeting specific folder
+            $path = get_upload_path_by_type('meeting_management') . $related . '/' . $minute_id . '/';
+
+            if (!is_dir($path)) {
+                mkdir($path, 0755, true);
+            }
+
+            $file_name = unique_filename(
+                $path,
+                $_FILES['attachment_other_party']['name']
+            );
+
+            if (
+                move_uploaded_file(
+                    $_FILES['attachment_other_party']['tmp_name'],
+                    $path . $file_name
+                )
+            ) {
+
+                $this->db->insert(
+                    db_prefix() . 'other_party_mom',
+                    [
+                        'meeting_id' => $minute_id,
+                        'file_name'  => $file_name,
+                    ]
+                );
+            }
+        }
         // Save agenda meeting files.
         $this->save_agends_files('agenda_meeting', $agenda_id);
 
@@ -613,217 +664,7 @@ class Meeting_model extends App_Model
         }
     }
 
-    // Update minutes for a given agenda
-    // public function update_minutes($agenda_id, $minutes_data)
-    // {
 
-    //     $affectedRows = 0;
-    //     unset(
-    //         $minutes_data['isedit'],
-    //         $minutes_data['area'],
-    //         $minutes_data['description'],
-    //         $minutes_data['decision'],
-    //         $minutes_data['action'],
-    //         $minutes_data['staff'],
-    //         $minutes_data['vendor'],
-    //         $minutes_data['target_date'],
-    //         $minutes_data['participants'],
-    //         $minutes_data['other_participants'],
-    //         $minutes_data['company_names'],
-    //         $minutes_data['agenda_id'],
-    //         $minutes_data['leads_import'],
-    //         $minutes_data['section_break'],
-    //         $minutes_data['related_tasks_length'],
-    //         $minutes_data['serial_no'],
-    //     );
-
-    //     $new_mom = [];
-    //     if (isset($minutes_data['newitems'])) {
-    //         $new_mom = $minutes_data['newitems'];
-    //         unset($minutes_data['newitems']);
-    //     }
-
-    //     $update_mom = [];
-    //     if (isset($minutes_data['items'])) {
-    //         $update_mom = $minutes_data['items'];
-    //         unset($minutes_data['items']);
-    //     }
-
-    //     $remove_order = [];
-    //     if (isset($minutes_data['removed_items'])) {
-    //         $remove_order = $minutes_data['removed_items'];
-    //         unset($minutes_data['removed_items']);
-    //     }
-    //     $remove_section_break = [];
-    //     if (isset($minutes_data['removed_section_break'])) {
-    //         $remove_section_break = $minutes_data['removed_section_break'];
-    //         unset($minutes_data['removed_section_break']);
-    //     }
-
-    //     $this->save_agends_files('agenda_meeting', $agenda_id);
-
-
-    //     if (!empty($minutes_data)) {
-    //         $this->db->where('id', $agenda_id);
-    //         $this->db->update(db_prefix() . 'meeting_management', $minutes_data);
-    //     }
-
-    //     // echo '<pre>';
-    //     // print_r($minutes_data);
-    //     // die;
-    //     if (count($new_mom) > 0) {
-    //         foreach ($new_mom as $key => $value) {
-    //             if (!empty($value['staff']) && isset($value['staff'])) {
-    //                 $staff = implode(',', $value['staff']);
-    //             } else {
-    //                 $staff = '';
-    //             }
-    //             if (isset($value['critical']) && !empty($value['critical'])) {
-    //                 $critical = $value['critical'];
-    //             } else {
-    //                 $critical = '';
-    //             }
-    //             $mom_arr = [];
-    //             $mom_arr['minute_id'] = $agenda_id;
-    //             $mom_arr['area'] = $value['area'];
-    //             $mom_arr['description'] = $value['description'];
-    //             $mom_arr['decision'] = $value['decision'];
-    //             $mom_arr['action'] = $value['action'];
-    //             $mom_arr['staff'] = $staff;
-    //             $mom_arr['vendor'] = $value['vendor'];
-    //             $mom_arr['target_date'] = $value['target_date'];
-    //             $mom_arr['section_break'] = $value['section_break'];
-    //             $mom_arr['serial_no'] = $value['serial_no'];
-    //             $mom_arr['reorder'] = isset($value['order']) ? $value['order'] : null;
-    //             $mom_arr['critical'] = $critical;
-    //             $this->db->insert(db_prefix() . 'minutes_details', $mom_arr);
-    //             $last_insert_id = $this->db->insert_id();
-    //             if ($critical > 0 && $critical != null) {
-    //                 unset(
-    //                     $mom_arr['reorder'],
-    //                     $mom_arr['section_break'],
-    //                     $mom_arr['serial_no'],
-    //                 );
-    //                 $mom_arr['meeting_detail_id'] = $last_insert_id;
-    //                 $mom_arr['project_id'] = $minutes_data['project_id'];
-    //                 $this->db->insert(db_prefix() . 'critical_mom', $mom_arr);
-    //             }
-    //             $iuploadedFiles = handle_mom_item_attachment_array('minutes_attachments', $agenda_id, $last_insert_id, 'newitems', $key);
-    //             if ($iuploadedFiles && is_array($iuploadedFiles)) {
-    //                 foreach ($iuploadedFiles as $ifile) {
-    //                     $idata = array();
-    //                     $idata['attachments'] = $ifile['file_name'];
-    //                     $this->db->where('id', $ifile['item_id']);
-    //                     $this->db->update(db_prefix() . 'minutes_details', $idata);
-    //                 }
-    //             }
-    //         }
-    //     }
-
-    //     if (count($update_mom) > 0) {
-    //         foreach ($update_mom as $key => $value) {
-    //             if (!empty($value['staff']) && isset($value['staff'])) {
-    //                 $staff = implode(',', $value['staff']);
-    //             } else {
-    //                 $staff = '';
-    //             }
-    //             if (isset($value['critical']) && !empty($value['critical'])) {
-    //                 $critical = $value['critical'];
-    //             } else {
-    //                 $critical = '';
-    //             }
-    //             $mom_arr = [];
-    //             $mom_arr['minute_id'] = $agenda_id;
-    //             $mom_arr['area'] = $value['area'];
-    //             $mom_arr['description'] = $value['description'];
-    //             $mom_arr['decision'] = $value['decision'];
-    //             $mom_arr['action'] = $value['action'];
-    //             $mom_arr['staff'] = $staff;
-    //             $mom_arr['vendor'] = $value['vendor'];
-    //             $mom_arr['target_date'] = $value['target_date'];
-    //             $mom_arr['section_break'] = $value['section_break'];
-    //             $mom_arr['serial_no'] = $value['serial_no'];
-    //             $mom_arr['reorder'] = isset($value['order']) ? $value['order'] : '';
-    //             $mom_arr['critical'] = $critical;
-
-
-    //             $this->db->where('id', $value['id']);
-    //             $this->db->update(db_prefix() . 'minutes_details', $mom_arr);
-
-    //             $this->db->select('tblcritical_mom.*');
-    //             $this->db->from('tblcritical_mom');
-    //             $this->db->where('critical', 1);
-    //             $this->db->where('meeting_detail_id', $value['id']);
-    //             $query = $this->db->get()->result_array();
-    //             unset(
-    //                 $mom_arr['reorder'],
-    //                 $mom_arr['section_break'],
-    //                 $mom_arr['serial_no']
-    //             );
-
-    //             if ($critical > 0 && $critical != null) {
-    //                 if (!empty($query)) {
-    //                     // Record exists - update it
-    //                     // $this->db->where('meeting_detail_id', $value['id']);
-    //                     // $this->db->where('critical', 1);
-    //                     // $this->db->update(db_prefix() . 'critical_mom', $mom_arr);
-    //                 } else {
-    //                     // Record doesn't exist - insert it
-    //                     $mom_arr['meeting_detail_id'] = $value['id'];
-    //                     $mom_arr['critical'] = 1; // Ensure critical flag is set
-    //                     $mom_arr['project_id'] = $minutes_data['project_id'];
-    //                     $this->db->insert(db_prefix() . 'critical_mom', $mom_arr);
-    //                 }
-    //             }
-    //             // Record exists - update it
-    //             $this->db->where('meeting_detail_id', $value['id']);
-    //             $this->db->where('critical', 1);
-    //             $this->db->update(db_prefix() . 'critical_mom', $mom_arr);
-
-    //             if ($this->db->affected_rows() > 0) {
-    //                 $affectedRows++;
-    //             }
-    //             $iuploadedFiles = handle_mom_item_attachment_array('minutes_attachments', $agenda_id, $value['id'], 'items', $key);
-    //             if ($iuploadedFiles && is_array($iuploadedFiles)) {
-    //                 foreach ($iuploadedFiles as $ifile) {
-    //                     $idata = array();
-    //                     $idata['attachments'] = $ifile['file_name'];
-    //                     $this->db->where('id', $ifile['item_id']);
-    //                     $this->db->update(db_prefix() . 'minutes_details', $idata);
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     if (count($remove_order) > 0) {
-    //         foreach ($remove_order as $remove_id) {
-    //             $this->db->where('id', $remove_id);
-    //             if ($this->db->delete(db_prefix() . 'minutes_details')) {
-    //                 $affectedRows++;
-    //             }
-    //         }
-    //     }
-
-
-
-    //     if (count($remove_section_break) > 0) {
-    //         foreach ($remove_section_break as $remove_id) {
-    //             $this->db->where('id', $remove_id);
-    //             if ($this->db->update(db_prefix() . 'minutes_details', ['section_break' => ''])) {
-    //                 $affectedRows++;
-    //             }
-    //         }
-    //     }
-
-
-    //     $data_log = [];
-    //     $data_log['rel_id'] = $agenda_id;
-    //     $data_log['rel_type'] = 'mom_agenda';
-    //     $data_log['staffid'] = get_staff_user_id();
-    //     $data_log['date'] = date('Y-m-d H:i:s');
-    //     $data_log['note'] = "update_mom_agenda_note";
-
-    //     $this->add_activity_log($data_log);
-    // }
     public function update_minutes($agenda_id, $minutes_data)
     {
         $affectedRows = 0;
@@ -875,6 +716,57 @@ class Meeting_model extends App_Model
         }
 
         $this->save_agends_files('agenda_meeting', $agenda_id);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Add New Other Party MOM Attachment (Keep Existing)
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            isset($_FILES['attachment_other_party']) &&
+            !empty($_FILES['attachment_other_party']['name'])
+        ) {
+
+            $related = 'other_party_mom';
+
+            if (!is_dir(get_upload_path_by_type('meeting_management'))) {
+                mkdir(get_upload_path_by_type('meeting_management'), 0755);
+            }
+
+            if (!is_dir(get_upload_path_by_type('meeting_management') . $related)) {
+                mkdir(get_upload_path_by_type('meeting_management') . $related, 0755);
+            }
+
+            $path = get_upload_path_by_type('meeting_management') . $related . '/' . $agenda_id . '/';
+
+            if (!is_dir($path)) {
+                mkdir($path, 0755, true);
+            }
+
+            $file_name = unique_filename(
+                $path,
+                $_FILES['attachment_other_party']['name']
+            );
+
+            if (
+                move_uploaded_file(
+                    $_FILES['attachment_other_party']['tmp_name'],
+                    $path . $file_name
+                )
+            ) {
+
+                $this->db->insert(
+                    db_prefix() . 'other_party_mom',
+                    [
+                        'meeting_id' => $agenda_id,
+                        'file_name'  => $file_name,
+                    ]
+                );
+
+                $affectedRows++;
+            }
+        }
 
         $field_changes = [];
         $meeting_title = $original_meeting ? $original_meeting['meeting_title'] : 'Untitled Meeting';
@@ -2012,5 +1904,18 @@ class Meeting_model extends App_Model
         $this->db->where('rel_id', $rel_id);
         $this->db->where('rel_type', $rel_type);
         return $this->db->get(db_prefix() . 'mom_activity_log')->result_array();
+    }
+
+    public function get_other_party_mom($meeting_id)
+    {
+        $this->db->where('meeting_id', $meeting_id);
+        return $this->db->get(db_prefix() . 'other_party_mom')->result_array();
+    }
+    public function get_other_party_mom_by_id($id)
+    {
+        return $this->db
+            ->where('id', $id)
+            ->get(db_prefix() . 'other_party_mom')
+            ->row();
     }
 }
