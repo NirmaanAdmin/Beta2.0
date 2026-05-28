@@ -13115,104 +13115,414 @@ class purchase extends AdminController
         redirect($_SERVER['HTTP_REFERER']);
     }
 
+    // public function payment_certificate_pdf($id)
+    // {
+    //     if (!$id) {
+    //         redirect(admin_url('purchase/purchase_order'));
+    //     }
+    //     $fpdiBase = APPPATH . 'third_party/fpdi/';
+    //     if (file_exists($fpdiBase . 'src/autoload.php')) {
+    //         require_once $fpdiBase . 'src/autoload.php';
+    //     } elseif (file_exists($fpdiBase . 'autoload.php')) {
+    //         require_once $fpdiBase . 'autoload.php';
+    //     } else {
+    //         if (file_exists($fpdiBase . 'fpdi.php')) {
+    //             require_once $fpdiBase . 'fpdi.php';
+    //         }
+    //         if (file_exists($fpdiBase . 'tcpdf_fpdi.php')) {
+    //             require_once $fpdiBase . 'tcpdf_fpdi.php';
+    //         }
+    //         if (file_exists($fpdiBase . 'fpdi_tcpdf.php')) {
+    //             require_once $fpdiBase . 'fpdi_tcpdf.php';
+    //         }
+    //     }
+    //     $html = $this->purchase_model->get_paymentcertificate_pdf_html($id);
+    //     $baseTcpdf = $this->purchase_model->paymentcertificate_pdf($html, $id);
+    //     $basePdfString = $baseTcpdf->Output('', 'S');
+    //     $extraFiles = [];
+    //     $attachments = $this->purchase_model->get_payment_certificate_attachments($id);
+    //     if (!empty($attachments)) {
+    //         foreach ($attachments as $key => $value) {
+    //             if ($value['filetype'] == 'application/pdf') {
+    //                 $extraFiles[] = FCPATH . 'uploads/purchase/payment_certificate/' . $value['rel_id'] . '/' . $value['file_name'] . '';
+    //             }
+    //         }
+    //     }
+    //     try {
+    //         if (class_exists('\setasign\Fpdi\Tcpdf\Fpdi')) {
+    //             $pdf = new \setasign\Fpdi\Tcpdf\Fpdi('P', 'mm', 'A4', true, 'UTF-8', false);
+    //             $pdf->setPrintHeader(false);
+    //             $pdf->setPrintFooter(false);
+    //             $src = \setasign\Fpdi\PdfParser\StreamReader::createByString($basePdfString);
+    //             $pageCount = $pdf->setSourceFile($src);
+    //             for ($p = 1; $p <= $pageCount; $p++) {
+    //                 $tplId = $pdf->importPage($p);
+    //                 $size  = $pdf->getTemplateSize($tplId);
+    //                 $orientation = ($size['width'] > $size['height']) ? 'L' : 'P';
+    //                 $pdf->AddPage($orientation, [$size['width'], $size['height']]);
+    //                 $pdf->useTemplate($tplId, 0, 0, $size['width'], $size['height'], true);
+    //             }
+    //             foreach ($extraFiles as $file) {
+    //                 if (!is_file($file)) {
+    //                     continue;
+    //                 }
+    //                 $pageCount = $pdf->setSourceFile($file);
+    //                 for ($p = 1; $p <= $pageCount; $p++) {
+    //                     $tplId = $pdf->importPage($p);
+    //                     $size  = $pdf->getTemplateSize($tplId);
+    //                     $orientation = ($size['width'] > $size['height']) ? 'L' : 'P';
+    //                     $pdf->AddPage($orientation, [$size['width'], $size['height']]);
+    //                     $pdf->useTemplate($tplId, 0, 0, $size['width'], $size['height'], true);
+    //                 }
+    //             }
+    //         } else {
+    //             $tmpDir = sys_get_temp_dir();
+    //             $tmpBase = tempnam($tmpDir, 'pcert_') . '.pdf';
+    //             file_put_contents($tmpBase, $basePdfString);
+    //             if (class_exists('TCPDF_FPDI')) {
+    //                 $pdf = new \TCPDF_FPDI('P', 'mm', 'A4', true, 'UTF-8', false);
+    //             } elseif (class_exists('FPDI')) {
+    //                 // Some old distributions provide a class named FPDI that extends TCPDF
+    //                 $pdf = new \FPDI('P', 'mm', 'A4', true, 'UTF-8', false);
+    //             } else {
+    //                 throw new Exception('FPDI library not found/loaded from application/third_party/fpdi.');
+    //             }
+    //             $pdf->setPrintHeader(false);
+    //             $pdf->setPrintFooter(false);
+    //             $pageCount = $pdf->setSourceFile($tmpBase);
+    //             for ($p = 1; $p <= $pageCount; $p++) {
+    //                 $tplId = $pdf->importPage($p);
+    //                 $size  = method_exists($pdf, 'getTemplateSize') ? $pdf->getTemplateSize($tplId) : ['width' => 210, 'height' => 297];
+    //                 $orientation = ($size['width'] > $size['height']) ? 'L' : 'P';
+    //                 $pdf->AddPage($orientation, [$size['width'], $size['height']]);
+    //                 $pdf->useTemplate($tplId, 0, 0, $size['width'], $size['height'], true);
+    //             }
+    //             foreach ($extraFiles as $file) {
+    //                 if (!is_file($file)) {
+    //                     continue;
+    //                 }
+    //                 $pageCount = $pdf->setSourceFile($file);
+    //                 for ($p = 1; $p <= $pageCount; $p++) {
+    //                     $tplId = $pdf->importPage($p);
+    //                     $size  = method_exists($pdf, 'getTemplateSize') ? $pdf->getTemplateSize($tplId) : ['width' => 210, 'height' => 297];
+    //                     $orientation = ($size['width'] > $size['height']) ? 'L' : 'P';
+    //                     $pdf->AddPage($orientation, [$size['width'], $size['height']]);
+    //                     $pdf->useTemplate($tplId, 0, 0, $size['width'], $size['height'], true);
+    //                 }
+    //             }
+    //             @unlink($tmpBase);
+    //         }
+    //     } catch (Exception $e) {
+    //         echo pur_html_entity_decode($e->getMessage());
+    //         die;
+    //     }
+
+    //     $type = 'D';
+
+    //     if ($this->input->get('output_type')) {
+    //         $type = $this->input->get('output_type');
+    //     }
+
+    //     if ($this->input->get('print')) {
+    //         $type = 'I';
+    //     }
+    //     $pdf->SetTitle(_l('payment_certificate'));
+    //     $pdf_name = _l('payment_certificate') . '.pdf';
+    //     $pdf->Output($pdf_name, $type);
+    // }
+
     public function payment_certificate_pdf($id)
     {
         if (!$id) {
             redirect(admin_url('purchase/purchase_order'));
         }
+
         $fpdiBase = APPPATH . 'third_party/fpdi/';
+
         if (file_exists($fpdiBase . 'src/autoload.php')) {
+
             require_once $fpdiBase . 'src/autoload.php';
         } elseif (file_exists($fpdiBase . 'autoload.php')) {
+
             require_once $fpdiBase . 'autoload.php';
         } else {
+
             if (file_exists($fpdiBase . 'fpdi.php')) {
                 require_once $fpdiBase . 'fpdi.php';
             }
+
             if (file_exists($fpdiBase . 'tcpdf_fpdi.php')) {
                 require_once $fpdiBase . 'tcpdf_fpdi.php';
             }
+
             if (file_exists($fpdiBase . 'fpdi_tcpdf.php')) {
                 require_once $fpdiBase . 'fpdi_tcpdf.php';
             }
         }
+
         $html = $this->purchase_model->get_paymentcertificate_pdf_html($id);
+
         $baseTcpdf = $this->purchase_model->paymentcertificate_pdf($html, $id);
+
         $basePdfString = $baseTcpdf->Output('', 'S');
+
         $extraFiles = [];
+
         $attachments = $this->purchase_model->get_payment_certificate_attachments($id);
+
         if (!empty($attachments)) {
+
             foreach ($attachments as $key => $value) {
+
                 if ($value['filetype'] == 'application/pdf') {
-                    $extraFiles[] = FCPATH . 'uploads/purchase/payment_certificate/' . $value['rel_id'] . '/' . $value['file_name'] . '';
+
+                    $extraFiles[] =
+                        FCPATH .
+                        'uploads/purchase/payment_certificate/' .
+                        $value['rel_id'] .
+                        '/' .
+                        $value['file_name'];
                 }
             }
         }
+
         try {
+
             if (class_exists('\setasign\Fpdi\Tcpdf\Fpdi')) {
-                $pdf = new \setasign\Fpdi\Tcpdf\Fpdi('P', 'mm', 'A4', true, 'UTF-8', false);
+
+                $pdf = new \setasign\Fpdi\Tcpdf\Fpdi(
+                    'P',
+                    'mm',
+                    'A4',
+                    true,
+                    'UTF-8',
+                    false
+                );
+
                 $pdf->setPrintHeader(false);
                 $pdf->setPrintFooter(false);
+
                 $src = \setasign\Fpdi\PdfParser\StreamReader::createByString($basePdfString);
+
                 $pageCount = $pdf->setSourceFile($src);
+
                 for ($p = 1; $p <= $pageCount; $p++) {
+
                     $tplId = $pdf->importPage($p);
+
                     $size  = $pdf->getTemplateSize($tplId);
+
                     $orientation = ($size['width'] > $size['height']) ? 'L' : 'P';
-                    $pdf->AddPage($orientation, [$size['width'], $size['height']]);
-                    $pdf->useTemplate($tplId, 0, 0, $size['width'], $size['height'], true);
+
+                    $pdf->AddPage(
+                        $orientation,
+                        [$size['width'], $size['height']]
+                    );
+
+                    $pdf->useTemplate(
+                        $tplId,
+                        0,
+                        0,
+                        $size['width'],
+                        $size['height'],
+                        true
+                    );
                 }
+
+            /*
+            |-------------------------------------------------------
+            | ATTACH EXTRA PDF FILES
+            |-------------------------------------------------------
+            | Skip compressed/encrypted/corrupted PDFs
+            */
+
                 foreach ($extraFiles as $file) {
+
                     if (!is_file($file)) {
                         continue;
                     }
-                    $pageCount = $pdf->setSourceFile($file);
-                    for ($p = 1; $p <= $pageCount; $p++) {
-                        $tplId = $pdf->importPage($p);
-                        $size  = $pdf->getTemplateSize($tplId);
-                        $orientation = ($size['width'] > $size['height']) ? 'L' : 'P';
-                        $pdf->AddPage($orientation, [$size['width'], $size['height']]);
-                        $pdf->useTemplate($tplId, 0, 0, $size['width'], $size['height'], true);
+
+                    try {
+
+                        // Check readable PDF
+                        $pageCount = $pdf->setSourceFile($file);
+
+                        // Skip invalid/compressed PDFs
+                        if (!$pageCount || $pageCount <= 0) {
+                            continue;
+                        }
+
+                        for ($p = 1; $p <= $pageCount; $p++) {
+
+                            try {
+
+                                $tplId = $pdf->importPage($p);
+
+                                $size = $pdf->getTemplateSize($tplId);
+
+                                $orientation =
+                                    ($size['width'] > $size['height'])
+                                    ? 'L'
+                                    : 'P';
+
+                                $pdf->AddPage(
+                                    $orientation,
+                                    [$size['width'], $size['height']]
+                                );
+
+                                $pdf->useTemplate(
+                                    $tplId,
+                                    0,
+                                    0,
+                                    $size['width'],
+                                    $size['height'],
+                                    true
+                                );
+                            } catch (Exception $e) {
+
+                                // Skip broken page
+                                continue;
+                            }
+                        }
+                    } catch (Exception $e) {
+
+                        // Skip compressed/encrypted/corrupted PDF
+                        continue;
                     }
                 }
             } else {
+
                 $tmpDir = sys_get_temp_dir();
+
                 $tmpBase = tempnam($tmpDir, 'pcert_') . '.pdf';
+
                 file_put_contents($tmpBase, $basePdfString);
+
                 if (class_exists('TCPDF_FPDI')) {
-                    $pdf = new \TCPDF_FPDI('P', 'mm', 'A4', true, 'UTF-8', false);
+
+                    $pdf = new \TCPDF_FPDI(
+                        'P',
+                        'mm',
+                        'A4',
+                        true,
+                        'UTF-8',
+                        false
+                    );
                 } elseif (class_exists('FPDI')) {
-                    // Some old distributions provide a class named FPDI that extends TCPDF
-                    $pdf = new \FPDI('P', 'mm', 'A4', true, 'UTF-8', false);
+
+                    $pdf = new \FPDI(
+                        'P',
+                        'mm',
+                        'A4',
+                        true,
+                        'UTF-8',
+                        false
+                    );
                 } else {
-                    throw new Exception('FPDI library not found/loaded from application/third_party/fpdi.');
+
+                    throw new Exception(
+                        'FPDI library not found/loaded from application/third_party/fpdi.'
+                    );
                 }
+
                 $pdf->setPrintHeader(false);
                 $pdf->setPrintFooter(false);
+
                 $pageCount = $pdf->setSourceFile($tmpBase);
+
                 for ($p = 1; $p <= $pageCount; $p++) {
+
                     $tplId = $pdf->importPage($p);
-                    $size  = method_exists($pdf, 'getTemplateSize') ? $pdf->getTemplateSize($tplId) : ['width' => 210, 'height' => 297];
-                    $orientation = ($size['width'] > $size['height']) ? 'L' : 'P';
-                    $pdf->AddPage($orientation, [$size['width'], $size['height']]);
-                    $pdf->useTemplate($tplId, 0, 0, $size['width'], $size['height'], true);
+
+                    $size = method_exists($pdf, 'getTemplateSize')
+                        ? $pdf->getTemplateSize($tplId)
+                        : ['width' => 210, 'height' => 297];
+
+                    $orientation =
+                        ($size['width'] > $size['height'])
+                        ? 'L'
+                        : 'P';
+
+                    $pdf->AddPage(
+                        $orientation,
+                        [$size['width'], $size['height']]
+                    );
+
+                    $pdf->useTemplate(
+                        $tplId,
+                        0,
+                        0,
+                        $size['width'],
+                        $size['height'],
+                        true
+                    );
                 }
+
+                /*
+            |-------------------------------------------------------
+            | ATTACH EXTRA PDF FILES
+            |-------------------------------------------------------
+            | Skip compressed/encrypted/corrupted PDFs
+            */
+
                 foreach ($extraFiles as $file) {
+
                     if (!is_file($file)) {
                         continue;
                     }
-                    $pageCount = $pdf->setSourceFile($file);
-                    for ($p = 1; $p <= $pageCount; $p++) {
-                        $tplId = $pdf->importPage($p);
-                        $size  = method_exists($pdf, 'getTemplateSize') ? $pdf->getTemplateSize($tplId) : ['width' => 210, 'height' => 297];
-                        $orientation = ($size['width'] > $size['height']) ? 'L' : 'P';
-                        $pdf->AddPage($orientation, [$size['width'], $size['height']]);
-                        $pdf->useTemplate($tplId, 0, 0, $size['width'], $size['height'], true);
+
+                    try {
+
+                        $pageCount = $pdf->setSourceFile($file);
+
+                        if (!$pageCount || $pageCount <= 0) {
+                            continue;
+                        }
+
+                        for ($p = 1; $p <= $pageCount; $p++) {
+
+                            try {
+
+                                $tplId = $pdf->importPage($p);
+
+                                $size = method_exists($pdf, 'getTemplateSize')
+                                    ? $pdf->getTemplateSize($tplId)
+                                    : ['width' => 210, 'height' => 297];
+
+                                $orientation =
+                                    ($size['width'] > $size['height'])
+                                    ? 'L'
+                                    : 'P';
+
+                                $pdf->AddPage(
+                                    $orientation,
+                                    [$size['width'], $size['height']]
+                                );
+
+                                $pdf->useTemplate(
+                                    $tplId,
+                                    0,
+                                    0,
+                                    $size['width'],
+                                    $size['height'],
+                                    true
+                                );
+                            } catch (Exception $e) {
+
+                                continue;
+                            }
+                        }
+                    } catch (Exception $e) {
+
+                        // Skip compressed/encrypted/corrupted PDF
+                        continue;
                     }
                 }
+
                 @unlink($tmpBase);
             }
         } catch (Exception $e) {
+
             echo pur_html_entity_decode($e->getMessage());
             die;
         }
@@ -13226,8 +13536,11 @@ class purchase extends AdminController
         if ($this->input->get('print')) {
             $type = 'I';
         }
+
         $pdf->SetTitle(_l('payment_certificate'));
+
         $pdf_name = _l('payment_certificate') . '.pdf';
+
         $pdf->Output($pdf_name, $type);
     }
 
@@ -17728,7 +18041,7 @@ class purchase extends AdminController
         $this->load->view('quality_reports/add', $data);
     }
 
-    public function add_checklist($po_wo_id = false, $po_or_wo= false)
+    public function add_checklist($po_wo_id = false, $po_or_wo = false)
     {
         $this->load->model('forms_model');
         if ($this->input->post()) {
@@ -17737,12 +18050,11 @@ class purchase extends AdminController
             $id              = $this->forms_model->add($data, get_staff_user_id());
             if ($id) {
                 set_alert('success', _l('new_form_added_successfully', $id));
-                if($data['pur_order_id'] != ''){
+                if ($data['pur_order_id'] != '') {
                     redirect(admin_url('purchase/purchase_order/' . $po_wo_id));
-                }elseif ($data['wo_order_id'] != '') {
+                } elseif ($data['wo_order_id'] != '') {
                     redirect(admin_url('purchase/work_order/' . $data['wo_order_id']));
                 }
-               
             }
         }
         // Load necessary models
