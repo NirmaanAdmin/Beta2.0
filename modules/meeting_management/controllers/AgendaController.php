@@ -31,7 +31,7 @@ class AgendaController extends AdminController
         }
         $data['projects'] = $this->projects_model->get_items();
         $data['title'] = _l('meeting_agenda');
-        $this->load->view('meeting_management/agendas_list', $data); 
+        $this->load->view('meeting_management/agendas_list', $data);
     }
 
     public function filter_minutes()
@@ -130,7 +130,7 @@ class AgendaController extends AdminController
         $attachments = $this->input->post('attachments');
         $item_key = $this->input->post('item_key');
         $critical = $this->input->post('critical');
-        echo $this->Meeting_model->create_mom_row_template($name, $area, $description, $decision, $action, $staff, $vendor, $target_date, $attachments, $item_key, '','',$critical);
+        echo $this->Meeting_model->create_mom_row_template($name, $area, $description, $decision, $action, $staff, $vendor, $target_date, $attachments, $item_key, '', '', $critical);
     }
     // Delete an agenda
     public function delete($id)
@@ -171,17 +171,65 @@ class AgendaController extends AdminController
         $this->load->view('meeting_management/view_meeting', $data);
     }
 
+    // public function export_to_pdf($agenda_id)
+    // {
+    //     // Initialize Dompdf
+    //     $pdf = new Dompdf();
+
+    //     // Fetch meeting details and other data
+    //     $meeting_details = $this->Meeting_model->get_meeting_details($agenda_id);
+    //     $participants = $this->Meeting_model->get_detailed_participants($agenda_id);
+    //     $tasks = $this->Meeting_model->get_tasks_by_agenda($agenda_id);
+    //     $attachments = $this->Meeting_model->get_meeting_attachments('agenda_meeting', $agenda_id);
+    //     // Fetch the meeting notes
+    //     $meeting_notes = $this->Meeting_model->get_meeting_notes($agenda_id);
+    //     $get_minutes_detials = $this->Meeting_model->get_minutes_detials($agenda_id);
+    //     $check_image = $this->Meeting_model->check_image($agenda_id);
+    //     $check_desc = $this->Meeting_model->check_desc($agenda_id);
+    //     $check_decision = $this->Meeting_model->check_decision($agenda_id);
+    //     $check_action = $this->Meeting_model->check_action($agenda_id);
+    //     $check_action_by = $this->Meeting_model->check_action_by($agenda_id);
+    //     $check_target_date = $this->Meeting_model->check_target_date($agenda_id);
+
+    //     // Load your HTML view for the PDF content
+    //     $data = [
+    //         'meeting' => $meeting_details, 
+    //         'participants' => $participants,
+    //         'tasks' => $tasks,
+    //         'meeting_notes' => $meeting_notes,
+    //         'minutes_data' => $get_minutes_detials,
+    //         'check_attachment' => $check_image,
+    //         'check_desc' => $check_desc,
+    //         'check_decision' => $check_decision, 
+    //         'attachments' => $attachments,
+    //         'check_action' => $check_action,
+    //         'check_action_by' => $check_action_by,
+    //         'check_target_date' => $check_target_date,
+    //     ];
+    //     $data['other_participants'] = $this->Meeting_model->get_participants($agenda_id);
+    //     $html_content = $this->load->view('meeting_management/pdf_template', $data, true);
+    //     $pdf->set_option('isRemoteEnabled', true);
+    //     $pdf->set_option('isHtml5ParserEnabled', true);
+    //     // Set the PDF content
+    //     $pdf->loadHtml($html_content);
+
+    //     $pdf->setPaper('A4', 'portrait');
+
+    //     // Render the PDF
+    //     $pdf->render();
+
+    //     // Output the PDF to the browser
+    //     $pdf->stream("Meeting_Agenda_{$agenda_id}.pdf", array("Attachment" => true));  // Download the PDF
+    // }
     public function export_to_pdf($agenda_id)
     {
-        // Initialize Dompdf
         $pdf = new Dompdf();
 
-        // Fetch meeting details and other data
+        // Fetch data
         $meeting_details = $this->Meeting_model->get_meeting_details($agenda_id);
         $participants = $this->Meeting_model->get_detailed_participants($agenda_id);
         $tasks = $this->Meeting_model->get_tasks_by_agenda($agenda_id);
         $attachments = $this->Meeting_model->get_meeting_attachments('agenda_meeting', $agenda_id);
-        // Fetch the meeting notes
         $meeting_notes = $this->Meeting_model->get_meeting_notes($agenda_id);
         $get_minutes_detials = $this->Meeting_model->get_minutes_detials($agenda_id);
         $check_image = $this->Meeting_model->check_image($agenda_id);
@@ -190,36 +238,69 @@ class AgendaController extends AdminController
         $check_action = $this->Meeting_model->check_action($agenda_id);
         $check_action_by = $this->Meeting_model->check_action_by($agenda_id);
         $check_target_date = $this->Meeting_model->check_target_date($agenda_id);
-        
-        // Load your HTML view for the PDF content
+
         $data = [
-            'meeting' => $meeting_details, 
+            'meeting' => $meeting_details,
             'participants' => $participants,
             'tasks' => $tasks,
             'meeting_notes' => $meeting_notes,
             'minutes_data' => $get_minutes_detials,
             'check_attachment' => $check_image,
             'check_desc' => $check_desc,
-            'check_decision' => $check_decision, 
+            'check_decision' => $check_decision,
             'attachments' => $attachments,
             'check_action' => $check_action,
             'check_action_by' => $check_action_by,
             'check_target_date' => $check_target_date,
         ];
+
         $data['other_participants'] = $this->Meeting_model->get_participants($agenda_id);
-        $html_content = $this->load->view('meeting_management/pdf_template', $data, true);
+
+        $html_content = $this->load->view(
+            'meeting_management/pdf_template',
+            $data,
+            true
+        );
+
         $pdf->set_option('isRemoteEnabled', true);
         $pdf->set_option('isHtml5ParserEnabled', true);
-        // Set the PDF content
+
         $pdf->loadHtml($html_content);
-
         $pdf->setPaper('A4', 'portrait');
-
-        // Render the PDF
         $pdf->render();
 
-        // Output the PDF to the browser
-        $pdf->stream("Meeting_Agenda_{$agenda_id}.pdf", array("Attachment" => true));  // Download the PDF
+        // PDF content
+        $pdfContent = $pdf->output();
+
+        // File names
+        $pdfFileName = "Meeting_Agenda_{$agenda_id}.pdf";
+        $zipFileName = "Meeting_Agenda_{$agenda_id}.zip";
+
+        // Temporary zip path
+        $zipPath = sys_get_temp_dir() . '/' . $zipFileName;
+
+        $zip = new ZipArchive();
+
+        if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
+
+            // Add PDF directly into zip
+            $zip->addFromString($pdfFileName, $pdfContent);
+
+            $zip->close();
+
+            // Download zip
+            header('Content-Type: application/zip');
+            header('Content-Disposition: attachment; filename="' . $zipFileName . '"');
+            header('Content-Length: ' . filesize($zipPath));
+
+            readfile($zipPath);
+
+            // Cleanup
+            unlink($zipPath);
+            exit;
+        }
+
+        show_error('Unable to create ZIP file.');
     }
 
     public function update_mom_list()
