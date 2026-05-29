@@ -406,7 +406,7 @@
                               Export as CSV
                            </a>
                            <a href="<?php echo admin_url('meeting_management/agendaController/export_to_pdf/' . $meeting['meeting_id']); ?>" class="btn btn-info">
-                              <?php echo _l('export_as_pdf'); ?>
+                              <?php echo _l('Export to ZIP'); ?>
                            </a>
                         </div>
                      </div>
