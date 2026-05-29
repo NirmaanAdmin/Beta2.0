@@ -255,7 +255,7 @@ class AgendaController extends AdminController
             'check_action'      => $check_action,
             'check_action_by'   => $check_action_by,
             'check_target_date' => $check_target_date,
-           
+
         ];
 
         $data['other_participants'] = $this->Meeting_model->get_participants($agenda_id);
@@ -311,7 +311,7 @@ class AgendaController extends AdminController
 
                     $zip->addFile(
                         $filePath,
-                        'Other_Party_MOM/' . basename($file['file_name'])
+                        basename($file['file_name'])
                     );
                 }
             }
