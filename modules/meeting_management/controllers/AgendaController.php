@@ -303,7 +303,7 @@ class AgendaController extends AdminController
                 }
 
                 $filePath = FCPATH .
-                    'uploads/meeting_management/other_party_mom/' .
+                    'uploads/meetings/other_party_mom/' .
                     $agenda_id . '/' .
                     $file['file_name'];
 
