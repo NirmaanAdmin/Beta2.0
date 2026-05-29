@@ -225,7 +225,7 @@ class AgendaController extends AdminController
     {
         $pdf = new Dompdf();
 
-        // Fetch data
+        // Fetch meeting details and other data
         $meeting_details = $this->Meeting_model->get_meeting_details($agenda_id);
         $participants = $this->Meeting_model->get_detailed_participants($agenda_id);
         $tasks = $this->Meeting_model->get_tasks_by_agenda($agenda_id);
@@ -239,23 +239,28 @@ class AgendaController extends AdminController
         $check_action_by = $this->Meeting_model->check_action_by($agenda_id);
         $check_target_date = $this->Meeting_model->check_target_date($agenda_id);
 
+        // Other Party MOM files
+        $get_other_party_mom = $this->Meeting_model->get_other_party_mom($agenda_id);
+
         $data = [
-            'meeting' => $meeting_details,
-            'participants' => $participants,
-            'tasks' => $tasks,
-            'meeting_notes' => $meeting_notes,
-            'minutes_data' => $get_minutes_detials,
-            'check_attachment' => $check_image,
-            'check_desc' => $check_desc,
-            'check_decision' => $check_decision,
-            'attachments' => $attachments,
-            'check_action' => $check_action,
-            'check_action_by' => $check_action_by,
+            'meeting'           => $meeting_details,
+            'participants'      => $participants,
+            'tasks'             => $tasks,
+            'meeting_notes'     => $meeting_notes,
+            'minutes_data'      => $get_minutes_detials,
+            'check_attachment'  => $check_image,
+            'check_desc'        => $check_desc,
+            'check_decision'    => $check_decision,
+            'attachments'       => $attachments,
+            'check_action'      => $check_action,
+            'check_action_by'   => $check_action_by,
             'check_target_date' => $check_target_date,
+           
         ];
 
         $data['other_participants'] = $this->Meeting_model->get_participants($agenda_id);
 
+        // Generate PDF HTML
         $html_content = $this->load->view(
             'meeting_management/pdf_template',
             $data,
@@ -269,38 +274,70 @@ class AgendaController extends AdminController
         $pdf->setPaper('A4', 'portrait');
         $pdf->render();
 
-        // PDF content
+        // Get PDF content
         $pdfContent = $pdf->output();
 
-        // File names
         $pdfFileName = "Meeting_Agenda_{$agenda_id}.pdf";
         $zipFileName = "Meeting_Agenda_{$agenda_id}.zip";
 
-        // Temporary zip path
-        $zipPath = sys_get_temp_dir() . '/' . $zipFileName;
+        // Temporary zip file path
+        $zipPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $zipFileName;
 
         $zip = new ZipArchive();
 
-        if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
+        if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== TRUE) {
+            show_error('Unable to create ZIP file.');
+            return;
+        }
 
-            // Add PDF directly into zip
-            $zip->addFromString($pdfFileName, $pdfContent);
+        // Add generated PDF
+        $zip->addFromString($pdfFileName, $pdfContent);
 
-            $zip->close();
+        // Add Other Party MOM files
+        if (!empty($get_other_party_mom)) {
 
-            // Download zip
+            foreach ($get_other_party_mom as $file) {
+
+                if (empty($file['file_name'])) {
+                    continue;
+                }
+
+                $filePath = FCPATH .
+                    'uploads/meeting_management/other_party_mom/' .
+                    $agenda_id . '/' .
+                    $file['file_name'];
+
+                if (file_exists($filePath)) {
+
+                    $zip->addFile(
+                        $filePath,
+                        'Other_Party_MOM/' . basename($file['file_name'])
+                    );
+                }
+            }
+        }
+
+        $zip->close();
+
+        // Download ZIP
+        if (file_exists($zipPath)) {
+
             header('Content-Type: application/zip');
             header('Content-Disposition: attachment; filename="' . $zipFileName . '"');
             header('Content-Length: ' . filesize($zipPath));
+            header('Pragma: public');
+            header('Cache-Control: must-revalidate');
+
+            ob_clean();
+            flush();
 
             readfile($zipPath);
 
-            // Cleanup
             unlink($zipPath);
             exit;
         }
 
-        show_error('Unable to create ZIP file.');
+        show_error('ZIP file was not created.');
     }
 
     public function update_mom_list()
