@@ -45,19 +45,19 @@ $(function(){
           response = JSON.parse(response);
           if(response.currency_rate != 1){
             $('#currency_rate_div').removeClass('hide');
-
             $('input[name="currency_rate"]').val(response.currency_rate).change();
-
             $('#convert_str').html(response.convert_str);
             $('.th_currency').html(response.currency_name);
+            update_order_summary_class_value('order_summary_currency', response.currency_name.replace(/[()]/g, ''));
+            pur_calculate_total();
           }else{
             $('input[name="currency_rate"]').val(response.currency_rate).change();
             $('#currency_rate_div').addClass('hide');
             $('#convert_str').html(response.convert_str);
             $('.th_currency').html(response.currency_name);
-
+            update_order_summary_class_value('order_summary_currency', response.currency_name.replace(/[()]/g, ''));
+            pur_calculate_total();
           }
-
         });
       }else{
         alert_float('warning', "<?php echo _l('please_select_currency'); ?>" )
@@ -482,7 +482,7 @@ function estimate_by_vendor(invoker){
       // $('select[name="estimate"]').selectpicker('refresh');
       $('#vendor_data').html('');
       $('#vendor_data').append(response.ven_html);
-      $('select[name="currency"]').val(response.currency_id).change();
+      // $('select[name="currency"]').val(response.currency_id).change();
 
       <?php if(get_option('po_only_prefix_and_number') != 1){ ?>
       $('input[name="pur_order_number"]').val(po_number+'-'+response.company);
@@ -507,8 +507,8 @@ function coppy_pur_estimate(){
     $.post(admin_url + 'purchase/coppy_pur_estimate/'+pur_estimate).done(function(response){
         response = JSON.parse(response);
         if(response){ 
-          $('select[name="currency"]').val(response.currency).change();
-          $('input[name="currency_rate"]').val(response.currency_rate).change();
+          // $('select[name="currency"]').val(response.currency).change();
+          // $('input[name="currency_rate"]').val(response.currency_rate).change();
           $('input[name="shipping_fee"]').val(response.shipping_fee).change();
 
           $('select[name="discount_type"]').val(response.discount_type).change();
@@ -542,8 +542,8 @@ function coppy_pur_request(){
           // $('select[name="estimate"]').html(response.estimate_html);
           // $('select[name="estimate"]').selectpicker('refresh');
 
-          $('select[name="currency"]').val(response.currency).change();
-          $('input[name="currency_rate"]').val(response.currency_rate).change();
+          // $('select[name="currency"]').val(response.currency).change();
+          // $('input[name="currency_rate"]').val(response.currency_rate).change();
 
           $('.invoice-item table.invoice-items-table.items tbody').html('');
           $('.invoice-item table.invoice-items-table.items tbody').append(response.list_item);
@@ -591,8 +591,8 @@ function coppy_sale_invoice(){
         response = JSON.parse(response);
 
         if(response){ 
-          $('select[name="currency"]').val(response.currency).change();
-          $('input[name="currency_rate"]').val(response.currency_rate).change();
+          // $('select[name="currency"]').val(response.currency).change();
+          // $('input[name="currency_rate"]').val(response.currency_rate).change();
 
           $('select[name="discount_type"]').val(response.discount_type).change();
           $('input[name="order_discount"]').val(response.discount_total).change();
@@ -656,6 +656,7 @@ function pur_calculate_total(from_discount_money){
       shipping_fee = 0;
       $('input[name="shipping_fee"]').val(0);
     }
+  var selected_currency = $('select[name="currency"] option:selected').text();
 
   $('.wh-tax-area').remove();
 
@@ -691,7 +692,7 @@ function pur_calculate_total(from_discount_money){
     item_amount = _amount;
     _amount = parseFloat(_amount);
 
-    $(this).find('td.into_money').html(format_money(_amount));
+    $(this).find('td.into_money').html(format_money(_amount, false, selected_currency));
     $(this).find('td._into_money input').val(_amount);
 
     subtotal += _amount;
@@ -772,9 +773,9 @@ function pur_calculate_total(from_discount_money){
 
       $(this).find('td.total_after_discount input').val(item_total_payment);
 
-    $(this).find('td.label_total_after_discount').html(format_money(item_total_payment));
+    $(this).find('td.label_total_after_discount').html(format_money(item_total_payment, false, selected_currency));
 
-    $(this).find('td._total').html(format_money(after_tax));
+    $(this).find('td._total').html(format_money(after_tax, false, selected_currency));
     $(this).find('td._total_after_tax input').val(after_tax);
 
     $(this).find('td.tax_value input').val(item_tax);
@@ -803,7 +804,7 @@ function pur_calculate_total(from_discount_money){
 
     total += total_tax;
     total_tax_money += total_tax;
-    total_tax = format_money(total_tax);
+    total_tax = format_money(total_tax, false, selected_currency);
     $('#tax_id_' + slugify(taxname)).html(total_tax);
   });
 
@@ -833,16 +834,16 @@ function pur_calculate_total(from_discount_money){
 
   total+= parseFloat(shipping_fee);
 
-  var discount_html = '-' + format_money(parseFloat(total_discount_calculated)+ parseFloat(additional_discount));
+  var discount_html = '-' + format_money(parseFloat(total_discount_calculated)+ parseFloat(additional_discount), false, selected_currency);
     $('input[name="discount_total"]').val(accounting.toFixed(total_discount_calculated, app.options.decimal_places));
     
   // Append, format to html and display
-  $('.shiping_fee').html(format_money(shipping_fee));
-  $('.order_discount_value').html(format_money(order_discount_percent_val));
+  $('.shiping_fee').html(format_money(shipping_fee, false, selected_currency));
+  $('.order_discount_value').html(format_money(order_discount_percent_val, false, selected_currency));
   $('.wh-total_discount').html(discount_html + hidden_input('dc_total', accounting.toFixed(order_discount_percent_val, app.options.decimal_places))  );
-  $('.adjustment').html(format_money(adjustment));
-  $('.wh-subtotal').html(format_money(subtotal) + hidden_input('total_mn', accounting.toFixed(subtotal, app.options.decimal_places)));
-  $('.wh-total').html(format_money(total) + hidden_input('grand_total', accounting.toFixed(total, app.options.decimal_places)));
+  $('.adjustment').html(format_money(adjustment, false, selected_currency));
+  $('.wh-subtotal').html(format_money(subtotal, false, selected_currency) + hidden_input('total_mn', accounting.toFixed(subtotal, app.options.decimal_places)));
+  $('.wh-total').html(format_money(total, false, selected_currency) + hidden_input('grand_total', accounting.toFixed(total, app.options.decimal_places)));
   subtotal_value_order_detail(subtotal);
   total_value_order_detail(total);
   total_tax_value_order_detail(total_tax_money);
@@ -1261,6 +1262,30 @@ function change_by_budget() {
   } else {
     package_select.selectpicker('refresh');
   }
+}
+
+function update_order_summary_class_value(class_name,value){
+  setTimeout(function(){
+    function updateEditorContent(){
+      var editor = tinymce.get('order_summary');
+      if(editor && editor.initialized){
+        var currentContent = editor.getContent();
+        if(value){
+          const regex=new RegExp(
+            `<span class="${class_name}">[\\s\\S]*?<\\/span>`,
+            'g'
+          );
+          currentContent=currentContent.replace(
+            regex,
+            `<span class="${class_name}">${value}</span>`
+          );
+        }
+        editor.setContent(currentContent);
+      }
+    }
+    updateEditorContent();
+    setTimeout(updateEditorContent,1000);
+  },0);
 }
 
 </script>

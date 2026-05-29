@@ -2,7 +2,6 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 
 $this->ci->load->model('purchase/purchase_model');
-$base_currency = get_base_currency_pur();
 
 $select = [
     'id',
@@ -26,7 +25,7 @@ if ($this->ci->input->post('wo_id')) {
     $rel_type = "wo_bill_bifurcation";
 }
 
-$additionalSelect = [];
+$additionalSelect = ['currency'];
 
 $sIndexColumn = 'pb.id';
 $sTable       = db_prefix() . 'pur_bills pb';
@@ -37,10 +36,11 @@ $rResult = $result['rResult'];
 
 foreach ($rResult as $key => $aRow) {
     $row = [];
+    $currency_name = get_currency_name($aRow['currency']);
 
     $row[] = $key + 1;
     $row[] = $aRow['bill_number'];
-    $row[] = app_format_money($aRow['total'], $base_currency->symbol);
+    $row[] = app_format_money($aRow['total'], $currency_name);
     $row[] = date('d-M-Y', strtotime($aRow['invoice_date']));
     $approve_status = '';
     if ($aRow['approve_status'] == 2) {

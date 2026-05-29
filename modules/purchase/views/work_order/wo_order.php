@@ -263,7 +263,7 @@
                     <div class="row">
                       <div class="col-md-6 ">
                         <?php
-                        $currency_attr = array('disabled' => true, 'data-show-subtext' => true);
+                        $currency_attr = array('data-show-subtext' => true);
 
                         $selected = '';
                         foreach ($currencies as $currency) {
@@ -768,9 +768,7 @@
               echo form_hidden('from_currency', $from_currency);
 
               ?>
-              <div class="col-md-8 <?php if ($po_currency->id == $base_currency->id) {
-                                      echo 'hide';
-                                    } ?>" id="currency_rate_div">
+              <div class="col-md-8 hide" id="currency_rate_div">
                 <div class="col-md-10 text-right">
 
                   <p class="mtop10"><?php echo _l('currency_rate'); ?><span id="convert_str"><?php echo ' (' . $base_currency->name . ' => ' . $po_currency->name . '): ';  ?></span></p>
@@ -977,8 +975,8 @@
         // $('select[name="estimate"]').html(response.estimate_html);
         // $('select[name="estimate"]').selectpicker('refresh');
 
-        $('select[name="currency"]').val(response.currency).change();
-        $('input[name="currency_rate"]').val(response.currency_rate).change();
+        // $('select[name="currency"]').val(response.currency).change();
+        // $('input[name="currency_rate"]').val(response.currency_rate).change();
 
         $('.invoice-item table.invoice-items-table.items tbody').html('');
         $('.invoice-item table.invoice-items-table.items tbody').append(response.list_item);

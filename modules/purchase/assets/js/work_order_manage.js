@@ -247,9 +247,9 @@ function get_work_order_dashboard() {
     response = JSON.parse(response);
 
     // Update value summaries
-    $('.total_wo_value').text(response.total_wo_value);
-    $('.approved_wo_value').text(response.approved_wo_value);
-    $('.draft_wo_value').text(response.draft_wo_value);
+    $('.total_wo_value').html(response.total_wo_value);
+    $('.approved_wo_value').html(response.approved_wo_value);
+    $('.draft_wo_value').html(response.draft_wo_value);
 
     // PIE CHART - Approval Status
     var pieCtx = document.getElementById('pieChartForWOApprovalStatus').getContext('2d');

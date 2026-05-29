@@ -202,15 +202,8 @@ $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [db
 
 $output  = $result['output'];
 $rResult = $result['rResult'];
-// echo '<pre>';
-// print_r($rResult);
-// die;
 
-$footer_data = [
-    'total_wo_value' => 0,
-    'total_tax_value' => 0,
-    'total_wo_value_included_tax' => 0,
-];
+$footer_data = [];
 
 $this->ci->load->model('purchase/purchase_model');
 $sr = 1;
@@ -224,20 +217,16 @@ foreach ($rResult as $aRow) {
             $_data = $aRow[$aColumns[$i]];
         }
 
-        $base_currency = get_base_currency_pur();
-        if($aRow['currency'] != 0){
-            $base_currency = pur_get_currency_by_id($aRow['currency']);
-        }
+        $currency_name = get_currency_name($aRow['currency']);
 
         if($aColumns[$i] == 'total'){
-            // $_data = app_format_money($aRow['total'], $base_currency->symbol);
             $_data = 0;
             $wo_total = $aRow['total'];
             $wo_co_sum_values = get_wo_co_sum_values($aRow['id']);
             if(!empty($wo_co_sum_values)) {
                 $wo_total = $wo_total + $wo_co_sum_values->co_value;
             }
-            $_data = app_format_money($wo_total, $base_currency->symbol);
+            $_data = app_format_money($wo_total, $currency_name);
         }elseif($aColumns[$i] == 'wo_order_number'){
 
             $numberOutput = '';
@@ -271,7 +260,7 @@ foreach ($rResult as $aRow) {
             $total_tax += $tax_val;
           }
 
-          $_data = app_format_money($total_tax, $base_currency->symbol);
+          $_data = app_format_money($total_tax, $currency_name);
         }elseif($aColumns[$i] == 'expense_convert'){
             if($aRow['expense_convert'] == 0){
              $_data = '<a href="javascript:void(0)" onclick="convert_expense_wo('.$aRow['id'].','.$aRow['total'].'); return false;" class="btn btn-warning btn-icon">'._l('convert').'</a>';
@@ -290,14 +279,13 @@ foreach ($rResult as $aRow) {
         }elseif($aColumns[$i] == 'type'){
             $_data = _l($aRow['type']);
         }elseif($aColumns[$i] == 'subtotal'){
-            // $_data = app_format_money($aRow['subtotal'],$base_currency->symbol);
             $_data = 0;
             $wo_subtotal = $aRow['subtotal'];
             $wo_co_sum_values = get_wo_co_sum_values($aRow['id']);
             if(!empty($wo_co_sum_values)) {
                 $wo_subtotal = $wo_subtotal + $wo_co_sum_values->co_value;
             }
-            $_data = app_format_money($wo_subtotal, $base_currency->symbol);
+            $_data = app_format_money($wo_subtotal, $currency_name);
         }elseif($aColumns[$i] == 'project'){
             $_data = $aRow['project_name'];
         }elseif($aColumns[$i] == 'department'){
@@ -336,14 +324,32 @@ foreach ($rResult as $aRow) {
         $row[] = $_data;
     }
 
-    $footer_data['total_wo_value'] += $aRow['subtotal'];
-    $footer_data['total_tax_value'] += $total_tax;
-    $footer_data['total_wo_value_included_tax'] += $aRow['total'];
+    $currency_key = $currency_name;
+    if (!isset($footer_data[$currency_key])) {
+        $footer_data[$currency_key] = [
+            'currency_name' => $currency_name,
+            'subtotal' => 0,
+            'tax' => 0,
+            'total' => 0,
+        ];
+    }
+    $footer_data[$currency_key]['subtotal'] += $aRow['subtotal'];
+    $footer_data[$currency_key]['tax'] += $total_tax;
+    $footer_data[$currency_key]['total'] += $aRow['total'];
     $output['aaData'][] = $row;
     $sr++;
 }
 
-foreach ($footer_data as $key => $total) {
-    $footer_data[$key] = app_format_money($total, $base_currency->symbol);
+$total_wo_value = [];
+$total_tax_value = [];
+$total_total_value = [];
+foreach ($footer_data as $currency => $totals) {
+    $total_wo_value[] = app_format_money($totals['subtotal'], $currency);
+    $total_tax_value[] = app_format_money($totals['tax'], $currency);
+    $total_total_value[] = app_format_money($totals['total'], $currency);
 }
-$output['sums'] = $footer_data;
+$output['sums'] = [
+    'total_wo_value' => implode(', ', $total_wo_value),
+    'total_tax_value' => implode(', ', $total_tax_value),
+    'total_wo_value_included_tax' => implode(', ', $total_total_value),
+];

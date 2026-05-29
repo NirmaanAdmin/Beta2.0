@@ -1195,3 +1195,33 @@ function get_all_company_gst_details()
     $CI->db->order_by('isdefault', 'desc');
     return $CI->db->get(db_prefix() . 'company_gst_details')->result_array();
 }
+
+function get_currency_name($id)
+{
+    $CI =& get_instance();
+    $CI->db->select('name');
+    $CI->db->from(db_prefix() . 'currencies');
+    $CI->db->where('id', $id);
+    $result = $CI->db->get()->row();
+    return $result ? $result->name : 'INR';
+}
+
+function format_currency_totals($items, $amount_key)
+{
+    if (empty($items)) {
+        return app_format_money(0);
+    }
+    $currency_totals = [];
+    foreach ($items as $item) {
+        $currency_name = get_currency_name($item['currency']);
+        if (!isset($currency_totals[$currency_name])) {
+            $currency_totals[$currency_name] = 0;
+        }
+        $currency_totals[$currency_name] += (float)$item[$amount_key];
+    }
+    $formatted = [];
+    foreach ($currency_totals as $currency_name => $amount) {
+        $formatted[] = app_format_money($amount, $currency_name);
+    }
+    return implode('<br>', $formatted);
+}

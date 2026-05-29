@@ -9992,6 +9992,7 @@ class purchase extends AdminController
         $data['changes'] = $this->purchase_model->get_change_wo_order($id);
         $data['payment_certificate'] = $this->purchase_model->get_all_wo_payment_certificate($id);
         $data['qor'] = $this->purchase_model->get_qor_by_wo($id);
+        $data['currency_name'] = get_currency_name($estimate->currency);
         if ($to_return == false) {
             $this->load->view('work_order/wo_order_preview', $data);
         } else {
