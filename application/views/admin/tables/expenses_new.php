@@ -236,15 +236,15 @@ foreach ($rResult as $aRow) {
     $row[] = '<a href="' . admin_url('purchase/vendor/' . $aRow['vendor']) . '">' . e($aRow['vendor_name']) . '</a>';
 
     $total = $aRow['amount'];
-    $tmpTotal = $total;
-    if ($aRow['tax'] != 0) {
-        $tax = get_tax_by_id($aRow['tax']);
-        $total += ($total / 100 * $tax->taxrate);
-    }
-    if ($aRow['tax2'] != 0) {
-        $tax = get_tax_by_id($aRow['tax2']);
-        $total += ($tmpTotal / 100 * $tax->taxrate);
-    }
+    // $tmpTotal = $total;
+    // if ($aRow['tax'] != 0) {
+    //     $tax = get_tax_by_id($aRow['tax']);
+    //     $total += ($total / 100 * $tax->taxrate);
+    // }
+    // if ($aRow['tax2'] != 0) {
+    //     $tax = get_tax_by_id($aRow['tax2']);
+    //     $total += ($tmpTotal / 100 * $tax->taxrate);
+    // }
     $row[] = '<a href="' . admin_url('expenses/list_expenses/' . $aRow['id']) . '" onclick="init_expense(' . $aRow['id'] . ');return false;">' . e($aRow['expense_name']) . '</a>';
     $row[] = date('d M, Y', strtotime($aRow['date']));
     $row[] = app_format_money($total, $aRow['currency_name']);
