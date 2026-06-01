@@ -131,7 +131,7 @@
             </div>
         </div>
         <div class="col-md-6">
-            <img src="<?php echo base_url('assets/images/fejcb.jpg') ?>" alt="">
+            <img src="<?php echo base_url('assets/images/bcmajcb.jpg') ?>" alt="">
         </div>
     </div>
 
