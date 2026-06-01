@@ -2176,6 +2176,7 @@ class drawing_management_model extends app_model
 
 	public function get_vendor_name($transmittal_id)
 	{
+		$this->db->order_by('id', 'DESC');
 		$this->db->where('item_id', $transmittal_id);
 		$query = $this->db->get('tbldms_share_logs');
 		$records = $query->result();

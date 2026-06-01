@@ -91,7 +91,7 @@ class drawing_management extends AdminController
 		$data['customer_groups'] = $this->client_groups_model->get_groups();
 		$data['discipline'] = $this->drawing_management_model->get_discipline();
 		$this->load->model('purchase/purchase_model');
-		$data['vendors'] = $this->purchase_model->get_vendor();
+		$data['vendors'] = $this->purchase_model->get_vendor('', db_prefix() . 'pur_contacts.id IS NOT NULL');
 
 		$this->load->view('file_managements/file_management.php', $data);
 	}
