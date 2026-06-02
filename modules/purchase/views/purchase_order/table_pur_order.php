@@ -211,11 +211,7 @@ $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [db
 $output  = $result['output'];
 $rResult = $result['rResult'];
 
-$footer_data = [
-    'total_po_value' => 0,
-    'total_tax_value' => 0,
-    'total_po_value_included_tax' => 0,
-];
+$footer_data = [];
 
 $this->ci->load->model('purchase/purchase_model');
 $sr = 1;
@@ -231,14 +227,10 @@ foreach ($rResult as $aRow) {
             $_data = $aRow[$aColumns[$i]];
         }
 
-        $base_currency = get_base_currency_pur();
-        if($aRow['currency'] != 0){
-            $base_currency = pur_get_currency_by_id($aRow['currency']);
-        }
+        $currency_name = get_currency_name($aRow['currency']);
 
         if($aColumns[$i] == 'total'){
-            // $_data = app_format_money($aRow['total'], $base_currency->symbol);
-            $_data = app_format_money($po_contract_data['po_with_co_total'], $base_currency->symbol);
+            $_data = app_format_money($po_contract_data['po_with_co_total'], $currency_name);
         }elseif($aColumns[$i] == 'pur_order_number'){
 
             $numberOutput = '';
@@ -266,7 +258,7 @@ foreach ($rResult as $aRow) {
         }elseif($aColumns[$i] == 'approve_status'){
             $_data = get_status_approve($aRow['approve_status']);
         }elseif($aColumns[$i] == 'total_tax'){
-          $_data = app_format_money($po_contract_data['po_with_co_tax'], $base_currency->symbol);
+          $_data = app_format_money($po_contract_data['po_with_co_tax'], $currency_name);
         }elseif($aColumns[$i] == 'expense_convert'){
             if($aRow['expense_convert'] == 0){
              $_data = '<a href="javascript:void(0)" onclick="convert_expense('.$aRow['id'].','.$aRow['total'].'); return false;" class="btn btn-warning btn-icon">'._l('convert').'</a>';
@@ -285,8 +277,7 @@ foreach ($rResult as $aRow) {
         }elseif($aColumns[$i] == 'type'){
             $_data = _l($aRow['type']);
         }elseif($aColumns[$i] == 'subtotal'){
-            // $_data = app_format_money($aRow['subtotal'],$base_currency->symbol);
-            $_data = app_format_money($po_contract_data['po_contract_amount'], $base_currency->symbol);
+            $_data = app_format_money($po_contract_data['po_contract_amount'], $currency_name);
         }elseif($aColumns[$i] == 'project'){
             $_data = $aRow['project_name'];
         }elseif($aColumns[$i] == 'department'){
@@ -421,14 +412,32 @@ foreach ($rResult as $aRow) {
         $row[] = $_data;
     }
 
-    $footer_data['total_po_value'] += $po_contract_data['po_contract_amount'];
-    $footer_data['total_tax_value'] += $po_contract_data['po_with_co_tax'];
-    $footer_data['total_po_value_included_tax'] += $po_contract_data['po_with_co_total'];
+    $currency_key = $currency_name;
+    if (!isset($footer_data[$currency_key])) {
+        $footer_data[$currency_key] = [
+            'currency_name' => $currency_name,
+            'subtotal' => 0,
+            'tax' => 0,
+            'total' => 0,
+        ];
+    }
+    $footer_data[$currency_key]['subtotal'] += $po_contract_data['po_contract_amount'];
+    $footer_data[$currency_key]['tax'] += $po_contract_data['po_with_co_tax'];
+    $footer_data[$currency_key]['total'] += $po_contract_data['po_with_co_total'];
     $output['aaData'][] = $row;
     $sr++;
 }
 
-foreach ($footer_data as $key => $total) {
-    $footer_data[$key] = app_format_money($total, $base_currency->symbol);
+$total_po_value = [];
+$total_tax_value = [];
+$total_total_value = [];
+foreach ($footer_data as $currency => $totals) {
+    $total_po_value[] = app_format_money($totals['subtotal'], $currency);
+    $total_tax_value[] = app_format_money($totals['tax'], $currency);
+    $total_total_value[] = app_format_money($totals['total'], $currency);
 }
-$output['sums'] = $footer_data;
+$output['sums'] = [
+    'total_po_value' => implode(', ', $total_po_value),
+    'total_tax_value' => implode(', ', $total_tax_value),
+    'total_po_value_included_tax' => implode(', ', $total_total_value),
+];

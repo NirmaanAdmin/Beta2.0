@@ -236,9 +236,9 @@ function get_purchase_order_dashboard() {
     response = JSON.parse(response);
 
     // Update value summaries
-    $('.total_po_value').text(response.total_po_value);
-    $('.approved_po_value').text(response.approved_po_value);
-    $('.draft_po_value').text(response.draft_po_value);
+    $('.total_po_value').html(response.total_po_value);
+    $('.approved_po_value').html(response.approved_po_value);
+    $('.draft_po_value').html(response.draft_po_value);
 
     // PIE CHART - Approval Status
     var pieCtx = document.getElementById('pieChartForPOApprovalStatus').getContext('2d');

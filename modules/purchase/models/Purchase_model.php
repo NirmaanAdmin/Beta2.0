@@ -5331,9 +5331,9 @@ class Purchase_model extends App_Model
      */
     public function get_purorder_pdf_html($pur_order_id)
     {
-
         $pur_order = $this->get_pur_order($pur_order_id);
         $pur_order_detail = $this->get_pur_order_detail($pur_order_id);
+        $currency_name = get_currency_name($pur_order->currency);
         $company_name = get_option('invoice_company_name');
         $address = get_option('invoice_company_address');
         $day = date('d', strtotime($pur_order->order_date));
@@ -5508,13 +5508,12 @@ class Purchase_model extends App_Model
             }
 
             $html .= '<td align="right" style="width: 10%">' . $row['quantity']  . ' ' . $unit_name . '</td>
-            <td align="right" style="width: 11%">' . '₹ ' . app_format_money($row['unit_price'], '') . '</td>
+            <td align="right" style="width: 11%">' . app_format_money($row['unit_price'], $currency_name) . '</td>
             
-            <td align="right" style="width: 10%">' . app_format_money($row['tax_rate'], '') . '</td>
+            <td align="right" style="width: 10%">' . app_format_money($row['tax_rate'], $currency_name) . '</td>
             
-            <td align="right" style="width: 12%">' . '₹ ' . app_format_money($row['total_money'], '') . '</td>
+            <td align="right" style="width: 12%">' . app_format_money($row['total_money'], $currency_name) . '</td>
           </tr>';
-            //   <td align="right" style="width: 12%">' . '₹ ' . app_format_money($row['total'] - $row['into_money'], '') . '</td>
             $t_mn += $row['total_money'];
             $tax_total += $row['total'] - $row['into_money'];
             $sub_total_amn += $row['total_money'] - $tax_total;
@@ -5535,7 +5534,7 @@ class Purchase_model extends App_Model
             <td width="33%"></td>
             <td>' . _l('subtotal') . ' </td>
             <td class="subtotal">
-            ' . '₹ ' . app_format_money($pur_order->subtotal, '') . '
+            ' . app_format_money($pur_order->subtotal, $currency_name) . '
             </td>
             </tr>';
         }
@@ -5544,14 +5543,14 @@ class Purchase_model extends App_Model
               <td width="33%"></td>
                  <td>Discount' . $discount_remarks . ' (%)</td>
                  <td class="subtotal">
-                    ' . app_format_money($pur_order->discount_percent, '') . ' %' . '
+                    ' . app_format_number($pur_order->discount_percent) . ' %' . '
                  </td>
               </tr>
               <tr id="subtotal">
               <td width="33%"></td>
                  <td>Discount' . $discount_remarks . '(amount)</td>
                  <td class="subtotal">
-                    ' . '₹ ' . app_format_money($pur_order->discount_total, '') . '
+                    ' . app_format_money($pur_order->discount_total, $currency_name) . '
                  </td>
               </tr>';
             $total_after_discount = 0;
@@ -5560,7 +5559,7 @@ class Purchase_model extends App_Model
               <td width="33%"></td>
                  <td>Total after discount' . $discount_remarks . '</td>
                  <td class="subtotal">
-                    ' . '₹ ' . app_format_money($total_after_discount, '') . '
+                    ' . app_format_money($total_after_discount, $currency_name) . '
                  </td>
               </tr>';
         }
@@ -5569,7 +5568,7 @@ class Purchase_model extends App_Model
             <td width="33%"></td>
             <td>' . _l('Tax') . ' </td>
             <td class="taxtotal">
-            ' . '₹ ' . app_format_money($tax_total, '') . '
+            ' . app_format_money($tax_total, $currency_name) . '
             </td>
             </tr>';
         }
@@ -5577,7 +5576,7 @@ class Purchase_model extends App_Model
                  <td width="33%"></td>
                  <td><strong>' . _l('total') . '</strong></td>
                  <td class="subtotal">
-                    ' . '₹ ' . app_format_money($pur_order->total, '') . '
+                    ' . app_format_money($pur_order->total, $currency_name) . '
                  </td>
               </tr>';
 
@@ -12128,9 +12127,9 @@ class Purchase_model extends App_Model
 
         if ($unit_price != '') {
             $original_price = ($currency_rate > 0) ? round(($unit_price / $currency_rate), 2) : 0;
-            $base_currency = get_base_currency();
-            if ($to_currency != 0 && $to_currency != $base_currency->id) {
-                $row .= render_input('original_price', '', app_format_money($original_price, $base_currency), 'text', ['data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => _l('original_price'), 'disabled' => true], [], 'no-margin', 'input-transparent text-right pur_input_none');
+            if (!empty($to_currency)) {
+                $currency_name = get_currency_name($to_currency);
+                $row .= render_input('original_price', '', app_format_money($original_price, $currency_name), 'text', ['data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => _l('original_price'), 'disabled' => true], [], 'no-margin', 'input-transparent text-right pur_input_none');
             }
             $row .= '<input class="hide" name="og_price" disabled="true" value="' . $original_price . '">';
         }
@@ -22266,7 +22265,7 @@ class Purchase_model extends App_Model
         $response['pie_budget_name'] = $response['pie_tax_value'] = array();
         $response['line_order_date'] = $response['line_order_total'] = array();
 
-        $this->db->select('id, pur_order_number, approve_status, total, order_date, total_tax, group_pur, vendor, project');
+        $this->db->select('id, pur_order_number, approve_status, total, order_date, total_tax, group_pur, vendor, project, currency');
         if (!empty($vendors) && is_array($vendors)) {
             $this->db->where_in(db_prefix() . 'pur_orders.vendor', $vendors);
         }
@@ -22280,34 +22279,17 @@ class Purchase_model extends App_Model
         $pur_orders = $this->db->get(db_prefix() . 'pur_orders')->result_array();
 
         if (!empty($pur_orders)) {
-            $draft_po_value = 0;
-            $approved_po_value = 0;
             $draft_po_array = array_filter($pur_orders, function ($item) {
                 return in_array($item['approve_status'], [1]);
             });
-
-            if (!empty($draft_po_array)) {
-                $draft_po_value = array_reduce($draft_po_array, function ($carry, $item) {
-                    return $carry + (float)$item['total'];
-                }, 0);
-            }
-            $response['draft_po_value'] = app_format_money($draft_po_value, $base_currency->symbol);
+            $response['draft_po_value'] = format_currency_totals($draft_po_array, 'total');
 
             $approved_po_array = array_filter($pur_orders, function ($item) {
                 return in_array($item['approve_status'], [2]);
             });
-
-            if (!empty($approved_po_array)) {
-                $approved_po_value = array_reduce($approved_po_array, function ($carry, $item) {
-                    return $carry + (float)$item['total'];
-                }, 0);
-            }
-            $response['approved_po_value'] = app_format_money($approved_po_value, $base_currency->symbol);
-
-            $total_po_value = array_reduce($pur_orders, function ($carry, $item) {
-                return $carry + (float)$item['total'];
-            }, 0);
-            $response['total_po_value'] = app_format_money($total_po_value, $base_currency->symbol);
+            $response['approved_po_value'] = format_currency_totals($approved_po_array, 'total');
+            
+            $response['total_po_value'] = format_currency_totals($pur_orders, 'total');
 
             $response['draft_po_count'] = count(array_filter($pur_orders, function ($item) {
                 return isset($item['approve_status']) && $item['approve_status'] == 1;

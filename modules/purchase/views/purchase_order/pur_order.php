@@ -288,7 +288,7 @@
                     <div class="row">
                       <div class="col-md-6 ">
                         <?php
-                        $currency_attr = array('disabled' => true, 'data-show-subtext' => true);
+                        $currency_attr = array('data-show-subtext' => true);
 
                         $selected = '';
                         foreach ($currencies as $currency) {
@@ -797,9 +797,7 @@
               echo form_hidden('from_currency', $from_currency);
 
               ?>
-              <div class="col-md-8 <?php if ($po_currency->id == $base_currency->id) {
-                                      echo 'hide';
-                                    } ?>" id="currency_rate_div">
+              <div class="col-md-8 hide" id="currency_rate_div">
                 <div class="col-md-10 text-right">
 
                   <p class="mtop10"><?php echo _l('currency_rate'); ?><span id="convert_str"><?php echo ' (' . $base_currency->name . ' => ' . $po_currency->name . '): ';  ?></span></p>
@@ -986,9 +984,9 @@
                 <strong>Subject:</strong> <span class="pur_order_name"></span><br><br>
 
                 Dear Sir/Madam,<br>
-                This is with reference to your final offer dated <span class="order_date">' . $formatted_date . '</span> and further our subsequent discussions with regards to <span class="pur_order_name"></span> for our above-mentioned project. We are pleased to issue you the order of <strong>INR <span class="subtotal_in_value"></span>/-</strong> (<span class="subtotal_in_words"></span>) (Exclusive of GST) on the following terms and conditions and specifications for the same as annexed.<br><br>
+                This is with reference to your final offer dated <span class="order_date">' . $formatted_date . '</span> and further our subsequent discussions with regards to <span class="pur_order_name"></span> for our above-mentioned project. We are pleased to issue you the order of <strong><span class="order_summary_currency">INR</span> <span class="subtotal_in_value"></span>/-</strong> (<span class="subtotal_in_words"></span>) (Exclusive of GST) on the following terms and conditions and specifications for the same as annexed.<br><br>
 
-                <strong>Currency:</strong> INR<br><br>
+                <strong>Currency:</strong> <span class="order_summary_currency">INR</span><br><br>
 
                 <strong>Terms:</strong> F.O.R. at Site<br><br>
 
@@ -1338,8 +1336,8 @@
         // $('select[name="estimate"]').html(response.estimate_html);
         // $('select[name="estimate"]').selectpicker('refresh');
 
-        $('select[name="currency"]').val(response.currency).change();
-        $('input[name="currency_rate"]').val(response.currency_rate).change();
+        // $('select[name="currency"]').val(response.currency).change();
+        // $('input[name="currency_rate"]').val(response.currency_rate).change();
 
         // $('.invoice-item table.invoice-items-table.items tbody').html('');
         // $('.invoice-item table.invoice-items-table.items tbody').append(response.list_item);

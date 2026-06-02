@@ -1619,6 +1619,7 @@ class purchase extends AdminController
         $data['payment_certificate'] = $this->purchase_model->get_all_po_payment_certificate($id);
         $data['bills_data'] = $this->purchase_model->get_bills_data($id);
         $data['qor'] = $this->purchase_model->get_qor_by_po($id);
+        $data['currency_name'] = get_currency_name($estimate->currency);
         if ($to_return == false) {
             $this->load->view('purchase_order/pur_order_preview', $data);
         } else {
