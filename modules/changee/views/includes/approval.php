@@ -1,5 +1,11 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
 
+<?php $related = [ 
+	0 => ['id' => 'co_request', 'name' => _l('co_request')],
+	1 => ['id' => 'pur_quotation', 'name' => _l('pur_quotation')],
+	2 => ['id' => 'pur_order', 'name' => _l('Change order')],
+	3 => ['id' => 'payment_request', 'name' => _l('payment_request')],
+]; ?>
 <div class="_buttons">
 	<a href="#" class="btn btn-info pull-left" onclick="new_approval_setting(); return false;"><?php echo _l('new_approval_setting'); ?></a>
 </div>
@@ -20,7 +26,16 @@
 		   <td><?php echo $key + 1; ?></td>
 		   <td><?php echo get_project_name_by_id($value['project_id']); ?></td>
 		   <td><?php echo changee_pur_html_entity_decode($value['name']); ?></td>
-		   <td><?php echo _l($value['related']); ?></td>
+		   <td>
+		   <?php
+		   foreach ($related as $item) {
+			    if ($item['id'] === $value['related']) {
+			        echo $item['name'];
+			        break;
+			    }
+		    }
+		    ?>
+		   </td>
 		   <td>
 		     <a href="#" onclick="edit_approval_setting(this,<?php echo changee_pur_html_entity_decode($value['id']); ?>); return false" data-name="<?php echo changee_pur_html_entity_decode($value['name']); ?>" data-related="<?php echo html_entity_decode($value['related']); ?>" data-project='<?php echo html_entity_decode($value['project_id']); ?>' data-approver='<?php echo html_entity_decode($value['approver']); ?>' class="btn btn-default btn-icon"><i class="fa fa-pencil-square"></i></a>
 		      <a href="<?php echo admin_url('changee/delete_approval_setting/'.$value['id']); ?>" class="btn btn-danger btn-icon _delete"><i class="fa fa-remove"></i></a>
@@ -53,12 +68,6 @@ if(changee_get_status_modules_pur('hr_profile') == true){
 					<div class="col-md-12">
 						<?php echo render_select('project_id', $projects, array('id','name'), 'project'); ?>
 						<?php echo render_input('name','subject','','text'); ?>
-						<?php $related = [ 
-								0 => ['id' => 'co_request', 'name' => _l('co_request')],
-								1 => ['id' => 'pur_quotation', 'name' => _l('pur_quotation')],
-								2 => ['id' => 'pur_order', 'name' => _l('pur_order')],
-								3 => ['id' => 'payment_request', 'name' => _l('payment_request')],
-							]; ?>
 						<?php echo render_select('related',$related,array('id','name'),'task_single_related'); ?>
 						<div class="select-placeholder form-group">
 							<label for="approver" class="control-label"><?php echo _l('approver'); ?></label>
