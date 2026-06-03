@@ -134,15 +134,15 @@
 				if (strpos($item->name, '.pdf') !== false) { ?>
 					<tr>
 						<td class="text-nowrap"><?php echo _l('DWG Drawing'); ?></td>
-						<td><?php if (isset($item->pdf_attachment) && !empty($item->pdf_attachment)) : ?>
+						<!-- <td><?php if (isset($item->pdf_attachment) && !empty($item->pdf_attachment)) : ?>
 
 								<?php
-								// Build the correct file path and URLs
-								$file_path = FCPATH . 'modules/drawing_management/uploads/pdf_attachments/' . $item->id . '/' . $item->pdf_attachment;
-								$download_url = base_url('modules/drawing_management/uploads/pdf_attachments/' . $item->id . '/' . rawurlencode($item->pdf_attachment));
+										// Build the correct file path and URLs
+										$file_path = FCPATH . 'modules/drawing_management/uploads/pdf_attachments/' . $item->id . '/' . $item->pdf_attachment;
+										$download_url = base_url('modules/drawing_management/uploads/pdf_attachments/' . $item->id . '/' . rawurlencode($item->pdf_attachment));
 
-								// Only show if file exists
-								if (file_exists($file_path)) : ?>
+										// Only show if file exists
+										if (file_exists($file_path)) : ?>
 									<a href="<?php echo $download_url; ?>" class="display-block mbot5" target="_blank" download>
 										<?php echo htmlspecialchars($item->pdf_attachment); ?>
 									</a>
@@ -150,6 +150,50 @@
 								<?php endif; ?>
 
 							<?php endif; ?>
+						</td> -->
+						<td>
+
+							<?php if (isset($item->pdf_attachment) && !empty($item->pdf_attachment)) : ?>
+
+								<?php
+								$file_path = FCPATH . 'modules/drawing_management/uploads/pdf_attachments/' . $item->id . '/' . $item->pdf_attachment;
+								$download_url = base_url(
+									'modules/drawing_management/uploads/pdf_attachments/' .
+										$item->id . '/' .
+										rawurlencode($item->pdf_attachment)
+								);
+
+								if (file_exists($file_path)) :
+								?>
+									<a href="<?php echo $download_url; ?>" class="display-block mbot5" target="_blank" download>
+										<?php echo htmlspecialchars($item->pdf_attachment); ?>
+									</a>
+								<?php endif; ?>
+
+							<?php elseif (isset($dwg_attachment) && !empty($dwg_attachment)) : ?>
+
+								<?php foreach ($dwg_attachment as $attachment) : ?>
+
+									<?php
+									$file_path = FCPATH . 'modules/drawing_management/uploads/pdf_attachments/' . $item->id . '/' . $attachment['file_name'];
+
+									$download_url = base_url(
+										'modules/drawing_management/uploads/pdf_attachments/' .
+											$item->id . '/' .
+											rawurlencode($attachment['file_name'])
+									);
+
+									if (file_exists($file_path)) :
+									?>
+										<a href="<?php echo $download_url; ?>" class="display-block mbot5" target="_blank" download>
+											<?php echo htmlspecialchars($attachment['file_name']); ?>
+										</a>
+									<?php endif; ?>
+
+								<?php endforeach; ?>
+
+							<?php endif; ?>
+
 						</td>
 					</tr>
 
@@ -610,8 +654,32 @@
 							<i class="fa fa-eye"></i> <?php echo _l('View Other Attachments'); ?>
 						</a>
 					<?php } ?>
-					<?php if (!(strpos($item->pdf_attachment, '.dwg') === false) || !(strpos($item->pdf_attachment, '.xref') === false)) { ?>
-						<a href="<?php echo admin_url('drawing_management/preview_file_pdf_dwg?id=' . $item->id) ?>" target="_blank" class="btn btn-default w100 mtop5 mbot5">
+					<?php
+					$show_dwg_button = false;
+
+					// Old attachment field
+					if (!empty($item->pdf_attachment)) {
+						$ext = strtolower(pathinfo($item->pdf_attachment, PATHINFO_EXTENSION));
+						if (in_array($ext, ['dwg', 'xref'])) {
+							$show_dwg_button = true;
+						}
+					}
+
+					// New attachment table
+					if (!$show_dwg_button && !empty($dwg_attachment)) {
+						foreach ($dwg_attachment as $attachment) {
+							$ext = strtolower(pathinfo($attachment['file_name'], PATHINFO_EXTENSION));
+
+							if (in_array($ext, ['dwg', 'xref'])) {
+								$show_dwg_button = true;
+								break;
+							}
+						}
+					}
+
+					if ($show_dwg_button) {
+					?>
+						<a href="<?php echo admin_url('drawing_management/preview_file_pdf_dwg?id=' . $item->id); ?>" target="_blank" class="btn btn-default w100 mtop5 mbot5">
 							<i class="fa fa-eye"></i> View DWG
 						</a>
 					<?php } ?>

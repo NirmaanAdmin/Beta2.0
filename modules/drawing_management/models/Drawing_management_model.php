@@ -248,40 +248,87 @@ class drawing_management_model extends app_model
 				$data['master_id'] = $this->get_master_id($data['parent_id']);
 			}
 
+			// if (!empty($_FILES['pdf_attachment']['name'])) {
+			// 	$uploadDir = DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/pdf_attachments/' . $id . '/';
+
+			// 	// Create directory if it doesn't exist
+			// 	if (!file_exists($uploadDir)) {
+			// 		mkdir($uploadDir, 0755, true);
+			// 	}
+
+			// 	$allowedExtensions = ['dwg', 'xref'];
+			// 	$fileExtension = pathinfo($_FILES['pdf_attachment']['name'], PATHINFO_EXTENSION);
+			// 	$originalFileName = basename($_FILES['pdf_attachment']['name']);
+
+			// 	// Validate file type
+			// 	if (in_array(strtolower($fileExtension), $allowedExtensions)) {
+			// 		$targetPath = $uploadDir . $originalFileName;
+
+			// 		// Check if file already exists and handle accordingly
+			// 		if (file_exists($targetPath)) {
+			// 			// Option 1: Append timestamp to filename to avoid overwriting
+			// 			$fileNameParts = pathinfo($originalFileName);
+			// 			$targetPath = $uploadDir . $fileNameParts['filename'] . '.' . $fileNameParts['extension'];
+
+			// 			// Option 2: Uncomment below to simply overwrite existing file
+			// 			// unlink($targetPath);
+			// 		}
+
+			// 		if (move_uploaded_file($_FILES['pdf_attachment']['tmp_name'], $targetPath)) {
+			// 			// Save relative path in database (including the subfolder structure)
+			// 			$data['pdf_attachment'] =  basename($targetPath);
+			// 		} else {
+			// 			// set_alert('warning', _l('file_upload_failed'));
+			// 		}
+			// 	} else {
+			// 		// set_alert('danger', _l('only_dwg_xref_files_allowed'));
+			// 	}
+			// }
+
 			if (!empty($_FILES['pdf_attachment']['name'])) {
+
 				$uploadDir = DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/pdf_attachments/' . $id . '/';
 
 				// Create directory if it doesn't exist
 				if (!file_exists($uploadDir)) {
-					mkdir($uploadDir, 0755, true);
+					mkdir($uploadDir, 0777, true);
 				}
 
 				$allowedExtensions = ['dwg', 'xref'];
-				$fileExtension = pathinfo($_FILES['pdf_attachment']['name'], PATHINFO_EXTENSION);
-				$originalFileName = basename($_FILES['pdf_attachment']['name']);
 
-				// Validate file type
-				if (in_array(strtolower($fileExtension), $allowedExtensions)) {
-					$targetPath = $uploadDir . $originalFileName;
+				// Handle both single and multiple file uploads
+				$fileNames = is_array($_FILES['pdf_attachment']['name'])
+					? $_FILES['pdf_attachment']['name']
+					: [$_FILES['pdf_attachment']['name']];
 
-					// Check if file already exists and handle accordingly
-					if (file_exists($targetPath)) {
-						// Option 1: Append timestamp to filename to avoid overwriting
-						$fileNameParts = pathinfo($originalFileName);
-						$targetPath = $uploadDir . $fileNameParts['filename'] . '.' . $fileNameParts['extension'];
+				foreach ($fileNames as $key => $fileName) {
 
-						// Option 2: Uncomment below to simply overwrite existing file
-						// unlink($targetPath);
+					if (empty($fileName)) {
+						continue;
 					}
 
-					if (move_uploaded_file($_FILES['pdf_attachment']['tmp_name'], $targetPath)) {
-						// Save relative path in database (including the subfolder structure)
-						$data['pdf_attachment'] =  basename($targetPath);
-					} else {
-						// set_alert('warning', _l('file_upload_failed'));
+					$fileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
+
+					// Validate file extension
+					if (in_array(strtolower($fileExtension), $allowedExtensions)) {
+
+						$newFileName = $fileName;
+						$targetPath  = $uploadDir . $newFileName;
+
+						$tmpName = is_array($_FILES['pdf_attachment']['tmp_name'])
+							? $_FILES['pdf_attachment']['tmp_name'][$key]
+							: $_FILES['pdf_attachment']['tmp_name'];
+
+						if (move_uploaded_file($tmpName, $targetPath)) {
+
+							$insertData = [
+								'dms_id'    => $id,
+								'file_name' => $newFileName,
+							];
+
+							$this->db->insert('tbldms_dwg_attachments', $insertData);
+						}
 					}
-				} else {
-					// set_alert('danger', _l('only_dwg_xref_files_allowed'));
 				}
 			}
 
@@ -1820,30 +1867,100 @@ class drawing_management_model extends app_model
 	 * @param  string $folder 
 	 * @return boolean         
 	 */
+	// public function upload_version_file($id, $version = '1.0.0')
+	// {
+	// 	$totalUploaded = 0;
+	// 	$data_item = $this->get_item($id);
+	// 	if ($data_item) {
+	// 		$parent_id = $data_item->parent_id;
+	// 		$path = DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/files/' . $parent_id . '/';
+	// 		if (
+	// 			isset($_FILES['file']['name'])
+	// 			&& ($_FILES['file']['name'] != '' || is_array($_FILES['file']['name']) && count($_FILES['file']['name']) > 0)
+	// 		) {
+	// 			if (!is_array($_FILES['file']['name'])) {
+	// 				$_FILES['file']['name'] = [$_FILES['file']['name']];
+	// 				$_FILES['file']['type'] = [$_FILES['file']['type']];
+	// 				$_FILES['file']['tmp_name'] = [$_FILES['file']['tmp_name']];
+	// 				$_FILES['file']['error'] = [$_FILES['file']['error']];
+	// 				$_FILES['file']['size'] = [$_FILES['file']['size']];
+	// 			}
+	// 			_file_attachments_index_fix('file');
+	// 			for ($i = 0; $i < count($_FILES['file']['name']); $i++) {
+	// 				// Get the temp file path
+	// 				$tmpFilePath = $_FILES['file']['tmp_name'][$i];
+	// 				// Make sure we have a filepath
+	// 				if (!empty($tmpFilePath) && $tmpFilePath != '') {
+	// 					if (
+	// 						_perfex_upload_error($_FILES['file']['error'][$i])
+	// 						|| !_upload_extension_allowed($_FILES['file']['name'][$i])
+	// 					) {
+	// 						continue;
+	// 					}
+
+	// 					_maybe_create_upload_path($path);
+	// 					$filename = $this->check_duplicate_file_name($parent_id, $_FILES['file']['name'][$i]);
+	// 					$newFilePath = $path . $filename;
+	// 					// Upload the file into the temp dir
+	// 					if (move_uploaded_file($tmpFilePath, $newFilePath)) {
+
+	// 						$version_data['name'] = $data_item->name;
+	// 						$version_data['version'] = $data_item->version;
+	// 						$version_data['filetype'] = $data_item->filetype;
+	// 						$version_data['parent_id'] = $id;
+	// 						$res_vs = $this->create_version_file($version_data);
+	// 						if ($res_vs) {
+
+	// 							// Move previous file to log folder
+	// 							$from_path = $path . $data_item->name;
+	// 							$log_path = DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/log_versions/' . $id . '/';
+	// 							_maybe_create_upload_path($log_path);
+	// 							$to_path = $log_path . $data_item->name;
+	// 							$this->move_file_to_folder($from_path, $to_path);
+
+	// 							// Update name and version of new file to database
+	// 							$this->update_change_version_to_database($filename, $id, $version, $_FILES['file']['type'][$i]);
+	// 							$totalUploaded++;
+	// 						}
+	// 					}
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// 	return (bool) $totalUploaded;
+	// }
+
 	public function upload_version_file($id, $version = '1.0.0')
 	{
 		$totalUploaded = 0;
 		$data_item = $this->get_item($id);
+
 		if ($data_item) {
+
 			$parent_id = $data_item->parent_id;
 			$path = DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/files/' . $parent_id . '/';
+
 			if (
 				isset($_FILES['file']['name'])
 				&& ($_FILES['file']['name'] != '' || is_array($_FILES['file']['name']) && count($_FILES['file']['name']) > 0)
 			) {
+
 				if (!is_array($_FILES['file']['name'])) {
-					$_FILES['file']['name'] = [$_FILES['file']['name']];
-					$_FILES['file']['type'] = [$_FILES['file']['type']];
+					$_FILES['file']['name']     = [$_FILES['file']['name']];
+					$_FILES['file']['type']     = [$_FILES['file']['type']];
 					$_FILES['file']['tmp_name'] = [$_FILES['file']['tmp_name']];
-					$_FILES['file']['error'] = [$_FILES['file']['error']];
-					$_FILES['file']['size'] = [$_FILES['file']['size']];
+					$_FILES['file']['error']    = [$_FILES['file']['error']];
+					$_FILES['file']['size']     = [$_FILES['file']['size']];
 				}
+
 				_file_attachments_index_fix('file');
+
 				for ($i = 0; $i < count($_FILES['file']['name']); $i++) {
-					// Get the temp file path
+
 					$tmpFilePath = $_FILES['file']['tmp_name'][$i];
-					// Make sure we have a filepath
+
 					if (!empty($tmpFilePath) && $tmpFilePath != '') {
+
 						if (
 							_perfex_upload_error($_FILES['file']['error'][$i])
 							|| !_upload_extension_allowed($_FILES['file']['name'][$i])
@@ -1852,27 +1969,54 @@ class drawing_management_model extends app_model
 						}
 
 						_maybe_create_upload_path($path);
-						$filename = $this->check_duplicate_file_name($parent_id, $_FILES['file']['name'][$i]);
+
+						$filename = $this->check_duplicate_file_name(
+							$parent_id,
+							$_FILES['file']['name'][$i]
+						);
+
 						$newFilePath = $path . $filename;
-						// Upload the file into the temp dir
+
 						if (move_uploaded_file($tmpFilePath, $newFilePath)) {
 
-							$version_data['name'] = $data_item->name;
-							$version_data['version'] = $data_item->version;
-							$version_data['filetype'] = $data_item->filetype;
+							$version_data['name']      = $data_item->name;
+							$version_data['version']   = $data_item->version;
+							$version_data['filetype']  = $data_item->filetype;
 							$version_data['parent_id'] = $id;
+
 							$res_vs = $this->create_version_file($version_data);
+
 							if ($res_vs) {
+
+								// Move DWG attachments from DMS record to version record
+								$this->db->where('dms_id', $id);
+								$this->db->update(
+									db_prefix() . 'dms_dwg_attachments',
+									[
+										'dms_id'      => NULL,
+										'versions_id' => $res_vs
+									]
+								);
 
 								// Move previous file to log folder
 								$from_path = $path . $data_item->name;
+
 								$log_path = DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/log_versions/' . $id . '/';
+
 								_maybe_create_upload_path($log_path);
+
 								$to_path = $log_path . $data_item->name;
+
 								$this->move_file_to_folder($from_path, $to_path);
 
 								// Update name and version of new file to database
-								$this->update_change_version_to_database($filename, $id, $version, $_FILES['file']['type'][$i]);
+								$this->update_change_version_to_database(
+									$filename,
+									$id,
+									$version,
+									$_FILES['file']['type'][$i]
+								);
+
 								$totalUploaded++;
 							}
 						}
@@ -1880,6 +2024,7 @@ class drawing_management_model extends app_model
 				}
 			}
 		}
+
 		return (bool) $totalUploaded;
 	}
 
@@ -3469,6 +3614,13 @@ class drawing_management_model extends app_model
 		$this->db->select('*');
 		$this->db->where('dms_id', $id);
 		return $this->db->get(db_prefix() . 'dms_attachments')->result_array();
+	}
+
+	public function get_dwg_attachment($id)
+	{
+		$this->db->select('*');
+		$this->db->where('dms_id', $id);
+		return $this->db->get(db_prefix() . 'dms_dwg_attachments')->result_array();
 	}
 	public function get_other_old_attachment($id)
 	{

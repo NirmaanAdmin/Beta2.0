@@ -81,6 +81,7 @@ class drawing_management extends AdminController
 				redirect(admin_url('drawing_management'));
 			}
 			$data['other_attachment'] = $this->drawing_management_model->get_other_attachment($id);
+			$data['dwg_attachment'] = $this->drawing_management_model->get_dwg_attachment($id);
 		}
 		$data['share_id'] = $this->drawing_management_model->get_item_share_to_me(true);
 		$data['file_locked'] = $file_locked;
@@ -475,10 +476,27 @@ class drawing_management extends AdminController
 		if (!(has_permission('drawing_management_file_management', '', 'view') || has_permission('drawing_management_file_management', '', 'view_own'))) {
 			access_denied('drawing_management');
 		}
-		$data['title']                 = _l('dmg_file_management');
-		$master_parent_id = '';
+
+		$data['title'] = _l('dmg_file_management');
+
 		$id = $this->input->get('id');
+
 		$data['file'] = $this->drawing_management_model->get_item($id);
+
+		// If old pdf_attachment is empty, get first DWG attachment
+		if (empty($data['file']->pdf_attachment)) {
+
+			$dwg_attachment = $this->db
+				->where('dms_id', $id)
+				->order_by('id', 'ASC')
+				->get(db_prefix() . 'dms_dwg_attachments')
+				->row();
+
+			if ($dwg_attachment) {
+				$data['file']->pdf_attachment = $dwg_attachment->file_name;
+			}
+		}
+
 		$this->load->view('file_managements/preview_file_pdf_dwg.php', $data);
 	}
 
@@ -1495,9 +1513,82 @@ class drawing_management extends AdminController
 		$this->load->view('file_managements/preview_other_file.php', $data);
 	}
 
+	// public function download_bundle($id)
+	// {
+
+	// 	$this->load->library('zip');
+
+	// 	$item = $this->drawing_management_model->get_item($id);
+
+	// 	if (!$item) {
+	// 		show_404();
+	// 	}
+	// 	$data_log_version = $this->drawing_management_model->get_log_version_by_parent($item->id);
+	// 	foreach ($data_log_version  as $key => $log) {
+
+	// 		$log_path =
+	// 			FCPATH .
+	// 			'modules/drawing_management/uploads/log_versions/' .
+	// 			$log['parent_id'] . '/' .
+	// 			$log['name'];
+
+	// 		if (file_exists($log_path)) {
+	// 			$this->zip->read_file($log_path);
+	// 		}
+	// 	}
+
+
+
+	// 	/*
+	// 	|--------------------------------------------------------------------------
+	// 	| Other Attachments
+	// 	|--------------------------------------------------------------------------
+	// 	*/
+	// 	$attachments = $this->drawing_management_model
+	// 		->get_other_attachment($item->id);
+
+	// 	foreach ($attachments as $attachment) {
+
+	// 		$path =
+	// 			FCPATH .
+	// 			'modules/drawing_management/uploads/all_attachment/' .
+	// 			$item->id . '/' .
+	// 			$attachment['file_name'];
+
+	// 		if (file_exists($path)) {
+	// 			$this->zip->read_file($path);
+	// 		}
+	// 	}
+
+	// 	/*
+	// 	|--------------------------------------------------------------------------
+	// 	| DWG Drawing
+	// 	|--------------------------------------------------------------------------
+	// 	*/
+	// 	if (!empty($item->pdf_attachment)) {
+
+	// 		$dwg =
+	// 			FCPATH .
+	// 			'modules/drawing_management/uploads/pdf_attachments/' .
+	// 			$item->id . '/' .
+	// 			$item->pdf_attachment;
+
+	// 		if (file_exists($dwg)) {
+	// 			$this->zip->read_file($dwg);
+	// 		}
+	// 	}
+
+	// 	$zip_name =
+	// 		'drawing_' .
+	// 		$item->id .
+	// 		'_' .
+	// 		date('Ymd_His') .
+	// 		'.zip';
+
+	// 	$this->zip->download($zip_name);
+	// }
 	public function download_bundle($id)
 	{
-
 		$this->load->library('zip');
 
 		$item = $this->drawing_management_model->get_item($id);
@@ -1505,8 +1596,10 @@ class drawing_management extends AdminController
 		if (!$item) {
 			show_404();
 		}
+
 		$data_log_version = $this->drawing_management_model->get_log_version_by_parent($item->id);
-		foreach ($data_log_version  as $key => $log) {
+
+		foreach ($data_log_version as $key => $log) {
 
 			$log_path =
 				FCPATH .
@@ -1519,15 +1612,12 @@ class drawing_management extends AdminController
 			}
 		}
 
-
-
 		/*
 		|--------------------------------------------------------------------------
 		| Other Attachments
 		|--------------------------------------------------------------------------
 		*/
-		$attachments = $this->drawing_management_model
-			->get_other_attachment($item->id);
+		$attachments = $this->drawing_management_model->get_other_attachment($item->id);
 
 		foreach ($attachments as $attachment) {
 
@@ -1544,10 +1634,62 @@ class drawing_management extends AdminController
 
 		/*
 		|--------------------------------------------------------------------------
-		| DWG Drawing
+		| DWG Attachments (Current + Version Records)
 		|--------------------------------------------------------------------------
 		*/
-		if (!empty($item->pdf_attachment)) {
+		$dwg_attachments = [];
+
+		// Current drawing attachments
+		$current_dwg_attachments = $this->db
+			->where('dms_id', $item->id)
+			->get(db_prefix() . 'dms_dwg_attachments')
+			->result_array();
+
+		if (!empty($current_dwg_attachments)) {
+			$dwg_attachments = array_merge($dwg_attachments, $current_dwg_attachments);
+		}
+
+		// Version attachments
+		if (!empty($data_log_version)) {
+
+			$version_ids = array_column($data_log_version, 'id');
+
+			if (!empty($version_ids)) {
+
+				$version_dwg_attachments = $this->db
+					->where_in('versions_id', $version_ids)
+					->get(db_prefix() . 'dms_dwg_attachments')
+					->result_array();
+
+				if (!empty($version_dwg_attachments)) {
+					$dwg_attachments = array_merge(
+						$dwg_attachments,
+						$version_dwg_attachments
+					);
+				}
+			}
+		}
+
+		if (!empty($dwg_attachments)) {
+
+			foreach ($dwg_attachments as $dwg_attachment) {
+
+				$dwg_path =
+					FCPATH .
+					'modules/drawing_management/uploads/pdf_attachments/' .
+					$item->id . '/' .
+					$dwg_attachment['file_name'];
+
+				if (file_exists($dwg_path)) {
+					$this->zip->read_file($dwg_path);
+				}
+			}
+		}
+		/*
+	|--------------------------------------------------------------------------
+	| Legacy DWG Attachment
+	|--------------------------------------------------------------------------
+	*/ elseif (!empty($item->pdf_attachment)) {
 
 			$dwg =
 				FCPATH .
@@ -1559,7 +1701,6 @@ class drawing_management extends AdminController
 				$this->zip->read_file($dwg);
 			}
 		}
-
 		$zip_name =
 			'drawing_' .
 			$item->id .
@@ -1601,7 +1742,7 @@ class drawing_management extends AdminController
 
 		// Handle Other Attachments
 		if (isset($_FILES['attachments']['name']) && !empty($_FILES['attachments']['name'])) {
-		$totalAttachments = $this->drawing_management_model->upload_other_attachments($parent_id);
+			$totalAttachments = $this->drawing_management_model->upload_other_attachments($parent_id);
 		}
 
 		// Return response

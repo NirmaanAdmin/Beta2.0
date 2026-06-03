@@ -164,7 +164,7 @@
 																				</div>
 																				<div class="col-md-12 text-center">
 																					<a href="javascript:void(0)" data-loading-text="<?php echo _l('fe_waiting'); ?>" onclick="approve_request(<?php echo drawing_htmldecode($id); ?>);" class="btn btn-success"><?php echo _l('approve'); ?></a>
-																					<a href="javascript:void(0)" data-loading-text="<?php echo _l('fe_waiting'); ?>" onclick="deny_request(<?php echo drawing_htmldecode($id); ?>);" class="btn btn-warning"><?php echo _l('deny'); ?></a>
+																					<a href="javascript:void(0)"  data-loading-text="<?php echo _l('fe_waiting'); ?>" onclick="deny_request(<?php echo drawing_htmldecode($id); ?>);" class="btn btn-warning"><?php echo _l('deny'); ?></a>
 																				</div>
 																				<div class="clearfix"></div>
 																				<br>

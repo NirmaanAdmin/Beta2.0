@@ -631,7 +631,7 @@
 				<input type="hidden" name="action_type" value="">
 				<input type="hidden" name="default_parent_id" value="<?php echo drawing_htmldecode($parent_id); ?>">
 				<div class="list"></div>
-			</div>
+			</div> 
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" data-dismiss="modal"><?php echo _l('close'); ?></button>
 				<button type="submit" class="btn btn-primary" onclick="continue_action()"><?php echo _l('dmg_continue'); ?></button>

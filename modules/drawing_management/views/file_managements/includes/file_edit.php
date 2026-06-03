@@ -152,16 +152,16 @@ if (isset($item)) {
 						CAD Drawing
 						<input type="file" name="pdf_attachment" id="pdf_attachment" class="form-control" accept=".dwg,.xref">
 					</div>
-					<?php if (isset($item->pdf_attachment) && !empty($item->pdf_attachment)) : ?>
+					<!-- <?php if (isset($item->pdf_attachment) && !empty($item->pdf_attachment)) : ?>
 						<div class="col-md-3" style="margin-top: 13px; display: flex;justify-content: space-between;">
 							<?php
-							// Build the correct file path and URLs
-							$file_path = FCPATH . 'modules/drawing_management/uploads/pdf_attachments/' . $item->id . '/' . $item->pdf_attachment;
-							$download_url = base_url('modules/drawing_management/uploads/pdf_attachments/' . $item->id . '/' . rawurlencode($item->pdf_attachment));
-							$delete_url = admin_url('drawing_management/delete_pdf_attachment/' . $item->id);
+								// Build the correct file path and URLs
+								$file_path = FCPATH . 'modules/drawing_management/uploads/pdf_attachments/' . $item->id . '/' . $item->pdf_attachment;
+								$download_url = base_url('modules/drawing_management/uploads/pdf_attachments/' . $item->id . '/' . rawurlencode($item->pdf_attachment));
+								$delete_url = admin_url('drawing_management/delete_pdf_attachment/' . $item->id);
 
-							// Only show if file exists
-							if (file_exists($file_path)) : ?>
+								// Only show if file exists
+								if (file_exists($file_path)) : ?>
 								<a href="<?php echo $download_url; ?>" class="display-block mbot5" target="_blank" download>
 									<?php echo htmlspecialchars($item->pdf_attachment); ?>
 								</a>
@@ -170,6 +170,62 @@ if (isset($item)) {
 								</a>
 							<?php endif; ?>
 						</div>
+					<?php endif; ?> -->
+					<?php if (isset($item->pdf_attachment) && !empty($item->pdf_attachment)) : ?>
+						<div class="col-md-3" style="margin-top: 13px; display: flex;justify-content: space-between;">
+							<?php
+							$file_path = FCPATH . 'modules/drawing_management/uploads/pdf_attachments/' . $item->id . '/' . $item->pdf_attachment;
+							$download_url = base_url('modules/drawing_management/uploads/pdf_attachments/' . $item->id . '/' . rawurlencode($item->pdf_attachment));
+							$delete_url = admin_url('drawing_management/delete_pdf_attachment/' . $item->id);
+
+							if (file_exists($file_path)) :
+							?>
+								<a href="<?php echo $download_url; ?>" class="display-block mbot5" target="_blank" download>
+									<?php echo htmlspecialchars($item->pdf_attachment); ?>
+								</a>
+
+								<a href="<?php echo $delete_url; ?>" class="text-danger _delete">
+									<?php echo _l('delete'); ?>
+								</a>
+							<?php endif; ?>
+						</div>
+
+					<?php elseif (isset($dwg_attachment) && !empty($dwg_attachment)) : ?>
+
+						<?php foreach ($dwg_attachment as $attachment) : ?>
+
+							<div class="col-md-3" style="margin-top: 13px; display: flex; justify-content: space-between;">
+
+								<?php
+								$file_path = FCPATH . 'modules/drawing_management/uploads/pdf_attachments/' . $item->id . '/' . $attachment['file_name'];
+
+								$download_url = base_url(
+									'modules/drawing_management/uploads/pdf_attachments/' .
+										$item->id . '/' .
+										rawurlencode($attachment['file_name'])
+								);
+
+								$delete_url = admin_url(
+									'drawing_management/delete_dwg_attachment/' . $attachment['id']
+								);
+
+								if (file_exists($file_path)) :
+								?>
+
+									<a href="<?php echo $download_url; ?>" class="display-block mbot5" target="_blank" download>
+										<?php echo htmlspecialchars($attachment['file_name']); ?>
+									</a>
+
+									<a href="<?php echo $delete_url; ?>" class="text-danger _delete">
+										<?php echo _l('delete'); ?>
+									</a>
+
+								<?php endif; ?>
+
+							</div>
+
+						<?php endforeach; ?>
+
 					<?php endif; ?>
 
 				<?php } ?>
