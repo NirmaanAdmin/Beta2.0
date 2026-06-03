@@ -33,7 +33,7 @@ function get_payment_certificate_dashboard() {
     // Update value summaries
     $('.total_purchase_orders').text(response.total_purchase_orders);
     $('.total_work_orders').text(response.total_work_orders);
-    $('.total_certified_value').text(response.total_certified_value);
+    $('.total_certified_value').html(response.total_certified_value);
     $('.approved_payment_certificates').text(response.approved_payment_certificates);
 
     // BAR CHART - Top 10 Vendors by Payment Certificate

@@ -18680,6 +18680,7 @@ class Purchase_model extends App_Model
     {
         $html = '';
         $payment_certificate = $this->get_payment_certificate($id);
+        $currency_name = get_currency_name($payment_certificate->currency);
         if (!empty($payment_certificate->wo_id)) {
             $pur_order = $this->get_wo_order($payment_certificate->wo_id);
             $pur_order->pur_order_number = $pur_order->wo_order_number;
@@ -18793,19 +18794,19 @@ class Purchase_model extends App_Model
                 <tr class="pay_cert_value">
                   <td>A1</td>
                   <td>' . $pur_order->pur_order_name . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->po_contract_amount) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->po_previous) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->po_this_bill) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->po_comulative) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->po_contract_amount, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->po_previous, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->po_this_bill, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->po_comulative, $currency_name) . '</td>
                   <td>' . $pay_cert_data->a1_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_title">
                   <td>A</td>
                   <td>' . _l('total_value_of_works_executed') . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->po_contract_amount) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->po_previous) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->po_this_bill) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->po_comulative) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->po_contract_amount, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->po_previous, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->po_this_bill, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->po_comulative, $currency_name) . '</td>
                   <td>' . $pay_cert_data->a_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_title">
@@ -18820,172 +18821,172 @@ class Purchase_model extends App_Model
                 <tr class="pay_cert_value">
                   <td>C1</td>
                   <td>Advance ' . $mobilization_text . ' ' . $payment_clause . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->pay_cert_c1_1) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->pay_cert_c1_2) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->pay_cert_c1_3) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->pay_cert_c1_4) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->pay_cert_c1_1, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->pay_cert_c1_2, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->pay_cert_c1_3, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->pay_cert_c1_4, $currency_name) . '</td>
                   <td>' . $pay_cert_data->c1_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_value">
                   <td>C2</td>
                   <td>' . _l('pay_cert_c2_title') . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->pay_cert_c2_1) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->pay_cert_c2_2) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->pay_cert_c2_3) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->pay_cert_c2_4) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->pay_cert_c2_1, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->pay_cert_c2_2, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->pay_cert_c2_3, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->pay_cert_c2_4, $currency_name) . '</td>
                   <td>' . $pay_cert_data->c2_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_title">
                   <td>C</td>
                   <td>' . _l('net_advance') . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->net_advance_1) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->net_advance_2) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->net_advance_3) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->net_advance_4) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->net_advance_1, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->net_advance_2, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->net_advance_3, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->net_advance_4, $currency_name) . '</td>
                   <td>' . $pay_cert_data->c_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_title">
                   <td>D</td>
                   <td>' . _l('sub_total_ac') . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->sub_total_ac_1) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->sub_total_ac_2) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->sub_total_ac_3) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->sub_total_ac_4) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->sub_total_ac_1, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->sub_total_ac_2, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->sub_total_ac_3, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->sub_total_ac_4, $currency_name) . '</td>
                   <td>' . $pay_cert_data->d_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_value">
                   <td>E1</td>
                   <td>' . _l('retention_fund') . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->ret_fund_1) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->ret_fund_2) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->ret_fund_3) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->ret_fund_4) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->ret_fund_1, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->ret_fund_2, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->ret_fund_3, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->ret_fund_4, $currency_name) . '</td>
                   <td>' . $pay_cert_data->e1_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_value">
                   <td>E2</td>
                   <td>' . _l('works_executed_5_of_A') . ' ' . $pay_cert_data->works_executed_on_a . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->works_exe_a_1) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->works_exe_a_2) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->works_exe_a_3) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->works_exe_a_4) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->works_exe_a_1, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->works_exe_a_2, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->works_exe_a_3, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->works_exe_a_4, $currency_name) . '</td>
                   <td>' . $pay_cert_data->e2_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_title">
                   <td>E</td>
                   <td>' . _l('less_total_retention') . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_ret_1) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_ret_2) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_ret_3) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_ret_4) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_ret_1, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_ret_2, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_ret_3, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_ret_4, $currency_name) . '</td>
                   <td>' . $pay_cert_data->e_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_title">
                   <td>F</td>
                   <td>' . _l('sub_total_de') . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->sub_t_de_1) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->sub_t_de_2) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->sub_t_de_3) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->sub_t_de_4) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->sub_t_de_1, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->sub_t_de_2, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->sub_t_de_3, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->sub_t_de_4, $currency_name) . '</td>
                   <td>' . $pay_cert_data->f_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_value">
                   <td>G1</td>
                   <td>' . _l('less_title') . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_1) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_2) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_3) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_4) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_1, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_2, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_3, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_4, $currency_name) . '</td>
                   <td>' . $pay_cert_data->g1_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_value">
                   <td>G2</td>
                   <td>' . _l('less_amount_hold_for_quality_ncr') . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_ah_1) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_ah_2) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_ah_3) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_ah_4) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_ah_1, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_ah_2, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_ah_3, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_ah_4, $currency_name) . '</td>
                   <td>' . $pay_cert_data->g2_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_value">
                   <td>G3</td>
                   <td>' . _l('less_amount_hold_for_testing_and_comissioning') . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_aht_1) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_aht_2) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_aht_3) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_aht_4) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_aht_1, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_aht_2, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_aht_3, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_aht_4, $currency_name) . '</td>
                   <td>' . $pay_cert_data->g3_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_title">
                   <td>G</td>
                   <td>' . _l('less_deductions') . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_ded_1) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_ded_2) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_ded_3) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_ded_4) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_ded_1, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_ded_2, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_ded_3, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->less_ded_4, $currency_name) . '</td>
                   <td>' . $pay_cert_data->g_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_title">
                   <td>H</td>
                   <td>' . _l('sub_total_exclusive_of_taxes') . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->sub_fg_1) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->sub_fg_2) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->sub_fg_3) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->sub_fg_4) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->sub_fg_1, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->sub_fg_2, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->sub_fg_3, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->sub_fg_4, $currency_name) . '</td>
                   <td>' . $pay_cert_data->h_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_value">
                   <td>I1</td>
                   <td>CGST @ ' . $cgst_tax . ' on A</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->cgst_on_a1) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->cgst_on_a2) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->cgst_on_a3) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->cgst_on_a4) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->cgst_on_a1, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->cgst_on_a2, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->cgst_on_a3, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->cgst_on_a4, $currency_name) . '</td>
                   <td>' . $pay_cert_data->i1_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_value">
                   <td>I2</td>
                   <td>SGST @ ' . $sgst_tax . ' on A</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->sgst_on_a1) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->sgst_on_a2) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->sgst_on_a3) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->sgst_on_a4) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->sgst_on_a1, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->sgst_on_a2, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->sgst_on_a3, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->sgst_on_a4, $currency_name) . '</td>
                   <td>' . $pay_cert_data->i2_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_value">
                   <td>I3</td>
                   <td>IGST @ ' . $igst_tax . ' on A</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->igst_on_a1) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->igst_on_a2) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->igst_on_a3) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->igst_on_a4) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->igst_on_a1, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->igst_on_a2, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->igst_on_a3, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->igst_on_a4, $currency_name) . '</td>
                   <td>' . $pay_cert_data->i3_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_value">
                   <td>I4</td>
                   <td>' . _l('labour_cess') . ' ' . $pay_cert_data->labour_cess . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->labour_cess_1) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->labour_cess_2) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->labour_cess_3) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->labour_cess_4) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->labour_cess_1, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->labour_cess_2, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->labour_cess_3, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->labour_cess_4, $currency_name) . '</td>
                   <td>' . $pay_cert_data->i4_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_title">
                   <td>I</td>
                   <td>' . _l('total_applicable_taxes') . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->tot_app_tax_1) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->tot_app_tax_2) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->tot_app_tax_3) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->tot_app_tax_4) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->tot_app_tax_1, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->tot_app_tax_2, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->tot_app_tax_3, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->tot_app_tax_4, $currency_name) . '</td>
                   <td>' . $pay_cert_data->i_remarks . '</td>
                 </tr>
                 <tr class="pay_cert_title">
                   <td>J</td>
                   <td>' . _l('amount_recommended') . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->amount_rec_1) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->amount_rec_2) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->amount_rec_3) . '</td>
-                  <td>' . check_value_pay_cert_pdf($pay_cert_data->amount_rec_4) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->amount_rec_1, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->amount_rec_2, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->amount_rec_3, $currency_name) . '</td>
+                  <td>' . check_value_pay_cert_pdf($pay_cert_data->amount_rec_4, $currency_name) . '</td>
                   <td>' . $pay_cert_data->j_remarks . '</td>
                 </tr>
             </tbody>
@@ -22589,6 +22590,7 @@ class Purchase_model extends App_Model
             ' . db_prefix() . 'payment_certificate.group_pur,
             ' . db_prefix() . 'payment_certificate.vendor,
             ' . db_prefix() . 'payment_certificate.order_date,
+            ' . db_prefix() . 'payment_certificate.currency,
             (CASE 
                 WHEN ' . db_prefix() . 'payment_certificate.po_id IS NOT NULL THEN ' . db_prefix() . 'pur_orders.project 
                 WHEN ' . db_prefix() . 'payment_certificate.wo_id IS NOT NULL THEN ' . db_prefix() . 'wo_orders.project 
@@ -22626,7 +22628,6 @@ class Purchase_model extends App_Model
         $this->db->order_by(db_prefix() . 'payment_certificate.order_date', 'asc');
         $payment_certificate = $this->db->get()->result_array();
 
-
         if (!empty($payment_certificate)) {
             $response['total_purchase_orders'] = count(
                 array_unique(
@@ -22647,14 +22648,17 @@ class Purchase_model extends App_Model
             $response['approved_payment_certificates'] = count(array_filter($payment_certificate, function ($item) {
                 return isset($item['approve_status']) && $item['approve_status'] == 2;
             }));
-            $total_certified_value = 0;
             $bar_top_vendors = array();
             $line_order_total = array();
+            $total_certified_items = array();
             foreach ($payment_certificate as $key => $value) {
                 $payment_certificate_calc = $this->get_payment_certificate_calc($value['id']);
                 if ($value['approve_status'] == 2) {
                     $amount_rec_4 = !empty($payment_certificate_calc['amount_rec_4']) ? $payment_certificate_calc['amount_rec_4'] : 0;
-                    $total_certified_value = $total_certified_value + $amount_rec_4;
+                    $total_certified_items[] = [
+                        'currency' => $value['currency'],
+                        'amount'   => $amount_rec_4,
+                    ];
 
                     $vendor_id = $value['vendor'];
                     if (!isset($bar_top_vendors[$vendor_id])) {
@@ -22679,7 +22683,7 @@ class Purchase_model extends App_Model
                     $line_order_total[$month] += $amount_rec_4;
                 }
             }
-            $response['total_certified_value'] = app_format_money($total_certified_value, $base_currency->symbol);
+            $response['total_certified_value'] = format_currency_totals($total_certified_items, 'amount');
 
             if (!empty($bar_top_vendors)) {
                 usort($bar_top_vendors, function ($a, $b) {

@@ -225,6 +225,25 @@
                       <?php $invoice_date = (isset($payment_certificate) ? _d($payment_certificate->invoice_date) : _d(date('Y-m-d')));
                       echo render_date_input('invoice_date', 'invoice_date', $invoice_date); ?>
                     </div>
+                    <div class="col-md-3">
+                      <?php
+                      $currency_attr = array('disabled' => true, 'data-show-subtext' => true);
+                      $currency_selected = '';
+                      foreach ($currencies as $currency) {
+                        if (isset($wo_order) && $wo_order->currency != 0) {
+                          if ($currency['id'] == $wo_order->currency) {
+                            $currency_selected = $currency['id'];
+                          }
+                        } else {
+                          if ($currency['isdefault'] == 1) {
+                            $currency_selected = $currency['id'];
+                          }
+                        }
+                      }
+                      echo render_select('currency', $currencies, array('id', 'name', 'symbol'), 'invoice_add_edit_currency', $currency_selected, $currency_attr);
+                      echo form_hidden('currency', $currency_selected);
+                      ?>
+                    </div>
                     <?php if (!empty($payment_certificate_id) && is_admin()) { ?>
                       <div class="col-md-3 form-group">
                         <label for="pur_change_status_to"><?php echo _l('pur_change_status_to'); ?></label>

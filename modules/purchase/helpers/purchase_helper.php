@@ -4131,12 +4131,12 @@ function format_amount_cert($value)
     return ($value != 0) ? $value : '';
 }
 
-function check_value_pay_cert_pdf($value)
+function check_value_pay_cert_pdf($value, $currency_name)
 {
     if (empty($value) || $value == 0) {
         return '';
     }
-    return app_format_money($value, '');
+    return app_format_money($value, $currency_name);
 }
 
 function get_production_status($id)

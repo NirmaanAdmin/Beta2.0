@@ -190,6 +190,7 @@ $result = data_tables_init(
         db_prefix() . 'pur_order_tracker.pur_order_name as ot_number',
         db_prefix() . 'payment_certificate.vendor',
         db_prefix() . 'payment_certificate.group_pur',
+        db_prefix() . 'payment_certificate.currency',
         '(CASE 
             WHEN ' . db_prefix() . 'payment_certificate.po_id IS NOT NULL THEN ' . db_prefix() . 'pur_orders.project 
             WHEN ' . db_prefix() . 'payment_certificate.wo_id IS NOT NULL THEN ' . db_prefix() . 'wo_orders.project
@@ -224,10 +225,7 @@ foreach ($rResult as $aRow) {
     for ($i = 0; $i < count($aColumns); $i++) {
         $_data = $aRow[$aColumns[$i]];
 
-        $base_currency = get_base_currency_pur();
-        if ($aRow['currency'] != 0) {
-            $base_currency = pur_get_currency_by_id($aRow['currency']);
-        }
+        $currency_name = get_currency_name($aRow['currency']);
 
         if ($aColumns[$i] == '0') {
             $_data = '<div class="checkbox"><input type="checkbox" value="' . $aRow['id'] . '"><label></label></div>';
@@ -276,7 +274,7 @@ foreach ($rResult as $aRow) {
         } elseif ($aColumns[$i] == 'group_name') {
             $_data = $aRow['group_name'];
         } elseif ($aColumns[$i] == 'this_bill') {
-            $_data = app_format_money($aRow['this_bill'], $base_currency->symbol);
+            $_data = app_format_money($aRow['this_bill'], $currency_name);
         } elseif ($aColumns[$i] == 'submission_date') {
             $_data = date('d-m-Y', strtotime($aRow['submission_date']));
         } elseif ($aColumns[$i] == 'approve_status') {

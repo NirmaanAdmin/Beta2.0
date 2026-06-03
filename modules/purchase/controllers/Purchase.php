@@ -13088,6 +13088,7 @@ class purchase extends AdminController
         $this->load->model('currencies_model');
         $this->load->model('warehouse/warehouse_model');
         $data['base_currency'] = $this->currencies_model->get_base_currency();
+        $data['currencies'] = $this->currencies_model->get();
         $data['po_id'] = $po_id;
         $data['payment_certificate_id'] = $payment_certificate_id;
         $data['pur_order'] = $this->purchase_model->get_pur_order($po_id);
@@ -13584,8 +13585,8 @@ class purchase extends AdminController
         $input['group_pur'] = isset($pur_order->group_pur) ? $pur_order->group_pur : 0;
         $input['description_services'] = $order_name;
         $input['invoice_date'] = !empty($payment_certificate->invoice_date) ? $payment_certificate->invoice_date : date('Y-m-d');
-        $input['currency'] = 3;
-        $input['to_currency'] = 3;
+        $input['currency'] = !empty($payment_certificate->currency) ? $payment_certificate->currency : 3;
+        $input['to_currency'] = !empty($payment_certificate->currency) ? $payment_certificate->currency : 3;
         $input['date_add'] = date('Y-m-d');
         $input['payment_status'] = 0;
         $input['pur_order'] = !empty($payment_certificate->po_id) ? $payment_certificate->po_id : NULL;
@@ -13723,6 +13724,7 @@ class purchase extends AdminController
         $this->load->model('currencies_model');
         $this->load->model('warehouse/warehouse_model');
         $data['base_currency'] = $this->currencies_model->get_base_currency();
+        $data['currencies'] = $this->currencies_model->get();
         $data['wo_id'] = $wo_id;
         $data['payment_certificate_id'] = $payment_certificate_id;
         $data['wo_order'] = $this->purchase_model->get_wo_order($wo_id);
@@ -16513,6 +16515,7 @@ class purchase extends AdminController
 
         $this->load->model('currencies_model');
         $data['base_currency'] = $this->currencies_model->get_base_currency();
+        $data['currencies'] = $this->currencies_model->get();
         $data['ot_id'] = $ot_id;
         $data['payment_certificate_id'] = $payment_certificate_id;
         $data['order_tracker'] = $this->purchase_model->get_order_tracker($ot_id);
