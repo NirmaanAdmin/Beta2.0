@@ -456,7 +456,7 @@
 	            .done(function(response) {
 	                response = JSON.parse(response);
 	                alert_float('success', response.result);
-	                window.location.reload();
+	                // window.location.reload();
 	            });
 	        }
 	    });

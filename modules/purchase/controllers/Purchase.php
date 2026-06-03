@@ -13681,12 +13681,12 @@ class purchase extends AdminController
     {
         $change = $this->purchase_model->change_status_pay_cert($status, $id);
         if ($change == true) {
-            $message = _l('payment_certificate') . ' ' . _l('successfully');
+            $message = 'Payment certificate status updated successfully.';
             echo json_encode([
                 'result' => $message,
             ]);
         } else {
-            $message = _l('payment_certificate') . ' ' . _l('fail');
+            $message = 'Failed to update payment certificate status.';
             echo json_encode([
                 'result' => $message,
             ]);
