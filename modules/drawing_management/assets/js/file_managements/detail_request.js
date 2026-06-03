@@ -14,7 +14,7 @@ function change_request_approval_status(id, status){
   "use strict";
   var data = {};
   data.rel_id = id;
-  data.rel_type = 'document';
+  data.rel_type = 'drawing';
   data.approve = status;
   data.note = $('textarea[name="reason"]').val();
   $.post(admin_url + 'drawing_management/change_approve_document/' + id, data).done(function(response){

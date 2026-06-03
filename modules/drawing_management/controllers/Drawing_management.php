@@ -38,9 +38,9 @@ class drawing_management extends AdminController
 		$data['share_to_me'] = ($share_to_me == null ? 0 : $share_to_me);
 		$data['my_approval'] = ($my_approval == null ? 0 : $my_approval);
 		$data['electronic_signing'] = ($electronic_signing == null ? 0 : $electronic_signing);
-		$query = 'approve = -1 and id in (SELECT rel_id FROM ' . db_prefix() . 'dms_approval_details where staffid = ' . $user_id . ' and approve is null and rel_type = \'document\')';
+		$query = 'approve = -1 and id in (SELECT rel_id FROM ' . db_prefix() . 'dms_approval_details where staffid = ' . $user_id . ' and approve is null and rel_type = \'drawing\')';
 		$data['approve_items'] = $this->drawing_management_model->get_item('', $query, 'name, id, dateadded, filetype, hash');
-		$query = 'sign_approve = -1 and id in (SELECT rel_id FROM ' . db_prefix() . 'dms_approval_detail_eids where staffid = ' . $user_id . ' and approve is null and rel_type = \'document\')';
+		$query = 'sign_approve = -1 and id in (SELECT rel_id FROM ' . db_prefix() . 'dms_approval_detail_eids where staffid = ' . $user_id . ' and approve is null and rel_type = \'drawing\')';
 		$data['approve_item_eids'] = $this->drawing_management_model->get_item('', $query, 'name, id, dateadded, filetype, hash');
 		$data_root_folder = $this->drawing_management_model->get_root_item($user_id, $default_project);
 		if (!empty($data_root_folder)) {
@@ -1231,7 +1231,7 @@ class drawing_management extends AdminController
 			$data['item'] = $data_item;
 			$data['title'] = $data_item->name;
 
-			$rel_type = 'document';
+			$rel_type = 'drawing';
 			$data['data_approve'] = $this->drawing_management_model->get_approval_details($id, $rel_type);
 			$process = '';
 			$check_proccess = $this->drawing_management_model->get_approve_setting($rel_type, false);

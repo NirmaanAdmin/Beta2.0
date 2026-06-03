@@ -36,7 +36,7 @@
           <div class="col-md-12">
            <?php echo render_input('name','subject','','text'); ?>
            <?php echo form_hidden('approval_setting_id', ''); ?>
-           <?php echo form_hidden('related', 'document'); ?>
+           <?php echo form_hidden('related', 'drawing'); ?>
            <?php $choose_when_approving = 0;
            if(isset($approval_setting)){
             $choose_when_approving = $approval_setting->choose_when_approving;
