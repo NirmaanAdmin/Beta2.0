@@ -94,24 +94,36 @@
 
 						$CI = &get_instance();
 
-						$child_records = $CI->db
-							->select('id')
-							->where('parent_id', $value['id'])
-							->get(db_prefix() . 'dms_items')
-							->result_array();
+						// Start with current item's direct children
+						$pending_ids = [$value['id']];
 
-						foreach ($child_records as $child) {
+						while (!empty($pending_ids) && !$recently_updated) {
 
-							$recent_log_new = drawing_get_audit_log_file($child['id']);
+							$current_id = array_shift($pending_ids);
 
-							if (!empty($recent_log_new[0]['date'])) {
+							$child_records = $CI->db
+								->select('id')
+								->where('parent_id', $current_id)
+								->get(db_prefix() . 'dms_items')
+								->result_array();
 
-								$hours_diff = (time() - strtotime($recent_log_new[0]['date'])) / 3600;
+							foreach ($child_records as $child) {
 
-								if ($hours_diff <= 72) {
-									$recently_updated = true;
-									break;
+								// Check audit log of current child
+								$recent_log_new = drawing_get_audit_log_file($child['id']);
+
+								if (!empty($recent_log_new[0]['date'])) {
+
+									$hours_diff = (time() - strtotime($recent_log_new[0]['date'])) / 3600;
+
+									if ($hours_diff <= 72) {
+										$recently_updated = true;
+										break 2; // Exit both foreach and while
+									}
 								}
+
+								// Add child id to queue so its children are checked too
+								$pending_ids[] = $child['id'];
 							}
 						}
 					}
