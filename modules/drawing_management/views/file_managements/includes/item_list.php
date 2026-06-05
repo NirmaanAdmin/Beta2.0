@@ -55,8 +55,15 @@
 					echo drawing_htmldecode('<div class="display-flex">' . $item_icon . $a1 . '<strong class="fs-14 mleft10">' . $document_number . '</strong>' . $a2 . '</div>'); ?>
 				</td>
 				<td>
-					<?php $recent_log = drawing_get_audit_log_file($value['id']); ?>
-					<?php echo drawing_htmldecode($a1 . _dt($recent_log['0']['date']) . $a2); ?>
+					<?php
+					$recent_log = drawing_get_audit_log_file($value['id']);
+
+					$display_date = !empty($recent_log[0]['date'])
+						? $recent_log[0]['date']
+						: $value['dateadded'];
+
+					echo drawing_htmldecode($a1 . _dt($display_date) . $a2);
+					?>
 				</td>
 
 				<td>
