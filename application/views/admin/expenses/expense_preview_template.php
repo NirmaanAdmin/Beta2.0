@@ -172,7 +172,7 @@
                             <span class="bold font-medium"><?php echo _l('expense_amount'); ?></span>
                             <span
                                 class="text-danger bold font-medium">
-                                <?php echo e(app_format_money($expense->amount, $expense->currency_data)); ?>
+                                <?php echo e(app_format_money($expense->amount, $expense->currency)); ?>
                             </span>
                         </div>
                         <?php if ($expense->paymentmode != '0' && !empty($expense->paymentmode)) {
@@ -193,7 +193,7 @@
                             $total += ($expense->amount / 100 * $expense->taxrate2);
                         }
                         if ($expense->tax != 0 || $expense->tax2 != 0) {
-                            echo '<p class="font-medium bold text-danger">' . _l('total_with_tax') . ': ' . e(app_format_money($total, $expense->currency_data)) . '</p>';
+                            echo '<p class="font-medium bold text-danger">' . _l('total_with_tax') . ': ' . e(app_format_money($total, $expense->currency)) . '</p>';
                         }
                         ?>
                         <p><span class="bold"><?php echo _l('expense_date'); ?></span> <span
@@ -331,7 +331,7 @@
                             <p><span class="bold font-medium"><?php echo _l('expense_amount'); ?></span>
                                 <span
                                     class="text-danger bold font-medium">
-                                    <?php echo e(app_format_money($recurring->amount, $recurring->currency_data)); ?>
+                                    <?php echo e(app_format_money($recurring->amount, $expense->currency)); ?>
                                 </span>
                                 <?php
                            if ($recurring->tax != 0) {
@@ -344,7 +344,7 @@
                                $total += ($recurring->amount / 100 * $recurring->taxrate2);
                            }
                            if ($recurring->tax != 0 || $recurring->tax2 != 0) {
-                               echo '<p class="font-medium bold text-danger">' . _l('total_with_tax') . ': ' . e(app_format_money($total, $recurring->currency_data)) . '</p>';
+                               echo '<p class="font-medium bold text-danger">' . _l('total_with_tax') . ': ' . e(app_format_money($total, $expense->currency)) . '</p>';
                            }
                            ?>
                         </span>

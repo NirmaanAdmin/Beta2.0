@@ -1206,21 +1206,33 @@ function get_currency_name($id)
     return $result ? $result->name : 'INR';
 }
 
-function format_currency_totals($items, $amount_key)
+function format_currency_totals($items, $amount_key, $is_average = false)
 {
     if (empty($items)) {
         return app_format_money(0);
     }
+    $CI =& get_instance();
+    $currency_ids = array_unique(array_column($items, 'currency'));
+    $CI->db->select('id, name');
+    $CI->db->where_in('id', $currency_ids);
+    $currencies = $CI->db->get(db_prefix() . 'currencies')->result_array();
+    $currency_map = array_column($currencies, 'name', 'id');
     $currency_totals = [];
+    $currency_counts = [];
     foreach ($items as $item) {
-        $currency_name = get_currency_name($item['currency']);
+        $currency_name = $currency_map[$item['currency']] ?? 'INR';
         if (!isset($currency_totals[$currency_name])) {
             $currency_totals[$currency_name] = 0;
+            $currency_counts[$currency_name] = 0;
         }
         $currency_totals[$currency_name] += (float)$item[$amount_key];
+        $currency_counts[$currency_name]++;
     }
     $formatted = [];
     foreach ($currency_totals as $currency_name => $amount) {
+        if ($is_average) {
+            $amount = $amount / $currency_counts[$currency_name];
+        }
         $formatted[] = app_format_money($amount, $currency_name);
     }
     return implode('<br>', $formatted);

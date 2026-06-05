@@ -198,9 +198,7 @@ $output = $result['output'];
 $rResult = $result['rResult'];
 $sr = 1;
 
-$footer_data = [
-    'total_expense_amount' => 0,
-];
+$footer_data = [];
 
 foreach ($rResult as $aRow) {
     $row = [];
@@ -297,11 +295,22 @@ foreach ($rResult as $aRow) {
     }
 
     $row['DT_RowClass'] = 'has-row-options';
-    $footer_data['total_expense_amount'] += $total;
+
+    $currency_key = $aRow['currency_name'];
+    if (!isset($footer_data[$currency_key])) {
+        $footer_data[$currency_key] = [
+            'currency_name' => $currency_key,
+            'total' => 0,
+        ];
+    }
+    $footer_data[$currency_key]['total'] += $total;
     $output['aaData'][] = $row;
 }
 
-foreach ($footer_data as $key => $exp_total) {
-    $footer_data[$key] = app_format_money($exp_total, $aRow['currency_name']);
+$total_value = [];
+foreach ($footer_data as $currency => $totals) {
+    $total_value[] = app_format_money($totals['total'], $currency);
 }
-$output['sums'] = $footer_data;
+$output['sums'] = [
+    'total_expense_amount' => implode(', ', $total_value),
+];

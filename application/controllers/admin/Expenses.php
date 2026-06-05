@@ -588,8 +588,8 @@ class Expenses extends AdminController
         $input['group_pur'] = !empty($group_pur) ? $group_pur : 0;
         $input['description_services'] = !empty($expense_name) ? $expense_name : '';
         $input['invoice_date'] = $expense_date;
-        $input['currency'] = 3;
-        $input['to_currency'] = 3;
+        $input['currency'] = !empty($expense->currency) ? $expense->currency : 3;
+        $input['to_currency'] = !empty($expense->currency) ? $expense->currency : 3;
         $input['date_add'] = date('Y-m-d');
         $input['payment_status'] = 0;
         $input['project_id'] = !empty($project_id) ? $project_id : 1;

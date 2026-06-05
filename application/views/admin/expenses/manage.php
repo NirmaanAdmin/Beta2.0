@@ -283,8 +283,8 @@
         response = JSON.parse(response);
 
         // Update value summaries
-        $('.total_expenses').text(response.total_expenses);
-        $('.total_average_expenses').text(response.total_average_expenses);
+        $('.total_expenses').html(response.total_expenses);
+        $('.total_average_expenses').html(response.total_average_expenses);
         $('.total_expenses_without_receipts').text(response.total_expenses_without_receipts);
         $('.total_untagged_expenses').text(response.total_untagged_expenses);
 

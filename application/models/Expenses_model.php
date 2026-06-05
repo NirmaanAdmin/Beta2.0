@@ -1006,6 +1006,7 @@ class Expenses_model extends App_Model
             db_prefix() . 'expenses.amount, ' .
             db_prefix() . 'expenses.vendor, ' .
             db_prefix() . 'expenses.vbt_id, ' .
+            db_prefix() . 'expenses.currency, ' .
             db_prefix() . 'expenses_categories.name as category_name'
         );
         $this->db->from(db_prefix() . 'expenses');
@@ -1029,13 +1030,9 @@ class Expenses_model extends App_Model
 
         if (!empty($expenses)) {
             $total_expenses_raised = count($expenses);
-            $total_expenses = array_reduce($expenses, function ($carry, $item) {
-                return $carry + (float)$item['amount'];
-            }, 0);
-            $response['total_expenses'] = app_format_money($total_expenses, $base_currency->symbol);
+            $response['total_expenses'] = format_currency_totals($expenses, 'amount');
             if($total_expenses_raised > 0) {
-                $total_average_expenses = $total_expenses / $total_expenses_raised;
-                $response['total_average_expenses'] = app_format_money($total_average_expenses, $base_currency->symbol);
+                $response['total_average_expenses'] = format_currency_totals($expenses, 'amount', true);
             }
             $response['total_expenses_without_receipts'] = count(array_filter($expenses, fn($item) =>
                 empty($item['file_name'])

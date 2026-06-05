@@ -10,7 +10,7 @@ if (!empty($expense->expense_name)) {
     $html .= '<h3>' . $expense->expense_name . '</h3>';
 }
 
-$html .= '<p><strong>' . _l('expense_amount') . ':</strong> ' . app_format_money($expense->amount, $expense->currency_data);
+$html .= '<p><strong>' . _l('expense_amount') . ':</strong> ' . app_format_money($expense->amount, $expense->currency);
 
 if ($expense->paymentmode != '0' && !empty($expense->paymentmode)) {
     $html .= '<br />' . _l('expense_paid_via', $expense->payment_mode_name);
@@ -31,7 +31,7 @@ if ($expense->tax != 0 || $expense->tax2 != 0) {
     }
 
     $html .= '</p>';
-    $html .= '<p><strong>' . _l('total_with_tax') . ': ' . app_format_money($total, $expense->currency_data) . '</strong></p>';
+    $html .= '<p><strong>' . _l('total_with_tax') . ': ' . app_format_money($total, $expense->currency) . '</strong></p>';
 }
 
 $html .= '<p><strong>' . _l('expense_date') . '</strong> ' . _d($expense->date) . '</p>';
