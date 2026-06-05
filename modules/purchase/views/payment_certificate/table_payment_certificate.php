@@ -65,6 +65,7 @@ $join = [
         WHERE approve IS NULL
         GROUP BY rel_id
     ) AS pcd ON pcd.rel_id = ' . db_prefix() . 'payment_certificate.id',
+    'LEFT JOIN ' . db_prefix() . 'currencies ON ' . db_prefix() . 'currencies.id = ' . db_prefix() . 'payment_certificate.currency',
 ];
 
 $where = [];
@@ -191,6 +192,7 @@ $result = data_tables_init(
         db_prefix() . 'payment_certificate.vendor',
         db_prefix() . 'payment_certificate.group_pur',
         db_prefix() . 'payment_certificate.currency',
+        db_prefix() . 'currencies.name as currency_name',
         '(CASE 
             WHEN ' . db_prefix() . 'payment_certificate.po_id IS NOT NULL THEN ' . db_prefix() . 'pur_orders.project 
             WHEN ' . db_prefix() . 'payment_certificate.wo_id IS NOT NULL THEN ' . db_prefix() . 'wo_orders.project
@@ -225,7 +227,7 @@ foreach ($rResult as $aRow) {
     for ($i = 0; $i < count($aColumns); $i++) {
         $_data = $aRow[$aColumns[$i]];
 
-        $currency_name = get_currency_name($aRow['currency']);
+        $currency_name = $aRow['currency_name'];
 
         if ($aColumns[$i] == '0') {
             $_data = '<div class="checkbox"><input type="checkbox" value="' . $aRow['id'] . '"><label></label></div>';

@@ -58,6 +58,7 @@ $join         = [
                     'LEFT JOIN '.db_prefix().'projects ON '.db_prefix().'projects.id = '.db_prefix().'pur_orders.project',
                     'LEFT JOIN '.db_prefix().'assets_group ON '.db_prefix().'assets_group.group_id = '.db_prefix().'pur_orders.group_pur',
                     'LEFT JOIN '.db_prefix().'wh_sub_group ON '.db_prefix().'wh_sub_group.id = '.db_prefix().'pur_orders.sub_groups_pur',
+                    'LEFT JOIN '.db_prefix().'currencies ON '.db_prefix().'currencies.id = '.db_prefix().'pur_orders.currency',
                     // 'LEFT JOIN '.db_prefix().'area ON '.db_prefix().'area.id = '.db_prefix().'pur_orders.area_pur',
                 ];
 $i = 0;
@@ -206,7 +207,7 @@ if(!isset($vendor) && !isset($project) && !isset($purchase_dashboard)) {
     update_module_filter($module_name, $to_date_filter_name, $to_date_filter_name_value);
 }
 
-$result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [db_prefix().'pur_orders.id as id','company','pur_order_number','expense_convert',db_prefix().'projects.name as project_name',db_prefix().'departments.name as department_name', 'currency', '(SELECT GROUP_CONCAT(' . db_prefix() . 'project_members.staff_id SEPARATOR ",") FROM ' . db_prefix() . 'project_members WHERE ' . db_prefix() . 'project_members.project_id=' . db_prefix() . 'pur_orders.project) as member_list'], '', [], $having);
+$result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [db_prefix().'pur_orders.id as id','company','pur_order_number','expense_convert',db_prefix().'projects.name as project_name',db_prefix().'departments.name as department_name', db_prefix().'currencies.name as currency_name', 'currency', '(SELECT GROUP_CONCAT(' . db_prefix() . 'project_members.staff_id SEPARATOR ",") FROM ' . db_prefix() . 'project_members WHERE ' . db_prefix() . 'project_members.project_id=' . db_prefix() . 'pur_orders.project) as member_list'], '', [], $having);
 
 $output  = $result['output'];
 $rResult = $result['rResult'];
@@ -227,7 +228,7 @@ foreach ($rResult as $aRow) {
             $_data = $aRow[$aColumns[$i]];
         }
 
-        $currency_name = get_currency_name($aRow['currency']);
+        $currency_name = $aRow['currency_name'];
 
         if($aColumns[$i] == 'total'){
             $_data = app_format_money($po_contract_data['po_with_co_total'], $currency_name);
