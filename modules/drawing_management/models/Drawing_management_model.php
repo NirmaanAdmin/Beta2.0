@@ -3429,66 +3429,190 @@ class drawing_management_model extends app_model
 
 		return $results;
 	}
+	// public function filterFilesAndFolders($design_stage = null, $discipline = null, $purpose = null, $status = null, $controlled_document = null)
+	// {
+	// 	$get_project_id = get_default_project();
+	// 	$module_name = 'drawing_management';
+	// 	$ds = 'design_stage';
+	// 	$design_stage = !empty($design_stage) ? $design_stage : NULL;
+	// 	update_module_filter($module_name, $ds, $design_stage);
+	// 	$d = 'discipline';
+	// 	$discipline_string = !empty($discipline) ? implode(',', $discipline) : NULL;
+	// 	update_module_filter($module_name, $d, $discipline_string);
+	// 	$p = 'purpose';
+	// 	$purpose = !empty($purpose) ? $purpose : NULL;
+	// 	update_module_filter($module_name, $p, $purpose);
+	// 	$s = 'status';
+	// 	$status = !empty($status) ? $status : NULL;
+	// 	update_module_filter($module_name, $s, $status);
+	// 	$cd = 'controlled_document';
+	// 	$controlled_document = !empty($controlled_document) ? $controlled_document : NULL;
+	// 	update_module_filter($module_name, $cd, $controlled_document);
+	// 	$this->db->select('*');
+	// 	$this->db->from(db_prefix() . 'dms_items');
+
+	// 	// Group conditions so that at least one filter matches
+	// 	if (!empty($design_stage) || (!empty($discipline) && is_array($discipline)) || !empty($purpose) || !empty($status) || !empty($controlled_document)) {
+
+	// 		// Apply design stage filter if provided
+	// 		if (!empty($design_stage)) {
+	// 			$this->db->where('design_stage', $design_stage);
+	// 		}
+
+	// 		// Apply discipline filter if provided (handling multiple values)
+	// 		if (!empty($discipline) && is_array($discipline)) {
+	// 			$this->db->group_start();
+	// 			foreach ($discipline as $d) {
+	// 				$this->db->or_where("FIND_IN_SET(" . $this->db->escape($d) . ", discipline) >", 0);
+	// 			}
+	// 			$this->db->group_end();
+	// 		}
+
+	// 		// Apply purpose stage filter if provided
+	// 		if (!empty($purpose)) {
+	// 			$this->db->where('purpose', $purpose);
+	// 		}
+	// 		// Apply status stage filter if provided
+	// 		if (!empty($status)) {
+	// 			$this->db->where('status', $status);
+	// 		}
+
+	// 		// Apply controlled document filter if provided
+	// 		if (!empty($controlled_document)) {
+	// 			if ($controlled_document == 1) {
+	// 				$this->db->where('controlled_document', $controlled_document);
+	// 			}
+	// 		}
+
+	// 		$query = $this->db->get();
+	// 		$results = $query->result();
+	// 	}
+
+	// 	if ($results) {
+	// 		// Fetch root folder (folder without a parent_id)
+	// 		$this->db->where('filetype', 'folder');
+	// 		$this->db->where('parent_id', NULL);
+	// 		$rootFolderQuery = $this->db->get(db_prefix() . 'dms_items');
+	// 		$rootFolder = $rootFolderQuery->row();
+
+	// 		// Add breadcrumb path for each result
+	// 		foreach ($results as $key => $item) {
+	// 			$breadcrumbs = [];
+
+	// 			if ($rootFolder) {
+	// 				$breadcrumbs[] = $rootFolder->name;  // Add root folder to every breadcrumb
+	// 			}
+
+	// 			$breadcrumbs = array_merge($breadcrumbs, $this->getLimitedBreadcrumb($item->parent_id));  // Get parent and grandparent
+	// 			$results[$key]->breadcrumb = $breadcrumbs;
+	// 		}
+
+	// 		return $results;
+	// 	}
+	// }
+
 	public function filterFilesAndFolders($design_stage = null, $discipline = null, $purpose = null, $status = null, $controlled_document = null)
 	{
-
+		$get_project_id = get_default_project();
 		$module_name = 'drawing_management';
+
 		$ds = 'design_stage';
 		$design_stage = !empty($design_stage) ? $design_stage : NULL;
 		update_module_filter($module_name, $ds, $design_stage);
+
 		$d = 'discipline';
 		$discipline_string = !empty($discipline) ? implode(',', $discipline) : NULL;
 		update_module_filter($module_name, $d, $discipline_string);
+
 		$p = 'purpose';
 		$purpose = !empty($purpose) ? $purpose : NULL;
 		update_module_filter($module_name, $p, $purpose);
+
 		$s = 'status';
 		$status = !empty($status) ? $status : NULL;
 		update_module_filter($module_name, $s, $status);
+
 		$cd = 'controlled_document';
 		$controlled_document = !empty($controlled_document) ? $controlled_document : NULL;
 		update_module_filter($module_name, $cd, $controlled_document);
+
 		$this->db->select('*');
 		$this->db->from(db_prefix() . 'dms_items');
 
-		// Group conditions so that at least one filter matches
-		if (!empty($design_stage) || (!empty($discipline) && is_array($discipline)) || !empty($purpose) || !empty($status) || !empty($controlled_document)) {
-
-			// Apply design stage filter if provided
-			if (!empty($design_stage)) {
-				$this->db->where('design_stage', $design_stage);
-			}
-
-			// Apply discipline filter if provided (handling multiple values)
-			if (!empty($discipline) && is_array($discipline)) {
-				$this->db->group_start();
-				foreach ($discipline as $d) {
-					$this->db->or_where("FIND_IN_SET(" . $this->db->escape($d) . ", discipline) >", 0);
-				}
-				$this->db->group_end();
-			}
-
-			// Apply purpose stage filter if provided
-			if (!empty($purpose)) {
-				$this->db->where('purpose', $purpose);
-			}
-			// Apply status stage filter if provided
-			if (!empty($status)) {
-				$this->db->where('status', $status);
-			}
-
-			// Apply controlled document filter if provided
-			if (!empty($controlled_document)) {
-				if ($controlled_document == 1) {
-					$this->db->where('controlled_document', $controlled_document);
-				}
-			}
-
-			$query = $this->db->get();
-			$results = $query->result();
+		// Apply filters
+		if (!empty($design_stage)) {
+			$this->db->where('design_stage', $design_stage);
 		}
 
-		if ($results) {
+		if (!empty($discipline) && is_array($discipline)) {
+			$this->db->group_start();
+			foreach ($discipline as $d) {
+				$this->db->or_where("FIND_IN_SET(" . $this->db->escape($d) . ", discipline) >", 0);
+			}
+			$this->db->group_end();
+		}
+
+		if (!empty($purpose)) {
+			$this->db->where('purpose', $purpose);
+		}
+
+		if (!empty($status)) {
+			$this->db->where('status', $status);
+		}
+
+		if (!empty($controlled_document) && $controlled_document == 1) {
+			$this->db->where('controlled_document', 1);
+		}
+
+		$query   = $this->db->get();
+		$results = $query->result();
+
+		/**
+		 * Filter by project hierarchy
+		 * Check current item -> parent -> grandparent ...
+		 * until project_id > 0 is found
+		 */
+		if (!empty($get_project_id) && !empty($results)) {
+
+			$filtered_results = [];
+
+			foreach ($results as $item) {
+
+				$current_item = $item;
+				$matched      = false;
+
+				while ($current_item) {
+
+					if (!empty($current_item->project_id) && $current_item->project_id > 0) {
+
+						if ((int)$current_item->project_id === (int)$get_project_id) {
+							$matched = true;
+						}
+
+						break;
+					}
+
+					if (empty($current_item->parent_id)) {
+						break;
+					}
+
+					$current_item = $this->db
+						->select('id,parent_id,project_id')
+						->where('id', $current_item->parent_id)
+						->get(db_prefix() . 'dms_items')
+						->row();
+				}
+
+				if ($matched) {
+					$filtered_results[] = $item;
+				}
+			}
+
+			$results = $filtered_results;
+		}
+
+		if (!empty($results)) {
+
 			// Fetch root folder (folder without a parent_id)
 			$this->db->where('filetype', 'folder');
 			$this->db->where('parent_id', NULL);
@@ -3497,18 +3621,47 @@ class drawing_management_model extends app_model
 
 			// Add breadcrumb path for each result
 			foreach ($results as $key => $item) {
+
 				$breadcrumbs = [];
 
 				if ($rootFolder) {
-					$breadcrumbs[] = $rootFolder->name;  // Add root folder to every breadcrumb
+					$breadcrumbs[] = $rootFolder->name;
 				}
 
-				$breadcrumbs = array_merge($breadcrumbs, $this->getLimitedBreadcrumb($item->parent_id));  // Get parent and grandparent
+				$breadcrumbs = array_merge(
+					$breadcrumbs,
+					$this->getLimitedBreadcrumb($item->parent_id)
+				);
+
 				$results[$key]->breadcrumb = $breadcrumbs;
 			}
 
 			return $results;
 		}
+
+		return [];
+	}
+	public function get_item_project_id($item_id)
+	{
+		while ($item_id) {
+			$item = $this->db
+				->select('id, parent_id, project_id')
+				->where('id', $item_id)
+				->get(db_prefix() . 'dms_items')
+				->row();
+
+			if (!$item) {
+				return 0;
+			}
+
+			if (!empty($item->project_id) && $item->project_id > 0) {
+				return $item->project_id;
+			}
+
+			$item_id = $item->parent_id;
+		}
+
+		return 0;
 	}
 
 
