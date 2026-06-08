@@ -432,30 +432,18 @@
 	function change_status_pay_cert(invoker, id) {
 	    "use strict";
 	    if (!invoker.value) {
-	        Swal.fire({
-	            icon: 'warning',
-	            title: 'Warning',
-	            text: 'Please select a status before proceeding.'
-	        });
+	        alert('Please select a status before proceeding.');
 	        return;
 	    }
-	    Swal.fire({
-	        title: 'Are you sure?',
-	        text: 'Do you want to change the status?',
-	        icon: 'warning',
-	        showCancelButton: true,
-	        confirmButtonText: 'Yes, change it',
-	        cancelButtonText: 'Cancel'
-	    }).then((result) => {
-	        if (result.isConfirmed) {
-	            $.post(admin_url + 'purchase/change_status_pay_cert/' + invoker.value + '/' + id)
-	            .done(function(response) {
-	                response = JSON.parse(response);
-	                alert_float('success', response.result);
-	                // window.location.reload();
-	            });
-	        }
-	    });
+	    if (confirm('Do you want to change the status?')) {
+	        $.post(
+	            admin_url + 'purchase/change_status_pay_cert/' + invoker.value + '/' + id
+	        )
+	        .done(function(response) {
+	            response = JSON.parse(response);
+	            alert_float('success', response.result);
+	        });
+	    }
 	}
 
 	function preview_paymentcert_btn(invoker) {
