@@ -1346,6 +1346,61 @@ class drawing_management_model extends app_model
 	// 	}
 	// }
 
+	// public function create_folder($id, $path = '')
+	// {
+	// 	if ($path == '') {
+	// 		$path = DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/temps/' . $id;
+	// 		drawing_dmg_create_folder($path);
+	// 		$path = $path . '/' . drawing_dmg_get_file_name($id);
+	// 		drawing_dmg_create_folder($path);
+	// 	}
+
+	// 	// Updated query to include pdf_attachment
+	// 	$data_child = $this->get_item('', 'parent_id = ' . $id, 'id, name, filetype, parent_id, pdf_attachment');
+
+	// 	if ($data_child) {
+	// 		foreach ($data_child as $value) {
+	// 			if ($value['filetype'] == 'folder') {
+	// 				$new_path = $path . '/' . $value['name'];
+	// 				drawing_dmg_create_folder($new_path);
+	// 				$this->create_folder($value['id'], $new_path);
+	// 			} else {
+	// 				// 1) Copy main file
+	// 				$path1 = DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/files/'
+	// 					. $value['parent_id'] . '/' . $value['name'];
+	// 				$path2 = $path . '/' . $value['name'];
+	// 				$this->copy_file($path1, $path2);
+
+	// 				// 2) Copy PDF attachment if exists
+	// 				if (!empty($value['pdf_attachment'])) {
+	// 					$sourcePdf = rtrim(DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER, '/')
+	// 						. '/pdf_attachments/' . $value['id'] . '/' . $value['pdf_attachment'];
+
+	// 					if (file_exists($sourcePdf)) {
+	// 						$destPdf = $path . '/' . basename($sourcePdf);
+	// 						$this->copy_file($sourcePdf, $destPdf);
+	// 					}
+	// 				}
+
+	// 				// 3) Copy all other attachments
+	// 				$other_attachments = $this->get_other_attachment($value['id']);
+
+	// 				foreach ($other_attachments as $attach) {
+	// 					if (!empty($attach['file_name'])) {
+	// 						$sourceOther = rtrim(DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER, '/')
+	// 							. '/all_attachment/' . $value['id'] . '/' . $attach['file_name'];
+
+	// 						if (file_exists($sourceOther)) {
+	// 							$destOther = $path . '/' . $attach['file_name'];
+	// 							$this->copy_file($sourceOther, $destOther);
+	// 						}
+	// 					}
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// }
+
 	public function create_folder($id, $path = '')
 	{
 		if ($path == '') {
@@ -1355,29 +1410,58 @@ class drawing_management_model extends app_model
 			drawing_dmg_create_folder($path);
 		}
 
-		// Updated query to include pdf_attachment
-		$data_child = $this->get_item('', 'parent_id = ' . $id, 'id, name, filetype, parent_id, pdf_attachment');
+		// Include document_number
+		$data_child = $this->get_item('', 'parent_id = ' . $id, 'id, name, filetype, parent_id, pdf_attachment, document_number');
 
 		if ($data_child) {
 			foreach ($data_child as $value) {
+
 				if ($value['filetype'] == 'folder') {
-					$new_path = $path . '/' . $value['name'];
+
+					$folder_name = $value['name'];
+
+					if (!empty($value['document_number'])) {
+						$folder_name = $value['document_number'] . '-' . $value['name'];
+					}
+
+					$new_path = $path . '/' . $folder_name;
+
 					drawing_dmg_create_folder($new_path);
+
 					$this->create_folder($value['id'], $new_path);
 				} else {
+
+					// File name with document number
+					$file_name = $value['name'];
+
+					if (!empty($value['document_number'])) {
+						$file_name = $value['document_number'] . '-' . $value['name'];
+					}
+
 					// 1) Copy main file
 					$path1 = DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/files/'
 						. $value['parent_id'] . '/' . $value['name'];
-					$path2 = $path . '/' . $value['name'];
+
+					$path2 = $path . '/' . $file_name;
+
 					$this->copy_file($path1, $path2);
 
 					// 2) Copy PDF attachment if exists
 					if (!empty($value['pdf_attachment'])) {
+
 						$sourcePdf = rtrim(DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER, '/')
 							. '/pdf_attachments/' . $value['id'] . '/' . $value['pdf_attachment'];
 
 						if (file_exists($sourcePdf)) {
-							$destPdf = $path . '/' . basename($sourcePdf);
+
+							$pdfFileName = basename($sourcePdf);
+
+							if (!empty($value['document_number'])) {
+								$pdfFileName = $value['document_number'] . '-' . $pdfFileName;
+							}
+
+							$destPdf = $path . '/' . $pdfFileName;
+
 							$this->copy_file($sourcePdf, $destPdf);
 						}
 					}
@@ -1386,12 +1470,22 @@ class drawing_management_model extends app_model
 					$other_attachments = $this->get_other_attachment($value['id']);
 
 					foreach ($other_attachments as $attach) {
+
 						if (!empty($attach['file_name'])) {
+
 							$sourceOther = rtrim(DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER, '/')
 								. '/all_attachment/' . $value['id'] . '/' . $attach['file_name'];
 
 							if (file_exists($sourceOther)) {
-								$destOther = $path . '/' . $attach['file_name'];
+
+								$otherFileName = $attach['file_name'];
+
+								if (!empty($value['document_number'])) {
+									$otherFileName = $value['document_number'] . '-' . $otherFileName;
+								}
+
+								$destOther = $path . '/' . $otherFileName;
+
 								$this->copy_file($sourceOther, $destOther);
 							}
 						}

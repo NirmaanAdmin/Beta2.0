@@ -154,7 +154,8 @@
 								if (!drawing_check_file_locked($value['id'])) {
 									echo '<li class="no-padding"><a href="' . admin_url('drawing_management?id=' . $value['id'] . '&edit=1&pid=' . $value['parent_id']) . '" data-name="' . drawing_htmldecode($value['name']) . '">' . _l('dmg_edit_metadata') . '</a></li>';
 								}
-								$download = '<a href="' . site_url('modules/drawing_management/uploads/files/' . $parent_id . '/' . $value['name']) . '" download onclick="download_all_rfi_pdf(' . $value['id'] . ')">' . _l('dmg_dowload') . '</a>';
+								// $download = '<a href="' . site_url('modules/drawing_management/uploads/files/' . $parent_id . '/' . $value['name']) . '" download onclick="download_all_rfi_pdf(' . $value['id'] . ')">' . _l('dmg_dowload') . '</a>';
+								$download = '<a href="' . site_url('modules/drawing_management/uploads/files/' . $parent_id . '/' . $value['name']) . '"  download="' . $document_number . '" onclick="download_all_rfi_pdf(' . $value['id'] . ')">' . _l('dmg_dowload') . '</a>';
 							}
 							?>
 							<li class="no-padding"><a href="#" data-type="<?php echo drawing_htmldecode($value['filetype']); ?>" onclick="share_document(this, '<?php echo drawing_htmldecode($value['id']); ?>')"><?php echo _l('dmg_share') ?></a></li>
