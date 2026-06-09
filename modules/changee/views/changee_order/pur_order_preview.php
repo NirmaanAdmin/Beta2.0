@@ -1,12 +1,6 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
 <?php echo form_hidden('_attachment_sale_id', $estimate->id); ?>
 <?php echo form_hidden('_attachment_sale_type', 'estimate'); ?>
-<?php
-$base_currency = changee_get_base_currency_pur();
-if ($estimate->currency != 0) {
-   $base_currency = changee_pur_get_currency_by_id($estimate->currency);
-}
-?>
 <div class="col-md-12 no-padding">
    <div class="panel_s">
       <div class="panel-body">
@@ -547,7 +541,7 @@ if ($estimate->currency != 0) {
                                           $diff_unit = $es['quantity'] - $es['original_quantity'];
                                           $unit_name = changee_pur_get_unit_name($es['unit_id']);
                                           $qty_after_incl_co = changee_pur_html_entity_decode($es['quantity']) . ' ' . $unit_name;
-                                          $rate_after_incl_co = app_format_money($es['unit_price'], $base_currency->symbol);
+                                          $rate_after_incl_co = app_format_money($es['unit_price'], $currency_name);
                                           $align = 'right';
                                           if ($diff_unit == 0) {
                                              $align = 'center';
@@ -570,11 +564,9 @@ if ($estimate->currency != 0) {
                                           </td>
                                           <td align="right"><?php echo changee_pur_html_entity_decode($es['original_quantity']) . ' ' . $unit_name; ?></br><span>Amendment :<?php echo  $diff_unit; ?></span></td>
                                           <td align="<?php echo $align; ?>"><?php echo $qty_after_incl_co; ?></td>
-                                          <td align="right"><?php echo app_format_money($es['original_unit_price'], $base_currency->symbol); ?></br><span>Amendment :<?php echo  $diff; ?></span></td>
+                                          <td align="right"><?php echo app_format_money($es['original_unit_price'], $currency_name); ?></br><span>Amendment :<?php echo  $diff; ?></span></td>
                                           <td align="<?php echo $align; ?>"><?php echo $rate_after_incl_co; ?></td>
-                                          <?php /*
-                                          <td align="right"><?php echo app_format_money($es['into_money'], $base_currency->symbol); ?></td> */ ?>
-                                          <td align="right"><?php echo app_format_money($es['into_money_updated'], $base_currency->symbol); ?></td>
+                                          <td align="right"><?php echo app_format_money($es['into_money_updated'], $currency_name); ?></td>
                                           <td align="right"><?php
                                                             if ($es['tax_name'] != '') {
                                                                echo changee_pur_html_entity_decode($es['tax_name']);
@@ -597,8 +589,8 @@ if ($estimate->currency != 0) {
                                                                }
                                                             }
                                                             ?></td>
-                                          <td align="right"><?php echo app_format_money($es['tax_value'], $base_currency->symbol); ?></td>
-                                          <td class="amount" align="right"><?php echo app_format_money($es['total'], $base_currency->symbol); ?></td>
+                                          <td align="right"><?php echo app_format_money($es['tax_value'], $currency_name); ?></td>
+                                          <td class="amount" align="right"><?php echo app_format_money($es['total'], $currency_name); ?></td>
                                        </tr>
                                  <?php
                                     }
@@ -614,7 +606,7 @@ if ($estimate->currency != 0) {
                                  <td><span class="bold"><?php echo _l('subtotal_wo_tax'); ?></span>
                                  </td>
                                  <td class="subtotal">
-                                    <?php echo app_format_money($estimate->subtotal, $base_currency->symbol); ?>
+                                    <?php echo app_format_money($estimate->subtotal, $currency_name); ?>
                                  </td>
                               </tr>
 
@@ -629,7 +621,7 @@ if ($estimate->currency != 0) {
                                     <td><span class="bold"><?php echo _l('discount_total(money)'); ?></span>
                                     </td>
                                     <td class="subtotal">
-                                       <?php echo '-' . app_format_money(($estimate->discount_total + $item_discount), $base_currency->symbol); ?>
+                                       <?php echo '-' . app_format_money(($estimate->discount_total + $item_discount), $currency_name); ?>
                                     </td>
                                  </tr>
                               <?php } ?>
@@ -638,7 +630,7 @@ if ($estimate->currency != 0) {
                                  <tr id="subtotal">
                                     <td><span class="bold"><?php echo _l('pur_shipping_fee'); ?></span></td>
                                     <td class="subtotal">
-                                       <?php echo app_format_money($estimate->shipping_fee, $base_currency->symbol); ?>
+                                       <?php echo app_format_money($estimate->shipping_fee, $currency_name); ?>
                                     </td>
                                  </tr>
                               <?php } ?>
@@ -648,7 +640,7 @@ if ($estimate->currency != 0) {
                                  <td><span class="bold"><?php echo _l('total'); ?></span>
                                  </td>
                                  <td class="subtotal bold">
-                                    <?php echo app_format_money($estimate->total, $base_currency->symbol); ?>
+                                    <?php echo app_format_money($estimate->total, $currency_name); ?>
                                  </td>
                               </tr>
 
@@ -656,7 +648,7 @@ if ($estimate->currency != 0) {
                                  <td><span class="bold"><?php echo _l('change_order_value'); ?></span>
                                  </td>
                                  <td class="co_value bold">
-                                    <?php echo app_format_money($estimate->co_value, $base_currency->symbol); ?>
+                                    <?php echo app_format_money($estimate->co_value, $currency_name); ?>
                                  </td>
                               </tr>
 
@@ -664,7 +656,7 @@ if ($estimate->currency != 0) {
                                  <td><span class="bold"><?php echo _l('non_tender_items_in_change_order'); ?></span>
                                  </td>
                                  <td class="non_tender_total bold">
-                                    <?php echo app_format_money($estimate->non_tender_total, $base_currency->symbol); ?>
+                                    <?php echo app_format_money($estimate->non_tender_total, $currency_name); ?>
                                  </td>
                               </tr>
                            </tbody>
@@ -875,15 +867,8 @@ if ($estimate->currency != 0) {
                   </thead>
                   <tbody>
                      <?php foreach ($payment as $pay) { ?>
-                        <?php
-                        $base_currency = $base_currency;
-                        $invoice_currency_id = changee_get_invoice_currency_id($pay['pur_invoice']);
-                        if ($invoice_currency_id != 0) {
-                           $base_currency = changee_pur_get_currency_by_id($invoice_currency_id);
-                        }
-                        ?>
                         <tr>
-                           <td><?php echo app_format_money($pay['amount'], $base_currency->symbol); ?></td>
+                           <td><?php echo app_format_money($pay['amount'], $currency_name); ?></td>
                            <td><?php echo changee_get_payment_mode_by_id($pay['paymentmode']); ?></td>
                            <td><?php echo changee_pur_html_entity_decode($pay['transactionid']); ?></td>
                            <td><?php echo _d($pay['date']); ?></td>

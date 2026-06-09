@@ -4767,6 +4767,7 @@ class Changee_model extends App_Model
     {
         $pur_order = $this->get_pur_order($pur_order_id);
         $co_order_detail = $this->get_co_order_detail($pur_order_id);
+        $currency_name = get_currency_name($pur_order->currency);
         $company_name = get_option('invoice_company_name');
         $address = get_option('invoice_company_address');
         $day = date('d', strtotime($pur_order->order_date));
@@ -4920,7 +4921,7 @@ class Changee_model extends App_Model
                 $non_tender = '<br><span style="display: block;font-size: 10px;font-style: italic;">' . _l('this_is_non_tendor_item') . '</span>';
             }
             $qty_after_incl_co = changee_pur_html_entity_decode($row['quantity']) . ' ' . $units->unit_name;
-            $rate_after_incl_co = '₹' . app_format_money($row['unit_price'], '');
+            $rate_after_incl_co = app_format_money($row['unit_price'], $currency_name);
             $align = 'right';
             if ($diff_unit == 0) {
                 $align = 'center';
@@ -4940,11 +4941,11 @@ class Changee_model extends App_Model
             </td>
             <td align="right" style="width: 8%; font-size: 11px;' . $font_weight . '">' . changee_pur_html_entity_decode($row['original_quantity']) . ' ' . $units->unit_name . '<br><span style="display: block; font-size: 10px;font-style: italic;">Amendment : ' . $diff_unit . '</span></td>
             <td align="' . $align . '" style="width: 8%; font-size: 11px;' . $font_weight . '">' . $qty_after_incl_co . '</td>
-            <td align="right" style="width: 8%; font-size: 11px;' . $font_weight . '">₹' . app_format_money($row['original_unit_price'], '') . '<br><span style="display: block; font-size: 10px;font-style: italic;">Amendment : ' . $diff . '</span></td>
+            <td align="right" style="width: 8%; font-size: 11px;' . $font_weight . '">' . app_format_money($row['original_unit_price'], $currency_name) . '<br><span style="display: block; font-size: 10px;font-style: italic;">Amendment : ' . $diff . '</span></td>
             <td align="' . $align . '" style="width: 7%; font-size: 11px;' . $font_weight . '">' . $rate_after_incl_co . '</td>
-            <td align="right" style="width: 9%; font-size: 11px;' . $font_weight . '">₹' . app_format_money($row['into_money_updated'], '') . '</td>
-            <td align="right" style="width: 9%; font-size: 11px;' . $font_weight . '">₹' . app_format_money($row['tax_value'], '') . '</td>
-            <td align="right" style="width: 9%; font-size: 11px;' . $font_weight . '">₹' . app_format_money($row['total'], '') . '</td>
+            <td align="right" style="width: 9%; font-size: 11px;' . $font_weight . '">' . app_format_money($row['into_money_updated'], $currency_name) . '</td>
+            <td align="right" style="width: 9%; font-size: 11px;' . $font_weight . '">' . app_format_money($row['tax_value'], $currency_name) . '</td>
+            <td align="right" style="width: 9%; font-size: 11px;' . $font_weight . '">' . app_format_money($row['total'], $currency_name) . '</td>
           </tr>';
 
             $t_mn += $row['total_money'];
@@ -4960,7 +4961,7 @@ class Changee_model extends App_Model
             <td width="33%"></td>
             <td>' . _l('subtotal') . ' </td>
             <td class="subtotal">
-            ' . '₹ ' . app_format_money($pur_order->subtotal, '') . '
+            ' . app_format_money($pur_order->subtotal, $currency_name) . '
             </td>
             </tr>';
         }
@@ -4969,7 +4970,7 @@ class Changee_model extends App_Model
             <td width="33%"></td>
             <td>' . _l('Tax') . ' </td>
             <td class="taxtotal">
-            ' . '₹ ' . app_format_money($tax_total, '') . '
+            ' . app_format_money($tax_total, $currency_name) . '
             </td>
             </tr>';
         }
@@ -4979,14 +4980,14 @@ class Changee_model extends App_Model
                   <td width="33%"></td>
                      <td>' . _l('discount(%)') . '(%)' . '</td>
                      <td class="subtotal">
-                        ' . app_format_money($pur_order->discount_percent, '') . ' %' . '
+                        ' . app_format_number($pur_order->discount_percent) . ' %' . '
                      </td>
                   </tr>
                   <tr id="subtotal">
                   <td width="33%"></td>
                      <td>' . _l('discount(money)') . '</td>
                      <td class="subtotal">
-                        ' . '₹ ' . app_format_money($pur_order->discount_total, '') . '
+                        ' . app_format_money($pur_order->discount_total, $currency_name) . '
                      </td>
                   </tr>';
         }
@@ -4994,7 +4995,7 @@ class Changee_model extends App_Model
                  <td width="33%"></td>
                  <td><strong>' . _l('total') . '</strong></td>
                  <td class="subtotal">
-                    ' . '₹ ' . app_format_money($pur_order->total, '') . '
+                    ' . app_format_money($pur_order->total, $currency_name) . '
                  </td>
               </tr>';
         if ($pur_order->co_value) {
@@ -5002,7 +5003,7 @@ class Changee_model extends App_Model
             <td width="33%"></td>
             <td>' . _l('change_order_value') . ' </td>
             <td class="subtotal">
-            ' . '₹ ' . app_format_money($pur_order->co_value, '') . '
+            ' . app_format_money($pur_order->co_value, $currency_name) . '
             </td>
             </tr>';
         }
@@ -5011,7 +5012,7 @@ class Changee_model extends App_Model
             <td width="33%"></td>
             <td>' . _l('non_tender_items_in_change_order') . ' </td>
             <td class="subtotal">
-            ' . '₹ ' . app_format_money($pur_order->non_tender_total, '') . '
+            ' . app_format_money($pur_order->non_tender_total, $currency_name) . '
             </td>
             </tr>';
         }
@@ -11375,10 +11376,10 @@ class Changee_model extends App_Model
         $row .= '<td class="original_rate">' . render_input($name_original_unit_price, '', $original_unit_price, 'number', ['readonly' => true], [], 'no-margin') . '<span class="variation">Amendment : </span></td>';
         $row .= '<td class="rate">' . render_input($name_unit_price, '', $unit_price, 'number', $array_rate_attr, [], 'no-margin', $text_right_class);
         if ($unit_price != '') {
-            $original_price = round(($unit_price / $currency_rate), 2);
-            $base_currency = get_base_currency();
-            if ($to_currency != 0 && $to_currency != $base_currency->id) {
-                $row .= render_input('original_price', '', app_format_money($original_price, $base_currency), 'text', ['data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => _l('original_price'), 'disabled' => true], [], 'no-margin', 'input-transparent text-right pur_input_none');
+            $original_price = ($currency_rate > 0) ? round(($unit_price / $currency_rate), 2) : 0;
+            if (!empty($to_currency)) {
+                $currency_name = get_currency_name($to_currency);
+                $row .= render_input('original_price', '', app_format_money($original_price, $currency_name), 'text', ['data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => _l('original_price'), 'disabled' => true], [], 'no-margin', 'input-transparent text-right pur_input_none');
             }
 
             $row .= '<input class="hide" name="og_price" disabled="true" value="' . $original_price . '">';
@@ -15018,7 +15019,7 @@ class Changee_model extends App_Model
         $response['pie_budget_name'] = $response['pie_tax_value'] = array();
         $response['line_order_date'] = $response['line_order_total'] = array();
 
-        $this->db->select('id, pur_order_number, approve_status, total, order_date, total_tax, group_pur, vendor, project, department');
+        $this->db->select('id, pur_order_number, approve_status, total, order_date, total_tax, group_pur, vendor, project, department, currency');
         if (!empty($vendors) && is_array($vendors)) {
             $this->db->where_in(db_prefix() . 'co_orders.vendor', $vendors);
         }
@@ -15029,34 +15030,18 @@ class Changee_model extends App_Model
         $co_orders = $this->db->get(db_prefix() . 'co_orders')->result_array();
 
         if (!empty($co_orders)) {
-            $draft_co_value = 0;
             $approved_co_value = 0;
             $draft_co_array = array_filter($co_orders, function ($item) {
                 return in_array($item['approve_status'], [1]);
             });
-
-            if (!empty($draft_co_array)) {
-                $draft_co_value = array_reduce($draft_co_array, function ($carry, $item) {
-                    return $carry + (float)$item['total'];
-                }, 0);
-            }
-            $response['draft_co_value'] = app_format_money($draft_co_value, $base_currency->symbol);
+            $response['draft_co_value'] = format_currency_totals($draft_co_array, 'total');
 
             $approved_co_array = array_filter($co_orders, function ($item) {
                 return in_array($item['approve_status'], [2]);
             });
+            $response['approved_co_value'] = format_currency_totals($approved_co_array, 'total');
 
-            if (!empty($approved_co_array)) {
-                $approved_co_value = array_reduce($approved_co_array, function ($carry, $item) {
-                    return $carry + (float)$item['total'];
-                }, 0);
-            }
-            $response['approved_co_value'] = app_format_money($approved_co_value, $base_currency->symbol);
-
-            $total_co_value = array_reduce($co_orders, function ($carry, $item) {
-                return $carry + (float)$item['total'];
-            }, 0);
-            $response['total_co_value'] = app_format_money($total_co_value, $base_currency->symbol);
+            $response['total_co_value'] = format_currency_totals($co_orders, 'total');
 
             $response['draft_co_count'] = count(array_filter($co_orders, function ($item) {
                 return isset($item['approve_status']) && $item['approve_status'] == 1;

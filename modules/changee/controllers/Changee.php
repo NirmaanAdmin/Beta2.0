@@ -1447,6 +1447,7 @@ class changee extends AdminController
         $data['sub_groups'] = $this->changee_model->get_sub_group();
         $data['area'] = $this->changee_model->get_area();
         $data['activity'] = $this->changee_model->get_po_activity($id);
+        $data['currency_name'] = get_currency_name($estimate->currency);
         if ($to_return == false) {
             $this->load->view('changee_order/pur_order_preview', $data);
         } else {
@@ -9064,6 +9065,8 @@ class changee extends AdminController
 
         $subtotal = $purchase_order->subtotal;
 
+        $currency_name = get_currency_name($purchase_order->currency);
+
         echo json_encode([
             'result' => $pur_order_detail,
             'subtotal' => app_format_money(round($subtotal, 2), ''),
@@ -9072,6 +9075,7 @@ class changee extends AdminController
             'taxes' => $taxes,
             'list_item' => $list_item,
             'currency' => $to_currency,
+            'currency_name' => $currency_name,
             'currency_rate' => $currency_rate,
             'estimate_html' => $estimate_html,
             'check_pur_existing_in_co' => $true,
@@ -9320,6 +9324,8 @@ class changee extends AdminController
 
         $get_order_summary =  $work_order->order_summary;
 
+        $currency_name = get_currency_name($purchase_order->currency);
+
         $get_terms = $work_order->terms;
         echo json_encode([
             'result' => $wo_order_detail,
@@ -9329,6 +9335,7 @@ class changee extends AdminController
             'taxes' => $taxes,
             'list_item' => $list_item,
             'currency' => $to_currency,
+            'currency_name' => $currency_name,
             'currency_rate' => $currency_rate,
             'estimate_html' => $estimate_html,
             'check_pur_existing_in_co' => $true,

@@ -62,6 +62,7 @@ $join         = [
     'LEFT JOIN ' . db_prefix() . 'assets_group ON ' . db_prefix() . 'assets_group.group_id = ' . db_prefix() . 'co_orders.group_pur',
     'LEFT JOIN ' . db_prefix() . 'wh_sub_group ON ' . db_prefix() . 'wh_sub_group.id = ' . db_prefix() . 'co_orders.sub_groups_pur',
     'LEFT JOIN ' . db_prefix() . 'area ON ' . db_prefix() . 'area.id = ' . db_prefix() . 'co_orders.area_pur',
+    'LEFT JOIN ' . db_prefix() . 'currencies ON ' . db_prefix() . 'currencies.id = ' . db_prefix() . 'co_orders.currency',
 ];
 $i = 0;
 foreach ($custom_fields as $field) {
@@ -218,16 +219,12 @@ update_module_filter($module_name, $department_filter_name, $department_filter_n
 
 
 
-$result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [db_prefix() . 'co_orders.id as id', 'company', 'pur_order_number', 'expense_convert', db_prefix() . 'projects.name as project_name', db_prefix() . 'departments.name as department_name', 'currency', '(SELECT GROUP_CONCAT(' . db_prefix() . 'project_members.staff_id SEPARATOR ",") FROM ' . db_prefix() . 'project_members WHERE ' . db_prefix() . 'project_members.project_id=' . db_prefix() . 'co_orders.project) as member_list'], '', [], $having);
+$result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [db_prefix() . 'co_orders.id as id', 'company', 'pur_order_number', 'expense_convert', db_prefix() . 'projects.name as project_name', db_prefix() . 'departments.name as department_name', db_prefix() . 'currencies.name as currency_name', 'currency', '(SELECT GROUP_CONCAT(' . db_prefix() . 'project_members.staff_id SEPARATOR ",") FROM ' . db_prefix() . 'project_members WHERE ' . db_prefix() . 'project_members.project_id=' . db_prefix() . 'co_orders.project) as member_list'], '', [], $having);
 
 $output  = $result['output'];
 $rResult = $result['rResult'];
 
-$footer_data = [
-    'total_co_value' => 0,
-    'total_tax_value' => 0,
-    'total_co_value_included_tax' => 0,
-];
+$footer_data = [];
 
 $this->ci->load->model('changee/changee_model');
 
@@ -241,13 +238,10 @@ foreach ($rResult as $aRow) {
             $_data = $aRow[$aColumns[$i]];
         }
 
-        $base_currency = changee_get_base_currency_pur();
-        if ($aRow['currency'] != 0) {
-            $base_currency = changee_pur_get_currency_by_id($aRow['currency']);
-        }
+        $currency_name = $aRow['currency_name'];
 
         if ($aColumns[$i] == 'total') {
-            $_data = app_format_money($aRow['total'], $base_currency->symbol);
+            $_data = app_format_money($aRow['total'], $currency_name);
         } elseif ($aColumns[$i] == 'pur_order_number') {
 
             $numberOutput = '';
@@ -281,7 +275,7 @@ foreach ($rResult as $aRow) {
                 $total_tax += $tax_val;
             }
 
-            $_data = app_format_money($total_tax, $base_currency->symbol);
+            $_data = app_format_money($total_tax, $currency_name);
         } elseif ($aColumns[$i] == 'expense_convert') {
             if ($aRow['expense_convert'] == 0) {
                 $_data = '<a href="javascript:void(0)" onclick="convert_expense(' . $aRow['id'] . ',' . $aRow['total'] . '); return false;" class="btn btn-warning btn-icon">' . _l('convert') . '</a>';
@@ -294,7 +288,7 @@ foreach ($rResult as $aRow) {
         } elseif ($aColumns[$i] == 'type') {
             $_data = _l($aRow['type']);
         } elseif ($aColumns[$i] == 'subtotal') {
-            $_data = app_format_money($aRow['subtotal'], $base_currency->symbol);
+            $_data = app_format_money($aRow['subtotal'], $currency_name);
         } elseif ($aColumns[$i] == db_prefix() . 'projects.name as project_name') {
             $_data = $aRow['project_name'];
         } elseif ($aColumns[$i] == 'department') {
@@ -425,13 +419,31 @@ foreach ($rResult as $aRow) {
         $row[] = $_data;
     }
 
-    $footer_data['total_co_value'] += $aRow['subtotal'];
-    $footer_data['total_tax_value'] += $total_tax;
-    $footer_data['total_co_value_included_tax'] += $aRow['total'];
+    $currency_key = $currency_name;
+    if (!isset($footer_data[$currency_key])) {
+        $footer_data[$currency_key] = [
+            'currency_name' => $currency_name,
+            'subtotal' => 0,
+            'tax' => 0,
+            'total' => 0,
+        ];
+    }
+    $footer_data[$currency_key]['subtotal'] += $aRow['subtotal'];
+    $footer_data[$currency_key]['tax'] += $total_tax;
+    $footer_data[$currency_key]['total'] += $aRow['total'];
     $output['aaData'][] = $row;
 }
 
-foreach ($footer_data as $key => $total) {
-    $footer_data[$key] = app_format_money($total, $base_currency->symbol);
+$total_co_value = [];
+$total_tax_value = [];
+$total_total_value = [];
+foreach ($footer_data as $currency => $totals) {
+    $total_co_value[] = app_format_money($totals['subtotal'], $currency);
+    $total_tax_value[] = app_format_money($totals['tax'], $currency);
+    $total_total_value[] = app_format_money($totals['total'], $currency);
 }
-$output['sums'] = $footer_data;
+$output['sums'] = [
+    'total_co_value' => implode(', ', $total_co_value),
+    'total_tax_value' => implode(', ', $total_tax_value),
+    'total_co_value_included_tax' => implode(', ', $total_total_value),
+];

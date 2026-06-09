@@ -220,9 +220,9 @@ function get_change_order_dashboard() {
     response = JSON.parse(response);
 
     // Update value summaries
-    $('.total_co_value').text(response.total_co_value);
-    $('.approved_co_value').text(response.approved_co_value);
-    $('.draft_co_value').text(response.draft_co_value);
+    $('.total_co_value').html(response.total_co_value);
+    $('.approved_co_value').html(response.approved_co_value);
+    $('.draft_co_value').html(response.draft_co_value);
 
     // PIE CHART - Approval Status
     var pieCtx = document.getElementById('pieChartForCOApprovalStatus').getContext('2d');

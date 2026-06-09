@@ -130,7 +130,7 @@ hooks()->add_filter('other_merge_fields_available_for', 'changee_register_other_
 define('CHANGEE_PATH', 'modules/changee/uploads/');
 define('CHANGEE_MODULE_ITEM_UPLOAD_FOLDER', 'modules/changee/uploads/item_img/');
 
-define('CHANGEE_REVISION', 150);
+define('CHANGEE_REVISION', rand(100000, 999999));
 // define('COMMODITY_ERROR_PUR', FCPATH );
 // define('COMMODITY_EXPORT_PUR', FCPATH );
 define('CHANGEE_IMPORT_ITEM_ERROR', 'modules/changee/uploads/import_item_error/');

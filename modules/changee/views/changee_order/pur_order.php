@@ -53,8 +53,8 @@
                             <option value=""></option>
                             <?php foreach ($pr_orders as $pr_order) { ?>
                               <option value="<?php echo html_entity_decode($pr_order['id']); ?>" <?php if (isset($pur_order) && ($pur_order->po_order_id == $pr_order['id'])) {
-                                                                                                    echo 'selected';
-                                                                                                  } ?>><?php echo html_entity_decode($pr_order['pur_order_number'] . ' - ' . $pr_order['pur_order_name']); ?></option>
+                                echo 'selected';
+                              } ?>><?php echo html_entity_decode($pr_order['pur_order_number'] . ' - ' . $pr_order['pur_order_name']); ?></option>
                             <?php } ?>
                           </select>
                         </div>
@@ -67,8 +67,8 @@
                             <?php
                             foreach ($wo_orders as $pr_order) { ?>
                               <option value="<?php echo html_entity_decode($pr_order['id']); ?>" <?php if (isset($pur_order) && ($pur_order->wo_order_id == $pr_order['id'])) {
-                                                                                                    echo 'selected';
-                                                                                                  } ?>><?php echo html_entity_decode($pr_order['wo_order_number'] . ' - ' . $pr_order['wo_order_name']); ?></option>
+                                echo 'selected';
+                              } ?>><?php echo html_entity_decode($pr_order['wo_order_number'] . ' - ' . $pr_order['wo_order_name']); ?></option>
                             <?php } ?>
                           </select>
                         </div>
@@ -106,21 +106,6 @@
                         <label for="vendor"><?php echo _l('vendor'); ?></label>
                         <input type="text" class="form-control" id="vendor_name" value="<?= $vendor_name ?>" readonly>
                         <input type="hidden" id="vendor" name="vendor" value="<?= $pur_order->vendor ?>">
-                        <!-- <select name="vendor" id="vendor" disabled   class="selectpicker" <?php if (isset($pur_order)) {
-                                                                                                  echo 'disabled';
-                                                                                                } ?> onchange="estimate_by_vendor(this); return false;" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
-                          <option value=""></option>
-                          <?php foreach ($vendors as $s) { ?>
-                            <option value="<?php echo changee_pur_html_entity_decode($s['userid']); ?>" <?php if (isset($pur_order) && $pur_order->vendor == $s['userid']) {
-                                                                                                          echo 'selected';
-                                                                                                        } else {
-                                                                                                          if (isset($ven) && $ven == $s['userid']) {
-                                                                                                            echo 'selected';
-                                                                                                          }
-                                                                                                        } ?>><?php echo changee_pur_html_entity_decode($s['company']); ?></option>
-                          <?php } ?>
-                        </select> -->
-
                       </div>
 
                       <?php
@@ -136,12 +121,11 @@
                           <option value=""></option>
                           <?php foreach ($co_request as $s) { ?>
                             <option value="<?php echo changee_pur_html_entity_decode($s['id']); ?>" <?php if (isset($pur_order) && $pur_order->co_request != '' && $pur_order->co_request == $s['id']) {
-                                                                                                      echo 'selected';
-                                                                                                    } ?>><?php echo changee_pur_html_entity_decode($s['pur_rq_code'] . ' - ' . $s['pur_rq_name']); ?></option>
+                              echo 'selected';
+                            } ?>><?php echo changee_pur_html_entity_decode($s['pur_rq_code'] . ' - ' . $s['pur_rq_name']); ?></option>
                           <?php } ?>
                         </select>
                       </div>
-
 
                     </div>
 
@@ -152,22 +136,22 @@
                           <option value=""></option>
                           <?php foreach ($estimates as $s) { ?>
                             <option value="<?php echo pur_html_entity_decode($s['id']); ?>" <?php if (isset($pur_order) && $s['id'] == $pur_order->estimate) {
-                                                                                              echo 'selected';
-                                                                                            } ?>><?php echo format_estimate_number($s['id']); ?></option>
+                              echo 'selected';
+                            } ?>><?php echo format_estimate_number($s['id']); ?></option>
                           <?php } ?>
                         </select>
                       </div>
                       <div class="col-md-6 form-group">
                         <label for="department"><?php echo _l('department'); ?></label>
                         <select name="department" id="department" class="selectpicker" <?php if (isset($pur_order)) {
-                                                                                          echo 'disabled';
-                                                                                        } ?> data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
-                          <option value=""></option>
-                          <?php foreach ($departments as $s) { ?>
-                            <option value="<?php echo changee_pur_html_entity_decode($s['departmentid']); ?>" <?php if (isset($pur_order) && $s['departmentid'] == $pur_order->department) {
-                                                                                                                echo 'selected';
-                                                                                                              } ?>><?php echo changee_pur_html_entity_decode($s['name']); ?></option>
-                          <?php } ?>
+                          echo 'disabled';
+                        } ?> data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
+                        <option value=""></option>
+                        <?php foreach ($departments as $s) { ?>
+                          <option value="<?php echo changee_pur_html_entity_decode($s['departmentid']); ?>" <?php if (isset($pur_order) && $s['departmentid'] == $pur_order->department) {
+                            echo 'selected';
+                          } ?>><?php echo changee_pur_html_entity_decode($s['name']); ?></option>
+                        <?php } ?>
                         </select>
                       </div>
                     </div>
@@ -186,10 +170,10 @@
                           <option value=""></option>
                           <?php foreach ($projects as $s) { ?>
                             <option value="<?php echo changee_pur_html_entity_decode($s['id']); ?>" <?php if (isset($pur_order) && $s['id'] == $pur_order->project) {
-                                                                                                      echo 'selected';
-                                                                                                    } else if (!isset($pur_order) && $s['id'] == $project_id) {
-                                                                                                      echo 'selected';
-                                                                                                    } ?>><?php echo changee_pur_html_entity_decode($s['name']); ?></option>
+                              echo 'selected';
+                            } else if (!isset($pur_order) && $s['id'] == $project_id) {
+                              echo 'selected';
+                            } ?>><?php echo changee_pur_html_entity_decode($s['name']); ?></option>
                           <?php } ?>
                         </select>
                       </div>
@@ -215,7 +199,7 @@
                     <div class="row">
                       <div class="col-md-6 ">
                         <?php
-                        $currency_attr = array('disabled' => true, 'data-show-subtext' => true);
+                        $currency_attr = array('data-show-subtext' => true);
 
                         $selected = '';
                         foreach ($currencies as $currency) {
@@ -588,9 +572,7 @@
               echo form_hidden('from_currency', $from_currency);
 
               ?>
-              <div class="col-md-8 <?php if ($po_currency->id == $base_currency->id) {
-                                      echo 'hide';
-                                    } ?>" id="currency_rate_div">
+              <div class="col-md-8 hide" id="currency_rate_div">
                 <div class="col-md-10 text-right">
 
                   <p class="mtop10"><?php echo _l('currency_rate'); ?><span id="convert_str"><?php echo ' (' . $base_currency->name . ' => ' . $po_currency->name . '): ';  ?></span></p>
@@ -703,10 +685,10 @@
                             </div>
                             <div class="col-md-3">
                               <input type="number" onchange="pur_calculate_total()" data-toggle="tooltip" value="<?php if (isset($pur_order)) {
-                                                                                                                    echo $pur_order->shipping_fee;
-                                                                                                                  } else {
-                                                                                                                    echo '0';
-                                                                                                                  } ?>" class="form-control pull-left text-right" name="shipping_fee">
+                                echo $pur_order->shipping_fee;
+                              } else {
+                                echo '0';
+                              } ?>" class="form-control pull-left text-right" name="shipping_fee">
                             </div>
                           </div>
                         </td>
@@ -803,9 +785,9 @@
                 <strong>Subject:</strong> <span class="pur_order_name"></span><br><br>
 
                 Dear Sir/Madam,<br>
-                This is with reference to your change order dated <span class="order_date">' . $formatted_date . '</span> and further our subsequent discussions with regards to <span class="pur_order_name"></span> for our above-mentioned project. We are pleased to issue you the order of <strong>INR <span class="subtotal_in_value"></span>/-</strong> (<span class="subtotal_in_words"></span>) (Exclusive of GST) on the following terms and conditions and specifications for the same as annexed.<br><br>
+                This is with reference to your change order dated <span class="order_date">' . $formatted_date . '</span> and further our subsequent discussions with regards to <span class="pur_order_name"></span> for our above-mentioned project. We are pleased to issue you the order of <strong><span class="order_summary_currency">INR</span> <span class="subtotal_in_value"></span>/-</strong> (<span class="subtotal_in_words"></span>) (Exclusive of GST) on the following terms and conditions and specifications for the same as annexed.<br><br>
 
-                <strong>Currency:</strong> INR<br><br>
+                <strong>Currency:</strong> <span class="order_summary_currency">INR</span><br><br>
 
                 <strong>Terms:</strong> F.O.R. at Site<br><br>
 

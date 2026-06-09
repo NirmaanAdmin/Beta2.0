@@ -44,9 +44,7 @@
           response = JSON.parse(response);
           if (response.currency_rate != 1) {
             $('#currency_rate_div').removeClass('hide');
-
             $('input[name="currency_rate"]').val(response.currency_rate).change();
-
             $('#convert_str').html(response.convert_str);
             $('.th_currency').html(response.currency_name);
           } else {
@@ -54,9 +52,7 @@
             $('#currency_rate_div').addClass('hide');
             $('#convert_str').html(response.convert_str);
             $('.th_currency').html(response.currency_name);
-
           }
-
         });
       } else {
         alert_float('warning', "<?php echo _l('please_select_currency'); ?>")
@@ -287,7 +283,7 @@
         // $('select[name="estimate"]').selectpicker('refresh');
         $('#vendor_data').html('');
         $('#vendor_data').append(response.ven_html);
-        $('select[name="currency"]').val(response.currency_id).change();
+        // $('select[name="currency"]').val(response.currency_id).change();
 
         <?php if (get_option('po_only_prefix_and_number') != 1) { ?>
           $('input[name="pur_order_number"]').val(po_number + '-' + response.company);
@@ -313,8 +309,8 @@
       $.post(admin_url + 'changee/coppy_co_request_for_po/' + co_request + '/' + vendor).done(function(response) {
         response = JSON.parse(response);
         if (response) {
-          $('select[name="currency"]').val(response.currency).change();
-          $('input[name="currency_rate"]').val(response.currency_rate).change();
+          // $('select[name="currency"]').val(response.currency).change();
+          // $('input[name="currency_rate"]').val(response.currency_rate).change();
 
           $('.invoice-item table.invoice-items-table.items tbody').html('');
           $('.invoice-item table.invoice-items-table.items tbody').append(response.list_item);
@@ -389,6 +385,7 @@
       shipping_fee = 0;
       $('input[name="shipping_fee"]').val(0);
     }
+    var selected_currency = $('select[name="currency"] option:selected').text();
 
     $('.wh-tax-area').remove();
 
@@ -502,7 +499,7 @@
       item_total_payment = parseFloat(item_amount) + parseFloat(item_tax) - parseFloat(item_discount);
 
       $(this).find('td.total_after_discount input').val(item_total_payment);
-      $(this).find('td.label_total_after_discount').html(format_money(item_total_payment));
+      $(this).find('td.label_total_after_discount').html(format_money(item_total_payment, false, selected_currency));
       $(this).find('td._total input').val(after_tax);
       $(this).find('td.tax_value input').val(item_tax);
       var variation = 0;
@@ -537,7 +534,7 @@
       }
       total += total_tax;
       total_tax_money += total_tax;
-      total_tax = format_money(total_tax);
+      total_tax = format_money(total_tax, false, selected_currency);
       $('#tax_id_' + slugify(taxname)).html(total_tax);
     });
 
@@ -563,18 +560,18 @@
 
     total += parseFloat(shipping_fee);
 
-    var discount_html = '-' + format_money(parseFloat(total_discount_calculated) + parseFloat(additional_discount));
+    var discount_html = '-' + format_money(parseFloat(total_discount_calculated) + parseFloat(additional_discount), false, selected_currency);
     $('input[name="discount_total"]').val(accounting.toFixed(total_discount_calculated, app.options.decimal_places));
 
     // Append, format to html and display
-    $('.shiping_fee').html(format_money(shipping_fee));
-    $('.order_discount_value').html(format_money(order_discount_percent_val));
+    $('.shiping_fee').html(format_money(shipping_fee, false, selected_currency));
+    $('.order_discount_value').html(format_money(order_discount_percent_val, false, selected_currency));
     $('.wh-total_discount').html(discount_html + hidden_input('dc_total', accounting.toFixed(order_discount_percent_val, app.options.decimal_places)));
-    $('.adjustment').html(format_money(adjustment));
-    $('.wh-subtotal').html(format_money(subtotal) + hidden_input('total_mn', accounting.toFixed(subtotal, app.options.decimal_places)));
-    $('.wh-total').html(format_money(total) + hidden_input('grand_total', accounting.toFixed(total, app.options.decimal_places)));
-    $('.wh-co-value').html(format_money(co_value) + hidden_input('co_value', accounting.toFixed(co_value, app.options.decimal_places)));
-    $('.wh-non-tender-total').html(format_money(non_tender_total) + hidden_input('non_tender_total', accounting.toFixed(non_tender_total, app.options.decimal_places)));
+    $('.adjustment').html(format_money(adjustment, false, selected_currency));
+    $('.wh-subtotal').html(format_money(subtotal, false, selected_currency) + hidden_input('total_mn', accounting.toFixed(subtotal, app.options.decimal_places)));
+    $('.wh-total').html(format_money(total, false, selected_currency) + hidden_input('grand_total', accounting.toFixed(total, app.options.decimal_places)));
+    $('.wh-co-value').html(format_money(co_value, false, selected_currency) + hidden_input('co_value', accounting.toFixed(co_value, app.options.decimal_places)));
+    $('.wh-non-tender-total').html(format_money(non_tender_total, false, selected_currency) + hidden_input('non_tender_total', accounting.toFixed(non_tender_total, app.options.decimal_places)));
     co_value_order_detail(co_value);
     co_amount_order_detail(co_value);
     co_grand_sub_total(subtotal);
@@ -931,6 +928,7 @@
               new Date().getFullYear() + '-' + response.vendor_code;
           }
           var order_date = $('#order_date').val();
+          const currency_name = response.currency_name ? response.currency_name : 'INR';
           // Process order_summary content
           const itemDesc = response.item_description; // e.g. Supply of Al. Powder Coated Designer Grille
           const originalAmount = response.original_amount; // e.g. INR 32,91,860/-
@@ -949,7 +947,7 @@
         
 This Change Order refers to our purchase order issued for the "<strong>${itemDesc}</strong>" dated <strong>${order_dateed}</strong>.<br><br>
 
-The original amount of INR <strong>${originalAmount}</strong> is hereby revised by amount INR <span class="subtotal_in_value">0</span>. The revised contract value is INR <span class="grand_sub_total"></span> (<span class="grand_sub_total_in_words"></span>), exclusive of GST.`)
+The original amount of ${currency_name} <strong>${originalAmount}</strong> is hereby revised by amount ${currency_name} <span class="subtotal_in_value">0</span>. The revised contract value is ${currency_name} <span class="grand_sub_total"></span> (<span class="grand_sub_total_in_words"></span>), exclusive of GST.`)
             .replace(/This is with reference to your final[\s\S]*?for the same as annexed\./g, "");
           // Set order_summary content (with TinyMCE check)
           if (tinymce.get('order_summary')) {
