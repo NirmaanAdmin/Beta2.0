@@ -890,3 +890,34 @@ function get_rfi_dms_items($id)
 	$tickets = $CI->db->get(db_prefix() . 'tickets')->result_array();
 	return $tickets;
 }
+
+function get_shared_date($item_id)
+{
+	
+	$userid = get_staff_user_id();
+	$CI = &get_instance();
+	$CI->db->select('shared_date');
+	$CI->db->where('item_id', $item_id);
+	$CI->db->where("FIND_IN_SET(" . (int)$userid . ", staff) !=", 0);
+	$data = $CI->db->get(db_prefix() . 'dms_share_logs')->row();
+	if ($data) {
+		return $data->shared_date;
+	}
+	return '';
+
+}
+
+function get_shared_by($item_id)
+{
+	$userid = get_staff_user_id();
+	$CI = &get_instance();
+	$CI->db->select('shared_by');
+	$CI->db->where('item_id', $item_id);
+	$CI->db->where("FIND_IN_SET(" . (int)$userid . ", staff) !=", 0);
+	$data = $CI->db->get(db_prefix() . 'dms_share_logs')->row();
+	if ($data) {
+		return $data->shared_by;
+	}
+	return '';
+
+}

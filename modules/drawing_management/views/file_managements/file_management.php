@@ -206,19 +206,6 @@
 								</ul>
 								<hr>
 								<ul class="list-group list-group-flush list-group-custom" role="tablist">
-									<?php /* <li class="list-group-item list-group-item-action display-flex<?php echo ($share_to_me == 1 ? ' active' : ''); ?>" data-toggle="list" role="tab">
-										<a href="<?php echo admin_url('drawing_management?share_to_me=1&id=0'); ?>" class="w100 display-flex">
-											<svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-share-2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>  
-											<span class="mtop2 mleft5">
-												<?php echo _l('dmg_share_to_me'); ?>
-												<?php 
-												$share_items = $this->drawing_management_model->get_item('','id IN ('.$share_id.')', 'name, id, dateadded, filetype');											
-												if($share_items && is_array($share_items) && count($share_items) > 0){ ?>
-													<span class="label bg-warning mleft10"><strong><?php echo count($share_items); ?></strong></span>
-												<?php } ?>
-											</span>
-										</a>
-									</li> */ ?>
 									<li class="list-group-item list-group-item-action display-flex<?php echo ($my_approval == 1 ? ' active' : ''); ?>" data-toggle="list" role="tab">
 										<a href="<?php echo admin_url('drawing_management?my_approval=1&id=0'); ?>" class="w100 display-flex">
 											<svg viewBox="0 0 24 24" width="23" height="23" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
@@ -233,7 +220,26 @@
 											</span>
 										</a>
 									</li>
-									<li class="list-group-item list-group-item-action display-flex<?php echo ($electronic_signing == 1 ? ' active' : ''); ?>" data-toggle="list" role="tab">
+									<li class="list-group-item list-group-item-action display-flex<?php echo ($share_to_me == 1 ? ' active' : ''); ?>" data-toggle="list" role="tab">
+										<a href="<?php echo admin_url('drawing_management?share_to_me=1&id=0'); ?>" class="w100 display-flex">
+											<svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-share-2">
+												<circle cx="18" cy="5" r="3" />
+												<circle cx="6" cy="12" r="3" />
+												<circle cx="18" cy="19" r="3" />
+												<line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+												<line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+											</svg>
+											<span class="mtop2 mleft5">
+												<?php echo _l('dmg_share_to_me'); ?>
+												<?php
+												$share_items = $this->drawing_management_model->get_item('', 'id IN (' . $share_id . ')', 'name, id, dateadded, filetype');
+												if ($share_items && is_array($share_items) && count($share_items) > 0) { ?>
+													<span class="label bg-warning mleft10"><strong><?php echo count($share_items); ?></strong></span>
+												<?php } ?>
+											</span>
+										</a>
+									</li>
+									<!-- <li class="list-group-item list-group-item-action display-flex<?php echo ($electronic_signing == 1 ? ' active' : ''); ?>" data-toggle="list" role="tab">
 										<a href="<?php echo admin_url('drawing_management?electronic_signing=1&id=0'); ?>" class="w100 display-flex">
 											<svg viewBox="0 0 24 24" width="23" height="23" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
 												<polyline points="9 11 12 14 22 4"></polyline>
@@ -246,7 +252,7 @@
 												<?php } ?>
 											</span>
 										</a>
-									</li>
+									</li> -->
 								</ul>
 							</div>
 
@@ -486,9 +492,9 @@
 												} else {
 													$child_items = [];
 													if ($parent_id == 0) {
-														$child_items = $this->drawing_management_model->get_item('', 'id IN (' . $share_id . ')', 'name, id, dateadded, filetype, parent_id');
+														$child_items = $this->drawing_management_model->get_item('', 'id IN (' . $share_id . ')', 'name, id, dateadded, filetype, parent_id,last_action,creator_id,document_number,orginal_filename');
 													} else {
-														$child_items = $this->drawing_management_model->get_item('', 'parent_id = ' . $parent_id, 'name, id, dateadded, filetype, parent_id');
+														$child_items = $this->drawing_management_model->get_item('', 'parent_id = ' . $parent_id, 'name, id, dateadded, filetype, parent_id,last_action,creator_id,document_number,orginal_filename');
 													}
 													if ($parent_id == 0 || (is_numeric($parent_id) && $parent_id > 0 && drawing_dmg_get_file_type($parent_id) == 'folder')) {
 														if (count($child_items)) {
@@ -631,7 +637,7 @@
 				<input type="hidden" name="action_type" value="">
 				<input type="hidden" name="default_parent_id" value="<?php echo drawing_htmldecode($parent_id); ?>">
 				<div class="list"></div>
-			</div> 
+			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" data-dismiss="modal"><?php echo _l('close'); ?></button>
 				<button type="submit" class="btn btn-primary" onclick="continue_action()"><?php echo _l('dmg_continue'); ?></button>
@@ -700,14 +706,14 @@
 							['id' => 'editor', 'name' => _l('dmg_editor')],
 							['id' => 'upload_only', 'name' =>  _l('dmg_upload_only')]
 						];
-						echo render_select('permission', $permission_list, array('id', 'name'), '<small class="req text-danger">* </small>' . _l('dmg_permission'), 'preview', ['required' => true, 'data-actions-box' => true], [], '', '', false); ?>
+						echo render_select('permission', $permission_list, array('id', 'name'), '<small class="req text-danger">* </small>' . _l('dmg_permission'), '', ['required' => true, 'data-actions-box' => true], [], '', '', false); ?>
 					</div>
 					<div class="col-md-12 vendor_pr hide">
 						<?php
 						$permission_list = [
 							['id' => 'preview', 'name' => _l('dmg_preview')]
 						];
-						echo render_select('permission', $permission_list, array('id', 'name'), '<small class="req text-danger">* </small>' . _l('dmg_permission'), 'preview', ['required' => true, 'data-actions-box' => true], [], '', '', false); ?>
+						echo render_select('permission', $permission_list, array('id', 'name'), '<small class="req text-danger">* </small>' . _l('dmg_permission'), '', ['required' => true, 'data-actions-box' => true], [], '', '', false); ?>
 					</div>
 					<div class="col-md-4">
 						<div class="checkbox checkbox-primary mtop25">

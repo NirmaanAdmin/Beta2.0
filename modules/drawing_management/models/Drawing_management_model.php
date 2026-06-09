@@ -2646,6 +2646,9 @@ class drawing_management_model extends app_model
 		if (isset($data['customer_group']) && $data['customer_group'] != '') {
 			$data['customer_group'] = implode(',', $data['customer_group']);
 		}
+		$userid = get_staff_user_id();
+		$data['shared_date'] = date('Y-m-d H:i:s');
+		$data['shared_by'] = $userid;
 		$this->db->insert(db_prefix() . 'dms_share_logs', $data);
 
 		if ($data['share_to'] == 'staff') {
