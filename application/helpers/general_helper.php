@@ -1206,7 +1206,7 @@ function get_currency_name($id)
     return $result ? $result->name : 'INR';
 }
 
-function format_currency_totals($items, $amount_key, $is_average = false)
+function format_currency_converter($items, $amount_key, $is_average = false)
 {
     if (empty($items)) {
         return app_format_money(0);

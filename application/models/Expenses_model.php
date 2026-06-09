@@ -1030,9 +1030,9 @@ class Expenses_model extends App_Model
 
         if (!empty($expenses)) {
             $total_expenses_raised = count($expenses);
-            $response['total_expenses'] = format_currency_totals($expenses, 'amount');
+            $response['total_expenses'] = format_currency_converter($expenses, 'amount');
             if($total_expenses_raised > 0) {
-                $response['total_average_expenses'] = format_currency_totals($expenses, 'amount', true);
+                $response['total_average_expenses'] = format_currency_converter($expenses, 'amount', true);
             }
             $response['total_expenses_without_receipts'] = count(array_filter($expenses, fn($item) =>
                 empty($item['file_name'])

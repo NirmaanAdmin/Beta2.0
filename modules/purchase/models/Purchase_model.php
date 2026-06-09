@@ -22283,14 +22283,14 @@ class Purchase_model extends App_Model
             $draft_po_array = array_filter($pur_orders, function ($item) {
                 return in_array($item['approve_status'], [1]);
             });
-            $response['draft_po_value'] = format_currency_totals($draft_po_array, 'total');
+            $response['draft_po_value'] = format_currency_converter($draft_po_array, 'total');
 
             $approved_po_array = array_filter($pur_orders, function ($item) {
                 return in_array($item['approve_status'], [2]);
             });
-            $response['approved_po_value'] = format_currency_totals($approved_po_array, 'total');
+            $response['approved_po_value'] = format_currency_converter($approved_po_array, 'total');
             
-            $response['total_po_value'] = format_currency_totals($pur_orders, 'total');
+            $response['total_po_value'] = format_currency_converter($pur_orders, 'total');
 
             $response['draft_po_count'] = count(array_filter($pur_orders, function ($item) {
                 return isset($item['approve_status']) && $item['approve_status'] == 1;
@@ -22390,14 +22390,14 @@ class Purchase_model extends App_Model
             $draft_wo_array = array_filter($wo_orders, function ($item) {
                 return in_array($item['approve_status'], [1]);
             });
-            $response['draft_wo_value'] = format_currency_totals($draft_wo_array, 'total');
+            $response['draft_wo_value'] = format_currency_converter($draft_wo_array, 'total');
 
             $approved_wo_array = array_filter($wo_orders, function ($item) {
                 return in_array($item['approve_status'], [2]);
             });
-            $response['approved_wo_value'] = format_currency_totals($approved_wo_array, 'total');
+            $response['approved_wo_value'] = format_currency_converter($approved_wo_array, 'total');
             
-            $response['total_wo_value'] = format_currency_totals($wo_orders, 'total');
+            $response['total_wo_value'] = format_currency_converter($wo_orders, 'total');
 
             $response['draft_wo_count'] = count(array_filter($wo_orders, function ($item) {
                 return isset($item['approve_status']) && $item['approve_status'] == 1;
@@ -22683,7 +22683,7 @@ class Purchase_model extends App_Model
                     $line_order_total[$month] += $amount_rec_4;
                 }
             }
-            $response['total_certified_value'] = format_currency_totals($total_certified_items, 'amount');
+            $response['total_certified_value'] = format_currency_converter($total_certified_items, 'amount');
 
             if (!empty($bar_top_vendors)) {
                 usort($bar_top_vendors, function ($a, $b) {
