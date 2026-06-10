@@ -659,6 +659,17 @@
                                     <?php echo app_format_money($estimate->non_tender_total, $currency_name); ?>
                                  </td>
                               </tr>
+                              <?php
+                              if($pur_order->currency != 3) { ?>
+                                 <tr>
+                                    <td><span class="bold"><?php echo _l('Total In INR'); ?></span>
+                                    </td>
+                                    <td class="bold">
+                                       <?php
+                                       echo find_total_in_inr($estimate->total, $pur_order->currency); ?>
+                                    </td>
+                                 </tr>
+                              <?php } ?>
                            </tbody>
                         </table>
                      </div>

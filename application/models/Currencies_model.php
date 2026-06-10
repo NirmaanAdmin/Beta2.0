@@ -62,6 +62,7 @@ class Currencies_model extends App_Model
     {
         unset($data['currencyid']);
         $data['name'] = strtoupper($data['name']);
+        $data['reference_value'] = !empty($data['reference_value']) ? $data['reference_value'] : 1;
         $this->db->insert(db_prefix() . 'currencies', $data);
         $insert_id = $this->db->insert_id();
         if ($insert_id) {
@@ -83,6 +84,7 @@ class Currencies_model extends App_Model
         $currencyid = $data['currencyid'];
         unset($data['currencyid']);
         $data['name'] = strtoupper($data['name']);
+        $data['reference_value'] = !empty($data['reference_value']) ? $data['reference_value'] : 1;
         $this->db->where('id', $currencyid);
         $this->db->update(db_prefix() . 'currencies', $data);
         if ($this->db->affected_rows() > 0) {

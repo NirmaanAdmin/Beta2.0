@@ -4268,3 +4268,4 @@ $lang['new_company_gst'] = 'New Company GST';
 $lang['edit_company_gst'] = 'Edit Company GST';
 $lang['default_gst_set'] = 'This is now your default company GST.';
 $lang['suppliers_gst'] = 'Suppliers / Vendors GST';
+$lang['reference_value'] = 'Reference value';

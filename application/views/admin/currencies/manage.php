@@ -15,6 +15,7 @@
                         <?php render_datatable([
                             _l('currency_list_name'),
                             _l('currency_list_symbol'),
+                            _l('reference_value'),
                             _l('options'),
                         ], 'currencies'); ?>
                     </div>
@@ -42,6 +43,7 @@
                         <div class="alert alert-warning"><?php echo _l('currency_valid_code_help'); ?></div>
                         <?php echo render_input('name', 'currency_add_edit_description', '', 'text', ['placeholder' => _l('iso_code')]); ?>
                         <?php echo render_input('symbol', 'currency_add_edit_rate'); ?>
+                        <?php echo render_input('reference_value', 'reference_value', '', 'number'); ?>
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
@@ -117,6 +119,7 @@ $(function() {
 
         $('#currency_modal input[name="name"]').val('');
         $('#currency_modal input[name="symbol"]').val('');
+        $('#currency_modal input[name="reference_value"]').val(1.00);
         $('#currency_modal input[name="currencyid"]').val('');
 
         $('#currency_modal #c_placement_before').prop('checked', true);
@@ -130,13 +133,15 @@ $(function() {
 
         if (typeof(id) !== 'undefined') {
             $('input[name="currencyid"]').val(id);
+            console.log($(button).parents('tr').find('td').eq(2).text());
             var name = $(button).parents('tr').find('td').eq(0).find('span.name').text();
             var symbol = $(button).parents('tr').find('td').eq(1).text();
-            var xrate = $(button).parents('tr').find('td').eq(2).text();
+            var reference_value = $(button).parents('tr').find('td').eq(2).text();
             $('#currency_modal .add-title').addClass('hide');
             $('#currency_modal .edit-title').removeClass('hide');
             $('#currency_modal input[name="name"]').val(name);
             $('#currency_modal input[name="symbol"]').val(symbol);
+            $('#currency_modal input[name="reference_value"]').val(reference_value);
 
             $('#currency_modal #c_placement_' + button.data('placement')).prop('checked', true);
             $('#currency_modal #decimal_separator').selectpicker('val', button.data(

@@ -4,6 +4,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 $aColumns = [
     'name',
     'symbol',
+    'reference_value',
     ];
 $sIndexColumn = 'id';
 $sTable       = db_prefix() . 'currencies';
@@ -28,6 +29,7 @@ foreach ($rResult as $aRow) {
         'data-placement'          => $aRow['placement'],
         'data-thousand-separator' => $aRow['thousand_separator'],
         'data-decimal-separator'  => $aRow['decimal_separator'],
+        'data-reference-value'    => $aRow['reference_value'],
         ];
 
         if ($aColumns[$i] == 'name') {

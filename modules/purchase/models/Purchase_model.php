@@ -22283,14 +22283,14 @@ class Purchase_model extends App_Model
             $draft_po_array = array_filter($pur_orders, function ($item) {
                 return in_array($item['approve_status'], [1]);
             });
-            $response['draft_po_value'] = format_currency_converter($draft_po_array, 'total');
+            $response['draft_po_value'] = app_format_money(format_currency_converter($draft_po_array, 'total'));
 
             $approved_po_array = array_filter($pur_orders, function ($item) {
                 return in_array($item['approve_status'], [2]);
             });
-            $response['approved_po_value'] = format_currency_converter($approved_po_array, 'total');
+            $response['approved_po_value'] = app_format_money(format_currency_converter($approved_po_array, 'total'));
             
-            $response['total_po_value'] = format_currency_converter($pur_orders, 'total');
+            $response['total_po_value'] = app_format_money(format_currency_converter($pur_orders, 'total'));
 
             $response['draft_po_count'] = count(array_filter($pur_orders, function ($item) {
                 return isset($item['approve_status']) && $item['approve_status'] == 1;
@@ -22390,14 +22390,14 @@ class Purchase_model extends App_Model
             $draft_wo_array = array_filter($wo_orders, function ($item) {
                 return in_array($item['approve_status'], [1]);
             });
-            $response['draft_wo_value'] = format_currency_converter($draft_wo_array, 'total');
+            $response['draft_wo_value'] = app_format_money(format_currency_converter($draft_wo_array, 'total'));
 
             $approved_wo_array = array_filter($wo_orders, function ($item) {
                 return in_array($item['approve_status'], [2]);
             });
-            $response['approved_wo_value'] = format_currency_converter($approved_wo_array, 'total');
+            $response['approved_wo_value'] = app_format_money(format_currency_converter($approved_wo_array, 'total'));
             
-            $response['total_wo_value'] = format_currency_converter($wo_orders, 'total');
+            $response['total_wo_value'] = app_format_money(format_currency_converter($wo_orders, 'total'));
 
             $response['draft_wo_count'] = count(array_filter($wo_orders, function ($item) {
                 return isset($item['approve_status']) && $item['approve_status'] == 1;
@@ -22683,7 +22683,7 @@ class Purchase_model extends App_Model
                     $line_order_total[$month] += $amount_rec_4;
                 }
             }
-            $response['total_certified_value'] = format_currency_converter($total_certified_items, 'amount');
+            $response['total_certified_value'] = app_format_money(format_currency_converter($total_certified_items, 'amount'));
 
             if (!empty($bar_top_vendors)) {
                 usort($bar_top_vendors, function ($a, $b) {
@@ -23675,6 +23675,7 @@ class Purchase_model extends App_Model
             'kind',
             'group_name',
             'remarks',
+            'currency',
         ];
         $sIndexColumn = 'id';
         $sTable = "(
@@ -23831,15 +23832,9 @@ class Purchase_model extends App_Model
         $output  = $result['output'];
         $result = $result['rResult'];
 
-        $cost_to_complete = 0;
-        if (!empty($result)) {
-            $cost_to_complete = array_sum(array_column($result, 'cost_to_complete'));
-        }
-        $response['cost_to_complete'] = app_format_money($cost_to_complete, $base_currency);
-        $rev_contract_value = 0;
-        if (!empty($result)) {
-            $rev_contract_value = array_sum(array_column($result, 'total_rev_contract_value'));
-        }
+        $cost_to_complete = format_currency_converter($result, 'cost_to_complete');
+        $response['cost_to_complete'] = app_format_money($cost_to_complete);
+        $rev_contract_value = format_currency_converter($result, 'total_rev_contract_value');
         $response['rev_contract_value'] = app_format_money($rev_contract_value, $base_currency);
         if ($cost_to_complete > 0) {
             $response['percentage_utilized'] = round(($rev_contract_value / $cost_to_complete) * 100);

@@ -714,6 +714,18 @@
                                     </td>
                                  </tr>
                               <?php } ?>
+                              <?php
+                              if($pur_order->currency != 3) { ?>
+                                 <tr>
+                                    <td><span class="bold"><?php echo _l('Total In INR'); ?></span>
+                                    </td>
+                                    <td class="bold">
+                                       <?php
+                                       $total_in_inr = !empty($changes) ? $grand_total : $estimate->total;
+                                       echo find_total_in_inr($total_in_inr, $pur_order->currency); ?>
+                                    </td>
+                                 </tr>
+                              <?php } ?>
                            </tbody>
                         </table>
                      </div>

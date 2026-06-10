@@ -15034,14 +15034,14 @@ class Changee_model extends App_Model
             $draft_co_array = array_filter($co_orders, function ($item) {
                 return in_array($item['approve_status'], [1]);
             });
-            $response['draft_co_value'] = format_currency_converter($draft_co_array, 'total');
+            $response['draft_co_value'] = app_format_money(format_currency_converter($draft_co_array, 'total'));
 
             $approved_co_array = array_filter($co_orders, function ($item) {
                 return in_array($item['approve_status'], [2]);
             });
-            $response['approved_co_value'] = format_currency_converter($approved_co_array, 'total');
+            $response['approved_co_value'] = app_format_money(format_currency_converter($approved_co_array, 'total'));
 
-            $response['total_co_value'] = format_currency_converter($co_orders, 'total');
+            $response['total_co_value'] = app_format_money(format_currency_converter($co_orders, 'total'));
 
             $response['draft_co_count'] = count(array_filter($co_orders, function ($item) {
                 return isset($item['approve_status']) && $item['approve_status'] == 1;

@@ -1213,27 +1213,64 @@ function format_currency_converter($items, $amount_key, $is_average = false)
     }
     $CI =& get_instance();
     $currency_ids = array_unique(array_column($items, 'currency'));
-    $CI->db->select('id, name');
+    $CI->db->select('id, name, reference_value');
     $CI->db->where_in('id', $currency_ids);
     $currencies = $CI->db->get(db_prefix() . 'currencies')->result_array();
-    $currency_map = array_column($currencies, 'name', 'id');
+    $currency_map = [];
+    foreach ($currencies as $currency) {
+        $currency_map[$currency['id']] = [
+            'name' => $currency['name'],
+            'reference_value' => (float) $currency['reference_value'],
+        ];
+    }
     $currency_totals = [];
     $currency_counts = [];
     foreach ($items as $item) {
-        $currency_name = $currency_map[$item['currency']] ?? 'INR';
+        $currency = $currency_map[$item['currency']] ?? [
+            'name' => 'INR',
+            'reference_value' => 1,
+        ];
+        $currency_name = $currency['name'];
         if (!isset($currency_totals[$currency_name])) {
             $currency_totals[$currency_name] = 0;
             $currency_counts[$currency_name] = 0;
         }
-        $currency_totals[$currency_name] += (float)$item[$amount_key];
+        $currency_totals[$currency_name] += (float) ($item[$amount_key] ?? 0);
         $currency_counts[$currency_name]++;
     }
-    $formatted = [];
+    $inr_total = 0;
     foreach ($currency_totals as $currency_name => $amount) {
-        if ($is_average) {
+        if ($is_average && $currency_counts[$currency_name] > 0) {
             $amount = $amount / $currency_counts[$currency_name];
         }
-        $formatted[] = app_format_money($amount, $currency_name);
+        if ($currency_name === 'INR') {
+            $inr_total += $amount;
+            continue;
+        }
+        $reference_rate = 1;
+        foreach ($currencies as $currency) {
+            if ($currency['name'] === $currency_name) {
+                $reference_rate = (float) ($currency['reference_value'] ?: 1);
+                break;
+            }
+        }
+        $inr_total += ($amount * $reference_rate);
     }
-    return implode('<br>', $formatted);
+    return $inr_total;
+}
+
+function find_total_in_inr($amount, $currency_id) 
+{
+    if(!empty($currency_id) && $currency_id != 3) {
+        $CI =& get_instance();
+        $CI->db->select('reference_value');
+        $CI->db->from(db_prefix() . 'currencies');
+        $CI->db->where('id', $currency_id);
+        $result = $CI->db->get()->row();
+        $reference_value = (float) ($result->reference_value ?? 1);
+        $final_amount = (float) $amount * $reference_value;
+        return app_format_money($final_amount);
+    } else {
+        return '';
+    }
 }
