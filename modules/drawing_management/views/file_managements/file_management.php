@@ -232,9 +232,54 @@
 											<span class="mtop2 mleft5">
 												<?php echo _l('dmg_share_to_me'); ?>
 												<?php
-												$share_items = $this->drawing_management_model->get_item('', 'id IN (' . $share_id . ')', 'name, id, dateadded, filetype');
-												if ($share_items && is_array($share_items) && count($share_items) > 0) { ?>
-													<span class="label bg-warning mleft10"><strong><?php echo count($share_items); ?></strong></span>
+												$share_items = $this->drawing_management_model->get_item(
+													'',
+													'id IN (' . $share_id . ')',
+													'name, id, parent_id, project_id, dateadded, filetype'
+												);
+
+												$default_project = get_default_project();
+												$filtered_count = 0;
+
+												if ($share_items && is_array($share_items)) {
+
+													$CI = &get_instance();
+
+													foreach ($share_items as $item) {
+
+														$current_id = $item['id'];
+														$matched_project_id = 0;
+
+														while ($current_id > 0) {
+
+															$record = $CI->db
+																->select('id, parent_id, project_id')
+																->where('id', $current_id)
+																->get(db_prefix() . 'dms_items')
+																->row_array();
+
+															if (!$record) {
+																break;
+															}
+
+															if ((int)$record['project_id'] > 0) {
+																$matched_project_id = (int)$record['project_id'];
+																break;
+															}
+
+															$current_id = (int)$record['parent_id'];
+														}
+
+														if ($matched_project_id == (int)$default_project) {
+															$filtered_count++;
+														}
+													}
+												}
+
+												if ($filtered_count > 0) { ?>
+													<span class="label bg-warning mleft10">
+														<strong><?php echo $filtered_count; ?></strong>
+													</span>
 												<?php } ?>
 											</span>
 										</a>

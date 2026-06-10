@@ -11,6 +11,38 @@
 		<tbody>
 			<?php
 			foreach ($child_items as $key => $value) {
+				$default_project = get_default_project();
+
+				$CI = &get_instance();
+
+				$current_id = $value['id'];
+				$matched_project_id = 0;
+
+				while ($current_id > 0) {
+					$item = $CI->db
+						->select('id, parent_id, project_id')
+						->where('id', $current_id)
+						->get(db_prefix() . 'dms_items')
+						->row_array();
+
+					if (!$item) {
+						break;
+					}
+
+					// Stop when a project_id is found
+					if ((int)$item['project_id'] > 0) {
+						$matched_project_id = (int)$item['project_id'];
+						break;
+					}
+
+					// Move to parent
+					$current_id = (int)$item['parent_id'];
+				}
+
+				// Skip this record if project_id doesn't match the selected project
+				if ($matched_project_id != (int)$default_project) {
+					continue;
+				}
 				$item_icon = '';
 				if ($value['filetype'] == 'folder') {
 					$item_icon = '<i class="fa fa-folder text-yellow fs-19"></i> ';
