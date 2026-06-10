@@ -1486,6 +1486,12 @@ class drawing_management extends AdminController
 				$urls[] = admin_url('tickets/pdf/' . $ticket_id);
 			}
 		}
+		$get_dwg_attachment = $this->drawing_management_model->get_dwg_attachment($file_id);
+		if (!empty($get_dwg_attachment)) {
+			foreach ($get_dwg_attachment as $attachment) {
+				$urls[] = base_url('modules/drawing_management/uploads/pdf_attachments/' . $file_id . '/' . $attachment['file_name']);
+			}
+		}
 		echo json_encode([
 			'status' => !empty($urls) ? true : false,
 			'download_urls' => $urls

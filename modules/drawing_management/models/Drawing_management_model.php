@@ -3878,74 +3878,7 @@ class drawing_management_model extends app_model
 		$this->db->where('dms_id', $id);
 		return $this->db->get(db_prefix() . 'dms_old_attachments')->result_array();
 	}
-	// public function view_other_attachments($input)
-	// {
-	// 	$file_html = '';
-
-	// 	$rel_id = $input['rel_id'];
-
-	// 	$this->db->where('dms_id', $rel_id);
-	// 	$attachments = $this->db->get(db_prefix() . 'dms_attachments')->result_array();
-	// 	if (count($attachments) > 0) {
-
-	// 		$file_html .= '<p class="bold text-muted">' . _l('Other Attachments') . '</p>';
-
-	// 		foreach ($attachments as $f) {
-
-	// 			$file_path = FCPATH .
-	// 				'modules/drawing_management/uploads/all_attachment/' .
-	// 				$f['dms_id'] . '/' .
-	// 				$f['file_name'];
-
-	// 			if (!file_exists($file_path)) {
-	// 				continue;
-	// 			}
-
-	// 			$filetype = pathinfo($f['file_name'], PATHINFO_EXTENSION);
-
-	// 			$href_url = base_url(
-	// 				'modules/drawing_management/uploads/all_attachment/' .
-	// 					$f['dms_id'] . '/' .
-	// 					rawurlencode($f['file_name'])
-	// 			);
-
-	// 			$file_html .= '
-	//         <div class="mbot15 row inline-block full-width" data-attachment-id="' . $f['id'] . '">
-
-	//             <div class="col-md-8">
-
-	//                 <div class="pull-left mright10">
-	//                     <i class="' . get_mime_class($filetype) . '"></i>
-	//                 </div>
-
-	//                 <a href="' . $href_url . '" target="_blank" download>
-	//                     ' . $f['file_name'] . '
-	//                 </a>
-
-	//                 <br />
-
-	//                 <small class="text-muted">
-	//                     .' . $filetype . '
-	//                 </small>
-
-	//             </div>
-
-	//             <div class="col-md-4 text-right">
-
-	//                 <a href="' . admin_url('drawing_management/delete_all_attachment/' . $f['id']) . '" class="text-danger _delete">
-	//                     <i class="fa fa-times"></i>
-	//                 </a>
-
-	//             </div>
-
-	//         </div>';
-	// 		}
-
-	// 		$file_html .= '<hr />';
-	// 	}
-
-	// 	return $file_html;
-	// }
+	
 
 	public function view_other_attachments($input)
 	{
