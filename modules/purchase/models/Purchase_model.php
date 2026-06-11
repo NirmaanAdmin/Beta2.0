@@ -23675,7 +23675,6 @@ class Purchase_model extends App_Model
             'kind',
             'group_name',
             'remarks',
-            'currency',
         ];
         $sIndexColumn = 'id';
         $sTable = "(
@@ -23832,14 +23831,20 @@ class Purchase_model extends App_Model
         $output  = $result['output'];
         $result = $result['rResult'];
 
-        $cost_to_complete = format_currency_converter($result, 'cost_to_complete');
+        $cost_to_complete = 0;
+        if (!empty($result)) {
+            $cost_to_complete = array_sum(array_column($result, 'cost_to_complete'));
+        }
         $response['cost_to_complete'] = app_format_money($cost_to_complete);
-        $rev_contract_value = format_currency_converter($result, 'total_rev_contract_value');
-        $response['rev_contract_value'] = app_format_money($rev_contract_value, $base_currency);
+        $rev_contract_value = 0;
+        if (!empty($result)) {
+            $rev_contract_value = array_sum(array_column($result, 'total_rev_contract_value'));
+        }
+        $response['rev_contract_value'] = app_format_money($rev_contract_value);
         if ($cost_to_complete > 0) {
             $response['percentage_utilized'] = round(($rev_contract_value / $cost_to_complete) * 100);
         }
-        $response['budgeted_procurement_net_value'] = app_format_money(($cost_to_complete - $rev_contract_value), $base_currency);
+        $response['budgeted_procurement_net_value'] = app_format_money(($cost_to_complete - $rev_contract_value));
         $anticipate_variation = 0;
         if (!empty($result)) {
             $anticipate_variation_result = array_filter($result, function ($item) {
@@ -23852,20 +23857,20 @@ class Purchase_model extends App_Model
         if ($cost_to_complete > 0) {
             $response['percentage_anticipated'] = round(($anticipate_variation / $cost_to_complete) * 100);
         }
-        $response['anticipate_variation'] = app_format_money($anticipate_variation, $base_currency);
+        $response['anticipate_variation'] = app_format_money($anticipate_variation);
         $work_done_value = 0;
         if (!empty($result)) {
             $work_done_value = array_sum(array_column($result, 'vendor_submitted_amount_without_tax'));
         }
-        $response['work_done_value'] = app_format_money($work_done_value, $base_currency);
+        $response['work_done_value'] = app_format_money($work_done_value);
 
         $ril_certified_amount = 0;
         if (!empty($result)) {
             $ril_certified_amount = array_sum(array_column($result, 'ril_certified_amount'));
         }
-        $response['ril_certified_amount'] = app_format_money($ril_certified_amount, $base_currency);
+        $response['ril_certified_amount'] = app_format_money($ril_certified_amount);
         $total_payment_due = $work_done_value - $ril_certified_amount;
-        $response['total_payment_due'] = app_format_money($total_payment_due, $base_currency);
+        $response['total_payment_due'] = app_format_money($total_payment_due);
 
         $unawarded_capex = 0;
         if (!empty($result)) {
@@ -23875,7 +23880,7 @@ class Purchase_model extends App_Model
             });
             $unawarded_capex = array_sum(array_column($filtered_result, 'cost_to_complete'));
         }
-        $response['unawarded_capex'] = app_format_money($unawarded_capex, $base_currency);
+        $response['unawarded_capex'] = app_format_money($unawarded_capex);
 
         if (!empty($result)) {
             $grouped = array_reduce($result, function ($carry, $item) {

@@ -339,9 +339,21 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         po.order_value,
         po.total AS total,
         IFNULL(co_sum.co_total, 0) AS co_total,
-        (po.subtotal + IFNULL(co_sum.co_total, 0)) AS total_rev_contract_value, 
+        CASE
+            WHEN po.currency = 3 THEN
+                (po.subtotal + IFNULL(co_sum.co_total, 0))
+            ELSE
+                (po.subtotal + IFNULL(co_sum.co_total, 0))
+                * COALESCE(cur.reference_value, 1)
+        END AS total_rev_contract_value,
         po.anticipate_variation,
-        (IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0))) AS cost_to_complete,
+        CASE
+            WHEN po.currency = 3 THEN
+                (IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0)))
+            ELSE
+                (IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0)))
+                * COALESCE(cur.reference_value, 1)
+        END AS cost_to_complete,
         COALESCE(inv_po_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
         COALESCE(inv_po_sum.ril_certified_amount, 0) AS ril_certified_amount,
         COALESCE(inv_po_sum.ril_payment, 0) AS ril_payment,
@@ -394,10 +406,10 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         pr.name as project,
         pr.id as project_id,
         po.last_action as last_action,
-        po.currency as currency,
         'pur_orders' AS source_table
     FROM tblpur_orders po
     LEFT JOIN tblpur_vendor pv ON pv.userid = po.vendor
+    LEFT JOIN tblcurrencies cur ON cur.id = po.currency
     LEFT JOIN (
         SELECT
             po_order_id,
@@ -438,7 +450,6 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         ) ip ON ip.invoiceid = ril.id
         GROUP BY pi.pur_order
     ) AS inv_po_sum ON inv_po_sum.pur_order = po.id
-    WHERE po.approve_status = 2
 
     UNION ALL
 
@@ -456,9 +467,21 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         wo.order_value,
         wo.total AS total,
         IFNULL(co_sum.co_total, 0) AS co_total,
-        (wo.subtotal + IFNULL(co_sum.co_total, 0)) AS total_rev_contract_value,
+        CASE
+            WHEN wo.currency = 3 THEN
+                (wo.subtotal + IFNULL(co_sum.co_total, 0))
+            ELSE
+                (wo.subtotal + IFNULL(co_sum.co_total, 0))
+                * COALESCE(cur.reference_value, 1)
+        END AS total_rev_contract_value,
         wo.anticipate_variation,
-        (IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0))) AS cost_to_complete,
+        CASE
+            WHEN wo.currency = 3 THEN
+                (IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0)))
+            ELSE
+                (IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0)))
+                * COALESCE(cur.reference_value, 1)
+        END AS cost_to_complete,
         COALESCE(inv_wo_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
         COALESCE(inv_wo_sum.ril_certified_amount, 0) AS ril_certified_amount,
         COALESCE(inv_wo_sum.ril_payment, 0) AS ril_payment,
@@ -511,10 +534,10 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         pr.name as project,
         pr.id as project_id,
         wo.last_action as last_action,
-        wo.currency as currency,
         'wo_orders' AS source_table
     FROM tblwo_orders wo
     LEFT JOIN tblpur_vendor pv ON pv.userid = wo.vendor
+    LEFT JOIN tblcurrencies cur ON cur.id = wo.currency
     LEFT JOIN (
         SELECT
             wo_order_id,
@@ -555,7 +578,6 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         ) ip ON ip.invoiceid = ril.id
         GROUP BY pi.wo_order
     ) AS inv_wo_sum ON inv_wo_sum.wo_order = wo.id
-    WHERE wo.approve_status = 2
 
     UNION ALL
 
@@ -573,9 +595,28 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         t.order_value,
         t.total AS total,
         t.co_total AS co_total,
-        (t.total + IFNULL(t.co_total, 0)) AS total_rev_contract_value,
+        CASE
+            WHEN t.currency = 3 THEN
+                (t.total + IFNULL(t.co_total, 0))
+            ELSE
+                (t.total + IFNULL(t.co_total, 0))
+                * COALESCE(cur.reference_value, 1)
+        END AS total_rev_contract_value,
         t.anticipate_variation,
-        (IFNULL(t.anticipate_variation, 0) + (t.total + IFNULL(t.co_total, 0))) AS cost_to_complete,
+        CASE
+            WHEN t.currency = 3 THEN
+                (
+                    IFNULL(t.anticipate_variation, 0) +
+                    t.total +
+                    IFNULL(t.co_total, 0)
+                )
+            ELSE
+                (
+                    IFNULL(t.anticipate_variation, 0) +
+                    t.total +
+                    IFNULL(t.co_total, 0)
+                ) * COALESCE(cur.reference_value, 1)
+        END AS cost_to_complete,
         COALESCE(inv_ot_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
         COALESCE(inv_ot_sum.ril_certified_amount, 0) AS ril_certified_amount,
         COALESCE(inv_ot_sum.ril_payment, 0) AS ril_payment,
@@ -628,10 +669,10 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         pr.name as project,
         pr.id as project_id,
         t.last_action as last_action,
-        t.currency as currency,
         'order_tracker' AS source_table
     FROM tblpur_order_tracker t
     LEFT JOIN tblpur_vendor pv ON pv.userid = t.vendor
+    LEFT JOIN tblcurrencies cur ON cur.id = t.currency
     LEFT JOIN tblprojects pr ON pr.id = t.project
     LEFT JOIN (
         SELECT
