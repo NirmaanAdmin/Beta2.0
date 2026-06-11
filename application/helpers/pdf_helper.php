@@ -424,4 +424,7 @@ function form_pdf_cmjcb($form, $tag = '')
 {
     return app_pdf('form', LIBSPATH . 'pdf/Form_pdf_cmjcb', $form, $tag);
 }
-
+function form_pdf_tmjcb($form, $tag = '')
+{
+    return app_pdf('form', LIBSPATH . 'pdf/Form_pdf_tmjcb', $form, $tag);
+}

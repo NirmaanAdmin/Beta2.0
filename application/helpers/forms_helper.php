@@ -1232,6 +1232,7 @@ function get_form_pdf_type($formid)
         'dujcb'  => 'dujcb_form_detail',
         'ecjcb'  => 'ecjcb_form_detail',
         'cmjcb'  => 'cmjcb_form_detail',
+        'tmjcb'  => 'tmjcb_form_detail',
     ];
 
     foreach ($forms as $type => $table) {

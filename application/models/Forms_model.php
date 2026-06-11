@@ -1816,6 +1816,28 @@ class Forms_model extends App_Model
                     $new_order = $data['items'];
                     unset($data['items']);
                 }
+            } elseif ($data['form_type'] == "tmjcb") {
+                $tmjcb_form = [];
+                $tmjcb_form['date'] = $data['date'];
+                $tmjcb_form['name_of_contractor'] = $data['name_of_contractor'];
+                $tmjcb_form['checklist_no'] = $data['checklist_no'];
+                $tmjcb_form['remarks'] = $data['remarks'];
+                $tmjcb_form['fit_status'] = $data['fit_status'];
+                $tmjcb_form['inspected_by'] = $data['inspected_by'];
+                $tmjcb_form['reviewed_by'] = $data['reviewed_by'];
+                unset($data['date']);
+                unset($data['name_of_contractor']);
+                unset($data['checklist_no']);
+                unset($data['remarks']);
+                unset($data['fit_status']);
+                unset($data['inspected_by']);
+                unset($data['reviewed_by']);
+                unset($data['action']);
+                $new_order = [];
+                if (isset($data['items'])) {
+                    $new_order = $data['items'];
+                    unset($data['items']);
+                }
             }
         }
 
@@ -2769,6 +2791,29 @@ class Forms_model extends App_Model
                     if (!empty($cmjcb_form)) {
                         $cmjcb_form['form_id'] = $formid;
                         $this->db->insert(db_prefix() . $data['form_type'] . '_form', $cmjcb_form);
+                    }
+                }
+                if (isset($new_order)) {
+                    if (!empty($new_order)) {
+                        $sr = 1;
+                        foreach ($new_order as $key => $value) {
+                            $dt_data = [];
+                            $dt_data['form_id'] = $formid;
+                            $dt_data['items'] = $sr;
+                            $dt_data['status'] = $value['status'];
+                            $dt_data['remarks'] = $value['remarks'];
+                            $this->db->insert(db_prefix() . $data['form_type'] . '_form_detail', $dt_data);
+                            $insert_id = $this->db->insert_id();
+
+                            $sr++;
+                        }
+                    }
+                }
+            } elseif ($data['form_type'] == "tmjcb") {
+                if (isset($tmjcb_form)) {
+                    if (!empty($tmjcb_form)) {
+                        $tmjcb_form['form_id'] = $formid;
+                        $this->db->insert(db_prefix() . $data['form_type'] . '_form', $tmjcb_form);
                     }
                 }
                 if (isset($new_order)) {
@@ -4067,7 +4112,31 @@ class Forms_model extends App_Model
                 $update_order = $data['items'];
                 unset($data['items']);
             }
+        } elseif ($formBeforeUpdate->form_type == "tmjcb") {
+
+            $tmjcb_form = [];
+            $tmjcb_form['date'] = $data['date'];
+            $tmjcb_form['name_of_contractor'] = $data['name_of_contractor'];
+            $tmjcb_form['checklist_no'] = $data['checklist_no'];
+            $tmjcb_form['remarks'] = $data['remarks'];
+            $tmjcb_form['fit_status'] = $data['fit_status'];
+            $tmjcb_form['inspected_by'] = $data['inspected_by'];
+            $tmjcb_form['reviewed_by'] = $data['reviewed_by'];
+            unset($data['date']);
+            unset($data['name_of_contractor']);
+            unset($data['checklist_no']);
+            unset($data['remarks']);
+            unset($data['fit_status']);
+            unset($data['inspected_by']);
+            unset($data['reviewed_by']);
+            unset($data['action']);
+            $update_order = [];
+            if (isset($data['items'])) {
+                $update_order = $data['items'];
+                unset($data['items']);
+            }
         }
+
 
 
 
@@ -5550,6 +5619,38 @@ class Forms_model extends App_Model
                 if (!empty($cmjcb_form)) {
                     $this->db->where('form_id', $data['formid']);
                     $this->db->update(db_prefix() . $formBeforeUpdate->form_type . '_form', $cmjcb_form);
+                    if ($this->db->affected_rows() > 0) {
+                        $affectedRows++;
+                    }
+                }
+            }
+
+
+            if (isset($update_order)) {
+                if (!empty($update_order)) {
+                    $sr = 1;
+                    foreach ($update_order as $key => $value) {
+                        $dt_data = [];
+                        $dt_data['form_id'] = $data['formid'];
+                        $dt_data['items'] = $sr;
+                        $dt_data['status'] = $value['status'];
+                        $dt_data['remarks'] = $value['remarks'];
+                        $this->db->where('id', $value['id']);
+                        $this->db->update(db_prefix() .  $formBeforeUpdate->form_type . '_form_detail', $dt_data);
+                        if ($this->db->affected_rows() > 0) {
+                            $affectedRows++;
+                        }
+
+
+                        $sr++;
+                    }
+                }
+            }
+        } elseif ($formBeforeUpdate->form_type == "tmjcb") {
+            if (isset($tmjcb_form)) {
+                if (!empty($tmjcb_form)) {
+                    $this->db->where('form_id', $data['formid']);
+                    $this->db->update(db_prefix() . $formBeforeUpdate->form_type . '_form', $tmjcb_form);
                     if ($this->db->affected_rows() > 0) {
                         $affectedRows++;
                     }
@@ -7725,5 +7826,17 @@ class Forms_model extends App_Model
     {
         $this->db->where('form_id', $form_id);
         return $this->db->get(db_prefix() . 'cmjcb_form_detail')->result_array();
+    }
+
+    public function get_tmjcb_form($form_id)
+    {
+        $this->db->where('form_id', $form_id);
+        return $this->db->get(db_prefix() . 'tmjcb_form')->row();
+    }
+
+    public function get_tmjcb_form_detail($form_id)
+    {
+        $this->db->where('form_id', $form_id);
+        return $this->db->get(db_prefix() . 'tmjcb_form_detail')->result_array();
     }
 }
