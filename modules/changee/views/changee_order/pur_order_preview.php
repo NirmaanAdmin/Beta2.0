@@ -666,7 +666,7 @@
                                     </td>
                                     <td class="bold">
                                        <?php
-                                       echo find_total_in_inr($estimate->total, $pur_order->currency); ?>
+                                       echo app_format_money(find_total_in_inr($estimate->total, $pur_order->currency)); ?>
                                     </td>
                                  </tr>
                               <?php } ?>

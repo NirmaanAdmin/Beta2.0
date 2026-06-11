@@ -725,7 +725,7 @@
                                     <td class="bold">
                                        <?php
                                        $total_in_inr = !empty($changes) ? $grand_total : $estimate->total;
-                                       echo find_total_in_inr($total_in_inr, $pur_order->currency); ?>
+                                       echo app_format_money(find_total_in_inr($total_in_inr, $pur_order->currency)); ?>
                                     </td>
                                  </tr>
                               <?php } ?>

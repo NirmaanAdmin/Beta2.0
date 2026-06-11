@@ -1209,7 +1209,7 @@ function get_currency_name($id)
 function format_currency_converter($items, $amount_key, $is_average = false)
 {
     if (empty($items)) {
-        return app_format_money(0);
+        return 0;
     }
     $CI =& get_instance();
     $currency_ids = array_unique(array_column($items, 'currency'));
@@ -1269,7 +1269,7 @@ function find_total_in_inr($amount, $currency_id)
         $result = $CI->db->get()->row();
         $reference_value = (float) ($result->reference_value ?? 1);
         $final_amount = (float) $amount * $reference_value;
-        return app_format_money($final_amount);
+        return $final_amount;
     } else {
         return '';
     }
