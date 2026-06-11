@@ -1772,6 +1772,50 @@ class Forms_model extends App_Model
                     $new_order = $data['items'];
                     unset($data['items']);
                 }
+            } elseif ($data['form_type'] == "ecjcb") {
+                $ecjcb_form = [];
+                $ecjcb_form['date'] = $data['date'];
+                $ecjcb_form['name_of_contractor'] = $data['name_of_contractor'];
+                $ecjcb_form['checklist_no'] = $data['checklist_no'];
+                $ecjcb_form['remarks'] = $data['remarks'];
+                $ecjcb_form['fit_status'] = $data['fit_status'];
+                $ecjcb_form['inspected_by'] = $data['inspected_by'];
+                $ecjcb_form['reviewed_by'] = $data['reviewed_by'];
+                unset($data['date']);
+                unset($data['name_of_contractor']);
+                unset($data['checklist_no']);
+                unset($data['remarks']);
+                unset($data['fit_status']);
+                unset($data['inspected_by']);
+                unset($data['reviewed_by']);
+                unset($data['action']);
+                $new_order = [];
+                if (isset($data['items'])) {
+                    $new_order = $data['items'];
+                    unset($data['items']);
+                }
+            } elseif ($data['form_type'] == "cmjcb") {
+                $cmjcb_form = [];
+                $cmjcb_form['date'] = $data['date'];
+                $cmjcb_form['name_of_contractor'] = $data['name_of_contractor'];
+                $cmjcb_form['checklist_no'] = $data['checklist_no'];
+                $cmjcb_form['remarks'] = $data['remarks'];
+                $cmjcb_form['fit_status'] = $data['fit_status'];
+                $cmjcb_form['inspected_by'] = $data['inspected_by'];
+                $cmjcb_form['reviewed_by'] = $data['reviewed_by'];
+                unset($data['date']);
+                unset($data['name_of_contractor']);
+                unset($data['checklist_no']);
+                unset($data['remarks']);
+                unset($data['fit_status']);
+                unset($data['inspected_by']);
+                unset($data['reviewed_by']);
+                unset($data['action']);
+                $new_order = [];
+                if (isset($data['items'])) {
+                    $new_order = $data['items'];
+                    unset($data['items']);
+                }
             }
         }
 
@@ -2679,6 +2723,52 @@ class Forms_model extends App_Model
                     if (!empty($dujcb_form)) {
                         $dujcb_form['form_id'] = $formid;
                         $this->db->insert(db_prefix() . $data['form_type'] . '_form', $dujcb_form);
+                    }
+                }
+                if (isset($new_order)) {
+                    if (!empty($new_order)) {
+                        $sr = 1;
+                        foreach ($new_order as $key => $value) {
+                            $dt_data = [];
+                            $dt_data['form_id'] = $formid;
+                            $dt_data['items'] = $sr;
+                            $dt_data['status'] = $value['status'];
+                            $dt_data['remarks'] = $value['remarks'];
+                            $this->db->insert(db_prefix() . $data['form_type'] . '_form_detail', $dt_data);
+                            $insert_id = $this->db->insert_id();
+
+                            $sr++;
+                        }
+                    }
+                }
+            } elseif ($data['form_type'] == "ecjcb") {
+                if (isset($ecjcb_form)) {
+                    if (!empty($ecjcb_form)) {
+                        $ecjcb_form['form_id'] = $formid;
+                        $this->db->insert(db_prefix() . $data['form_type'] . '_form', $ecjcb_form);
+                    }
+                }
+                if (isset($new_order)) {
+                    if (!empty($new_order)) {
+                        $sr = 1;
+                        foreach ($new_order as $key => $value) {
+                            $dt_data = [];
+                            $dt_data['form_id'] = $formid;
+                            $dt_data['items'] = $sr;
+                            $dt_data['status'] = $value['status'];
+                            $dt_data['remarks'] = $value['remarks'];
+                            $this->db->insert(db_prefix() . $data['form_type'] . '_form_detail', $dt_data);
+                            $insert_id = $this->db->insert_id();
+
+                            $sr++;
+                        }
+                    }
+                }
+            } elseif ($data['form_type'] == "cmjcb") {
+                if (isset($cmjcb_form)) {
+                    if (!empty($cmjcb_form)) {
+                        $cmjcb_form['form_id'] = $formid;
+                        $this->db->insert(db_prefix() . $data['form_type'] . '_form', $cmjcb_form);
                     }
                 }
                 if (isset($new_order)) {
@@ -3931,7 +4021,54 @@ class Forms_model extends App_Model
                 $update_order = $data['items'];
                 unset($data['items']);
             }
+        } elseif ($formBeforeUpdate->form_type == "ecjcb") {
+
+            $ecjcb_form = [];
+            $ecjcb_form['date'] = $data['date'];
+            $ecjcb_form['name_of_contractor'] = $data['name_of_contractor'];
+            $ecjcb_form['checklist_no'] = $data['checklist_no'];
+            $ecjcb_form['remarks'] = $data['remarks'];
+            $ecjcb_form['fit_status'] = $data['fit_status'];
+            $ecjcb_form['inspected_by'] = $data['inspected_by'];
+            $ecjcb_form['reviewed_by'] = $data['reviewed_by'];
+            unset($data['date']);
+            unset($data['name_of_contractor']);
+            unset($data['checklist_no']);
+            unset($data['remarks']);
+            unset($data['fit_status']);
+            unset($data['inspected_by']);
+            unset($data['reviewed_by']);
+            unset($data['action']);
+            $update_order = [];
+            if (isset($data['items'])) {
+                $update_order = $data['items'];
+                unset($data['items']);
+            }
+        } elseif ($formBeforeUpdate->form_type == "cmjcb") {
+
+            $cmjcb_form = [];
+            $cmjcb_form['date'] = $data['date'];
+            $cmjcb_form['name_of_contractor'] = $data['name_of_contractor'];
+            $cmjcb_form['checklist_no'] = $data['checklist_no'];
+            $cmjcb_form['remarks'] = $data['remarks'];
+            $cmjcb_form['fit_status'] = $data['fit_status'];
+            $cmjcb_form['inspected_by'] = $data['inspected_by'];
+            $cmjcb_form['reviewed_by'] = $data['reviewed_by'];
+            unset($data['date']);
+            unset($data['name_of_contractor']);
+            unset($data['checklist_no']);
+            unset($data['remarks']);
+            unset($data['fit_status']);
+            unset($data['inspected_by']);
+            unset($data['reviewed_by']);
+            unset($data['action']);
+            $update_order = [];
+            if (isset($data['items'])) {
+                $update_order = $data['items'];
+                unset($data['items']);
+            }
         }
+
 
 
         $this->db->where('formid', $data['formid']);
@@ -5376,7 +5513,72 @@ class Forms_model extends App_Model
                     }
                 }
             }
+        } elseif ($formBeforeUpdate->form_type == "ecjcb") {
+            if (isset($ecjcb_form)) {
+                if (!empty($ecjcb_form)) {
+                    $this->db->where('form_id', $data['formid']);
+                    $this->db->update(db_prefix() . $formBeforeUpdate->form_type . '_form', $ecjcb_form);
+                    if ($this->db->affected_rows() > 0) {
+                        $affectedRows++;
+                    }
+                }
+            }
+
+
+            if (isset($update_order)) {
+                if (!empty($update_order)) {
+                    $sr = 1;
+                    foreach ($update_order as $key => $value) {
+                        $dt_data = [];
+                        $dt_data['form_id'] = $data['formid'];
+                        $dt_data['items'] = $sr;
+                        $dt_data['status'] = $value['status'];
+                        $dt_data['remarks'] = $value['remarks'];
+                        $this->db->where('id', $value['id']);
+                        $this->db->update(db_prefix() .  $formBeforeUpdate->form_type . '_form_detail', $dt_data);
+                        if ($this->db->affected_rows() > 0) {
+                            $affectedRows++;
+                        }
+
+
+                        $sr++;
+                    }
+                }
+            }
+        } elseif ($formBeforeUpdate->form_type == "cmjcb") {
+            if (isset($cmjcb_form)) {
+                if (!empty($cmjcb_form)) {
+                    $this->db->where('form_id', $data['formid']);
+                    $this->db->update(db_prefix() . $formBeforeUpdate->form_type . '_form', $cmjcb_form);
+                    if ($this->db->affected_rows() > 0) {
+                        $affectedRows++;
+                    }
+                }
+            }
+
+
+            if (isset($update_order)) {
+                if (!empty($update_order)) {
+                    $sr = 1;
+                    foreach ($update_order as $key => $value) {
+                        $dt_data = [];
+                        $dt_data['form_id'] = $data['formid'];
+                        $dt_data['items'] = $sr;
+                        $dt_data['status'] = $value['status'];
+                        $dt_data['remarks'] = $value['remarks'];
+                        $this->db->where('id', $value['id']);
+                        $this->db->update(db_prefix() .  $formBeforeUpdate->form_type . '_form_detail', $dt_data);
+                        if ($this->db->affected_rows() > 0) {
+                            $affectedRows++;
+                        }
+
+
+                        $sr++;
+                    }
+                }
+            }
         }
+
         $sendAssignedEmail = false;
 
         $current_assigned = $formBeforeUpdate->assigned;
@@ -7501,5 +7703,27 @@ class Forms_model extends App_Model
         return $this->db->get(db_prefix() . 'dujcb_form_detail')->result_array();
     }
 
-    
+    public function get_ecjcb_form($form_id)
+    {
+        $this->db->where('form_id', $form_id);
+        return $this->db->get(db_prefix() . 'ecjcb_form')->row();
+    }
+
+    public function get_ecjcb_form_detail($form_id)
+    {
+        $this->db->where('form_id', $form_id);
+        return $this->db->get(db_prefix() . 'ecjcb_form_detail')->result_array();
+    }
+
+    public function get_cmjcb_form($form_id)
+    {
+        $this->db->where('form_id', $form_id);
+        return $this->db->get(db_prefix() . 'cmjcb_form')->row();
+    }
+
+    public function get_cmjcb_form_detail($form_id)
+    {
+        $this->db->where('form_id', $form_id);
+        return $this->db->get(db_prefix() . 'cmjcb_form_detail')->result_array();
+    }
 }
