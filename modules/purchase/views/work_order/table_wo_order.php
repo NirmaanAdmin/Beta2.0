@@ -227,7 +227,11 @@ foreach ($rResult as $aRow) {
             if(!empty($wo_co_sum_values)) {
                 $wo_total = $wo_total + $wo_co_sum_values->co_value;
             }
-            $_data = app_format_money($wo_total, $currency_name);
+            if(isset($purchase_dashboard) && $aRow['currency'] != 3) {
+                $_data = app_format_money(find_total_in_inr($wo_total, $aRow['currency']));
+            } else {
+                $_data = app_format_money($wo_total, $currency_name);
+            }
         }elseif($aColumns[$i] == 'wo_order_number'){
 
             $numberOutput = '';
@@ -260,8 +264,11 @@ foreach ($rResult as $aRow) {
           foreach($tax['taxes_val'] as $tax_val){
             $total_tax += $tax_val;
           }
-
-          $_data = app_format_money($total_tax, $currency_name);
+          if(isset($purchase_dashboard) && $aRow['currency'] != 3) {
+            $_data = app_format_money(find_total_in_inr($total_tax, $aRow['currency']));
+          } else {
+            $_data = app_format_money($total_tax, $currency_name);
+          }
         }elseif($aColumns[$i] == 'expense_convert'){
             if($aRow['expense_convert'] == 0){
              $_data = '<a href="javascript:void(0)" onclick="convert_expense_wo('.$aRow['id'].','.$aRow['total'].'); return false;" class="btn btn-warning btn-icon">'._l('convert').'</a>';

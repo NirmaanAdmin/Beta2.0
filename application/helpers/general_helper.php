@@ -1271,6 +1271,6 @@ function find_total_in_inr($amount, $currency_id)
         $final_amount = (float) $amount * $reference_value;
         return $final_amount;
     } else {
-        return '';
+        return 0;
     }
 }

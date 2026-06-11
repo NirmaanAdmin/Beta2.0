@@ -231,7 +231,11 @@ foreach ($rResult as $aRow) {
         $currency_name = $aRow['currency_name'];
 
         if($aColumns[$i] == 'total'){
-            $_data = app_format_money($po_contract_data['po_with_co_total'], $currency_name);
+            if(isset($purchase_dashboard) && $aRow['currency'] != 3) {
+                $_data = app_format_money(find_total_in_inr($po_contract_data['po_with_co_total'], $aRow['currency']));
+            } else {
+                $_data = app_format_money($po_contract_data['po_with_co_total'], $currency_name);
+            }
         }elseif($aColumns[$i] == 'pur_order_number'){
 
             $numberOutput = '';
@@ -259,7 +263,11 @@ foreach ($rResult as $aRow) {
         }elseif($aColumns[$i] == 'approve_status'){
             $_data = get_status_approve($aRow['approve_status']);
         }elseif($aColumns[$i] == 'total_tax'){
-          $_data = app_format_money($po_contract_data['po_with_co_tax'], $currency_name);
+          if(isset($purchase_dashboard) && $aRow['currency'] != 3) {
+            $_data = app_format_money(find_total_in_inr($po_contract_data['po_with_co_tax'], $aRow['currency']));
+          } else {
+            $_data = app_format_money($po_contract_data['po_with_co_tax'], $currency_name);
+          }
         }elseif($aColumns[$i] == 'expense_convert'){
             if($aRow['expense_convert'] == 0){
              $_data = '<a href="javascript:void(0)" onclick="convert_expense('.$aRow['id'].','.$aRow['total'].'); return false;" class="btn btn-warning btn-icon">'._l('convert').'</a>';

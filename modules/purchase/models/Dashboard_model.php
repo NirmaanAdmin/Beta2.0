@@ -59,9 +59,21 @@ class Dashboard_model extends App_Model
 	                po.order_value,
 	                po.total,
 	                IFNULL(co_sum.co_total, 0) AS co_total,
-	                (po.subtotal + IFNULL(co_sum.co_total, 0)) AS total_rev_contract_value,
+	                CASE
+				        WHEN po.currency = 3 THEN
+				            (po.subtotal + IFNULL(co_sum.co_total, 0))
+				        ELSE
+				            (po.subtotal + IFNULL(co_sum.co_total, 0))
+				            * COALESCE(cur.reference_value, 1)
+				    END AS total_rev_contract_value,
 	                po.anticipate_variation,
-	                (IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0))) AS cost_to_complete,
+	                CASE
+				        WHEN po.currency = 3 THEN
+				            (IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0)))
+				        ELSE
+				            (IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0)))
+				            * COALESCE(cur.reference_value, 1)
+				    END AS cost_to_complete,
 	                COALESCE(inv_po_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
 	                po.group_pur,
 	                po.kind,
@@ -72,6 +84,7 @@ class Dashboard_model extends App_Model
 	                'pur_orders' AS source_table
 	            FROM tblpur_orders po
 	            LEFT JOIN tblpur_vendor pv ON pv.userid = po.vendor
+	            LEFT JOIN tblcurrencies cur ON cur.id = po.currency
 	            LEFT JOIN (
 		            SELECT
 		                po_order_id,
@@ -109,9 +122,21 @@ class Dashboard_model extends App_Model
 	                wo.order_value,
 	                wo.total,
 	                IFNULL(co_sum.co_total, 0) AS co_total,
-	                (wo.subtotal + IFNULL(co_sum.co_total, 0)) AS total_rev_contract_value,
+	                CASE
+					    WHEN wo.currency = 3 THEN
+					        (wo.subtotal + IFNULL(co_sum.co_total, 0))
+					    ELSE
+					        (wo.subtotal + IFNULL(co_sum.co_total, 0))
+					        * COALESCE(cur.reference_value, 1)
+					END AS total_rev_contract_value,
 	                wo.anticipate_variation,
-	                (IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0))) AS cost_to_complete,
+	                CASE
+					    WHEN wo.currency = 3 THEN
+					        (IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0)))
+					    ELSE
+					        (IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0)))
+					        * COALESCE(cur.reference_value, 1)
+					END AS cost_to_complete,
 	                COALESCE(inv_wo_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
 	                wo.group_pur,
 	                wo.kind,
@@ -122,6 +147,7 @@ class Dashboard_model extends App_Model
 	                'wo_orders' AS source_table
 	            FROM tblwo_orders wo
 	            LEFT JOIN tblpur_vendor pv ON pv.userid = wo.vendor
+	            LEFT JOIN tblcurrencies cur ON cur.id = wo.currency
 	            LEFT JOIN (
 		            SELECT
 		                wo_order_id,
@@ -159,9 +185,28 @@ class Dashboard_model extends App_Model
 	                t.order_value,
 	                t.total,
 	                t.co_total,
-	                (t.total + IFNULL(t.co_total, 0)) AS total_rev_contract_value,
+	                CASE
+					    WHEN t.currency = 3 THEN
+					        (t.total + IFNULL(t.co_total, 0))
+					    ELSE
+					        (t.total + IFNULL(t.co_total, 0))
+					        * COALESCE(cur.reference_value, 1)
+					END AS total_rev_contract_value,
 	                t.anticipate_variation,
-	                (IFNULL(t.anticipate_variation, 0) + (t.total + IFNULL(t.co_total, 0))) AS cost_to_complete,
+	                CASE
+					    WHEN t.currency = 3 THEN
+					        (
+					            IFNULL(t.anticipate_variation, 0) +
+					            t.total +
+					            IFNULL(t.co_total, 0)
+					        )
+					    ELSE
+					        (
+					            IFNULL(t.anticipate_variation, 0) +
+					            t.total +
+					            IFNULL(t.co_total, 0)
+					        ) * COALESCE(cur.reference_value, 1)
+					END AS cost_to_complete,
 	                COALESCE(inv_ot_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
 	                t.group_pur,
 	                t.kind,
@@ -172,6 +217,7 @@ class Dashboard_model extends App_Model
 	                'order_tracker' AS source_table
 	            FROM tblpur_order_tracker t
 	            LEFT JOIN tblpur_vendor pv ON pv.userid = t.vendor
+	            LEFT JOIN tblcurrencies cur ON cur.id = t.currency
 	            LEFT JOIN tblprojects pr ON pr.id = t.project
 	            LEFT JOIN (
 	                SELECT order_tracker_id, SUM(vendor_submitted_amount_without_tax) AS vendor_submitted_amount_without_tax 
@@ -243,21 +289,34 @@ class Dashboard_model extends App_Model
 		if (!empty($result)) {
 			$cost_to_complete = array_sum(array_column($result, 'cost_to_complete'));
 		}
-		$response['cost_to_complete'] = app_format_money($cost_to_complete, $base_currency);
+		$response['cost_to_complete'] = app_format_money($cost_to_complete);
 		$response['rev_contract_value'] = 0;
 		$rev_contract_value = 0;
 		if (!empty($result)) {
 			$rev_contract_value = array_sum(array_column($result, 'total_rev_contract_value'));
 		}
-		$response['rev_contract_value'] = app_format_money($rev_contract_value, $base_currency);
+		$response['rev_contract_value'] = app_format_money($rev_contract_value);
 		$response['percentage_utilized'] = 0;
 		if ($cost_to_complete > 0) {
 			$response['percentage_utilized'] = round(($rev_contract_value / $cost_to_complete) * 100);
 		}
-		$response['budgeted_procurement_net_value'] = app_format_money(($cost_to_complete - $rev_contract_value), $base_currency);
+		$response['budgeted_procurement_net_value'] = app_format_money(($cost_to_complete - $rev_contract_value));
 		$po_amount_incl_co = 0;
-		$this->db->select('SUM(' . db_prefix() . 'pur_orders.total) as total');
+		$this->db->select("
+		    SUM(
+		        CASE
+		            WHEN " . db_prefix() . "pur_orders.currency = 3 THEN
+		                " . db_prefix() . "pur_orders.total
+		            ELSE
+		                (
+		                    " . db_prefix() . "pur_orders.total *
+		                    COALESCE(" . db_prefix() . "currencies.reference_value, 1)
+		                )
+		        END
+		    ) AS total
+		", false);
 		$this->db->from(db_prefix() . 'pur_orders');
+		$this->db->join(db_prefix() . 'currencies', db_prefix() . 'currencies.id = ' . db_prefix() . 'pur_orders.currency', 'left');
 		$this->db->where(db_prefix() . 'pur_orders.approve_status', 2);
 		if (!empty($vendors)) {
 			$this->db->where(db_prefix() . 'pur_orders.vendor', $vendors);
@@ -279,8 +338,21 @@ class Dashboard_model extends App_Model
 		}
 		$pur_orders_total_data = $this->db->get()->row_array();
 		$pur_orders_total_amount = isset($pur_orders_total_data['total']) ? (int)$pur_orders_total_data['total'] : 0;
-		$this->db->select('SUM(' . db_prefix() . 'co_orders.co_value) as co_value');
+		$this->db->select("
+		    SUM(
+		        CASE
+		            WHEN " . db_prefix() . "co_orders.currency = 3 THEN
+		                " . db_prefix() . "co_orders.co_value
+		            ELSE
+		                (
+		                    " . db_prefix() . "co_orders.co_value *
+		                    COALESCE(" . db_prefix() . "currencies.reference_value, 1)
+		                )
+		        END
+		    ) AS co_value
+		", false);
 		$this->db->from(db_prefix() . 'co_orders');
+		$this->db->join(db_prefix() . 'currencies', db_prefix() . 'currencies.id = ' . db_prefix() . 'co_orders.currency', 'left');
 		$this->db->where(db_prefix() . 'co_orders.approve_status', 2);
 		$this->db->where(db_prefix() . 'co_orders.po_order_id IS NOT NULL', null, false);
 		if (!empty($vendors)) {
@@ -304,10 +376,23 @@ class Dashboard_model extends App_Model
 		$co_orders_total_data = $this->db->get()->row_array();
 		$co_orders_total_amount = isset($co_orders_total_data['co_value']) ? (int)$co_orders_total_data['co_value'] : 0;
 		$po_amount_incl_co = $pur_orders_total_amount + $co_orders_total_amount;
-		$response['po_amount_incl_co'] = app_format_money($po_amount_incl_co, $base_currency);
+		$response['po_amount_incl_co'] = app_format_money($po_amount_incl_co);
 		$wo_amount_incl_co = 0;
-		$this->db->select('SUM(' . db_prefix() . 'wo_orders.total) as total');
+		$this->db->select("
+		    SUM(
+		        CASE
+		            WHEN " . db_prefix() . "wo_orders.currency = 3 THEN
+		                " . db_prefix() . "wo_orders.total
+		            ELSE
+		                (
+		                    " . db_prefix() . "wo_orders.total *
+		                    COALESCE(" . db_prefix() . "currencies.reference_value, 1)
+		                )
+		        END
+		    ) AS total
+		", false);
 		$this->db->from(db_prefix() . 'wo_orders');
+		$this->db->join(db_prefix() . 'currencies', db_prefix() . 'currencies.id = ' . db_prefix() . 'wo_orders.currency', 'left');
 		$this->db->where(db_prefix() . 'wo_orders.approve_status', 2);
 		if (!empty($vendors)) {
 			$this->db->where(db_prefix() . 'wo_orders.vendor', $vendors);
@@ -329,8 +414,21 @@ class Dashboard_model extends App_Model
 		}
 		$wo_orders_total_data = $this->db->get()->row_array();
 		$wo_orders_total_amount = isset($wo_orders_total_data['total']) ? (int)$wo_orders_total_data['total'] : 0;
-		$this->db->select('SUM(' . db_prefix() . 'co_orders.co_value) as co_value');
+		$this->db->select("
+		    SUM(
+		        CASE
+		            WHEN " . db_prefix() . "co_orders.currency = 3 THEN
+		                " . db_prefix() . "co_orders.co_value
+		            ELSE
+		                (
+		                    " . db_prefix() . "co_orders.co_value *
+		                    COALESCE(" . db_prefix() . "currencies.reference_value, 1)
+		                )
+		        END
+		    ) AS co_value
+		", false);
 		$this->db->from(db_prefix() . 'co_orders');
+		$this->db->join(db_prefix() . 'currencies', db_prefix() . 'currencies.id = ' . db_prefix() . 'co_orders.currency', 'left');
 		$this->db->where(db_prefix() . 'co_orders.approve_status', 2);
 		$this->db->where(db_prefix() . 'co_orders.wo_order_id IS NOT NULL', null, false);
 		if (!empty($vendors)) {
@@ -354,7 +452,7 @@ class Dashboard_model extends App_Model
 		$co_orders_total_data = $this->db->get()->row_array();
 		$co_orders_total_amount = isset($co_orders_total_data['co_value']) ? (int)$co_orders_total_data['co_value'] : 0;
 		$wo_amount_incl_co = $wo_orders_total_amount + $co_orders_total_amount;
-		$response['wo_amount_incl_co'] = app_format_money($wo_amount_incl_co, $base_currency);
+		$response['wo_amount_incl_co'] = app_format_money($wo_amount_incl_co);
 		$unawarded_capex = 0;
 		$this->db->select('(
 		    ' . db_prefix() . 'estimate_package_info.total_package
@@ -378,7 +476,7 @@ class Dashboard_model extends App_Model
 		if(!empty($estimate_package_info)) {
 			$unawarded_capex = array_sum(array_column($estimate_package_info, 'pending_value_in_package'));
 		}
-		$response['unawarded_capex'] = app_format_money($unawarded_capex, $base_currency);
+		$response['unawarded_capex'] = app_format_money($unawarded_capex);
 
 		$response['cost_to_complete_ratio'] = $response['percentage_utilized'];
 		$response['rev_contract_value_ratio'] = 100 - $response['cost_to_complete_ratio'];
@@ -441,8 +539,8 @@ class Dashboard_model extends App_Model
 					$response['procurement_table_data'] .= '
 			      <tr>
 			        <td align="left">' . htmlspecialchars($row['month']) . '</td>
-			        <td align="right">' . app_format_money($row['cost_to_complete'], $base_currency) . '</td>
-			        <td align="right">' . app_format_money($row['total_rev_contract_value'], $base_currency) . '</td>
+			        <td align="right">' . app_format_money($row['cost_to_complete']) . '</td>
+			        <td align="right">' . app_format_money($row['total_rev_contract_value']) . '</td>
 			      </tr>';
 				}
 			} else {
@@ -996,10 +1094,10 @@ class Dashboard_model extends App_Model
 			    array_filter($result, fn($item) => empty($item['ril_invoice_id']))
 			);
 		}
-		$response['total_bil_amount'] = app_format_money($total_bil_amount, $base_currency);
-		$response['total_ril_amount'] = app_format_money($total_ril_amount, $base_currency);
-		$response['total_paid_amount'] = app_format_money($total_paid_amount, $base_currency);
-		$response['total_unpaid_amount'] = app_format_money($total_unpaid_amount, $base_currency);
+		$response['total_bil_amount'] = app_format_money($total_bil_amount);
+		$response['total_ril_amount'] = app_format_money($total_ril_amount);
+		$response['total_paid_amount'] = app_format_money($total_paid_amount);
+		$response['total_unpaid_amount'] = app_format_money($total_unpaid_amount);
 
 		$response['line_bil_order_date'] = $response['line_bil_order_total'] = array();
 		$response['line_ril_order_date'] = $response['line_ril_order_total'] = array();
