@@ -127,7 +127,7 @@
     <div class="row">
         <div class="col-md-6">
             <div class="form-group">
-                <?php echo render_textarea('remarks', 'Remarks', isset($msh_form) ? $msh_form->remarks : '',  ['style' => 'height:267px;resize: none;']); ?>
+                <?php echo render_textarea('remarks', 'Remarks', isset($bcmjcb_form) ? $bcmjcb_form->remarks : '',  ['style' => 'height:267px;resize: none;']); ?>
             </div>
         </div>
         <div class="col-md-6">
@@ -166,10 +166,10 @@
         <!-- Section Headers -->
         <tr>
             <td colspan="2" class="daily_report_head">
-                <span class="daily_report_label" style="display: ruby;">Inspected By Name: <?php echo render_select('inspected_by', get_staff_list(), array('staffid', 'name'), '', isset($msh_form->inspected_by) ? $msh_form->inspected_by : ''); ?></span>
+                <span class="daily_report_label" style="display: ruby;">Inspected By Name: <?php echo render_select('inspected_by', get_staff_list(), array('staffid', 'name'), '', isset($bcmjcb_form->inspected_by) ? $bcmjcb_form->inspected_by : ''); ?></span>
             </td>
             <td class="daily_report_head">
-                <span class="daily_report_label" style="display: ruby;">Reviewed By Name: <?php echo render_select('reviewed_by', get_staff_list(), array('staffid', 'name'), '', isset($msh_form->reviewed_by) ? $msh_form->reviewed_by : ''); ?></span>
+                <span class="daily_report_label" style="display: ruby;">Reviewed By Name: <?php echo render_select('reviewed_by', get_staff_list(), array('staffid', 'name'), '', isset($bcmjcb_form->reviewed_by) ? $bcmjcb_form->reviewed_by : ''); ?></span>
             </td>
         </tr>
 

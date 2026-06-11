@@ -163,7 +163,7 @@ return App_table::find('forms')
 
             $row = [];
             for ($i = 0; $i < count($aColumns); $i++) {
-                
+
                 if (strpos($aColumns[$i], 'as') !== false && !isset($aRow[$aColumns[$i]])) {
                     $_data = $aRow[strafter($aColumns[$i], 'as ')];
                 } else {
@@ -229,20 +229,8 @@ return App_table::find('forms')
                 } elseif ($aColumns[$i] == '2') {
                     $check_formid_is_qcr = chcek_formid_is_qcr($aRow['formid']);
                     $check_formid_is_qor = check_formid_is_qor($aRow['formid']);
-                    $check_formis_is_st = check_formid_is_st($aRow['formid']);
-                    $check_formis_is_krp = check_formid_is_krp($aRow['formid']);
-                    $check_formis_is_wpf = check_formid_is_wpf($aRow['formid']);
-                    $check_formis_is_ncr = check_formid_is_ncr($aRow['formid']);
-                    $check_formis_is_sf = check_formid_is_sf($aRow['formid']);
-                    $check_formis_is_lse = check_formid_is_lse($aRow['formid']);
-                    $check_formis_is_wah = check_formid_is_wah($aRow['formid']);
-                    $check_formis_is_hw = check_formid_is_hw($aRow['formid']);
-                    $check_formis_is_me = check_formid_is_me($aRow['formid']);
-                    $check_formis_is_vtf = check_formid_is_vtf($aRow['formid']);
-                    $check_formis_is_rccb = check_formid_is_rccb($aRow['formid']);
-                    $check_formis_is_bljcb = check_formid_is_bljcb($aRow['formid']);
-                    $check_formis_is_bbmjcb = check_formid_is_bbmjcb($aRow['formid']);
-                    $check_formis_is_bcmjcb = check_formid_is_bcmjcb($aRow['formid']);
+
+                    $form_type = get_form_pdf_type($aRow['formid']);
                     if ($check_formid_is_qcr > 0) {
                         $_data = '<div class="btn-group mright5">
                        <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ><i class="fa fa-file-pdf"></i><span class="caret"></span></a>
@@ -261,141 +249,24 @@ return App_table::find('forms')
                            <li><a href="' . admin_url('forms/pdf_qor/' . $aRow['formid']) . '" download>' . _l('download') . '</a></li>
                         </ul>
                         </div>';
-                    } elseif ($check_formis_is_wpr > 0) {
-                        $_data = '<div class="btn-group mright5">
-                        <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ><i class="fa fa-file-pdf"></i><span class="caret"></span></a>
-                        <ul class="dropdown-menu dropdown-menu-right">
-                           <li class="hidden-xs"><a href="' . admin_url('forms/pdf_wpr/' . $aRow['formid'] . '?output_type=I') . '">' . _l('view_pdf') . '</a></li>
-                           <li class="hidden-xs"><a href="' . admin_url('forms/pdf_wpr/' . $aRow['formid'] . '?output_type=I') . '" target="_blank">' . _l('view_pdf_in_new_window') . '</a></li>
-                           <li><a href="' . admin_url('forms/pdf_wpr/' . $aRow['formid']) . '" download>' . _l('download') . '</a></li>
-                        </ul>
-                        </div>';
-                    } elseif ($check_formis_is_st > 0) {
-                        $_data = '<div class="btn-group mright5">
-                        <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ><i class="fa fa-file-pdf"></i><span class="caret"></span></a>
-                        <ul class="dropdown-menu dropdown-menu-right">
-                           <li class="hidden-xs"><a href="' . admin_url('forms/pdf_st/' . $aRow['formid'] . '?output_type=I') . '">' . _l('view_pdf') . '</a></li>
-                           <li class="hidden-xs"><a href="' . admin_url('forms/pdf_st/' . $aRow['formid'] . '?output_type=I') . '" target="_blank">' . _l('view_pdf_in_new_window') . '</a></li>
-                           <li><a href="' . admin_url('forms/pdf_st/' . $aRow['formid']) . '" download>' . _l('download') . '</a></li>
-                        </ul>
-                        </div>';
-                    } elseif ($check_formis_is_krp > 0) {
-                        $_data = '<div class="btn-group mright5">
-                        <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ><i class="fa fa-file-pdf"></i><span class="caret"></span></a>
-                        <ul class="dropdown-menu dropdown-menu-right">
-                           <li class="hidden-xs"><a href="' . admin_url('forms/pdf_krp/' . $aRow['formid'] . '?output_type=I') . '">' . _l('view_pdf') . '</a></li>
-                           <li class="hidden-xs"><a href="' . admin_url('forms/pdf_krp/' . $aRow['formid'] . '?output_type=I') . '" target="_blank">' . _l('view_pdf_in_new_window') . '</a></li>
-                           <li><a href="' . admin_url('forms/pdf_krp/' . $aRow['formid']) . '" download>' . _l('download') . '</a></li>
-                        </ul>
-                        </div>';
-                    } elseif ($check_formis_is_wpf > 0) {
-                        $_data = '<div class="btn-group mright5">
-                        <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ><i class="fa fa-file-pdf"></i><span class="caret"></span></a>
-                        <ul class="dropdown-menu dropdown-menu-right">
-                           <li class="hidden-xs"><a href="' . admin_url('forms/pdf_wpf/' . $aRow['formid'] . '?output_type=I') . '">' . _l('view_pdf') . '</a></li>
-                           <li class="hidden-xs"><a href="' . admin_url('forms/pdf_wpf/' . $aRow['formid'] . '?output_type=I') . '" target="_blank">' . _l('view_pdf_in_new_window') . '</a></li>
-                           <li><a href="' . admin_url('forms/pdf_wpf/' . $aRow['formid']) . '" download>' . _l('download') . '</a></li>
-                        </ul>
-                        </div>';
-                    } elseif ($check_formis_is_ncr > 0) {
-                        $_data = '<div class="btn-group mright5">
-                        <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ><i class="fa fa-file-pdf"></i><span class="caret"></span></a>
-                        <ul class="dropdown-menu dropdown-menu-right">
-                           <li class="hidden-xs"><a href="' . admin_url('forms/pdf_ncr/' . $aRow['formid'] . '?output_type=I') . '">' . _l('view_pdf') . '</a></li>
-                           <li class="hidden-xs"><a href="' . admin_url('forms/pdf_ncr/' . $aRow['formid'] . '?output_type=I') . '" target="_blank">' . _l('view_pdf_in_new_window') . '</a></li>
-                           <li><a href="' . admin_url('forms/pdf_ncr/' . $aRow['formid']) . '" download>' . _l('download') . '</a></li>
-                        </ul>
-                        </div>';
-                    } elseif ($check_formis_is_sf > 0) {
-                        $_data = '<div class="btn-group mright5">
-                        <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ><i class="fa fa-file-pdf"></i><span class="caret"></span></a>
-                        <ul class="dropdown-menu dropdown-menu-right">
-                           <li class="hidden-xs"><a href="' . admin_url('forms/pdf_sf/' . $aRow['formid'] . '?output_type=I') . '">' . _l('view_pdf') . '</a></li>
-                           <li class="hidden-xs"><a href="' . admin_url('forms/pdf_sf/' . $aRow['formid'] . '?output_type=I') . '" target="_blank">' . _l('view_pdf_in_new_window') . '</a></li>
-                           <li><a href="' . admin_url('forms/pdf_sf/' . $aRow['formid']) . '" download>' . _l('download') . '</a></li>
-                        </ul>
-                        </div>';
-                    } elseif ($check_formis_is_lse > 0) {
-                        $_data = '<div class="btn-group mright5">
-                        <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ><i class="fa fa-file-pdf"></i><span class="caret"></span></a>
-                        <ul class="dropdown-menu dropdown-menu-right">
-                           <li class="hidden-xs"><a href="' . admin_url('forms/pdf_lse/' . $aRow['formid'] . '?output_type=I') . '">' . _l('view_pdf') . '</a></li>
-                           <li class="hidden-xs"><a href="' . admin_url('forms/pdf_lse/' . $aRow['formid'] . '?output_type=I') . '" target="_blank">' . _l('view_pdf_in_new_window') . '</a></li>
-                           <li><a href="' . admin_url('forms/pdf_lse/' . $aRow['formid']) . '" download>' . _l('download') . '</a></li>
-                        </ul>
-                        </div>';
-                    } elseif ($check_formis_is_wah > 0) {
-                        $_data = '<div class="btn-group mright5">
-                        <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ><i class="fa fa-file-pdf"></i><span class="caret"></span></a>
-                        <ul class="dropdown-menu dropdown-menu-right">
-                           <li class="hidden-xs"><a href="' . admin_url('forms/pdf_wah/' . $aRow['formid'] . '?output_type=I') . '">' . _l('view_pdf') . '</a></li>
-                           <li class="hidden-xs"><a href="' . admin_url('forms/pdf_wah/' . $aRow['formid'] . '?output_type=I') . '" target="_blank">' . _l('view_pdf_in_new_window') . '</a></li>
-                           <li><a href="' . admin_url('forms/pdf_wah/' . $aRow['formid']) . '" download>' . _l('download') . '</a></li>
-                        </ul>
-                        </div>';
-                    } elseif ($check_formis_is_hw > 0) {
-                        $_data = '<div class="btn-group mright5">
-                        <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ><i class="fa fa-file-pdf"></i><span class="caret"></span></a>
-                        <ul class="dropdown-menu dropdown-menu-right">
-                           <li class="hidden-xs"><a href="' . admin_url('forms/pdf_hw/' . $aRow['formid'] . '?output_type=I') . '">' . _l('view_pdf') . '</a></li>
-                           <li class="hidden-xs"><a href="' . admin_url('forms/pdf_hw/' . $aRow['formid'] . '?output_type=I') . '" target="_blank">' . _l('view_pdf_in_new_window') . '</a></li>
-                           <li><a href="' . admin_url('forms/pdf_hw/' . $aRow['formid']) . '" download>' . _l('download') . '</a></li>
-                        </ul>
-                        </div>';
-                    } elseif ($check_formis_is_me > 0) {
-                        $_data = '<div class="btn-group mright5">
-                        <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ><i class="fa fa-file-pdf"></i><span class="caret"></span></a>
-                        <ul class="dropdown-menu dropdown-menu-right">
-                           <li class="hidden-xs"><a href="' . admin_url('forms/pdf_me/' . $aRow['formid'] . '?output_type=I') . '">' . _l('view_pdf') . '</a></li>
-                           <li class="hidden-xs"><a href="' . admin_url('forms/pdf_me/' . $aRow['formid'] . '?output_type=I') . '" target="_blank">' . _l('view_pdf_in_new_window') . '</a></li>
-                           <li><a href="' . admin_url('forms/pdf_me/' . $aRow['formid']) . '" download>' . _l('download') . '</a></li>
-                        </ul>
-                        </div>';
-                    } elseif ($check_formis_is_vtf > 0) {
-                        $_data = '<div class="btn-group mright5">
-                        <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ><i class="fa fa-file-pdf"></i><span class="caret"></span></a>
-                        <ul class="dropdown-menu dropdown-menu-right">
-                           <li class="hidden-xs"><a href="' . admin_url('forms/pdf_vtf/' . $aRow['formid'] . '?output_type=I') . '">' . _l('view_pdf') . '</a></li>
-                           <li class="hidden-xs"><a href="' . admin_url('forms/pdf_vtf/' . $aRow['formid'] . '?output_type=I') . '" target="_blank">' . _l('view_pdf_in_new_window') . '</a></li>
-                           <li><a href="' . admin_url('forms/pdf_vtf/' . $aRow['formid']) . '" download>' . _l('download') . '</a></li>
-                        </ul>
-                        </div>';
-                    } elseif ($check_formis_is_rccb > 0) {
-                        $_data = '<div class="btn-group mright5">
-                        <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ><i class="fa fa-file-pdf"></i><span class="caret"></span></a>
-                        <ul class="dropdown-menu dropdown-menu-right">
-                           <li class="hidden-xs"><a href="' . admin_url('forms/pdf_rccb/' . $aRow['formid'] . '?output_type=I') . '">' . _l('view_pdf') . '</a></li>
-                           <li class="hidden-xs"><a href="' . admin_url('forms/pdf_rccb/' . $aRow['formid'] . '?output_type=I') . '" target="_blank">' . _l('view_pdf_in_new_window') . '</a></li>
-                           <li><a href="' . admin_url('forms/pdf_rccb/' . $aRow['formid']) . '" download>' . _l('download') . '</a></li>
-                        </ul>
-                        </div>';
-                    } elseif ($check_formis_is_bljcb > 0) {
-                        $_data = '<div class="btn-group mright5">
-                        <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ><i class="fa fa-file-pdf"></i><span class="caret"></span></a>
-                        <ul class="dropdown-menu dropdown-menu-right">
-                           <li class="hidden-xs"><a href="' . admin_url('forms/pdf_bljcb/' . $aRow['formid'] . '?output_type=I') . '">' . _l('view_pdf') . '</a></li>
-                           <li class="hidden-xs"><a href="' . admin_url('forms/pdf_bljcb/' . $aRow['formid'] . '?output_type=I') . '" target="_blank">' . _l('view_pdf_in_new_window') . '</a></li>
-                           <li><a href="' . admin_url('forms/pdf_bljcb/' . $aRow['formid']) . '" download>' . _l('download') . '</a></li>
-                        </ul>
-                        </div>';
-                    } elseif ($check_formis_is_bbmjcb > 0) {
-                        $_data = '<div class="btn-group mright5">
-                        <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ><i class="fa fa-file-pdf"></i><span class="caret"></span></a>
-                        <ul class="dropdown-menu dropdown-menu-right">
-                           <li class="hidden-xs"><a href="' . admin_url('forms/pdf_bbmjcb/' . $aRow['formid'] . '?output_type=I') . '">' . _l('view_pdf') . '</a></li>
-                           <li class="hidden-xs"><a href="' . admin_url('forms/pdf_bbmjcb/' . $aRow['formid'] . '?output_type=I') . '" target="_blank">' . _l('view_pdf_in_new_window') . '</a></li>
-                           <li><a href="' . admin_url('forms/pdf_bbmjcb/' . $aRow['formid']) . '" download>' . _l('download') . '</a></li>
-                        </ul>
-                        </div>';
-                    } elseif ($check_formis_is_bcmjcb > 0) {
-                        $_data = '<div class="btn-group mright5">
-                        <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ><i class="fa fa-file-pdf"></i><span class="caret"></span></a>
-                        <ul class="dropdown-menu dropdown-menu-right">
-                           <li class="hidden-xs"><a href="' . admin_url('forms/pdf_bcmjcb/' . $aRow['formid'] . '?output_type=I') . '">' . _l('view_pdf') . '</a></li>
-                           <li class="hidden-xs"><a href="' . admin_url('forms/pdf_bcmjcb/' . $aRow['formid'] . '?output_type=I') . '" target="_blank">' . _l('view_pdf_in_new_window') . '</a></li>
-                           <li><a href="' . admin_url('forms/pdf_bcmjcb/' . $aRow['formid']) . '" download>' . _l('download') . '</a></li>
-                        </ul>
-                        </div>';
+                    } elseif ($form_type) {
+                        $_data = '
+                            <div class="btn-group mright5">
+                                <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fa fa-file-pdf"></i><span class="caret"></span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-right">
+                                    <li class="hidden-xs">
+                                        <a href="' . admin_url('forms/pdf_' . $form_type . '/' . $aRow['formid'] . '?output_type=I') . '">' . _l('view_pdf') . '</a>
+                                    </li>
+                                    <li class="hidden-xs">
+                                        <a href="' . admin_url('forms/pdf_' . $form_type . '/' . $aRow['formid'] . '?output_type=I') . '" target="_blank">' . _l('view_pdf_in_new_window') . '</a>
+                                    </li>
+                                    <li>
+                                        <a href="' . admin_url('forms/pdf_' . $form_type . '/' . $aRow['formid']) . '" download>' . _l('download') . '</a>
+                                    </li>
+                                </ul>
+                            </div>';
                     } else {
                         $_data = '';
                     }

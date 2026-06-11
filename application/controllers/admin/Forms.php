@@ -1754,66 +1754,12 @@ class Forms extends AdminController
 
     public function pdf_st($id)
     {
-        if (!$id) {
-            redirect(admin_url('forms'));
-        }
-
-        $form = $this->forms_model->get_form_by_id($id);
-
-        try {
-            $pdf = form_pdf_st($form);
-        } catch (Exception $e) {
-            $message = $e->getMessage();
-            echo $message;
-            if (strpos($message, 'Unable to get the size of the image') !== false) {
-                show_pdf_unable_to_get_image_size_error();
-            }
-            die;
-        }
-
-        $type = 'I';
-
-        if ($this->input->get('output_type')) {
-            $type = $this->input->get('output_type');
-        }
-
-        if ($this->input->get('print')) {
-            $type = 'D';
-        }
-
-        $pdf->Output(mb_strtoupper(slug_it($form->subject)) . '.pdf', $type);
+        $this->generate_form_pdf($id, 'st');
     }
 
     public function pdf_krp($id)
     {
-        if (!$id) {
-            redirect(admin_url('forms'));
-        }
-
-        $form = $this->forms_model->get_form_by_id($id);
-
-        try {
-            $pdf = form_pdf_krp($form);
-        } catch (Exception $e) {
-            $message = $e->getMessage();
-            echo $message;
-            if (strpos($message, 'Unable to get the size of the image') !== false) {
-                show_pdf_unable_to_get_image_size_error();
-            }
-            die;
-        }
-
-        $type = 'I';
-
-        if ($this->input->get('output_type')) {
-            $type = $this->input->get('output_type');
-        }
-
-        if ($this->input->get('print')) {
-            $type = 'D';
-        }
-
-        $pdf->Output(mb_strtoupper(slug_it($form->subject)) . '.pdf', $type);
+        $this->generate_form_pdf($id, 'krp');
     }
 
     public function get_wpf_row_template()
@@ -1829,34 +1775,7 @@ class Forms extends AdminController
 
     public function pdf_wpf($id)
     {
-        if (!$id) {
-            redirect(admin_url('forms'));
-        }
-
-        $form = $this->forms_model->get_form_by_id($id);
-
-        try {
-            $pdf = form_pdf_wpf($form);
-        } catch (Exception $e) {
-            $message = $e->getMessage();
-            echo $message;
-            if (strpos($message, 'Unable to get the size of the image') !== false) {
-                show_pdf_unable_to_get_image_size_error();
-            }
-            die;
-        }
-
-        $type = 'I';
-
-        if ($this->input->get('output_type')) {
-            $type = $this->input->get('output_type');
-        }
-
-        if ($this->input->get('print')) {
-            $type = 'D';
-        }
-
-        $pdf->Output(mb_strtoupper(slug_it($form->subject)) . '.pdf', $type);
+        $this->generate_form_pdf($id, 'wpf');
     }
 
     public function get_areas_by_project()
@@ -1871,34 +1790,7 @@ class Forms extends AdminController
 
     public function pdf_ncr($id)
     {
-        if (!$id) {
-            redirect(admin_url('forms'));
-        }
-
-        $form = $this->forms_model->get_form_by_id($id);
-
-        try {
-            $pdf = form_pdf_ncr($form);
-        } catch (Exception $e) {
-            $message = $e->getMessage();
-            echo $message;
-            if (strpos($message, 'Unable to get the size of the image') !== false) {
-                show_pdf_unable_to_get_image_size_error();
-            }
-            die;
-        }
-
-        $type = 'I';
-
-        if ($this->input->get('output_type')) {
-            $type = $this->input->get('output_type');
-        }
-
-        if ($this->input->get('print')) {
-            $type = 'D';
-        }
-
-        $pdf->Output(mb_strtoupper(slug_it($form->subject)) . '.pdf', $type);
+        $this->generate_form_pdf($id, 'ncr');
     }
 
     public function get_next_ncr_number()
@@ -1919,193 +1811,31 @@ class Forms extends AdminController
 
     public function pdf_sf($id)
     {
-        if (!$id) {
-            redirect(admin_url('forms'));
-        }
-
-        $form = $this->forms_model->get_form_by_id($id);
-
-        try {
-            $pdf = form_pdf_sf($form);
-        } catch (Exception $e) {
-            $message = $e->getMessage();
-            echo $message;
-            if (strpos($message, 'Unable to get the size of the image') !== false) {
-                show_pdf_unable_to_get_image_size_error();
-            }
-            die;
-        }
-
-        $type = 'I';
-
-        if ($this->input->get('output_type')) {
-            $type = $this->input->get('output_type');
-        }
-
-        if ($this->input->get('print')) {
-            $type = 'D';
-        }
-
-        $pdf->Output(mb_strtoupper(slug_it($form->subject)) . '.pdf', $type);
+        $this->generate_form_pdf($id, 'sf');
     }
 
     public function pdf_lse($id)
     {
-        if (!$id) {
-            redirect(admin_url('forms'));
-        }
-
-        $form = $this->forms_model->get_form_by_id($id);
-
-        try {
-            $pdf = form_pdf_lse($form);
-        } catch (Exception $e) {
-            $message = $e->getMessage();
-            echo $message;
-            if (strpos($message, 'Unable to get the size of the image') !== false) {
-                show_pdf_unable_to_get_image_size_error();
-            }
-            die;
-        }
-
-        $type = 'I';
-
-        if ($this->input->get('output_type')) {
-            $type = $this->input->get('output_type');
-        }
-
-        if ($this->input->get('print')) {
-            $type = 'D';
-        }
-
-        $pdf->Output(mb_strtoupper(slug_it($form->subject)) . '.pdf', $type);
+        $this->generate_form_pdf($id, 'lse');
     }
 
     public function pdf_wah($id)
     {
-        if (!$id) {
-            redirect(admin_url('forms'));
-        }
-
-        $form = $this->forms_model->get_form_by_id($id);
-
-        try {
-            $pdf = form_pdf_wah($form);
-        } catch (Exception $e) {
-            $message = $e->getMessage();
-            echo $message;
-            if (strpos($message, 'Unable to get the size of the image') !== false) {
-                show_pdf_unable_to_get_image_size_error();
-            }
-            die;
-        }
-
-        $type = 'I';
-
-        if ($this->input->get('output_type')) {
-            $type = $this->input->get('output_type');
-        }
-
-        if ($this->input->get('print')) {
-            $type = 'D';
-        }
-
-        $pdf->Output(mb_strtoupper(slug_it($form->subject)) . '.pdf', $type);
+        $this->generate_form_pdf($id, 'wah');
     }
-
     public function pdf_hw($id)
     {
-        if (!$id) {
-            redirect(admin_url('forms'));
-        }
-
-        $form = $this->forms_model->get_form_by_id($id);
-
-        try {
-            $pdf = form_pdf_hw($form);
-        } catch (Exception $e) {
-            $message = $e->getMessage();
-            echo $message;
-            if (strpos($message, 'Unable to get the size of the image') !== false) {
-                show_pdf_unable_to_get_image_size_error();
-            }
-            die;
-        }
-
-        $type = 'I';
-
-        if ($this->input->get('output_type')) {
-            $type = $this->input->get('output_type');
-        }
-
-        if ($this->input->get('print')) {
-            $type = 'D';
-        }
-
-        $pdf->Output(mb_strtoupper(slug_it($form->subject)) . '.pdf', $type);
+        $this->generate_form_pdf($id, 'hw');
     }
+
     public function pdf_me($id)
     {
-        if (!$id) {
-            redirect(admin_url('forms'));
-        }
-
-        $form = $this->forms_model->get_form_by_id($id);
-
-        try {
-            $pdf = form_pdf_me($form);
-        } catch (Exception $e) {
-            $message = $e->getMessage();
-            echo $message;
-            if (strpos($message, 'Unable to get the size of the image') !== false) {
-                show_pdf_unable_to_get_image_size_error();
-            }
-            die;
-        }
-
-        $type = 'I';
-
-        if ($this->input->get('output_type')) {
-            $type = $this->input->get('output_type');
-        }
-
-        if ($this->input->get('print')) {
-            $type = 'D';
-        }
-
-        $pdf->Output(mb_strtoupper(slug_it($form->subject)) . '.pdf', $type);
+        $this->generate_form_pdf($id, 'me');
     }
 
     public function pdf_vtf($id)
     {
-        if (!$id) {
-            redirect(admin_url('forms'));
-        }
-
-        $form = $this->forms_model->get_form_by_id($id);
-
-        try {
-            $pdf = form_pdf_vtf($form);
-        } catch (Exception $e) {
-            $message = $e->getMessage();
-            echo $message;
-            if (strpos($message, 'Unable to get the size of the image') !== false) {
-                show_pdf_unable_to_get_image_size_error();
-            }
-            die;
-        }
-
-        $type = 'I';
-
-        if ($this->input->get('output_type')) {
-            $type = $this->input->get('output_type');
-        }
-
-        if ($this->input->get('print')) {
-            $type = 'D';
-        }
-
-        $pdf->Output(mb_strtoupper(slug_it($form->subject)) . '.pdf', $type);
+        $this->generate_form_pdf($id, 'vtf');
     }
     public function get_rccb_row_template()
     {
@@ -2123,100 +1853,33 @@ class Forms extends AdminController
     }
     public function pdf_rccb($id)
     {
-        if (!$id) {
-            redirect(admin_url('forms'));
-        }
-
-        $form = $this->forms_model->get_form_by_id($id);
-
-        try {
-            $pdf = form_pdf_rccb($form);
-        } catch (Exception $e) {
-            $message = $e->getMessage();
-            echo $message;
-            if (strpos($message, 'Unable to get the size of the image') !== false) {
-                show_pdf_unable_to_get_image_size_error();
-            }
-            die;
-        }
-
-        $type = 'I';
-
-        if ($this->input->get('output_type')) {
-            $type = $this->input->get('output_type');
-        }
-
-        if ($this->input->get('print')) {
-            $type = 'D';
-        }
-
-        $pdf->Output(mb_strtoupper(slug_it($form->subject)) . '.pdf', $type);
+        $this->generate_form_pdf($id, 'rccb');
     }
     public function pdf_bljcb($id)
     {
-        if (!$id) {
-            redirect(admin_url('forms'));
-        }
-
-        $form = $this->forms_model->get_form_by_id($id);
-
-        try {
-            $pdf = form_pdf_bljcb($form);
-        } catch (Exception $e) {
-            $message = $e->getMessage();
-            echo $message;
-            if (strpos($message, 'Unable to get the size of the image') !== false) {
-                show_pdf_unable_to_get_image_size_error();
-            }
-            die;
-        }
-
-        $type = 'I';
-
-        if ($this->input->get('output_type')) {
-            $type = $this->input->get('output_type');
-        }
-
-        if ($this->input->get('print')) {
-            $type = 'D';
-        }
-
-        $pdf->Output(mb_strtoupper(slug_it($form->subject)) . '.pdf', $type);
+        $this->generate_form_pdf($id, 'bljcb');
     }
     public function pdf_bbmjcb($id)
     {
-        if (!$id) {
-            redirect(admin_url('forms'));
-        }
+        $this->generate_form_pdf($id, 'bbmjcb');
+    }
+    public function pdf_bcmjcb($id)
+    {
+        $this->generate_form_pdf($id, 'bcmjcb');
+    }
 
-        $form = $this->forms_model->get_form_by_id($id);
+    public function pdf_exjcb($id)
+    {
+        $this->generate_form_pdf($id, 'exjcb');
+    }
 
-        try {
-            $pdf = form_pdf_bbmjcb($form);
-        } catch (Exception $e) {
-            $message = $e->getMessage();
-            echo $message;
-            if (strpos($message, 'Unable to get the size of the image') !== false) {
-                show_pdf_unable_to_get_image_size_error();
-            }
-            die;
-        }
-
-        $type = 'I';
-
-        if ($this->input->get('output_type')) {
-            $type = $this->input->get('output_type');
-        }
-
-        if ($this->input->get('print')) {
-            $type = 'D';
-        }
-
-        $pdf->Output(mb_strtoupper(slug_it($form->subject)) . '.pdf', $type);
+    public function pdf_dujcb($id)
+    {
+        $this->generate_form_pdf($id, 'dujcb');
     }
 
 
-    public function pdf_bcmjcb($id)
+    public function generate_form_pdf($id, $type)
     {
         if (!$id) {
             redirect(admin_url('forms'));
@@ -2225,26 +1888,30 @@ class Forms extends AdminController
         $form = $this->forms_model->get_form_by_id($id);
 
         try {
-            $pdf = form_pdf_bcmjcb($form);
+            $function = 'form_pdf_' . $type;
+
+            if (!function_exists($function)) {
+                show_404();
+            }
+
+            $pdf = $function($form);
         } catch (Exception $e) {
             $message = $e->getMessage();
             echo $message;
+
             if (strpos($message, 'Unable to get the size of the image') !== false) {
                 show_pdf_unable_to_get_image_size_error();
             }
+
             die;
         }
 
-        $type = 'I';
-
-        if ($this->input->get('output_type')) {
-            $type = $this->input->get('output_type');
-        }
+        $outputType = $this->input->get('output_type') ?: 'I';
 
         if ($this->input->get('print')) {
-            $type = 'D';
+            $outputType = 'D';
         }
 
-        $pdf->Output(mb_strtoupper(slug_it($form->subject)) . '.pdf', $type);
+        $pdf->Output(mb_strtoupper(slug_it($form->subject)) . '.pdf', $outputType);
     }
 }

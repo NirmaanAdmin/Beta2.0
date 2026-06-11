@@ -487,7 +487,7 @@ function get_vendor($name_agency, $agency)
 function get_vendor_list_for_forms($vendor_id = '')
 {
     $CI = &get_instance();
-    if($vendor_id != ''){
+    if ($vendor_id != '') {
         $CI->db->where('userid', $vendor_id);
     }
     $result = $CI->db->get(db_prefix() . 'pur_vendor')->result_array();
@@ -836,35 +836,6 @@ function check_formid_is_wpr($formid)
     return $count > 0;
 }
 
-function check_formid_is_st($formid)
-{
-
-    $CI = &get_instance();
-    // Use your DB prefix helper (Perfex = db_prefix())
-    $table = db_prefix() . 'st_form_detail';
-
-    // Count how many rows match this formid
-    $count = $CI->db
-        ->where('form_id', $formid)
-        ->count_all_results($table);
-
-    return $count > 0;
-}
-
-function check_formid_is_krp($formid)
-{
-
-    $CI = &get_instance();
-    // Use your DB prefix helper (Perfex = db_prefix())
-    $table = db_prefix() . 'krp_form';
-
-    // Count how many rows match this formid
-    $count = $CI->db
-        ->where('form_id', $formid)
-        ->count_all_results($table);
-
-    return $count > 0;
-}
 
 function get_risk_level()
 {
@@ -886,48 +857,6 @@ function get_risk_level()
     return $result;
 }
 
-function check_formid_is_wpf($formid)
-{
-
-    $CI = &get_instance();
-    // Use your DB prefix helper (Perfex = db_prefix())
-    $table = db_prefix() . 'wpf_form';
-
-    // Count how many rows match this formid
-    $count = $CI->db
-        ->where('form_id', $formid)
-        ->count_all_results($table);
-
-    return $count > 0;
-}
-function check_formid_is_ncr($formid)
-{
-
-    $CI = &get_instance();
-    // Use your DB prefix helper (Perfex = db_prefix())
-    $table = db_prefix() . 'ncr_form';
-
-    // Count how many rows match this formid
-    $count = $CI->db
-        ->where('form_id', $formid)
-        ->count_all_results($table);
-
-    return $count > 0;
-}
-function check_formid_is_sf($formid)
-{
-
-    $CI = &get_instance();
-    // Use your DB prefix helper (Perfex = db_prefix())
-    $table = db_prefix() . 'sf_form';
-
-    // Count how many rows match this formid
-    $count = $CI->db
-        ->where('form_id', $formid)
-        ->count_all_results($table);
-
-    return $count > 0;
-}
 function get_item_status_lse_listing()
 {
     $result = array();
@@ -946,136 +875,6 @@ function get_item_status_lse_listing()
         ]
     ];
     return $result;
-}
-function check_formid_is_lse($formid)
-{
-
-    $CI = &get_instance();
-    // Use your DB prefix helper (Perfex = db_prefix())
-    $table = db_prefix() . 'lse_form';
-
-    // Count how many rows match this formid
-    $count = $CI->db
-        ->where('form_id', $formid)
-        ->count_all_results($table);
-
-    return $count > 0;
-}
-
-function check_formid_is_wah($formid)
-{
-
-    $CI = &get_instance();
-    // Use your DB prefix helper (Perfex = db_prefix())
-    $table = db_prefix() . 'wah_form';
-
-    // Count how many rows match this formid
-    $count = $CI->db
-        ->where('form_id', $formid)
-        ->count_all_results($table);
-
-    return $count > 0;
-}
-
-function check_formid_is_hw($formid)
-{
-
-    $CI = &get_instance();
-    // Use your DB prefix helper (Perfex = db_prefix())
-    $table = db_prefix() . 'hw_form';
-
-    // Count how many rows match this formid
-    $count = $CI->db
-        ->where('form_id', $formid)
-        ->count_all_results($table);
-
-    return $count > 0;
-}
-function check_formid_is_me($formid)
-{
-
-    $CI = &get_instance();
-    // Use your DB prefix helper (Perfex = db_prefix())
-    $table = db_prefix() . 'me_form';
-
-    // Count how many rows match this formid
-    $count = $CI->db
-        ->where('form_id', $formid)
-        ->count_all_results($table);
-
-    return $count > 0;
-}
-function check_formid_is_vtf($formid)
-{
-
-    $CI = &get_instance();
-    // Use your DB prefix helper (Perfex = db_prefix())
-    $table = db_prefix() . 'vtf_form';
-
-    // Count how many rows match this formid
-    $count = $CI->db
-        ->where('form_id', $formid)
-        ->count_all_results($table);
-
-    return $count > 0;
-}
-function check_formid_is_rccb($formid)
-{
-
-    $CI = &get_instance();
-    // Use your DB prefix helper (Perfex = db_prefix())
-    $table = db_prefix() . 'rccb_form';
-
-    // Count how many rows match this formid
-    $count = $CI->db
-        ->where('form_id', $formid)
-        ->count_all_results($table);
-
-    return $count > 0;
-}
-
-function check_formid_is_bljcb($formid)
-{
-
-    $CI = &get_instance();
-    // Use your DB prefix helper (Perfex = db_prefix())
-    $table = db_prefix() . 'bljcb_form';
-
-    // Count how many rows match this formid
-    $count = $CI->db
-        ->where('form_id', $formid)
-        ->count_all_results($table);
-
-    return $count > 0;
-}
-function check_formid_is_bbmjcb($formid)
-{
-
-    $CI = &get_instance();
-    // Use your DB prefix helper (Perfex = db_prefix())
-    $table = db_prefix() . 'bbmjcb_form';
-
-    // Count how many rows match this formid
-    $count = $CI->db
-        ->where('form_id', $formid)
-        ->count_all_results($table);
-
-    return $count > 0;
-}
-
-function check_formid_is_bcmjcb($formid)
-{
-
-    $CI = &get_instance();
-    // Use your DB prefix helper (Perfex = db_prefix())
-    $table = db_prefix() . 'bcmjcb_form';
-
-    // Count how many rows match this formid
-    $count = $CI->db
-        ->where('form_id', $formid)
-        ->count_all_results($table);
-
-    return $count > 0;
 }
 
 function get_ground_floor_items()
@@ -1408,4 +1207,39 @@ function get_second_floor_items()
         ]
     ];
     return $result;
+}
+function get_form_pdf_type($formid)
+{
+    $CI = &get_instance();
+
+    $forms = [
+        'wpr'    => 'wpr_form_detail',
+        'st'     => 'st_form_detail',
+        'krp'    => 'krp_form_detail',
+        'wpf'    => 'wpf_form_detail',
+        'ncr'    => 'ncr_form_detail',
+        'sf'     => 'sf_form_detail',
+        'lse'    => 'lse_form_detail',
+        'wah'    => 'wah_form_detail',
+        'hw'     => 'hw_form_detail',
+        'me'     => 'me_form_detail',
+        'vtf'    => 'vtf_form_detail',
+        'rccb'   => 'rccb_form_detail',
+        'bljcb'  => 'bljcb_form_detail',
+        'bbmjcb' => 'bbmjcb_form_detail',
+        'bcmjcb' => 'bcmjcb_form_detail',
+        'exjcb'  => 'exjcb_form_detail',
+        'dujcb'  => 'dujcb_form_detail',
+    ];
+
+    foreach ($forms as $type => $table) {
+        if (
+            $CI->db->where('form_id', $formid)
+            ->count_all_results(db_prefix() . $table) > 0
+        ) {
+            return $type;
+        }
+    }
+
+    return false;
 }

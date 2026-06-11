@@ -406,3 +406,13 @@ function form_pdf_bcmjcb($form, $tag = '')
     return app_pdf('form', LIBSPATH . 'pdf/Form_pdf_bcmjcb', $form, $tag);
 }
 
+function form_pdf_exjcb($form, $tag = '')
+{
+    return app_pdf('form', LIBSPATH . 'pdf/Form_pdf_exjcb', $form, $tag);
+}
+
+function form_pdf_dujcb($form, $tag = '')
+{
+    return app_pdf('form', LIBSPATH . 'pdf/Form_pdf_dujcb', $form, $tag);
+}
+
