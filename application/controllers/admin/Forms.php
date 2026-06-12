@@ -932,6 +932,7 @@ class Forms extends AdminController
                 'bcmajcb'   => ['has_attachments' => false],
                 'pgrjcb'    => ['has_attachments' => false],
                 'csjcb'     => ['has_attachments' => false],
+                'bptjcb'    => ['has_attachments' => false],
             ];
 
             if (isset($formConfigs[$form_type])) {
