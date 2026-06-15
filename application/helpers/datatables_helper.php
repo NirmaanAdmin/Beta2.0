@@ -337,7 +337,12 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         po.completion_date,
         po.budget,
         po.order_value,
-        po.total AS total,
+        CASE
+            WHEN po.currency = 3 THEN
+                po.total
+            ELSE
+                po.total * COALESCE(cur.reference_value, 1)
+        END AS total,
         IFNULL(co_sum.co_total, 0) AS co_total,
         CASE
             WHEN po.currency = 3 THEN
@@ -402,7 +407,12 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         po.group_pur,
         po.kind, 
         po.remarks AS remarks,
-        po.subtotal as subtotal,
+        CASE
+            WHEN po.currency = 3 THEN
+                po.subtotal
+            ELSE
+                po.subtotal * COALESCE(cur.reference_value, 1)
+        END AS subtotal,
         pr.name as project,
         pr.id as project_id,
         po.last_action as last_action,
@@ -465,7 +475,12 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         wo.completion_date,
         wo.budget,
         wo.order_value,
-        wo.total AS total,
+        CASE
+            WHEN wo.currency = 3 THEN
+                wo.total
+            ELSE
+                wo.total * COALESCE(cur.reference_value, 1)
+        END AS total,
         IFNULL(co_sum.co_total, 0) AS co_total,
         CASE
             WHEN wo.currency = 3 THEN
@@ -530,7 +545,12 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         wo.group_pur,
         wo.kind,
         wo.remarks AS remarks,
-        wo.subtotal as subtotal,
+        CASE
+            WHEN wo.currency = 3 THEN
+                wo.subtotal
+            ELSE
+                wo.subtotal * COALESCE(cur.reference_value, 1)
+        END AS subtotal,
         pr.name as project,
         pr.id as project_id,
         wo.last_action as last_action,
@@ -593,7 +613,12 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         t.completion_date,
         t.budget,
         t.order_value,
-        t.total AS total,
+        CASE
+            WHEN t.currency = 3 THEN
+                t.total
+            ELSE
+                t.total * COALESCE(cur.reference_value, 1)
+        END AS total,
         t.co_total AS co_total,
         CASE
             WHEN t.currency = 3 THEN
@@ -665,7 +690,12 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         t.group_pur,
         t.kind,
         t.remarks AS remarks,
-        t.subtotal as subtotal,
+        CASE
+            WHEN t.currency = 3 THEN
+                t.subtotal
+            ELSE
+                t.subtotal * COALESCE(cur.reference_value, 1)
+        END AS subtotal,
         pr.name as project,
         pr.id as project_id,
         t.last_action as last_action,

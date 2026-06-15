@@ -331,7 +331,6 @@ $footer_data = [
 $this->ci->load->model('purchase/purchase_model');
 $vendor_list  = $this->ci->purchase_model->get_vendor();
 $vendor_by_id       = array_column($vendor_list,  null, 'userid');
-$base_currency = get_base_currency_pur();
 
 $sr = 1;
 foreach ($rResult as $aRow) {
@@ -342,13 +341,13 @@ foreach ($rResult as $aRow) {
       // Process specific columns
       if ($column == 'total') {
          if ($aRow['source_table']  == "order_tracker") {
-            $_data = app_format_money($aRow['total'], $base_currency->symbol);
+            $_data = app_format_money($aRow['total']);
 
             // Check if total exists in the database
             if (!empty($aRow['total'])) {
                // Display as plain text
                $_data = '<span class="contract-amount-display" data-id="' . $aRow['id'] . '" data-type="' . $aRow['source_table'] . '">' .
-                  app_format_money($aRow['total'], '₹') .
+                  app_format_money($aRow['total']) .
                   '</span>';
             } else {
                // Render as an editable input if no total exists
@@ -358,7 +357,7 @@ foreach ($rResult as $aRow) {
                          data-type="' . $aRow['source_table'] . '">';
             }
          } else {
-            $_data = app_format_money($aRow['subtotal'], $base_currency->symbol);
+            $_data = app_format_money($aRow['subtotal']);
          }
       } elseif ($column == 'order_name') {
          if ($aRow['source_table'] == "pur_orders") {
@@ -488,7 +487,7 @@ foreach ($rResult as $aRow) {
          if (!empty($aRow['budget'])) {
             // Display as plain text
             $_data = '<span class="budget-display" data-id="' . $aRow['id'] . '" data-type="' . $aRow['source_table'] . '">' .
-               app_format_money($aRow['budget'], '₹') .
+               app_format_money($aRow['budget']) .
                '</span>';
          } else {
             // Render as an editable input if no budget exists
@@ -498,15 +497,13 @@ foreach ($rResult as $aRow) {
                          data-type="' . $aRow['source_table'] . '">';
          }
       } elseif ($column == 'co_total') {
-         // $_data = app_format_money($aRow['co_total'], $base_currency->symbol);
-
          // Check if anticipate_variation exists in the database
          if (!empty($aRow['co_total'])) {
             if ($aRow['source_table'] == "order_tracker") {
                if (!empty($aRow['co_total'])) {
                   // Display as plain text
                   $_data = '<span class="co-total-display" data-id="' . $aRow['id'] . '" data-type="' . $aRow['source_table'] . '">' .
-                     app_format_money($aRow['co_total'], '₹') .
+                     app_format_money($aRow['co_total']) .
                      '</span>';
                } else {
                   $_data = '<input type="number" class="form-control co-total-input"
@@ -517,7 +514,7 @@ foreach ($rResult as $aRow) {
             } else {
                // Display as plain text
                $_data = '<span class="" data-id="' . $aRow['id'] . '" data-type="' . $aRow['source_table'] . '">' .
-                  app_format_money($aRow['co_total'], '₹') .
+                  app_format_money($aRow['co_total']) .
                   '</span>';
             }
          } else {
@@ -529,13 +526,13 @@ foreach ($rResult as $aRow) {
             $_data = '<span style="font-style: italic;font-size: 12px;">Values will be fetched directly from the change order module</span>';
          }
       } elseif ($column == 'total_rev_contract_value') {
-         $_data = app_format_money($aRow['total_rev_contract_value'], $base_currency->symbol);
+         $_data = app_format_money($aRow['total_rev_contract_value']);
       } elseif ($column == 'anticipate_variation') {
          // Check if anticipate_variation exists in the database
          if (!empty($aRow['anticipate_variation'])) {
             // Display as plain text
             $_data = '<span class="anticipate-variation-display" data-id="' . $aRow['id'] . '" data-type="' . $aRow['source_table'] . '">' .
-               app_format_money($aRow['anticipate_variation'], '₹') .
+               app_format_money($aRow['anticipate_variation']) .
                '</span>';
          } else {
             // Render as an editable input if no value exists
@@ -545,12 +542,12 @@ foreach ($rResult as $aRow) {
                      data-type="' . $aRow['source_table'] . '">';
          }
       } elseif ($column == 'cost_to_complete') {
-         $_data = app_format_money($aRow['cost_to_complete'], $base_currency->symbol);
+         $_data = app_format_money($aRow['cost_to_complete']);
       } elseif ($column == 'vendor_submitted_amount_without_tax') {
          if (!empty($aRow['vendor_submitted_amount_without_tax']) && $aRow['vendor_submitted_amount_without_tax'] != 0) {
 
             $_data = '<span class=  data-id="' . $aRow['id'] . '" data-type="' . $aRow['source_table'] . '">' .
-               app_format_money($aRow['vendor_submitted_amount_without_tax'], '₹') .
+               app_format_money($aRow['vendor_submitted_amount_without_tax']) .
                '</span>';
          } else {
             // Render as an editable input if no value exists
@@ -569,9 +566,9 @@ foreach ($rResult as $aRow) {
             $_data = '';
          }
       } elseif ($column == 'yield_delta') {
-         $_data = app_format_money($aRow['yield_delta'], $base_currency->symbol);
+         $_data = app_format_money($aRow['yield_delta']);
       } elseif ($column == 'ril_certified_amount') {
-         $_data = '<span class=  data-id="' . $aRow['id'] . '" data-type="' . $aRow['source_table'] . '">' . app_format_money($aRow['ril_certified_amount'], '₹') . '</span>';
+         $_data = '<span class=  data-id="' . $aRow['id'] . '" data-type="' . $aRow['source_table'] . '">' . app_format_money($aRow['ril_certified_amount']) . '</span>';
       } elseif ($column == 1) {
          $_data = '
             <div class="input-group" style="width: 100%;">
@@ -613,9 +610,6 @@ foreach ($rResult as $aRow) {
       }  elseif ($column == 'last_action') {
          $_data = get_last_action_full_name($aRow['last_action']);
       }
-      //  elseif ($column == 'order_value') {
-      //    $_data = '<span class="order-value-display" data-id="' . $aRow['id'] . '" data-type="' . $aRow['source_table'] . '">' . app_format_money($aRow['order_value'], $base_currency->symbol) . '</span>';
-      // }
       elseif ($column == 'aw_unw_order_status') {
          $status_labels_aw_uw = [
             1 => ['label' => 'success', 'table' => 'awarded', 'text' => _l('Awarded')],
@@ -759,6 +753,6 @@ foreach ($rResult as $aRow) {
 }
 
 foreach ($footer_data as $key => $total) {
-   $footer_data[$key] = app_format_money($total, $base_currency->symbol);
+   $footer_data[$key] = app_format_money($total);
 }
 $output['sums'] = $footer_data;
