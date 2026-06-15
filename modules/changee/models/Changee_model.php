@@ -15008,18 +15008,34 @@ class Changee_model extends App_Model
         $response = array();
         $vendors = isset($data['vendors']) ? $data['vendors'] : '';
         $projects = isset($data['projects']) ? $data['projects'] : [get_default_project()];
-        $this->load->model('currencies_model');
-        $this->load->model('departments_model');
-        $base_currency = $this->currencies_model->get_base_currency();
-        if ($request->currency != 0 && $request->currency != null) {
-            $base_currency = pur_get_currency_by_id($request->currency);
-        }
 
         $response['total_co_value'] = $response['approved_co_value'] = $response['draft_co_value'] = $response['draft_co_count'] = $response['approved_co_count'] = $response['rejected_co_count'] = 0;
         $response['pie_budget_name'] = $response['pie_tax_value'] = array();
         $response['line_order_date'] = $response['line_order_total'] = array();
 
-        $this->db->select('id, pur_order_number, approve_status, total, order_date, total_tax, group_pur, vendor, project, department, currency');
+        $this->db->select(
+            db_prefix() . 'co_orders.id,
+            ' . db_prefix() . 'co_orders.pur_order_number,
+            ' . db_prefix() . 'co_orders.approve_status,
+            CASE
+                WHEN ' . db_prefix() . 'co_orders.currency = 3 THEN
+                    ' . db_prefix() . 'co_orders.total
+                ELSE
+                    ' . db_prefix() . 'co_orders.total * COALESCE(' . db_prefix() . 'currencies.reference_value, 1)
+            END AS total,
+            ' . db_prefix() . 'co_orders.order_date,
+            CASE
+                WHEN ' . db_prefix() . 'co_orders.currency = 3 THEN
+                    ' . db_prefix() . 'co_orders.total_tax
+                ELSE
+                    ' . db_prefix() . 'co_orders.total_tax * COALESCE(' . db_prefix() . 'currencies.reference_value, 1)
+            END AS total_tax,
+            ' . db_prefix() . 'co_orders.group_pur,
+            ' . db_prefix() . 'co_orders.vendor,
+            ' . db_prefix() . 'co_orders.project,
+            ' . db_prefix() . 'co_orders.department'
+        );
+        $this->db->join(db_prefix() . 'currencies', '' . db_prefix() . 'currencies.id = ' . db_prefix() . 'co_orders.currency', 'left');
         if (!empty($vendors) && is_array($vendors)) {
             $this->db->where_in(db_prefix() . 'co_orders.vendor', $vendors);
         }
@@ -15030,18 +15046,34 @@ class Changee_model extends App_Model
         $co_orders = $this->db->get(db_prefix() . 'co_orders')->result_array();
 
         if (!empty($co_orders)) {
+            $draft_co_value = 0;
             $approved_co_value = 0;
             $draft_co_array = array_filter($co_orders, function ($item) {
                 return in_array($item['approve_status'], [1]);
             });
-            $response['draft_co_value'] = app_format_money(format_currency_converter($draft_co_array, 'total'));
+
+            if (!empty($draft_co_array)) {
+                $draft_co_value = array_reduce($draft_co_array, function ($carry, $item) {
+                    return $carry + (float)$item['total'];
+                }, 0);
+            }
+            $response['draft_co_value'] = app_format_money($draft_co_value);
 
             $approved_co_array = array_filter($co_orders, function ($item) {
                 return in_array($item['approve_status'], [2]);
             });
-            $response['approved_co_value'] = app_format_money(format_currency_converter($approved_co_array, 'total'));
 
-            $response['total_co_value'] = app_format_money(format_currency_converter($co_orders, 'total'));
+            if (!empty($approved_co_array)) {
+                $approved_co_value = array_reduce($approved_co_array, function ($carry, $item) {
+                    return $carry + (float)$item['total'];
+                }, 0);
+            }
+            $response['approved_co_value'] = app_format_money($approved_co_value);
+
+            $total_co_value = array_reduce($co_orders, function ($carry, $item) {
+                return $carry + (float)$item['total'];
+            }, 0);
+            $response['total_co_value'] = app_format_money($total_co_value);
 
             $response['draft_co_count'] = count(array_filter($co_orders, function ($item) {
                 return isset($item['approve_status']) && $item['approve_status'] == 1;

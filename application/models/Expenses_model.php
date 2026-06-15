@@ -983,11 +983,6 @@ class Expenses_model extends App_Model
     public function get_expenses_dashboard($data = array())
     {
         $response = array();
-        $this->load->model('currencies_model');
-        $base_currency = $this->currencies_model->get_base_currency();
-        if ($request->currency != 0 && $request->currency != null) {
-            $base_currency = pur_get_currency_by_id($request->currency);
-        }
 
         $response['total_expenses'] = $response['total_average_expenses'] = $response['total_expenses_without_receipts'] = $response['total_untagged_expenses'] = 0;
         $response['line_order_date'] = $response['line_order_total'] = array();
@@ -996,20 +991,25 @@ class Expenses_model extends App_Model
         $default_project = get_default_project();
 
         $this->db->select(
-            db_prefix() . 'expenses.id, ' .
-            db_prefix() . 'expenses.expense_name, ' .
-            db_prefix() . 'expenses.category, ' .
-            db_prefix() . 'expenses.invoiceid, ' .
-            db_prefix() . 'expenses.project_id, ' .
-            db_prefix() . 'expenses.date, ' .
-            db_prefix() . 'files.file_name, ' .
-            db_prefix() . 'expenses.amount, ' .
-            db_prefix() . 'expenses.vendor, ' .
-            db_prefix() . 'expenses.vbt_id, ' .
-            db_prefix() . 'expenses.currency, ' .
-            db_prefix() . 'expenses_categories.name as category_name'
+            db_prefix() . 'expenses.id,
+            ' . db_prefix() . 'expenses.expense_name,
+            ' . db_prefix() . 'expenses.category,
+            ' . db_prefix() . 'expenses.invoiceid,
+            ' . db_prefix() . 'expenses.project_id,
+            ' . db_prefix() . 'expenses.date,
+            ' . db_prefix() . 'files.file_name,
+            CASE
+                WHEN ' . db_prefix() . 'expenses.currency = 3 THEN
+                    ' . db_prefix() . 'expenses.amount
+                ELSE
+                    ' . db_prefix() . 'expenses.amount * COALESCE(' . db_prefix() . 'currencies.reference_value, 1)
+            END AS amount,
+            ' . db_prefix() . 'expenses.vendor,
+            ' . db_prefix() . 'expenses.vbt_id,
+            ' . db_prefix() . 'expenses_categories.name AS category_name'
         );
         $this->db->from(db_prefix() . 'expenses');
+        $this->db->join(db_prefix() . 'currencies', '' . db_prefix() . 'currencies.id = ' . db_prefix() . 'expenses.currency', 'left');
         $this->db->join(
             db_prefix() . 'files',
             db_prefix() . 'files.rel_id = ' . db_prefix() . 'expenses.id AND ' . db_prefix() . 'files.rel_type = "expense"',
@@ -1030,9 +1030,13 @@ class Expenses_model extends App_Model
 
         if (!empty($expenses)) {
             $total_expenses_raised = count($expenses);
-            $response['total_expenses'] = app_format_money(format_currency_converter($expenses, 'amount'));
+            $total_expenses = array_reduce($expenses, function ($carry, $item) {
+                return $carry + (float)$item['amount'];
+            }, 0);
+            $response['total_expenses'] = app_format_money($total_expenses);
             if($total_expenses_raised > 0) {
-                $response['total_average_expenses'] = app_format_money(format_currency_converter($expenses, 'amount', true));
+                $total_average_expenses = $total_expenses / $total_expenses_raised;
+                $response['total_average_expenses'] = app_format_money($total_average_expenses);
             }
             $response['total_expenses_without_receipts'] = count(array_filter($expenses, fn($item) =>
                 empty($item['file_name'])

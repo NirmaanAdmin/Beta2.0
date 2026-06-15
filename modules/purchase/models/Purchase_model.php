@@ -22256,17 +22256,33 @@ class Purchase_model extends App_Model
         $vendors = isset($data['vendors']) ? $data['vendors'] : '';
         $projects = isset($data['projects']) ? $data['projects'] : [get_default_project()];
         $group_pur = isset($data['group_pur']) ? $data['group_pur'] : '';
-        $this->load->model('currencies_model');
-        $base_currency = $this->currencies_model->get_base_currency();
-        if ($request->currency != 0 && $request->currency != null) {
-            $base_currency = pur_get_currency_by_id($request->currency);
-        }
 
         $response['total_po_value'] = $response['approved_po_value'] = $response['draft_po_value'] = $response['draft_po_count'] = $response['approved_po_count'] = $response['rejected_po_count'] = 0;
         $response['pie_budget_name'] = $response['pie_tax_value'] = array();
         $response['line_order_date'] = $response['line_order_total'] = array();
 
-        $this->db->select('id, pur_order_number, approve_status, total, order_date, total_tax, group_pur, vendor, project, currency');
+        $this->db->select(
+            db_prefix() . 'pur_orders.id,
+            ' . db_prefix() . 'pur_orders.pur_order_number,
+            ' . db_prefix() . 'pur_orders.approve_status,
+            CASE
+                WHEN ' . db_prefix() . 'pur_orders.currency = 3 THEN
+                    ' . db_prefix() . 'pur_orders.total
+                ELSE
+                    ' . db_prefix() . 'pur_orders.total * COALESCE(' . db_prefix() . 'currencies.reference_value, 1)
+            END AS total,
+            ' . db_prefix() . 'pur_orders.order_date,
+            CASE
+                WHEN ' . db_prefix() . 'pur_orders.currency = 3 THEN
+                    ' . db_prefix() . 'pur_orders.total_tax
+                ELSE
+                    ' . db_prefix() . 'pur_orders.total_tax * COALESCE(' . db_prefix() . 'currencies.reference_value, 1)
+            END AS total_tax,
+            ' . db_prefix() . 'pur_orders.group_pur,
+            ' . db_prefix() . 'pur_orders.vendor,
+            ' . db_prefix() . 'pur_orders.project'
+        );
+        $this->db->join(db_prefix() . 'currencies', '' . db_prefix() . 'currencies.id = ' . db_prefix() . 'pur_orders.currency', 'left');
         if (!empty($vendors) && is_array($vendors)) {
             $this->db->where_in(db_prefix() . 'pur_orders.vendor', $vendors);
         }
@@ -22280,17 +22296,34 @@ class Purchase_model extends App_Model
         $pur_orders = $this->db->get(db_prefix() . 'pur_orders')->result_array();
 
         if (!empty($pur_orders)) {
+            $draft_po_value = 0;
+            $approved_po_value = 0;
             $draft_po_array = array_filter($pur_orders, function ($item) {
                 return in_array($item['approve_status'], [1]);
             });
-            $response['draft_po_value'] = app_format_money(format_currency_converter($draft_po_array, 'total'));
+
+            if (!empty($draft_po_array)) {
+                $draft_po_value = array_reduce($draft_po_array, function ($carry, $item) {
+                    return $carry + (float)$item['total'];
+                }, 0);
+            }
+            $response['draft_po_value'] = app_format_money($draft_po_value);
 
             $approved_po_array = array_filter($pur_orders, function ($item) {
                 return in_array($item['approve_status'], [2]);
             });
-            $response['approved_po_value'] = app_format_money(format_currency_converter($approved_po_array, 'total'));
-            
-            $response['total_po_value'] = app_format_money(format_currency_converter($pur_orders, 'total'));
+
+            if (!empty($approved_po_array)) {
+                $approved_po_value = array_reduce($approved_po_array, function ($carry, $item) {
+                    return $carry + (float)$item['total'];
+                }, 0);
+            }
+            $response['approved_po_value'] = app_format_money($approved_po_value);
+
+            $total_po_value = array_reduce($pur_orders, function ($carry, $item) {
+                return $carry + (float)$item['total'];
+            }, 0);
+            $response['total_po_value'] = app_format_money($total_po_value);
 
             $response['draft_po_count'] = count(array_filter($pur_orders, function ($item) {
                 return isset($item['approve_status']) && $item['approve_status'] == 1;
@@ -22362,18 +22395,34 @@ class Purchase_model extends App_Model
         $vendors = isset($data['vendors']) ? $data['vendors'] : '';
         $projects = isset($data['projects']) ? $data['projects'] : [get_default_project()];
         $group_pur = isset($data['group_pur']) ? $data['group_pur'] : '';
-        $this->load->model('currencies_model');
-        $this->load->model('departments_model');
-        $base_currency = $this->currencies_model->get_base_currency();
-        if ($request->currency != 0 && $request->currency != null) {
-            $base_currency = pur_get_currency_by_id($request->currency);
-        }
 
         $response['total_wo_value'] = $response['approved_wo_value'] = $response['draft_wo_value'] = $response['draft_wo_count'] = $response['approved_wo_count'] = $response['rejected_wo_count'] = 0;
         $response['pie_budget_name'] = $response['pie_tax_value'] = array();
         $response['line_order_date'] = $response['line_order_total'] = array();
 
-        $this->db->select('id, wo_order_number, approve_status, total, order_date, total_tax, group_pur, vendor, project, department, currency');
+        $this->db->select(
+            db_prefix() . 'wo_orders.id,
+            ' . db_prefix() . 'wo_orders.wo_order_number,
+            ' . db_prefix() . 'wo_orders.approve_status,
+            CASE
+                WHEN ' . db_prefix() . 'wo_orders.currency = 3 THEN
+                    ' . db_prefix() . 'wo_orders.total
+                ELSE
+                    ' . db_prefix() . 'wo_orders.total * COALESCE(' . db_prefix() . 'currencies.reference_value, 1)
+            END AS total,
+            ' . db_prefix() . 'wo_orders.order_date,
+            CASE
+                WHEN ' . db_prefix() . 'wo_orders.currency = 3 THEN
+                    ' . db_prefix() . 'wo_orders.total_tax
+                ELSE
+                    ' . db_prefix() . 'wo_orders.total_tax * COALESCE(' . db_prefix() . 'currencies.reference_value, 1)
+            END AS total_tax,
+            ' . db_prefix() . 'wo_orders.group_pur,
+            ' . db_prefix() . 'wo_orders.vendor,
+            ' . db_prefix() . 'wo_orders.project,
+            ' . db_prefix() . 'wo_orders.department'
+        );
+        $this->db->join(db_prefix() . 'currencies', '' . db_prefix() . 'currencies.id = ' . db_prefix() . 'wo_orders.currency', 'left');
         if (!empty($vendors) && is_array($vendors)) {
             $this->db->where_in(db_prefix() . 'wo_orders.vendor', $vendors);
         }
@@ -22387,17 +22436,34 @@ class Purchase_model extends App_Model
         $wo_orders = $this->db->get(db_prefix() . 'wo_orders')->result_array();
 
         if (!empty($wo_orders)) {
+            $draft_wo_value = 0;
+            $approved_wo_value = 0;
             $draft_wo_array = array_filter($wo_orders, function ($item) {
                 return in_array($item['approve_status'], [1]);
             });
-            $response['draft_wo_value'] = app_format_money(format_currency_converter($draft_wo_array, 'total'));
+
+            if (!empty($draft_wo_array)) {
+                $draft_wo_value = array_reduce($draft_wo_array, function ($carry, $item) {
+                    return $carry + (float)$item['total'];
+                }, 0);
+            }
+            $response['draft_wo_value'] = app_format_money($draft_wo_value);
 
             $approved_wo_array = array_filter($wo_orders, function ($item) {
                 return in_array($item['approve_status'], [2]);
             });
-            $response['approved_wo_value'] = app_format_money(format_currency_converter($approved_wo_array, 'total'));
-            
-            $response['total_wo_value'] = app_format_money(format_currency_converter($wo_orders, 'total'));
+
+            if (!empty($approved_wo_array)) {
+                $approved_wo_value = array_reduce($approved_wo_array, function ($carry, $item) {
+                    return $carry + (float)$item['total'];
+                }, 0);
+            }
+            $response['approved_wo_value'] = app_format_money($approved_wo_value);
+
+            $total_wo_value = array_reduce($wo_orders, function ($carry, $item) {
+                return $carry + (float)$item['total'];
+            }, 0);
+            $response['total_wo_value'] = app_format_money($total_wo_value);
 
             $response['draft_wo_count'] = count(array_filter($wo_orders, function ($item) {
                 return isset($item['approve_status']) && $item['approve_status'] == 1;
@@ -22569,11 +22635,6 @@ class Purchase_model extends App_Model
         $vendors = isset($data['vendors']) ? $data['vendors'] : '';
         $projects = isset($data['projects']) ? $data['projects'] : [get_default_project()];
         $group_pur = isset($data['group_pur']) ? $data['group_pur'] : '';
-        $this->load->model('currencies_model');
-        $base_currency = $this->currencies_model->get_base_currency();
-        if ($request->currency != 0 && $request->currency != null) {
-            $base_currency = pur_get_currency_by_id($request->currency);
-        }
 
         $response['total_purchase_orders'] = $response['total_work_orders'] = $response['total_certified_value'] = $response['approved_payment_certificates'] = 0;
         $response['bar_top_vendor_name'] = $response['bar_top_vendor_value'] = array();
@@ -22591,6 +22652,7 @@ class Purchase_model extends App_Model
             ' . db_prefix() . 'payment_certificate.vendor,
             ' . db_prefix() . 'payment_certificate.order_date,
             ' . db_prefix() . 'payment_certificate.currency,
+            ' . db_prefix() . 'currencies.reference_value,
             (CASE 
                 WHEN ' . db_prefix() . 'payment_certificate.po_id IS NOT NULL THEN ' . db_prefix() . 'pur_orders.project 
                 WHEN ' . db_prefix() . 'payment_certificate.wo_id IS NOT NULL THEN ' . db_prefix() . 'wo_orders.project 
@@ -22599,6 +22661,7 @@ class Purchase_model extends App_Model
              END) as project'
         );
         $this->db->from(db_prefix() . 'payment_certificate');
+        $this->db->join(db_prefix() . 'currencies', '' . db_prefix() . 'currencies.id = ' . db_prefix() . 'payment_certificate.currency', 'left');
         $this->db->join(
             db_prefix() . 'pur_orders',
             db_prefix() . 'pur_orders.id = ' . db_prefix() . 'payment_certificate.po_id',
@@ -22648,17 +22711,17 @@ class Purchase_model extends App_Model
             $response['approved_payment_certificates'] = count(array_filter($payment_certificate, function ($item) {
                 return isset($item['approve_status']) && $item['approve_status'] == 2;
             }));
+            $total_certified_value = 0;
             $bar_top_vendors = array();
             $line_order_total = array();
-            $total_certified_items = array();
             foreach ($payment_certificate as $key => $value) {
                 $payment_certificate_calc = $this->get_payment_certificate_calc($value['id']);
                 if ($value['approve_status'] == 2) {
                     $amount_rec_4 = !empty($payment_certificate_calc['amount_rec_4']) ? $payment_certificate_calc['amount_rec_4'] : 0;
-                    $total_certified_items[] = [
-                        'currency' => $value['currency'],
-                        'amount'   => $amount_rec_4,
-                    ];
+                    if($value['currency'] != 3) {
+                        $amount_rec_4 = $amount_rec_4 * $value['reference_value'];
+                    }
+                    $total_certified_value = $total_certified_value + $amount_rec_4;
 
                     $vendor_id = $value['vendor'];
                     if (!isset($bar_top_vendors[$vendor_id])) {
@@ -22683,7 +22746,7 @@ class Purchase_model extends App_Model
                     $line_order_total[$month] += $amount_rec_4;
                 }
             }
-            $response['total_certified_value'] = app_format_money(format_currency_converter($total_certified_items, 'amount'));
+            $response['total_certified_value'] = app_format_money($total_certified_value);
 
             if (!empty($bar_top_vendors)) {
                 usort($bar_top_vendors, function ($a, $b) {
