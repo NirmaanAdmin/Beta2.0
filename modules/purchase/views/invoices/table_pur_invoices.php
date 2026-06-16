@@ -332,7 +332,6 @@ $footer_data = [
     'total_invoice_amount' => 0,
 ];
 $invoice_ids = '';
-$base_currency = get_base_currency_pur();
 
 $aColumns = array_map(function ($col) {
     $col = trim($col);
@@ -464,15 +463,11 @@ foreach ($rResult as $aRow) {
         } elseif ($aColumns[$i] == 'invoice_date') {
             $_data = '<input type="date" class="form-control invoice-date-input" value="' . $aRow['invoice_date'] . '" data-id="' . $aRow['id'] . '">';
         } elseif ($aColumns[$i] == 'vendor_submitted_amount_without_tax') {
-
-            // $_data = '<input type="text" class="form-control vsawt-input"  data-id="' . $aRow['id'] . '" value="' . app_format_money($aRow['vendor_submitted_amount_without_tax'], $base_currency->symbol) . '" >';
-            // $_data = app_format_money($aRow['vendor_submitted_amount_without_tax'], $base_currency->symbol);
-
             // Check if budget exists in the database
             if (!empty($aRow['vendor_submitted_amount_without_tax'])) {
                 // Display as plain text
                 $_data = '<span class="vsawt-display" data-id="' . $aRow['id'] . '">' .
-                    app_format_money($aRow['vendor_submitted_amount_without_tax'], $base_currency->symbol) .
+                    app_format_money($aRow['vendor_submitted_amount_without_tax']) .
                     '</span>';
             } else {
                 // Render as an editable input if no budget exists
@@ -487,12 +482,12 @@ foreach ($rResult as $aRow) {
             //     $total_tax += $tax_val;
             // }
 
-            $_data = app_format_money($aRow['vendor_submitted_tax_amount'], $base_currency->symbol);
+            $_data = app_format_money($aRow['vendor_submitted_tax_amount']);
 
             if (!empty($aRow['vendor_submitted_tax_amount'])) {
                 // Display as plain text
                 $_data = '<span class="vsta-display" data-id="' . $aRow['id'] . '">' .
-                    app_format_money($aRow['vendor_submitted_tax_amount'], $base_currency->symbol) .
+                    app_format_money($aRow['vendor_submitted_tax_amount']) .
                     '</span>';
             } else {
                 // Render as an editable input if no budget exists
@@ -501,12 +496,8 @@ foreach ($rResult as $aRow) {
                          data-id="' . $aRow['id'] . '">';
             }
         } elseif ($aColumns[$i] == 'final_certified_amount') {
-            $_data = app_format_money($aRow['final_certified_amount'], $base_currency->symbol);
-        }
-        // elseif ($aColumns[$i] == 'vendor_submitted_amount') {
-        //     $_data = app_format_money($aRow['vendor_submitted_amount'], $base_currency->symbol);
-        // } 
-        elseif ($aColumns[$i] == 'payment_status') {
+            $_data = app_format_money($aRow['final_certified_amount']);
+        } elseif ($aColumns[$i] == 'payment_status') {
             // $class = ''; 
             // if($aRow['payment_status'] == 'unpaid'){
             //     $class = 'danger';
@@ -678,7 +669,7 @@ if (!empty($invoice_ids)) {
 }
 
 foreach ($footer_data as $key => $total) {
-    $footer_data[$key] = app_format_money($total, $base_currency->symbol);
+    $footer_data[$key] = app_format_money($total);
 }
 
 $output['sums'] = $footer_data;

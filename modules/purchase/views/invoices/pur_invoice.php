@@ -17,12 +17,12 @@
 						<div class="row">
 							<div class="col-md-12">
 								<h4 class="no-margin font-bold"><i class="fa <?php if (isset($pur_invoice)) {
-																					echo 'fa-pencil-square';
-																				} else {
-																					echo 'fa-plus';
-																				} ?>" aria-hidden="true"></i> <?php echo _l($title); ?> <?php if (isset($pur_invoice)) {
-																																			echo ' ' . pur_html_entity_decode($pur_invoice->invoice_number);
-																																		} ?></h4>
+									echo 'fa-pencil-square';
+								} else {
+									echo 'fa-plus';
+								} ?>" aria-hidden="true"></i> <?php echo _l($title); ?> <?php if (isset($pur_invoice)) {
+									echo ' ' . pur_html_entity_decode($pur_invoice->invoice_number);
+								} ?></h4>
 								<hr />
 							</div>
 						</div>
@@ -55,8 +55,8 @@
 										<option value=""></option>
 										<?php foreach ($vendors as $ven) { ?>
 											<option value="<?php echo pur_html_entity_decode($ven['userid']); ?>" <?php if (isset($pur_invoice) && $pur_invoice->vendor == $ven['userid']) {
-																														echo 'selected';
-																													} ?>><?php echo pur_html_entity_decode($ven['vendor_code'] . ' ' . $ven['company']); ?></option>
+												echo 'selected';
+											} ?>><?php echo pur_html_entity_decode($ven['vendor_code'] . ' ' . $ven['company']); ?></option>
 										<?php } ?>
 									</select>
 								</div>
@@ -173,8 +173,7 @@
 							<div class="col-md-6">
 								<div class="col-md-6 pad_left_0">
 									<?php
-									$currency_attr = array('data-show-subtext' => true, 'required' => true);
-
+									$currency_attr = array('disabled' => true, 'data-show-subtext' => true, 'required' => true);
 									$selected = '';
 									foreach ($currencies as $currency) {
 										if (isset($pur_invoice) && $pur_invoice->currency != 0) {
@@ -187,10 +186,10 @@
 											}
 										}
 									}
-
 									?>
 									<label for="currency"><span class="text-danger">* </span><?php echo _l('invoice_add_edit_currency') ?></label>
 									<?php echo render_select('currency', $currencies, array('id', 'name', 'symbol'), '', $selected, $currency_attr); ?>
+									<?php echo form_hidden('currency', $selected); ?>
 								</div>
 								<div class="col-md-6 form-group">
 									<div id="inputTagsWrapper">

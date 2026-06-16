@@ -7420,12 +7420,9 @@ class Purchase_model extends App_Model
 
         hooks()->do_action('after_pur_invoice_updated', $id);
         if ($this->db->affected_rows() > 0) {
-
-
-
             return true;
         }
-        return false;
+        return true;
     }
 
     /**
@@ -15177,10 +15174,6 @@ class Purchase_model extends App_Model
         $company_name = get_option('invoice_company_name');
         $vendor = $this->get_vendor($invoice->vendor);
         $tax_data = $this->get_html_tax_pur_invoice($invoice_id);
-        $base_currency = get_base_currency_pur();
-        if ($invoice->currency != 0) {
-            $base_currency = pur_get_currency_by_id($invoice->currency);
-        }
         $invoice_date = (isset($invoice) ? _d($invoice->invoice_date) : '');
         $due_date = (isset($invoice) ? _d($invoice->duedate) : '');
         $contract = '';
@@ -15310,18 +15303,18 @@ class Purchase_model extends App_Model
             </tr>
             <tr>
                 <td style="padding: 8px;">Amount w/o Tax</td>
-                <td style="padding: 8px;">' . app_format_money($invoice->vendor_submitted_amount_without_tax, $base_currency->symbol) . '</td>
+                <td style="padding: 8px;">' . app_format_money($invoice->vendor_submitted_amount_without_tax) . '</td>
                 <td style="padding: 8px;">Vendor Submitted Tax Amount</td>
-                <td style="padding: 8px;">' . app_format_money($invoice->vendor_submitted_tax_amount, $base_currency->symbol) . '</td>
+                <td style="padding: 8px;">' . app_format_money($invoice->vendor_submitted_tax_amount) . '</td>
             </tr>
             <tr>
                 <td colspan="4"><hr class="mtop5 mbot5"></td>
             </tr>
             <tr>
                 <td style="padding: 8px;">Vendor Submitted Amount</td>
-                <td style="padding: 8px;">' . app_format_money($invoice->vendor_submitted_amount, $base_currency->symbol) . '</td>
+                <td style="padding: 8px;">' . app_format_money($invoice->vendor_submitted_amount) . '</td>
                 <td style="padding: 8px;">Final Certified Amount</td>
-                <td style="padding: 8px;">' . app_format_money($invoice->final_certified_amount, $base_currency->symbol) . '</td>
+                <td style="padding: 8px;">' . app_format_money($invoice->final_certified_amount) . '</td>
             </tr>
             <tr>
                 <td colspan="4"><hr class="mtop5 mbot5"></td>
@@ -22797,11 +22790,6 @@ class Purchase_model extends App_Model
         $vendors = isset($data['vendors']) ? $data['vendors'] : '';
         $group_pur = isset($data['group_pur']) ? $data['group_pur'] : '';
         $is_expense = isset($data['is_expense']) ? $data['is_expense'] : '';
-        $this->load->model('currencies_model');
-        $base_currency = $this->currencies_model->get_base_currency();
-        if ($request->currency != 0 && $request->currency != null) {
-            $base_currency = pur_get_currency_by_id($request->currency);
-        }
 
         $response['total_certified_amount'] = $response['total_bills_not_tag_to_orders'] = $response['total_uninvoice_bills'] = $response['total_pending_amount_to_be_invoice'] = 0;
         $response['bar_top_vendor_name'] = $response['bar_top_vendor_value'] = array();
@@ -22859,7 +22847,7 @@ class Purchase_model extends App_Model
             $total_certified_amount = array_reduce($pur_invoices, function ($carry, $item) {
                 return $carry + (float)$item['final_certified_amount'];
             }, 0);
-            $response['total_certified_amount'] = app_format_money($total_certified_amount, $base_currency->symbol);
+            $response['total_certified_amount'] = app_format_money($total_certified_amount);
             $response['total_bills_not_tag_to_orders'] = count(array_filter(
                 $pur_invoices,
                 fn($item) =>
@@ -22873,7 +22861,7 @@ class Purchase_model extends App_Model
                 empty($item['ril_invoice_id'])
             ));
             $total_pending_amount_to_be_invoice = array_sum(array_column(array_filter($pur_invoices, fn($item) => empty($item['ril_invoice_id'])), 'vendor_submitted_amount_without_tax'));
-            $response['total_pending_amount_to_be_invoice'] = app_format_money($total_pending_amount_to_be_invoice, $base_currency->symbol);
+            $response['total_pending_amount_to_be_invoice'] = app_format_money($total_pending_amount_to_be_invoice);
 
             $bar_top_vendors = array();
             foreach ($pur_invoices as $key => $value) {

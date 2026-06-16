@@ -58,7 +58,7 @@
 							<div class="col-md-6">
 								<div class="payment-preview-wrapper">
 									<?php echo _l('payment_total_amount'); ?><br />
-									<?php echo app_format_money($payment_invoice->amount,$base_currency->name); ?>
+									<?php echo app_format_money($payment_invoice->amount); ?>
 								</div>
 							</div>
 						</div>
@@ -82,11 +82,11 @@
 								<tr>
 									<td><?php echo get_pur_invoice_number($payment_invoice->pur_invoice); ?></td>
 									<td><?php echo _d($invoice->invoice_date); ?></td>
-									<td><?php echo app_format_money($invoice->total, $base_currency->name); ?></td>
-									<td><?php echo app_format_money($payment_invoice->amount, $base_currency->name); ?></td>
+									<td><?php echo app_format_money($invoice->total); ?></td>
+									<td><?php echo app_format_money($payment_invoice->amount); ?></td>
 									<?php if($invoice->payment_status != 'paid') { ?>
 											<td class="text-danger">
-												<?php echo app_format_money(purinvoice_left_to_pay($invoice->id), $base_currency->name); ?>
+												<?php echo app_format_money(purinvoice_left_to_pay($invoice->id)); ?>
 											</td>
 										<?php } ?>
 									</tr>

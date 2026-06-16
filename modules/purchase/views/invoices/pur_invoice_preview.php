@@ -8,7 +8,7 @@
         <div class="panel_s">
         	<?php if((debits_can_be_applied_to_invoice($pur_invoice->payment_status) && $debits_available > 0)) { ?>
 			<div class="alert alert-warning mbot5">
-			   <?php echo app_format_money($debits_available, $vendor_currency->name).' '. _l('x_debits_available'); ?>
+			   <?php echo app_format_money($debits_available).' '. _l('x_debits_available'); ?>
 			   <br />
 			   <a href="#" data-toggle="modal" data-target="#apply_debits"><?php echo _l('apply_debits'); ?></a>
 			</div>
@@ -222,19 +222,19 @@
 	         					<p><?php echo _l('invoice_amount').':'; ?><span class="pull-right bold"><?php echo app_format_money($pur_invoice->total,$base_currency->symbol); ?></span></p>
 	         				</div> -->
 							 <div class="col-md-6 pad_left_0 border-right">
-	         					<p><?php echo _l('amount_without_tax').':'; ?><span class="pull-right bold"><?php echo app_format_money($pur_invoice->vendor_submitted_amount_without_tax,$base_currency->symbol); ?></span></p>
+	         					<p><?php echo _l('amount_without_tax').':'; ?><span class="pull-right bold"><?php echo app_format_money($pur_invoice->vendor_submitted_amount_without_tax); ?></span></p>
 	         				</div>
 							<div class="col-md-6 pad_right_0 ">
-	         					<p><?php echo _l('vendor_submitted_tax_amount').':'; ?><span class="pull-right bold"><?php echo app_format_money($pur_invoice->vendor_submitted_tax_amount,$base_currency->symbol); ?></span></p>
+	         					<p><?php echo _l('vendor_submitted_tax_amount').':'; ?><span class="pull-right bold"><?php echo app_format_money($pur_invoice->vendor_submitted_tax_amount); ?></span></p>
 	         				</div>
 							 <div class="col-md-12 pad_left_0 pad_right_0">
 	         					<hr class="mtop5 mbot5">
 	         				</div>
 							<div class="col-md-6 pad_left_0 border-right">
-	         					<p><?php echo _l('vendor_submitted_amount').':'; ?><span class="pull-right bold"><?php echo app_format_money($pur_invoice->vendor_submitted_amount,$base_currency->symbol); ?></span></p>
+	         					<p><?php echo _l('vendor_submitted_amount').':'; ?><span class="pull-right bold"><?php echo app_format_money($pur_invoice->vendor_submitted_amount); ?></span></p>
 	         				</div>
 							<div class="col-md-6 pad_right_0 ">
-	         					<p><?php echo _l('final_certified_amount').':'; ?><span class="pull-right bold"><?php echo app_format_money($pur_invoice->final_certified_amount,$base_currency->symbol); ?></span></p>
+	         					<p><?php echo _l('final_certified_amount').':'; ?><span class="pull-right bold"><?php echo app_format_money($pur_invoice->final_certified_amount); ?></span></p>
 	         				</div>
 							 <div class="col-md-12 pad_left_0 pad_right_0">
 	         					<hr class="mtop5 mbot5">
@@ -493,8 +493,8 @@
 		                     <?php foreach($payment as $pay) { ?>
 		                        <tr>
 		                           <td><?php echo _d($pay['date']); ?></td>
-		                           <td><?php echo app_format_money($pay['amount'],$base_currency->symbol); ?></td>
-		                           <td><?php echo app_format_money($pay['tds'],$base_currency->symbol); ?></td>
+		                           <td><?php echo app_format_money($pay['amount']); ?></td>
+		                           <td><?php echo app_format_money($pay['tds']); ?></td>
 		                           <td><?php echo get_payment_mode_by_id($pay['paymentmode']); ?></td>
 		                           <td><?php echo pur_html_entity_decode($pay['transactionid']); ?></td>
 		                           <td><?php echo get_status_approve($pay['approval_status']); ?></td>
@@ -528,7 +528,7 @@
 		                              <a href="<?php echo admin_url('purchase/debit_notes/'.$debit['debit_id']); ?>"><?php echo format_debit_note_number($debit['debit_id']); ?></a>
 		                           </td>
 		                           <td><?php echo _d($debit['date']); ?></td>
-		                           <td><?php echo app_format_money($debit['amount'], $base_currency->symbol) ?>
+		                           <td><?php echo app_format_money($debit['amount']) ?>
 		                              <?php if(has_permission('purchase_debit_notes','','delete')){ ?>
 		                              <a href="<?php echo admin_url('purchase/delete_invoice_applied_debit/'.$debit['id'].'/'.$debit['debit_id'].'/'.$pur_invoice->id); ?>" class="pull-right text-danger _delete"><i class="fa fa-trash"></i></a>
 		                              <?php } ?>
