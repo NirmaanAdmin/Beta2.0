@@ -428,3 +428,8 @@ function form_pdf_tmjcb($form, $tag = '')
 {
     return app_pdf('form', LIBSPATH . 'pdf/Form_pdf_tmjcb', $form, $tag);
 }
+
+function form_pdf_cpjcb($form, $tag = '')
+{
+    return app_pdf('form', LIBSPATH . 'pdf/Form_pdf_cpjcb', $form, $tag);
+}

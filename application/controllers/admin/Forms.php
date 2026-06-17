@@ -1899,6 +1899,11 @@ class Forms extends AdminController
         $this->generate_form_pdf($id, 'tmjcb');
     }
 
+    public function pdf_cpjcb($id)
+    {
+        $this->generate_form_pdf($id, 'cpjcb');
+    }
+
     public function generate_form_pdf($id, $type)
     {
         if (!$id) {
