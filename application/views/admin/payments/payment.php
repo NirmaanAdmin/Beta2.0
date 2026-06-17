@@ -133,7 +133,7 @@
                                 <div class="col-md-6">
                                     <div class="payment-preview-wrapper">
                                         <?php echo _l('payment_total_amount'); ?><br />
-                                        <?php echo e(app_format_money($payment->amount, $payment->invoice->currency_name)); ?>
+                                        <?php echo e(app_format_money($payment->amount)); ?>
                                     </div>
                                 </div>
                             </div>
@@ -161,14 +161,14 @@
                                         <tr>
                                             <td><?php echo e(format_invoice_number($payment->invoice->id)); ?></td>
                                             <td><?php echo e(_d($payment->invoice->date)); ?></td>
-                                            <td><?php echo e(app_format_money($payment->invoice->total, $payment->invoice->currency_name)); ?>
+                                            <td><?php echo e(app_format_money($payment->invoice->total)); ?>
                                             </td>
-                                            <td><?php echo e(app_format_money($payment->amount, $payment->invoice->currency_name)); ?>
+                                            <td><?php echo e(app_format_money($payment->amount)); ?>
                                             </td>
                                             <?php if ($payment->invoice->status != Invoices_model::STATUS_PAID
                                                         && $payment->invoice->status != Invoices_model::STATUS_CANCELLED) { ?>
                                             <td class="text-danger">
-                                                <?php echo e(app_format_money(get_invoice_total_left_to_pay($payment->invoice->id, $payment->invoice->total), $payment->invoice->currency_name)); ?>
+                                                <?php echo e(app_format_money(get_invoice_total_left_to_pay($payment->invoice->id, $payment->invoice->total))); ?>
                                             </td>
                                             <?php } ?>
                                         </tr>

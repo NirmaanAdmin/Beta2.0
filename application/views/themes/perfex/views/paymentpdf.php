@@ -54,7 +54,7 @@ $pdf->SetFontSize(12);
 $pdf->Ln(3);
 $pdf->Cell(80, 10, _l('payment_total_amount'), 0, 1, 'C', '1');
 $pdf->SetFontSize(11);
-$pdf->Cell(80, 10, app_format_money($payment->amount, $payment->invoice_data->currency_name), 0, 1, 'C', '1');
+$pdf->Cell(80, 10, app_format_money($payment->amount), 0, 1, 'C', '1');
 
 $pdf->Ln(10);
 $pdf->SetTextColor(0);
@@ -80,10 +80,10 @@ $tblhtml .= '<tbody>';
 $tblhtml .= '<tr>';
 $tblhtml .= '<td>' . format_invoice_number($payment->invoice_data->id) . '</td>';
 $tblhtml .= '<td>' . _d($payment->invoice_data->date) . '</td>';
-$tblhtml .= '<td>' . app_format_money($payment->invoice_data->total, $payment->invoice_data->currency_name) . '</td>';
-$tblhtml .= '<td>' . app_format_money($payment->amount, $payment->invoice_data->currency_name) . '</td>';
+$tblhtml .= '<td>' . app_format_money($payment->invoice_data->total) . '</td>';
+$tblhtml .= '<td>' . app_format_money($payment->amount) . '</td>';
 if ($amountDue) {
-    $tblhtml .= '<td style="color:#fc2d42">' . app_format_money($payment->invoice_data->total_left_to_pay, $payment->invoice_data->currency_name) . '</td>';
+    $tblhtml .= '<td style="color:#fc2d42">' . app_format_money($payment->invoice_data->total_left_to_pay) . '</td>';
 }
 $tblhtml .= '</tr>';
 $tblhtml .= '</tbody>';

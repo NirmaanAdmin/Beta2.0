@@ -106,7 +106,7 @@ foreach ($rResult as $aRow) {
 
     $row[] = '<a href="' . admin_url('clients/client/' . $aRow['clientid']) . '">' . e($aRow['company']) . '</a>';
 
-    $row[] = e(app_format_money($aRow['amount'], $aRow['currency_name']));
+    $row[] = e(app_format_money($aRow['amount']));
 
     $row[] = e(_d($aRow['date']));
 
@@ -119,6 +119,6 @@ foreach ($rResult as $aRow) {
 }
 
 foreach ($footer_data as $key => $total) {
-    $footer_data[$key] = app_format_money($total, $aRow['currency_name']);
+    $footer_data[$key] = app_format_money($total);
 }
 $output['sums'] = $footer_data;
