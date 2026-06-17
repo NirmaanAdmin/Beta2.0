@@ -1049,10 +1049,10 @@ class Warehouse_model extends App_Model
 				$data['filetype']  = $file['filetype'];
 				$this->db->insert(db_prefix() . 'invetory_files', $data);
 				$invetory_file_id = $this->db->insert_id();
-				if($related == 'goods_receipt') {
+				if ($related == 'goods_receipt') {
 					create_goods_receipt_attachments_in_documents($invetory_file_id);
 				}
-				if($related == 'goods_delivery') {
+				if ($related == 'goods_delivery') {
 					create_goods_delivery_attachments_in_documents($invetory_file_id);
 				}
 				$file_names[] = $file['file_name'];
@@ -1118,7 +1118,7 @@ class Warehouse_model extends App_Model
 	 */
 	public function add_goods_receipt($data, $id = false)
 	{
-
+		
 		$inventory_receipts = $production_approval = $checklist_id_arr = $required_arr = [];
 		$insert_id = '';
 		if (isset($data['newitems'])) {
@@ -1284,7 +1284,6 @@ class Warehouse_model extends App_Model
 					$this->update_inventory_setting(['next_inventory_stock_reconciliation_mumber' =>  get_warehouse_option('next_inventory_stock_reconciliation_mumber') + 1]);
 				}
 			}
-
 			foreach ($inventory_receipts as $inventory_receipt) {
 				$inventory_receipt['goods_receipt_id'] = $insert_id;
 
@@ -1422,7 +1421,6 @@ class Warehouse_model extends App_Model
 				{
 					return strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $description));
 				}
-
 				foreach ($inventory_receipts as $receipt) {
 
 					$matched = false;
@@ -1450,7 +1448,7 @@ class Warehouse_model extends App_Model
 							break;
 						}
 					}
-
+					
 					/**
 					 * ✅ INSERT NEW ITEM (SYSTEM-COMPATIBLE)
 					 */
@@ -1465,7 +1463,7 @@ class Warehouse_model extends App_Model
 						$new_item['commodity_name'] = $receipt['commodity_name'];
 						$new_item['description'] = $receipt['description'];
 						$new_item['warehouse_id'] = $receipt['warehouse_id'] ?? '';
-						$new_item['area'] = $receipt['area'] ?? '';
+						$new_item['area'] = !empty($receipt['area']) ? implode(',', $receipt['area']) : NULL;
 
 
 
@@ -1474,7 +1472,6 @@ class Warehouse_model extends App_Model
 
 						// unit_id is required
 						$new_item['unit_id'] = $receipt['unit_id'] ?? null;
-
 						$this->db->insert(db_prefix() . 'stock_reconciliation_detail', $new_item);
 					}
 				}
@@ -1544,6 +1541,7 @@ class Warehouse_model extends App_Model
 					}
 				}
 			}
+			
 		}
 
 		if (isset($insert_id)) {
@@ -1574,7 +1572,9 @@ class Warehouse_model extends App_Model
 
 			hooks()->do_action('after_wh_goods_receipt_added', $insert_id);
 		}
+		
 		add_stock_received_activity_log($insert_id);
+		
 		return $insert_id > 0 ? $insert_id : false;
 	}
 
@@ -1679,6 +1679,7 @@ class Warehouse_model extends App_Model
 		$index = 0;
 		$last_index = 0;
 		$warehouse_data = $this->warehouse_model->get_warehouse();
+		$total_goods_items = count($results);
 		foreach ($results as $key => $value) {
 			$available_quantity = (float)$value['quantities'];
 			$non_break_description = strip_tags(str_replace(["\r", "\n", "<br />", "<br/>"], '', $value['description']));
@@ -1729,7 +1730,7 @@ class Warehouse_model extends App_Model
 				$commodity_name = wh_get_item_variatiom($value['commodity_code']);
 				$quantities = $available_quantity;
 				$sub_total = 0;
-				$list_item .= $this->create_goods_receipt_row_template($warehouse_data, 'newitems[' . $index . ']', $commodity_name, '', $quantities, 0, $unit_name, $unit_price, $taxname, $lot_number, $vendor_id, $delivery_date, $date_manufacture, $expiry_date, $value['commodity_code'], $value['unit_id'], $value['tax_rate'], $value['tax_value'], $value['goods_money'], $note, $value['id'], $sub_total, '', $value['tax'], true, '', $value['description'], $payment_date, $est_delivery_date, $production_status, $value['area']);
+				$list_item .= $this->create_goods_receipt_row_template($warehouse_data, 'newitems[' . $index . ']', $commodity_name, '', $quantities, 0, $unit_name, $unit_price, $taxname, $lot_number, $vendor_id, $delivery_date, $date_manufacture, $expiry_date, $value['commodity_code'], $value['unit_id'], $value['tax_rate'], $value['tax_value'], $value['goods_money'], $note, $value['id'], $sub_total, '', $value['tax'], true, '', $value['description'], $payment_date, $est_delivery_date, $production_status, $value['area'], $total_goods_items, $copy_pur_request = true);
 				$production_approval_item .= $this->create_goods_receipt_production_approvals_template('approvalsitems[' . $index . ']', $value['description'], $commodity_name, '', '', '', '', $value['commodity_code']);
 				$total_goods_money_temp = $available_quantity * (float)$unit_price;
 				$total_goods_money += $total_goods_money_temp;
@@ -15436,7 +15437,7 @@ class Warehouse_model extends App_Model
 	 * @param  boolean $is_edit          
 	 * @return [type]                    
 	 */
-	public function create_goods_receipt_row_template($warehouse_data = [], $name = '', $commodity_name = '', $warehouse_id = '', $po_quantities = '', $quantities = '', $unit_name = '', $unit_price = '', $taxname = '', $lot_number = '', $vendor_id = '', $delivery_date = '', $date_manufacture = '', $expiry_date = '', $commodity_code = '', $unit_id = '', $tax_rate = '', $tax_money = '', $goods_money = '', $note = '', $item_key = '', $sub_total = '', $tax_name = '', $tax_id = '', $is_edit = false, $serial_number = '', $description = '', $payment_date = '', $est_delivery_date = '', $status = '', $area = '')
+	public function create_goods_receipt_row_template($warehouse_data = [], $name = '', $commodity_name = '', $warehouse_id = '', $po_quantities = '', $quantities = '', $unit_name = '', $unit_price = '', $taxname = '', $lot_number = '', $vendor_id = '', $delivery_date = '', $date_manufacture = '', $expiry_date = '', $commodity_code = '', $unit_id = '', $tax_rate = '', $tax_money = '', $goods_money = '', $note = '', $item_key = '', $sub_total = '', $tax_name = '', $tax_id = '', $is_edit = false, $serial_number = '', $description = '', $payment_date = '', $est_delivery_date = '', $status = '', $area = '', $total_goods_items = 0, $copy_pur_request = false)
 	{
 
 		$this->load->model('invoice_items_model');
@@ -15569,7 +15570,28 @@ class Warehouse_model extends App_Model
 
 		$row .= '<td class="">' . render_textarea($name_commodity_name, '', $commodity_name, ['rows' => 2, 'placeholder' => _l('item_description_placeholder'), 'readonly' => true]) . '</td>';
 		$row .= '<td class="">' . render_textarea($name_description, '', $description, ['rows' => 2, 'placeholder' => _l('item_description_placeholder'), 'readonly' => true]) . '</td>';
-		$row .= '<td class="area">' . get_inventory_area_list($name_area, $area) . '</td>';
+		if ($is_edit == true && $total_goods_items > PURCHASE_LOADING_ISSUE_ITEMS && $copy_pur_request == false) {
+
+			$row .= '<td class="area">
+                <span class="editable_area_warehouse"
+                    data-name_area="' . htmlspecialchars($name_area, ENT_QUOTES, 'UTF-8') . '"
+                    data-area="' . htmlspecialchars(json_encode($area), ENT_QUOTES, 'UTF-8') . '">'
+				. (get_area_name_by_id($area) ?: 'None') .
+				'</span>
+            </td>';
+		}
+		if ($is_edit == true && $total_goods_items > PURCHASE_LOADING_ISSUE_ITEMS && $copy_pur_request == true) {
+
+			$row .= '<td class="area">
+                <span>'
+				. (get_area_name_by_id($area) ?: 'None') .
+				'</span>
+				<input type="hidden" name="' . $name_area . '" value="' . $area . '">
+            </td>';
+		} else {
+			$row .= '<td class="area">' . get_inventory_area_list($name_area, $area) . '</td>';
+		}
+
 		$row .= '<td class="warehouse_select">' .
 			// render_select_with_input_group($name_warehouse_id, $warehouse_data,array('warehouse_id','warehouse_name'),'',$warehouse_id,'<a href="javascript:void(0)" onclick="new_vehicle_reg(this,\''.$name_commodity_code.'\', \''.$name_warehouse_id.'\');return false;"><i class="fa fa-plus"></i></a>', ["data-none-selected-text" => _l('warehouse_name')]).
 			render_select($name_warehouse_id, $warehouse_data, array('warehouse_id', 'warehouse_name'), '', $warehouse_id, [], ["data-none-selected-text" => _l('warehouse_name')], 'no-margin') .
@@ -20961,10 +20983,10 @@ class Warehouse_model extends App_Model
 			if (count($other_attachments) == 0) {
 				delete_dir(get_upload_path_by_type('inventory') . $attachment->rel_type . '/' . $attachment->rel_id);
 			}
-			if($attachment->rel_type == 'goods_receipt') {
+			if ($attachment->rel_type == 'goods_receipt') {
 				delete_goods_receipt_attachments_in_documents($attachment->id);
 			}
-			if($attachment->rel_type == 'goods_delivery') {
+			if ($attachment->rel_type == 'goods_delivery') {
 				delete_goods_delivery_attachments_in_documents($attachment->id);
 			}
 		}

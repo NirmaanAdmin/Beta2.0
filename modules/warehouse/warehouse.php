@@ -22,6 +22,7 @@ define('WAREHOUSE_ORDER_RETURN_MODULE_UPLOAD_FOLDER', module_dir_path(WAREHOUSE_
 define('WAREHOUSE_PROPOSAL_UPLOAD_FOLDER', module_dir_path(WAREHOUSE_MODULE_NAME, 'uploads/proposal/'));
 define('WAREHOUSE_ITEM_UPLOAD', module_dir_path(WAREHOUSE_MODULE_NAME, 'uploads/item_img/'));
 define('WAREHOUSE_SHIPMENT_UPLOAD', module_dir_path(WAREHOUSE_MODULE_NAME, 'uploads/shipments/'));
+define('WAREHOUSE_LOADING_ISSUE_ITEMS', 70);
 
 define('WAREHOUSE_PRINT_ITEM', 'modules/warehouse/uploads/print_item/');
 define('WAREHOUSE_EXPORT_ITEM', 'modules/warehouse/uploads/export_item/');

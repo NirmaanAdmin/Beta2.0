@@ -205,8 +205,7 @@
 					$("body").find('.dt-loader').remove();
 					$('#item_select').selectpicker('val', '');
 				}
-			}).fail(function(error) {
-			});
+			}).fail(function(error) {});
 			if (wo_order_id != '') {
 				$.post(admin_url + 'warehouse/copy_wo_vender/' + wo_order_id).done(function(response) {
 					var response_vendor = JSON.parse(response);
@@ -235,10 +234,10 @@
 
 		var pur_order_value = $('select[name="pr_order_id"]').val();
 		var wo_order_value = $('select[name="wo_order_id"]').val();
-		if(!empty(pur_order_value)) {
+		if (!empty(pur_order_value)) {
 			$('select[name="wo_order_id"]').prop('disabled', true).selectpicker('refresh');
 		}
-		if(!empty(wo_order_value)) {
+		if (!empty(wo_order_value)) {
 			$('select[name="pr_order_id"]').prop('disabled', true).selectpicker('refresh');
 		}
 	})(jQuery);
@@ -804,4 +803,21 @@
 			});
 		}
 	}
+	$("body").on('dblclick', '.editable_area_warehouse', function() {
+		var span = $(this);
+		var td = span.closest('td');
+		var name_area = span.data('name_area');
+		var area = span.data('area');
+		span.html('<i class="fa fa-spinner fa-spin"></i>');
+		$.post(admin_url + 'purchase/load_order_area_html', {
+			name_area: name_area,
+			area: area
+		}).done(function(response) {
+			span.replaceWith(response);
+			td.find('select').selectpicker('refresh');
+		}).fail(function() {
+			span.html('Error');
+			alert_float('danger', 'Something went wrong');
+		});
+	});
 </script>
