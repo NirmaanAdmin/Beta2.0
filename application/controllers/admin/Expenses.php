@@ -588,8 +588,8 @@ class Expenses extends AdminController
         $input['group_pur'] = !empty($group_pur) ? $group_pur : 0;
         $input['description_services'] = !empty($expense_name) ? $expense_name : '';
         $input['invoice_date'] = $expense_date;
-        $input['currency'] = !empty($expense->currency) ? $expense->currency : 3;
-        $input['to_currency'] = !empty($expense->currency) ? $expense->currency : 3;
+        $input['currency'] = 3;
+        $input['to_currency'] = 3;
         $input['date_add'] = date('Y-m-d');
         $input['payment_status'] = 0;
         $input['project_id'] = !empty($project_id) ? $project_id : 1;
@@ -597,6 +597,14 @@ class Expenses extends AdminController
         $input['vendor_submitted_tax_amount'] = $vendor_submitted_tax_amount;
         $input['vendor_submitted_amount'] = $vendor_submitted_amount;
         $input['final_certified_amount'] = $vendor_submitted_amount;
+        if(!empty($expense->currency)) {
+            if($expense->currency != 3) {
+                $input['vendor_submitted_amount_without_tax'] = find_total_in_inr($vendor_submitted_amount_without_tax, $expense->currency);
+                $input['vendor_submitted_tax_amount'] = find_total_in_inr($vendor_submitted_tax_amount, $expense->currency);
+                $input['vendor_submitted_amount'] = find_total_in_inr($vendor_submitted_amount, $expense->currency);
+                $input['final_certified_amount'] = find_total_in_inr($vendor_submitted_amount, $expense->currency);
+            }
+        }
         $input['expense_id'] = $id;
         $input['add_from'] = get_staff_user_id();
         $input['pur_order'] = $pur_order;

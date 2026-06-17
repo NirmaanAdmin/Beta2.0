@@ -13585,8 +13585,8 @@ class purchase extends AdminController
         $input['group_pur'] = isset($pur_order->group_pur) ? $pur_order->group_pur : 0;
         $input['description_services'] = $order_name;
         $input['invoice_date'] = !empty($payment_certificate->invoice_date) ? $payment_certificate->invoice_date : date('Y-m-d');
-        $input['currency'] = !empty($payment_certificate->currency) ? $payment_certificate->currency : 3;
-        $input['to_currency'] = !empty($payment_certificate->currency) ? $payment_certificate->currency : 3;
+        $input['currency'] = 3;
+        $input['to_currency'] = 3;
         $input['date_add'] = date('Y-m-d');
         $input['payment_status'] = 0;
         $input['pur_order'] = !empty($payment_certificate->po_id) ? $payment_certificate->po_id : NULL;
@@ -13597,6 +13597,14 @@ class purchase extends AdminController
         $input['vendor_submitted_tax_amount'] = $payment_certificate_calc['tot_app_tax_3'];
         $input['vendor_submitted_amount'] = $value_certified_amount;
         $input['final_certified_amount'] = $value_certified_amount;
+        if(!empty($payment_certificate->currency)) {
+            if($payment_certificate->currency != 3) {
+                $input['vendor_submitted_amount_without_tax'] = find_total_in_inr($payment_certificate_calc['sub_fg_3'], $payment_certificate->currency);
+                $input['vendor_submitted_tax_amount'] = find_total_in_inr($payment_certificate_calc['tot_app_tax_3'], $payment_certificate->currency);
+                $input['vendor_submitted_amount'] = find_total_in_inr($value_certified_amount, $payment_certificate->currency);
+                $input['final_certified_amount'] = find_total_in_inr($value_certified_amount, $payment_certificate->currency);
+            }
+        }
         $input['pc_id'] = $id;
         $input['add_from'] = get_staff_user_id();
         $this->db->insert(db_prefix() . 'pur_invoices', $input);
