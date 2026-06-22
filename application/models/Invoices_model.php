@@ -2237,10 +2237,10 @@ class Invoices_model extends App_Model
             <td>' . $basic_invoice['final_invoice']['name'] . '</td>
             <td>' . $basic_invoice['final_invoice']['description'] . '</td>
             <td>' . $hsn_sac_code . '</td>
-            <td>' . str_replace(',', '', app_format_money($basic_invoice['final_invoice']['subtotal'], $invoice->currency_name, true)) . '</td>
-            <td>' . str_replace(',', '', app_format_money($basic_invoice['final_invoice']['cgst_tax'], $invoice->currency_name, true)) . '</td>
-            <td>' . str_replace(',', '', app_format_money($basic_invoice['final_invoice']['sgst_tax'], $invoice->currency_name, true)) . '</td>
-            <td>' . str_replace(',', '', app_format_money($rounded_amount, $invoice->currency_name, true)) . '</td>
+            <td>' . str_replace(',', '', app_format_number($basic_invoice['final_invoice']['subtotal'])) . '</td>
+            <td>' . str_replace(',', '', app_format_number($basic_invoice['final_invoice']['cgst_tax'])) . '</td>
+            <td>' . str_replace(',', '', app_format_number($basic_invoice['final_invoice']['sgst_tax'])) . '</td>
+            <td>' . str_replace(',', '', app_format_number($rounded_amount)) . '</td>
             <td>' . clear_textarea_breaks($basic_invoice['final_invoice']['remarks']) . '</td>
         </tr>';
         $tblfinvoicehtml .= '</table>';
@@ -2266,22 +2266,22 @@ class Invoices_model extends App_Model
             <tr>
                 <td>' . ($ikey + 1) . '</td>
                 <td>' . $ivalue['name'] . '</td>
-                <td>' . str_replace(',', '', app_format_money($ivalue['budgeted_amount'], $invoice->currency_name, true)) . '</td>
-                <td>' . str_replace(',', '', app_format_money($ivalue['total_previous_billing'], $invoice->currency_name, true)) . '</td>
-                <td>' . str_replace(',', '', app_format_money($ivalue['total_current_billing_amount'], $invoice->currency_name, true)) . '</td>
-                <td>' . str_replace(',', '', app_format_money($ivalue['total_cumulative_billing'], $invoice->currency_name, true)) . '</td>
-                <td>' . str_replace(',', '', app_format_money($ivalue['balance_available'], $invoice->currency_name, true)) . '</td>
+                <td>' . str_replace(',', '', app_format_number($ivalue['budgeted_amount'])) . '</td>
+                <td>' . str_replace(',', '', app_format_number($ivalue['total_previous_billing'])) . '</td>
+                <td>' . str_replace(',', '', app_format_number($ivalue['total_current_billing_amount'])) . '</td>
+                <td>' . str_replace(',', '', app_format_number($ivalue['total_cumulative_billing'])) . '</td>
+                <td>' . str_replace(',', '', app_format_number($ivalue['balance_available'])) . '</td>
             </tr>';
         }
         $tblbudgetsummaryhtml .= '
           <tr>
             <th>' . _l('total') . '</th>
             <th></th>
-            <th>' . str_replace(',', '', app_format_money($basic_invoice['total_budget_summary']['budgeted_amount'], $invoice->currency_name, true)) . '</th>
-            <th>' . str_replace(',', '', app_format_money($basic_invoice['total_budget_summary']['total_previous_billing'], $invoice->currency_name, true)) . '</th>
-            <th>' . str_replace(',', '', app_format_money($basic_invoice['total_budget_summary']['total_current_billing_amount'], $invoice->currency_name, true)) . '</th>
-            <th>' . str_replace(',', '', app_format_money($basic_invoice['total_budget_summary']['total_cumulative_billing'], $invoice->currency_name, true)) . '</th>
-            <th>' . str_replace(',', '', app_format_money($basic_invoice['total_budget_summary']['balance_available'], $invoice->currency_name, true)) . '</th>
+            <th>' . str_replace(',', '', app_format_number($basic_invoice['total_budget_summary']['budgeted_amount'])) . '</th>
+            <th>' . str_replace(',', '', app_format_number($basic_invoice['total_budget_summary']['total_previous_billing'])) . '</th>
+            <th>' . str_replace(',', '', app_format_number($basic_invoice['total_budget_summary']['total_current_billing_amount'])) . '</th>
+            <th>' . str_replace(',', '', app_format_number($basic_invoice['total_budget_summary']['total_cumulative_billing'])) . '</th>
+            <th>' . str_replace(',', '', app_format_number($basic_invoice['total_budget_summary']['balance_available'])) . '</th>
           </tr>';
         $tblbudgetsummaryhtml .= '</table>';
 
@@ -2303,18 +2303,18 @@ class Invoices_model extends App_Model
             <tr>
                 <td>' . ($ikey + 1) . '</td>
                 <td>' . $ivalue['name'] . '</td>
-                <td>' . str_replace(',', '', app_format_money($ivalue['subtotal'], $invoice->currency_name, true)) . '</td>
-                <td>' . str_replace(',', '', app_format_money($ivalue['tax'], $invoice->currency_name, true)) . '</td>
-                <td>' . str_replace(',', '', app_format_money($ivalue['amount'], $invoice->currency_name, true)) . '</td>
+                <td>' . str_replace(',', '', app_format_number($ivalue['subtotal'])) . '</td>
+                <td>' . str_replace(',', '', app_format_number($ivalue['tax'])) . '</td>
+                <td>' . str_replace(',', '', app_format_number($ivalue['amount'])) . '</td>
             </tr>';
         }
         $tblindexahtml .= '
           <tr>
             <th>' . _l('total') . '</th>
             <th></th>
-            <th>' . str_replace(',', '', app_format_money($basic_invoice['final_invoice']['subtotal'], $invoice->currency_name, true)) . '</th>
-            <th>' . str_replace(',', '', app_format_money($basic_invoice['final_invoice']['tax'], $invoice->currency_name, true)) . '</th>
-            <th>' . str_replace(',', '', app_format_money($basic_invoice['final_invoice']['amount'], $invoice->currency_name, true)) . '</th>
+            <th>' . str_replace(',', '', app_format_number($basic_invoice['final_invoice']['subtotal'])) . '</th>
+            <th>' . str_replace(',', '', app_format_number($basic_invoice['final_invoice']['tax'])) . '</th>
+            <th>' . str_replace(',', '', app_format_number($basic_invoice['final_invoice']['amount'])) . '</th>
           </tr>';
         $tblindexahtml .= '</table>';
 
@@ -2366,9 +2366,9 @@ class Invoices_model extends App_Model
                             <td>' . $vendor_name . '</td>
                             <td>' . $invoice_no . '</td>
                             <td>' . $invoice_date. '</td>
-                            <td>' . str_replace(',', '', app_format_money($item['rate'], $invoice->currency_name, true)) . '</td>
-                            <td>' . str_replace(',', '', app_format_money($total_tax, $invoice->currency_name, true)) . '</td>
-                            <td>' . str_replace(',', '', app_format_money($amount, $invoice->currency_name, true)) . '</td>
+                            <td>' . str_replace(',', '', app_format_number($item['rate'])) . '</td>
+                            <td>' . str_replace(',', '', app_format_number($total_tax)) . '</td>
+                            <td>' . str_replace(',', '', app_format_number($amount)) . '</td>
                             <td>' . clear_textarea_breaks($item['remarks']) . '</td>
                         </tr>';
                         $inv++;
@@ -2382,9 +2382,9 @@ class Invoices_model extends App_Model
                     <th></th>
                     <th></th>
                     <th></th>
-                    <th>' . str_replace(',', '', app_format_money($avalue['subtotal'], $invoice->currency_name, true)) . '</th>
-                    <th>' . str_replace(',', '', app_format_money($avalue['tax'], $invoice->currency_name, true)) . '</th>
-                    <th>' . str_replace(',', '', app_format_money($avalue['amount'], $invoice->currency_name, true)) . '</th>
+                    <th>' . str_replace(',', '', app_format_number($avalue['subtotal'])) . '</th>
+                    <th>' . str_replace(',', '', app_format_number($avalue['tax'])) . '</th>
+                    <th>' . str_replace(',', '', app_format_number($avalue['amount'])) . '</th>
                     <th></th>
                   </tr>';
                 $tblannexurehtml .= '</table>';
@@ -2405,11 +2405,6 @@ class Invoices_model extends App_Model
     public function get_client_invoices_dashboard($data = array())
     {
         $response = array();
-        $this->load->model('currencies_model');
-        $base_currency = $this->currencies_model->get_base_currency();
-        if ($request->currency != 0 && $request->currency != null) {
-            $base_currency = pur_get_currency_by_id($request->currency);
-        }
 
         $response['total_invoices_raised'] = $response['total_invoiced_amount'] = $response['average_invoice_value'] = 0;
         $response['line_order_date'] = $response['line_order_total'] = array();
@@ -2430,10 +2425,10 @@ class Invoices_model extends App_Model
             $total_invoiced_amount = array_reduce($invoices, function ($carry, $item) {
                 return $carry + (float)$item['total'];
             }, 0);
-            $response['total_invoiced_amount'] = app_format_money($total_invoiced_amount, $base_currency->symbol);
+            $response['total_invoiced_amount'] = app_format_money($total_invoiced_amount);
             if($total_invoices_raised > 0) {
                 $average_invoice_value = $total_invoiced_amount / $total_invoices_raised;
-                $response['average_invoice_value'] = app_format_money($average_invoice_value, $base_currency->symbol);
+                $response['average_invoice_value'] = app_format_money($average_invoice_value);
             }
 
             $line_order_total = array();

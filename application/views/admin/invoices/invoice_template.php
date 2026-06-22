@@ -698,16 +698,16 @@
                                             <?php echo $annexure_invoice['final_invoice']['qty']; ?>
                                         </td> */ ?>
                                 <td align="right">
-                                    <?php echo app_format_money($annexure_invoice['final_invoice']['subtotal'], $base_currency); ?>
+                                    <?php echo app_format_money($annexure_invoice['final_invoice']['subtotal']); ?>
                                 </td>
                                 <td align="right">
-                                    <?php echo app_format_money($annexure_invoice['final_invoice']['cgst_tax'], $base_currency); ?>
+                                    <?php echo app_format_money($annexure_invoice['final_invoice']['cgst_tax']); ?>
                                 </td>
                                 <td align="right">
-                                    <?php echo app_format_money($annexure_invoice['final_invoice']['sgst_tax'], $base_currency); ?>
+                                    <?php echo app_format_money($annexure_invoice['final_invoice']['sgst_tax']); ?>
                                 </td>
                                 <td align="right">
-                                    <?php echo app_format_money($annexure_invoice['final_invoice']['amount'], $base_currency); ?>
+                                    <?php echo app_format_money($annexure_invoice['final_invoice']['amount']); ?>
                                 </td>
                                 <td align="right">
                                     <?php echo '<textarea name="remarks" class="form-control" rows="5"> ' . clear_textarea_breaks($annexure_invoice['final_invoice']['remarks']) . '</textarea>';
@@ -725,7 +725,7 @@
                                     <span class="bold tw-text-neutral-700"><?php echo _l('subtotal_without_tax'); ?> :</span>
                                 </td>
                                 <td>
-                                    <?php echo app_format_money($annexure_invoice['final_invoice']['subtotal'], $base_currency); ?>
+                                    <?php echo app_format_money($annexure_invoice['final_invoice']['subtotal']); ?>
                                 </td>
                             </tr>
                             <?php /*
@@ -801,7 +801,7 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <?php echo app_format_money($annexure_invoice['final_invoice']['cgst_tax'], $base_currency); ?>
+                                    <?php echo app_format_money($annexure_invoice['final_invoice']['cgst_tax']); ?>
                                 </td>
                             </tr>
                             <tr id="total_tax">
@@ -817,7 +817,7 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <?php echo app_format_money($annexure_invoice['final_invoice']['sgst_tax'], $base_currency); ?>
+                                    <?php echo app_format_money($annexure_invoice['final_invoice']['sgst_tax']); ?>
                                 </td>
                             </tr>
                             <?php /*
@@ -845,7 +845,7 @@
                                 <td><span class="bold tw-text-neutral-700"><?php echo _l('invoice_total'); ?> :</span>
                                 </td>
                                 <td>
-                                    <?php echo app_format_money($annexure_invoice['final_invoice']['amount'], $base_currency); ?>
+                                    <?php echo app_format_money($annexure_invoice['final_invoice']['amount']); ?>
                                 </td>
                             </tr>
                             <?php hooks()->do_action('after_admin_invoice_form_total_field', $invoice ?? null); ?>
@@ -900,13 +900,13 @@
                                                     <?php echo $ivalue['qty']; ?>
                                                 </td> */ ?>
                                         <td align="right">
-                                            <?php echo app_format_money($ivalue['subtotal'], $base_currency); ?>
+                                            <?php echo app_format_money($ivalue['subtotal']); ?>
                                         </td>
                                         <td align="right">
-                                            <?php echo app_format_money($ivalue['tax'], $base_currency); ?>
+                                            <?php echo app_format_money($ivalue['tax']); ?>
                                         </td>
                                         <td align="right">
-                                            <?php echo app_format_money($ivalue['amount'], $base_currency); ?>
+                                            <?php echo app_format_money($ivalue['amount']); ?>
                                         </td>
                                     </tr>
                             <?php }
@@ -922,7 +922,7 @@
                                     <span class="bold tw-text-neutral-700"><?php echo _l('subtotal_without_management_fees_and_tax'); ?> :</span>
                                 </td>
                                 <td>
-                                    <?php echo app_format_money($annexure_invoice['final_invoice']['total_without_man_fees'], $base_currency); ?>
+                                    <?php echo app_format_money($annexure_invoice['final_invoice']['total_without_man_fees']); ?>
                                 </td>
                             </tr>
                             <tr id="subtotal">
@@ -930,7 +930,7 @@
                                     <span class="bold tw-text-neutral-700"><?php echo _l('grand_subtotal_without_tax'); ?> :</span>
                                 </td>
                                 <td>
-                                    <?php echo app_format_money($annexure_invoice['final_invoice']['subtotal'], $base_currency); ?>
+                                    <?php echo app_format_money($annexure_invoice['final_invoice']['subtotal']); ?>
                                 </td>
                             </tr>
                             <tr id="total_tax" class="hide">
@@ -938,14 +938,14 @@
                                     <span class="bold tw-text-neutral-700"><?php echo _l('tax'); ?> :</span>
                                 </td>
                                 <td>
-                                    <?php echo app_format_money($annexure_invoice['final_invoice']['tax'], $base_currency); ?>
+                                    <?php echo app_format_money($annexure_invoice['final_invoice']['tax']); ?>
                                 </td>
                             </tr>
                             <tr class="hide">
                                 <td><span class="bold tw-text-neutral-700"><?php echo _l('invoice_total'); ?> :</span>
                                 </td>
                                 <td>
-                                    <?php echo app_format_money($annexure_invoice['final_invoice']['amount'], $base_currency); ?>
+                                    <?php echo app_format_money($annexure_invoice['final_invoice']['amount']); ?>
                                 </td>
                             </tr>
                             <?php hooks()->do_action('after_admin_invoice_form_total_field', $invoice ?? null); ?>
@@ -978,27 +978,27 @@
                                         </td>
                                         <td align="right">
                                             <span class="budgeted-amount-display" data-invoice="<?php echo $bvalue['invoiceid']; ?>" data-annexure="<?php echo $bvalue['annexure']; ?>" data-id="<?php echo $bkey + 1; ?>">
-                                                <?php echo app_format_money($bvalue['budgeted_amount'], $base_currency); ?>
+                                                <?php echo app_format_money($bvalue['budgeted_amount']); ?>
                                             </span>
                                         </td>
                                         <td align="right">
                                             <span class="total-previous-billing-display" data-invoice="<?php echo $bvalue['invoiceid']; ?>" data-annexure="<?php echo $bvalue['annexure']; ?>" data-id="<?php echo $bkey + 1; ?>">
-                                                <?php echo app_format_money($bvalue['total_previous_billing'], $base_currency); ?>
+                                                <?php echo app_format_money($bvalue['total_previous_billing']); ?>
                                             </span>
                                         </td>
                                         <td align="right">
                                             <span class="total-current-billing-amount-display" data-id="<?php echo $bkey + 1; ?>">
-                                                <?php echo app_format_money($bvalue['total_current_billing_amount'], $base_currency); ?>
+                                                <?php echo app_format_money($bvalue['total_current_billing_amount']); ?>
                                             </span>
                                         </td>
                                         <td align="right">
                                             <span class="total-cumulative-billing-display" data-id="<?php echo $bkey + 1; ?>">
-                                                <?php echo app_format_money($bvalue['total_cumulative_billing'], $base_currency); ?>
+                                                <?php echo app_format_money($bvalue['total_cumulative_billing']); ?>
                                             </span>
                                         </td>
                                         <td align="right">
                                             <span class="balance-available-display" data-id="<?php echo $bkey + 1; ?>">
-                                                <?php echo app_format_money($bvalue['balance_available'], $base_currency); ?>
+                                                <?php echo app_format_money($bvalue['balance_available']); ?>
                                             </span>
                                         </td>
                                     </tr>
@@ -1015,7 +1015,7 @@
                                     <span class="bold tw-text-neutral-700"><?php echo _l('total') . ' ' . _l('budgeted_amount'); ?> :</span>
                                 </td>
                                 <td>
-                                    <?php echo app_format_money($annexure_invoice['total_budget_summary']['budgeted_amount'], $base_currency); ?>
+                                    <?php echo app_format_money($annexure_invoice['total_budget_summary']['budgeted_amount']); ?>
                                 </td>
                             </tr>
                             <tr>
@@ -1023,7 +1023,7 @@
                                     <span class="bold tw-text-neutral-700"><?php echo _l('total_previous_billing'); ?> :</span>
                                 </td>
                                 <td>
-                                    <?php echo app_format_money($annexure_invoice['total_budget_summary']['total_previous_billing'], $base_currency); ?>
+                                    <?php echo app_format_money($annexure_invoice['total_budget_summary']['total_previous_billing']); ?>
                                 </td>
                             </tr>
                             <tr>
@@ -1031,7 +1031,7 @@
                                     <span class="bold tw-text-neutral-700"><?php echo _l('total_current_billing_amount'); ?> :</span>
                                 </td>
                                 <td>
-                                    <?php echo app_format_money($annexure_invoice['total_budget_summary']['total_current_billing_amount'], $base_currency); ?>
+                                    <?php echo app_format_money($annexure_invoice['total_budget_summary']['total_current_billing_amount']); ?>
                                 </td>
                             </tr>
                             <tr>
@@ -1039,7 +1039,7 @@
                                     <span class="bold tw-text-neutral-700"><?php echo _l('total_cumulative_billing'); ?> :</span>
                                 </td>
                                 <td>
-                                    <?php echo app_format_money($annexure_invoice['total_budget_summary']['total_cumulative_billing'], $base_currency); ?>
+                                    <?php echo app_format_money($annexure_invoice['total_budget_summary']['total_cumulative_billing']); ?>
                                 </td>
                             </tr>
                             <tr>
@@ -1047,7 +1047,7 @@
                                     <span class="bold tw-text-neutral-700"><?php echo _l('total') . ' ' . _l('balance_available'); ?> :</span>
                                 </td>
                                 <td>
-                                    <?php echo app_format_money($annexure_invoice['total_budget_summary']['balance_available'], $base_currency); ?>
+                                    <?php echo app_format_money($annexure_invoice['total_budget_summary']['balance_available']); ?>
                                 </td>
                             </tr>
                             <?php hooks()->do_action('after_admin_invoice_form_total_field', $invoice ?? null); ?>

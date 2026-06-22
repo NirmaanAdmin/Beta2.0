@@ -147,19 +147,19 @@ $tblinvoicehtml .= '
     <td width="6%;"align="center" rowspan="5">1</td>
     <td width="23%" align="left">' . $basic_invoice['final_invoice']['description'] . '</td>
     <td width="12%" align="center">'.$hsn_sac_code.'</td>
-    <td width="16%" align="center">' . app_format_money($basic_invoice['final_invoice']['subtotal'], $invoice->currency_name) . '</td>
-    <td width="13%" align="center">' . app_format_money($basic_invoice['final_invoice']['cgst_tax'], $invoice->currency_name) . '</td>
-    <td width="13%" align="center">' . app_format_money($basic_invoice['final_invoice']['sgst_tax'], $invoice->currency_name) . '</td>
-    <td width="17%" align="right">' . app_format_money($amount, $invoice->currency_name) . '</td>
+    <td width="16%" align="center">' . app_format_money($basic_invoice['final_invoice']['subtotal']) . '</td>
+    <td width="13%" align="center">' . app_format_money($basic_invoice['final_invoice']['cgst_tax']) . '</td>
+    <td width="13%" align="center">' . app_format_money($basic_invoice['final_invoice']['sgst_tax']) . '</td>
+    <td width="17%" align="right">' . app_format_money($amount) . '</td>
 </tr>';
 $tblinvoicehtml .= '
 <tr style="font-size:12px;">
     <td width="23%" align="left">Total Invoice Value</td>
     <td width="12%" align="center"></td>
-    <td width="16%" align="center">' . app_format_money($basic_invoice['final_invoice']['subtotal'], $invoice->currency_name) . '</td>
-    <td width="13%" align="center">' . app_format_money($basic_invoice['final_invoice']['cgst_tax'], $invoice->currency_name) . '</td>
-    <td width="13%" align="center">' . app_format_money($basic_invoice['final_invoice']['sgst_tax'], $invoice->currency_name) . '</td>
-    <td width="17%" align="right">' . app_format_money($amount, $invoice->currency_name) . '</td>
+    <td width="16%" align="center">' . app_format_money($basic_invoice['final_invoice']['subtotal']) . '</td>
+    <td width="13%" align="center">' . app_format_money($basic_invoice['final_invoice']['cgst_tax']) . '</td>
+    <td width="13%" align="center">' . app_format_money($basic_invoice['final_invoice']['sgst_tax']) . '</td>
+    <td width="17%" align="right">' . app_format_money($amount) . '</td>
 </tr>';
 $tblinvoicehtml .= '
 <tr style="font-size:12px;">
@@ -169,7 +169,7 @@ $tblinvoicehtml .= '
 $tblinvoicehtml .= '
 <tr style="font-size:12px;">
     <td colspan="5">Total Amount with GST</td>
-    <td align="right">' . app_format_money($rounded_amount, $invoice->currency_name) . '</td>
+    <td align="right">' . app_format_money($rounded_amount) . '</td>
 </tr>';
 $tblinvoicehtml .= '
 <tr style="font-size:12px;">
@@ -241,11 +241,11 @@ foreach ($budgetsummary as $ikey => $ivalue) {
     <tr style="font-size:12px;">
         <td width="5%;" align="center">' . ($ikey + 1) . '</td>
         <td width="12%" align="left;"><span style="font-size:12px;"><strong>' . $ivalue['name'] . '</strong></span></td>
-        <td width="16%" align="right">' . app_format_money($ivalue['budgeted_amount'], $invoice->currency_name) . '</td>
-        <td width="17%" align="right">' . app_format_money($ivalue['total_previous_billing'], $invoice->currency_name) . '</td>
-        <td width="17%" align="right">' . app_format_money($ivalue['total_current_billing_amount'], $invoice->currency_name) . '</td>
-        <td width="16%" align="right">' . app_format_money($ivalue['total_cumulative_billing'], $invoice->currency_name) . '</td>
-        <td width="17%" align="right">' . app_format_money($ivalue['balance_available'], $invoice->currency_name) . '</td>
+        <td width="16%" align="right">' . app_format_money($ivalue['budgeted_amount']) . '</td>
+        <td width="17%" align="right">' . app_format_money($ivalue['total_previous_billing']) . '</td>
+        <td width="17%" align="right">' . app_format_money($ivalue['total_current_billing_amount']) . '</td>
+        <td width="16%" align="right">' . app_format_money($ivalue['total_cumulative_billing']) . '</td>
+        <td width="17%" align="right">' . app_format_money($ivalue['balance_available']) . '</td>
         
     </tr>';
 }
@@ -259,32 +259,32 @@ $tblbudgetsummaryhtml .= '<table cellpadding="6" style="font-size:14px">';
 $tblbudgetsummaryhtml .= '
 <tr>
     <td align="right" width="75%"><strong>' . _l('subtotal_before_management_fees') . '</strong></td>
-    <td align="right" width="25%">' . app_format_money($basic_invoice['total_budget_summary']['total_without_man_fees'], $invoice->currency_name) . '</td>
+    <td align="right" width="25%">' . app_format_money($basic_invoice['total_budget_summary']['total_without_man_fees']) . '</td>
 </tr>';
 $tblbudgetsummaryhtml .= '
 <tr>
     <td align="right" width="75%"><strong>' . _l('total').' '._l('budgeted_amount') . '</strong></td>
-    <td align="right" width="25%">' . app_format_money($basic_invoice['total_budget_summary']['budgeted_amount'], $invoice->currency_name) . '</td>
+    <td align="right" width="25%">' . app_format_money($basic_invoice['total_budget_summary']['budgeted_amount']) . '</td>
 </tr>';
 $tblbudgetsummaryhtml .= '
 <tr>
     <td align="right" width="75%"><strong>' ._l('total_previous_billing') . '</strong></td>
-    <td align="right" width="25%">' . app_format_money($basic_invoice['total_budget_summary']['total_previous_billing'], $invoice->currency_name) . '</td>
+    <td align="right" width="25%">' . app_format_money($basic_invoice['total_budget_summary']['total_previous_billing']) . '</td>
 </tr>';
 $tblbudgetsummaryhtml .= '
 <tr>
     <td align="right" width="75%"><strong>' ._l('total_current_billing_amount') . '</strong></td>
-    <td align="right" width="25%">' . app_format_money($basic_invoice['total_budget_summary']['total_current_billing_amount'], $invoice->currency_name) . '</td>
+    <td align="right" width="25%">' . app_format_money($basic_invoice['total_budget_summary']['total_current_billing_amount']) . '</td>
 </tr>';
 $tblbudgetsummaryhtml .= '
 <tr>
     <td align="right" width="75%"><strong>' ._l('total_cumulative_billing') . '</strong></td>
-    <td align="right" width="25%">' . app_format_money($basic_invoice['total_budget_summary']['total_cumulative_billing'], $invoice->currency_name) . '</td>
+    <td align="right" width="25%">' . app_format_money($basic_invoice['total_budget_summary']['total_cumulative_billing']) . '</td>
 </tr>';
 $tblbudgetsummaryhtml .= '
 <tr>
     <td align="right" width="75%"><strong>' . _l('total').' '._l('balance_available') . '</strong></td>
-    <td align="right" width="25%">' . app_format_money($basic_invoice['total_budget_summary']['balance_available'], $invoice->currency_name) . '</td>
+    <td align="right" width="25%">' . app_format_money($basic_invoice['total_budget_summary']['balance_available']) . '</td>
 </tr>';
 $tblbudgetsummaryhtml .= '</table>';
 $pdf->writeHTML($tblbudgetsummaryhtml, true, false, false, false, '');
@@ -310,9 +310,9 @@ foreach ($indexa as $ikey => $ivalue) {
     <tr style="font-size:13px;">
         <td width="7%;" align="center">' . ($ikey + 1) . '</td>
         <td width="38%" align="left;"><span style="font-size:13px;"><strong>' . $ivalue['name'] . '</strong></span></td>
-        <td width="20%" align="right">' . app_format_money($ivalue['subtotal'], $invoice->currency_name) . '</td>
-        <td width="15%" align="right">' . app_format_money($ivalue['tax'], $invoice->currency_name) . '</td>
-        <td width="20%" align="right">' . app_format_money($ivalue['amount'], $invoice->currency_name) . '</td>
+        <td width="20%" align="right">' . app_format_money($ivalue['subtotal']) . '</td>
+        <td width="15%" align="right">' . app_format_money($ivalue['tax']) . '</td>
+        <td width="20%" align="right">' . app_format_money($ivalue['amount']) . '</td>
     </tr>';
 }
 $tblindexahtml .= '</tbody>';
@@ -325,22 +325,22 @@ $tblindexafinalhtml .= '<table cellpadding="6" style="font-size:14px">';
 $tblindexafinalhtml .= '
 <tr>
     <td align="right" width="85%"><strong>' . _l('subtotal_without_management_fees_and_tax') . '</strong></td>
-    <td align="right" width="15%">' . app_format_money($basic_invoice['final_invoice']['total_without_man_fees'], $invoice->currency_name) . '</td>
+    <td align="right" width="15%">' . app_format_money($basic_invoice['final_invoice']['total_without_man_fees']) . '</td>
 </tr>';
 $tblindexafinalhtml .= '
 <tr>
     <td align="right" width="85%"><strong>' . _l('grand_subtotal_without_tax') . '</strong></td>
-    <td align="right" width="15%">' . app_format_money($basic_invoice['final_invoice']['subtotal'], $invoice->currency_name) . '</td>
+    <td align="right" width="15%">' . app_format_money($basic_invoice['final_invoice']['subtotal']) . '</td>
 </tr>';
 // $tblindexafinalhtml .= '
 // <tr>
 //     <td align="right" width="85%"><strong>' . _l('tax') . '</strong></td>
-//     <td align="right" width="15%">' . app_format_money($basic_invoice['final_invoice']['tax'], $invoice->currency_name) . '</td>
+//     <td align="right" width="15%">' . app_format_money($basic_invoice['final_invoice']['tax']) . '</td>
 // </tr>';
 // $tblindexafinalhtml .= '
 // <tr>
 //     <td align="right" width="85%"><strong>' . _l('invoice_total') . '</strong></td>
-//     <td align="right" width="15%">' . app_format_money($basic_invoice['final_invoice']['amount'], $invoice->currency_name) . '</td>
+//     <td align="right" width="15%">' . app_format_money($basic_invoice['final_invoice']['amount']) . '</td>
 // </tr>';
 $tblindexafinalhtml .= '</table>';
 $pdf->writeHTML($tblindexafinalhtml, true, false, false, false, '');
@@ -414,9 +414,9 @@ if (!empty($indexa)) {
                     <td width="16%" align="left">' . $vendor_name . '</td>
                     <td width="10%" align="left">'.$invoice_date.'</td>
                     <td width="11%" align="left">' . $invoice_no . '</td>
-                    <td width="11%" align="right">' . app_format_money($item['rate'], $invoice->currency_name) . '</td>
-                    <td width="11%" align="right">' . app_format_money($total_tax, $invoice->currency_name) . '</td>
-                    <td width="12%" align="right">' . app_format_money($amount, $invoice->currency_name) . '</td>
+                    <td width="11%" align="right">' . app_format_money($item['rate']) . '</td>
+                    <td width="11%" align="right">' . app_format_money($total_tax) . '</td>
+                    <td width="12%" align="right">' . app_format_money($amount) . '</td>
                 </tr>';
                 $inv++;
             }
@@ -432,17 +432,17 @@ if (!empty($indexa)) {
         $tblannexurefinalhtml .= '
         <tr>
             <td align="right" width="85%"><strong>' . _l('invoice_subtotal') . '</strong></td>
-            <td align="right" width="15%">' . app_format_money($avalue['subtotal'], $invoice->currency_name) . '</td>
+            <td align="right" width="15%">' . app_format_money($avalue['subtotal']) . '</td>
         </tr>';
         $tblannexurefinalhtml .= '
         <tr>
             <td align="right" width="85%"><strong>' . _l('tax') . '</strong></td>
-            <td align="right" width="15%">' . app_format_money($avalue['tax'], $invoice->currency_name) . '</td>
+            <td align="right" width="15%">' . app_format_money($avalue['tax']) . '</td>
         </tr>';
         $tblannexurefinalhtml .= '
         <tr>
             <td align="right" width="85%"><strong>' . _l('invoice_total') . '</strong></td>
-            <td align="right" width="15%">' . app_format_money($avalue['amount'], $invoice->currency_name) . '</td>
+            <td align="right" width="15%">' . app_format_money($avalue['amount']) . '</td>
         </tr>';
         $tblannexurefinalhtml .= '</table>';
         $pdf->writeHTML($tblannexurefinalhtml, true, false, false, false, '');
@@ -456,7 +456,7 @@ $tbltotal .= '<table cellpadding="6" style="font-size:' . ($font_size + 4) . 'px
 $tbltotal .= '
 <tr>
     <td align="right" width="85%"><strong>' . _l('invoice_subtotal') . '</strong></td>
-    <td align="right" width="15%">' . app_format_money($basic_invoice['final_invoice']['subtotal'], $invoice->currency_name) . '</td>
+    <td align="right" width="15%">' . app_format_money($basic_invoice['final_invoice']['subtotal']) . '</td>
 </tr>';
 
 if (is_sale_discount_applied($invoice)) {
@@ -468,33 +468,33 @@ if (is_sale_discount_applied($invoice)) {
     }
     $tbltotal .= '</strong>';
     $tbltotal .= '</td>';
-    $tbltotal .= '<td align="right" width="15%">-' . app_format_money($invoice->discount_total, $invoice->currency_name) . '</td>
+    $tbltotal .= '<td align="right" width="15%">-' . app_format_money($invoice->discount_total) . '</td>
     </tr>';
 }
 
 // foreach ($items->taxes() as $tax) {
 //     $tbltotal .= '<tr>
 //     <td align="right" width="85%"><strong>' . $tax['taxname'] . ' (' . app_format_number($tax['taxrate']) . '%)' . '</strong></td>
-//     <td align="right" width="15%">' . app_format_money($tax['total_tax'], $invoice->currency_name) . '</td>
+//     <td align="right" width="15%">' . app_format_money($tax['total_tax']) . '</td>
 // </tr>';
 // }
 
 $tbltotal .= '<tr>
     <td align="right" width="85%"><strong>' . _l('tax') . '</strong></td>
-    <td align="right" width="15%">' . app_format_money($basic_invoice['final_invoice']['tax'], $invoice->currency_name) . '</td>
+    <td align="right" width="15%">' . app_format_money($basic_invoice['final_invoice']['tax']) . '</td>
 </tr>';
 
 if ((int) $invoice->adjustment != 0) {
     $tbltotal .= '<tr>
     <td align="right" width="85%"><strong>' . _l('invoice_adjustment') . '</strong></td>
-    <td align="right" width="15%">' . app_format_money($invoice->adjustment, $invoice->currency_name) . '</td>
+    <td align="right" width="15%">' . app_format_money($invoice->adjustment) . '</td>
 </tr>';
 }
 
 $tbltotal .= '
 <tr style="background-color:#f0f0f0;">
     <td align="right" width="85%"><strong>' . _l('invoice_total') . '</strong></td>
-    <td align="right" width="15%">' . app_format_money($basic_invoice['final_invoice']['amount'], $invoice->currency_name) . '</td>
+    <td align="right" width="15%">' . app_format_money($basic_invoice['final_invoice']['amount']) . '</td>
 </tr>';
 
 if (count($invoice->payments) > 0 && get_option('show_total_paid_on_invoice') == 1) {
@@ -506,7 +506,7 @@ if (count($invoice->payments) > 0 && get_option('show_total_paid_on_invoice') ==
         'where' => [
             'invoiceid' => $invoice->id,
         ],
-    ]), $invoice->currency_name) . '</td>
+    ])) . '</td>
     </tr>';
 }
 
@@ -514,14 +514,14 @@ if (get_option('show_credits_applied_on_invoice') == 1 && $credits_applied = tot
     $tbltotal .= '
     <tr>
         <td align="right" width="85%"><strong>' . _l('applied_credits') . '</strong></td>
-        <td align="right" width="15%">-' . app_format_money($credits_applied, $invoice->currency_name) . '</td>
+        <td align="right" width="15%">-' . app_format_money($credits_applied) . '</td>
     </tr>';
 }
 
 if (get_option('show_amount_due_on_invoice') == 1 && $invoice->status != Invoices_model::STATUS_CANCELLED) {
     $tbltotal .= '<tr style="background-color:#f0f0f0;">
        <td align="right" width="85%"><strong>' . _l('invoice_amount_due') . '</strong></td>
-       <td align="right" width="15%">' . app_format_money($invoice->total_left_to_pay, $invoice->currency_name) . '</td>
+       <td align="right" width="15%">' . app_format_money($invoice->total_left_to_pay) . '</td>
    </tr>';
 }
 
@@ -562,7 +562,7 @@ if (count($invoice->payments) > 0 && get_option('show_transactions_on_invoice_pd
             <td>' . $payment['paymentid'] . '</td>
             <td>' . $payment_name . '</td>
             <td>' . _d($payment['date']) . '</td>
-            <td>' . app_format_money($payment['amount'], $invoice->currency_name) . '</td>
+            <td>' . app_format_money($payment['amount']) . '</td>
             </tr>
         ';
     }

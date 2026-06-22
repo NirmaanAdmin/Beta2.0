@@ -130,9 +130,9 @@ return App_table::find('invoices')
 
             $row[] = $aRow['title'];
 
-            $row[] = e(app_format_money($aRow['subtotal'], $aRow['currency_name']));
+            $row[] = e(app_format_money($aRow['subtotal']));
 
-            $row[] = e(app_format_money($aRow['total_left_to_pay'], $aRow['currency_name']));
+            $row[] = e(app_format_money($aRow['total_left_to_pay']));
 
             // $row[] = e($aRow['year']);
 
@@ -169,7 +169,7 @@ return App_table::find('invoices')
         }
 
         foreach ($footer_data as $key => $total) {
-            $footer_data[$key] = app_format_money($total, $aRow['currency_name']);
+            $footer_data[$key] = app_format_money($total);
         }
         $output['sums'] = $footer_data;
         return $output;

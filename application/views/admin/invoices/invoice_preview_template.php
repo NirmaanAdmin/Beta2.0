@@ -1,7 +1,7 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
 <?php if ((credits_can_be_applied_to_invoice($invoice->status) && $credits_available > 0)) { ?>
 <div class="alert alert-warning mbot5">
-    <?php echo e(_l('x_credits_available', app_format_money($credits_available, $customer_currency->name))); ?>
+    <?php echo e(_l('x_credits_available', app_format_money($credits_available))); ?>
     <br />
     <a href="#" data-toggle="modal" data-target="#apply_credits"><?php echo _l('apply_credits'); ?></a>
 </div>
@@ -20,7 +20,7 @@
                 <a href="<?php echo admin_url('invoices/list_invoices/' . $_inv->id); ?>" target="_blank"
                     class="tw-font-medium"><?php echo e(format_invoice_number($_inv->id))." (".$_inv->title.")"; ?></a> -
                 <span class="tw-text-neutral-500">
-                    <?php echo e(app_format_money($_inv->total, $_inv->currency_name)); ?>
+                    <?php echo e(app_format_money($_inv->total)); ?>
                 </span>
             </div>
             <?php echo format_invoice_status($_inv->status); ?>
@@ -334,7 +334,7 @@
                                             href="<?php echo admin_url('credit_notes/list_credit_notes/' . $credit['credit_id']); ?>"><?php echo e(format_credit_note_number($credit['credit_id'])); ?></a>
                                     </td>
                                     <td><?php echo e(_d($credit['date'])); ?></td>
-                                    <td><?php echo app_format_money($credit['amount'], $invoice->currency_name) ?>
+                                    <td><?php echo app_format_money($credit['amount']) ?>
                                         <?php if (staff_can('delete',  'credit_notes')) { ?>
                                         <a href="<?php echo admin_url('credit_notes/delete_invoice_applied_credit/' . $credit['id'] . '/' . $credit['credit_id'] . '/' . $invoice->id); ?>"
                                             class="pull-right text-danger _delete"><i class="fa fa-trash"></i></a>
@@ -372,7 +372,7 @@
                                 onclick="init_invoice(<?php echo e($recurring->id); ?>); return false;"
                                 target="_blank"><?php echo e(format_invoice_number($recurring->id)); ?>
                                 <span
-                                    class="pull-right bold"><?php echo e(app_format_money($recurring->total, $recurring->currency_name)); ?></span>
+                                    class="pull-right bold"><?php echo e(app_format_money($recurring->total)); ?></span>
                             </a>
                             <br />
                             <span class="inline-block tw-mt-1">
