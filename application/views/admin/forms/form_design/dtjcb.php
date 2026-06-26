@@ -52,7 +52,7 @@
             <input type="hidden" name="action" value="apc">
             <thead>
                 <tr>
-                    <th colspan="5" class="daily_report_title">GRADER</th>
+                    <th colspan="5" class="daily_report_title">Diesel Tanker</th>
                 </tr>
                 <tr>
                     <th colspan="3" class="daily_report_head">
@@ -74,7 +74,7 @@
                 </tr>
                 <tr>
                     <th colspan="5" class="daily_report_head">
-                        <span class="daily_report_label">Equipment Name & Number: 35 - GRADER &</span>
+                        <span class="daily_report_label">Equipment Name & Number: 42 - Diesel Tanker  &</span>
                     </th>
                 </tr>
                 <tr>
@@ -131,7 +131,7 @@
             </div>
         </div>
         <div class="col-md-6">
-            <img src="<?php echo base_url('assets/images/gcjcb.jpg') ?>" alt="">
+            <img src="<?php echo base_url('assets/images/dtjcb.jpg') ?>" alt="">
         </div>
     </div>
 
