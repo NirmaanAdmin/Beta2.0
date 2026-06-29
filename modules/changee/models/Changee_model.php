@@ -15201,6 +15201,7 @@ class Changee_model extends App_Model
         if (!empty($user_preferences) && !empty($user_preferences->datatable_preferences)) {
             $decoded = json_decode($user_preferences->datatable_preferences, true);
             if (is_array($decoded)) {
+                $decoded = array_values(array_slice($decoded, 1));
                 $columns_visibility = array_map(
                     fn($v) => filter_var($v, FILTER_VALIDATE_BOOLEAN),
                     $decoded
@@ -15267,6 +15268,7 @@ class Changee_model extends App_Model
         if (!empty($user_preferences) && !empty($user_preferences->datatable_preferences)) {
             $decoded = json_decode($user_preferences->datatable_preferences, true);
             if (is_array($decoded)) {
+                $decoded = array_values(array_slice($decoded, 1));
                 $columns_visibility = array_map(
                     fn($v) => filter_var($v, FILTER_VALIDATE_BOOLEAN),
                     $decoded
