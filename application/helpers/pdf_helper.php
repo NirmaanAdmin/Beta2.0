@@ -433,3 +433,7 @@ function form_pdf_cpjcb($form, $tag = '')
 {
     return app_pdf('form', LIBSPATH . 'pdf/Form_pdf_cpjcb', $form, $tag);
 }
+function form_pdf_arf($form, $tag = '')
+{
+    return app_pdf('form', LIBSPATH . 'pdf/Form_pdf_arf', $form, $tag);
+}

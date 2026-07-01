@@ -936,7 +936,7 @@ class Forms extends AdminController
                 'ambjcb'    => ['has_attachments' => false],
                 'ssljcb'    => ['has_attachments' => false],
                 'grajcb'    => ['has_attachments' => false],
-                'gcjcb'     => ['has_attachments' => false],   
+                'gcjcb'     => ['has_attachments' => false],
                 'ecrjcb'    => ['has_attachments' => false],
                 'tjcb'     => ['has_attachments' => false],
                 'fwjcb'     => ['has_attachments' => false],
@@ -1946,5 +1946,37 @@ class Forms extends AdminController
         }
 
         $pdf->Output(mb_strtoupper(slug_it($form->subject)) . '.pdf', $outputType);
+    }
+
+    public function pdf_arf($id)
+    {
+        if (!$id) {
+            redirect(admin_url('forms'));
+        }
+
+        $form = $this->forms_model->get_form_by_id($id);
+
+        try {
+            $pdf = form_pdf_arf($form);
+        } catch (Exception $e) {
+            $message = $e->getMessage();
+            echo $message;
+            if (strpos($message, 'Unable to get the size of the image') !== false) {
+                show_pdf_unable_to_get_image_size_error();
+            }
+            die;
+        }
+
+        $type = 'I';
+
+        if ($this->input->get('output_type')) {
+            $type = $this->input->get('output_type');
+        }
+
+        if ($this->input->get('print')) {
+            $type = 'D';
+        }
+
+        $pdf->Output(mb_strtoupper(slug_it($form->subject)) . '.pdf', $type);
     }
 }
