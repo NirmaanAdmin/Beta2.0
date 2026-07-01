@@ -7440,3 +7440,35 @@ function get_area_ncr_name_by_id($area_id)
 
     return $area->area_name;
 }
+
+function get_estimate_package_name_by_id($package_id)
+{
+    $CI = &get_instance();
+    $estimate_package_info = $CI->db->select('package_name')
+        ->where('id', $package_id)
+        ->from(db_prefix() . 'estimate_package_info')
+        ->get()
+        ->row();
+
+    return !empty($estimate_package_info) ? $estimate_package_info->package_name : '';
+}
+
+function get_estimate_package_list($name_package, $package_id = '')
+{
+    $CI = &get_instance();
+    $default_project = get_default_project();
+    $estimate_package_info = array();
+    $CI->db->select('id');
+    $CI->db->from(db_prefix() . 'estimates');
+    $CI->db->where('project_id', $default_project);
+    $estimates = $CI->db->get()->result_array();
+    if(!empty($estimates)) {
+        $estimate_ids = array_column($estimates, 'id');
+        $CI->db->select('id, package_name');
+        $CI->db->from(db_prefix() . 'estimate_package_info');
+        $CI->db->where_in('estimate_id', $estimate_ids);
+        $estimate_package_info = $CI->db->get()->result_array();
+    }
+
+    return render_select($name_package, $estimate_package_info, array('id', 'package_name'), '', $package_id);
+}

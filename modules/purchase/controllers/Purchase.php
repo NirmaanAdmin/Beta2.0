@@ -10938,7 +10938,7 @@ class purchase extends AdminController
                             if (($flag == 0) && ($flag2 == 0)) {
 
                                 $rows[] = $row;
-                                $list_item .= $this->purchase_model->create_order_tracker_row_template('newitems[' . $index_quote . ']', $value_cell_order_scope, '', $value_cell_order_date, $value_cell_completion_date, $value_cell_budget, $value_cell_contract_amount, $value_cell_change_order, $value_cell_anticipate_variation, $value_cell_total_certified_amount, '', '', $value_cell_total_remaks, $value_cell_order_value, '');
+                                $list_item .= $this->purchase_model->create_order_tracker_row_template('newitems[' . $index_quote . ']', $value_cell_order_scope, '', $value_cell_order_date, $value_cell_completion_date, $value_cell_budget, $value_cell_contract_amount, $value_cell_change_order, $value_cell_anticipate_variation, $value_cell_total_certified_amount, '', '', $value_cell_total_remaks, $value_cell_order_value, '', '');
 
                                 $index_quote++;
                                 $total_rows_data++;
@@ -12847,8 +12847,9 @@ class purchase extends AdminController
         $group_pur = $this->input->post('group_pur');
         $remarks = $this->input->post('remarks');
         $order_value = $this->input->post('order_value');
+        $package_id = $this->input->post('package_id');
 
-        echo $this->purchase_model->create_order_tracker_row_template($name, $order_scope, $vendor, $order_date, $completion_date, $budget_ro_projection, $committed_contract_amount, $change_order_amount, $anticipate_variation, $final_certified_amount, $kind, $group_pur, $remarks, $order_value, $project);
+        echo $this->purchase_model->create_order_tracker_row_template($name, $order_scope, $vendor, $order_date, $completion_date, $budget_ro_projection, $committed_contract_amount, $change_order_amount, $anticipate_variation, $final_certified_amount, $kind, $group_pur, $remarks, $order_value, $project, $package_id);
     }
 
     public function update_billing_remarks()
@@ -18469,5 +18470,23 @@ class purchase extends AdminController
         $name_unit_name = $this->input->post('name_unit_name');
         $unit_name = $this->input->post('unit_name');
         echo render_select($name_unit_name, $units_list, ['id', 'label'], '', $unit_name, ['id']);
+    }
+
+    public function update_order_tracker_estimate_package()
+    {
+        $id = $this->input->post('id');
+        $package_id = $this->input->post('package_id');
+        $package_id = !empty($package_id) ? $package_id : NULL;
+        if (!$id) {
+            echo json_encode(['success' => false, 'message' => _l('invalid_request')]);
+            return;
+        }
+        $this->db->where('id', $id);
+        $success = $this->db->update(db_prefix() . 'pur_order_tracker', ['package_id' => $package_id]);
+        if ($success) {
+            echo json_encode(['success' => true, 'message' => _l('The package has been updated successfully.')]);
+        } else {
+            echo json_encode(['success' => false, 'message' => _l('update_failed')]);
+        }
     }
 }

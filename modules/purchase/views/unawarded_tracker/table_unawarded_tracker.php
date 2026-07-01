@@ -103,7 +103,6 @@ foreach ($rResult as $aRow) {
    $row = [];
    foreach ($aColumns as $column) {
       $_data = isset($aRow[$column]) ? $aRow[$column] : '';
-      $base_currency = get_base_currency_pur();
       // Process specific columns
       if ($column == 'project') {
          $_data = $aRow['project'];
@@ -117,13 +116,13 @@ foreach ($rResult as $aRow) {
       } elseif ($column == 'budget_head_name') {
          $_data = $aRow['budget_head_name'];
       } elseif ($column == 'total_package') {
-         $_data = app_format_money($aRow['total_package'], $base_currency->symbol);
+         $_data = app_format_money($aRow['total_package']);
       } elseif ($column == 'sdeposit_value') {
-         $_data = app_format_money($aRow['sdeposit_value'], $base_currency->symbol);
+         $_data = app_format_money($aRow['sdeposit_value']);
       } elseif ($column == 'awarded_value') {
-         $_data = app_format_money($aRow['awarded_value'], $base_currency->symbol);
+         $_data = app_format_money($aRow['awarded_value']);
       } elseif ($column == 'pending_value_in_package') {
-         $_data = app_format_money($aRow['pending_value_in_package'], $base_currency->symbol);
+         $_data = app_format_money($aRow['pending_value_in_package']);
       } elseif ($column == 'kind') {
          $_data = $aRow['kind'];
       } elseif ($column == 'rli_filter') {
@@ -189,7 +188,7 @@ foreach ($rResult as $aRow) {
 }
 
 foreach ($footer_data as $key => $total) {
-   $footer_data[$key] = app_format_money($total, $base_currency->symbol);
+   $footer_data[$key] = app_format_money($total);
 }
 $output['sums'] = $footer_data;
 

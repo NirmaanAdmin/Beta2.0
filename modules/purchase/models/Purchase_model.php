@@ -17891,7 +17891,7 @@ class Purchase_model extends App_Model
         $this->db->update('tblpur_invoices', array('bil_total' => $total));
         return true;
     }
-    public function create_order_tracker_row_template($name = '', $order_scope = '', $contractor = '', $order_date = '', $completion_date = '', $budget_ro_projection = '', $committed_contract_amount = '', $change_order_amount = '', $anticipate_variation = '',  $final_certified_amount = '', $category = '', $group_pur = '', $remarks = '', $order_value = '', $project = '')
+    public function create_order_tracker_row_template($name = '', $order_scope = '', $contractor = '', $order_date = '', $completion_date = '', $budget_ro_projection = '', $committed_contract_amount = '', $change_order_amount = '', $anticipate_variation = '',  $final_certified_amount = '', $category = '', $group_pur = '', $remarks = '', $order_value = '', $project = '', $package_id = '')
     {
         $row = '';
         $name_order_scope = 'order_scope';
@@ -17908,6 +17908,7 @@ class Purchase_model extends App_Model
         $name_remarks = 'remarks';
         $name_order_value = 'order_value';
         $name_project = 'project';
+        $name_package_id = 'package_id';
 
         if ($name == '') {
             $row .= '<tr class="main">';
@@ -17927,8 +17928,8 @@ class Purchase_model extends App_Model
             $name_remarks = $name . '[remarks]';
             $name_order_value = $name . '[order_value]';
             $name_project = $name . '[project]';
+            $name_package_id = $name . '[package_id]';
         }
-
 
         $row .= '<td class="">' . render_textarea($name_order_scope, '', $order_scope, ['rows' => 2, 'placeholder' => _l('order_scope')]) . '</td>';
         $row .= '<td class="">' .  get_vemdor_list($name_vendor, $contractor) . '</td>';
@@ -17944,6 +17945,7 @@ class Purchase_model extends App_Model
         $row .= '<td class="">' .  get_projects_list($name_project, $project) . '</td>';
         $row .= '<td class="">' .  get_kind_list($name_kind, $category) . '</td>';
         $row .= '<td class="">' .  get_budget_head_list($name_group_pur, $group_pur) . '</td>';
+        $row .= '<td class="">' .  get_estimate_package_list($name_package_id, $package_id) . '</td>';
         $row .= '<td class="">' .  render_textarea($name_remarks, '', $remarks, ['rows' => 2, 'placeholder' => _l('remarks')]) . '</td>';
 
         $add_class = '';
@@ -18029,6 +18031,7 @@ class Purchase_model extends App_Model
         unset($data['project']);
         unset($data['kind']);
         unset($data['group_pur']);
+        unset($data['package_id']);
         unset($data['remarks']);
         unset($data['order_value']);
         $order_detail = [];
@@ -18052,6 +18055,7 @@ class Purchase_model extends App_Model
                 $dt_data['final_certified_amount'] = $rqd['final_certified_amount'];
                 $dt_data['kind'] = $rqd['kind'];
                 $dt_data['group_pur'] = $rqd['group_pur'];
+                $dt_data['package_id'] = $rqd['package_id'];
                 $dt_data['remarks'] = $rqd['remarks'];
                 $dt_data['order_value'] = $rqd['order_value'];
                 $dt_data['project'] = $rqd['project'];

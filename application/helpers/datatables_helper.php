@@ -416,6 +416,7 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         pr.name as project,
         pr.id as project_id,
         po.last_action as last_action,
+        po.package_id as package_id,
         'pur_orders' AS source_table
     FROM tblpur_orders po
     LEFT JOIN tblpur_vendor pv ON pv.userid = po.vendor
@@ -554,6 +555,7 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         pr.name as project,
         pr.id as project_id,
         wo.last_action as last_action,
+        wo.package_id as package_id,
         'wo_orders' AS source_table
     FROM tblwo_orders wo
     LEFT JOIN tblpur_vendor pv ON pv.userid = wo.vendor
@@ -699,6 +701,7 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         pr.name as project,
         pr.id as project_id,
         t.last_action as last_action,
+        t.package_id as package_id,
         'order_tracker' AS source_table
     FROM tblpur_order_tracker t
     LEFT JOIN tblpur_vendor pv ON pv.userid = t.vendor
@@ -889,42 +892,46 @@ function data_tables_init_union_unawarded($aColumns, $sIndexColumn, $combinedTab
     }
 
     $sTable = "(
-        SELECT 
-            p.id,
-            pr.id as project_id,
-            pr.name as project,
-            p.estimate_id,
-            p.budget_head,
-            ig.name as budget_head_name,
-            p.project_awarded_date,
-            p.package_name,
-            p.sdeposit_percent,
-            p.sdeposit_value,
-            p.total_package,
-            IFNULL(SUM(po.subtotal),0) + IFNULL(SUM(wo.subtotal),0) AS awarded_value,
-            p.kind,
-            p.rli_filter,
-            (p.total_package - 
-                (
-                    (
-                        SELECT IFNULL(SUM(subtotal),0)
-                        FROM tblpur_orders 
-                        WHERE package_id = p.id
-                    ) +
-                    (
-                        SELECT IFNULL(SUM(subtotal),0)
-                        FROM tblwo_orders 
-                        WHERE package_id = p.id
-                    )
-                )
-            ) AS pending_value_in_package
+        SELECT
+        p.id,
+        pr.id AS project_id,
+        pr.name AS project,
+        p.estimate_id,
+        p.budget_head,
+        ig.name AS budget_head_name,
+        p.project_awarded_date,
+        p.package_name,
+        p.sdeposit_percent,
+        p.sdeposit_value,
+        p.total_package,
+        (
+            IFNULL(po.total_po, 0)
+            + IFNULL(wo.total_wo, 0)
+            + IFNULL(pot.total_tracker, 0)
+        ) AS awarded_value,
+        p.kind,
+        p.rli_filter,
+        (
+            p.total_package -
+            (
+                IFNULL(po.total_po, 0)
+                + IFNULL(wo.total_wo, 0)
+                + IFNULL(pot.total_tracker, 0)
+            )
+        ) AS pending_value_in_package
         FROM tblestimate_package_info p
         LEFT JOIN tblestimates est ON est.id = p.estimate_id
         LEFT JOIN tblprojects pr ON pr.id = est.project_id
         LEFT JOIN tblitems_groups ig ON ig.id = p.budget_head
-        LEFT JOIN tblpur_orders po ON po.package_id = p.id
-        LEFT JOIN tblwo_orders wo ON wo.package_id = p.id
-        GROUP BY p.id
+        LEFT JOIN (
+            SELECT package_id, SUM(subtotal) AS total_po FROM tblpur_orders GROUP BY package_id
+        ) po ON po.package_id = p.id
+        LEFT JOIN (
+            SELECT package_id, SUM(subtotal) AS total_wo FROM tblwo_orders GROUP BY package_id
+        ) wo ON wo.package_id = p.id
+        LEFT JOIN (
+            SELECT package_id, SUM(total) AS total_tracker FROM tblpur_order_tracker GROUP BY package_id
+        ) pot ON pot.package_id = p.id
     ) AS combined_orders";
 
     $allColumns = [];

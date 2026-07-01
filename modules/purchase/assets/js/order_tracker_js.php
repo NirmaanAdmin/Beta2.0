@@ -4,6 +4,9 @@
 
         // Initialize the DataTable
         var table_order_tracker = $('.table-table_order_tracker').DataTable();
+        $('.table-table_order_tracker').on('draw.dt', function () {
+            $('.selectpicker').selectpicker('refresh');
+        });
 
         // Inline editing for "Completion Date"
         $('body').on('change', '.completion-date-input', function(e) {
@@ -288,6 +291,24 @@
                 }
             });
         });
+
+        $('body').on('change', 'select[name="estimate_package"]', function(e) {
+            e.preventDefault();
+            var rowId = $(this).closest('td').find('.estimate_package').data('id');
+            var package_id = $(this).val();
+            $.post(admin_url + 'purchase/update_order_tracker_estimate_package', {
+                id: rowId,
+                package_id: package_id
+            }).done(function(response) {
+                response = JSON.parse(response);
+                if (response.success) {
+                    alert_float('success', response.message);
+                    table_order_tracker.ajax.reload(null, false);
+                } else {
+                    alert_float('danger', response.message);
+                }
+            });
+        });
     });
     $(document).ready(function() {
         var table = $('.table-table_order_tracker').DataTable();
@@ -420,7 +441,7 @@
         var item_key = lastAddedItemKey ? lastAddedItemKey += 1 : $("body").find('.order-tracker-items-table tbody .item').length + 1;
         lastAddedItemKey = item_key;
         // $("body").append('<div class="dt-loader"></div>');
-        order_get_item_row_template('newitems[' + item_key + ']', data.order_scope, data.vendor, data.order_date, data.completion_date, data.budget_ro_projection, data.committed_contract_amount, data.change_order_amount, data.anticipate_variation, data.final_certified_amount, data.kind, data.project, data.group_pur, data.remarks, data.order_value).done(function(output) {
+        order_get_item_row_template('newitems[' + item_key + ']', data.order_scope, data.vendor, data.order_date, data.completion_date, data.budget_ro_projection, data.committed_contract_amount, data.change_order_amount, data.anticipate_variation, data.final_certified_amount, data.kind, data.project, data.group_pur, data.remarks, data.order_value, data.package_id).done(function(output) {
             table_row += output;
 
             $('.invoice-item table.order-tracker-items-table.items tbody').append(table_row);
@@ -455,6 +476,7 @@
         response.project = $('.invoice-item .main select[name="project"]').val();
         response.kind = $('.invoice-item .main select[name="kind"]').val();
         response.group_pur = $('.invoice-item .main select[name="group_pur"]').val();
+        response.package_id = $('.invoice-item .main select[name="package_id"]').val();
         response.remarks = $('.invoice-item .main textarea[name="remarks"]').val();
 
         return response;
@@ -470,7 +492,7 @@
         previewArea.find('select').val('').selectpicker('refresh');
     }
 
-    function order_get_item_row_template(name, order_scope, vendor, order_date, completion_date, budget_ro_projection, committed_contract_amount, change_order_amount, anticipate_variation, final_certified_amount, kind, project, group_pur, remarks, order_value) {
+    function order_get_item_row_template(name, order_scope, vendor, order_date, completion_date, budget_ro_projection, committed_contract_amount, change_order_amount, anticipate_variation, final_certified_amount, kind, project, group_pur, remarks, order_value, package_id) {
         "use strict";
 
         jQuery.ajaxSetup({
@@ -492,7 +514,8 @@
             kind: kind,
             group_pur: group_pur,
             remarks: remarks,
-            order_value: order_value
+            order_value: order_value,
+            package_id: package_id
         });
         jQuery.ajaxSetup({
             async: true

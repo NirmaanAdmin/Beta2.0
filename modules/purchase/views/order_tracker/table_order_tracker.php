@@ -38,6 +38,7 @@ $aColumns = [
    'rli_filter',
    'kind',
    'group_name',
+   'package_id',
    'remarks',
    'last_action',
 ];
@@ -729,8 +730,32 @@ foreach ($rResult as $aRow) {
             // For other source tables, just display the group name
             $_data = $aRow['group_name'];
          }
+      } elseif ($column == 'package_id') {
+         if ($aRow['source_table'] == "pur_orders") {
+            if(!empty($aRow['package_id'])) {
+               $_data = get_estimate_package_name_by_id($aRow['package_id']);
+            } else {
+               $_data = '<span style="font-style: italic;font-size: 12px;">Package will be fetched directly from the purchase order</span>';
+            }
+         } elseif ($aRow['source_table'] == "wo_orders") {
+            if(!empty($aRow['package_id'])) {
+               $_data = get_estimate_package_name_by_id($aRow['package_id']);
+            } else {
+               $_data = '<span style="font-style: italic;font-size: 12px;">Package will be fetched directly from the work order</span>';
+            }
+         } elseif ($aRow['source_table'] == "order_tracker") {
+            $estimate_package_html = '';
+            if(!empty($aRow['package_id'])) {
+               $estimate_package_html .= get_estimate_package_list('estimate_package', $aRow['package_id']);
+            } else {
+               $estimate_package_html .= get_estimate_package_list('estimate_package');
+            }
+            $estimate_package_html .= '<span class="estimate_package" data-id="' . $aRow['id'] . '" data-type="' . $aRow['source_table'] . '"></span>';
+            $_data = $estimate_package_html;
+         } else {
+            $_data = '';
+         }
       }
-
 
       $row[] = $_data;
    }

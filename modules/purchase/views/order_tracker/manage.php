@@ -474,6 +474,7 @@
                               _l('rli_filter'),
                               _l('category'),
                               _l('group_pur'),
+                              _l('Package'),
                               _l('remarks'),
                               _l('last_action_by')
                            ];
@@ -526,6 +527,7 @@
                                  <th><?php echo _l('rli_filter'); ?></th>
                                  <th><?php echo _l('category'); ?></th>
                                  <th><?php echo _l('group_pur'); ?></th>
+                                 <th><?php echo _l('Package'); ?></th>
                                  <th><?php echo _l('remarks'); ?></th>
                                  <th><?php echo _l('last_action_by'); ?></th>
                               </tr>
@@ -546,6 +548,7 @@
                               <td class="total_cost_to_complete"></td>
                               <td class="total_final_certified_amount"></td>
                               <td class="total_ril_certified_amount"></td>
+                              <td></td>
                               <td></td>
                               <td></td>
                               <td></td>
@@ -626,6 +629,7 @@
                               <th align="left"><?php echo _l('project'); ?></th>
                               <th align="left"><?php echo _l('category'); ?></th>
                               <th align="left"><?php echo _l('group_pur'); ?></th>
+                              <th align="left"><?php echo _l('Package'); ?></th>
                               <th align="left"><?php echo _l('remarks'); ?></th>
                               <th align="center"><i class="fa fa-cog"></i></th>
                            </tr>
