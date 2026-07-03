@@ -218,6 +218,13 @@
             }
 
         });
+
+        $("body").on('click', '.chart_btn', function() {
+            var mode = $(this).attr('id');
+            load_cashflow_data(mode);
+            $('.chart_btn').removeClass('btn-info active').addClass('btn-outline-info');
+            $(this).removeClass('btn-outline-info').addClass('btn-info active');
+        });
     });
 
     function fix_user_data_widget_tabs() {
@@ -337,13 +344,14 @@
 
     var budgetedVsActualCategory;
     var orderTrackerLineChartOverTime;
-    var costvsProgressLineChartOverTime;
     var pieChartForPRApprovalStatus;
     var pieChartForPOApprovalStatus;
     var pieChartForWOApprovalStatus;
     var pieChartForCOApprovalStatus;
     var pieChartForBillingStatus;
     var pieChartForPCApprovalStatus;
+    var cashflowChart = null;
+    var currentMode = 'scurve';
 
     get_order_tracker_dashboard();
     get_vendors_dashboard();
@@ -353,6 +361,7 @@
     get_change_order_dashboard();
     get_vbt_dashboard();
     get_payment_certificate_dashboard();
+    load_cashflow_data('scurve');
 
     function get_order_tracker_dashboard() {
       "use strict";
@@ -365,69 +374,6 @@
         $('.rev_contract_value').text(response.rev_contract_value);
         $('.percentage_utilized').text(response.percentage_utilized + '%');
         $('.budgeted_procurement_net_value').text(response.budgeted_procurement_net_value);
-
-        // Cost vs Progress S-Curve
-        var costvsProgresslineCtx = document.getElementById('costvsProgressLineChartOverTime').getContext('2d');
-        if (costvsProgressLineChartOverTime) {
-          costvsProgressLineChartOverTime.data.labels = response.scurve_order_date;
-          costvsProgressLineChartOverTime.data.datasets[0].data = response.line_actual_cost_total;
-          costvsProgressLineChartOverTime.data.datasets[1].data = response.line_planned_cost_total;
-          costvsProgressLineChartOverTime.update();
-        } else {
-          costvsProgressLineChartOverTime = new Chart(costvsProgresslineCtx, {
-            type: 'line',
-            data: {
-              labels: response.scurve_order_date,
-              datasets: [
-                {
-                  label: 'Actual Cost',
-                  data: response.line_actual_cost_total,
-                  fill: false,
-                  borderColor: 'rgba(54, 162, 235, 1)',
-                  backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                  tension: 0.3
-                },
-                {
-                  label: 'Planned Cost',
-                  data: response.line_planned_cost_total,
-                  fill: false,
-                  borderColor: 'rgba(255, 99, 132, 1)',
-                  backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                  tension: 0.3
-                }
-              ]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                legend: {
-                  display: true,
-                  position: 'bottom'
-                },
-                tooltip: {
-                  mode: 'index',
-                  intersect: false
-                }
-              },
-              scales: {
-                x: {
-                  title: {
-                    display: true,
-                    text: 'Month'
-                  }
-                },
-                y: {
-                  beginAtZero: true,
-                  title: {
-                    display: true,
-                    text: 'Percentage'
-                  }
-                }
-              }
-            }
-          });
-        }
 
         // Total Order Value Over Time
         var orderTrackerlineCtx = document.getElementById('orderTrackerLineChartOverTime').getContext('2d');
@@ -832,4 +778,213 @@
 
       });
     }
+
+    function load_cashflow_data(mode) {
+      <?php
+      $module_name = 'cashflow';
+      $total_months = get_module_filter($module_name, 'total_months');
+      $total_months_val = !empty($total_months) ? $total_months->filter_value : 42;
+      $start_date = get_module_filter($module_name, 'start_date');
+      $start_date_val = !empty($start_date) ?  $start_date->filter_value : '01-01-2026';
+      $budgeted = get_module_filter($module_name, 'budgeted');
+      $budgeted_val = !empty($budgeted) ?  $budgeted->filter_value : 4070000000;
+      ?>
+      var total_months = <?php echo $total_months_val; ?>;
+      var start_date   = "<?php echo $start_date_val; ?>";
+      var budgeted     = <?php echo $budgeted_val; ?>;
+      $.post(admin_url + 'purchase/get_cashflow_data', {
+         total_months: total_months,
+         start_date: start_date,
+         budgeted: budgeted
+        }, function(response){
+            var data = JSON.parse(response);
+            var months_cal_name = [];
+            var realistic_months_cal_name = [];
+            var charts_planned_cum_cf = [];
+            var charts_actual_spending = [];
+            var charts_forecast_cum_cf = [];
+            var charts_planned_monthly_cf = [];
+            var charts_current_cum_amount = [];
+            var charts_forecast_monthly_cf = [];
+
+            if (Array.isArray(data.actual_spending_on_project) && data.actual_spending_on_project.length > 0) {
+               $.each(data.actual_spending_on_project, function(i, row){
+                  charts_actual_spending.push(parseFloat(row.actual_cum_amount) || 0);
+                  charts_current_cum_amount.push(parseFloat(row.current_cum_amount) || 0);
+               });
+            }
+
+            var cashflow_forecast_tbody = '';
+            if (Array.isArray(data.cashflow_forecast) && data.cashflow_forecast.length > 0) {
+               $.each(data.cashflow_forecast, function(i, row){
+                  months_cal_name.push(row.months_cal_name);
+                  realistic_months_cal_name.push(row.realistic_calendar_month);
+                  charts_planned_cum_cf.push(parseFloat(row.planned_cum_cf) || 0);
+                  charts_forecast_cum_cf.push(parseFloat(row.forecast_cum_cf) || 0);
+                  charts_planned_monthly_cf.push(parseFloat(row.planned_monthly_cf) || 0);
+                  charts_forecast_monthly_cf.push(parseFloat(row.forecast_monthly_cf) || 0);
+               });
+            }
+
+            $('.speed_ratio').html(parseFloat(data.current_speed_ratio).toFixed(2)+'%');
+            $('.budget_spent').html(format_money(data.total_budget_spent));
+            $('.on_time_finish').html(data.on_time_finish);
+            $('.realistic_finish').html(data.projected_completion_date);
+
+            render_cashflow_chart(
+               mode,
+               months_cal_name,
+               realistic_months_cal_name,
+               charts_planned_cum_cf,
+               charts_actual_spending,
+               charts_forecast_cum_cf,
+               charts_planned_monthly_cf,
+               charts_current_cum_amount,
+               charts_forecast_monthly_cf
+            );
+      });
+   }
+
+   function render_cashflow_chart(
+      mode,
+      months_cal_name,
+      realistic_months_cal_name,
+      charts_planned_cum_cf,
+      charts_actual_spending,
+      charts_forecast_cum_cf,
+      charts_planned_monthly_cf,
+      charts_current_cum_amount,
+      charts_forecast_monthly_cf
+   ) {
+      var ctx = document.getElementById('cashflowChart').getContext('2d');
+      if (cashflowChart !== null) {
+         cashflowChart.destroy();
+      }
+      var all_months_name = '';
+      if(mode == 'scurve' || mode == 'monthly_cashflow') {
+         all_months_name = months_cal_name;
+      } else if(mode == 'realistic') {
+         all_months_name = realistic_months_cal_name;
+      } else {
+         all_months_name = months_cal_name;
+      }
+      var all_datasets = [];
+      if (mode == 'scurve') {
+         all_datasets.push({
+            type: 'line',
+            label: 'Planned S-Curve',
+            data: charts_planned_cum_cf,
+            borderColor: '#0000FF',
+            backgroundColor: '#0000FF',
+            tension: 0.3,
+            fill: false
+         },
+         {
+            type: 'line',
+            label: 'Actual Spending',
+            data: charts_actual_spending,
+            borderColor: '#FFBF00',
+            backgroundColor: '#FFBF00',
+            tension: 0.3,
+            fill: false
+         },
+         {
+            type: 'line',
+            label: 'Forecast (Accelerated)',
+            data: charts_forecast_cum_cf,
+            borderColor: '#097969',
+            backgroundColor: '#097969',
+            borderDash: [5, 5],
+            tension: 0.3,
+            fill: false
+         });
+      } else if(mode == 'realistic') {
+         all_datasets.push({
+            type: 'line',
+            label: 'Realistic (Current Pace)',
+            data: charts_planned_cum_cf,
+            borderColor: '#FF0000',
+            backgroundColor: '#FF0000',
+            borderDash: [5, 5],
+            tension: 0.3,
+            fill: false
+         });
+      } else if(mode == 'monthly_cashflow') {
+         all_datasets.push({
+            type: 'line',
+            label: 'Planned Monthly',
+            data: charts_planned_monthly_cf,
+            borderColor: '#0000FF',
+            backgroundColor: '#0000FF',
+            tension: 0.3,
+            fill: false
+         },
+         {
+            type: 'line',
+            label: 'Actual Monthly',
+            data: charts_current_cum_amount,
+            borderColor: '#FFBF00',
+            backgroundColor: '#FFBF00',
+            tension: 0.3,
+            fill: false
+         },
+         {
+            type: 'line',
+            label: 'Forecast Monthly',
+            data: charts_forecast_monthly_cf,
+            borderColor: '#097969',
+            backgroundColor: '#097969',
+            tension: 0.3,
+            fill: false
+         });
+      } else {
+         all_datasets = [];
+      }
+      cashflowChart = new Chart(ctx, {
+         data: {
+            labels: all_months_name,
+            datasets: all_datasets
+         },
+         options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+               mode: 'index',
+               intersect: false
+            },
+            plugins: {
+               legend: {
+                  position: 'bottom'
+               },
+               tooltip: {
+                  callbacks: {
+                     label: function(context) {
+                        return context.dataset.label + ': ' + format_money(context.raw);
+                     }
+                  }
+               }
+            },
+            scales: {
+               x: {
+                  title: {
+                     display: true,
+                     text: 'Month'
+                  }
+               },
+               y: {
+                  beginAtZero: true,
+                  title: {
+                     display: true,
+                     text: 'Value'
+                  },
+                  ticks: {
+                     callback: function(value) {
+                        return format_money(value);
+                     }
+                  }
+               }
+            }
+         }
+      });
+   }
 </script>
