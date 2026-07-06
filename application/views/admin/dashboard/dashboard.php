@@ -113,7 +113,7 @@
                          </div>
                       </div>
                    </div>
-                   <div class="row mtop20">
+                   <div class="row mtop25">
                       <div class="col-md-12 mbot20">
                          <a href="javascript:void(0)" id="scurve" class="btn btn-outline-info pull-left display-block chart_btn active">S-Curve (Cumulative)</a>
                          <a href="javascript:void(0)" id="realistic" class="btn btn-outline-info pull-left display-block mleft10 chart_btn">Realistic (Month)</a>
