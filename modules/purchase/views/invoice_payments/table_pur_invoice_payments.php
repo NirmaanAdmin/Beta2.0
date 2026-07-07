@@ -209,7 +209,6 @@ $footer_data = [
     'total_ril_this_bill' => 0,
     'total_ril_amount' => 0,
 ];
-$base_currency = get_base_currency_pur();
 
 $this->ci->load->model('purchase/purchase_model');
 $sr = 1 + $this->ci->input->post('start');
@@ -263,26 +262,26 @@ foreach ($rResult as $aRow) {
         } elseif ($aColumns[$i] == 'invoice_date') {
             $_data = date('d-m-Y', strtotime($aRow['invoice_date']));
         } elseif ($aColumns[$i] == 'vendor_submitted_amount_without_tax') {
-            $_data = app_format_money($aRow['vendor_submitted_amount_without_tax'], $base_currency->symbol);
+            $_data = app_format_money($aRow['vendor_submitted_amount_without_tax']);
         } elseif ($aColumns[$i] == 'vendor_submitted_tax_amount') {
-            $_data = app_format_money($aRow['vendor_submitted_tax_amount'], $base_currency->symbol);
+            $_data = app_format_money($aRow['vendor_submitted_tax_amount']);
         } elseif ($aColumns[$i] == 'final_certified_amount') {
-            $_data = app_format_money($aRow['final_certified_amount'], $base_currency->symbol);
+            $_data = app_format_money($aRow['final_certified_amount']);
         } elseif ($aColumns[$i] == db_prefix() . 'pur_invoices.vendor') {
             $_data = '<a href="' . admin_url('purchase/vendor/' . $aRow[db_prefix() . 'pur_invoices.vendor']) . '" target="_blank">' .  get_vendor_company_name($aRow[db_prefix() . 'pur_invoices.vendor']) . '</a>';
         } elseif ($aColumns[$i] == 'bil_tds') {
-            $_data = '<span class="bil-tds-display" data-id="' . $aRow['id'] . '">' .app_format_money($aRow['bil_tds'], $base_currency->symbol) .'</span>';
+            $_data = '<span class="bil-tds-display" data-id="' . $aRow['id'] . '">' .app_format_money($aRow['bil_tds']) .'</span>';
         } elseif ($aColumns[$i] == 'bil_total') {
-            $_data = app_format_money($aRow['bil_total'], $base_currency->symbol);
+            $_data = app_format_money($aRow['bil_total']);
         } elseif ($aColumns[$i] == 'ril_previous') {
             if(!empty($ril_invoice_link)) {
-                $_data = '<span class="ril-previous-display" data-id="' . $aRow['id'] . '">' .app_format_money($aRow['ril_previous'], $base_currency->symbol) .'</span>';
+                $_data = '<span class="ril-previous-display" data-id="' . $aRow['id'] . '">' .app_format_money($aRow['ril_previous']) .'</span>';
             } else {
                 $_data = '';
             }
         } elseif ($aColumns[$i] == 'ip.amount as ril_this_bill') {
             if(!empty($ril_invoice_link)) {
-                $_data = '<span class="ril-this-bill-display" data-id="' . $aRow['id'] . '">' .app_format_money($aRow['ril_this_bill'], $base_currency->symbol) .'</span>';
+                $_data = '<span class="ril-this-bill-display" data-id="' . $aRow['id'] . '">' .app_format_money($aRow['ril_this_bill']) .'</span>';
             } else {
                 $_data = '';
             }
@@ -294,7 +293,7 @@ foreach ($rResult as $aRow) {
             }
         } elseif ($aColumns[$i] == 'ril_amount') {
             if(!empty($ril_invoice_link)) {
-                $_data = app_format_money($aRow['ril_amount'], $base_currency->symbol);
+                $_data = app_format_money($aRow['ril_amount']);
             } else {
                 $_data = '';
             }
@@ -408,7 +407,7 @@ foreach ($rResult as $aRow) {
 }
 
 foreach ($footer_data as $key => $total) {
-    $footer_data[$key] = app_format_money($total, $base_currency->symbol);
+    $footer_data[$key] = app_format_money($total);
 }
 
 $output['sums'] = $footer_data;

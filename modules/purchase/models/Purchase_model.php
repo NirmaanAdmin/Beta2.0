@@ -24318,12 +24318,7 @@ class Purchase_model extends App_Model
         $group_pur = isset($data['group_pur']) ? $data['group_pur'] : '';
         $billing_invoices = isset($data['billing_invoices']) ? $data['billing_invoices'] : '';
         $bil_payment_status = isset($data['bil_payment_status']) ? $data['bil_payment_status'] : '';
-        $this->load->model('currencies_model');
-        $base_currency = $this->currencies_model->get_base_currency();
-        if ($request->currency != 0 && $request->currency != null) {
-            $base_currency = pur_get_currency_by_id($request->currency);
-        }
-
+        
         $response['total_billed'] = $response['total_paid'] = $response['total_unpaid'] = 0;
         $response['bar_top_vendor_name'] = $response['bar_top_vendor_value'] = array();
         $response['vendor_order_date'] = $response['line_vendor_billing_total'] = $response['line_vendor_payment_total'] = array();
@@ -24378,13 +24373,13 @@ class Purchase_model extends App_Model
             $total_billed = array_reduce($pur_invoices, function ($carry, $item) {
                 return $carry + (float)$item['final_certified_amount'];
             }, 0);
-            $response['total_billed'] = app_format_money($total_billed, $base_currency->symbol);
+            $response['total_billed'] = app_format_money($total_billed);
             $total_paid = array_reduce($pur_invoices, function ($carry, $item) {
                 return $carry + (float)$item['ril_this_bill'];
             }, 0);
-            $response['total_paid'] = app_format_money($total_paid, $base_currency->symbol);
+            $response['total_paid'] = app_format_money($total_paid);
             $total_unpaid = $total_billed - $total_paid;
-            $response['total_unpaid'] = app_format_money($total_unpaid, $base_currency->symbol);
+            $response['total_unpaid'] = app_format_money($total_unpaid);
 
             $bar_top_vendors = array();
             $bar_top_budget_head = array();
