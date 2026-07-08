@@ -4528,6 +4528,7 @@ class Purchase_model extends App_Model
 
         $pur_request = $this->get_purchase_request($pur_request_id);
         $pur_request_detail = $this->get_pur_request_detail($pur_request_id);
+        $currency_name = get_currency_name($pur_request->currency);
         $company_name = get_option('invoice_company_name');
         $dpm_name = $this->departments_model->get($pur_request->department)->name;
         $address = get_option('invoice_company_address');
@@ -4605,9 +4606,9 @@ class Purchase_model extends App_Model
             if ($show_image_column) {
                 $html .= '<td style="width: 10%">' . $full_item_image . '</td>';
             }
-            $html .= '<td align="right" style="width: 12%">' . '₹ ' . app_format_money($row['unit_price'], '') . '</td>
+            $html .= '<td align="right" style="width: 12%">' . app_format_money($row['unit_price'], $currency_name) . '</td>
             <td align="right" style="width: 12%">' . $row['quantity'] . ' ' . $units->unit_name . '</td>
-            <td align="right" style="width: 12%">' . '₹ ' . app_format_money($row['into_money'], '') . '</td>
+            <td align="right" style="width: 12%">' . app_format_money($row['into_money'], $currency_name) . '</td>
           </tr>';
         }
         $html .=  '</tbody>
@@ -4673,6 +4674,7 @@ class Purchase_model extends App_Model
 
         $pur_request = $this->get_purchase_request($pur_request_id);
         $pur_request_detail = $this->get_pur_request_detail($pur_request_id);
+        $currency_name = get_currency_name($pur_request->currency);
         $company_name = get_option('invoice_company_name');
         $dpm_name = $this->departments_model->get($pur_request->department)->name;
         $address = get_option('invoice_company_address');
@@ -4738,9 +4740,9 @@ class Purchase_model extends App_Model
             <td style="width: 10%">' . get_area_name_by_id($row['area']) . '</td>
             <td style="width: 10%">' . $full_item_image . '</td>
             <td align="right" style="width: 10%">' . $units->unit_name . '</td>
-            <td align="right" style="width: 10%">' . app_format_money($row['unit_price'], '') . '</td>
+            <td align="right" style="width: 10%">' . app_format_money($row['unit_price'], $currency_name) . '</td>
             <td align="right" style="width: 10%">' . $row['quantity'] . '</td>
-            <td align="right" style="width: 15%">' . app_format_money($row['into_money'], '') . '</td>
+            <td align="right" style="width: 15%">' . app_format_money($row['into_money'], $currency_name) . '</td>
           </tr>';
         }
         $html .=  '</tbody>
@@ -11376,10 +11378,10 @@ class Purchase_model extends App_Model
         $row .= '<td class=""><input type="file" extension="' . str_replace(['.', ' '], '', '.png,.jpg,.jpeg') . '" filesize="' . file_upload_max_size() . '" class="form-control" name="' . $name_image . '" accept="' . get_item_form_accepted_mimes() . '">' . $full_item_image . '</td>';
         $row .= '<td class="rate">' . render_input($name_unit_price, '', $unit_price, 'number', $array_rate_attr, [], 'no-margin', $text_right_class);
         if ($unit_price != '') {
-            $original_price = round(($unit_price / $currency_rate), 2);
-            $base_currency = get_base_currency();
-            if ($to_currency != 0 && $to_currency != $base_currency->id) {
-                $row .= render_input('original_price', '', app_format_money($original_price, $base_currency), 'text', ['data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => _l('original_price'), 'disabled' => true], [], 'no-margin', 'input-transparent text-right pur_input_none');
+            $original_price = ($currency_rate > 0) ? round(($unit_price / $currency_rate), 2) : 0;
+            if (!empty($to_currency)) {
+                $currency_name = get_currency_name($to_currency);
+                $row .= render_input('original_price', '', app_format_money($original_price, $currency_name), 'text', ['data-toggle' => 'tooltip', 'data-placement' => 'top', 'title' => _l('original_price'), 'disabled' => true], [], 'no-margin', 'input-transparent text-right pur_input_none');
             }
 
             $row .= '<input class="hide" name="og_price" disabled="true" value="' . $original_price . '">';
@@ -22529,12 +22531,7 @@ class Purchase_model extends App_Model
         $response = array();
         $projects = isset($data['projects']) ? $data['projects'] : [get_default_project()];
         $group_pur = isset($data['group_pur']) ? $data['group_pur'] : '';
-        $this->load->model('currencies_model');
         $this->load->model('departments_model');
-        $base_currency = $this->currencies_model->get_base_currency();
-        if ($request->currency != 0 && $request->currency != null) {
-            $base_currency = pur_get_currency_by_id($request->currency);
-        }
 
         $response['total_purchase_requests'] = $response['total_approved_requests'] = $response['total_draft_requests'] = $response['total_closed_requests'] = 0;
         $response['budget_head_name'] = $response['budget_head_value'] = array();

@@ -14,12 +14,6 @@
             ?>
 
             <input type="hidden" id="csrf_token_name" name="<?= $csrf['name']; ?>" value="<?= $csrf['hash']; ?>" />
-            <?php if ($pur_request->currency != 0) {
-
-              $base_currency = pur_get_currency_by_id($pur_request->currency);
-            } else {
-              $base_currency = $base_currency;
-            } ?>
             <?php if ($pur_request->status == 1) { ?>
               <div class="ribbon info"><span class="fontz9"><?php echo _l('purchase_draft'); ?></span></div>
             <?php } elseif ($pur_request->status == 2) { ?>
@@ -334,8 +328,8 @@
                                   ?>
                                 </td>
                                 <td align="right"><?php echo pur_html_entity_decode($es['quantity']) . ' ' . pur_get_unit_name($es['unit_id']); ?></td>
-                                <td align="right"><?php echo app_format_money($es['unit_price'], $base_currency->symbol); ?></td>
-                                <td align="right"><?php echo app_format_money($es['into_money'], $base_currency->symbol); ?></td>
+                                <td align="right"><?php echo app_format_money($es['unit_price'], $currency_name); ?></td>
+                                <td align="right"><?php echo app_format_money($es['into_money'], $currency_name); ?></td>
                                 <td align="right">
                                   <?php
                                   if ($es['tax_name'] != '') {
@@ -354,8 +348,8 @@
                                   }
                                   ?>
                                 </td>
-                                <td align="right"><?php echo app_format_money($es['tax_value'], $base_currency->symbol); ?></td>
-                                <td class="amount" align="right"><?php echo app_format_money($es['total'], $base_currency->symbol); ?></td>
+                                <td align="right"><?php echo app_format_money($es['tax_value'], $currency_name); ?></td>
+                                <td class="amount" align="right"><?php echo app_format_money($es['total'], $currency_name); ?></td>
                               </tr>
                           <?php }
                           } ?>
@@ -371,7 +365,7 @@
                           </td>
                           <td width="65%" id="total_td">
 
-                            <?php echo app_format_money($_subtotal, $base_currency->symbol); ?>
+                            <?php echo app_format_money($_subtotal, $currency_name); ?>
                           </td>
                         </tr>
                       </tbody>
@@ -392,7 +386,7 @@
                           <td class="td_style"><span class="bold"><?php echo _l('total'); ?></span>
                           </td>
                           <td width="65%" id="total_td">
-                            <?php echo app_format_money($_total, $base_currency->symbol); ?>
+                            <?php echo app_format_money($_total, $currency_name); ?>
                           </td>
                         </tr>
                       </tbody>

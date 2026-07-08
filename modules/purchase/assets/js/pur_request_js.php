@@ -33,31 +33,27 @@ $("body").on('change', 'select.taxes', function () {
 });
 
 $("body").on('change', 'select[name="currency"]', function () {
-
   var currency_id = $(this).val();
   if(currency_id != ''){
     $.post(admin_url + 'purchase/get_currency_rate/'+currency_id).done(function(response){
       response = JSON.parse(response);
       if(response.currency_rate != 1){
-        $('#currency_rate_div').removeClass('hide');
-
-        $('input[name="currency_rate"]').val(response.currency_rate).change();
-
+        // $('#currency_rate_div').removeClass('hide');
+        // $('input[name="currency_rate"]').val(response.currency_rate).change();
         $('#convert_str').html(response.convert_str);
         $('.th_currency').html(response.currency_name);
+        pur_calculate_total();
       }else{
-        $('input[name="currency_rate"]').val(response.currency_rate).change();
-        $('#currency_rate_div').addClass('hide');
+        // $('input[name="currency_rate"]').val(response.currency_rate).change();
+        // $('#currency_rate_div').addClass('hide');
         $('#convert_str').html(response.convert_str);
         $('.th_currency').html(response.currency_name);
-
+        pur_calculate_total();
       }
-
     });
   }else{
     alert_float('warning', "<?php echo _l('please_select_currency'); ?>" )
   }
-
   init_pr_currency();
 });
 
@@ -130,8 +126,8 @@ function coppy_sale_invoice(){
         response = JSON.parse(response);
 
         if(response){
-          $('select[name="currency"]').val(response.currency).change();
-          $('input[name="currency_rate"]').val(response.currency_rate).change();
+          // $('select[name="currency"]').val(response.currency).change();
+          // $('input[name="currency_rate"]').val(response.currency_rate).change();
           
           $('.invoice-item table.invoice-items-table.items tbody').html('');
           $('.invoice-item table.invoice-items-table.items tbody').append(response.list_item);
@@ -170,8 +166,8 @@ function coppy_sale_estimate(){
         response = JSON.parse(response);
 
         if(response){
-          $('select[name="currency"]').val(response.currency).change();
-          $('input[name="currency_rate"]').val(response.currency_rate).change();
+          // $('select[name="currency"]').val(response.currency).change();
+          // $('input[name="currency_rate"]').val(response.currency_rate).change();
           
           $('.invoice-item table.invoice-items-table.items tbody').html('');
           $('.invoice-item table.invoice-items-table.items tbody').append(response.list_item);
@@ -412,6 +408,8 @@ function pur_calculate_total(){
     discount_total_type = $('.discount-total-type.selected'),
     discount_type = $('select[name="discount_type"]').val();
 
+  var selected_currency = $('select[name="currency"] option:selected').text();
+
   $('.wh-tax-area').remove();
 
     $.each(rows, function () {
@@ -478,7 +476,7 @@ function pur_calculate_total(){
 
     total += total_tax;
     total_tax_money += total_tax;
-    total_tax = format_money(total_tax);
+    total_tax = format_money(total_tax, false, selected_currency);
     $('#tax_id_' + slugify(taxname)).html(total_tax);
   });
 
@@ -499,28 +497,28 @@ function pur_calculate_total(){
     total = total + adjustment;
   }
 
-  var discount_html = '-' + format_money(total_discount_calculated);
+  var discount_html = '-' + format_money(total_discount_calculated, false, selected_currency);
     $('input[name="discount_total"]').val(accounting.toFixed(total_discount_calculated, app.options.decimal_places));
 
   // Append, format to html and display
   $('.discount-total').html(discount_html);
-  $('.adjustment').html(format_money(adjustment));
-  $('.wh-subtotal').html(format_money(subtotal) + hidden_input('total_goods_money', accounting.toFixed(subtotal, app.options.decimal_places)) + hidden_input('value_of_inventory', accounting.toFixed(subtotal, app.options.decimal_places)));
+  $('.adjustment').html(format_money(adjustment, false, selected_currency));
+  $('.wh-subtotal').html(format_money(subtotal, false, selected_currency) + hidden_input('total_goods_money', accounting.toFixed(subtotal, app.options.decimal_places)) + hidden_input('value_of_inventory', accounting.toFixed(subtotal, app.options.decimal_places)));
 
   $('.inventory_value').remove();
   
   //var total_inventory_value = '<tr class="inventory_value"><td><span class="bold"><?php echo _l('value_of_inventory'); ?> :</span></td><td class="">'+format_money(subtotal)+'</td></tr>';
   //$('#subtotal').after(total_inventory_value);
 
-  $('input[name="subtotal"]').val(format_money(subtotal, true));
+  $('input[name="subtotal"]').val(format_money(subtotal, true, selected_currency));
 
   $('.total_tax_value').remove();
-  var total_tax_value = '<tr class="total_tax_value"><td><span class="bold"><?php echo _l('total_tax_money'); ?> :</span></td><td class="">'+format_money(total_tax_money)+'</td></tr>';
+  var total_tax_value = '<tr class="total_tax_value"><td><span class="bold"><?php echo _l('total_tax_money'); ?> :</span></td><td class="">'+format_money(total_tax_money, false, selected_currency)+'</td></tr>';
   $('#totalmoney').before(total_tax_value);
 
-  $('.wh-total').html(format_money(total) + hidden_input('total_tax_money', accounting.toFixed(total_tax_money, app.options.decimal_places)) + hidden_input('total_money', accounting.toFixed(total, app.options.decimal_places)));
+  $('.wh-total').html(format_money(total, false, selected_currency) + hidden_input('total_tax_money', accounting.toFixed(total_tax_money, app.options.decimal_places)) + hidden_input('total_money', accounting.toFixed(total, app.options.decimal_places)));
 
-  $('input[name="total_mn"]').val(format_money(total, true));
+  $('input[name="total_mn"]').val(format_money(total, true, selected_currency));
 
   $(document).trigger('purchase-request-total-calculated');
 
