@@ -2441,7 +2441,6 @@ class Estimates_model extends App_Model
 
     public function view_package($data)
     {
-        $this->load->model('currencies_model');
         $response = array();
         $package_info = array();
         $budgetsummary = '';
@@ -2449,7 +2448,6 @@ class Estimates_model extends App_Model
         $estimate_id = $data['id'];
         $package_budget = isset($data['package_budget']) ? $data['package_budget'] : '';
         $package_id = isset($data['package_id']) ? $data['package_id'] : '';
-        $base_currency = $this->currencies_model->get_base_currency();
         if (!empty($package_id)) {
             $this->db->where('id', $package_id);
             $package_info = $this->db->get(db_prefix() . 'estimate_package_info')->row();
@@ -2714,7 +2712,7 @@ class Estimates_model extends App_Model
                         $itemhtml .= '<tr>
                             <td>'.($pkey + 1).'</td>
                             <td>'.$order_link.'</td>
-                            <td>'.app_format_money($pvalue['subtotal'], $base_currency).'</td>
+                            <td>'.app_format_money($pvalue['subtotal']).'</td>
                         </tr>';
                     }
                 } else {
@@ -3967,15 +3965,47 @@ class Estimates_model extends App_Model
 
     public function get_package_orders($package_id)
     {
-        $this->db->select("id, subtotal, pur_order_number as order_number, 'po' as type");
-        $this->db->where('package_id', $package_id);
-        $this->db->order_by('id', 'ASC');
-        $pur_orders = $this->db->get(db_prefix() . 'pur_orders')->result_array();
+        $this->db->select("
+            pur_orders.id,
+            CASE
+                WHEN pur_orders.currency = 3 THEN
+                    pur_orders.subtotal
+                ELSE
+                    pur_orders.subtotal * COALESCE(cur.reference_value, 1)
+            END AS subtotal,
+            pur_orders.pur_order_number AS order_number,
+            'po' AS type
+        ", false);
+        $this->db->from(db_prefix() . 'pur_orders AS pur_orders');
+        $this->db->join(
+            db_prefix() . 'currencies AS cur',
+            'cur.id = pur_orders.currency',
+            'left'
+        );
+        $this->db->where('pur_orders.package_id', $package_id);
+        $this->db->order_by('pur_orders.id', 'ASC');
+        $pur_orders = $this->db->get()->result_array();
 
-        $this->db->select("id, subtotal, wo_order_number as order_number, 'wo' as type");
-        $this->db->where('package_id', $package_id);
-        $this->db->order_by('id', 'ASC');
-        $wo_orders = $this->db->get(db_prefix() . 'wo_orders')->result_array();
+        $this->db->select("
+            wo_orders.id,
+            CASE
+                WHEN wo_orders.currency = 3 THEN
+                    wo_orders.subtotal
+                ELSE
+                    wo_orders.subtotal * COALESCE(cur.reference_value, 1)
+            END AS subtotal,
+            wo_orders.wo_order_number AS order_number,
+            'wo' AS type
+        ", false);
+        $this->db->from(db_prefix() . 'wo_orders AS wo_orders');
+        $this->db->join(
+            db_prefix() . 'currencies AS cur',
+            'cur.id = wo_orders.currency',
+            'left'
+        );
+        $this->db->where('wo_orders.package_id', $package_id);
+        $this->db->order_by('wo_orders.id', 'ASC');
+        $wo_orders = $this->db->get()->result_array();
 
         return array_merge($pur_orders, $wo_orders);
     }

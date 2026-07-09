@@ -924,10 +924,30 @@ function data_tables_init_union_unawarded($aColumns, $sIndexColumn, $combinedTab
         LEFT JOIN tblprojects pr ON pr.id = est.project_id
         LEFT JOIN tblitems_groups ig ON ig.id = p.budget_head
         LEFT JOIN (
-            SELECT package_id, SUM(subtotal) AS total_po FROM tblpur_orders GROUP BY package_id
+            SELECT
+            po.package_id,
+            SUM(
+                CASE
+                    WHEN po.currency = 3 THEN po.subtotal
+                    ELSE po.subtotal * COALESCE(cur.reference_value, 1)
+                END
+            ) AS total_po
+            FROM tblpur_orders po
+            LEFT JOIN tblcurrencies cur ON cur.id = po.currency
+            GROUP BY po.package_id
         ) po ON po.package_id = p.id
         LEFT JOIN (
-            SELECT package_id, SUM(subtotal) AS total_wo FROM tblwo_orders GROUP BY package_id
+            SELECT
+            wo.package_id,
+            SUM(
+                CASE
+                    WHEN wo.currency = 3 THEN wo.subtotal
+                    ELSE wo.subtotal * COALESCE(cur.reference_value, 1)
+                END
+            ) AS total_wo
+            FROM tblwo_orders wo
+            LEFT JOIN tblcurrencies cur ON cur.id = wo.currency
+            GROUP BY wo.package_id
         ) wo ON wo.package_id = p.id
         LEFT JOIN (
             SELECT package_id, SUM(total) AS total_tracker FROM tblpur_order_tracker GROUP BY package_id

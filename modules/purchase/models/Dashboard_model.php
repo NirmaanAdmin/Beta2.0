@@ -9,8 +9,6 @@ class Dashboard_model extends App_Model
 {
 	public function get_purchase_order_dashboard($data)
 	{
-		$this->load->model('currencies_model');
-		$base_currency = $this->currencies_model->get_base_currency();
 		$vendors = $data['vendors'];
 		$projects = $data['projects'];
 		$group_pur = $data['group_pur'];
@@ -904,8 +902,6 @@ class Dashboard_model extends App_Model
 
 	public function get_billing_dashboard($data)
 	{
-		$this->load->model('currencies_model');
-		$base_currency = $this->currencies_model->get_base_currency();
 		$vendors = isset($data['vendors']) ? $data['vendors'] : '';
 		$projects = isset($data['projects']) ? $data['projects'] : get_default_project();
 		$order_tagged_detail = isset($data['order_tagged_detail']) ? $data['order_tagged_detail'] : array();
