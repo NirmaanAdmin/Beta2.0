@@ -1299,13 +1299,55 @@ class Forms extends AdminController
         $this->load->view('admin/progress_reports/report_listing', $data);
     }
 
+    // public function find_dpr_design($form_id = 0)
+    // {
+    //     $dpr_row_template = $this->forms_model->create_dpr_row_template();
+    //     if ($form_id != 0) {
+    //         $dpr_main_form = $this->forms_model->get_form($form_id);
+    //         $dpr_form = $this->forms_model->get_dpr_form($form_id);
+    //         $dpr_form_detail = $this->forms_model->get_dpr_form_detail($form_id);
+    //         if (!empty($dpr_form_detail)) {
+    //             $index_order = 0;
+    //             foreach ($dpr_form_detail as $value) {
+    //                 $index_order++;
+    //                 $dpr_row_template .= $this->forms_model->create_dpr_row_template(
+    //                     'items[' . $index_order . ']',
+    //                     $value['location'],
+    //                     $value['agency'],
+    //                     $value['type'],
+    //                     $value['sub_type'],
+    //                     $value['work_execute'],
+    //                     $value['material_consumption'],
+    //                     $value['male'],
+    //                     $value['female'],
+    //                     $value['total'],
+    //                     $value['machinery'],
+    //                     $value['total_machinery'],
+    //                     true,
+    //                     $value['id']
+    //                 );
+    //             }
+    //         }
+    //         $data['dpr_form'] = $dpr_form;
+    //         $data['dpr_main_form'] = $dpr_main_form;
+    //     }
+    //     $data['dpr_row_template'] = $dpr_row_template;
+    //     $this->load->view('admin/progress_reports/dpr/dpr_form_design', $data);
+    // }
+
     public function find_dpr_design($form_id = 0)
     {
         $dpr_row_template = $this->forms_model->create_dpr_row_template();
+        $dpr_row_department_template = $this->forms_model->create_dpr_department_row_template();
+        $dpr_row_rmc_template = $this->forms_model->create_dpr_rmc_row_template();
+        $dpr_row_material_template = $this->forms_model->create_dpr_material_row_template();
         if ($form_id != 0) {
             $dpr_main_form = $this->forms_model->get_form($form_id);
             $dpr_form = $this->forms_model->get_dpr_form($form_id);
             $dpr_form_detail = $this->forms_model->get_dpr_form_detail($form_id);
+            $dpr_department_form_detail = $this->forms_model->get_dpr_department_form_detail($form_id);
+            $dpr_rmc_form_detail = $this->forms_model->get_dpr_rmc_form_detail($form_id);
+            $dpr_material_form_detail = $this->forms_model->get_dpr_material_form_detail($form_id);
             if (!empty($dpr_form_detail)) {
                 $index_order = 0;
                 foreach ($dpr_form_detail as $value) {
@@ -1328,10 +1370,68 @@ class Forms extends AdminController
                     );
                 }
             }
+
+            if (!empty($dpr_department_form_detail)) {
+                $index_order = 0;
+                foreach ($dpr_department_form_detail as $value) {
+                    $index_order++;
+                    $dpr_row_department_template .= $this->forms_model->create_dpr_department_row_template(
+                        'itemsdepartment[' . $index_order . ']',
+                        $value['staff'],
+                        $value['attendance'],
+                        $value['over_time'],
+                        $value['kharchi'],
+                        true,
+                        $value['id']
+                    );
+                }
+            }
+
+            if (!empty($dpr_rmc_form_detail)) {
+                $index_order = 0;
+                foreach ($dpr_rmc_form_detail as $value) {
+                    $index_order++;
+                    $dpr_row_rmc_template .= $this->forms_model->create_dpr_rmc_row_template(
+                        'itemsrmc[' . $index_order . ']',
+                        $value['challan'],
+                        $value['grade'],
+                        $value['structure'],
+                        $value['quantity'],
+                        true,
+                        $value['id']
+                    );
+                }
+            }
+
+            if (!empty($dpr_material_form_detail)) {
+                $index_order = 0;
+                foreach ($dpr_material_form_detail as $value) {
+                    $index_order++;
+                    $dpr_row_material_template .= $this->forms_model->create_dpr_material_row_template(
+                        'itemsmaterial[' . $index_order . ']',
+                        $value['challan'],
+                        $value['supplier'],
+                        $value['material_description'],
+                        $value['total'],
+                        true,
+                        $value['id']
+                    );
+                }
+            }
+
             $data['dpr_form'] = $dpr_form;
             $data['dpr_main_form'] = $dpr_main_form;
         }
         $data['dpr_row_template'] = $dpr_row_template;
+        $data['dpr_department_row_template'] = $dpr_row_department_template;
+        $data['dpr_rmc_row_template'] = $dpr_row_rmc_template;
+        $data['dpr_material_row_template'] = $dpr_row_material_template;
+        $data['dpr_cement_data'] = $this->forms_model->get_dpr_department_cement_rack($form_id);
+        $data['dpr_block_data'] = $this->forms_model->get_dpr_department_block_mortar($form_id);
+        $data['dpr_tile_data'] = $this->forms_model->get_dpr_department_tile_mortar($form_id);
+        $data['dpr_coupler_data'] = $this->forms_model->get_dpr_department_coupler_mortar($form_id);
+        $data['dpr_wires_data'] = $this->forms_model->get_dpr_department_wires_mortar($form_id);
+        $data['dpr_council_data'] = $this->forms_model->get_dpr_department_council_mortar($form_id);
         $this->load->view('admin/progress_reports/dpr/dpr_form_design', $data);
     }
 
@@ -1416,6 +1516,83 @@ class Forms extends AdminController
         $this->load->view('admin/progress_reports/dpr/add', $data);
     }
 
+    // public function view_edit_dpr($id)
+    // {
+    //     if (!$id) {
+    //         redirect(admin_url('forms/add'));
+    //     }
+
+    //     $data['form']         = $this->forms_model->get_form_by_id($id);
+    //     $data['merged_forms'] = $this->forms_model->get_merged_forms_by_primary_id($id);
+
+    //     if (!$data['form']) {
+    //         blank_page(_l('form_not_found'));
+    //     }
+
+    //     if (get_option('staff_access_only_assigned_departments') == 1) {
+    //         if (!is_admin()) {
+    //             $this->load->model('departments_model');
+    //             $staff_departments = $this->departments_model->get_staff_departments(get_staff_user_id(), true);
+    //             if (!in_array($data['form']->department, $staff_departments)) {
+    //                 set_alert('danger', _l('form_access_by_department_denied'));
+    //                 redirect(admin_url('access_denied'));
+    //             }
+    //         }
+    //     }
+
+    //     if ($this->input->post()) {
+    //         $returnToFormList = false;
+    //         $data               = $this->input->post();
+
+    //         if (isset($data['form_add_response_and_back_to_list'])) {
+    //             $returnToFormList = true;
+    //             unset($data['form_add_response_and_back_to_list']);
+    //         }
+
+    //         $data['message'] = html_purify($this->input->post('message', false));
+    //         $replyid         = $this->forms_model->add_reply($data, $id, get_staff_user_id());
+
+    //         if ($replyid) {
+    //             set_alert('success', _l('replied_to_form_successfully', $id));
+    //         }
+    //         if (!$returnToFormList) {
+    //             redirect(admin_url('forms/form/' . $id));
+    //         } else {
+    //             set_form_open(0, $id);
+    //             redirect(admin_url('forms'));
+    //         }
+    //     }
+    //     // Load necessary models
+    //     $this->load->model('knowledge_base_model');
+    //     $this->load->model('departments_model');
+
+    //     $data['statuses']                       = $this->forms_model->get_form_status();
+    //     $data['statuses']['callback_translate'] = 'form_status_translate';
+
+    //     $data['departments']        = $this->departments_model->get();
+    //     $data['predefined_replies'] = $this->forms_model->get_predefined_reply();
+    //     $data['priorities']         = $this->forms_model->get_priority();
+    //     $data['services']           = $this->forms_model->get_service();
+    //     $whereStaff                 = [];
+    //     if (get_option('access_forms_to_none_staff_members') == 0) {
+    //         $whereStaff['is_not_staff'] = 0;
+    //     }
+    //     $data['staff']                = $this->staff_model->get('', $whereStaff);
+    //     $data['articles']             = $this->knowledge_base_model->get();
+    //     $data['form_replies']       = $this->forms_model->get_form_replies($id);
+    //     $data['bodyclass']            = 'top-tabs form single-form';
+    //     $data['title']                = $data['form']->subject;
+    //     $data['form']->form_notes = $this->misc_model->get_notes($id, 'form');
+    //     $data['projects'] = $this->projects_model->get_items();
+    //     $data['form_listing'] = $this->forms_model->get_form_listing();
+    //     $data['daily_labor_report'] = $this->forms_model->get_daily_labor_report($id);
+    //     $data['labor_report_machinery'] = $this->forms_model->get_labor_report_machinery($id);
+
+    //     $data['dpr_department_labor_report'] = $this->forms_model->get_dpr_department_form_detail($id);
+    //     $data['dpr_department_rmc_plant'] = $this->forms_model->get_dpr_rmc_sum_form_detail($id);
+    //     add_admin_progress_reports_js_assets();
+    //     $this->load->view('admin/progress_reports/dpr/view_edit', $data);
+    // }
     public function view_edit_dpr($id)
     {
         if (!$id) {
@@ -1429,16 +1606,7 @@ class Forms extends AdminController
             blank_page(_l('form_not_found'));
         }
 
-        if (get_option('staff_access_only_assigned_departments') == 1) {
-            if (!is_admin()) {
-                $this->load->model('departments_model');
-                $staff_departments = $this->departments_model->get_staff_departments(get_staff_user_id(), true);
-                if (!in_array($data['form']->department, $staff_departments)) {
-                    set_alert('danger', _l('form_access_by_department_denied'));
-                    redirect(admin_url('access_denied'));
-                }
-            }
-        }
+
 
         if ($this->input->post()) {
             $returnToFormList = false;
@@ -1450,13 +1618,13 @@ class Forms extends AdminController
             }
 
             $data['message'] = html_purify($this->input->post('message', false));
-            $replyid         = $this->forms_model->add_reply($data, $id, get_staff_user_id());
+            $replyid         = $this->forms_model->add_edit_attachments($data, $id, get_staff_user_id());
 
             if ($replyid) {
-                set_alert('success', _l('replied_to_form_successfully', $id));
+                set_alert('success', _l('Attachment Updated Successfully', $id));
             }
             if (!$returnToFormList) {
-                redirect(admin_url('forms/form/' . $id));
+                redirect(admin_url('forms/view_edit_dpr/' . $id . '/?tab=settings'));
             } else {
                 set_form_open(0, $id);
                 redirect(admin_url('forms'));
@@ -1487,10 +1655,11 @@ class Forms extends AdminController
         $data['form_listing'] = $this->forms_model->get_form_listing();
         $data['daily_labor_report'] = $this->forms_model->get_daily_labor_report($id);
         $data['labor_report_machinery'] = $this->forms_model->get_labor_report_machinery($id);
+        $data['dpr_department_labor_report'] = $this->forms_model->get_dpr_department_form_detail($id);
+        $data['dpr_department_rmc_plant'] = $this->forms_model->get_dpr_rmc_sum_form_detail($id);
         add_admin_progress_reports_js_assets();
         $this->load->view('admin/progress_reports/dpr/view_edit', $data);
     }
-
     public function update_dpr_changes()
     {
         if ($this->input->post()) {
@@ -1978,5 +2147,40 @@ class Forms extends AdminController
         }
 
         $pdf->Output(mb_strtoupper(slug_it($form->subject)) . '.pdf', $type);
+    }
+
+    public function get_rmc_dpr_row_template()
+    {
+        $name = $this->input->post('name');
+        $challan = $this->input->post('challan');
+        $grade = $this->input->post('grade');
+        $structure = $this->input->post('structure');
+        $quantity = $this->input->post('quantity');
+        $item_key = $this->input->post('item_key');
+
+        echo $this->forms_model->create_dpr_rmc_row_template($name, $challan, $grade, $structure, $quantity, false, $item_key);
+    }
+    public function get_material_dpr_row_template()
+    {
+        $name = $this->input->post('name');
+        $challan = $this->input->post('challan');
+        $supplier = $this->input->post('supplier');
+        $material_description = $this->input->post('material_description');
+        $total = $this->input->post('total');
+        $item_key = $this->input->post('item_key');
+
+        echo $this->forms_model->create_dpr_material_row_template($name, $challan, $supplier, $material_description, $total, false, $item_key);
+    }
+
+    public function get_department_dpr_row_template()
+    {
+        $name = $this->input->post('name');
+        $staff = $this->input->post('staff');
+        $attendance = $this->input->post('attendance');
+        $over_time = $this->input->post('over_time');
+        $kharchi = $this->input->post('kharchi');
+        $item_key = $this->input->post('item_key');
+
+        echo $this->forms_model->create_dpr_department_row_template($name, $staff, $attendance, $over_time, $kharchi, false, $item_key);
     }
 }
