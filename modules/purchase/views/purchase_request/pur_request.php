@@ -46,17 +46,15 @@
         <div class="panel_s">
           <div class="panel-body">
             <h4 class="customer-profile-group-heading"><?php if (isset($pur_request)) {
-                                                          echo pur_html_entity_decode($pur_request->pur_rq_code);
-                                                        } else {
-                                                          echo _l($title) . ' ' . _l('purchase_request');
-                                                        } ?></h4>
+              echo pur_html_entity_decode($pur_request->pur_rq_code);
+            } else {
+              echo _l($title) . ' ' . _l('purchase_request');
+            } ?></h4>
             <?php
-
             if (isset($pur_request)) {
               echo form_hidden('isedit');
             } ?>
             <div class="row accounting-template">
-
 
               <div class="row ">
                 <div class="col-md-12">
@@ -89,10 +87,10 @@
                           <option value=""></option>
                           <?php foreach ($projects as $s) { ?>
                             <option value="<?php echo pur_html_entity_decode($s['id']); ?>" <?php if (isset($pur_request) && $s['id'] == $pur_request->project) {
-                                                                                              echo 'selected';
-                                                                                            } else if (!isset($pur_request) && $s['id'] == $project_id) {
-                                                                                              echo 'selected';
-                                                                                            } ?>><?php echo pur_html_entity_decode($s['name']); ?></option>
+                              echo 'selected';
+                            } else if (!isset($pur_request) && $s['id'] == $project_id) {
+                              echo 'selected';
+                            } ?>><?php echo pur_html_entity_decode($s['name']); ?></option>
                           <?php } ?>
                         </select>
                         <br><br>
@@ -127,7 +125,7 @@
 
                       <div class="col-md-3 ">
                         <?php
-                        $currency_attr = array('disabled' => true, 'data-show-subtext' => true);
+                        $currency_attr = array('data-show-subtext' => true);
 
                         $selected = (isset($pur_request) && $pur_request->currency != 0) ? $pur_request->currency : '';
                         if ($selected == '') {
@@ -150,13 +148,12 @@
                       <option value=""></option>
                       <?php foreach ($departments as $s) { ?>
                         <option value="<?php echo pur_html_entity_decode($s['departmentid']); ?>" <?php if (isset($pur_request) && $s['departmentid'] == $pur_request->department) {
-                                                                                                    echo 'selected';
-                                                                                                  } ?>><?php echo pur_html_entity_decode($s['name']); ?></option>
+                          echo 'selected';
+                        } ?>><?php echo pur_html_entity_decode($s['name']); ?></option>
                       <?php } ?>
                     </select>
                     <br><br>
                   </div>
-
 
                   <!-- <div class="col-md-3 form-group ">
                     <label for="sale_invoice"><?php echo _l('sale_invoice'); ?></label>
@@ -171,17 +168,16 @@
 
                   </div> -->
 
-
                   <div class="col-md-3 form-group">
                     <label for="requester"><?php echo _l('requester'); ?></label>
                     <select name="requester" id="requester" class="selectpicker" data-live-search="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>">
                       <option value=""></option>
                       <?php foreach ($staffs as $s) { ?>
                         <option value="<?php echo pur_html_entity_decode($s['staffid']); ?>" <?php if (isset($pur_request) && $s['staffid'] == $pur_request->requester) {
-                                                                                                echo 'selected';
-                                                                                              } elseif ($s['staffid'] == get_staff_user_id()) {
-                                                                                                echo 'selected';
-                                                                                              } ?>><?php echo pur_html_entity_decode($s['lastname'] . ' ' . $s['firstname']); ?></option>
+                          echo 'selected';
+                        } elseif ($s['staffid'] == get_staff_user_id()) {
+                          echo 'selected';
+                        } ?>><?php echo pur_html_entity_decode($s['lastname'] . ' ' . $s['firstname']); ?></option>
                       <?php } ?>
                     </select>
                     <br><br>
@@ -198,8 +194,8 @@
 
                       <?php foreach ($vendors as $s) { ?>
                         <option value="<?php echo pur_html_entity_decode($s['userid']); ?>" <?php if (isset($pur_request) && in_array($s['userid'], $vendors_arr)) {
-                                                                                              echo 'selected';
-                                                                                            } ?>><?php echo pur_html_entity_decode($s['company']); ?></option>
+                          echo 'selected';
+                        } ?>><?php echo pur_html_entity_decode($s['company']); ?></option>
                       <?php } ?>
                     </select>
                   </div>
@@ -351,9 +347,7 @@
                     echo form_hidden('from_currency', $from_currency);
 
                     ?>
-                    <div class="col-md-8 <?php if ($pur_request_currency->id == $base_currency->id) {
-                                            echo 'hide';
-                                          } ?>" id="currency_rate_div">
+                    <div class="col-md-8 hide" id="currency_rate_div">
                       <div class="col-md-10 text-right">
 
                         <p class="mtop10"><?php echo _l('currency_rate'); ?><span id="convert_str"><?php echo ' (' . $base_currency->name . ' => ' . $pur_request_currency->name . '): ';  ?></span></p>
@@ -407,8 +401,8 @@
                             <div class="input-group" id="discount-total">
 
                               <input type="text" readonly="true" class="form-control text-right" name="subtotal" value="<?php if (isset($pur_request)) {
-                                                                                                                          echo app_format_money($pur_request->subtotal, '');
-                                                                                                                        } ?>">
+                                echo app_format_money($pur_request->subtotal, '');
+                              } ?>">
 
                               <div class="input-group-addon">
                                 <div class="dropdown">
@@ -428,7 +422,6 @@
                                     ?>
                                   </span>
 
-
                                 </div>
                               </div>
 
@@ -442,8 +435,8 @@
                           <td width="65%" id="total_td">
                             <div class="input-group" id="total">
                               <input type="text" readonly="true" class="form-control text-right" name="total_mn" value="<?php if (isset($pur_request)) {
-                                                                                                                          echo app_format_money($pur_request->total, '');
-                                                                                                                        } ?>">
+                                echo app_format_money($pur_request->total, '');
+                              } ?>">
                               <div class="input-group-addon">
                                 <div class="dropdown">
 
@@ -469,7 +462,6 @@
                         </tr>
                       </tbody>
                     </table>
-
 
                   </div>
 

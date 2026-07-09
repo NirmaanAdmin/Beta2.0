@@ -45,15 +45,15 @@
         $.post(admin_url + 'purchase/get_currency_rate/' + currency_id).done(function(response) {
           response = JSON.parse(response);
           if (response.currency_rate != 1) {
-            $('#currency_rate_div').removeClass('hide');
-            $('input[name="currency_rate"]').val(response.currency_rate).change();
+            // $('#currency_rate_div').removeClass('hide');
+            // $('input[name="currency_rate"]').val(response.currency_rate).change();
             $('#convert_str').html(response.convert_str);
             $('.th_currency').html(response.currency_name);
             update_order_summary_class_value('order_summary_currency', response.currency_name.replace(/[()]/g, ''));
             pur_calculate_total();
           } else {
-            $('input[name="currency_rate"]').val(response.currency_rate).change();
-            $('#currency_rate_div').addClass('hide');
+            // $('input[name="currency_rate"]').val(response.currency_rate).change();
+            // $('#currency_rate_div').addClass('hide');
             $('#convert_str').html(response.convert_str);
             $('.th_currency').html(response.currency_name);
             update_order_summary_class_value('order_summary_currency', response.currency_name.replace(/[()]/g, ''));

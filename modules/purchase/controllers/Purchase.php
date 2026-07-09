@@ -661,7 +661,6 @@ class purchase extends AdminController
         }
 
         $this->load->model('departments_model');
-        $this->load->model('currencies_model');
 
         $send_mail_approve = $this->session->userdata("send_mail_approve");
         if ((isset($send_mail_approve)) && $send_mail_approve != '') {
@@ -702,7 +701,6 @@ class purchase extends AdminController
         $data['units'] = $this->purchase_model->get_units();
         $data['items'] = $this->purchase_model->get_items();
         $data['taxes_data'] = $this->purchase_model->get_html_tax_pur_request($id);
-        $data['base_currency'] = $this->currencies_model->get_base_currency();
         $data['check_appr'] = $this->purchase_model->get_approve_setting('pur_request');
         $data['get_staff_sign'] = $this->purchase_model->get_staff_sign($id, 'pur_request');
         $data['check_approve_status'] = $this->purchase_model->check_approval_details($id, 'pur_request');
@@ -716,6 +714,7 @@ class purchase extends AdminController
         $data['sub_groups_request'] = $this->purchase_model->get_sub_group();
         $data['area_request'] = $this->purchase_model->get_area();
         $data['activity'] = $this->purchase_model->get_pr_activity($id);
+        $data['currency_name'] = get_currency_name($data['pur_request']->currency);
         $this->load->view('purchase_request/view_pur_request', $data);
     }
 
