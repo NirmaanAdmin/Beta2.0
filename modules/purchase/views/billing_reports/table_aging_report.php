@@ -2,7 +2,6 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 
 $this->ci->load->model('purchase/purchase_model');
-$base_currency = get_base_currency_pur();
 
 $select = [
     'pv.company as vendor_name',
@@ -63,7 +62,7 @@ foreach ($rResult as $aRow) {
     $row[] = '<a href="' . admin_url('purchase/vendor/' . $aRow['vendor_id']) . '" target="_blank">' . $aRow['vendor_name'] . '</a>';
     $row[] = $aRow['invoice_no'];
     $row[] = date('d-M-Y', strtotime($aRow['invoice_date']));
-    $row[] = app_format_money($aRow['invoice_amount'], $base_currency->symbol);
+    $row[] = app_format_money($aRow['invoice_amount']);
     $row[] = $aRow['days_since_invoice'];
 
     switch ($aRow['billing_status']) {
@@ -91,7 +90,7 @@ foreach ($rResult as $aRow) {
 }
 
 foreach ($footer_data as $key => $total) {
-    $footer_data[$key] = app_format_money($total, '₹');
+    $footer_data[$key] = app_format_money($total);
 }
 
 $output['sums'] = $footer_data;

@@ -2,7 +2,6 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 
 $this->ci->load->model('purchase/purchase_model');
-$base_currency = get_base_currency_pur();
 
 $select = [
     'pi.vendor_invoice_number as invoice_no',
@@ -63,7 +62,7 @@ foreach ($rResult as $aRow) {
     $row[] = $aRow['invoice_no'];
     $row[] = '<a href="' . admin_url('purchase/vendor/' . $aRow['vendor_id']) . '" target="_blank">' . $aRow['vendor_name'] . '</a>';
     $row[] = '<a href="' . admin_url('invoices/list_invoices/' . $aRow['client_invoice_id']) . '" target="_blank">' . $aRow['invoice_title'] . '</a>';
-    $row[] = app_format_money($aRow['invoice_amount'], $base_currency->symbol);
+    $row[] = app_format_money($aRow['invoice_amount']);
 
     switch ($aRow['billing_status']) {
         case 5:
@@ -83,7 +82,7 @@ foreach ($rResult as $aRow) {
 }
 
 foreach ($footer_data as $key => $total) {
-    $footer_data[$key] = app_format_money($total, '₹');
+    $footer_data[$key] = app_format_money($total);
 }
 
 $output['sums'] = $footer_data;

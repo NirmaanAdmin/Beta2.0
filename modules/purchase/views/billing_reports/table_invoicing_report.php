@@ -34,7 +34,6 @@ $result = data_tables_init_for_billing_invoicing_reports($aColumns, $sIndexColum
 
 $output  = $result['output'];
 $rResult = $result['rResult'];
-$base_currency = get_base_currency_pur();
 
 $footer_data = [
     'total_amount' => 0,
@@ -44,8 +43,8 @@ foreach ($rResult as $aRow) {
     $row = [];
 
     $row[] = '<a href="' . admin_url('projects/view/' . $aRow['project_id']) . '" target="_blank">' . $aRow['project_name'] . '</a>';
-    $row[] = app_format_money($aRow['total_billed'], $base_currency->symbol);
-    $row[] = app_format_money($aRow['total_paid'], $base_currency->symbol);
+    $row[] = app_format_money($aRow['total_billed']);
+    $row[] = app_format_money($aRow['total_paid']);
 
     switch ($aRow['status']) {
         case 'Unpaid':
@@ -73,7 +72,7 @@ foreach ($rResult as $aRow) {
 }
 
 foreach ($footer_data as $key => $total) {
-    $footer_data[$key] = app_format_money($total, '₹');
+    $footer_data[$key] = app_format_money($total);
 }
 
 $output['sums'] = $footer_data;

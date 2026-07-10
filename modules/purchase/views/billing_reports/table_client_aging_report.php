@@ -2,7 +2,6 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 
 $this->ci->load->model('purchase/purchase_model');
-$base_currency = get_base_currency_pur();
 
 $select = [
     'inv.id as invoice_id',
@@ -62,7 +61,7 @@ foreach ($rResult as $aRow) {
     $row[] = '<a href="' . admin_url('invoices/list_invoices/' . $aRow['invoice_id']) . '" target="_blank">' . e(format_invoice_number($aRow['invoice_id'])) . '</a>';
     $row[] = '<a href="' . admin_url('projects/view/' . $aRow['project_id']) . '" target="_blank">' . $aRow['project_name'] . '</a>';
     $row[] = date('d-M-Y', strtotime($aRow['invoice_date']));
-    $row[] = app_format_money($aRow['total_left_to_pay'], $base_currency->symbol);
+    $row[] = app_format_money($aRow['total_left_to_pay']);
     $row[] = $aRow['days_outstanding'];
     $row[] = format_invoice_status($aRow['status']);
 
@@ -72,7 +71,7 @@ foreach ($rResult as $aRow) {
 }
 
 foreach ($footer_data as $key => $total) {
-    $footer_data[$key] = app_format_money($total, '₹');
+    $footer_data[$key] = app_format_money($total);
 }
 
 $output['sums'] = $footer_data;
