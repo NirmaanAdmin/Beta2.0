@@ -279,7 +279,7 @@
                         _l('supplier_name'),
                         _l('category'),
                         _l('day_vouchers'),
-                        _('Last Action By'),
+                        _l('Last Action By'),
                         _l('imported_local'),
                         _l('status'),
                         _l('production_status'),
