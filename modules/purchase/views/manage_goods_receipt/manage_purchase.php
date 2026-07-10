@@ -317,7 +317,7 @@
                     _l('supplier_name'),
                     _l('category'),
                     _l('day_vouchers'),
-                    _('Last Action By'),
+                    _l('Last Action By'),
                     _l('imported_local'),
                     _l('status'),
                     _l('production_status'),
@@ -359,7 +359,7 @@
                         _l('day_vouchers'),
                         _l('production_status'),
                         _l('status_label'),
-                        _('Last Action By'),
+                        _l('Last Action By'),
                       ];
                       ?>
                       <div>
@@ -380,7 +380,7 @@
                     _l('day_vouchers'),
                     _l('production_status'),
                     _l('status_label'),
-                    _('Last Action By'),
+                    _l('Last Action By'),
                   ), 'table_manage_goods_receipt', ['purchase_sm' => 'purchase_sm']); ?>
                 </div>
               </div>
