@@ -2946,13 +2946,18 @@ class purchase extends AdminController
     public function import_goods_report()
     {
         if ($this->input->is_ajax_request()) {
-            $this->load->model('currencies_model');
+            // $this->load->model('currencies_model');
 
             $select = [
                 'tblitems.commodity_code as item_code',
                 'tblitems.description as item_name',
                 '(select pur_order_name from ' . db_prefix() . 'pur_orders where ' . db_prefix() . 'pur_orders.id = pur_order) as po_name',
-                'total_money',
+                "CASE
+                    WHEN " . db_prefix() . "pur_orders.currency = 3 THEN
+                        " . db_prefix() . "pur_order_detail.total_money
+                    ELSE
+                        " . db_prefix() . "pur_order_detail.total_money * COALESCE(" . db_prefix() . "currencies.reference_value, 1)
+                END AS total_money",
             ];
             $where = [];
 
@@ -2965,20 +2970,20 @@ class purchase extends AdminController
             if ($custom_date_select != '') {
                 array_push($where, $custom_date_select);
             }
-            $currency = $this->currencies_model->get_base_currency();
+            // $currency = $this->currencies_model->get_base_currency();
 
-            if ($this->input->post('report_currency')) {
-                $report_currency = $this->input->post('report_currency');
-                $base_currency = get_base_currency_pur();
+            // if ($this->input->post('report_currency')) {
+            //     $report_currency = $this->input->post('report_currency');
+            //     $base_currency = get_base_currency_pur();
 
-                if ($report_currency == $base_currency->id) {
-                    array_push($where, 'AND ' . db_prefix() . 'pur_orders.currency IN (0, ' . $report_currency . ')');
-                } else {
-                    array_push($where, 'AND ' . db_prefix() . 'pur_orders.currency = ' . $report_currency);
-                }
+            //     if ($report_currency == $base_currency->id) {
+            //         array_push($where, 'AND ' . db_prefix() . 'pur_orders.currency IN (0, ' . $report_currency . ')');
+            //     } else {
+            //         array_push($where, 'AND ' . db_prefix() . 'pur_orders.currency = ' . $report_currency);
+            //     }
 
-                $currency = pur_get_currency_by_id($report_currency);
-            }
+            //     $currency = pur_get_currency_by_id($report_currency);
+            // }
 
             if ($this->input->post('products_services')) {
                 $products_services  = $this->input->post('products_services');
@@ -3000,6 +3005,7 @@ class purchase extends AdminController
             $join         = [
                 'LEFT JOIN ' . db_prefix() . 'items ON ' . db_prefix() . 'items.id = ' . db_prefix() . 'pur_order_detail.item_code',
                 'LEFT JOIN ' . db_prefix() . 'pur_orders ON ' . db_prefix() . 'pur_orders.id = ' . db_prefix() . 'pur_order_detail.pur_order',
+                'LEFT JOIN ' . db_prefix() . 'currencies ON ' . db_prefix() . 'currencies.id = ' . db_prefix() . 'pur_orders.currency',
             ];
 
             $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [
@@ -3023,17 +3029,14 @@ class purchase extends AdminController
 
                 $row[] = '<a href="' . admin_url('purchase/purchase_order/' . $aRow['po_id']) . '" target="_blank">' . $aRow['po_name'] . '</a>';
 
-
-
-
-                $row[] = app_format_money($aRow['total_money'], $currency->name);
+                $row[] = app_format_money($aRow['total_money']);
                 $footer_data['total'] += $aRow['total_money'];
 
                 $output['aaData'][] = $row;
             }
 
             foreach ($footer_data as $key => $total) {
-                $footer_data[$key] = app_format_money($total, $currency->name);
+                $footer_data[$key] = app_format_money($total);
             }
 
             $output['sums'] = $footer_data;
@@ -4715,7 +4718,6 @@ class purchase extends AdminController
     public function po_voucher_report()
     {
         if ($this->input->is_ajax_request()) {
-            $this->load->model('currencies_model');
 
             $select = [
                 'pur_order_number',
@@ -4739,7 +4741,6 @@ class purchase extends AdminController
                 array_push($where, 'AND project = ' . $project_id);
             }
 
-            $currency = $this->currencies_model->get_base_currency();
             $aColumns     = $select;
             $sIndexColumn = 'id';
             $sTable       = db_prefix() . 'pur_orders';
@@ -4824,7 +4825,7 @@ class purchase extends AdminController
     public function po_report()
     {
         if ($this->input->is_ajax_request()) {
-            $this->load->model('currencies_model');
+            // $this->load->model('currencies_model');
 
             $select = [
                 'pur_order_number',
@@ -4832,9 +4833,24 @@ class purchase extends AdminController
                 'department',
                 'vendor',
                 'approve_status',
-                'subtotal',
-                'total_tax',
-                'total',
+                "CASE
+                    WHEN " . db_prefix() . "pur_orders.currency = 3 THEN
+                        " . db_prefix() . "pur_orders.subtotal
+                    ELSE
+                        " . db_prefix() . "pur_orders.subtotal * COALESCE(" . db_prefix() . "currencies.reference_value, 1)
+                END AS subtotal",
+                "CASE
+                    WHEN " . db_prefix() . "pur_orders.currency = 3 THEN
+                        " . db_prefix() . "pur_orders.total_tax
+                    ELSE
+                        " . db_prefix() . "pur_orders.total_tax * COALESCE(" . db_prefix() . "currencies.reference_value, 1)
+                END AS total_tax",
+                "CASE
+                    WHEN " . db_prefix() . "pur_orders.currency = 3 THEN
+                        " . db_prefix() . "pur_orders.total
+                    ELSE
+                        " . db_prefix() . "pur_orders.total * COALESCE(" . db_prefix() . "currencies.reference_value, 1)
+                END AS total",
             ];
             $where = [];
             $project_id = get_default_project();
@@ -4861,20 +4877,20 @@ class purchase extends AdminController
                 array_push($where, 'AND department IN (' . implode(',', $this->input->post('department')) . ')');
             }
 
-            $currency = $this->currencies_model->get_base_currency();
+            // $currency = $this->currencies_model->get_base_currency();
 
-            if ($this->input->post('report_currency')) {
-                $report_currency = $this->input->post('report_currency');
-                $base_currency = get_base_currency_pur();
+            // if ($this->input->post('report_currency')) {
+            //     $report_currency = $this->input->post('report_currency');
+            //     $base_currency = get_base_currency_pur();
 
-                if ($report_currency == $base_currency->id) {
-                    array_push($where, 'AND ' . db_prefix() . 'pur_orders.currency IN (0, ' . $report_currency . ')');
-                } else {
-                    array_push($where, 'AND ' . db_prefix() . 'pur_orders.currency = ' . $report_currency);
-                }
+            //     if ($report_currency == $base_currency->id) {
+            //         array_push($where, 'AND ' . db_prefix() . 'pur_orders.currency IN (0, ' . $report_currency . ')');
+            //     } else {
+            //         array_push($where, 'AND ' . db_prefix() . 'pur_orders.currency = ' . $report_currency);
+            //     }
 
-                $currency = pur_get_currency_by_id($report_currency);
-            }
+            //     $currency = pur_get_currency_by_id($report_currency);
+            // }
 
             $aColumns     = $select;
             $sIndexColumn = 'id';
@@ -4883,6 +4899,7 @@ class purchase extends AdminController
                 'LEFT JOIN ' . db_prefix() . 'departments ON ' . db_prefix() . 'departments.departmentid = ' . db_prefix() . 'pur_orders.department',
                 'LEFT JOIN ' . db_prefix() . 'projects ON ' . db_prefix() . 'projects.id = ' . db_prefix() . 'pur_orders.project',
                 'LEFT JOIN ' . db_prefix() . 'pur_vendor ON ' . db_prefix() . 'pur_vendor.userid = ' . db_prefix() . 'pur_orders.vendor',
+                'LEFT JOIN ' . db_prefix() . 'currencies ON ' . db_prefix() . 'currencies.id = ' . db_prefix() . 'pur_orders.currency',
             ];
 
             $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [
@@ -4914,11 +4931,11 @@ class purchase extends AdminController
 
                 $row[] = get_status_approve($aRow['approve_status']);
 
-                $row[] = app_format_money($aRow['subtotal'], $currency->name);
+                $row[] = app_format_money($aRow['subtotal']);
 
-                $row[] = app_format_money($aRow['total_tax'], $currency->name);
+                $row[] = app_format_money($aRow['total_tax']);
 
-                $row[] = app_format_money($aRow['total'], $currency->name);
+                $row[] = app_format_money($aRow['total']);
 
                 $footer_data['total'] += $aRow['total'];
                 $footer_data['total_tax'] += $aRow['total_tax'];
@@ -4928,7 +4945,7 @@ class purchase extends AdminController
             }
 
             foreach ($footer_data as $key => $total) {
-                $footer_data[$key] = app_format_money($total, $currency->name);
+                $footer_data[$key] = app_format_money($total);
             }
 
             $output['sums'] = $footer_data;
@@ -4945,7 +4962,7 @@ class purchase extends AdminController
     public function wo_report()
     {
         if ($this->input->is_ajax_request()) {
-            $this->load->model('currencies_model');
+            // $this->load->model('currencies_model');
 
             $select = [
                 'wo_order_number',
@@ -4953,9 +4970,24 @@ class purchase extends AdminController
                 'department',
                 'vendor',
                 'approve_status',
-                'subtotal',
-                'total_tax',
-                'total',
+                "CASE
+                    WHEN " . db_prefix() . "wo_orders.currency = 3 THEN
+                        " . db_prefix() . "wo_orders.subtotal
+                    ELSE
+                        " . db_prefix() . "wo_orders.subtotal * COALESCE(" . db_prefix() . "currencies.reference_value, 1)
+                END AS subtotal",
+                "CASE
+                    WHEN " . db_prefix() . "wo_orders.currency = 3 THEN
+                        " . db_prefix() . "wo_orders.total_tax
+                    ELSE
+                        " . db_prefix() . "wo_orders.total_tax * COALESCE(" . db_prefix() . "currencies.reference_value, 1)
+                END AS total_tax",
+                "CASE
+                    WHEN " . db_prefix() . "wo_orders.currency = 3 THEN
+                        " . db_prefix() . "wo_orders.total
+                    ELSE
+                        " . db_prefix() . "wo_orders.total * COALESCE(" . db_prefix() . "currencies.reference_value, 1)
+                END AS total",
             ];
             $where = [];
             $project_id = get_default_project();
@@ -4982,20 +5014,20 @@ class purchase extends AdminController
                 array_push($where, 'AND department IN (' . implode(',', $this->input->post('wo_department')) . ')');
             }
 
-            $currency = $this->currencies_model->get_base_currency();
+            // $currency = $this->currencies_model->get_base_currency();
 
-            if ($this->input->post('report_currency')) {
-                $report_currency = $this->input->post('report_currency');
-                $base_currency = get_base_currency_pur();
+            // if ($this->input->post('report_currency')) {
+            //     $report_currency = $this->input->post('report_currency');
+            //     $base_currency = get_base_currency_pur();
 
-                if ($report_currency == $base_currency->id) {
-                    array_push($where, 'AND ' . db_prefix() . 'wo_orders.currency IN (0, ' . $report_currency . ')');
-                } else {
-                    array_push($where, 'AND ' . db_prefix() . 'wo_orders.currency = ' . $report_currency);
-                }
+            //     if ($report_currency == $base_currency->id) {
+            //         array_push($where, 'AND ' . db_prefix() . 'wo_orders.currency IN (0, ' . $report_currency . ')');
+            //     } else {
+            //         array_push($where, 'AND ' . db_prefix() . 'wo_orders.currency = ' . $report_currency);
+            //     }
 
-                $currency = pur_get_currency_by_id($report_currency);
-            }
+            //     $currency = pur_get_currency_by_id($report_currency);
+            // }
 
             $aColumns     = $select;
             $sIndexColumn = 'id';
@@ -5004,6 +5036,7 @@ class purchase extends AdminController
                 'LEFT JOIN ' . db_prefix() . 'departments ON ' . db_prefix() . 'departments.departmentid = ' . db_prefix() . 'wo_orders.department',
                 'LEFT JOIN ' . db_prefix() . 'projects ON ' . db_prefix() . 'projects.id = ' . db_prefix() . 'wo_orders.project',
                 'LEFT JOIN ' . db_prefix() . 'pur_vendor ON ' . db_prefix() . 'pur_vendor.userid = ' . db_prefix() . 'wo_orders.vendor',
+                'LEFT JOIN ' . db_prefix() . 'currencies ON ' . db_prefix() . 'currencies.id = ' . db_prefix() . 'wo_orders.currency',
             ];
 
             $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [
@@ -5011,7 +5044,6 @@ class purchase extends AdminController
                 db_prefix() . 'departments.name as department_name',
                 db_prefix() . 'projects.name as project_name',
                 db_prefix() . 'pur_vendor.company as vendor_name',
-                'total',
             ]);
 
             $output  = $result['output'];
@@ -5035,11 +5067,11 @@ class purchase extends AdminController
 
                 $row[] = get_status_approve($aRow['approve_status']);
 
-                $row[] = app_format_money($aRow['subtotal'], $currency->name);
+                $row[] = app_format_money($aRow['subtotal']);
 
-                $row[] = app_format_money($aRow['total_tax'], $currency->name);
+                $row[] = app_format_money($aRow['total_tax']);
 
-                $row[] = app_format_money($aRow['total'], $currency->name);
+                $row[] = app_format_money($aRow['total']);
 
                 $footer_data['total'] += $aRow['total'];
                 $footer_data['total_tax'] += $aRow['total_tax'];
@@ -5049,7 +5081,7 @@ class purchase extends AdminController
             }
 
             foreach ($footer_data as $key => $total) {
-                $footer_data[$key] = app_format_money($total, $currency->name);
+                $footer_data[$key] = app_format_money($total);
             }
 
             $output['sums'] = $footer_data;
@@ -16010,7 +16042,6 @@ class purchase extends AdminController
     public function po_wo_aging_report()
     {
         if ($this->input->is_ajax_request()) {
-            $this->load->model('currencies_model');
 
             $select = [
                 'order_number',
@@ -16150,13 +16181,27 @@ class purchase extends AdminController
     public function payment_certificate_summary_report()
     {
         if ($this->input->is_ajax_request()) {
-            $this->load->model('currencies_model');
 
             $select = [
                 'pur_order_number',
                 'vendor',
-                'total',
-                '(SELECT SUM(po_this_bill) FROM ' . db_prefix() . 'payment_certificate WHERE ' . db_prefix() . 'payment_certificate.po_id = ' . db_prefix() . 'pur_orders.id) as pc_total',
+                "CASE
+                    WHEN " . db_prefix() . "pur_orders.currency = 3 THEN
+                        " . db_prefix() . "pur_orders.total
+                    ELSE
+                        " . db_prefix() . "pur_orders.total * COALESCE(" . db_prefix() . "currencies.reference_value, 1)
+                END AS total",
+                "(
+                    SELECT
+                        CASE
+                            WHEN " . db_prefix() . "pur_orders.currency = 3 THEN
+                                COALESCE(SUM(pc.po_this_bill), 0)
+                            ELSE
+                                COALESCE(SUM(pc.po_this_bill), 0) * COALESCE(" . db_prefix() . "currencies.reference_value, 1)
+                        END
+                    FROM " . db_prefix() . "payment_certificate pc
+                    WHERE pc.po_id = " . db_prefix() . "pur_orders.id
+                ) AS pc_total",
                 '1',
                 '2',
             ];
@@ -16183,6 +16228,7 @@ class purchase extends AdminController
             $sTable       = db_prefix() . 'pur_orders';
             $join         = [
                 'LEFT JOIN ' . db_prefix() . 'pur_vendor ON ' . db_prefix() . 'pur_vendor.userid = ' . db_prefix() . 'pur_orders.vendor',
+                'LEFT JOIN ' . db_prefix() . 'currencies ON ' . db_prefix() . 'currencies.id = ' . db_prefix() . 'pur_orders.currency',
             ];
 
             $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [
@@ -16211,9 +16257,9 @@ class purchase extends AdminController
                 $balance = $po_total - $pc_total;
                 $paid_percentage = $po_total > 0 ? round(($pc_total / $po_total) * 100, 2) : 0;
 
-                $row[] = app_format_money($po_total, '₹');
-                $row[] = app_format_money($pc_total, '₹');
-                $row[] = app_format_money($balance, '₹');
+                $row[] = app_format_money($po_total);
+                $row[] = app_format_money($pc_total);
+                $row[] = app_format_money($balance);
                 $row[] = $paid_percentage . '%';
 
                 $footer_data['total_po_value'] += $po_total;
@@ -16224,7 +16270,7 @@ class purchase extends AdminController
             }
 
             foreach ($footer_data as $key => $total) {
-                $footer_data[$key] = app_format_money($total, '₹');
+                $footer_data[$key] = app_format_money($total);
             }
 
             $output['sums'] = $footer_data;
@@ -16253,7 +16299,6 @@ class purchase extends AdminController
     public function delivery_performance_report()
     {
         if ($this->input->is_ajax_request()) {
-            $this->load->model('currencies_model');
 
             $select = [
                 'tblitems.description as item_name',

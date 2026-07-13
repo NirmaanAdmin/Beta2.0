@@ -5649,18 +5649,36 @@ class Purchase_model extends App_Model
             $year = date('Y');
         }
 
-        $base_currency = get_base_currency_pur();
+        // $base_currency = get_base_currency_pur();
 
-        if ($currency == $base_currency->id) {
-            $where = 'AND ' . db_prefix() . 'pur_orders.currency IN (0, ' . $currency . ')';
-        } else {
-            $where =  'AND ' . db_prefix() . 'pur_orders.currency = ' . $currency;
-        }
+        // if ($currency == $base_currency->id) {
+        //     $where = 'AND ' . db_prefix() . 'pur_orders.currency IN (0, ' . $currency . ')';
+        // } else {
+        //     $where =  'AND ' . db_prefix() . 'pur_orders.currency = ' . $currency;
+        // }
 
-
-        $query = $this->db->query('SELECT DATE_FORMAT(order_date, "%m") AS month, Sum((SELECT SUM(total_money) as total FROM ' . db_prefix() . 'pur_order_detail where pur_order = ' . db_prefix() . 'pur_orders.id)) as total 
-            FROM ' . db_prefix() . 'pur_orders where DATE_FORMAT(order_date, "%Y") = ' . $year . ' ' . $where . '
-            group by month')->result_array();
+        $query = $this->db->query("
+            SELECT
+                DATE_FORMAT(po.order_date, '%m') AS month,
+                SUM(
+                    (
+                        SELECT
+                            SUM(
+                                CASE
+                                    WHEN po.currency = 3 THEN pod.total_money
+                                    ELSE pod.total_money * COALESCE(cur.reference_value, 1)
+                                END
+                            )
+                        FROM " . db_prefix() . "pur_order_detail pod
+                        LEFT JOIN " . db_prefix() . "currencies cur
+                            ON cur.id = po.currency
+                        WHERE pod.pur_order = po.id
+                    )
+                ) AS total
+            FROM " . db_prefix() . "pur_orders po
+            WHERE DATE_FORMAT(po.order_date, '%Y') = {$year}
+            GROUP BY month
+        ")->result_array();
         $result = [];
         $result[] = 0;
         $result[] = 0;
