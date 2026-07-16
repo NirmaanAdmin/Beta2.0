@@ -2503,7 +2503,7 @@ class Vendors_portal extends App_Controller
 
     public function update_single_form_settings()
     {
-        
+
         if ($this->input->post()) {
             $this->session->mark_as_flash('active_tab');
             $this->session->mark_as_flash('active_tab_settings');
@@ -2527,7 +2527,7 @@ class Vendors_portal extends App_Controller
             if ($success) {
                 $this->session->set_flashdata('active_tab', true);
                 $this->session->set_flashdata('active_tab_settings', true);
-                
+
                 set_alert('success', _l('form_settings_updated_successfully'));
             }
             echo json_encode([
@@ -2535,5 +2535,128 @@ class Vendors_portal extends App_Controller
             ]);
             die();
         }
+    }
+
+    public function daily_reports()
+    {
+        $data['title'] = _l('Daily Reports');
+        $data['purchase_request'] = $this->purchase_model->get_purchase_request_by_vendor(get_vendor_user_id());
+
+        $this->data($data);
+        $this->view('vendor_portal/daily_reports/manage');
+        $this->layout();
+    }
+
+    public function add_dpr_vendor($form_id = '')
+    {
+        $this->load->model('clients_model');
+        if ($this->input->post()) {
+            $data = $this->input->post();
+            $data['form_type'] = 'dpr';
+
+            $data['message'] = html_purify($this->input->post('message', false));
+            $id              = $this->forms_model->add($data, get_staff_user_id());
+            if ($id) {
+                set_alert('success', _l('dpr_added_successfully', $id));
+                redirect(admin_url('forms/progress_report_setting/dpr'));
+            }
+        }
+
+        // Load necessary models
+        $this->load->model('knowledge_base_model');
+        $this->load->model('departments_model');
+        $this->load->model('projects_model');
+        $data['departments']        = $this->departments_model->get();
+        $data['predefined_replies'] = $this->forms_model->get_predefined_reply();
+        $data['priorities']         = $this->forms_model->get_priority();
+        $data['services']           = $this->forms_model->get_service();
+        $whereStaff                 = [];
+
+        $data['staff']     = $this->staff_model->get('', $whereStaff);
+        $data['articles']  = $this->knowledge_base_model->get();
+        $data['bodyclass'] = 'form';
+        $data['title']     = _l('new_form');
+
+        if ($this->input->get('project_id') && $this->input->get('project_id') > 0) {
+            // request from project area to create new form
+            $data['project_id'] = $this->input->get('project_id');
+            $data['userid']     = get_client_id_by_project_id($data['project_id']);
+            if (total_rows(db_prefix() . 'contacts', ['active' => 1, 'userid' => $data['userid']]) == 1) {
+                $contact = $this->clients_model->get_contacts($data['userid']);
+                if (isset($contact[0])) {
+                    $data['contact'] = $contact[0];
+                }
+            }
+        } elseif ($this->input->get('contact_id') && $this->input->get('contact_id') > 0 && $this->input->get('userid')) {
+            $contact_id = $this->input->get('contact_id');
+            if (total_rows(db_prefix() . 'contacts', ['active' => 1, 'id' => $contact_id]) == 1) {
+                $contact = $this->clients_model->get_contact($contact_id);
+                if ($contact) {
+                    $data['contact'] = (array) $contact;
+                }
+            }
+        }
+        $data['projects'] = $this->projects_model->get_items();
+        
+        $data['form_listing'] = $this->forms_model->get_form_listing();
+        $agency = get_vendor_user_id();
+        $data['ven_project_ids'] = vendor_project_list($agency);
+        $dpr_row_template = $this->purchase_model->create_dpr_row_template('','',$agency);
+        $data['isedit'] = false;
+        if ($form_id != 0) {
+            $dpr_form = $this->forms_model->get_dpr_form($form_id);
+            $dpr_form_detail = $this->forms_model->get_dpr_form_detail($form_id);
+            if (!empty($dpr_form_detail)) {
+                $index_order = 0;
+                foreach ($dpr_form_detail as $value) {
+                    $index_order++;
+                    $dpr_row_template .= $this->forms_model->create_dpr_row_template(
+                        'items[' . $index_order . ']',
+                        $value['location'],
+                        $value['agency'],
+                        $value['type'],
+                        $value['work_execute'],
+                        $value['material_consumption'],
+                        $value['work_execute_unit'],
+                        $value['material_consumption_unit'],
+                        $value['machinery'],
+                        $value['skilled'],
+                        $value['unskilled'],
+                        $value['depart'],
+                        $value['total'],
+                        $value['male'],
+                        $value['female'],
+                        true,
+                        $value['id']
+                    );
+                }
+            }
+            $data['dpr_form'] = $dpr_form;
+            $data['isedit'] = true;
+        }
+        $data['dpr_row_template'] = $dpr_row_template;
+        // add_admin_progress_reports_js_assets();
+        $this->data($data);
+        $this->view('vendor_portal/daily_reports/add');
+        $this->layout();
+    }
+
+    public function get_dpr_row_template()
+    {
+        $name = $this->input->post('name');
+        $location = $this->input->post('location');
+        $agency = $this->input->post('agency');
+        $type = $this->input->post('type');
+        $sub_type = $this->input->post('sub_type');
+        $work_execute = $this->input->post('work_execute');
+        $material_consumption = $this->input->post('material_consumption');
+        $male = $this->input->post('male');
+        $female = $this->input->post('female');
+        $total = $this->input->post('total');
+        $machinery = $this->input->post('machinery');
+        $total_machinery = $this->input->post('total_machinery');
+        $item_key = $this->input->post('item_key');
+
+        echo $this->purchase_model->create_dpr_row_template($name, $location, $agency, $type, $sub_type, $work_execute, $material_consumption, $male, $female, $total, $machinery, $total_machinery, false, $item_key);
     }
 }

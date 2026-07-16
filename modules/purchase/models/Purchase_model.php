@@ -29370,4 +29370,67 @@ class Purchase_model extends App_Model
         $this->db->where('estimate_id', $estimate_id);
         return $this->db->get(db_prefix() . 'estimate_package_info')->result_array();
     }
+    
+     public function create_dpr_row_template($name = '', $location = '', $agency = '', $type = '', $sub_type = '', $work_execute = '', $material_consumption = '', $male = '', $female = '', $total = '', $machinery = '', $total_machinery = '', $is_edit = false, $item_key = '')
+    {
+        $row = '';
+
+        $name_location = 'location';
+        $name_agency = 'agency';
+        $name_type = 'type';
+        $name_sub_type = 'sub_type';
+        $name_work_execute = 'work_execute';
+        $name_material_consumption = 'material_consumption';
+        $name_male = 'male';
+        $name_female = 'female';
+        $name_total = 'total';
+        $name_machinery = 'machinery';
+        $name_total_machinery = 'total_machinery';
+
+        if ($name == '') {
+            $row .= '<tr class="main">';
+            $manual = true;
+        } else {
+            $manual = false;
+            $row .= '<tr class="item"><input type="hidden" class="ids" name="' . $name . '[id]" value="' . $item_key . '">';
+            $name_location = $name . '[location]';
+            $name_agency = $name . '[agency]';
+            $name_type = $name . '[type]';
+            $name_sub_type = $name . '[sub_type]';
+            $name_work_execute = $name . '[work_execute]';
+            $name_material_consumption = $name . '[material_consumption]';
+            $name_male = $name . '[male]';
+            $name_female = $name . '[female]';
+            $name_total = $name . '[total]';
+            $name_machinery = $name . '[machinery]';
+            $name_total_machinery = $name . '[total_machinery]';
+        }
+
+        $male = !empty($male) ? $male : 0;
+        $female = !empty($female) ? $female : 0;
+        $total = !empty($total) ? $total : 0;
+        $total_machinery = !empty($total_machinery) ? $total_machinery : 0;
+
+        $row .= '<td class="location">' . render_input($name_location, '', $location) . '</td>';
+        $agency = get_vendor_user_id();
+        $row .= '<td class="agency">' . get_vendor_dpr($name_agency, $agency) . '</td>';
+        $row .= '<td class="progress_report_type" >' . get_progress_report_type_listing($name_type, $type) . '</td>';
+        $row .= '<td class="progress_report_sub_type">' . render_textarea($name_sub_type, '', $sub_type) . '</td>';
+        $row .= '<td class="work_execute">' . render_input($name_work_execute, '', $work_execute) . '</td>';
+        $row .= '<td class="material_consumption">' . render_input($name_material_consumption, '', $material_consumption) . '</td>';
+        $row .= '<td class="male">' . render_input($name_male, '', $male, 'nubmer', ['onblur' => 'dpr_calculate_total();', 'onchange' => 'dpr_calculate_total();']) . '</td>';
+        $row .= '<td class="female">' . render_input($name_female, '', $female, 'nubmer', ['onblur' => 'dpr_calculate_total();', 'onchange' => 'dpr_calculate_total();']) . '</td>';
+        $row .= '<td class="total">' . render_input($name_total, '', $total, 'number', ['readonly' => true, 'style' => 'padding:0px !important;text-align: center;']) . '</td>';
+        $row .= '<td class="machinery">' . get_progress_report_machinary_listing($name_machinery, $machinery) . '</td>';
+        $row .= '<td class="total_machinery">' . render_input($name_total_machinery, '', $total_machinery, 'nubmer') . '</td>';
+
+        if ($name == '') {
+            $row .= '<td><button type="button" class="btn pull-right btn-info dpr-add-item-to-table"><i class="fa fa-check"></i></button></td>';
+        } else {
+            $row .= '<td><a href="#" class="btn btn-danger pull-right" onclick="dpr_delete_item(this,' . $item_key . ',\'.invoice-item\'); return false;"><i class="fa fa-trash"></i></a></td>';
+        }
+
+        $row .= '</tr>';
+        return $row;
+    }
 }

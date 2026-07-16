@@ -376,7 +376,7 @@
 
             <div class="col-md-7 small-table-right-col">
                <div id="pur_order" class="hide">
-               </div>
+               </div> 
             </div>
          </div>
       </div>

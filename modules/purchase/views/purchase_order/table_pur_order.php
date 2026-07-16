@@ -431,7 +431,7 @@ foreach ($rResult as $aRow) {
         ];
     }
     $footer_data[$currency_key]['subtotal'] += $po_contract_data['po_contract_amount'];
-    $footer_data[$currency_key]['tax'] += $po_contract_data['po_with_co_tax'];
+    $footer_data[$currency_key]['tax'] += $po_contract_data['po_with_co_tax']; 
     $footer_data[$currency_key]['total'] += $po_contract_data['po_with_co_total'];
     $output['aaData'][] = $row;
     $sr++;

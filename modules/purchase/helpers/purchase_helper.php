@@ -7472,3 +7472,140 @@ function get_estimate_package_list($name_package, $package_id = '')
 
     return render_select($name_package, $estimate_package_info, array('id', 'package_name'), '', $package_id);
 }
+
+function get_vendor_dpr($name_agency, $agency)
+{
+    $where = [];
+    $CI = &get_instance();
+
+    $CI->db->select(
+        implode(',', prefixed_table_fields_array(db_prefix() . 'pur_vendor')) . ',' . get_sql_select_vendor_company()
+    );
+
+    $CI->db->join(
+        db_prefix() . 'countries',
+        db_prefix() . 'countries.country_id = ' . db_prefix() . 'pur_vendor.country',
+        'left'
+    );
+
+    $CI->db->join(
+        db_prefix() . 'pur_contacts',
+        db_prefix() . 'pur_contacts.userid = ' . db_prefix() . 'pur_vendor.userid AND is_primary = 1',
+        'left'
+    );
+
+    if ((is_array($where) && count($where) > 0) || (is_string($where) && $where != '')) {
+        $CI->db->where($where);
+    }
+
+    // Show only the selected vendor
+    if (!empty($agency)) {
+        $CI->db->where(db_prefix() . 'pur_vendor.userid', $agency);
+    }
+
+    // Permission check
+    if (!has_permission('purchase_vendors', '', 'view') && is_staff_logged_in()) {
+        $CI->db->where(
+            db_prefix() . 'pur_vendor.userid IN (SELECT vendor_id FROM ' .
+            db_prefix() . 'pur_vendor_admin WHERE staff_id=' . get_staff_user_id() . ')',
+            null,
+            false
+        );
+    }
+
+    $CI->db->order_by('company', 'ASC');
+
+    $result = $CI->db->get(db_prefix() . 'pur_vendor')->result_array();
+
+    return render_select($name_agency, $result, ['userid', 'company'], '', $agency);
+}
+
+function get_vendor_project_ids($vendor_id)
+{
+    $CI = &get_instance();
+
+    $project_ids = [];
+
+    // Get projects from Purchase Orders
+    $pur_orders = $CI->db->select('project')
+        ->from(db_prefix() . 'pur_orders')
+        ->where('vendor', $vendor_id)
+        ->where('project IS NOT NULL', null, false)
+        ->where('project !=', '')
+        ->get()
+        ->result_array();
+
+    foreach ($pur_orders as $row) {
+        $project_ids[] = $row['project'];
+    }
+
+    // Get projects from Work Orders
+    $wo_orders = $CI->db->select('project')
+        ->from(db_prefix() . 'wo_orders')
+        ->where('vendor', $vendor_id)
+        ->where('project IS NOT NULL', null, false)
+        ->where('project !=', '')
+        ->get()
+        ->result_array();
+
+    foreach ($wo_orders as $row) {
+        $project_ids[] = $row['project'];
+    }
+
+    // Remove duplicate values
+    $project_ids = array_values(array_unique($project_ids));
+    // Return single ID if only one exists
+    if (count($project_ids) == 1) {
+        return $project_ids[0];
+    }   
+    return $project_ids;
+}
+
+function vendor_project_list($vendor_id)
+{
+    $CI = &get_instance();
+
+    // Get project IDs from Purchase Orders
+    $pur_projects = $CI->db->select('project')
+        ->from(db_prefix() . 'pur_orders')
+        ->where('vendor', $vendor_id)
+        ->where('project IS NOT NULL', null, false)
+        ->where('project !=', '')
+        ->get()
+        ->result_array();
+
+    // Get project IDs from Work Orders
+    $wo_projects = $CI->db->select('project')
+        ->from(db_prefix() . 'wo_orders')
+        ->where('vendor', $vendor_id)
+        ->where('project IS NOT NULL', null, false)
+        ->where('project !=', '')
+        ->get()
+        ->result_array();
+
+    // Merge project IDs
+    $project_ids = [];
+
+    foreach ($pur_projects as $row) {
+        $project_ids[] = $row['project'];
+    }
+
+    foreach ($wo_projects as $row) {
+        $project_ids[] = $row['project'];
+    }
+
+    // Remove duplicate IDs
+    $project_ids = array_unique($project_ids);
+
+    if (empty($project_ids)) {
+        return [];
+    }
+
+    // Return project id and name
+    return $CI->db->select('id, name')
+        ->from(db_prefix() . 'projects')
+        ->where_in('id', $project_ids)
+        ->order_by('name', 'ASC')
+        ->get()
+        ->result_array();
+}

@@ -9,12 +9,12 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
          </button>
-         <?php get_company_logo('purchase/vendors_portal','navbar-brand logo'); ?>
+         <?php get_company_logo('purchase/vendors_portal', 'navbar-brand logo'); ?>
       </div>
       <!-- Collect the nav links, forms, and other content for toggling -->
       <div class="collapse navbar-collapse" id="theme-navbar-collapse">
          <ul class="nav navbar-nav navbar-right">
-          <?php  if (is_vendor_logged_in()) { ?>
+            <?php if (is_vendor_logged_in()) { ?>
                <?php /* <li class="customers-nav-item-items">
                   <a href="<?php echo site_url('purchase/vendors_portal/items'); ?>">
                      <?php
@@ -23,43 +23,48 @@
                     ?>
                   </a>
                </li> */ ?>
+               <li class="customers-nav-item-items">
+                  <a href="<?php echo site_url('purchase/vendors_portal/daily_reports'); ?>">
+                     <?php echo _l('Daily Reports'); ?>
+                  </a>
+               </li>
 
                <li class="customers-nav-item-items">
                   <a href="<?php echo site_url('purchase/vendors_portal/drawing_management'); ?>">
                      <?php echo _l('dms_documents'); ?>
                   </a>
                </li>
-               
+
                <!-- <li class="customers-nav-item-items">
                   <a href="<?php echo site_url('purchase/vendors_portal/purchase_request'); ?>">
                      <?php
-                     
+
                      echo _l('purchase_request');
-                    ?>
+                     ?>
                   </a>
                </li> -->
                <li class="customers-nav-item-items">
                   <a href="<?php echo site_url('purchase/vendors_portal/purchase_tender'); ?>">
                      <?php
-                     
+
                      echo _l('Tenders');
-                    ?>
+                     ?>
                   </a>
                </li>
                <li class="customers-nav-item-items">
                   <a href="<?php echo site_url('purchase/vendors_portal/quotations'); ?>">
                      <?php
-                     
+
                      echo _l('quotations');
-                    ?>
+                     ?>
                   </a>
                </li>
-                <li class="customers-nav-item-items">
+               <li class="customers-nav-item-items">
                   <a href="<?php echo site_url('purchase/vendors_portal/purchase_order'); ?>">
                      <?php
-                     
+
                      echo _l('purchase_order');
-                    ?>
+                     ?>
                   </a>
                </li>
                <?php /* <li class="customers-nav-item-items">
@@ -73,9 +78,9 @@
                <li class="customers-nav-item-items">
                   <a href="<?php echo site_url('purchase/vendors_portal/invoices'); ?>">
                      <?php
-                     
+
                      echo _l('pur_invoices');
-                    ?>
+                     ?>
                   </a>
                </li>
 
@@ -87,33 +92,33 @@
                     ?>
                   </a>
                </li> */ ?>
-        <?php } ?>
-        
-          
-            <?php if(is_vendor_logged_in()) { ?>
+            <?php } ?>
+
+
+            <?php if (is_vendor_logged_in()) { ?>
                <li class="dropdown customers-nav-item-profile">
                   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                     <img src="<?php echo vendor_contact_profile_image_url($contact->id,'thumb'); ?>" data-toggle="tooltip" data-title="<?php echo html_escape($contact->firstname . ' ' .$contact->lastname); ?>" data-placement="bottom" class="client-profile-image-small mright5">
+                     <img src="<?php echo vendor_contact_profile_image_url($contact->id, 'thumb'); ?>" data-toggle="tooltip" data-title="<?php echo html_escape($contact->firstname . ' ' . $contact->lastname); ?>" data-placement="bottom" class="client-profile-image-small mright5">
                      <span class="caret"></span>
-                     </a>
-                     <ul class="dropdown-menu animated fadeIn">
-                        <li class="customers-nav-item-edit-profile">
-                           <a href="<?php echo site_url('purchase/vendors_portal/profile'); ?>">
-                              <?php echo _l('clients_nav_profile'); ?>
+                  </a>
+                  <ul class="dropdown-menu animated fadeIn">
+                     <li class="customers-nav-item-edit-profile">
+                        <a href="<?php echo site_url('purchase/vendors_portal/profile'); ?>">
+                           <?php echo _l('clients_nav_profile'); ?>
+                        </a>
+                     </li>
+                     <?php if ($contact->is_primary == 1) { ?>
+                        <li class="customers-nav-item-company-info">
+                           <a href="<?php echo site_url('purchase/vendors_portal/company'); ?>">
+                              <?php echo _l('client_company_info'); ?>
                            </a>
                         </li>
-                        <?php if($contact->is_primary == 1){ ?>
-                           <li class="customers-nav-item-company-info">
-                              <a href="<?php echo site_url('purchase/vendors_portal/company'); ?>">
-                                 <?php echo _l('client_company_info'); ?>
-                              </a>
-                           </li>
-                        <?php } ?>
-                    
-                        
+                     <?php } ?>
+
+
                      <li class="customers-nav-item-languages">
                         <a href="<?php echo site_url('purchase/vendors_portal/setting_language'); ?>">
-                             <?php echo _l('language'); ?>
+                           <?php echo _l('language'); ?>
                         </a>
                      </li>
 
@@ -125,7 +130,7 @@
                   </ul>
                </li>
             <?php } ?>
-            
+
          </ul>
       </div>
       <!-- /.navbar-collapse -->
