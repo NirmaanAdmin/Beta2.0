@@ -2706,6 +2706,8 @@ class Estimates_model extends App_Model
                             $order_link = '<a href="' . admin_url('purchase/purchase_order/#' . $pvalue['id']) . '" target="_blank">'.$pvalue['order_number']. '</a>';
                         } else if($pvalue['type'] == 'wo') {
                             $order_link = '<a href="' . admin_url('purchase/work_order/#' . $pvalue['id']) . '" target="_blank">'.$pvalue['order_number']. '</a>';
+                        } else if($pvalue['type'] == 'ot') {
+                            $order_link = $pvalue['order_number'];
                         } else {
                             $order_link = '';
                         }
@@ -4007,6 +4009,27 @@ class Estimates_model extends App_Model
         $this->db->order_by('wo_orders.id', 'ASC');
         $wo_orders = $this->db->get()->result_array();
 
-        return array_merge($pur_orders, $wo_orders);
+        $this->db->select("
+            pur_order_tracker.id,
+            CASE
+                WHEN pur_order_tracker.currency = 3 THEN
+                    pur_order_tracker.order_value
+                ELSE
+                    pur_order_tracker.order_value * COALESCE(cur.reference_value, 1)
+            END AS subtotal,
+            pur_order_tracker.pur_order_name AS order_number,
+            'ot' AS type
+        ", false);
+        $this->db->from(db_prefix() . 'pur_order_tracker AS pur_order_tracker');
+        $this->db->join(
+            db_prefix() . 'currencies AS cur',
+            'cur.id = pur_order_tracker.currency',
+            'left'
+        );
+        $this->db->where('pur_order_tracker.package_id', $package_id);
+        $this->db->order_by('pur_order_tracker.id', 'ASC');
+        $pur_order_tracker = $this->db->get()->result_array();
+
+        return array_merge($pur_orders, $wo_orders, $pur_order_tracker);
     }
 }
