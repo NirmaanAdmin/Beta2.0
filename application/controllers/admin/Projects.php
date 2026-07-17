@@ -22,7 +22,12 @@ class Projects extends AdminController
         $data['statuses'] = $this->projects_model->get_project_statuses();
         $this->app_scripts->add('circle-progress-js', 'assets/plugins/jquery-circle-progress/circle-progress.min.js');
         $data['title']    = _l('projects');
-        $data['table'] = App_table::find('projects');
+        // $data['table'] = App_table::find('projects');
+        $this->load->model('clients_model');
+        $this->load->model('staff_model');
+        $data['project_name'] = $this->projects_model->get();
+        $data['clients'] = $this->clients_model->get();
+        $data['members'] = $this->staff_model->get();
         $this->load->view('admin/projects/manage', $data);
     }
 
@@ -31,6 +36,13 @@ class Projects extends AdminController
         App_table::find('projects')->output([
             'clientid' => $clientid
         ]);
+    }
+
+    public function table_new()
+    {
+        if ($this->input->is_ajax_request()) {
+             $this->app->get_table_data('projects_new');
+        }
     }
 
     public function staff_projects()

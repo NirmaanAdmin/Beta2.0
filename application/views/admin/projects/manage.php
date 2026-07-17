@@ -1,5 +1,6 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
 <?php init_head(); ?>
+<?php $module_name = 'projects'; ?>
 <div id="wrapper">
     <div class="content">
         <div id="vueApp">
@@ -17,15 +18,6 @@
                             data-title="<?php echo _l('project_gant'); ?>" class="btn btn-default btn-with-tooltip">
                             <i class="fa fa-align-left" aria-hidden="true"></i>
                         </a>
-                        <div class="tw-inline pull-right">
-                            <app-filters
-                                id="<?php echo $table->id(); ?>"
-                                view="<?php echo $table->viewName(); ?>"
-                                :rules="extra.projectsRules || <?php echo app\services\utilities\Js::from($this->input->get('status') ? $table->findRule('status')->setValue([(int) $this->input->get('status')]) : []); ?>"
-                                :saved-filters="<?php echo $table->filtersJs(); ?>"
-                                :available-rules="<?php echo $table->rulesJs(); ?>">
-                            </app-filters>
-                        </div>
                         <div class="clearfix"></div>
                     </div>
 
@@ -51,24 +43,85 @@
                                         }
                                     ?>
                                 </div>
-                                <div class="_filters _hidden_inputs">
-                                    <?php foreach ($statuses as $status) { ?>
-                                    <div
-                                        class="col-md-2 col-xs-6 md:tw-border-r md:tw-border-solid md:tw-border-neutral-300 last:tw-border-r-0">
-                                        <?php $where = ($_where == '' ? '' : $_where . ' AND ') . 'status = ' . $status['id']; ?>
-                                        <a href="#"
-                                            class="tw-text-neutral-600 hover:tw-opacity-70 tw-inline-flex tw-items-center"
-                                            @click.prevent="extra.projectsRules = <?php echo app\services\utilities\Js::from($table->findRule('status')->setValue([(int) $status['id']])); ?>"
-                                            >
-                                            <span class="tw-font-semibold tw-mr-3 rtl:tw-ml-3 tw-text-lg">
-                                                <?php echo total_rows(db_prefix() . 'projects', $where); ?>
-                                            </span>
-                                            <span style="color: <?php echo e($status['color']); ?>" class="<?php echo 'project-status-'.$status['color']; ?>">
-                                                <?php echo e($status['name']); ?>
-                                            </span>
-                                        </a>
-                                    </div>
-                                    <?php } ?>
+                            </div>
+                            <hr class="hr-panel-separator" />
+                            <div class="row all_filters">
+                                <?php
+                                $project_name_filter = get_module_filter($module_name, 'project_name');
+                                $project_name_filter_val = !empty($project_name_filter) ? explode(",", $project_name_filter->filter_value) : [];
+                                ?>
+                                <div class="col-md-3 form-group">
+                                    <label for="project_name"><?php echo _l('project_name'); ?></label>
+                                    <select name="project_name[]" id="project_name" class="selectpicker" data-live-search="true" multiple="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>" data-actions-box="true">
+                                        <?php foreach ($project_name as $project) { ?>
+                                            <option value="<?php echo pur_html_entity_decode($project['id']); ?>"
+                                                <?php if (in_array($project['id'], $project_name_filter_val)) {
+                                                    echo 'selected';
+                                                } ?>>
+                                                <?php echo pur_html_entity_decode($project['name']); ?>
+                                            </option>
+                                        <?php } ?>
+                                    </select>
+                                </div>
+
+                                <?php
+                                $clients_filter = get_module_filter($module_name, 'clients');
+                                $clients_filter_val = !empty($clients_filter) ? explode(",", $clients_filter->filter_value) : [];
+                                ?>
+                                <div class="col-md-3 form-group">
+                                    <label for="clients"><?php echo _l('clients'); ?></label>
+                                    <select name="clients[]" id="clients" class="selectpicker" data-live-search="true" multiple="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>" data-actions-box="true">
+                                        <?php foreach ($clients as $client) { ?>
+                                            <option value="<?php echo pur_html_entity_decode($client['userid']); ?>"
+                                                <?php if (in_array($client['userid'], $clients_filter_val)) {
+                                                    echo 'selected';
+                                                } ?>>
+                                                <?php echo pur_html_entity_decode($client['company']); ?>
+                                            </option>
+                                        <?php } ?>
+                                    </select>
+                                </div>
+
+                                <?php
+                                $members_filter = get_module_filter($module_name, 'members');
+                                $members_filter_val = !empty($members_filter) ? explode(",", $members_filter->filter_value) : [];
+                                ?>
+                                <div class="col-md-3 form-group">
+                                    <label for="project_members"><?php echo _l('project_members'); ?></label>
+                                    <select name="members[]" id="members" class="selectpicker" data-live-search="true" multiple="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>" data-actions-box="true">
+                                        <?php foreach ($members as $member) { ?>
+                                            <option value="<?php echo pur_html_entity_decode($member['staffid']); ?>"
+                                                <?php if (in_array($member['staffid'], $members_filter_val)) {
+                                                    echo 'selected';
+                                                } ?>>
+                                                <?php echo pur_html_entity_decode($member['firstname']).' '.pur_html_entity_decode($member['lastname']); ?>
+                                            </option>
+                                        <?php } ?>
+                                    </select>
+                                </div>
+
+                                <?php
+                                $statuses_filter = get_module_filter($module_name, 'statuses');
+                                $statuses_filter_val = !empty($statuses_filter) ? explode(",", $statuses_filter->filter_value) : [];
+                                ?>
+                                <div class="col-md-3 form-group">
+                                    <label for="project_status"><?php echo _l('project_status'); ?></label>
+                                    <select name="statuses[]" id="statuses" class="selectpicker" data-live-search="true" multiple="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>" data-actions-box="true">
+                                        <?php foreach ($statuses as $status) { ?>
+                                            <option value="<?php echo pur_html_entity_decode($status['id']); ?>"
+                                                <?php if (in_array($status['id'], $statuses_filter_val)) {
+                                                    echo 'selected';
+                                                } ?>>
+                                                <?php echo pur_html_entity_decode($status['name']); ?>
+                                            </option>
+                                        <?php } ?>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-1 form-group">
+                                    <a href="javascript:void(0)" class="btn btn-info btn-icon reset_all_filters">
+                                        <?php echo _l('reset_filter'); ?>
+                                    </a>
                                 </div>
                             </div>
                             <hr class="hr-panel-separator" />
@@ -86,9 +139,22 @@
 <?php $this->load->view('admin/projects/copy_settings'); ?>
 <?php init_tail(); ?>
 <script>
+var table_projects;
 $(function() {
-    initDataTable('.table-projects', admin_url + 'projects/table', [8,9], [8,9], {},
+    table_projects = $('.table-projects');
+    var Params = {
+        "project_name": "[name='project_name[]']",
+        "clients": "[name='clients[]']",
+        "members": "[name='members[]']",
+        "statuses": "[name='statuses[]']",
+    };
+    initDataTable('.table-projects', admin_url + 'projects/table_new', [8,9], [8,9], Params,
         <?php echo hooks()->apply_filters('projects_table_default_order', json_encode([5, 'asc'])); ?>);
+    $.each(Params, function(i, obj) {
+        $('select' + obj).on('change', function() {
+            table_projects.DataTable().ajax.reload();
+        });
+    });
 
     $('.table-projects').DataTable().on('draw', function() {
         var rows = $('.table-projects').find('tr');
@@ -104,7 +170,26 @@ $(function() {
                 }
             })
         })
-    })
+    });
+
+    $(document).on('click', '.reset_all_filters', function() {
+        var filterArea = $('.all_filters');
+        filterArea.find('input').val("");
+        filterArea.find('select').selectpicker("val", "");
+        table_projects.DataTable().ajax.reload();
+    });
+    $(document).on('change', 'select[name="project_name[]"]', function() {
+        $('select[name="project_name[]"]').selectpicker('refresh');
+    });
+    $(document).on('change', 'select[name="clients[]"]', function() {
+        $('select[name="clients[]"]').selectpicker('refresh');
+    });
+    $(document).on('change', 'select[name="members[]"]', function() {
+        $('select[name="members[]"]').selectpicker('refresh');
+    });
+    $(document).on('change', 'select[name="statuses[]"]', function() {
+        $('select[name="statuses[]"]').selectpicker('refresh');
+    });
 
     init_ajax_search('customer', '#clientid_copy_project.ajax-search');
 });
