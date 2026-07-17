@@ -950,7 +950,7 @@ function data_tables_init_union_unawarded($aColumns, $sIndexColumn, $combinedTab
             GROUP BY wo.package_id
         ) wo ON wo.package_id = p.id
         LEFT JOIN (
-            SELECT package_id, SUM(total) AS total_tracker FROM tblpur_order_tracker GROUP BY package_id
+            SELECT package_id, SUM(order_value) AS total_tracker FROM tblpur_order_tracker GROUP BY package_id
         ) pot ON pot.package_id = p.id
     ) AS combined_orders";
 
