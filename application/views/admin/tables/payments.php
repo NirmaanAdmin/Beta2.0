@@ -4,6 +4,11 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 $hasPermissionDelete = staff_can('delete',  'payments');
 
+$CI = &get_instance();
+$module_name = 'payments';
+$invoice_name = 'invoices';
+$last_action_by_name = 'last_action_by';
+
 $aColumns = [
     db_prefix() . 'invoicepaymentrecords.id as id',
     'invoiceid',
@@ -40,6 +45,20 @@ if (staff_cant('view', 'payments')) {
 if(get_default_project()) {
     array_push($where, 'AND ' . db_prefix() . 'invoices.project_id = '.get_default_project().'');
 }
+
+if ($CI->input->post('invoices') && count($CI->input->post('invoices')) > 0) {
+    array_push($where, 'AND ' . db_prefix() . 'invoices.id IN (' . implode(',', $CI->input->post('invoices')) . ')');
+}
+
+if ($CI->input->post('last_action_by') && count($CI->input->post('last_action_by')) > 0) {
+    array_push($where, 'AND ' . db_prefix() . 'invoicepaymentrecords.last_action IN (' . implode(',', $CI->input->post('last_action_by')) . ')');
+}
+
+$invoice_name_value = !empty($CI->input->post('invoices')) ? implode(',', $CI->input->post('invoices')) : NULL;
+update_module_filter($module_name, $invoice_name, $invoice_name_value);
+
+$last_action_by_name_value = !empty($CI->input->post('last_action_by')) ? implode(',', $CI->input->post('last_action_by')) : NULL;
+update_module_filter($module_name, $last_action_by_name, $last_action_by_name_value);
 
 $sIndexColumn = 'id';
 $sTable       = db_prefix() . 'invoicepaymentrecords';

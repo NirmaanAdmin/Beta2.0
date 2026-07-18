@@ -193,6 +193,7 @@
                             </a>
                         </div>
                     </div>
+                    <hr class="hr-panel-separator" />
                     
                     <div class="btn-group show_hide_columns" id="show_hide_columns" style="position: absolute !important; z-index: 99999; left: 204px !important">
                         <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding: 4px 7px;"><i class="fa fa-cog"></i> <?php  ?> <span class="caret"></span>

@@ -55,6 +55,10 @@ class Payments extends AdminController
         }
 
         $data['title'] = _l('payments');
+        $this->load->model('invoices_model');
+        $this->load->model('staff_model');
+        $data['invoices'] = $this->invoices_model->get();
+        $data['staffs'] = $this->staff_model->get();
         $this->load->view('admin/payments/manage', $data);
     }
 
