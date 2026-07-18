@@ -2184,24 +2184,24 @@ $(function () {
         '[name="' + $(this).attr("name") + '"]';
     });
 
-    if (table_invoices.length) {
-      // Invoices tables
-      initDataTable(
-        table_invoices,
-        admin_url +
-        "invoices/table" +
-        ($("body").hasClass("recurring") ? "?recurring=1" : ""),
-        "undefined",
-        "undefined",
-        Sales_table_ServerParams,
-        !$("body").hasClass("recurring")
-          ? [
-            [3, "desc"],
-            [0, "desc"],
-          ]
-          : [table_invoices.find("th.next-recurring-date").index(), "asc"]
-      );
-    }
+    // if (table_invoices.length) {
+    //   // Invoices tables
+    //   initDataTable(
+    //     table_invoices,
+    //     admin_url +
+    //     "invoices/table" +
+    //     ($("body").hasClass("recurring") ? "?recurring=1" : ""),
+    //     "undefined",
+    //     "undefined",
+    //     Sales_table_ServerParams,
+    //     !$("body").hasClass("recurring")
+    //       ? [
+    //         [3, "desc"],
+    //         [0, "desc"],
+    //       ]
+    //       : [table_invoices.find("th.next-recurring-date").index(), "asc"]
+    //   );
+    // }
 
     if (table_estimates.length) {
       // Estimates table

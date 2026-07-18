@@ -15,8 +15,46 @@
 <script>var hidden_columns = [2,6,7,8];</script>
 <?php init_tail(); ?>
 <script>
+var table_invoices;
 $(function(){
 	init_invoice();
+	table_invoices = $('.table-invoices');
+  var Params = {
+    "invoices": "[name='invoices[]']",
+    "statuses": "[name='statuses[]']",
+    "last_action_by": "[name='last_action_by[]']",
+  };
+  initDataTable('.table-invoices', admin_url + 'invoices/table_new', [], [], Params, [5, 'desc']);
+  $.each(Params, function(i, obj) {
+    $('select' + obj).on('change', function() {
+      table_invoices.DataTable().ajax.reload();
+    });
+  });
+
+  $('.table-invoices').on('draw.dt', function () {
+    var reportsTable = $(this).DataTable();
+    var sums = reportsTable.ajax.json().sums;
+    $(this).find('tfoot').addClass('bold');
+    $(this).find('tfoot td').eq(1).html("Total (Per Page)");
+    $(this).find('tfoot td.total_invoice_amount').html(sums.total_invoice_amount);
+    $(this).find('tfoot td.total_invoice_amount_due').html(sums.total_invoice_amount_due);
+  });
+
+  $(document).on('click', '.reset_all_filters', function() {
+    var filterArea = $('.all_filters');
+    filterArea.find('input').val("");
+    filterArea.find('select').selectpicker("val", "");
+    table_invoices.DataTable().ajax.reload();
+  });
+  $(document).on('change', 'select[name="invoices[]"]', function() {
+    $('select[name="invoices[]"]').selectpicker('refresh');
+  });
+  $(document).on('change', 'select[name="statuses[]"]', function() {
+    $('select[name="statuses[]"]').selectpicker('refresh');
+  });
+  $(document).on('change', 'select[name="last_action_by[]"]', function() {
+    $('select[name="last_action_by[]"]').selectpicker('refresh');
+  });
 });
 </script>
 <script>

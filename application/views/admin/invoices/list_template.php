@@ -4,6 +4,7 @@
       width: 25% !important;
    }
 </style>
+<?php $module_name = 'invoices'; ?>
 <div class="col-md-12">
     <div class="tw-mb-2 sm:tw-mb-4">
         <div class="_buttons">
@@ -42,13 +43,6 @@
                     title="<?php echo _l('view_stats_tooltip'); ?>">
                     <i class="fa fa-bar-chart"></i>
                 </a>
-                <app-filters
-                            id="<?php echo $invoices_table->id(); ?>"
-                            view="<?php echo $invoices_table->viewName(); ?>"
-                            :rules="extra.invoicesRules || <?php echo app\services\utilities\Js::from($this->input->get('status') ? $invoices_table->findRule('status')->setValue([$this->input->get('status')]) : ($this->input->get('not_sent') ?  $invoices_table->findRule('sent')->setValue("0") : [])); ?>"
-                            :saved-filters="<?php echo $invoices_table->filtersJs(); ?>"
-                            :available-rules="<?php echo $invoices_table->rulesJs(); ?>">
-                </app-filters>
             </div>
             <div class="clearfix"></div>
         </div>
@@ -139,6 +133,67 @@
         <div class="col-md-12" id="small-table">
             <div class="panel_s">
                 <div class="panel-body panel-table-full">
+                    <div class="row all_filters">
+                        <?php
+                        $invoices_filter = get_module_filter($module_name, 'invoices');
+                        $invoices_filter_val = !empty($invoices_filter) ? explode(",", $invoices_filter->filter_value) : [];
+                        ?>
+                        <div class="col-md-3 form-group">
+                            <label for="invoices"><?php echo _l('invoices'); ?></label>
+                            <select name="invoices[]" id="invoices" class="selectpicker" data-live-search="true" multiple="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>" data-actions-box="true">
+                                <?php foreach ($invoices as $invoice) { ?>
+                                    <option value="<?php echo pur_html_entity_decode($invoice['id']); ?>"
+                                        <?php if (in_array($invoice['id'], $invoices_filter_val)) {
+                                            echo 'selected';
+                                        } ?>>
+                                        <?php echo format_invoice_number($invoice['id']); ?>
+                                    </option>
+                                <?php } ?>
+                            </select>
+                        </div>
+
+                        <?php
+                        $statuses_filter = get_module_filter($module_name, 'statuses');
+                        $statuses_filter_val = !empty($statuses_filter) ? explode(",", $statuses_filter->filter_value) : [];
+                        ?>
+                        <div class="col-md-3 form-group">
+                            <label for="status"><?php echo _l('Status'); ?></label>
+                            <select name="statuses[]" id="statuses" class="selectpicker" data-live-search="true" multiple="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>" data-actions-box="true">
+                                <?php foreach (invoice_statuses() as $key => $value) { ?>
+                                    <option value="<?php echo $key; ?>" <?php if (in_array($key, $statuses_filter_val)) { echo 'selected'; } ?>>
+                                        <?php echo $value; ?>
+                                    </option>
+                                <?php } ?>
+                            </select>
+                        </div>
+
+                        <?php
+                        $last_action_by_filter = get_module_filter($module_name, 'last_action_by');
+                        $last_action_by_filter_val = !empty($last_action_by_filter) ? explode(",", $last_action_by_filter->filter_value) : [];
+                        ?>
+                        <div class="col-md-3 form-group">
+                            <label for="last_action_by"><?php echo _l('last_action_by'); ?></label>
+                            <select name="last_action_by[]" id="last_action_by" class="selectpicker" data-live-search="true" multiple="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>" data-actions-box="true">
+                                <?php foreach ($staffs as $staff) { ?>
+                                    <option value="<?php echo pur_html_entity_decode($staff['staffid']); ?>"
+                                        <?php if (in_array($staff['staffid'], $last_action_by_filter_val)) {
+                                            echo 'selected';
+                                        } ?>>
+                                        <?php echo pur_html_entity_decode($staff['firstname']).' '.pur_html_entity_decode($staff['lastname']); ?>
+                                    </option>
+                                <?php } ?>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-1 form-group">
+                            <a href="javascript:void(0)" class="btn btn-info btn-icon reset_all_filters">
+                                <?php echo _l('reset_filter'); ?>
+                            </a>
+                        </div>
+                    </div>
+                    
                     <div class="btn-group show_hide_columns" id="show_hide_columns" style="position: absolute !important; z-index: 99999; left: 204px !important">
                         <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding: 4px 7px;"><i class="fa fa-cog"></i> <?php  ?> <span class="caret"></span>
                         </button>

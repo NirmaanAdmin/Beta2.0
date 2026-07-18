@@ -35,8 +35,11 @@ class Invoices extends AdminController
         $data['invoices_years']       = $this->invoices_model->get_invoices_years();
         $data['invoices_sale_agents'] = $this->invoices_model->get_sale_agents();
         $data['invoices_statuses']    = $this->invoices_model->get_statuses();
-        $data['invoices_table'] = App_table::find('invoices');
+        // $data['invoices_table'] = App_table::find('invoices');
         $data['bodyclass']            = 'invoices-total-manual';
+        $this->load->model('staff_model');
+        $data['invoices'] = $this->invoices_model->get();
+        $data['staffs'] = $this->staff_model->get();
         $this->load->view('admin/invoices/manage', $data);
     }
 
@@ -78,6 +81,13 @@ class Invoices extends AdminController
                 'clientid' => $clientid,
                 'data'     => $data,
             ]);
+        }
+    }
+
+    public function table_new()
+    {
+        if ($this->input->is_ajax_request()) {
+            $this->app->get_table_data('invoices_new');
         }
     }
 

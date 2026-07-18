@@ -117,7 +117,9 @@
                                         <?php } ?>
                                     </select>
                                 </div>
+                            </div>
 
+                            <div class="row">
                                 <div class="col-md-1 form-group">
                                     <a href="javascript:void(0)" class="btn btn-info btn-icon reset_all_filters">
                                         <?php echo _l('reset_filter'); ?>

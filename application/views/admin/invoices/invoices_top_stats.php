@@ -49,12 +49,6 @@
                 <dd class="tw-mt-1 tw-flex tw-items-baseline tw-justify-between md:tw-block lg:tw-flex">
                     <div class="tw-flex tw-items-baseline tw-text-base tw-font-semibold tw-text-primary-600">
                         <?php echo e($total_by_status); ?> / <?php echo e($total_invoices); ?>
-                        <span class="tw-ml-2 tw-text-sm tw-font-medium tw-text-neutral-500">
-                            <a href="#" 
-                            @click.prevent="extra.invoicesRules = <?php echo app\services\utilities\Js::from($invoices_table->findRule('status')->setValue([$status])); ?>">
-                                <?php echo _l('view'); ?>
-                            </a>
-                        </span>
                     </div>
                     <div class="tw-font-medium md:tw-mt-2 lg:tw-mt-0">
                         <?php echo e($percent); ?>%

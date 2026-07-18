@@ -1203,3 +1203,17 @@ function get_default_company_gst_id()
     }
     return NULL;
 }
+
+if (!function_exists('invoice_statuses')) {
+    function invoice_statuses()
+    {
+        return hooks()->apply_filters('invoice_statuses', [
+            1 => _l('invoice_status_unpaid'),
+            2 => _l('invoice_status_paid'),
+            3 => _l('invoice_status_not_paid_completely'),
+            4 => _l('invoice_status_overdue'),
+            5 => _l('invoice_status_cancelled'),
+            6 => _l('invoice_status_draft'),
+        ]);
+    }
+}
