@@ -1269,3 +1269,15 @@ function get_total_budgeted_amount($estimate_id, $budget_head = null)
     return ($row && $row->total !== null) ? $row->total : 0;
 }
 
+if (!function_exists('estimate_statuses')) {
+    function estimate_statuses()
+    {
+        return hooks()->apply_filters('estimate_statuses', [
+            1 => _l('estimate_status_draft'),
+            2 => _l('estimate_status_sent'),
+            3 => _l('estimate_status_declined'),
+            4 => _l('estimate_status_accepted'),
+            5 => _l('estimate_status_expired'),
+        ]);
+    }
+}

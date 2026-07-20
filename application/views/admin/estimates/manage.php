@@ -17,6 +17,36 @@
 </script>
 <?php init_tail(); ?>
 <script>
+var table_estimates;
+$(function(){
+    init_estimate();
+    table_estimates = $('.table-estimates');
+    var Params = {
+        "clients": "[name='clients[]']",
+        "statuses": "[name='statuses[]']",
+    };
+    initDataTable('.table-estimates', admin_url + 'estimates/table_new', [], [], Params, [0, 'desc']);
+    $.each(Params, function(i, obj) {
+        $('select' + obj).on('change', function() {
+          table_estimates.DataTable().ajax.reload();
+        });
+    });
+
+    $(document).on('click', '.reset_all_filters', function() {
+        var filterArea = $('.all_filters');
+        filterArea.find('input').val("");
+        filterArea.find('select').selectpicker("val", "");
+        table_estimates.DataTable().ajax.reload();
+    });
+    $(document).on('change', 'select[name="clients[]"]', function() {
+        $('select[name="clients[]"]').selectpicker('refresh');
+    });
+    $(document).on('change', 'select[name="statuses[]"]', function() {
+        $('select[name="statuses[]"]').selectpicker('refresh');
+    });
+});
+</script>
+<script>
     $(document).ready(function() {
         var table = $('.table-estimates').DataTable();
 
@@ -46,11 +76,6 @@
         $('.dropdown-menu').on('click', function(e) {
             e.stopPropagation();
         });
-    });
-</script>
-<script>
-    $(function() {
-        init_estimate();
     });
 </script>
 </body>

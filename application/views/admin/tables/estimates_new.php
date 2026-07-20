@@ -1,0 +1,167 @@
+<?php
+
+defined('BASEPATH') or exit('No direct script access allowed');
+
+$CI = &get_instance();
+$module_name = 'estimates';
+$client_name = 'clients';
+$status_name = 'statuses';
+
+$aColumns = [
+    'number',
+    'total',
+    'total_tax',
+    'YEAR(date) as year',
+    get_sql_select_client_company(),
+    db_prefix() . 'projects.name as project_name',
+    'date',
+    // 'expirydate',
+    // 'reference_no',
+    db_prefix() . 'estimates.status',
+    '(SELECT GROUP_CONCAT(name SEPARATOR ",") FROM ' . db_prefix() . 'taggables JOIN ' . db_prefix() . 'tags ON ' . db_prefix() . 'taggables.tag_id = ' . db_prefix() . 'tags.id WHERE rel_id = ' . db_prefix() . 'estimates.id and rel_type="estimate" ORDER by tag_order ASC) as tags',
+    '(SELECT SUM(total) FROM ' . db_prefix() . 'invoices WHERE estimate = ' . db_prefix() . 'estimates.id) as invoice_amount',
+    '(SELECT SUM(total) FROM ' . db_prefix() . 'co_orders WHERE estimate = ' . db_prefix() . 'estimates.id and approve_status = "2") as co_amount',
+];
+
+$join = [
+    'LEFT JOIN ' . db_prefix() . 'clients ON ' . db_prefix() . 'clients.userid = ' . db_prefix() . 'estimates.clientid',
+    'LEFT JOIN ' . db_prefix() . 'currencies ON ' . db_prefix() . 'currencies.id = ' . db_prefix() . 'estimates.currency',
+    'LEFT JOIN ' . db_prefix() . 'projects ON ' . db_prefix() . 'projects.id = ' . db_prefix() . 'estimates.project_id',
+];
+
+$sIndexColumn = 'id';
+$sTable       = db_prefix() . 'estimates';
+
+$custom_fields = get_table_custom_fields('estimate');
+
+foreach ($custom_fields as $key => $field) {
+    $selectAs = (is_cf_date($field) ? 'date_picker_cvalue_' . $key : 'cvalue_' . $key);
+    array_push($customFieldsColumns, $selectAs);
+    array_push($aColumns, 'ctable_' . $key . '.value as ' . $selectAs);
+    array_push($join, 'LEFT JOIN ' . db_prefix() . 'customfieldsvalues as ctable_' . $key . ' ON ' . db_prefix() . 'estimates.id = ctable_' . $key . '.relid AND ctable_' . $key . '.fieldto="' . $field['fieldto'] . '" AND ctable_' . $key . '.fieldid=' . $field['id']);
+}
+
+$where  = [];
+
+if (staff_cant('view', 'estimates')) {
+    $userWhere = 'AND ' . get_estimates_where_sql_for_staff(get_staff_user_id());
+    array_push($where, $userWhere);
+}
+
+array_push($where, 'AND ' . db_prefix() . 'estimates.active = 1');
+
+if(get_default_project()) {
+    array_push($where, 'AND ' . db_prefix() . 'estimates.project_id = '.get_default_project().'');
+}
+
+$aColumns = hooks()->apply_filters('estimates_table_sql_columns', $aColumns);
+
+if ($CI->input->post('clients') && count($CI->input->post('clients')) > 0) {
+    array_push($where, 'AND ' . db_prefix() . 'estimates.clientid IN (' . implode(',', $CI->input->post('clients')) . ')');
+}
+
+if ($CI->input->post('statuses') && count($CI->input->post('statuses')) > 0) {
+    array_push($where, 'AND ' . db_prefix() . 'estimates.status IN (' . implode(',', $CI->input->post('statuses')) . ')');
+}
+
+$client_name_value = !empty($CI->input->post('clients')) ? implode(',', $CI->input->post('clients')) : NULL;
+update_module_filter($module_name, $client_name, $client_name_value);
+
+$status_name_value = !empty($CI->input->post('statuses')) ? implode(',', $CI->input->post('statuses')) : NULL;
+update_module_filter($module_name, $status_name, $status_name_value);
+
+// Fix for big queries. Some hosting have max_join_limit
+if (count($custom_fields) > 4) {
+    @$this->ci->db->query('SET SQL_BIG_SELECTS=1');
+}
+
+$result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [
+    db_prefix() . 'estimates.id',
+    db_prefix() . 'estimates.clientid',
+    db_prefix() . 'estimates.invoiceid',
+    db_prefix() . 'currencies.name as currency_name',
+    'project_id',
+    'deleted_customer_name',
+    'hash',
+    'lock_budget',
+]);
+
+$output  = $result['output'];
+$rResult = $result['rResult'];
+
+foreach ($rResult as $aRow) {
+    $row = [];
+
+    $numberOutput = '';
+    // If is from client area table or projects area request
+    if (is_numeric($clientid) || $project_id) {
+        $numberOutput = '<a href="' . admin_url('estimates/list_estimates/' . $aRow['id']) . '" target="_blank">' . e(format_estimate_number($aRow['id'])) . '</a>';
+    } else {
+        $numberOutput = '<a href="' . admin_url('estimates/list_estimates/' . $aRow['id']) . '" onclick="init_estimate(' . $aRow['id'] . '); small_table_full_view(); return false;">' . e(format_estimate_number($aRow['id'])) . '</a>';
+    }
+
+    $numberOutput .= '<div class="row-options">';
+
+    $numberOutput .= '<a href="' . admin_url('estimates/list_estimates/' . $aRow['id']) . '" onclick="init_estimate(' . $aRow['id'] . '); small_table_full_view(); return false;">' . _l('view') . '</a>';
+    if (staff_can('edit',  'estimates')) {
+        if($aRow['lock_budget'] == 1) {
+            $numberOutput .= '<span data-toggle="tooltip" title="Unlock the budget for editing" data-placement="bottom"> | <a href="' . admin_url('estimates/estimate/' . $aRow['id']) . '" class="disabled">' . _l('edit') . '</a></span>';
+        } else {
+            $numberOutput .= ' | <a href="' . admin_url('estimates/estimate/' . $aRow['id']) . '">' . _l('edit') . '</a>';
+        }
+    }
+    $numberOutput .= '</div>';
+
+    $row[] = $numberOutput;
+
+    $amount = e(app_format_money($aRow['total']));
+
+    if ($aRow['invoiceid']) {
+        $amount .= '<br /><span class="hide"> - </span><span class="text-success tw-text-sm">' . _l('estimate_invoiced') . '</span>';
+    }
+
+    $row[] = $amount;
+
+    $row[] = e(app_format_money($aRow['co_amount']));
+
+    $total_amount = $aRow['total'] + $aRow['co_amount'];
+    $row[] = e(app_format_money($total_amount, $aRow['currency_name']));
+
+    $row[] = e(app_format_money($aRow['invoice_amount']));
+
+    $remain_amount = $total_amount - $aRow['invoice_amount'];
+    $row[] = e(app_format_money($remain_amount));
+
+    $row[] = e(app_format_money($aRow['total_tax']));
+
+    $row[] = $aRow['year'];
+
+    if (empty($aRow['deleted_customer_name'])) {
+        $row[] = '<a href="' . admin_url('clients/client/' . $aRow['clientid']) . '">' . e($aRow['company']) . '</a>';
+    } else {
+        $row[] = e($aRow['deleted_customer_name']);
+    }
+
+    $row[] = '<a href="' . admin_url('projects/view/' . $aRow['project_id']) . '">' . e($aRow['project_name']) . '</a>';
+
+    $row[] = e(_d($aRow['date']));
+
+    // $row[] = e(_d($aRow['expirydate']));
+
+    // $row[] = e($aRow['reference_no']);
+
+    $row[] = format_estimate_status($aRow[db_prefix() . 'estimates.status']);
+
+    // Custom fields add values
+    foreach ($customFieldsColumns as $customFieldColumn) {
+        $row[] = (strpos($customFieldColumn, 'date_picker_') !== false ? _d($aRow[$customFieldColumn]) : $aRow[$customFieldColumn]);
+    }
+
+    $row[] = render_tags($aRow['tags']);
+
+    $row['DT_RowClass'] = 'has-row-options';
+
+    $row = hooks()->apply_filters('estimates_table_row_data', $row, $aRow);
+
+    $output['aaData'][] = $row;
+}

@@ -31,7 +31,9 @@ class Estimates extends AdminController
         $isPipeline = $this->session->userdata('estimate_pipeline') == 'true';
 
         $data['estimate_statuses'] = $this->estimates_model->get_statuses();
-        $data['estimates_table'] = App_table::find('estimates');
+        // $data['estimates_table'] = App_table::find('estimates');
+        $this->load->model('clients_model');
+        $data['clients'] = $this->clients_model->get();
         
         if ($isPipeline && !$this->input->get('status') && !$this->input->get('filter')) {
             $data['title']           = _l('estimates_pipeline');
@@ -72,6 +74,13 @@ class Estimates extends AdminController
         App_table::find('estimates')->output([
             'clientid' => $clientid,
         ]);
+    }
+
+    public function table_new()
+    {
+        if ($this->input->is_ajax_request()) {
+            $this->app->get_table_data('estimates_new');
+        }
     }
 
     /* Add new estimate or update existing */

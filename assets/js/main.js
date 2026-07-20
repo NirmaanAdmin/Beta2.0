@@ -2203,20 +2203,20 @@ $(function () {
     //   );
     // }
 
-    if (table_estimates.length) {
-      // Estimates table
-      initDataTable(
-        table_estimates,
-        admin_url + "estimates/table",
-        "undefined",
-        "undefined",
-        Sales_table_ServerParams,
-        [
-          [3, "desc"],
-          [0, "desc"],
-        ]
-      );
-    }
+    // if (table_estimates.length) {
+    //   // Estimates table
+    //   initDataTable(
+    //     table_estimates,
+    //     admin_url + "estimates/table",
+    //     "undefined",
+    //     "undefined",
+    //     Sales_table_ServerParams,
+    //     [
+    //       [3, "desc"],
+    //       [0, "desc"],
+    //     ]
+    //   );
+    // }
   }
 
   table_tasks = $(".table-tasks");

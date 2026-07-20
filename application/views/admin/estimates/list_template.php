@@ -2,6 +2,7 @@
 <style>
 
 </style>
+<?php $module_name = 'estimates'; ?>
 <div class="col-md-12">
     <?php $this->load->view('admin/estimates/estimates_top_stats'); ?>
     <?php if (staff_can('create',  'estimates')) { ?>
@@ -23,20 +24,56 @@
         <a href="#" class="btn btn-default btn-with-tooltip estimates-total"
             onclick="slideToggle('#stats-top'); init_estimates_total(true); return false;" data-toggle="tooltip"
             title="<?php echo _l('view_stats_tooltip'); ?>"><i class="fa fa-bar-chart"></i></a>
-
-        <app-filters
-            id="<?php echo $estimates_table->id(); ?>"
-            view="<?php echo $estimates_table->viewName(); ?>"
-            :rules="extra.estimatesRules || <?php echo app\services\utilities\Js::from($this->input->get('status') ? $estimates_table->findRule('status')->setValue([$this->input->get('status')]) : ($this->input->get('not_sent') ?  $estimates_table->findRule('sent')->setValue("0") : [])); ?>"
-            :saved-filters="<?php echo $estimates_table->filtersJs(); ?>"
-            :available-rules="<?php echo $estimates_table->rulesJs(); ?>">
-        </app-filters>
     </div>
     <div class="clearfix"></div>
     <div class="row tw-mt-2 sm:tw-mt-4">
         <div class="col-md-12" id="small-table">
             <div class="panel_s">
                 <div class="panel-body">
+                    <div class="row all_filters">
+                        <?php
+                        $clients_filter = get_module_filter($module_name, 'clients');
+                        $clients_filter_val = !empty($clients_filter) ? explode(",", $clients_filter->filter_value) : [];
+                        ?>
+                        <div class="col-md-3 form-group">
+                            <label for="clients"><?php echo _l('clients'); ?></label>
+                            <select name="clients[]" id="clients" class="selectpicker" data-live-search="true" multiple="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>" data-actions-box="true">
+                                <?php foreach ($clients as $client) { ?>
+                                    <option value="<?php echo pur_html_entity_decode($client['userid']); ?>"
+                                        <?php if (in_array($client['userid'], $clients_filter_val)) {
+                                            echo 'selected';
+                                        } ?>>
+                                        <?php echo pur_html_entity_decode($client['company']); ?>
+                                    </option>
+                                <?php } ?>
+                            </select>
+                        </div>
+
+                        <?php
+                        $statuses_filter = get_module_filter($module_name, 'statuses');
+                        $statuses_filter_val = !empty($statuses_filter) ? explode(",", $statuses_filter->filter_value) : [];
+                        ?>
+                        <div class="col-md-3 form-group">
+                            <label for="status"><?php echo _l('Status'); ?></label>
+                            <select name="statuses[]" id="statuses" class="selectpicker" data-live-search="true" multiple="true" data-width="100%" data-none-selected-text="<?php echo _l('ticket_settings_none_assigned'); ?>" data-actions-box="true">
+                                <?php foreach (estimate_statuses() as $key => $value) { ?>
+                                    <option value="<?php echo $key; ?>" <?php if (in_array($key, $statuses_filter_val)) { echo 'selected'; } ?>>
+                                        <?php echo $value; ?>
+                                    </option>
+                                <?php } ?>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-1 form-group">
+                            <a href="javascript:void(0)" class="btn btn-info btn-icon reset_all_filters">
+                                <?php echo _l('reset_filter'); ?>
+                            </a>
+                        </div>
+                    </div>
+                    <hr class="hr-panel-separator" />
+
                     <div class="btn-group show_hide_columns" id="show_hide_columns" style="position: absolute !important;
         z-index: 99999;
         left: 204px !important">
