@@ -1,0 +1,143 @@
+<?php
+
+defined('BASEPATH') or exit('No direct script access allowed');
+
+$CI = &get_instance();
+$module_name = 'creditnotes';
+$client_name = 'clients';
+$status_name = 'statuses';
+
+$remainingAmountSelect = '(SELECT ' . db_prefix() . 'creditnotes.total - (
+    (SELECT COALESCE(SUM(amount),0) FROM ' . db_prefix() . 'credits WHERE ' . db_prefix() . 'credits.credit_id=' . db_prefix() . 'creditnotes.id)
+    +
+    (SELECT COALESCE(SUM(amount),0) FROM ' . db_prefix() . 'creditnote_refunds WHERE ' . db_prefix() . 'creditnote_refunds.credit_note_id=' . db_prefix() . 'creditnotes.id)
+    )
+  )';
+
+$aColumns = [
+    'number',
+    'date',
+    get_sql_select_client_company(),
+    db_prefix() . 'creditnotes.status as status',
+    db_prefix() . 'projects.name as project_name',
+    'reference_no',
+    'total',
+    $remainingAmountSelect.' as remaining_amount',
+];
+
+$join = [
+    'LEFT JOIN ' . db_prefix() . 'clients ON ' . db_prefix() . 'clients.userid = ' . db_prefix() . 'creditnotes.clientid',
+    'LEFT JOIN ' . db_prefix() . 'currencies ON ' . db_prefix() . 'currencies.id = ' . db_prefix() . 'creditnotes.currency',
+    'LEFT JOIN ' . db_prefix() . 'projects ON ' . db_prefix() . 'projects.id = ' . db_prefix() . 'creditnotes.project_id',
+];
+
+$sIndexColumn = 'id';
+$sTable       = db_prefix() . 'creditnotes';
+
+$custom_fields = get_table_custom_fields('credit_note');
+
+foreach ($custom_fields as $key => $field) {
+    $selectAs = (is_cf_date($field) ? 'date_picker_cvalue_' . $key : 'cvalue_' . $key);
+    array_push($customFieldsColumns, $selectAs);
+    array_push($aColumns, 'ctable_' . $key . '.value as ' . $selectAs);
+    array_push($join, 'LEFT JOIN ' . db_prefix() . 'customfieldsvalues as ctable_' . $key . ' ON ' . db_prefix() . 'creditnotes.id = ctable_' . $key . '.relid AND ctable_' . $key . '.fieldto="' . $field['fieldto'] . '" AND ctable_' . $key . '.fieldid=' . $field['id']);
+}
+
+$where  = [];
+
+if (staff_cant('view', 'credit_notes')) {
+    array_push($where, 'AND ' . db_prefix() . 'creditnotes.addedfrom=' . get_staff_user_id());
+}
+
+if(get_default_project()) {
+    // array_push($where, 'AND ' . db_prefix() . 'creditnotes.project_id = '.get_default_project().'');
+}
+
+if ($this->ci->input->post('order_rel_id')) {
+    $order_rel_id = $this->ci->input->post('order_rel_id');
+    $order_rel_type = $this->ci->input->get('order_rel_type');
+    if($order_rel_type == 'po') {
+        array_push($where, 'AND ' . db_prefix() . 'creditnotes.pur_order=' . $this->ci->db->escape_str($order_rel_id));
+    }
+    if($order_rel_type == 'wo') {
+        array_push($where, 'AND ' . db_prefix() . 'creditnotes.wo_order=' . $this->ci->db->escape_str($order_rel_id));
+    }
+}
+
+if ($CI->input->post('clients') && count($CI->input->post('clients')) > 0) {
+    array_push($where, 'AND ' . db_prefix() . 'creditnotes.clientid IN (' . implode(',', $CI->input->post('clients')) . ')');
+}
+
+if ($CI->input->post('statuses') && count($CI->input->post('statuses')) > 0) {
+    array_push($where, 'AND ' . db_prefix() . 'creditnotes.status IN (' . implode(',', $CI->input->post('statuses')) . ')');
+}
+
+$client_name_value = !empty($CI->input->post('clients')) ? implode(',', $CI->input->post('clients')) : NULL;
+update_module_filter($module_name, $client_name, $client_name_value);
+
+$status_name_value = !empty($CI->input->post('statuses')) ? implode(',', $CI->input->post('statuses')) : NULL;
+update_module_filter($module_name, $status_name, $status_name_value);
+
+// Fix for big queries. Some hosting have max_join_limit
+if (count($custom_fields) > 4) {
+    @$this->ci->db->query('SET SQL_BIG_SELECTS=1');
+}
+
+$result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [
+    db_prefix() . 'creditnotes.id',
+    db_prefix() . 'creditnotes.clientid',
+    db_prefix() . 'currencies.name as currency_name',
+    'project_id',
+    'deleted_customer_name',
+]);
+
+$output  = $result['output'];
+$rResult = $result['rResult'];
+
+foreach ($rResult as $aRow) {
+    $row = [];
+
+    $numberOutput = '';
+    // If is from client area table
+    if (is_numeric($clientid) || $project_id) {
+        $numberOutput = '<a href="' . admin_url('credit_notes/list_credit_notes/' . $aRow['id']) . '" target="_blank">' . e(format_credit_note_number($aRow['id'])) . '</a>';
+    } else {
+        $numberOutput = '<a href="' . admin_url('credit_notes/list_credit_notes/' . $aRow['id']) . '" onclick="init_credit_note(' . $aRow['id'] . '); return false;">' . e(format_credit_note_number($aRow['id'])) . '</a>';
+    }
+
+    $numberOutput .= '<div class="row-options">';
+
+    if (staff_can('edit',  'credit_notes')) {
+        $numberOutput .= '<a href="' . admin_url('credit_notes/credit_note/' . $aRow['id']) . '">' . _l('edit') . '</a>';
+    }
+    $numberOutput .= '</div>';
+
+    $row[] = $numberOutput;
+
+    $row[] = e(_d($aRow['date']));
+
+    if (empty($aRow['deleted_customer_name'])) {
+        $row[] = '<a href="' . admin_url('clients/client/' . $aRow['clientid']) . '">' . e($aRow['company']) . '</a>';
+    } else {
+        $row[] = e($aRow['deleted_customer_name']);
+    }
+
+    $row[] = format_credit_note_status($aRow['status']);
+
+    $row[] = '<a href="' . admin_url('projects/view/' . $aRow['project_id']) . '">' . e($aRow['project_name']) . '</a>';
+
+    $row[] = e($aRow['reference_no']);
+
+    $row[] = e(app_format_money($aRow['total'], $aRow['currency_name']));
+
+    $row[] = e(app_format_money($aRow['remaining_amount'], $aRow['currency_name']));
+
+    // Custom fields add values
+    foreach ($customFieldsColumns as $customFieldColumn) {
+        $row[] = (strpos($customFieldColumn, 'date_picker_') !== false ? _d($aRow[$customFieldColumn]) : $aRow[$customFieldColumn]);
+    }
+
+    $output['aaData'][] = $row;
+}
+
+?>

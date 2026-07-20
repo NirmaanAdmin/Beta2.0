@@ -165,3 +165,5 @@ foreach ($rResult as $aRow) {
 
     $output['aaData'][] = $row;
 }
+
+?>

@@ -29,7 +29,9 @@ class Credit_notes extends AdminController
         $data['statuses']       = $this->credit_notes_model->get_statuses();
         $data['credit_note_id'] = $id;
         $data['title']          = _l('credit_notes');
-        $data['table'] = App_table::find('credit_notes');
+        // $data['table'] = App_table::find('credit_notes');
+        $this->load->model('clients_model');
+        $data['clients'] = $this->clients_model->get();
         $this->load->view('admin/credit_notes/manage', $data);
     }
 
@@ -42,6 +44,13 @@ class Credit_notes extends AdminController
         App_table::find('credit_notes')->output([
             'clientid' => $clientid,
         ]);
+    }
+
+    public function table_new()
+    {
+        if ($this->input->is_ajax_request()) {
+            $this->app->get_table_data('credit_notes_new');
+        }
     }
 
     public function update_number_settings($id)
