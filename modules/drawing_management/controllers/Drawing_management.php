@@ -1876,4 +1876,41 @@ class drawing_management extends AdminController
 		$data['file'] = $this->drawing_management_model->get_item($id);
 		$this->load->view('file_managements/undo_file_superseder.php', $data);
 	}
+
+	public function delete_dwg_attachment($id)
+	{
+		$result = false;
+		$parent_id = 0;
+
+		if ($id != '') {
+			// First, get the attachment data to retrieve dms_id
+			$this->db->where('id', $id);
+			$attachment = $this->db->get(db_prefix() . 'dms_dwg_attachments')->row();
+
+			if ($attachment) {
+				$parent_id = $attachment->dms_id; // Store the dms_id before deletion
+
+				// Now delete the attachment
+				$result = $this->drawing_management_model->delete_dwg_attachment($id);
+
+				if ($result) {
+					set_alert('success', _l('dmg_deleted_successfully'));
+				} else {
+					set_alert('danger', _l('dmg_deleted_fail'));
+				}
+			} else {
+				set_alert('danger', _l('dmg_attachment_not_found'));
+			}
+		} else {
+			set_alert('danger', _l('dmg_invalid_id'));
+		}
+
+		// Redirect back to the parent drawing page
+		if ($parent_id > 0) {
+			redirect(admin_url('drawing_management?id=' . $parent_id));
+		} else {
+			// Fallback redirect if no parent_id found
+			redirect(admin_url('drawing_management'));
+		}
+	}
 }

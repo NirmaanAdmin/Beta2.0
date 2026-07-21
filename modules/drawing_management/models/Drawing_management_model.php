@@ -3878,7 +3878,7 @@ class drawing_management_model extends app_model
 		$this->db->where('dms_id', $id);
 		return $this->db->get(db_prefix() . 'dms_old_attachments')->result_array();
 	}
-	
+
 
 	public function view_other_attachments($input)
 	{
@@ -4155,6 +4155,45 @@ class drawing_management_model extends app_model
 				}
 				return true;
 			}
+		}
+		return false;
+	}
+
+
+
+	public function delete_dwg_attachment($id)
+	{
+		// First, get the attachment details to retrieve the file name
+		$this->db->where('id', $id);
+		$attachment = $this->db->get(db_prefix() . 'dms_dwg_attachments')->row();
+
+		if (!$attachment) {
+			return false;
+		}
+
+		// Get the dms_id and file name
+		$dms_id = $attachment->dms_id;
+		$file_name = $attachment->file_name; // Adjust this based on your actual column name
+
+		// Define the upload directory
+		$uploadDir = DRAWING_MANAGEMENT_MODULE_UPLOAD_FOLDER . '/pdf_attachments/' . $dms_id . '/';
+
+		// Delete the file from server
+		if (!empty($file_name) && file_exists($uploadDir . $file_name)) {
+			unlink($uploadDir . $file_name);
+		}
+
+		// Optional: Remove the directory if it's empty
+		if (is_dir($uploadDir) && count(scandir($uploadDir)) == 2) { // 2 = . and ..
+			rmdir($uploadDir);
+		}
+
+		// Delete the database record
+		$this->db->where('id', $id);
+		$this->db->delete(db_prefix() . 'dms_dwg_attachments');
+
+		if ($this->db->affected_rows() > 0) {
+			return true;
 		}
 		return false;
 	}
