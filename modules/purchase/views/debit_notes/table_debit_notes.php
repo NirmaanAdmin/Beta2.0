@@ -2,6 +2,11 @@
 
 defined('BASEPATH') or exit('No direct script access allowed');
 
+$module_name = 'debitnotes';
+$debit_notes_filter_name = 'debit_notes';
+$vendors_filter_name = 'vendors';
+$statuses_filter_name = 'statuses';
+
 $aColumns = [
     'number',
     'date',
@@ -48,6 +53,30 @@ if ($this->ci->input->post('order_rel_id')) {
 if (!has_permission('purchase_debit_notes', '', 'view')) {
     array_push($where, 'AND (' . db_prefix() . 'pur_debit_notes.addedfrom = '.get_staff_user_id().' OR ' . db_prefix() . 'pur_debit_notes.vendorid IN (SELECT vendor_id FROM ' . db_prefix() . 'pur_vendor_admin WHERE staff_id=' . get_staff_user_id() . '))');
 }
+
+if ($this->ci->input->post('debit_notes')
+    && count($this->ci->input->post('debit_notes')) > 0) {
+    array_push($where, 'AND ' . db_prefix() . 'pur_debit_notes.id IN (' . implode(',', $this->ci->input->post('debit_notes')) . ')');
+}
+
+if ($this->ci->input->post('vendors')
+    && count($this->ci->input->post('vendors')) > 0) {
+    array_push($where, 'AND ' . db_prefix() . 'pur_debit_notes.vendorid IN (' . implode(',', $this->ci->input->post('vendors')) . ')');
+}
+
+if ($this->ci->input->post('statuses')
+    && count($this->ci->input->post('statuses')) > 0) {
+    array_push($where, 'AND ' . db_prefix() . 'pur_debit_notes.status IN (' . implode(',', $this->ci->input->post('statuses')) . ')');
+}
+
+$debit_notes_filter_name_value = !empty($this->ci->input->post('debit_notes')) ? implode(',', $this->ci->input->post('debit_notes')) : NULL;
+update_module_filter($module_name, $debit_notes_filter_name, $debit_notes_filter_name_value);
+
+$vendors_filter_name_value = !empty($this->ci->input->post('vendors')) ? implode(',', $this->ci->input->post('vendors')) : NULL;
+update_module_filter($module_name, $vendors_filter_name, $vendors_filter_name_value);
+
+$statuses_filter_name_value = !empty($this->ci->input->post('statuses')) ? implode(',', $this->ci->input->post('statuses')) : NULL;
+update_module_filter($module_name, $statuses_filter_name, $statuses_filter_name_value);
 
 $this->ci->load->model('purchase/purchase_model');
 $statuses  = $this->ci->purchase_model->get_debit_note_statuses();

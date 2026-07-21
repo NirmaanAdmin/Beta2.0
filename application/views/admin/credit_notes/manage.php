@@ -65,6 +65,15 @@
                                         </select>
                                     </div>
                                 </div>
+
+                                <div class="row">
+                                    <div class="col-md-1 form-group">
+                                        <a href="javascript:void(0)" class="btn btn-info btn-icon reset_all_filters">
+                                            <?php echo _l('reset_filter'); ?>
+                                        </a>
+                                    </div>
+                                </div>
+                                <hr class="hr-panel-separator" />
                                 <!-- if credit not id found in url -->
                                 <?php echo form_hidden('credit_note_id', $credit_note_id); ?>
                                 <?php $this->load->view('admin/credit_notes/table_html'); ?>

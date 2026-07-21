@@ -7547,6 +7547,8 @@ class purchase extends AdminController
         $data['debit_note_id'] = $id;
 
         $data['title']          = _l('pur_debit_note');
+        $data['debit_notes'] = $this->purchase_model->get_pur_debit_notes();
+        $data['vendors'] = $this->purchase_model->get_vendor();
 
         $this->load->view('debit_notes/manage', $data);
     }

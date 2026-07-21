@@ -29433,4 +29433,14 @@ class Purchase_model extends App_Model
         $row .= '</tr>';
         return $row;
     }
+
+    public function get_pur_debit_notes($id = '')
+    {
+        if ($id != '') {
+            $this->db->where('id', $id);
+            return $this->db->get(db_prefix() . 'pur_debit_notes')->row();
+        } else {
+            return $this->db->get(db_prefix() . 'pur_debit_notes')->result_array();
+        }
+    }
 }
