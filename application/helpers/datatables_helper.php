@@ -909,6 +909,10 @@ function data_tables_init_union_unawarded($aColumns, $sIndexColumn, $combinedTab
             + IFNULL(wo.total_wo, 0)
             + IFNULL(pot.total_tracker, 0)
         ) AS awarded_value,
+        (
+            IFNULL(po.total_po_co, 0)
+            + IFNULL(wo.total_wo_co, 0)
+        ) AS co_value,
         p.kind,
         p.rli_filter,
         (
@@ -917,6 +921,8 @@ function data_tables_init_union_unawarded($aColumns, $sIndexColumn, $combinedTab
                 IFNULL(po.total_po, 0)
                 + IFNULL(wo.total_wo, 0)
                 + IFNULL(pot.total_tracker, 0)
+                + IFNULL(po.total_po_co, 0)
+                + IFNULL(wo.total_wo_co, 0)
             )
         ) AS pending_value_in_package
         FROM tblestimate_package_info p
@@ -925,32 +931,66 @@ function data_tables_init_union_unawarded($aColumns, $sIndexColumn, $combinedTab
         LEFT JOIN tblitems_groups ig ON ig.id = p.budget_head
         LEFT JOIN (
             SELECT
-            po.package_id,
-            SUM(
-                CASE
-                    WHEN po.currency = 3 THEN po.subtotal
-                    ELSE po.subtotal * COALESCE(cur.reference_value, 1)
-                END
-            ) AS total_po
+                po.package_id,
+                SUM(
+                    CASE
+                        WHEN po.currency = 3 THEN po.subtotal
+                        ELSE po.subtotal * COALESCE(cur.reference_value, 1)
+                    END
+                ) AS total_po,
+                SUM(
+                    CASE
+                        WHEN po.currency = 3 THEN COALESCE(co.co_value, 0)
+                        ELSE COALESCE(co.co_value, 0) * COALESCE(cur.reference_value, 1)
+                    END
+                ) AS total_po_co
             FROM tblpur_orders po
             LEFT JOIN tblcurrencies cur ON cur.id = po.currency
+            LEFT JOIN (
+                SELECT c.po_order_id, c.co_value
+                FROM tblco_orders c
+                INNER JOIN (
+                    SELECT po_order_id, MAX(id) AS latest_id
+                    FROM tblco_orders
+                    WHERE po_order_id IS NOT NULL
+                    GROUP BY po_order_id
+                ) latest ON latest.latest_id = c.id
+            ) co ON co.po_order_id = po.id
             GROUP BY po.package_id
         ) po ON po.package_id = p.id
         LEFT JOIN (
             SELECT
-            wo.package_id,
-            SUM(
-                CASE
-                    WHEN wo.currency = 3 THEN wo.subtotal
-                    ELSE wo.subtotal * COALESCE(cur.reference_value, 1)
-                END
-            ) AS total_wo
+                wo.package_id,
+                SUM(
+                    CASE
+                        WHEN wo.currency = 3 THEN wo.subtotal
+                        ELSE wo.subtotal * COALESCE(cur.reference_value, 1)
+                    END
+                ) AS total_wo,
+                SUM(
+                    CASE
+                        WHEN wo.currency = 3 THEN COALESCE(co.co_value, 0)
+                        ELSE COALESCE(co.co_value, 0) * COALESCE(cur.reference_value, 1)
+                    END
+                ) AS total_wo_co
             FROM tblwo_orders wo
             LEFT JOIN tblcurrencies cur ON cur.id = wo.currency
+            LEFT JOIN (
+                SELECT c.wo_order_id, c.co_value
+                FROM tblco_orders c
+                INNER JOIN (
+                    SELECT wo_order_id, MAX(id) AS latest_id
+                    FROM tblco_orders
+                    WHERE wo_order_id IS NOT NULL
+                    GROUP BY wo_order_id
+                ) latest ON latest.latest_id = c.id
+            ) co ON co.wo_order_id = wo.id
             GROUP BY wo.package_id
         ) wo ON wo.package_id = p.id
         LEFT JOIN (
-            SELECT package_id, SUM(order_value) AS total_tracker FROM tblpur_order_tracker GROUP BY package_id
+            SELECT package_id, SUM(order_value) AS total_tracker
+            FROM tblpur_order_tracker
+            GROUP BY package_id
         ) pot ON pot.package_id = p.id
     ) AS combined_orders";
 

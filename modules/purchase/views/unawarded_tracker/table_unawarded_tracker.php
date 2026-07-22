@@ -15,6 +15,7 @@ $aColumns = [
    'rli_filter',
    'total_package',
    'awarded_value',
+   'co_value',
    'sdeposit_value',
    'pending_value_in_package',
    2,
@@ -30,6 +31,7 @@ if($estimate_id != 0) {
       'rli_filter',
       'total_package',
       'awarded_value',
+      'co_value',
       'sdeposit_value',
       'pending_value_in_package',
       2,
@@ -121,6 +123,8 @@ foreach ($rResult as $aRow) {
          $_data = app_format_money($aRow['sdeposit_value']);
       } elseif ($column == 'awarded_value') {
          $_data = app_format_money($aRow['awarded_value']);
+      } elseif ($column == 'co_value') {
+         $_data = app_format_money($aRow['co_value']);
       } elseif ($column == 'pending_value_in_package') {
          $_data = app_format_money($aRow['pending_value_in_package']);
       } elseif ($column == 'kind') {
