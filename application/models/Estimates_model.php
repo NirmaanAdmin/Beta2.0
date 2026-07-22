@@ -2697,15 +2697,19 @@ class Estimates_model extends App_Model
                         <th>No</th>
                         <th>Order</th>
                         <th>Sub Total</th>
+                        <th>CO Value</th>
                     </tr>
                 </thead>';
                 $itemhtml .= '<tbody>';
                 if(!empty($package_orders)) {
                     foreach ($package_orders as $pkey => $pvalue) {
+                        $co_value = 0;
                         if($pvalue['type'] == 'po') {
                             $order_link = '<a href="' . admin_url('purchase/purchase_order/#' . $pvalue['id']) . '" target="_blank">'.$pvalue['order_number']. '</a>';
+                            $co_value = $this->get_order_co_value($pvalue['id'], $pvalue['type']);
                         } else if($pvalue['type'] == 'wo') {
                             $order_link = '<a href="' . admin_url('purchase/work_order/#' . $pvalue['id']) . '" target="_blank">'.$pvalue['order_number']. '</a>';
+                            $co_value = $this->get_order_co_value($pvalue['id'], $pvalue['type']);
                         } else if($pvalue['type'] == 'ot') {
                             $order_link = $pvalue['order_number'];
                         } else {
@@ -2715,6 +2719,7 @@ class Estimates_model extends App_Model
                             <td>'.($pkey + 1).'</td>
                             <td>'.$order_link.'</td>
                             <td>'.app_format_money($pvalue['subtotal']).'</td>
+                            <td>'.app_format_money($co_value).'</td>
                         </tr>';
                     }
                 } else {
@@ -4031,5 +4036,29 @@ class Estimates_model extends App_Model
         $pur_order_tracker = $this->db->get()->result_array();
 
         return array_merge($pur_orders, $wo_orders, $pur_order_tracker);
+    }
+
+    public function get_order_co_value($order_id, $order_type)
+    {
+        if (empty($order_id) || !in_array($order_type, ['po', 'wo'])) {
+            return 0;
+        }
+        $this->db->select("
+            CASE
+                WHEN co.currency = 3 THEN COALESCE(co.co_value, 0)
+                ELSE COALESCE(co.co_value, 0) * COALESCE(cur.reference_value, 1)
+            END AS co_value
+        ", false);
+        $this->db->from(db_prefix() . 'co_orders AS co');
+        $this->db->join(db_prefix() . 'currencies AS cur', 'cur.id = co.currency', 'left');
+        if ($order_type == 'po') {
+            $this->db->where('co.po_order_id', $order_id);
+        } else {
+            $this->db->where('co.wo_order_id', $order_id);
+        }
+        $this->db->order_by('co.id', 'DESC');
+        $this->db->limit(1);
+        $row = $this->db->get()->row();
+        return ($row) ? (float) $row->co_value : 0;
     }
 }
