@@ -446,4 +446,64 @@ function allow_vendors_to_register(invoker){
     }
   }
 
+  function bulk_master_area_delete() {
+   "use strict";
+   var print_id = '';
+   var rows = $('.dt-table').find('tbody tr');
+   $.each(rows, function() {
+     var checkbox = $($(this).find('td').eq(0)).find('input');
+     if (checkbox.prop('checked') === true) {
+         if (print_id !== '') {
+             print_id += ','; // Append a comma before adding the next value
+         }
+         print_id += checkbox.val();
+     }
+   });
+   if (print_id !== '') {
+     $.post(admin_url + 'costplanning/bulk_master_area_delete', {
+       ids: print_id,
+     }).done(function (response) {
+       response = JSON.parse(response);
+       if (response.success) {
+        alert_float('success', response.message);
+        location.reload();
+       } else {
+        alert_float('danger', response.message);
+       }
+     });
+   } else {
+     alert_float('danger', 'Please select at least one item from the list');
+   }
+  }
+
+  function bulk_functionality_area_delete() {
+   "use strict";
+   var print_id = '';
+   var rows = $('.dt-table').find('tbody tr');
+   $.each(rows, function() {
+     var checkbox = $($(this).find('td').eq(0)).find('input');
+     if (checkbox.prop('checked') === true) {
+         if (print_id !== '') {
+             print_id += ','; // Append a comma before adding the next value
+         }
+         print_id += checkbox.val();
+     }
+   });
+   if (print_id !== '') {
+     $.post(admin_url + 'costplanning/bulk_functionality_area_delete', {
+       ids: print_id,
+     }).done(function (response) {
+       response = JSON.parse(response);
+       if (response.success) {
+        alert_float('success', response.message);
+        location.reload();
+       } else {
+        alert_float('danger', response.message);
+       }
+     });
+   } else {
+     alert_float('danger', 'Please select at least one item from the list');
+   }
+  }
+
 </script>

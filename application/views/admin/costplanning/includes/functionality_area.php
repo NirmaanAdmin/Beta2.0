@@ -25,8 +25,12 @@
 
 <hr class="hr-panel-heading" />
 <div class="clearfix"></div>
+<div class="row">
+    <a onclick="bulk_functionality_area_delete(); return false;" data-table=".dt-table" class=" hide bulk-actions-btn table-btn">Bulk Delete</a>
+</div>
 <table class="table dt-table">
  <thead>
+    <th></th>
     <th><?php echo _l('id'); ?></th>
     <th><?php echo _l('name'); ?></th>
     <th><?php echo _l('description'); ?></th>
@@ -35,6 +39,7 @@
  <tbody>
   <?php foreach($functionality_area as $key => $vc){ ?>
     <tr>
+      <td><div class="checkbox"><input type="checkbox" value="<?php echo $vc['id']; ?>"><label></label></div></td>
       <td><?php echo $key + 1; ?></td>
       <td><?php echo pur_html_entity_decode($vc['category_name']); ?></td>
       <td><?php echo pur_html_entity_decode($vc['description']); ?></td>

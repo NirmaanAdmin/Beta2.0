@@ -151,6 +151,40 @@ class Costplanning extends AdminController
         $value = $this->input->post('value');
         echo $this->costplanning_model->get_sub_head_dropdown($name, $value);
     }
+
+    public function bulk_master_area_delete()
+    {
+        $response = array();
+        $response['success'] = false;
+        $response['message'] = 'Please select at least one item from the list';
+        $ids = $this->input->post('ids');
+        if (!empty($ids)) {
+            $ids = explode(',', $ids);
+            foreach ($ids as $id) {
+                $this->costplanning_model->delete_master_area((int)$id);
+            }
+            $response['success'] = true;
+            $response['message'] = 'Master areas have been deleted successfully.';
+        }
+        echo json_encode($response);
+    }
+
+    public function bulk_functionality_area_delete()
+    {
+        $response = array();
+        $response['success'] = false;
+        $response['message'] = 'Please select at least one item from the list';
+        $ids = $this->input->post('ids');
+        if (!empty($ids)) {
+            $ids = explode(',', $ids);
+            foreach ($ids as $id) {
+                $this->costplanning_model->delete_functionality_area((int)$id);
+            }
+            $response['success'] = true;
+            $response['message'] = 'Functionality areas have been deleted successfully.';
+        }
+        echo json_encode($response);
+    }
 }
 
 ?>

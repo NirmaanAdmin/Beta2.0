@@ -18535,4 +18535,60 @@ class purchase extends AdminController
             echo json_encode(['success' => false, 'message' => _l('update_failed')]);
         }
     }
+
+    public function bulk_commodity_group_delete()
+    {
+        $response = array();
+        $response['success'] = false;
+        $response['message'] = '';
+        $ids = $this->input->post('ids');
+        if (empty($ids)) {
+            $response['message'] = 'Please select at least one item.';
+            echo json_encode($response);
+            return;
+        }
+        $ids = explode(',', $ids);
+        $deleted = 0;
+        foreach ($ids as $id) {
+            if ($this->purchase_model->find_commodity_group_exist_in_modules((int)$id)) {
+                $this->purchase_model->delete_commodity_group_type((int)$id);
+                $deleted++;
+            }
+        }
+        if ($deleted > 0) {
+            $response['success'] = true;
+            $response['message'] = $deleted . ' commodity group(s) deleted successfully.';
+        } else {
+            $response['message'] = 'No commodity groups were deleted.';
+        }
+        echo json_encode($response);
+    }
+
+    public function bulk_sub_group_delete()
+    {
+        $response = array();
+        $response['success'] = false;
+        $response['message'] = '';
+        $ids = $this->input->post('ids');
+        if (empty($ids)) {
+            $response['message'] = 'Please select at least one item.';
+            echo json_encode($response);
+            return;
+        }
+        $ids = explode(',', $ids);
+        $deleted = 0;
+        foreach ($ids as $id) {
+            if ($this->purchase_model->find_sub_group_exist_in_modules((int)$id)) {
+                $this->purchase_model->delete_sub_group((int)$id);
+                $deleted++;
+            }
+        }
+        if ($deleted > 0) {
+            $response['success'] = true;
+            $response['message'] = $deleted . ' sub group(s) deleted successfully.';
+        } else {
+            $response['message'] = 'No sub groups were deleted.';
+        }
+        echo json_encode($response);
+    }
 }

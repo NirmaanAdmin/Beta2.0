@@ -30,7 +30,7 @@ commodity_group_table = $('.commodity-group-table');
 var Params = {
   "project": "[name='select_project']"
 };
-initDataTable('.commodity-group-table', admin_url + 'purchase/table_pur_commodity_group', [], [], Params, [0, 'asc']);
+initDataTable('.commodity-group-table', admin_url + 'purchase/table_pur_commodity_group', [], [], Params, [1, 'asc']);
 $('select[name="select_project"]').on('change', function () {
   commodity_group_table.DataTable().ajax.reload();
 });
@@ -146,6 +146,36 @@ function uploadpurchasecommoditygroupfilecsv() {
     }
   });
   return false;
+}
+
+function bulk_commodity_group_delete() {
+ "use strict";
+ var print_id = '';
+ var rows = $('.commodity-group-table').find('tbody tr');
+ $.each(rows, function() {
+   var checkbox = $($(this).find('td').eq(0)).find('input');
+   if (checkbox.prop('checked') === true) {
+       if (print_id !== '') {
+           print_id += ','; // Append a comma before adding the next value
+       }
+       print_id += checkbox.val();
+   }
+ });
+ if (print_id !== '') {
+   $.post(admin_url + 'purchase/bulk_commodity_group_delete', {
+     ids: print_id,
+   }).done(function (response) {
+      response = JSON.parse(response);
+      if (response.success) {
+        alert_float('success', response.message);
+      } else {
+        alert_float('danger', response.message);
+      }
+      location.reload();
+   });
+ } else {
+   alert_float('danger', 'Please select at least one item from the list');
+ }
 }
 
 </script>

@@ -4,6 +4,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 $aColumns = [
     'id',
+    'id',
     'sub_group_code',
     'sub_group_name',
     'group_id',
@@ -41,6 +42,7 @@ foreach ($rResult as $key => $aRow) {
         }
     }
 
+    $row[] = '<div class="checkbox"><input type="checkbox" value="' . $id . '"><label></label></div>';
     $row[] = $key + 1;
     $row[] = $sub_group_code;
     $row[] = $sub_group_name;
