@@ -1033,7 +1033,7 @@ function data_tables_init_union_unawarded($aColumns, $sIndexColumn, $combinedTab
         LEFT JOIN (
             SELECT
                 t.package_id,
-                SUM(t.order_value) AS total_tracker,
+                SUM(t.total) AS total_tracker,
                 SUM(t.co_total) AS pot_co_total,
                 SUM(
                     IFNULL(t.anticipate_variation, 0)

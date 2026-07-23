@@ -1241,7 +1241,7 @@ function change_by_budget() {
   "use strict";
   var estimate = $('select[name="estimate"]').val();
   var package_select = $('select[name="package_id"]');
-  var package_id = '<?php echo (isset($pur_order) ? $pur_order->package_id : ""); ?>';
+  var package_id = '<?php echo (isset($wo_order) ? $wo_order->package_id : ""); ?>';
   package_select.empty();
   package_select.append('<option value=""></option>');
   if (estimate) {

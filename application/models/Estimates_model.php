@@ -4018,9 +4018,9 @@ class Estimates_model extends App_Model
             pur_order_tracker.id,
             CASE
                 WHEN pur_order_tracker.currency = 3 THEN
-                    pur_order_tracker.order_value
+                    pur_order_tracker.total
                 ELSE
-                    pur_order_tracker.order_value * COALESCE(cur.reference_value, 1)
+                    pur_order_tracker.total * COALESCE(cur.reference_value, 1)
             END AS subtotal,
             pur_order_tracker.pur_order_name AS order_number,
             'ot' AS type
