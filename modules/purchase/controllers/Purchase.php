@@ -1613,7 +1613,6 @@ class purchase extends AdminController
         $data['commodity_groups'] = $this->purchase_model->get_commodity_group_add_commodity();
         $data['sub_groups'] = $this->purchase_model->get_sub_group();
         $data['area'] = $this->purchase_model->get_area();
-        $data['activity'] = $this->purchase_model->get_po_activity($id);
         $data['changes'] = $this->purchase_model->get_po_changes($id);
         $data['payment_certificate'] = $this->purchase_model->get_all_po_payment_certificate($id);
         $data['bills_data'] = $this->purchase_model->get_bills_data($id);
@@ -18590,5 +18589,10 @@ class purchase extends AdminController
             $response['message'] = 'No sub groups were deleted.';
         }
         echo json_encode($response);
+    }
+
+    public function table_module_related_activity()
+    {
+        $this->app->get_table_data(module_views_path('purchase', 'table_module_related_activity'));
     }
 }
