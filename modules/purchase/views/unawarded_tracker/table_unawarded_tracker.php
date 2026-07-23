@@ -16,6 +16,7 @@ $aColumns = [
    'total_package',
    'awarded_value',
    'co_value',
+   'cost_to_complete',
    'sdeposit_value',
    'pending_value_in_package',
    2,
@@ -32,6 +33,7 @@ if($estimate_id != 0) {
       'total_package',
       'awarded_value',
       'co_value',
+      'cost_to_complete',
       'sdeposit_value',
       'pending_value_in_package',
       2,
@@ -125,6 +127,8 @@ foreach ($rResult as $aRow) {
          $_data = app_format_money($aRow['awarded_value']);
       } elseif ($column == 'co_value') {
          $_data = app_format_money($aRow['co_value']);
+      } elseif ($column == 'cost_to_complete') {
+         $_data = app_format_money($aRow['cost_to_complete']);
       } elseif ($column == 'pending_value_in_package') {
          $_data = app_format_money($aRow['pending_value_in_package']);
       } elseif ($column == 'kind') {

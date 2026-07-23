@@ -934,6 +934,7 @@
                                      <th><?php echo _l('Package Value'); ?></th>
                                      <th><?php echo _l('Awarded Value'); ?></th>
                                      <th><?php echo _l('CO Value'); ?></th>
+                                     <th><?php echo _l('Cost to Complete'); ?></th>
                                      <th><?php echo _l('Secured Deposit Value'); ?></th>
                                      <th><?php echo _l('Pending Value In Package'); ?></th>
                                      <th><?php echo _l('Package Status'); ?></th>
@@ -943,6 +944,7 @@
                                <tbody>
                                </tbody>
                                <tfoot>
+                                  <td></td>
                                   <td></td>
                                   <td></td>
                                   <td></td>
