@@ -762,7 +762,7 @@ class Estimates extends AdminController
         } else {
             set_alert('success', 'Package is added successfully');
         }
-        redirect($_SERVER['HTTP_REFERER'].'#'.$estimate_id);
+        redirect($_SERVER['HTTP_REFERER']);
     }
 
     public function delete_package($id)
