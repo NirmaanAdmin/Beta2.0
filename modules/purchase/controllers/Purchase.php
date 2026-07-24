@@ -10021,7 +10021,6 @@ class purchase extends AdminController
         $data['commodity_groups'] = $this->purchase_model->get_commodity_group_add_commodity();
         $data['sub_groups'] = $this->purchase_model->get_sub_group();
         $data['area'] = $this->purchase_model->get_area();
-        $data['activity'] = $this->purchase_model->get_wo_activity($id);
         $data['changes'] = $this->purchase_model->get_change_wo_order($id);
         $data['payment_certificate'] = $this->purchase_model->get_all_wo_payment_certificate($id);
         $data['qor'] = $this->purchase_model->get_qor_by_wo($id);
