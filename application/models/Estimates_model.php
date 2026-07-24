@@ -2396,13 +2396,18 @@ class Estimates_model extends App_Model
                 if (!empty($added)) {
                     $this->db->where('id', $value['item_id']);
                     $itemable = $this->db->get(db_prefix() . 'itemable')->row();
-                    $this->db->insert(db_prefix() . 'estimate_package_items_info', [
-                        'package_id' => $added,
-                        'item_id' => $value['item_id'],
-                        'package_qty' => $itemable->qty,
-                        'package_rate' => $itemable->rate,
-                    ]);
-                    $this->update_estimate_package_info($added);
+                    $this->db->where('package_id', $added);
+                    $this->db->where('item_id', $value['item_id']);
+                    $estimate_package_items_info_exists = $this->db->get(db_prefix() . 'estimate_package_items_info')->row();
+                    if (!$estimate_package_items_info_exists) {
+                        $this->db->insert(db_prefix() . 'estimate_package_items_info', [
+                            'package_id' => $added,
+                            'item_id' => $value['item_id'],
+                            'package_qty' => $itemable->qty,
+                            'package_rate' => $itemable->rate,
+                        ]);
+                        $this->update_estimate_package_info($added);
+                    }
                     
                     $this->db->where('package_id', $added);
                     $this->db->where('estimate_id', $estimate_id);
