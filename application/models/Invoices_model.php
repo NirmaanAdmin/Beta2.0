@@ -1987,8 +1987,8 @@ class Invoices_model extends App_Model
             $final_invoice['sgst_tax'] = $final_invoice['subtotal'] * ($sgst_tax / 100);
             $final_invoice['amount'] = $final_invoice['subtotal'] + $final_invoice['tax'];
             $final_invoice['remarks'] = $invoice->remarks;
-            if($value['annexure'] != 17) {
-                $final_invoice['total_without_man_fees'] = $final_invoice['subtotal'];
+            if ($value['annexure'] != 17) {
+                $final_invoice['total_without_man_fees'] += $value['subtotal'];
             }
         }
 
@@ -2071,8 +2071,8 @@ class Invoices_model extends App_Model
                 $total_budget_summary['total_current_billing_amount'] += $value['total_current_billing_amount'];
                 $total_budget_summary['total_cumulative_billing'] += $value['total_cumulative_billing'];
                 $total_budget_summary['balance_available'] += $value['balance_available'];
-                if($value['annexure'] == 17) {
-                    $total_budget_summary['total_without_man_fees'] = $total_budget_summary['total_current_billing_amount'] - $value['total_current_billing_amount'];
+                if ($value['annexure'] != 17) {
+                    $total_budget_summary['total_without_man_fees'] += $value['total_current_billing_amount'];
                 }
             }
         }
