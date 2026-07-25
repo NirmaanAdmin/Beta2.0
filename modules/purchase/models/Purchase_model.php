@@ -18498,6 +18498,9 @@ class Purchase_model extends App_Model
             $save_and_send = $data['save_and_send'];
             unset($data['save_and_send']);
         }
+        if(isset($data['DataTables_Table_0_length'])) {
+            unset($data['DataTables_Table_0_length']);
+        }
 
         $this->db->insert(db_prefix() . 'payment_certificate', $data);
         $insert_id = $this->db->insert_id();
@@ -18550,6 +18553,9 @@ class Purchase_model extends App_Model
         if (isset($data['save_and_send'])) {
             $save_and_send = $data['save_and_send'];
             unset($data['save_and_send']);
+        }
+        if(isset($data['DataTables_Table_0_length'])) {
+            unset($data['DataTables_Table_0_length']);
         }
         update_all_pc_fields_activity_log($id, $data);
         $this->db->where('id', $id);
@@ -24235,6 +24241,9 @@ class Purchase_model extends App_Model
             $save_and_send = $data['save_and_send'];
             unset($data['save_and_send']);
         }
+        if(isset($data['DataTables_Table_0_length'])) {
+            unset($data['DataTables_Table_0_length']);
+        }
 
         $this->db->insert(db_prefix() . 'payment_certificate', $data);
         $insert_id = $this->db->insert_id();
@@ -24297,6 +24306,9 @@ class Purchase_model extends App_Model
         if (isset($data['save_and_send'])) {
             $save_and_send = $data['save_and_send'];
             unset($data['save_and_send']);
+        }
+        if(isset($data['DataTables_Table_0_length'])) {
+            unset($data['DataTables_Table_0_length']);
         }
         $data['vendor'] = !empty($data['vendor']) ? $data['vendor'] : NULL;
         update_all_pc_fields_activity_log($id, $data);

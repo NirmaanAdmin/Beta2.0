@@ -636,4 +636,17 @@
 	    	calculate_payment_certificate();
 	    }
 	});
+
+	var payment_certificate_id = $('input[name="payment_certificate_id"]').val();
+   	if(payment_certificate_id) {
+		var table_pc_activity = $('.table-pc-activity');
+	    if ($.fn.DataTable.isDataTable('.table-pc-activity')) {
+	      $('.table-pc-activity').DataTable().destroy();
+	    }
+	    var fnpcactivityServerParams;
+	    fnpcactivityServerParams = {
+	      "rel_id": '[name="payment_certificate_id"]',
+	    }
+	    initDataTable('.table-pc-activity', admin_url + 'purchase/table_module_related_activity?module_name=pc', false, false, fnpcactivityServerParams, [1, 'desc']);
+	}
 </script>
