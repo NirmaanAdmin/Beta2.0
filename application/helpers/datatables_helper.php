@@ -346,17 +346,17 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         IFNULL(co_sum.co_total, 0) AS co_total,
         CASE
             WHEN po.currency = 3 THEN
-                (po.subtotal + IFNULL(co_sum.co_total, 0))
+                ((po.subtotal - po.discount_total) + IFNULL(co_sum.co_total, 0))
             ELSE
-                (po.subtotal + IFNULL(co_sum.co_total, 0))
+                ((po.subtotal - po.discount_total) + IFNULL(co_sum.co_total, 0))
                 * COALESCE(cur.reference_value, 1)
         END AS total_rev_contract_value,
         po.anticipate_variation,
         CASE
             WHEN po.currency = 3 THEN
-                (IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0)))
+                (IFNULL(po.anticipate_variation, 0) + ((po.subtotal - po.discount_total) + IFNULL(co_sum.co_total, 0)))
             ELSE
-                (IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0)))
+                (IFNULL(po.anticipate_variation, 0) + ((po.subtotal - po.discount_total) + IFNULL(co_sum.co_total, 0)))
                 * COALESCE(cur.reference_value, 1)
         END AS cost_to_complete,
         COALESCE(inv_po_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
@@ -366,19 +366,19 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
             WHEN IFNULL(inv_po_sum.vendor_submitted_amount_without_tax, 0) = 0 
                  AND IFNULL(inv_po_sum.ril_certified_amount, 0) = 0 
                 THEN 1
-            WHEN IFNULL((IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+            WHEN IFNULL((IFNULL(po.anticipate_variation, 0) + ((po.subtotal - po.discount_total) + IFNULL(co_sum.co_total, 0))), 0) 
                  > IFNULL(inv_po_sum.vendor_submitted_amount_without_tax, 0)
-                 AND IFNULL((IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                 AND IFNULL((IFNULL(po.anticipate_variation, 0) + ((po.subtotal - po.discount_total) + IFNULL(co_sum.co_total, 0))), 0) 
                  > IFNULL(inv_po_sum.ril_certified_amount, 0)
                 THEN 2
-            WHEN IFNULL((IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+            WHEN IFNULL((IFNULL(po.anticipate_variation, 0) + ((po.subtotal - po.discount_total) + IFNULL(co_sum.co_total, 0))), 0) 
                  < IFNULL(inv_po_sum.vendor_submitted_amount_without_tax, 0)
-                 OR IFNULL((IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                 OR IFNULL((IFNULL(po.anticipate_variation, 0) + ((po.subtotal - po.discount_total) + IFNULL(co_sum.co_total, 0))), 0) 
                  < IFNULL(inv_po_sum.ril_certified_amount, 0)
                 THEN 3
-            WHEN IFNULL((IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+            WHEN IFNULL((IFNULL(po.anticipate_variation, 0) + ((po.subtotal - po.discount_total) + IFNULL(co_sum.co_total, 0))), 0) 
                  = IFNULL(inv_po_sum.vendor_submitted_amount_without_tax, 0)
-                 OR IFNULL((IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                 OR IFNULL((IFNULL(po.anticipate_variation, 0) + ((po.subtotal - po.discount_total) + IFNULL(co_sum.co_total, 0))), 0) 
                  = IFNULL(inv_po_sum.ril_certified_amount, 0)
                 THEN 4
             ELSE 0
@@ -388,19 +388,19 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
             THEN 0
             WHEN 
                 (
-                    IFNULL((IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                    IFNULL((IFNULL(po.anticipate_variation, 0) + ((po.subtotal - po.discount_total) + IFNULL(co_sum.co_total, 0))), 0) 
                     > IFNULL(inv_po_sum.vendor_submitted_amount_without_tax, 0)
-                    AND IFNULL((IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                    AND IFNULL((IFNULL(po.anticipate_variation, 0) + ((po.subtotal - po.discount_total) + IFNULL(co_sum.co_total, 0))), 0) 
                     > IFNULL(inv_po_sum.ril_certified_amount, 0)
                 )
                 OR
                 (
-                    IFNULL((IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                    IFNULL((IFNULL(po.anticipate_variation, 0) + ((po.subtotal - po.discount_total) + IFNULL(co_sum.co_total, 0))), 0) 
                     < IFNULL(inv_po_sum.vendor_submitted_amount_without_tax, 0)
-                    OR IFNULL((IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                    OR IFNULL((IFNULL(po.anticipate_variation, 0) + ((po.subtotal - po.discount_total) + IFNULL(co_sum.co_total, 0))), 0) 
                     < IFNULL(inv_po_sum.ril_certified_amount, 0)
                 )
-                THEN (IFNULL(po.anticipate_variation, 0) + (po.subtotal + IFNULL(co_sum.co_total, 0))) 
+                THEN (IFNULL(po.anticipate_variation, 0) + ((po.subtotal - po.discount_total) + IFNULL(co_sum.co_total, 0))) 
                      - COALESCE(inv_po_sum.vendor_submitted_amount_without_tax, 0)
             ELSE 0
         END AS yield_delta,
@@ -409,9 +409,9 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         po.remarks AS remarks,
         CASE
             WHEN po.currency = 3 THEN
-                po.subtotal
+                (po.subtotal - po.discount_total)
             ELSE
-                po.subtotal * COALESCE(cur.reference_value, 1)
+                (po.subtotal - po.discount_total) * COALESCE(cur.reference_value, 1)
         END AS subtotal,
         pr.name as project,
         pr.id as project_id,
@@ -485,17 +485,17 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         IFNULL(co_sum.co_total, 0) AS co_total,
         CASE
             WHEN wo.currency = 3 THEN
-                (wo.subtotal + IFNULL(co_sum.co_total, 0))
+                ((wo.subtotal - wo.discount_total) + IFNULL(co_sum.co_total, 0))
             ELSE
-                (wo.subtotal + IFNULL(co_sum.co_total, 0))
+                ((wo.subtotal - wo.discount_total) + IFNULL(co_sum.co_total, 0))
                 * COALESCE(cur.reference_value, 1)
         END AS total_rev_contract_value,
         wo.anticipate_variation,
         CASE
             WHEN wo.currency = 3 THEN
-                (IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0)))
+                (IFNULL(wo.anticipate_variation, 0) + ((wo.subtotal - wo.discount_total) + IFNULL(co_sum.co_total, 0)))
             ELSE
-                (IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0)))
+                (IFNULL(wo.anticipate_variation, 0) + ((wo.subtotal - wo.discount_total) + IFNULL(co_sum.co_total, 0)))
                 * COALESCE(cur.reference_value, 1)
         END AS cost_to_complete,
         COALESCE(inv_wo_sum.vendor_submitted_amount_without_tax, 0) AS vendor_submitted_amount_without_tax,
@@ -505,19 +505,19 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
             WHEN IFNULL(inv_wo_sum.vendor_submitted_amount_without_tax, 0) = 0
                  AND IFNULL(inv_wo_sum.ril_certified_amount, 0) = 0 
                 THEN 1
-            WHEN IFNULL((IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+            WHEN IFNULL((IFNULL(wo.anticipate_variation, 0) + ((wo.subtotal - wo.discount_total) + IFNULL(co_sum.co_total, 0))), 0) 
                  > IFNULL(inv_wo_sum.vendor_submitted_amount_without_tax, 0)
-                 AND IFNULL((IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                 AND IFNULL((IFNULL(wo.anticipate_variation, 0) + ((wo.subtotal - wo.discount_total) + IFNULL(co_sum.co_total, 0))), 0) 
                  > IFNULL(inv_wo_sum.ril_certified_amount, 0)
                 THEN 2
-            WHEN IFNULL((IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+            WHEN IFNULL((IFNULL(wo.anticipate_variation, 0) + ((wo.subtotal - wo.discount_total) + IFNULL(co_sum.co_total, 0))), 0) 
                  < IFNULL(inv_wo_sum.vendor_submitted_amount_without_tax, 0)
-                 OR IFNULL((IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                 OR IFNULL((IFNULL(wo.anticipate_variation, 0) + ((wo.subtotal - wo.discount_total) + IFNULL(co_sum.co_total, 0))), 0) 
                  < IFNULL(inv_wo_sum.ril_certified_amount, 0)
                 THEN 3
-            WHEN IFNULL((IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+            WHEN IFNULL((IFNULL(wo.anticipate_variation, 0) + ((wo.subtotal - wo.discount_total) + IFNULL(co_sum.co_total, 0))), 0) 
                  = IFNULL(inv_wo_sum.vendor_submitted_amount_without_tax, 0)
-                 OR IFNULL((IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                 OR IFNULL((IFNULL(wo.anticipate_variation, 0) + ((wo.subtotal - wo.discount_total) + IFNULL(co_sum.co_total, 0))), 0) 
                  = IFNULL(inv_wo_sum.ril_certified_amount, 0)
                 THEN 4
             ELSE 0
@@ -527,19 +527,19 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
             THEN 0
             WHEN 
                 (
-                    IFNULL((IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                    IFNULL((IFNULL(wo.anticipate_variation, 0) + ((wo.subtotal - wo.discount_total) + IFNULL(co_sum.co_total, 0))), 0) 
                     > IFNULL(inv_wo_sum.vendor_submitted_amount_without_tax, 0)
-                    AND IFNULL((IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                    AND IFNULL((IFNULL(wo.anticipate_variation, 0) + ((wo.subtotal - wo.discount_total) + IFNULL(co_sum.co_total, 0))), 0) 
                     > IFNULL(inv_wo_sum.ril_certified_amount, 0)
                 )
                 OR
                 (
-                    IFNULL((IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                    IFNULL((IFNULL(wo.anticipate_variation, 0) + ((wo.subtotal - wo.discount_total) + IFNULL(co_sum.co_total, 0))), 0) 
                     < IFNULL(inv_wo_sum.vendor_submitted_amount_without_tax, 0)
-                    OR IFNULL((IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0))), 0) 
+                    OR IFNULL((IFNULL(wo.anticipate_variation, 0) + ((wo.subtotal - wo.discount_total) + IFNULL(co_sum.co_total, 0))), 0) 
                     < IFNULL(inv_wo_sum.ril_certified_amount, 0)
                 )
-                THEN (IFNULL(wo.anticipate_variation, 0) + (wo.subtotal + IFNULL(co_sum.co_total, 0))) 
+                THEN (IFNULL(wo.anticipate_variation, 0) + ((wo.subtotal - wo.discount_total) + IFNULL(co_sum.co_total, 0))) 
                      - COALESCE(inv_wo_sum.vendor_submitted_amount_without_tax, 0)
             ELSE 0
         END AS yield_delta,
@@ -548,9 +548,9 @@ function data_tables_init_union($aColumns, $sIndexColumn, $combinedTables, $join
         wo.remarks AS remarks,
         CASE
             WHEN wo.currency = 3 THEN
-                wo.subtotal
+                (wo.subtotal - wo.discount_total)
             ELSE
-                wo.subtotal * COALESCE(cur.reference_value, 1)
+                (wo.subtotal - wo.discount_total) * COALESCE(cur.reference_value, 1)
         END AS subtotal,
         pr.name as project,
         pr.id as project_id,
