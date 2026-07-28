@@ -1446,7 +1446,6 @@ class changee extends AdminController
         $data['commodity_groups'] = $this->changee_model->get_commodity_group_add_commodity();
         $data['sub_groups'] = $this->changee_model->get_sub_group();
         $data['area'] = $this->changee_model->get_area();
-        $data['activity'] = $this->changee_model->get_po_activity($id);
         $data['currency_name'] = get_currency_name($estimate->currency);
         if ($to_return == false) {
             $this->load->view('changee_order/pur_order_preview', $data);
