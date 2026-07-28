@@ -713,7 +713,6 @@ class purchase extends AdminController
         $data['commodity_groups_request'] = $this->purchase_model->get_commodity_group_add_commodity();
         $data['sub_groups_request'] = $this->purchase_model->get_sub_group();
         $data['area_request'] = $this->purchase_model->get_area();
-        $data['activity'] = $this->purchase_model->get_pr_activity($id);
         $data['currency_name'] = get_currency_name($data['pur_request']->currency);
         $this->load->view('purchase_request/view_pur_request', $data);
     }
