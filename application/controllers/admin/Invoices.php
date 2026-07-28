@@ -464,7 +464,6 @@ class Invoices extends AdminController
         $data['invoices_to_merge']          = $this->invoices_model->check_for_merge_invoice($invoice->clientid, $id);
         $data['members']                    = $this->staff_model->get('', ['active' => 1]);
         $data['payments']                   = $this->payments_model->get_invoice_payments($id);
-        $data['activity']                   = $this->invoices_model->get_invoice_activity($id);
         $data['totalNotes']                 = total_rows(db_prefix() . 'notes', ['rel_id' => $id, 'rel_type' => 'invoice']);
         $data['invoice_recurring_invoices'] = $this->invoices_model->get_invoice_recurring_invoices($id);
 

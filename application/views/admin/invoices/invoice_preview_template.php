@@ -407,67 +407,19 @@
                     <hr />
                     <div class="mtop20" id="sales_notes_area"></div>
                 </div>
+
                 <div role="tabpanel" class="tab-pane ptop10" id="tab_activity">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="activity-feed">
-                                <?php foreach ($activity as $activity) {
-                      $_custom_data = false; ?>
-                                <div class="feed-item" data-sale-activity-id="<?php echo e($activity['id']); ?>">
-                                    <div class="date">
-                                        <span class="text-has-action" data-toggle="tooltip"
-                                            data-title="<?php echo e(_dt($activity['date'])); ?>">
-                                            <?php echo e(time_ago($activity['date'])); ?>
-                                        </span>
-                                    </div>
-                                    <div class="text">
-                                        <?php if (is_numeric($activity['staffid']) && $activity['staffid'] != 0) { ?>
-                                        <a href="<?php echo admin_url('profile/' . $activity['staffid']); ?>">
-                                            <?php echo staff_profile_image($activity['staffid'], ['staff-profile-xs-image pull-left mright5']);
-                                 ?>
-                                        </a>
-                                        <?php } ?>
-                                        <?php
-                                 $additional_data = '';
-                      if (!empty($activity['additional_data']) && $additional_data = unserialize($activity['additional_data'])) {
-                          $i               = 0;
-                          foreach ($additional_data as $data) {
-                              if (strpos($data, '<original_status>') !== false) {
-                                  $original_status     = get_string_between($data, '<original_status>', '</original_status>');
-                                  $additional_data[$i] = format_invoice_status($original_status, '', false);
-                              } elseif (strpos($data, '<new_status>') !== false) {
-                                  $new_status          = get_string_between($data, '<new_status>', '</new_status>');
-                                  $additional_data[$i] = format_invoice_status($new_status, '', false);
-                              } elseif (strpos($data, '<custom_data>') !== false) {
-                                  $_custom_data = get_string_between($data, '<custom_data>', '</custom_data>');
-                                  unset($additional_data[$i]);
-                              }
-                              $i++;
-                          }
-                      }
-
-                      $_formatted_activity = _l($activity['description'], $additional_data);
-
-                      if ($_custom_data !== false) {
-                          $_formatted_activity .= ' - ' . $_custom_data;
-                      }
-
-                      if (!empty($activity['full_name'])) {
-                          $_formatted_activity = e($activity['full_name']) . ' - ' . $_formatted_activity;
-                      }
-
-                      echo $_formatted_activity;
-
-                      if (is_admin()) {
-                          echo '<a href="#" class="pull-right text-danger" onclick="delete_sale_activity(' . $activity['id'] . '); return false;"><i class="fa fa-remove"></i></a>';
-                      } ?>
-                                    </div>
-                                </div>
-                                <?php } ?>
-                            </div>
-                        </div>
-                    </div>
+                   <div class="clearfix"></div>
+                   <table class="table table-cli-activity scroll-responsive">
+                      <thead>
+                         <th><?php echo _l('decription'); ?></th>
+                         <th><?php echo _l('date'); ?></th>
+                         <th><?php echo _l('staff'); ?></th>
+                      </thead>
+                      <tbody></tbody>
+                   </table>
                 </div>
+
                 <div role="tabpanel" class="tab-pane ptop10" id="tab_views">
                     <?php
                   $views_activity = get_views_tracking('invoice', $invoice->id);
@@ -505,5 +457,14 @@ record_payment(<?php echo e($invoice->id); ?>);
 <?php } elseif ($send_later) { ?>
 schedule_invoice_send(<?php echo e($invoice->id); ?>);
 <?php } ?>
+var table_cli_activity = $('.table-cli-activity');
+if ($.fn.DataTable.isDataTable('.table-cli-activity')) {
+  $('.table-cli-activity').DataTable().destroy();
+}
+var fncliactivityServerParams;
+fncliactivityServerParams = {
+  "rel_id": '[name="_attachment_sale_id"]',
+}
+initDataTable('.table-cli-activity', admin_url + 'purchase/table_module_related_activity?module_name=cli', false, false, fncliactivityServerParams, [1, 'desc']);
 </script>
 <?php hooks()->do_action('after_invoice_preview_template_rendered', $invoice); ?>
