@@ -297,7 +297,6 @@ class Estimates extends AdminController
 
         $data = prepare_mail_preview_data($template_name, $estimate->clientid);
 
-        $data['activity']          = $this->estimates_model->get_estimate_activity($id);
         $data['estimate']          = $estimate;
         $data['members']           = $this->staff_model->get('', ['active' => 1]);
         $data['estimate_statuses'] = $this->estimates_model->get_statuses();
