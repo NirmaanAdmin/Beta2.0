@@ -41,6 +41,12 @@
               </a>
             </li>
 
+            <li role="presentation">
+              <a href="#tab_activity" aria-controls="tab_activity" role="tab" data-toggle="tab">
+                <?php echo _l('invoice_view_activity_tooltip'); ?>
+              </a>
+            </li>
+
             <li role="presentation" class="tab-separator">
               <a href="#attachment" aria-controls="attachment" role="tab" data-toggle="tab">
                 <?php echo _l('attachment'); ?>
@@ -612,6 +618,19 @@
             </div>
           </div>
         <?php } ?>
+
+        <div role="tabpanel" class="tab-pane ptop10" id="tab_activity">
+          <div class="clearfix"></div>
+          <table class="table table-stckiss-activity scroll-responsive">
+            <thead>
+              <th><?php echo _l('decription'); ?></th>
+              <th><?php echo _l('date'); ?></th>
+              <th><?php echo _l('staff'); ?></th>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
         <div role="tabpanel" class="tab-pane" id="tab_activilog">
           <div class="panel_s no-shadow">
             <div class="activity-feed">
@@ -769,4 +788,14 @@
       "use strict";
       $('._project_file').modal('hide');
    }
+
+   var table_stckiss_activity = $('.table-stckiss-activity');
+   if ($.fn.DataTable.isDataTable('.table-stckiss-activity')) {
+    $('.table-stckiss-activity').DataTable().destroy();
+   }
+   var fnstckissactivityServerParams;
+   fnstckissactivityServerParams = {
+    "rel_id": '[name="_attachment_sale_id"]',
+   }
+   initDataTable('.table-stckiss-activity', admin_url + 'purchase/table_module_related_activity?module_name=stckiss', false, false, fnstckissactivityServerParams, [1, 'desc']);
 </script>
