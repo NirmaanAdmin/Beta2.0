@@ -109,7 +109,11 @@
 	                     <?php echo _l('attachment'); ?>
 	                     </a>
 	                  </li>  
-	                  
+	                  <li role="presentation">
+	                     <a href="#tab_activity" aria-controls="tab_activity" role="tab" data-toggle="tab">
+	                        <?php echo _l('invoice_view_activity_tooltip'); ?>
+	                     </a>
+	                  </li>
 	                  
 	               </ul>
 	            </div>
@@ -611,6 +615,18 @@
 		               <div id="purinv_file_data"></div>
                   	</div>
 
+                  	<div role="tabpanel" class="tab-pane ptop10" id="tab_activity">
+		               <div class="clearfix"></div>
+		               <table class="table table-vbt-activity scroll-responsive">
+		                  <thead>
+		                     <th><?php echo _l('decription'); ?></th>
+		                     <th><?php echo _l('date'); ?></th>
+		                     <th><?php echo _l('staff'); ?></th>
+		                  </thead>
+		                  <tbody></tbody>
+		               </table>
+		            </div>
+
                   	<div role="tabpanel" class="tab-pane" id="tab_tasks">
                      <?php init_relation_tasks_table(array('data-new-rel-id'=>$pur_invoice->id,'data-new-rel-type'=>'pur_invoice')); ?>
                   </div>
@@ -663,3 +679,15 @@
 <?php $this->load->view('debit_notes/apply_invoice_debits'); ?>   
 </body>
 </html>
+
+<script>
+var table_vbt_activity = $('.table-vbt-activity');
+if ($.fn.DataTable.isDataTable('.table-vbt-activity')) {
+  $('.table-vbt-activity').DataTable().destroy();
+}
+var fnvbtactivityServerParams;
+fnvbtactivityServerParams = {
+  "rel_id": '[name="invoice_id"]',
+}
+initDataTable('.table-vbt-activity', admin_url + 'purchase/table_module_related_activity?module_name=vbt', false, false, fnvbtactivityServerParams, [1, 'desc']);
+</script>
