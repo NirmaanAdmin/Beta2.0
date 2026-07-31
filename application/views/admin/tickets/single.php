@@ -101,6 +101,11 @@
                                                 <?php echo _l('tasks'); ?>
                                             </a>
                                         </li>
+                                        <li role="presentation">
+                                            <a href="#tab_activity" aria-controls="tab_activity" role="tab" data-toggle="tab">
+                                                <?php echo _l('invoice_view_activity_tooltip'); ?>
+                                            </a>
+                                        </li>
                                         <?php do_action_deprecated('add_single_ticket_tab_menu_item', $ticket, '3.0.7', 'after_admin_single_ticket_tab_menu_last_item'); ?>
                                         <?php hooks()->do_action('after_admin_single_ticket_tab_menu_last_item', $ticket); ?>
                                     </ul>
@@ -587,6 +592,17 @@
                                     </a>
                                 </div>
                             </div>
+                            <div role="tabpanel" class="tab-pane ptop10" id="tab_activity">
+                               <div class="clearfix"></div>
+                               <table class="table table-rfi-activity scroll-responsive">
+                                  <thead>
+                                     <th><?php echo _l('decription'); ?></th>
+                                     <th><?php echo _l('date'); ?></th>
+                                     <th><?php echo _l('staff'); ?></th>
+                                  </thead>
+                                  <tbody></tbody>
+                               </table>
+                            </div>
                             <?php hooks()->do_action('after_admin_single_ticket_tab_menu_last_content', $ticket); ?>
 
                         </div>
@@ -968,6 +984,16 @@
             new_task(new_task_url);
         }
     <?php } ?>
+
+    var table_rfi_activity = $('.table-rfi-activity');
+    if ($.fn.DataTable.isDataTable('.table-rfi-activity')) {
+      $('.table-rfi-activity').DataTable().destroy();
+    }
+    var fnrfiactivityServerParams;
+    fnrfiactivityServerParams = {
+      "rel_id": '[name="ticketid"]',
+    }
+    initDataTable('.table-rfi-activity', admin_url + 'purchase/table_module_related_activity?module_name=rfi', false, false, fnrfiactivityServerParams, [1, 'desc']);
 </script>
 </body>
 
