@@ -152,6 +152,7 @@ class purchase extends AdminController
             $data['tab'][] = ['name' => 'expenses', 'icon' => '<i class="fa fa-tasks menu-icon"></i>'];
             $data['tab'][] = ['name' => 'notes', 'icon' => '<i class="fa fa-sticky-note menu-icon"></i>'];
             $data['tab'][] = ['name' => 'attachments', 'icon' => '<i class="fa fa-paperclip menu-icon"></i>'];
+            $data['tab'][] = ['name' => 'activity_log', 'icon' => '<i class="fa fa-tasks menu-icon"></i>'];
 
             if ($data['group'] == '') {
                 $data['group'] = 'profile';

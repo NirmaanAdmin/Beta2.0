@@ -72,3 +72,15 @@
 
 </body>
 </html>
+
+<script>
+var table_ven_activity = $('.table-ven-activity');
+if ($.fn.DataTable.isDataTable('.table-ven-activity')) {
+  $('.table-ven-activity').DataTable().destroy();
+}
+var fnvenactivityServerParams;
+fnvenactivityServerParams = {
+  "rel_id": '[name="userid"]',
+}
+initDataTable('.table-ven-activity', admin_url + 'purchase/table_module_related_activity?module_name=ven', false, false, fnvenactivityServerParams, [1, 'desc']);
+</script>
