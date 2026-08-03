@@ -15173,9 +15173,9 @@ class Changee_model extends App_Model
                     $row['department'] = $value[8];
                     $row['co_description'] = $value[9];
                     $row['approval_status'] = preg_match('/<span[^>]*>(.*?)<\/span>/', $value[10], $m) ? trim($m[1]) : '';
-                    $row['co_value'] = $value[11];
-                    $row['tax_value'] = $value[12];
-                    $row['co_value_included_tax'] = $value[13];
+                    $row['co_value'] = preg_replace('/[^\d.\-]/', '', $value[11]);
+                    $row['tax_value'] = preg_replace('/[^\d.\-]/', '', $value[12]);
+                    $row['co_value_included_tax'] = preg_replace('/[^\d.\-]/', '', $value[13]);
                     $row['tags'] = '';
                     $row['payment_status'] = preg_match('/<div[^>]*class="[^"]*progress-bar[^"]*"[^>]*>([^<]+)<\/div>/i', $value[15], $m) ? trim($m[1]) : '';
                     $row['convert_expense'] = preg_match('/<a[^>]*>(.*?)<\/a>/', $value[16], $m) ? trim($m[1]) : '';

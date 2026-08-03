@@ -26467,9 +26467,9 @@ class Purchase_model extends App_Model
                     $row['project'] = $value[6];
                     $row['department'] = $value[7];
                     $row['approval_status'] = preg_match('/<span[^>]*>(.*?)<\/span>/', $value[8], $m) ? trim($m[1]) : '';
-                    $row['po_value'] = $value[9];
-                    $row['tax_value'] = $value[10];
-                    $row['po_value_included_tax'] = $value[11];
+                    $row['po_value'] = preg_replace('/[^\d.\-]/', '', $value[9]);
+                    $row['tax_value'] = preg_replace('/[^\d.\-]/', '', $value[10]);
+                    $row['po_value_included_tax'] = preg_replace('/[^\d.\-]/', '', $value[11]);
                     $row['tags'] = '';
                     $row['delivery_date'] = $value[13];
                     $row['delivery_status'] = preg_match('/<span[^>]*>([^<]+)/', $value[14], $m) ? trim($m[1]) : '';
@@ -26666,9 +26666,9 @@ class Purchase_model extends App_Model
                     $row['project'] = $value[6];
                     $row['department'] = $value[7];
                     $row['approval_status'] = preg_match('/<span[^>]*>(.*?)<\/span>/', $value[8], $m) ? trim($m[1]) : '';
-                    $row['wo_value'] = $value[9];
-                    $row['tax_value'] = $value[10];
-                    $row['wo_value_included_tax'] = $value[11];
+                    $row['wo_value'] = preg_replace('/[^\d.\-]/', '', $value[9]);
+                    $row['tax_value'] = preg_replace('/[^\d.\-]/', '', $value[10]);
+                    $row['wo_value_included_tax'] = preg_replace('/[^\d.\-]/', '', $value[11]);
                     $row['tags'] = '';
                     $row['payment_status'] = preg_match('/<div[^>]*class="[^"]*progress-bar[^"]*"[^>]*>([^<]+)<\/div>/i', $value[13], $m) ? trim($m[1]) : '';
 
@@ -27478,7 +27478,7 @@ class Purchase_model extends App_Model
                     $row['vendor'] = preg_match('/<a[^>]*>([^<]+)<\/a>/', $value[4], $m) ? trim($m[1]) : '';
                     $row['order_date'] = $value[5];
                     $row['group_pur'] = $value[6];
-                    $row['this_bill'] = $value[7];
+                    $row['this_bill'] = preg_replace('/[^\d.\-]/', '', $value[7]);
                     $row['submission_date'] = $value[8];
                     $row['approval_status'] = preg_match('/<span[^>]*>(.*?)<\/span>/', $value[9], $m) ? trim($m[1]) : '';
                     $row['pending_approval'] = $value[10];
