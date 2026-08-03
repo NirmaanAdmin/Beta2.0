@@ -26201,9 +26201,9 @@ class Purchase_model extends App_Model
                     $row['billing_budget_head'] = preg_match('/<span[^>]*id="budget_span_\d+"[^>]*>([^<]+)</', $value[6], $m) ? trim($m[1]) : '';
                     $row['description_of_services'] = preg_match('/<textarea[^>]*>(.*?)<\/textarea>/s', $value[7], $m) ? trim($m[1]) : '';
                     $row['ril_invoice'] = preg_match('/<a[^>]*>(.*?)<\/a>/', $value[8], $m) ? trim($m[1]) : '';
-                    $row['amount_without_tax'] = preg_match('/<span[^>]*>(.*?)<\/span>/', $value[9], $m) ? trim($m[1]) : '';
-                    $row['vendor_submitted_tax_amount'] = preg_match('/<span[^>]*>(.*?)<\/span>/', $value[10], $m) ? trim($m[1]) : '';
-                    $row['certified_amount'] = $value[11];
+                    $row['amount_without_tax'] = preg_match('/<span[^>]*>(.*?)<\/span>/', $value[9], $m) ? preg_replace('/[^\d.\-]/', '', trim($m[1])) : '';
+                    $row['vendor_submitted_tax_amount'] = preg_match('/<span[^>]*>(.*?)<\/span>/', $value[10], $m) ? preg_replace('/[^\d.\-]/', '', trim($m[1])) : '';
+                    $row['certified_amount'] = preg_replace('/[^\d.\-]/', '', $value[11]);
                     $row['billing_status'] = preg_match('/<span[^>]*id="status_span_\d+"[^>]*>([^<]+)</', $value[12], $m) ? trim($m[1]) : '';
                     $row['responsible_person'] = preg_match_all('/<option[^>]*selected[^>]*>(.*?)<\/option>/', $value[13], $m) ? implode(', ', array_map('trim', $m[1])) : '';
                     $row['vbt_order_name'] = preg_match('/<a[^>]*>(.*?)<\/a>/', $value[14], $m) ? trim($m[1]) : (preg_match('/<div[^>]*>(.*?)<\/div>/', $value[14], $m2) ? trim(strip_tags($m2[1])) : '');
@@ -26262,7 +26262,7 @@ class Purchase_model extends App_Model
             'attachment'                  => _l('attachment'),
             'adminnote'                   => _l('adminnote'),
             'is_expense'                  => _l('is_expense'),
-            'last_action_by'              => _l('last_action_by')
+            'last_action_by'              => _l('last_action_by'),
         ];
         $column_keys = array_keys($column_labels);
         $visible_columns = [];
@@ -26271,12 +26271,23 @@ class Purchase_model extends App_Model
                 $visible_columns[] = $key;
             }
         }
-        $html = '<table class="table purorder-item" style="width:100%">';
+        $total_amount_without_tax = array_sum(
+            array_map('floatval', array_column($pur_invoice_data, 'amount_without_tax'))
+        );
+        $total_vendor_tax = array_sum(
+            array_map('floatval', array_column($pur_invoice_data, 'vendor_submitted_tax_amount'))
+        );
+        $total_certified_amount = array_sum(
+            array_map('floatval', array_column($pur_invoice_data, 'certified_amount'))
+        );
+        $label_column = $visible_columns[0] ?? '';
+        $html = '<table class="table purorder-item" style="width:100%;">';
         $html .= '<thead><tr>';
         foreach ($visible_columns as $key) {
             $html .= '<th class="thead-dark" align="left">' . $column_labels[$key] . '</th>';
         }
-        $html .= '</tr></thead><tbody>';
+        $html .= '</tr></thead>';
+        $html .= '<tbody>';
         if (!empty($pur_invoice_data)) {
             foreach ($pur_invoice_data as $row) {
                 $html .= '<tr>';
@@ -26286,9 +26297,27 @@ class Purchase_model extends App_Model
                 $html .= '</tr>';
             }
         }
-        $html .= '</tbody></table>';
+        $html .= '</tbody>';
+        $html .= '<tfoot>';
+        $html .= '<tr style="font-weight:bold;">';
+        foreach ($visible_columns as $key) {
+            if ($key === $label_column) {
+                $html .= '<td><strong>Total (Per Page)</strong></td>';
+            } elseif ($key === 'amount_without_tax') {
+                $html .= '<td><strong>' . $total_amount_without_tax . '</strong></td>';
+            } elseif ($key === 'vendor_submitted_tax_amount') {
+                $html .= '<td><strong>' . $total_vendor_tax . '</strong></td>';
+            } elseif ($key === 'certified_amount') {
+                $html .= '<td><strong>' . $total_certified_amount . '</strong></td>';
+            } else {
+                $html .= '<td></td>';
+            }
+        }
+        $html .= '</tr>';
+        $html .= '</tfoot>';
+        $html .= '</table>';
+        $html .= '<link href="' . module_dir_url(PURCHASE_MODULE_NAME, 'assets/css/order_tracker_pdf.css') . '" rel="stylesheet" type="text/css" />';
 
-        $html .= '<link href="' . module_dir_url(PURCHASE_MODULE_NAME, 'assets/css/order_tracker_pdf.css') . '"  rel="stylesheet" type="text/css" />';
         return $html;
     }
 
@@ -26332,7 +26361,7 @@ class Purchase_model extends App_Model
             'attachment'                  => _l('attachment'),
             'adminnote'                   => _l('adminnote'),
             'is_expense'                  => _l('is_expense'),
-            'last_action_by'              => _l('last_action_by')
+            'last_action_by'              => _l('last_action_by'),
         ];
         $column_keys = array_keys($column_labels);
         $visible_columns = [];
@@ -26341,11 +26370,19 @@ class Purchase_model extends App_Model
                 $visible_columns[] = $key;
             }
         }
-
+        $total_amount_without_tax = array_sum(
+            array_map('floatval', array_column($pur_invoice_data, 'amount_without_tax'))
+        );
+        $total_vendor_tax = array_sum(
+            array_map('floatval', array_column($pur_invoice_data, 'vendor_submitted_tax_amount'))
+        );
+        $total_certified_amount = array_sum(
+            array_map('floatval', array_column($pur_invoice_data, 'certified_amount'))
+        );
         header('Content-Type: text/csv; charset=utf-8');
         header('Content-Disposition: attachment; filename="Vendor_Billing_Tracker.csv"');
         $output = fopen('php://output', 'w');
-        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+        fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
         $csv_headers = [];
         foreach ($visible_columns as $key) {
             $csv_headers[] = $column_labels[$key];
@@ -26360,6 +26397,23 @@ class Purchase_model extends App_Model
                 fputcsv($output, $data_row);
             }
         }
+        fputcsv($output, []);
+        $label_column = $visible_columns[0] ?? '';
+        $total_row = [];
+        foreach ($visible_columns as $key) {
+            if ($key === $label_column) {
+                $total_row[] = 'Total (Per Page)';
+            } elseif ($key === 'amount_without_tax') {
+                $total_row[] = $total_amount_without_tax;
+            } elseif ($key === 'vendor_submitted_tax_amount') {
+                $total_row[] = $total_vendor_tax;
+            } elseif ($key === 'certified_amount') {
+                $total_row[] = $total_certified_amount;
+            } else {
+                $total_row[] = '';
+            }
+        }
+        fputcsv($output, $total_row);
         fclose($output);
         exit;
     }
