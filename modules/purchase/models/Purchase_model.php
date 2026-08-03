@@ -3338,6 +3338,9 @@ class Purchase_model extends App_Model
         $this->db->where('relid', $id);
         $this->db->delete(db_prefix() . 'customfieldsvalues');
 
+        $this->db->where('pur_order', $id);
+        $this->db->update(db_prefix() . 'pur_invoices', ['pur_order' => NULL]);
+
         $this->db->where('id', $id);
         $this->db->delete(db_prefix() . 'pur_orders');
 
@@ -16997,6 +17000,9 @@ class Purchase_model extends App_Model
         $this->db->where('relid', $id);
         $this->db->delete(db_prefix() . 'customfieldsvalues');
 
+        $this->db->where('wo_order', $id);
+        $this->db->update(db_prefix() . 'pur_invoices', ['wo_order' => NULL]);
+
         $this->db->where('id', $id);
         $this->db->delete(db_prefix() . 'wo_orders');
 
@@ -19355,6 +19361,8 @@ class Purchase_model extends App_Model
      */
     public function delete_order_tracker($id)
     {
+        $this->db->where('order_tracker_id', $id);
+        $this->db->update(db_prefix() . 'pur_invoices', ['order_tracker_id' => NULL]);
 
         $this->db->where('id', $id);
         $this->db->delete(db_prefix() . 'pur_order_tracker');
