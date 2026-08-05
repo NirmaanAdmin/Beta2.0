@@ -30,7 +30,7 @@ commodity_group_table = $('.commodity-group-table');
 var Params = {
   "project": "[name='select_project']"
 };
-initDataTable('.commodity-group-table', admin_url + 'purchase/table_pur_commodity_group', [], [], Params, [1, 'asc']);
+initDataTable('.commodity-group-table', admin_url + 'purchase/table_pur_commodity_group', [], [0], Params, [1, 'asc']);
 $('select[name="select_project"]').on('change', function () {
   commodity_group_table.DataTable().ajax.reload();
 });
@@ -162,6 +162,9 @@ function bulk_commodity_group_delete() {
    }
  });
  if (print_id !== '') {
+   if (!confirm('Are you sure you want to delete the selected records?')) {
+    return false;
+   }
    $.post(admin_url + 'purchase/bulk_commodity_group_delete', {
      ids: print_id,
    }).done(function (response) {

@@ -36,11 +36,13 @@
 <hr class="hr-panel-heading" />
 <div class="clearfix"></div>
 <div class="row">
-    <a onclick="bulk_commodity_group_delete(); return false;" data-table=".commodity-group-table" class=" hide bulk-actions-btn table-btn">Bulk Delete</a>
+    <a onclick="bulk_commodity_group_delete(); return false;" data-table=".table-commodity" class=" hide bulk-actions-btn table-btn">Bulk Delete</a>
 </div>
-<table class="table border commodity-group-table">
+<table class="table border commodity-group-table table-commodity">
  <thead>
-    <th></th>
+    <th>
+        <div class="checkbox mass_select_all_wrap"><input type="checkbox" id="mass_select_all" data-to-table="commodity"><label></label></div>
+    </th>
     <th><?php echo _l('id'); ?></th>
     <th><?php echo _l('commodity_group_code'); ?></th>
     <th><?php echo _l('commodity_group_name'); ?></th>

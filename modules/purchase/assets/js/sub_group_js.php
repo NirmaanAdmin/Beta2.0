@@ -37,7 +37,7 @@ sub_group_table = $('.sub-group-table');
 var Params = {
   "project": "[name='select_project']"
 };
-initDataTable('.sub-group-table', admin_url + 'purchase/table_pur_sub_group', [], [], Params, [1, 'asc']);
+initDataTable('.sub-group-table', admin_url + 'purchase/table_pur_sub_group', [], [0], Params, [1, 'asc']);
 $('select[name="select_project"]').on('change', function () {
   sub_group_table.DataTable().ajax.reload();
 });
@@ -150,6 +150,9 @@ function bulk_sub_group_delete() {
    }
  });
  if (print_id !== '') {
+   if (!confirm('Are you sure you want to delete the selected records?')) {
+    return false;
+   }
    $.post(admin_url + 'purchase/bulk_sub_group_delete', {
      ids: print_id,
    }).done(function (response) {

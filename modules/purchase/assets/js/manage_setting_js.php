@@ -460,6 +460,9 @@ function allow_vendors_to_register(invoker){
      }
    });
    if (print_id !== '') {
+     if (!confirm('Are you sure you want to delete the selected records?')) {
+      return false;
+     }
      $.post(admin_url + 'costplanning/bulk_master_area_delete', {
        ids: print_id,
      }).done(function (response) {
@@ -490,6 +493,9 @@ function allow_vendors_to_register(invoker){
      }
    });
    if (print_id !== '') {
+     if (!confirm('Are you sure you want to delete the selected records?')) {
+      return false;
+     }
      $.post(admin_url + 'costplanning/bulk_functionality_area_delete', {
        ids: print_id,
      }).done(function (response) {
