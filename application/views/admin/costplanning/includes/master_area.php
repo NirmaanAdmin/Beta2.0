@@ -28,7 +28,7 @@
 <div class="row">
     <a onclick="bulk_master_area_delete(); return false;" data-table=".table-areas" class=" hide bulk-actions-btn table-btn">Bulk Delete</a>
 </div>
-<table class="table dt-table table-areas" data-order-col="1" data-order-type="asc">
+<table class="table dt-table border table-striped table-areas" data-order-col="1" data-order-type="asc">
  <thead>
     <th data-orderable="false">
         <div class="checkbox mass_select_all_wrap"><input type="checkbox" id="mass_select_all" data-to-table="areas"><label></label></div>

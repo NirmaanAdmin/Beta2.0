@@ -40,7 +40,7 @@
 <div class="row">
     <a onclick="bulk_sub_group_delete(); return false;" data-table=".table-sub" class=" hide bulk-actions-btn table-btn">Bulk Delete</a>
 </div>
-<table class="table border sub-group-table table-sub">
+<table class="table border table-striped sub-group-table table-sub">
  <thead>
     <th>
         <div class="checkbox mass_select_all_wrap"><input type="checkbox" id="mass_select_all" data-to-table="sub"><label></label></div>
