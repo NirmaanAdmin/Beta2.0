@@ -18590,4 +18590,21 @@ class purchase extends AdminController
     {
         $this->app->get_table_data(module_views_path('purchase', 'table_module_related_activity'));
     }
+
+    public function bulk_unit_delete()
+    {
+        $response = array();
+        $response['success'] = false;
+        $response['message'] = 'Please select at least one item from the list';
+        $ids = $this->input->post('ids');
+        if (!empty($ids)) {
+            $ids = explode(',', $ids);
+            foreach ($ids as $id) {
+                $this->purchase_model->delete_unit_type((int)$id);
+            }
+            $response['success'] = true;
+            $response['message'] = 'Units have been deleted successfully.';
+        }
+        echo json_encode($response);
+    }
 }

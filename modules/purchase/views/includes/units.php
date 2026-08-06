@@ -8,8 +8,14 @@
 <div class="clearfix"></div>
 <hr class="hr-panel-heading" />
 <div class="clearfix"></div>
-<table class="table dt-table border table-striped">
+<div class="row">
+    <a onclick="bulk_unit_delete(); return false;" data-table=".table-units" class=" hide bulk-actions-btn table-btn">Bulk Delete</a>
+</div>
+<table class="table dt-table border table-striped table-units" data-order-col="1" data-order-type="asc">
  <thead>
+    <th data-orderable="false">
+        <div class="checkbox mass_select_all_wrap"><input type="checkbox" id="mass_select_all" data-to-table="units"><label></label></div>
+    </th>
     <th><?php echo _l('id'); ?></th>
     <th><?php echo _l('unit_code'); ?></th>
     <th><?php echo _l('unit_name'); ?></th>
@@ -21,8 +27,8 @@
  </thead>
   <tbody>
     <?php foreach($unit_types as $unit_type){ ?>
-
     <tr>
+        <td><div class="checkbox"><input type="checkbox" value="<?php echo $unit_type['unit_type_id']; ?>"><label></label></div></td>
         <td><?php echo pur_html_entity_decode($unit_type['unit_type_id']); ?></td>
         <td><?php echo pur_html_entity_decode($unit_type['unit_code']); ?></td>
         <td><?php echo pur_html_entity_decode($unit_type['unit_name']); ?></td>
@@ -30,13 +36,11 @@
         <td><?php echo pur_html_entity_decode($unit_type['order']); ?></td>
         <td><?php if($unit_type['display'] == 0){ echo _l('not_display'); }else{echo _l('display');} ?></td>
         <td><?php echo pur_html_entity_decode($unit_type['note']); ?></td>
-
         <td>
             <?php if (has_permission('purchase_settings', '', 'edit') || is_admin()) { ?>
               <a href="#" onclick="edit_unit_type(this,<?php echo pur_html_entity_decode($unit_type['unit_type_id']); ?>); return false;" data-unit_code="<?php echo pur_html_entity_decode($unit_type['unit_code']); ?>" data-unit_name="<?php echo pur_html_entity_decode($unit_type['unit_name']); ?>" data-unit_symbol="<?php echo pur_html_entity_decode($unit_type['unit_symbol']); ?>" data-order="<?php echo pur_html_entity_decode($unit_type['order']); ?>" data-display="<?php echo pur_html_entity_decode($unit_type['display']); ?>" data-note="<?php echo pur_html_entity_decode($unit_type['note']); ?>" class="btn btn-default btn-icon"><i class="fa fa-pencil-square"></i>
             </a>
             <?php } ?>
-
             <?php if (has_permission('purchase_settings', '', 'edit') || is_admin()) { ?> 
             <a href="<?php echo admin_url('purchase/delete_unit_type/'.$unit_type['unit_type_id']); ?>" class="btn btn-danger btn-icon _delete"><i class="fa fa-remove"></i></a>
              <?php } ?>
