@@ -8,8 +8,14 @@
 <div class="clearfix"></div>
 <hr class="hr-panel-heading" />
 <div class="clearfix"></div>
-<table class="table dt-table">
+<div class="row">
+    <a onclick="bulk_vendor_category_delete(); return false;" data-table=".table-vendorcat" class=" hide bulk-actions-btn table-btn">Bulk Delete</a>
+</div>
+<table class="table dt-table border table-striped table-vendorcat" data-order-col="1" data-order-type="asc">
  <thead>
+    <th data-orderable="false">
+        <div class="checkbox mass_select_all_wrap"><input type="checkbox" id="mass_select_all" data-to-table="vendorcat"><label></label></div>
+    </th>
     <th><?php echo _l('id'); ?></th>
     <th><?php echo _l('name'); ?></th>
     <th><?php echo _l('description'); ?></th>
@@ -18,12 +24,14 @@
  <tbody>
   <?php foreach($vendor_categories as $vc){ ?>
     <tr>
+      <td>
+        <div class="checkbox"><input type="checkbox" value="<?php echo $vc['id']; ?>"><label></label></div>
+      </td>
       <td><?php echo pur_html_entity_decode($vc['id']); ?></td>
       <td><?php echo pur_html_entity_decode($vc['category_name']); ?></td>
       <td><?php echo pur_html_entity_decode($vc['description']); ?></td>
       <td>
         <a href="#" onclick="edit_vendor_cate(this,<?php echo pur_html_entity_decode($vc['id']); ?>); return false" data-name="<?php echo pur_html_entity_decode($vc['category_name']); ?>" data-description="<?php echo pur_html_entity_decode($vc['description']); ?>" class="btn btn-default btn-icon"><i class="fa fa-pencil-square"></i></a>
-
           <a href="<?php echo admin_url('purchase/delete_vendor_category/' . $vc['id']); ?>" class="btn btn-danger btn-icon _delete"><i class="fa fa-remove"></i></a>
       </td>
     </tr>
