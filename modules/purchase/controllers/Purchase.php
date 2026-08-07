@@ -18624,4 +18624,21 @@ class purchase extends AdminController
         }
         echo json_encode($response);
     }
+
+    public function bulk_area_delete()
+    {
+        $response = array();
+        $response['success'] = false;
+        $response['message'] = 'Please select at least one item from the list';
+        $ids = $this->input->post('ids');
+        if (!empty($ids)) {
+            $ids = explode(',', $ids);
+            foreach ($ids as $id) {
+                $this->purchase_model->delete_area((int)$id);
+            }
+            $response['success'] = true;
+            $response['message'] = 'Areas have been deleted successfully.';
+        }
+        echo json_encode($response);
+    }
 }

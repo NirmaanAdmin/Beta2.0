@@ -29,7 +29,7 @@
   var Params = {
     "project": "[name='select_project']"
   };
-  initDataTable('.area-table', admin_url + 'purchase/table_pur_area', [], [], Params, [0, 'desc']);
+  initDataTable('.area-table', admin_url + 'purchase/table_pur_area', [], [0], Params, [1, 'desc']);
   $('select[name="select_project"]').on('change', function () {
     area_table.DataTable().ajax.reload();
   });
@@ -87,6 +87,39 @@
       }
     });
     return false;
-}
+  }
+
+  function bulk_area_delete() {
+   "use strict";
+   var print_id = '';
+   var rows = $('.area-table').find('tbody tr');
+   $.each(rows, function() {
+     var checkbox = $($(this).find('td').eq(0)).find('input');
+     if (checkbox.prop('checked') === true) {
+         if (print_id !== '') {
+             print_id += ','; // Append a comma before adding the next value
+         }
+         print_id += checkbox.val();
+     }
+   });
+   if (print_id !== '') {
+     if (!confirm('Are you sure you want to delete the selected records?')) {
+      return false;
+     }
+     $.post(admin_url + 'purchase/bulk_area_delete', {
+       ids: print_id,
+     }).done(function (response) {
+        response = JSON.parse(response);
+        if (response.success) {
+          alert_float('success', response.message);
+        } else {
+          alert_float('danger', response.message);
+        }
+        location.reload();
+     });
+   } else {
+     alert_float('danger', 'Please select at least one item from the list');
+   }
+  }
 
 </script>

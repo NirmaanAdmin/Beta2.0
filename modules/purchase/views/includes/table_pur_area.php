@@ -7,6 +7,7 @@ $project_filter_name = 'project';
 
 $aColumns = [
     'id',
+    'id',
     'area_name',
     'project',
 ];
@@ -35,6 +36,7 @@ foreach ($rResult as $key => $aRow) {
     $area_name = $aRow['area_name'];
     $project = $aRow['project'];
 
+    $row[] = '<div class="checkbox"><input type="checkbox" value="' . $id . '"><label></label></div>';
     $row[] = $key + 1;
     $row[] = $area_name;
     $row[] = get_project_name_by_id($project);

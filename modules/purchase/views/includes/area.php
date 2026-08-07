@@ -39,8 +39,14 @@
 
 <hr class="hr-panel-heading" />
 <div class="clearfix"></div>
-<table class="table border area-table">
+<div class="row">
+    <a onclick="bulk_area_delete(); return false;" data-table=".table-area" class=" hide bulk-actions-btn table-btn">Bulk Delete</a>
+</div>
+<table class="table border table-striped area-table table-area">
  <thead>
+    <th>
+        <div class="checkbox mass_select_all_wrap"><input type="checkbox" id="mass_select_all" data-to-table="area"><label></label></div>
+    </th>
     <th><?php echo _l('id'); ?></th>
     <th><?php echo _l('area_name'); ?></th>
     <th><?php echo _l('project'); ?></th>
