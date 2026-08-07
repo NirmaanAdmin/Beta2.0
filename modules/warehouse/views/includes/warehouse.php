@@ -27,32 +27,29 @@
                 <hr class="hr-panel-heading" />
                 <div class="clearfix"></div>
 
-                                    <?php 
-                                      $table_data = array(
-                                                        
-                                                          _l('warehouse_code'),
-                                                          _l('warehouse_name'),
-                                                          _l('warehouse_address'),
-                                                          _l('order'),
-                                                          _l('display'),
-                                                          _l('note'),
-                                                        );
-                                       $cf = get_custom_fields('warehouse_name',array('show_on_table'=>1));
-
-                                      foreach($cf as $custom_field) {
-                                        array_push($table_data,$custom_field['name']);
-                                      }
-
-                                      render_datatable($table_data,'table_warehouse_name',
-                                          array('customizable-table'),
-                                          array(
-                                            'proposal_sm' => 'proposal_sm',
-                                             'id'=>'table-table_warehouse_name',
-                                             'data-last-order-identifier'=>'table_warehouse_name',
-                                             'data-default-order'=>get_table_last_order('table_warehouse_name'),
-                                           )); ?>
-
-
+                <div class="row">
+                    <a onclick="bulk_warehouse_name_delete(); return false;" data-table=".table-table_warehouse_name" class=" hide bulk-actions-btn table-btn">Bulk Delete</a>
+                </div>
+                <?php $cf = get_custom_fields('warehouse_name', ['show_on_table' => 1]); ?>
+                <table id="table-table_warehouse_name" proposal_sm="proposal_sm" data-last-order-identifier="table_warehouse_name" data-default-order="<?php echo get_table_last_order('table_warehouse_name'); ?>" class="table border table-striped dt-table-loading table-table_warehouse_name customizable-table">
+                    <thead>
+                        <tr>
+                            <th>
+                                <div class="checkbox mass_select_all_wrap"><input type="checkbox" id="mass_select_all" data-to-table="table_warehouse_name"><label></label></div>
+                            </th>
+                            <th><?php echo _l('warehouse_code'); ?></th>
+                            <th><?php echo _l('warehouse_name'); ?></th>
+                            <th><?php echo _l('warehouse_address'); ?></th>
+                            <th><?php echo _l('order'); ?></th>
+                            <th><?php echo _l('display'); ?></th>
+                            <th><?php echo _l('note'); ?></th>
+                            <?php foreach ($cf as $custom_field) { ?>
+                                <th><?php echo $custom_field['name']; ?></th>
+                            <?php } ?>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
 
                 <div class="modal1 fade" id="warehouse_type" tabindex="-1" role="dialog">
                         <div class="modal-dialog setting-handsome-table">

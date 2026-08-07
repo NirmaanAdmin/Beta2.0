@@ -10412,4 +10412,21 @@ class warehouse extends AdminController
 
 		echo json_encode(['status' => true]);
 	}
+
+	public function bulk_warehouse_name_delete()
+    {
+        $response = array();
+        $response['success'] = false;
+        $response['message'] = 'Please select at least one item from the list';
+        $ids = $this->input->post('ids');
+        if (!empty($ids)) {
+            $ids = explode(',', $ids);
+            foreach ($ids as $id) {
+                $this->warehouse_model->delete_warehouse((int)$id);
+            }
+            $response['success'] = true;
+            $response['message'] = 'Warehouses have been deleted successfully.';
+        }
+        echo json_encode($response);
+    }
 }

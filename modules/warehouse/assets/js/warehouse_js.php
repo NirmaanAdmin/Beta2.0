@@ -8,7 +8,7 @@
     });
     
   var table_warehouse_name = $('table.table-table_warehouse_name');
-  var _table_api = initDataTable(table_warehouse_name, admin_url+'warehouse/table_warehouse_name', [0], [0], '',  [3, 'asc']);
+  var _table_api = initDataTable(table_warehouse_name, admin_url+'warehouse/table_warehouse_name', [0], [0], '',  [4, 'asc']);
 
 
 var warehouse_type_value = {};
@@ -345,6 +345,38 @@ setTimeout(function(){
         alert_float('warning', "<?php echo _l('Maximum_length_warehouse_code_is_100_words') ; ?>", 200);
     }
   });
-  
+
+  function bulk_warehouse_name_delete() {
+   "use strict";
+   var print_id = '';
+   var rows = $('.table-table_warehouse_name').find('tbody tr');
+   $.each(rows, function() {
+     var checkbox = $($(this).find('td').eq(0)).find('input');
+     if (checkbox.prop('checked') === true) {
+         if (print_id !== '') {
+             print_id += ','; // Append a comma before adding the next value
+         }
+         print_id += checkbox.val();
+     }
+   });
+   if (print_id !== '') {
+     if (!confirm('Are you sure you want to delete the selected records?')) {
+      return false;
+     }
+     $.post(admin_url + 'warehouse/bulk_warehouse_name_delete', {
+       ids: print_id,
+     }).done(function (response) {
+        response = JSON.parse(response);
+        if (response.success) {
+          alert_float('success', response.message);
+        } else {
+          alert_float('danger', response.message);
+        }
+        location.reload();
+     });
+   } else {
+     alert_float('danger', 'Please select at least one item from the list');
+   }
+  }
 
 </script>

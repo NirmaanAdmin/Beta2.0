@@ -3,6 +3,7 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 
 $aColumns = [
+	'warehouse_id',
 	'warehouse_code',
 	'warehouse_name',
 	'warehouse_address',
@@ -53,9 +54,11 @@ $rResult = $result['rResult'];
 
 			if (strpos($aColumns[$i], 'as') !== false && !isset($aRow[$aColumns[$i]])) {
 	            $_data = $aRow[strafter($aColumns[$i], 'as ')];
-	        } 
+	        }
 
-			if ($aColumns[$i] == 'warehouse_code') {
+	        if($aColumns[$i] == 'warehouse_id') {
+	        	$_data = '<div class="checkbox"><input type="checkbox" value="' . $aRow['warehouse_id'] . '"><label></label></div>';
+	        } elseif ($aColumns[$i] == 'warehouse_code') {
 				$code = '<a href="' . admin_url('warehouse/view_warehouse_detail/' . $aRow['warehouse_id']) . '">' . $aRow['warehouse_code'] . '</a>';
 				$code .= '<div class="row-options">';
 
