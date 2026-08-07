@@ -12,6 +12,7 @@ $status_filter_name = 'status';
 $from_date_filter_name = 'from_date';
 $to_date_filter_name = 'to_date';
 $aColumns = [
+    db_prefix() . 'pur_request.id as id',
     'pur_rq_code',
     'pur_rq_name',
     db_prefix() . 'departments.name as department_name',
@@ -135,7 +136,6 @@ $requester_filter_name_value = !empty($this->ci->input->post('requester')) ? imp
 update_module_filter($module_name, $requester_filter_name, $requester_filter_name_value);
 
 $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [
-    db_prefix() . 'pur_request' . '.id',
     'tbldepartments.name',
     'pur_rq_code',
     '(SELECT GROUP_CONCAT(' . db_prefix() . 'project_members.staff_id SEPARATOR ",") FROM ' . db_prefix() . 'project_members WHERE ' . db_prefix() . 'project_members.project_id=' . db_prefix() . 'pur_request.project) as member_list',
@@ -150,7 +150,9 @@ foreach ($rResult as $aRow) {
     for ($i = 0; $i < count($aColumns); $i++) {
 
         $_data = $aRow[$aColumns[$i]];
-        if ($aColumns[$i] == 'request_date') {
+        if ($aColumns[$i] == db_prefix() . 'pur_request.id as id') {
+            $_data = '<div class="checkbox"><input type="checkbox" value="' . $aRow['id'] . '"><label></label></div>';
+        } elseif ($aColumns[$i] == 'request_date') {
             $_data = _dt($aRow['request_date']);
         } elseif ($aColumns[$i] == 'requester') {
             $_data = '<a href="' . admin_url('staff/profile/' . $aRow['requester']) . '">' . staff_profile_image($aRow['requester'], [

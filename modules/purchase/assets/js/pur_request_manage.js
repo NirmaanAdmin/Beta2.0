@@ -14,7 +14,7 @@ var Params = {
 (function ($) {
   "use strict";
 
-  initDataTable('.table-table_pur_request', admin_url + 'purchase/table_pur_request', [0], [0], Params, [6, 'desc']);
+  initDataTable('.table-table_pur_request', admin_url + 'purchase/table_pur_request', [0], [0, 1], Params, [7, 'desc']);
 
   $.each(Params, function (i, obj) {
     $('select' + obj).on('change', function () {
@@ -186,6 +186,39 @@ function change_pr_approve_status(status, id) {
       }
     });
   }
+}
+
+function bulk_pur_request_delete() {
+ "use strict";
+ var print_id = '';
+ var rows = $('.table-table_pur_request').find('tbody tr');
+ $.each(rows, function() {
+   var checkbox = $($(this).find('td').eq(0)).find('input');
+   if (checkbox.prop('checked') === true) {
+       if (print_id !== '') {
+           print_id += ','; // Append a comma before adding the next value
+       }
+       print_id += checkbox.val();
+   }
+ });
+ if (print_id !== '') {
+   if (!confirm('Are you sure you want to delete the selected records?')) {
+    return false;
+   }
+   $.post(admin_url + 'purchase/bulk_pur_request_delete', {
+     ids: print_id,
+   }).done(function (response) {
+      response = JSON.parse(response);
+      if (response.success) {
+        alert_float('success', response.message);
+      } else {
+        alert_float('danger', response.message);
+      }
+      location.reload();
+   });
+ } else {
+   alert_float('danger', 'Please select at least one item from the list');
+ }
 }
 
 var lineChartOverTime;

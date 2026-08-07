@@ -16,12 +16,12 @@ $module_name = 'purchase_request';
   .show_hide_columns {
     position: absolute;
     z-index: 5000;
-    left: 229px
+    left: 319px
   }
   .export-btn-div {
     position: absolute;
     z-index: 999;
-    left: 133px;
+    left: 221px;
   }
 </style>
 <div id="wrapper">
@@ -231,6 +231,10 @@ $module_name = 'purchase_request';
             <br>
 
             <div class="row">
+              <a onclick="bulk_pur_request_delete(); return false;" data-table=".table-table_pur_request" class=" hide bulk-actions-btn table-btn">Bulk Delete</a>
+            </div>
+
+            <div class="row">
               <div class="col-md-12" id="small-table">
                <div class="btn-group show_hide_columns" id="show_hide_columns">
                   <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding: 4px 7px;">
@@ -243,6 +247,7 @@ $module_name = 'purchase_request';
                      <hr>
                      <?php
                      $columns = [
+                        'Checkbox',
                         'pur_rq_code',
                         'pur_rq_name',
                         'department',
@@ -280,6 +285,9 @@ $module_name = 'purchase_request';
                   <table class="dt-table-loading table table-table_pur_request">
                      <thead>
                         <tr>
+                           <th>
+                            <div class="checkbox mass_select_all_wrap"><input type="checkbox" id="mass_select_all" data-to-table="table_pur_request"><label></label></div>
+                           </th>
                            <th><?php echo _l('pur_rq_code'); ?></th>
                            <th><?php echo _l('pur_rq_name'); ?></th>
                            <th><?php echo _l('department'); ?></th>
