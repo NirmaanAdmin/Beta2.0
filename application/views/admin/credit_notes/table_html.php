@@ -1,28 +1,46 @@
-<?php defined('BASEPATH') or exit('No direct script access allowed');
-
-$table_data = array(
- _l('credit_note_number'),
- _l('credit_note_date'),
- (!isset($client) ? _l('client') : array(
-   'name'=>_l('client'),
-   'th_attrs'=>array('class'=>'not_visible')
- )),
- _l('credit_note_status'),
- (!isset($project) ? _l('project') : array(
-   'name'=>_l('project'),
-   'th_attrs'=>array('class'=>'not_visible')
- )),
- _l('reference_no'),
- _l('credit_note_amount'),
- _l('credit_note_remaining_credits'),
+<?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
+<?php
+$custom_fields = get_custom_fields(
+    'credit_note',
+    array('show_on_table' => 1)
 );
-
-$custom_fields = get_custom_fields('credit_note',array('show_on_table'=>1));
-foreach($custom_fields as $field){
-  array_push($table_data, [
-   'name' => $field['name'],
-   'th_attrs' => array('data-type'=>$field['type'], 'data-custom-field'=>1)
- ]);
-}
-render_datatable($table_data,'credit-notes', [], ['id'=>$table_id ?? 'credit_notes']);
 ?>
+<div class="row">
+  <a onclick="bulk_credit_notes_delete(); return false;" data-table=".table-credit-notes" class=" hide bulk-actions-btn table-btn">Bulk Delete</a>
+</div>
+<table class="table table-striped table-credit-notes" id="<?php echo $table_id ?? 'credit_notes'; ?>">
+    <thead>
+        <tr>
+            <th>
+                <div class="checkbox mass_select_all_wrap"><input type="checkbox" id="mass_select_all" data-to-table="credit-notes"><label></label></div>
+            </th>
+            <th><?php echo _l('credit_note_number'); ?></th>
+            <th><?php echo _l('credit_note_date'); ?></th>
+            <?php if (!isset($client)) { ?>
+                <th><?php echo _l('client'); ?></th>
+            <?php } else { ?>
+                <th class="not_visible">
+                    <?php echo _l('client'); ?>
+                </th>
+            <?php } ?>
+            <th><?php echo _l('credit_note_status'); ?></th>
+            <?php if (!isset($project)) { ?>
+                <th><?php echo _l('project'); ?></th>
+            <?php } else { ?>
+                <th class="not_visible">
+                    <?php echo _l('project'); ?>
+                </th>
+            <?php } ?>
+            <th><?php echo _l('reference_no'); ?></th>
+            <th><?php echo _l('credit_note_amount'); ?></th>
+            <th><?php echo _l('credit_note_remaining_credits'); ?></th>
+            <?php foreach ($custom_fields as $field) { ?>
+                <th data-type="<?php echo htmlspecialchars($field['type']); ?>" data-custom-field="1"
+                >
+                    <?php echo $field['name']; ?>
+                </th>
+            <?php } ?>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>

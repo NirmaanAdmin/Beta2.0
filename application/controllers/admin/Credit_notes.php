@@ -438,4 +438,21 @@ class Credit_notes extends AdminController
 
         $pdf->Output(mb_strtoupper(slug_it($credit_note_number)) . '.pdf', $type);
     }
+
+    public function bulk_credit_notes_delete()
+    {
+        $response = array();
+        $response['success'] = false;
+        $response['message'] = 'Please select at least one item from the list';
+        $ids = $this->input->post('ids');
+        if (!empty($ids)) {
+            $ids = explode(',', $ids);
+            foreach ($ids as $id) {
+                $this->credit_notes_model->delete((int)$id);
+            }
+            $response['success'] = true;
+            $response['message'] = 'Credit notes have been deleted successfully.';
+        }
+        echo json_encode($response);
+    }
 }

@@ -102,10 +102,10 @@ $(function() {
         "clients": "[name='clients[]']",
         "statuses": "[name='statuses[]']",
     };
-    initDataTable('.table-credit-notes', admin_url + 'credit_notes/table_new', ['undefined'], ['undefined'],
+    initDataTable('.table-credit-notes', admin_url + 'credit_notes/table_new', ['undefined'], [0],
         Params, [
-            [1, 'desc'],
-            [0, 'desc']
+            [2, 'desc'],
+            [1, 'desc']
         ]);
     init_credit_note();
     $.each(Params, function(i, obj) {
@@ -127,6 +127,38 @@ $(function() {
         $('select[name="statuses[]"]').selectpicker('refresh');
     });
 });
+function bulk_credit_notes_delete() {
+    "use strict";
+    var print_id = '';
+    var rows = $('.table-credit-notes').find('tbody tr');
+    $.each(rows, function() {
+      var checkbox = $($(this).find('td').eq(0)).find('input');
+      if (checkbox.prop('checked') === true) {
+          if (print_id !== '') {
+              print_id += ','; // Append a comma before adding the next value
+          }
+          print_id += checkbox.val();
+      }
+    });
+    if (print_id !== '') {
+      if (!confirm('Are you sure you want to delete the selected records?')) {
+       return false;
+      }
+      $.post(admin_url + 'credit_notes/bulk_credit_notes_delete', {
+        ids: print_id,
+      }).done(function (response) {
+         response = JSON.parse(response);
+         if (response.success) {
+           alert_float('success', response.message);
+         } else {
+           alert_float('danger', response.message);
+         }
+         location.reload();
+      });
+    } else {
+      alert_float('danger', 'Please select at least one item from the list');
+    }
+}
 </script>
 </body>
 

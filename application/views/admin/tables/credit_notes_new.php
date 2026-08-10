@@ -15,6 +15,7 @@ $remainingAmountSelect = '(SELECT ' . db_prefix() . 'creditnotes.total - (
   )';
 
 $aColumns = [
+    db_prefix() . 'creditnotes.id as id',
     'number',
     'date',
     get_sql_select_client_company(),
@@ -84,7 +85,6 @@ if (count($custom_fields) > 4) {
 }
 
 $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [
-    db_prefix() . 'creditnotes.id',
     db_prefix() . 'creditnotes.clientid',
     db_prefix() . 'currencies.name as currency_name',
     'project_id',
@@ -96,6 +96,8 @@ $rResult = $result['rResult'];
 
 foreach ($rResult as $aRow) {
     $row = [];
+
+    $row[] = '<div class="checkbox"><input type="checkbox" value="' . $aRow['id'] . '"><label></label></div>';
 
     $numberOutput = '';
     // If is from client area table
