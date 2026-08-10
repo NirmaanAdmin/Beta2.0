@@ -8,6 +8,7 @@ $vendors_filter_name = 'vendors';
 $statuses_filter_name = 'statuses';
 
 $aColumns = [
+    db_prefix() . 'pur_debit_notes.id as id',
     'number',
     'date',
     get_sql_select_vendor_company(),
@@ -116,7 +117,6 @@ if(isset($vendor)){
 $having = '';
 
 $result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, [
-    db_prefix() . 'pur_debit_notes.id',
     db_prefix() . 'pur_debit_notes.vendorid',
     db_prefix(). 'currencies.name as currency_name',
     'deleted_vendor_name',
@@ -134,6 +134,8 @@ $rResult = $result['rResult'];
 
 foreach ($rResult as $aRow) {
     $row = [];
+
+    $row[] = '<div class="checkbox"><input type="checkbox" value="' . $aRow['id'] . '"><label></label></div>';
 
     $numberOutput = '';
     // If is from client area table
