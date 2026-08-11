@@ -18675,4 +18675,21 @@ class purchase extends AdminController
         }
         echo json_encode($response);
     }
+
+    public function bulk_pur_invoices_delete()
+    {
+        $response = array();
+        $response['success'] = false;
+        $response['message'] = 'Please select at least one item from the list';
+        $ids = $this->input->post('ids');
+        if (!empty($ids)) {
+            $ids = explode(',', $ids);
+            foreach ($ids as $id) {
+                $this->purchase_model->delete_pur_invoice((int)$id);
+            }
+            $response['success'] = true;
+            $response['message'] = 'Vendor bills have been deleted successfully.';
+        }
+        echo json_encode($response);
+    }
 }

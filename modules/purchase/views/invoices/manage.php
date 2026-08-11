@@ -4,7 +4,7 @@
    .show_hide_columns {
       position: absolute;
       z-index: 999;
-      left: 539px
+      left: 634px
    }
 
    /* Ensure the table uses correct layout */
@@ -71,7 +71,7 @@
    .export-btn-div {
       position: absolute;
       z-index: 999;
-      left: 445px;
+      left: 537px;
    }
 </style>
 <?php $module_name = 'vendor_billing_tracker'; ?>
@@ -339,6 +339,7 @@
                      <a onclick="bulk_convert_ril_bill(); return false;" data-toggle="modal" data-table=".table-table_pur_invoices" class=" hide bulk-actions-btn table-btn">Bulk Convert</a>
                      <a onclick="bulk_assign_ril_bill(); return false;" data-toggle="modal" data-table=".table-table_pur_invoices" class=" hide bulk-actions-btn table-btn">Bulk Assign</a>
                      <a onclick="bulk_transfer_invoices(); return false;" data-toggle="modal" data-table=".table-table_pur_invoices" class=" hide bulk-actions-btn table-btn">Transfer Invoices</a>
+                     <a onclick="bulk_pur_invoices_delete(); return false;" data-table=".table-table_pur_invoices" class=" hide bulk-actions-btn table-btn">Bulk Delete</a>
                   </div>
 
                   <?php
