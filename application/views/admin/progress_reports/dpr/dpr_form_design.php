@@ -1,3 +1,66 @@
+<!-- <style type="text/css">
+    .daily_report_title,
+    .daily_report_activity {
+        font-weight: bold;
+        text-align: center;
+        background-color: lightgrey;
+    }
+
+    .daily_report_title {
+        font-size: 17px;
+    }
+
+    .daily_report_activity {
+        font-size: 16px;
+    }
+
+    .daily_report_head {
+        font-size: 14px;
+    }
+
+    .daily_report_label {
+        font-weight: bold;
+    }
+
+    .daily_center {
+        text-align: center;
+    }
+
+    .table-responsive {
+        overflow-x: visible !important;
+        scrollbar-width: none !important;
+    }
+
+    .laber-type .dropdown-menu .open,
+    .agency .dropdown-menu .open {
+        width: max-content !important;
+    }
+
+    .agency .dropdown-toggle,
+    .laber-type .dropdown-toggle {
+        width: 138px !important;
+    }
+
+    .laber-type .dropdown-menu .open,
+    .progress_report_type .dropdown-menu .open {
+        width: max-content !important;
+    }
+
+    .progress_report_type .dropdown-toggle,
+    .laber-type .dropdown-toggle {
+        width: 140px !important;
+    }
+
+    .laber-type .dropdown-menu .open,
+    .machinery .dropdown-menu .open {
+        width: max-content !important;
+    }
+
+    .machinery .dropdown-toggle,
+    .laber-type .dropdown-toggle {
+        width: 140px !important;
+    }
+</style> -->
 <style type="text/css">
     .daily_report_title,
     .daily_report_activity {
@@ -59,6 +122,576 @@
     .machinery .dropdown-toggle,
     .laber-type .dropdown-toggle {
         width: 140px !important;
+    }
+
+    /* ========== RESPONSIVE STACKED LAYOUT ========== */
+    @media (max-width: 768px) {
+
+        /* Make all tables block level */
+        .dpr-items-table,
+        .dpr-rmc-table,
+        .dpr-material-table,
+        .dpr-department-labour-table,
+        .rack-cement-table,
+        .block-mortar-table,
+        .tile-adhesive-table,
+        .tile-coupler-table,
+        .tile-wires-table,
+        .tile-coucil-table {
+            display: block;
+            width: 100%;
+        }
+
+        /* Hide thead for all tables */
+        .dpr-items-table thead,
+        .dpr-rmc-table thead,
+        .dpr-material-table thead,
+        .dpr-department-labour-table thead,
+        .rack-cement-table thead,
+        .block-mortar-table thead,
+        .tile-adhesive-table thead,
+        .tile-coupler-table thead,
+        .tile-wires-table thead,
+        .tile-coucil-table thead {
+            display: none;
+        }
+
+        /* Make tbody block */
+        .dpr-items-table tbody,
+        .dpr-rmc-table tbody,
+        .dpr-material-table tbody,
+        .dpr-department-labour-table tbody,
+        .rack-cement-table tbody,
+        .block-mortar-table tbody,
+        .tile-adhesive-table tbody,
+        .tile-coupler-table tbody,
+        .tile-wires-table tbody,
+        .tile-coucil-table tbody {
+            display: block;
+        }
+
+        /* Style each row as a card */
+        .dpr-items-table tbody tr,
+        .dpr-rmc-table tbody tr,
+        .dpr-material-table tbody tr,
+        .dpr-department-labour-table tbody tr,
+        .rack-cement-table tbody tr,
+        .block-mortar-table tbody tr,
+        .tile-adhesive-table tbody tr,
+        .tile-coupler-table tbody tr,
+        .tile-wires-table tbody tr,
+        .tile-coucil-table tbody tr {
+            display: block;
+            border: 1px solid #ddd;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 100%;
+        }
+
+        /* Style each td as a flex row with label */
+        .dpr-items-table tbody tr td,
+        .dpr-rmc-table tbody tr td,
+        .dpr-material-table tbody tr td,
+        .dpr-department-labour-table tbody tr td,
+        .rack-cement-table tbody tr td,
+        .block-mortar-table tbody tr td,
+        .tile-adhesive-table tbody tr td,
+        .tile-coupler-table tbody tr td,
+        .tile-wires-table tbody tr td,
+        .tile-coucil-table tbody tr td {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            padding: 8px 5px;
+            border: none;
+            border-bottom: 1px solid #eee;
+            width: 100%;
+        }
+
+        .dpr-items-table tbody tr td:last-child,
+        .dpr-rmc-table tbody tr td:last-child,
+        .dpr-material-table tbody tr td:last-child,
+        .dpr-department-labour-table tbody tr td:last-child {
+            border-bottom: none;
+        }
+
+        /* Add labels before each field using data-label attribute */
+        .dpr-items-table tbody tr td:before,
+        .dpr-rmc-table tbody tr td:before,
+        .dpr-material-table tbody tr td:before,
+        .dpr-department-labour-table tbody tr td:before,
+        .rack-cement-table tbody tr td:before,
+        .block-mortar-table tbody tr td:before,
+        .tile-adhesive-table tbody tr td:before,
+        .tile-coupler-table tbody tr td:before,
+        .tile-wires-table tbody tr td:before,
+        .tile-coucil-table tbody tr td:before {
+            content: attr(data-label);
+            font-weight: bold;
+            min-width: 120px;
+            padding-right: 10px;
+            font-size: 13px;
+            color: #333;
+        }
+
+        /* Make inputs and selects full width */
+        .dpr-items-table tbody tr td input,
+        .dpr-items-table tbody tr td select,
+        .dpr-rmc-table tbody tr td input,
+        .dpr-rmc-table tbody tr td select,
+        .dpr-material-table tbody tr td input,
+        .dpr-material-table tbody tr td select,
+        .dpr-department-labour-table tbody tr td input,
+        .dpr-department-labour-table tbody tr td select,
+        .rack-cement-table tbody tr td input,
+        .rack-cement-table tbody tr td select,
+        .block-mortar-table tbody tr td input,
+        .block-mortar-table tbody tr td select,
+        .tile-adhesive-table tbody tr td input,
+        .tile-adhesive-table tbody tr td select,
+        .tile-coupler-table tbody tr td input,
+        .tile-coupler-table tbody tr td select,
+        .tile-wires-table tbody tr td input,
+        .tile-wires-table tbody tr td select,
+        .tile-coucil-table tbody tr td input,
+        .tile-coucil-table tbody tr td select {
+            flex: 1;
+            min-width: 150px;
+            width: 100% !important;
+        }
+
+        /* Bootstrap select fixes */
+        .dpr-items-table tbody tr td .bootstrap-select,
+        .dpr-rmc-table tbody tr td .bootstrap-select,
+        .dpr-material-table tbody tr td .bootstrap-select,
+        .dpr-department-labour-table tbody tr td .bootstrap-select,
+        .rack-cement-table tbody tr td .bootstrap-select,
+        .block-mortar-table tbody tr td .bootstrap-select,
+        .tile-adhesive-table tbody tr td .bootstrap-select,
+        .tile-coupler-table tbody tr td .bootstrap-select,
+        .tile-wires-table tbody tr td .bootstrap-select,
+        .tile-coucil-table tbody tr td .bootstrap-select {
+            width: 100% !important;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .dpr-items-table tbody tr td .dropdown-toggle,
+        .dpr-rmc-table tbody tr td .dropdown-toggle,
+        .dpr-material-table tbody tr td .dropdown-toggle,
+        .dpr-department-labour-table tbody tr td .dropdown-toggle,
+        .rack-cement-table tbody tr td .dropdown-toggle,
+        .block-mortar-table tbody tr td .dropdown-toggle,
+        .tile-adhesive-table tbody tr td .dropdown-toggle,
+        .tile-coupler-table tbody tr td .dropdown-toggle,
+        .tile-wires-table tbody tr td .dropdown-toggle,
+        .tile-coucil-table tbody tr td .dropdown-toggle {
+            width: 100% !important;
+        }
+
+        .dpr-items-table tbody tr td .btn-group,
+        .dpr-rmc-table tbody tr td .btn-group,
+        .dpr-material-table tbody tr td .btn-group,
+        .dpr-department-labour-table tbody tr td .btn-group,
+        .rack-cement-table tbody tr td .btn-group,
+        .block-mortar-table tbody tr td .btn-group,
+        .tile-adhesive-table tbody tr td .btn-group,
+        .tile-coupler-table tbody tr td .btn-group,
+        .tile-wires-table tbody tr td .btn-group,
+        .tile-coucil-table tbody tr td .btn-group {
+            width: 100% !important;
+        }
+
+        /* Action buttons - last column */
+        .dpr-items-table tbody tr td:last-child,
+        .dpr-rmc-table tbody tr td:last-child,
+        .dpr-material-table tbody tr td:last-child,
+        .dpr-department-labour-table tbody tr td:last-child {
+            justify-content: flex-end;
+        }
+
+        .dpr-items-table tbody tr td:last-child:before,
+        .dpr-rmc-table tbody tr td:last-child:before,
+        .dpr-material-table tbody tr td:last-child:before,
+        .dpr-department-labour-table tbody tr td:last-child:before {
+            display: none;
+        }
+
+        /* ===== HEADER SECTIONS ===== */
+        .table-main-dpr-edit,
+        .table-responsive {
+            display: block;
+            overflow-x: visible !important;
+        }
+
+        /* Header rows stack vertically */
+        .table-main-dpr-edit thead tr:first-child th,
+        .table-main-dpr-edit thead tr:nth-child(2) th,
+        .table-main-dpr-edit thead tr:nth-child(3) th,
+        .table-main-dpr-edit thead tr:nth-child(4) th {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .table-main-dpr-edit thead tr:first-child th {
+            text-align: center;
+        }
+
+        .table-main-dpr-edit thead tr:nth-child(2) th,
+        .table-main-dpr-edit thead tr:nth-child(3) th,
+        .table-main-dpr-edit thead tr:nth-child(4) th {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .table-main-dpr-edit thead tr:nth-child(2) th .daily_report_label,
+        .table-main-dpr-edit thead tr:nth-child(3) th .daily_report_label,
+        .table-main-dpr-edit thead tr:nth-child(4) th .daily_report_label {
+            display: inline-flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 5px;
+            width: 100%;
+        }
+
+        .table-main-dpr-edit thead tr:nth-child(2) th .daily_report_label select,
+        .table-main-dpr-edit thead tr:nth-child(3) th .daily_report_label select,
+        .table-main-dpr-edit thead tr:nth-child(4) th .daily_report_label select,
+        .table-main-dpr-edit thead tr:nth-child(2) th .daily_report_label input,
+        .table-main-dpr-edit thead tr:nth-child(3) th .daily_report_label input,
+        .table-main-dpr-edit thead tr:nth-child(4) th .daily_report_label input {
+            width: auto !important;
+            min-width: 120px;
+            flex: 1;
+        }
+
+        /* Activity header */
+        .table-main-dpr-edit thead tr:nth-child(5) th {
+            display: block;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* Hide the second header row with column labels */
+        .table-main-dpr-edit thead tr:nth-child(6) {
+            display: none;
+        }
+
+        /* ===== DATA LABELS FOR EACH COLUMN ===== */
+        /* DPR Items Table */
+        .dpr-items-table tbody tr td:nth-child(1):before {
+            content: "Location";
+        }
+
+        .dpr-items-table tbody tr td:nth-child(2):before {
+            content: "Agency";
+        }
+
+        .dpr-items-table tbody tr td:nth-child(3):before {
+            content: "Type";
+        }
+
+        .dpr-items-table tbody tr td:nth-child(4):before {
+            content: "Remarks";
+        }
+
+        .dpr-items-table tbody tr td:nth-child(5):before {
+            content: "Work Execute";
+        }
+
+        .dpr-items-table tbody tr td:nth-child(6):before {
+            content: "Material Consumption";
+        }
+
+        .dpr-items-table tbody tr td:nth-child(7):before {
+            content: "Skilled";
+        }
+
+        .dpr-items-table tbody tr td:nth-child(8):before {
+            content: "Unskilled";
+        }
+
+        .dpr-items-table tbody tr td:nth-child(9):before {
+            content: "Total";
+        }
+
+        .dpr-items-table tbody tr td:nth-child(10):before {
+            content: "Machinery";
+        }
+
+        .dpr-items-table tbody tr td:nth-child(11):before {
+            content: "Total";
+        }
+
+        /* RMC Table */
+        .dpr-rmc-table tbody tr td:nth-child(1):before {
+            content: "Challan No";
+        }
+
+        .dpr-rmc-table tbody tr td:nth-child(2):before {
+            content: "Grade";
+        }
+
+        .dpr-rmc-table tbody tr td:nth-child(3):before {
+            content: "Structure Work";
+        }
+
+        .dpr-rmc-table tbody tr td:nth-child(4):before {
+            content: "Quantity(CMT)";
+        }
+
+        /* Material Table */
+        .dpr-material-table tbody tr td:nth-child(1):before {
+            content: "Challan No/ Truck No";
+        }
+
+        .dpr-material-table tbody tr td:nth-child(2):before {
+            content: "Supplier Name";
+        }
+
+        .dpr-material-table tbody tr td:nth-child(3):before {
+            content: "Material Description";
+        }
+
+        .dpr-material-table tbody tr td:nth-child(4):before {
+            content: "Total";
+        }
+
+        /* Department Labour Table */
+        .dpr-department-labour-table tbody tr td:nth-child(1):before {
+            content: "Name";
+        }
+
+        .dpr-department-labour-table tbody tr td:nth-child(2):before {
+            content: "Attendance";
+        }
+
+        .dpr-department-labour-table tbody tr td:nth-child(3):before {
+            content: "Over Time";
+        }
+
+        .dpr-department-labour-table tbody tr td:nth-child(4):before {
+            content: "Kharchi";
+        }
+
+        /* Rack Cement Table */
+        .rack-cement-table tbody tr td:nth-child(1):before {
+            content: "Inward Inventory";
+        }
+
+        .rack-cement-table tbody tr td:nth-child(2):before {
+            content: "Todays usage";
+        }
+
+        .rack-cement-table tbody tr td:nth-child(3):before {
+            content: "Total Remaining";
+        }
+
+        .rack-cement-table tbody tr td:nth-child(4):before {
+            content: "Notes";
+        }
+
+        /* Block Mortar Joint */
+        .block-mortar-table tbody tr td:nth-child(1):before {
+            content: "Inward Inventory";
+        }
+
+        .block-mortar-table tbody tr td:nth-child(2):before {
+            content: "Todays usage";
+        }
+
+        .block-mortar-table tbody tr td:nth-child(3):before {
+            content: "Total Remaining";
+        }
+
+        .block-mortar-table tbody tr td:nth-child(4):before {
+            content: "Notes";
+        }
+
+        /* Tile Adhesive */
+        .tile-adhesive-table tbody tr td:nth-child(1):before {
+            content: "Inward Inventory";
+        }
+
+        .tile-adhesive-table tbody tr td:nth-child(2):before {
+            content: "Todays usage";
+        }
+
+        .tile-adhesive-table tbody tr td:nth-child(3):before {
+            content: "Total Remaining";
+        }
+
+        .tile-adhesive-table tbody tr td:nth-child(4):before {
+            content: "Notes";
+        }
+
+        /* Coupler */
+        .tile-coupler-table tbody tr td:nth-child(1):before {
+            content: "Inward Inventory";
+        }
+
+        .tile-coupler-table tbody tr td:nth-child(2):before {
+            content: "Type";
+        }
+
+        .tile-coupler-table tbody tr td:nth-child(3):before {
+            content: "Todays usage";
+        }
+
+        .tile-coupler-table tbody tr td:nth-child(4):before {
+            content: "Total Remaining";
+        }
+
+        .tile-coupler-table tbody tr td:nth-child(5):before {
+            content: "Notes";
+        }
+
+        /* Wires */
+        .tile-wires-table tbody tr td:nth-child(1):before {
+            content: "Inward Inventory";
+        }
+
+        .tile-wires-table tbody tr td:nth-child(2):before {
+            content: "Type";
+        }
+
+        .tile-wires-table tbody tr td:nth-child(3):before {
+            content: "Todays usage";
+        }
+
+        .tile-wires-table tbody tr td:nth-child(4):before {
+            content: "Total Remaining";
+        }
+
+        .tile-wires-table tbody tr td:nth-child(5):before {
+            content: "Notes";
+        }
+
+        /* Council Box */
+        .tile-coucil-table tbody tr td:nth-child(1):before {
+            content: "Inward Inventory";
+        }
+
+        .tile-coucil-table tbody tr td:nth-child(2):before {
+            content: "Todays usage";
+        }
+
+        .tile-coucil-table tbody tr td:nth-child(3):before {
+            content: "Total Remaining";
+        }
+
+        .tile-coucil-table tbody tr td:nth-child(4):before {
+            content: "Notes";
+        }
+
+        /* Remove labels for action columns */
+        .dpr-rmc-table tbody tr td:last-child:before,
+        .dpr-material-table tbody tr td:last-child:before,
+        .dpr-department-labour-table tbody tr td:last-child:before,
+        .rack-cement-table tbody tr td:last-child:before,
+        .block-mortar-table tbody tr td:last-child:before,
+        .tile-adhesive-table tbody tr td:last-child:before,
+        .tile-coupler-table tbody tr td:last-child:before,
+        .tile-wires-table tbody tr td:last-child:before,
+        .tile-coucil-table tbody tr td:last-child:before {
+            display: none;
+        }
+
+        /* Tab content responsive */
+        .horizontal-scrollable-tabs {
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .horizontal-scrollable-tabs .nav-tabs {
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+        }
+
+        .horizontal-scrollable-tabs .nav-tabs li {
+            float: none;
+            display: inline-block;
+        }
+    }
+
+    /* Extra small screens */
+    @media (max-width: 480px) {
+
+        .dpr-items-table tbody tr td:before,
+        .dpr-rmc-table tbody tr td:before,
+        .dpr-material-table tbody tr td:before,
+        .dpr-department-labour-table tbody tr td:before,
+        .rack-cement-table tbody tr td:before,
+        .block-mortar-table tbody tr td:before,
+        .tile-adhesive-table tbody tr td:before,
+        .tile-coupler-table tbody tr td:before,
+        .tile-wires-table tbody tr td:before,
+        .tile-coucil-table tbody tr td:before {
+            min-width: 80px;
+            font-size: 12px;
+        }
+
+        .dpr-items-table tbody tr td input,
+        .dpr-items-table tbody tr td select,
+        .dpr-rmc-table tbody tr td input,
+        .dpr-rmc-table tbody tr td select,
+        .dpr-material-table tbody tr td input,
+        .dpr-material-table tbody tr td select,
+        .dpr-department-labour-table tbody tr td input,
+        .dpr-department-labour-table tbody tr td select,
+        .rack-cement-table tbody tr td input,
+        .rack-cement-table tbody tr td select,
+        .block-mortar-table tbody tr td input,
+        .block-mortar-table tbody tr td select,
+        .tile-adhesive-table tbody tr td input,
+        .tile-adhesive-table tbody tr td select,
+        .tile-coupler-table tbody tr td input,
+        .tile-coupler-table tbody tr td select,
+        .tile-wires-table tbody tr td input,
+        .tile-wires-table tbody tr td select,
+        .tile-coucil-table tbody tr td input,
+        .tile-coucil-table tbody tr td select {
+            min-width: 100px;
+            font-size: 12px;
+        }
+
+        .table-main-dpr-edit thead tr:nth-child(2) th .daily_report_label,
+        .table-main-dpr-edit thead tr:nth-child(3) th .daily_report_label,
+        .table-main-dpr-edit thead tr:nth-child(4) th .daily_report_label {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .table-main-dpr-edit thead tr:nth-child(2) th .daily_report_label select,
+        .table-main-dpr-edit thead tr:nth-child(3) th .daily_report_label select,
+        .table-main-dpr-edit thead tr:nth-child(4) th .daily_report_label select,
+        .table-main-dpr-edit thead tr:nth-child(2) th .daily_report_label input,
+        .table-main-dpr-edit thead tr:nth-child(3) th .daily_report_label input,
+        .table-main-dpr-edit thead tr:nth-child(4) th .daily_report_label input {
+            width: 100% !important;
+        }
+
+        .dpr-items-table tbody tr,
+        .dpr-rmc-table tbody tr,
+        .dpr-material-table tbody tr,
+        .dpr-department-labour-table tbody tr,
+        .rack-cement-table tbody tr,
+        .block-mortar-table tbody tr,
+        .tile-adhesive-table tbody tr,
+        .tile-coupler-table tbody tr,
+        .tile-wires-table tbody tr,
+        .tile-coucil-table tbody tr {
+            padding: 8px;
+        }
     }
 </style>
 <div class="col-md-12">
