@@ -121,7 +121,7 @@
                                 <div class="top_stats_wrapper">
                                   <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
                                     <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
-                                      <span class="tw-truncate dashboard_stat_title">Total Paid</span>
+                                      <span class="tw-truncate dashboard_stat_title">Total BIL Paid</span>
                                     </div>
                                     <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
                                   </div>
@@ -137,7 +137,7 @@
                                 <div class="top_stats_wrapper">
                                   <div class="tw-text-neutral-800 mtop5 tw-flex tw-items-center tw-justify-between">
                                     <div class="tw-font-medium tw-inline-flex text-neutral-600 tw-items-center tw-truncate">
-                                      <span class="tw-truncate dashboard_stat_title">Total Unpaid</span>
+                                      <span class="tw-truncate dashboard_stat_title">Total BIL Unpaid</span>
                                     </div>
                                     <span class="tw-font-semibold tw-text-neutral-600 tw-shrink-0"></span>
                                   </div>

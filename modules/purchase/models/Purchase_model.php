@@ -24365,31 +24365,19 @@ class Purchase_model extends App_Model
             'pi.group_pur',
             'pi.final_certified_amount',
             'pi.invoice_date',
-            'IF(ril.total > 0, ip.amount * pi.final_certified_amount / ril.total, 0) AS ril_this_bill'
+            'COALESCE(pip.total_bil_paid, 0) AS total_bil_paid'
         ]);
-
-        $this->db->from(db_prefix() . 'pur_invoices as pi');
+        $this->db->from(db_prefix() . 'pur_invoices AS pi');
         $this->db->join(
-            db_prefix() . 'itemable as itm',
-            'itm.vbt_id = pi.id AND itm.rel_type = "invoice"',
-            'left'
-        );
-        $this->db->join(
-            db_prefix() . 'invoices as ril',
-            'ril.id = itm.rel_id',
-            'left'
-        );
-        $this->db->join(
-            '(SELECT invoiceid, 
-                      SUM(amount) AS amount, 
-                      SUM(ril_previous) AS ril_previous, 
-                      SUM(ril_amount) AS ril_amount, 
-                      MAX(date) AS date
-               FROM ' . db_prefix() . 'invoicepaymentrecords
-               GROUP BY invoiceid
-            ) AS ip',
-            'ip.invoiceid = ril.id',
-            'left'
+            '(SELECT 
+                pur_invoice,
+                SUM(COALESCE(amount, 0)) + SUM(COALESCE(tds, 0)) AS total_bil_paid
+              FROM ' . db_prefix() . 'pur_invoice_payment
+              GROUP BY pur_invoice
+            ) AS pip',
+            'pip.pur_invoice = pi.id',
+            'left',
+            false
         );
         if (!empty($vendors) && is_array($vendors)) {
             $this->db->where_in('pi.vendor', $vendors);
@@ -24400,7 +24388,6 @@ class Purchase_model extends App_Model
         if (!empty($default_project)) {
             $this->db->where('pi.project_id', $default_project);
         }
-        $this->db->group_by('pi.id');
         $this->db->order_by('pi.invoice_date', 'asc');
         $pur_invoices = $this->db->get()->result_array();
 
@@ -24410,7 +24397,7 @@ class Purchase_model extends App_Model
             }, 0);
             $response['total_billed'] = app_format_money($total_billed);
             $total_paid = array_reduce($pur_invoices, function ($carry, $item) {
-                return $carry + (float)$item['ril_this_bill'];
+                return $carry + (float)$item['total_bil_paid'];
             }, 0);
             $response['total_paid'] = app_format_money($total_paid);
             $total_unpaid = $total_billed - $total_paid;
@@ -24424,7 +24411,7 @@ class Purchase_model extends App_Model
                     $bar_top_vendors[$vendor_id]['name'] = get_vendor_company_name($vendor_id);
                     $bar_top_vendors[$vendor_id]['value'] = 0;
                 }
-                $bar_top_vendors[$vendor_id]['value'] += (float) $item['ril_this_bill'];
+                $bar_top_vendors[$vendor_id]['value'] += (float) $item['total_bil_paid'];
 
                 $group_pur = $item['group_pur'];
                 if (!isset($bar_top_budget_head[$group_pur])) {
@@ -24432,7 +24419,7 @@ class Purchase_model extends App_Model
                     $bar_top_budget_head[$group_pur]['name'] = $budget_head->name;
                     $bar_top_budget_head[$group_pur]['value'] = 0;
                 }
-                $bar_top_budget_head[$group_pur]['value'] += (float) $item['ril_this_bill'];
+                $bar_top_budget_head[$group_pur]['value'] += (float) $item['total_bil_paid'];
             }
             if (!empty($bar_top_vendors)) {
                 usort($bar_top_vendors, function ($a, $b) {
@@ -24463,7 +24450,7 @@ class Purchase_model extends App_Model
                 if (!isset($line_vendor_payment_total[$month])) {
                     $line_vendor_payment_total[$month] = 0;
                 }
-                $line_vendor_payment_total[$month] += (float)$value['ril_this_bill'];
+                $line_vendor_payment_total[$month] += (float)$value['total_bil_paid'];
             }
             $all_months = array_unique(array_merge(array_keys($line_vendor_billing_total), array_keys($line_vendor_payment_total)));
             sort($all_months);

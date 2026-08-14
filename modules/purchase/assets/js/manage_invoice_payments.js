@@ -92,6 +92,7 @@
          if (response.success) {
             alert_float('success', response.message);
             table_pur_invoice_payments.ajax.reload(null, false);
+            get_vpt_dashboard();
          } else {
             alert_float('danger', response.message);
          }
@@ -117,6 +118,7 @@
          if (response.success) {
             alert_float('success', response.message);
             table_pur_invoice_payments.ajax.reload(null, false);
+            get_vpt_dashboard();
          } else {
             alert_float('danger', response.message);
          }
@@ -142,6 +144,7 @@
          if (response.success) {
             alert_float('success', response.message);
             table_pur_invoice_payments.ajax.reload(null, false);
+            get_vpt_dashboard();
          } else {
             alert_float('danger', response.message);
          }
@@ -160,6 +163,7 @@
       if (response.success) {
         alert_float('success', response.message);
         table_pur_invoice_payments.ajax.reload(null, false);
+        get_vpt_dashboard();
       } else {
         alert_float('danger', response.message);
       }
@@ -194,6 +198,7 @@
       if (response.success) {
         alert_float('success', response.message);
         table_pur_invoice_payments.ajax.reload(null, false);
+        get_vpt_dashboard();
       } else {
         alert_float('danger', response.message);
       }
@@ -228,6 +233,7 @@
       if (response.success) {
         alert_float('success', response.message);
         table_pur_invoice_payments.ajax.reload(null, false);
+        get_vpt_dashboard();
       } else {
         alert_float('danger', response.message);
       }
@@ -262,6 +268,7 @@
       if (response.success) {
         alert_float('success', response.message);
         table_pur_invoice_payments.ajax.reload(null, false);
+        get_vpt_dashboard();
       } else {
         alert_float('danger', response.message);
       }
@@ -283,6 +290,7 @@
       if (response.success) {
         alert_float('success', response.message);
         table_pur_invoice_payments.ajax.reload(null, false); // Reload table without refreshing the page
+        get_vpt_dashboard();
       } else {
         alert_float('danger', response.message);
       }
