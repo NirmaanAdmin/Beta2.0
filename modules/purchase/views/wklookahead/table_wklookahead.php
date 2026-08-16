@@ -104,10 +104,7 @@ foreach ($rResult as $aRow) {
     $row[] = $_data;
 
 
-    /*
-     * OPTION
-     */
-    $option = '';
+   
 
     /*
      * PDF
@@ -158,7 +155,7 @@ foreach ($rResult as $aRow) {
     </ul>
 
 </div>';
-
+    $option = '';
     $row[] = $option;
 
     $row[] = $option;
