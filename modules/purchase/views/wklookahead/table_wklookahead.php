@@ -42,36 +42,66 @@ foreach ($rResult as $aRow) {
     /*
      * DATE + PROJECT
      */
-    $date_html = '';
+    $numberOutput = '';
 
-    if (!empty($aRow['week_start_date'])) {
+    $numberOutput .= '<a href="' . admin_url('purchase/add_update_wklookahead/' . $aRow['id']) . '">'
+        . _d($aRow['week_start_date'])
+        . '</a>';
 
-        $date_html .= '<div class="tw-font-medium">';
-
-        $date_html .= _d(
-            $aRow['week_start_date']
-        );
-
-        $date_html .= '</div>';
-    }
-
-    /*
-     * Project name
-     */
     if (!empty($aRow['project_name'])) {
 
-        $date_html .= '<div class="text-muted small mtop5">';
+        $numberOutput .= '<div class="text-muted small mtop5">';
 
-        $date_html .= '<i class="fa fa-building-o"></i> ';
+        $numberOutput .= '<i class="fa fa-building-o"></i> ';
 
-        $date_html .= html_escape(
+        $numberOutput .= html_escape(
             $aRow['project_name']
         );
 
-        $date_html .= '</div>';
+        $numberOutput .= '</div>';
     }
 
-    $row[] = $date_html;
+
+    $numberOutput .= '<div class="row-options">';
+
+
+
+    $numberOutput .= ' <a href="' .
+        admin_url(
+            'purchase/add_update_wklookahead/' . $aRow['id']
+        ) .
+        '">' .
+        _l('view') .
+        '</a>';
+
+
+    $numberOutput .= ' | <a href="' .
+        admin_url(
+            'purchase/add_update_wklookahead/' . $aRow['id']
+        ) .
+        '">' .
+        _l('edit') .
+        '</a>';
+
+
+
+
+
+    $numberOutput .= ' | <a href="' .
+        admin_url(
+            'purchase/delete_wklookahead/' . $aRow['id']
+        ) .
+        '" class="text-danger _delete">' .
+        _l('delete') .
+        '</a>';
+
+
+
+    $numberOutput .= '</div>';
+
+    $_data = $numberOutput;
+
+    $row[] = $_data;
 
 
     /*
