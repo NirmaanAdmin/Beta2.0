@@ -13363,7 +13363,7 @@ class purchase extends AdminController
                     );
                 }
 
-            /*
+                /*
             |-------------------------------------------------------
             | ATTACH EXTRA PDF FILES
             |-------------------------------------------------------
@@ -13628,8 +13628,8 @@ class purchase extends AdminController
         $input['vendor_submitted_tax_amount'] = $payment_certificate_calc['tot_app_tax_3'];
         $input['vendor_submitted_amount'] = $value_certified_amount;
         $input['final_certified_amount'] = $value_certified_amount;
-        if(!empty($payment_certificate->currency)) {
-            if($payment_certificate->currency != 3) {
+        if (!empty($payment_certificate->currency)) {
+            if ($payment_certificate->currency != 3) {
                 $input['vendor_submitted_amount_without_tax'] = find_total_in_inr($payment_certificate_calc['sub_fg_3'], $payment_certificate->currency);
                 $input['vendor_submitted_tax_amount'] = find_total_in_inr($payment_certificate_calc['tot_app_tax_3'], $payment_certificate->currency);
                 $input['vendor_submitted_amount'] = find_total_in_inr($value_certified_amount, $payment_certificate->currency);
@@ -18691,5 +18691,92 @@ class purchase extends AdminController
             $response['message'] = 'Vendor bills have been deleted successfully.';
         }
         echo json_encode($response);
+    }
+
+
+
+    public function wklookahead()
+    {
+        $data['title'] = _l('3 WK Lookahead');
+        $this->load->view('wklookahead/wklookahead', $data);
+    }
+
+    public function table_wklookahead()
+    {
+        $this->app->get_table_data(module_views_path('purchase', 'wklookahead/table_wklookahead'));
+    }
+
+    public function add_update_wklookahead($id = '')
+    {
+    
+        if ($id != '') {
+
+            $data['title'] = _l('Edit Weekly Lookahead');
+
+            $data['lookahead'] = $this->purchase_model->lookahead_get($id);
+
+            if (!$data['lookahead']) {
+                show_404();
+            }
+
+            $data['activities'] = $this->purchase_model->get_activities($id);
+        } else {
+
+            /*
+         * ADD
+         */
+            $data['title'] = _l('Add Weekly Lookahead');
+
+            $data['lookahead'] = null;
+            $data['activities'] = [];
+        }
+
+        $this->load->model('projects_model');
+
+        $data['projects'] = $this->projects_model->get();
+
+        $this->load->model('purchase_model');
+
+        $data['vendors'] = $this->purchase_model->get_vendor();
+
+        if ($this->input->post()) {
+
+            $post_data = $this->input->post();
+
+            if ($id != '') {
+
+                $result = $this->purchase_model->lookahead_update(
+                    $id,
+                    $post_data
+                );
+
+                if ($result) {
+
+                    set_alert(
+                        'success',
+                        _l('updated_successfully', 'Weekly Lookahead')
+                    );
+
+                   
+                    redirect(admin_url('purchase/wklookahead'));
+                }
+            } else {
+
+                $new_id = $this->purchase_model->lookahead_add($post_data);
+
+                if ($new_id) {
+
+                    set_alert(
+                        'success',
+                        _l('added_successfully', 'Weekly Lookahead')
+                    );
+
+                    redirect(admin_url('purchase/wklookahead'));
+                }
+            }
+        }
+
+        $data['bodyclass'] = 'project';
+        $this->load->view('wklookahead/add_update_wklookahead', $data);
     }
 }

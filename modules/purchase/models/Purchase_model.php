@@ -15402,7 +15402,7 @@ class Purchase_model extends App_Model
             </tr>
             <tr>
                 <td style="padding: 8px;" colspan="4"><strong>Vendor Note</strong>: <span>' . pur_html_entity_decode($invoice->vendor_note) . '</span></td>
-';
+    ';
 
         $html .= '<div class="col-md-12 mtop15">
                         <h4>' . _l('terms_and_conditions') . ':</h4><p>' . $invoice->terms . '</p>
@@ -29504,4 +29504,213 @@ class Purchase_model extends App_Model
             return $this->db->get(db_prefix() . 'pur_debit_notes')->result_array();
         }
     }
+
+        /**
+     * Add Weekly Lookahead
+     */
+    public function lookahead_add($data)
+    {
+        /*
+        * Insert Lookahead Header
+        */
+        $header_data = [
+            'project_id'      => $data['project_id'],
+            'week_start_date' => to_sql_date($data['week_start_date']),
+            'created_at'      => date('Y-m-d H:i:s'),
+        ];
+
+        $this->db->insert(
+            'tbl_wklookahead',
+            $header_data
+        );
+
+        $lookahead_id = $this->db->insert_id();
+
+        if (!$lookahead_id) {
+            return false;
+        }
+
+
+        /*
+        * Insert Activities
+        */
+        if (!empty($data['activity'])) {
+
+            foreach ($data['activity'] as $key => $activity) {
+
+                /*
+                * Skip empty activity
+                */
+                if (trim($activity) == '') {
+                    continue;
+                }
+
+                $activity_data = [
+                    'lookahead_id' => $lookahead_id,
+                    'activity'     => trim($activity),
+                    'vendor_id'    => !empty($data['vendor_id'][$key])
+                        ? $data['vendor_id'][$key]
+                        : null,
+                    'created_at'   => date('Y-m-d H:i:s'),
+                ];
+
+
+                /*
+                * Save 21 Days
+                */
+                for ($i = 1; $i <= 21; $i++) {
+
+                    $field = 'day_' . $i;
+
+                    /*
+                    * Sunday = Holiday
+                    * Day 7, 14, 21
+                    */
+                    if (
+                        $i == 7 ||
+                        $i == 14 ||
+                        $i == 21
+                    ) {
+
+                        $activity_data[$field] = 0;
+
+                    } else {
+
+                        $activity_data[$field] =
+                            isset($data[$field][$key])
+                                ? 1
+                                : 0;
+                    }
+                }
+
+
+                $this->db->insert(
+                    'tbl_wklookahead_activities',
+                    $activity_data
+                );
+            }
+        }
+
+        return $lookahead_id;
+    }
+
+
+    /**
+     * Update Weekly Lookahead
+     */
+    public function lookahead_update($id, $data)
+    {
+        /*
+        * Update Lookahead Header
+        */
+        $header_data = [
+            'project_id'      => $data['project_id'],
+            'week_start_date' => to_sql_date($data['week_start_date']),
+            'updated_at'      => date('Y-m-d H:i:s'),
+        ];
+
+        $this->db
+            ->where('id', $id)
+            ->update(
+                'tbl_wklookahead',
+                $header_data
+            );
+
+
+        /*
+        * Delete Existing Activities
+        */
+        $this->db
+            ->where('lookahead_id', $id)
+            ->delete(
+                'tbl_wklookahead_activities'
+            );
+
+
+        /*
+        * Insert Updated Activities
+        */
+        if (!empty($data['activity'])) {
+
+            foreach ($data['activity'] as $key => $activity) {
+
+                /*
+                * Skip empty activity
+                */
+                if (trim($activity) == '') {
+                    continue;
+                }
+
+                $activity_data = [
+                    'lookahead_id' => $id,
+                    'activity'     => trim($activity),
+                    'vendor_id'    => !empty($data['vendor_id'][$key])
+                        ? $data['vendor_id'][$key]
+                        : null,
+                    'created_at'   => date('Y-m-d H:i:s'),
+                ];
+
+
+                /*
+                * Save 21 Days
+                */
+                for ($i = 1; $i <= 21; $i++) {
+
+                    $field = 'day_' . $i;
+
+                    /*
+                    * Sunday = Holiday
+                    */
+                    if (
+                        $i == 7 ||
+                        $i == 14 ||
+                        $i == 21
+                    ) {
+
+                        $activity_data[$field] = 0;
+
+                    } else {
+
+                        $activity_data[$field] =
+                            isset($data[$field][$key])
+                                ? 1
+                                : 0;
+                    }
+                }
+
+
+                $this->db->insert(
+                    'tbl_wklookahead_activities',
+                    $activity_data
+                );
+            }
+        }
+
+        return true;
+    }
+
+    public function lookahead_get($id = '')
+        {
+            if ($id == '') {
+                return $this->db
+                    ->order_by('id', 'DESC')
+                    ->get('tbl_wklookahead')
+                    ->result();
+            }
+
+            return $this->db
+                ->where('id', $id)
+                ->get('tbl_wklookahead')
+                ->row();
+        }
+
+    public function get_activities($lookahead_id)
+    {
+        return $this->db
+            ->where('lookahead_id', $lookahead_id)
+            ->order_by('id', 'ASC')
+            ->get('tbl_wklookahead_activities')
+            ->result();
+    }
+
 }
