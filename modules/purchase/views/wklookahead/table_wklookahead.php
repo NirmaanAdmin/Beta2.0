@@ -104,14 +104,14 @@ foreach ($rResult as $aRow) {
     $row[] = $_data;
 
 
-   
+
 
     /*
      * PDF
      */
     $option = '';
 
-    $option .= '<div class="btn-group">
+    $option .= '<div class="btn-group pull-right">
     <a href="javascript:void(0)"
         class="btn btn-default dropdown-toggle"
         data-toggle="dropdown"
@@ -154,8 +154,7 @@ foreach ($rResult as $aRow) {
 
     </ul>
 
-</div>';
-    $option = '';
+    </div>';
     $row[] = $option;
 
     $row[] = $option;

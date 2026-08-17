@@ -18779,4 +18779,29 @@ class purchase extends AdminController
         $data['bodyclass'] = 'project';
         $this->load->view('wklookahead/add_update_wklookahead', $data);
     }
+
+    public function wklookahead_pdf($id)
+    {
+
+       $wklookahead = $this->purchase_model->get_wklookahead_pdf_html($id); 
+        try {
+            $pdf = $this->purchase_model->wklookahead_pdf($wklookahead, $id);
+            $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+        } catch (Exception $e) {
+            echo pur_html_entity_decode($e->getMessage());
+            die;
+        }
+
+        $type = 'D';
+
+        if ($this->input->get('output_type')) {
+            $type = $this->input->get('output_type');
+        }
+
+        if ($this->input->get('print')) {
+            $type = 'I';
+        }
+        $pdf_name = 'wklookahead.pdf';
+        $pdf->Output($pdf_name, $type);
+    }
 }

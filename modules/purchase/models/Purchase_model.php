@@ -29713,4 +29713,232 @@ class Purchase_model extends App_Model
             ->result();
     }
 
+
+    public function get_wklookahead_pdf_html($lookahead_id)
+    {
+        /*
+        * Get Lookahead
+        */
+        $lookahead = $this->lookahead_get($lookahead_id);
+
+        if (empty($lookahead)) {
+            return '';
+        }
+
+        /*
+        * Get Activities
+        */
+        $activities = $this->get_activities($lookahead_id);
+
+        /*
+        * Company Information
+        */
+        $company_name = get_option('invoice_company_name');
+        $address      = '';
+
+        /*
+        * Logo
+        */
+        $logo = '';
+
+        $company_logo = get_option('company_logo_dark');
+
+        if (!empty($company_logo)) {
+            $logo = '<img
+                        src="' . base_url('uploads/company/' . $company_logo) . '"
+                        width="130"
+                        height="80"
+                    >';
+        }
+
+        /*
+        * Project Name
+        */
+        $project_name = '';
+
+        if (!empty($lookahead->project_id)) {
+            $project_name = get_project_name_by_id($lookahead->project_id);
+        }
+
+        /*
+        * Start Date
+        */
+        $start_date = $lookahead->week_start_date;
+
+        /*
+        * Make sure start date is Monday
+        */
+        $day_number = date('N', strtotime($start_date));
+
+        if ($day_number != 1) {
+            $start_date = date('Y-m-d', strtotime('monday this week', strtotime($start_date)));
+        }
+
+        /*
+        * Header
+        */
+        $html = '<table class="table" style="width:100%;">
+            <tbody>
+                <tr>
+                    <td style="width:50%;">
+                        ' . $logo . '
+                    </td>
+                    <td align="right" style="width:50%;">
+                        <span style="font-size:22px; text-align:right;">
+                            <b>' . mb_strtoupper('3 WEEK LOOKAHEAD') . '</b>
+                        </span>
+                        <br><br>
+                        <span>
+                            <b>Week Starting:</b>
+                            ' . date('d M Y', strtotime($start_date)) . '
+                        </span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>';
+
+        /*
+        * Company / Project Information
+        */
+        $html .= '<table class="table" style="width:100%; margin-top:10px;">
+            <tbody>
+                <tr>
+                    <td style="width:50%;">
+                        <br>
+                    </td>
+                    <td style="width:50%;" align="right">
+                        <b>Project:</b>
+                        ' . html_escape($project_name) . '
+                    </td>
+                </tr>
+            </tbody>
+        </table>';
+
+        /*
+        * Space
+        */
+        $html .= '<br><br>';
+
+        /*
+        * Lookahead Table
+        */
+        $html .= '<table class="table" style="width:100%; border-collapse:collapse; font-size:9px;">
+            <thead>
+                <tr>
+                    <th rowspan="2" align="left" style="width:22%; background-color:#f1f1f1; border:1px solid #000;">
+                        Activities
+                    </th>
+                    <th rowspan="2" align="left" style="width:15%; background-color:#f1f1f1; border:1px solid #000;">
+                        Vendor
+                    </th>';
+
+        $total_days = 21;
+
+        /*
+        * 21 Days Headers
+        */
+        for ($i = 1; $i <= $total_days; $i++) {
+            $current_date = date('Y-m-d', strtotime('+' . ($i - 1) . ' days', strtotime($start_date)));
+            $day_name = date('D', strtotime($current_date));
+            $day_date = date('d', strtotime($current_date));
+
+            // First letter of day name, except Sunday uses "S" (no conflict with Saturday)
+            $header_text = ($day_name == 'Sun') ? 'S' : substr($day_name, 0, 1);
+
+            $html .= '<th align="center" style="width:3%; background-color:#f1f1f1; border:1px solid #000; font-size:8px;">
+                        <b>' . $header_text . '</b>
+                        <br>
+                        <span style="font-size:7px;">' . $day_date . '</span>
+                    </th>';
+        }
+
+        $html .= '</tr>';
+
+        /*
+        * Week Information Row (Removed empty loop, kept structure intact)
+        */
+        
+
+        $html .= '</thead>';
+
+        /*
+        * Body
+        */
+        $html .= '<tbody>';
+
+        if (!empty($activities)) {
+            foreach ($activities as $activity) {
+                $html .= '<tr>';
+
+                /*
+                * Activity
+                */
+                $html .= '<td style="border:1px solid #000; padding:5px;width:22%">
+                            ' . html_escape($activity->activity) . '
+                        </td>';
+
+                /*
+                * Vendor
+                */
+                $vendor_name = '';
+                if (!empty($activity->vendor_id)) {
+                    $vendor = $this->get_vendor($activity->vendor_id);
+                    if (!empty($vendor)) {
+                        if (is_object($vendor)) {
+                            $vendor_name = $vendor->company ?? $vendor->name ?? '';
+                        } elseif (is_array($vendor)) {
+                            $vendor_name = $vendor['company'] ?? $vendor['name'] ?? '';
+                        }
+                    }
+                }
+
+                $html .= '<td style="border:1px solid #000; padding:5px;width:15%">
+                            ' . html_escape($vendor_name) . '
+                        </td>';
+
+                /*
+                * 21 Days
+                */
+                for ($i = 1; $i <= $total_days; $i++) {
+                    $current_date = date('Y-m-d', strtotime('+' . ($i - 1) . ' days', strtotime($start_date)));
+                    $day_name = date('D', strtotime($current_date));
+
+                    // If Sunday = "H" (Holiday), otherwise check if activity is scheduled
+                    if ($day_name == 'Sun') {
+                        $cell_value = '<b>H</b>';
+                    } else {
+                        $field = 'day_' . $i;
+                        $cell_value = (!empty($activity->{$field})) ? 'X' : '';
+                    }
+
+                    $html .= '<td align="center" style="border:1px solid #000; height:25px; font-size:10px;width:3%">
+                                ' . $cell_value . '
+                            </td>';
+                }
+
+                $html .= '</tr>';
+            }
+        } else {
+            /*
+            * No Activities
+            */
+            $html .= '<tr>
+                        <td colspan="23" align="center" style="border:1px solid #000; padding:10px;">
+                            No activities found.
+                        </td>
+                    </tr>';
+        }
+
+        $html .= '</tbody>';
+        $html .= '</table>';
+
+        return $html;
+    }
+
+
+    public function wklookahead_pdf($wklookahead, $id)
+    {
+        return app_pdf('wklookahead', module_dir_path(PURCHASE_MODULE_NAME, 'libraries/pdf/Wklookahead_pdf'), $wklookahead);
+    }
+
 }

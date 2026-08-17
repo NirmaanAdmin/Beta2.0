@@ -32,7 +32,7 @@
                   <thead>
                     <tr>
                       <th><?php echo _l('Date'); ?></th>
-                      <th><?php echo _l('Option'); ?></th>
+                      <th class="text-right"><?php echo _l('Option'); ?></th>
                     </tr>
                   </thead>
                   <tbody></tbody>
