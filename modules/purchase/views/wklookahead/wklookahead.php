@@ -72,6 +72,20 @@
                 <div role="tabpanel" class="tab-pane ptop10 " id="tab_calendar">
                 </div>
                 <div role="tabpanel" class="tab-pane ptop10 " id="tab_list">
+
+                  <div class="row mbot15">
+                    <div class="col-md-12">
+                      <button type="button"
+                        class="btn btn-primary"
+                        data-toggle="modal"
+                        data-target="#newActivityModal">
+                        <i class="fa fa-plus"></i>
+                        <?php echo _l('New Activity'); ?>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="clearfix"></div>
                   <table class="dt-table-loading table table-table_wklookahead_list">
                     <thead>
                       <tr>
@@ -93,7 +107,186 @@
       </div>
     </div>
   </div>
+  <div class="modal fade"
+    id="newActivityModal"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="newActivityModalLabel">
 
+    <div class="modal-dialog" role="document">
+
+      <div class="modal-content">
+
+        <?php echo form_open(
+          admin_url('purchase/add_wklookahead_activity'),
+          [
+            'id' => 'newActivityForm'
+          ]
+        ); ?>
+
+        <div class="modal-header">
+
+          <button type="button"
+            class="close"
+            data-dismiss="modal">
+            <span>&times;</span>
+          </button>
+
+          <h4 class="modal-title" id="newActivityModalLabel">
+            <i class="fa fa-plus"></i>
+            <?php echo _l('New Activity'); ?>
+          </h4>
+
+        </div>
+
+        <div class="modal-body">
+
+          <div class="form-group">
+
+            <label for="activity">
+              <?php echo _l('Activity'); ?>
+            </label>
+
+            <input type="text"
+              name="activity"
+              id="activity"
+              class="form-control"
+              required>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label for="vendor_id">
+              <?php echo _l('Vendor'); ?>
+            </label>
+
+            <select name="vendor_id"
+              id="vendor_id"
+              class="form-control selectpicker"
+              data-live-search="true">
+
+              <option value="">
+                <?php echo _l('dropdown_non_selected_tex'); ?>
+              </option>
+
+              <?php
+              $vendors = get_all_vendors();
+
+              foreach ($vendors as $vendor) {
+              ?>
+
+                <option value="<?php echo $vendor['userid']; ?>">
+                  <?php echo html_escape($vendor['company']); ?>
+                </option>
+
+              <?php
+              }
+              ?>
+
+            </select>
+
+          </div>
+
+
+          <div class="row">
+
+            <div class="col-md-6">
+
+              <div class="form-group">
+
+                <label for="start_date">
+                  <?php echo _l('Start Date'); ?>
+                </label>
+
+                <input type="date"
+                  name="start_date"
+                  id="start_date"
+                  class="form-control"
+                  required>
+
+              </div>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+              <div class="form-group">
+
+                <label for="due_date">
+                  <?php echo _l('Due Date'); ?>
+                </label>
+
+                <input type="date"
+                  name="due_date"
+                  id="due_date"
+                  class="form-control">
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label for="percentage">
+              <?php echo _l('Complete'); ?>
+            </label>
+
+            <div class="input-group">
+
+              <input type="number"
+                name="percentage"
+                id="percentage"
+                class="form-control"
+                min="0"
+                max="100"
+                value="0">
+
+              <span class="input-group-addon">
+                %
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div id="activity_form_message"></div>
+
+        </div>
+
+
+        <div class="modal-footer">
+
+          <button type="button"
+            class="btn btn-default"
+            data-dismiss="modal">
+            <?php echo _l('close'); ?>
+          </button>
+
+          <button type="submit"
+            class="btn btn-primary"
+            id="saveActivityBtn">
+
+            <i class="fa fa-save"></i>
+            <?php echo _l('Save Activity'); ?>
+
+          </button>
+
+        </div>
+
+        <?php echo form_close(); ?>
+
+      </div>
+
+    </div>
+
+  </div>
   <?php init_tail(); ?>
   <script>
     $(document).ready(function() {
@@ -122,6 +315,79 @@
 
 
 
+
+    });
+
+    $(document).ready(function() {
+
+      $('#newActivityForm').on('submit', function(e) {
+
+        e.preventDefault();
+
+        var form = $(this);
+        var button = $('#saveActivityBtn');
+
+        button.prop('disabled', true);
+
+        $.ajax({
+
+          url: form.attr('action'),
+
+          type: 'POST',
+
+          data: form.serialize(),
+
+          dataType: 'json',
+
+          success: function(response) {
+
+            if (response.success) {
+
+              alert_float(
+                'success',
+                response.message
+              );
+
+              $('#newActivityModal').modal('hide');
+
+              form[0].reset();
+
+              $('.selectpicker').selectpicker('refresh');
+
+              /*
+               * Reload DataTable
+               */
+              $('.table-table_wklookahead_list')
+                .DataTable()
+                .ajax.reload(null, false);
+
+            } else {
+
+              alert_float(
+                'danger',
+                response.message
+              );
+            }
+          },
+
+          error: function(xhr) {
+
+            alert_float(
+              'danger',
+              'Something went wrong while creating the activity.'
+            );
+
+            console.log(xhr.responseText);
+          },
+
+          complete: function() {
+
+            button.prop('disabled', false);
+          }
+
+        });
+
+      });
 
     });
   </script>

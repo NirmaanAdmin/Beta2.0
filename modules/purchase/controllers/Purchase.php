@@ -18708,7 +18708,7 @@ class purchase extends AdminController
 
     public function add_update_wklookahead($id = '')
     {
-    
+
         if ($id != '') {
 
             $data['title'] = _l('Edit Weekly Lookahead');
@@ -18757,7 +18757,7 @@ class purchase extends AdminController
                         _l('updated_successfully', 'Weekly Lookahead')
                     );
 
-                   
+
                     redirect(admin_url('purchase/wklookahead'));
                 }
             } else {
@@ -18783,7 +18783,7 @@ class purchase extends AdminController
     public function wklookahead_pdf($id)
     {
 
-       $wklookahead = $this->purchase_model->get_wklookahead_pdf_html($id); 
+        $wklookahead = $this->purchase_model->get_wklookahead_pdf_html($id);
         try {
             $pdf = $this->purchase_model->wklookahead_pdf($wklookahead, $id);
             $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
@@ -18792,7 +18792,7 @@ class purchase extends AdminController
             die;
         }
 
-        $type = 'D'; 
+        $type = 'D';
 
         if ($this->input->get('output_type')) {
             $type = $this->input->get('output_type');
@@ -18808,5 +18808,196 @@ class purchase extends AdminController
     public function table_wklookahead_list()
     {
         $this->app->get_table_data(module_views_path('purchase', 'wklookahead/table_wklookahead_list'));
+    }
+    public function add_wklookahead_activity()
+    {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+        }
+
+        $activity = trim($this->input->post('activity'));
+        $vendor_id = $this->input->post('vendor_id');
+        $start_date = $this->input->post('start_date');
+        $due_date = $this->input->post('due_date');
+        $percentage = $this->input->post('percentage');
+
+        if (empty($activity)) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Activity is required.'
+            ]);
+            return;
+        }
+
+        if (empty($start_date)) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Start date is required.'
+            ]);
+            return;
+        }
+
+        /*
+     * ---------------------------------------------------------
+     * 1. FIND EXISTING LOOKAHEAD
+     * ---------------------------------------------------------
+     *
+     * The activity can belong to a lookahead if the
+     * start date falls between:
+     *
+     * week_start_date
+     * and
+     * week_start_date + 20 days
+     */
+
+        $this->db->where(
+            'week_start_date <=',
+            $start_date
+        );
+
+        $this->db->where(
+            'DATE_ADD(week_start_date, INTERVAL 20 DAY) >=',
+            $start_date
+        );
+
+        $this->db->order_by(
+            'week_start_date',
+            'DESC'
+        );
+
+        $lookahead = $this->db
+            ->get(db_prefix() . '_wklookahead')
+            ->row();
+
+
+        /*
+     * ---------------------------------------------------------
+     * 2. IF NO LOOKAHEAD EXISTS, CREATE ONE
+     * ---------------------------------------------------------
+     */
+
+        if (!$lookahead) {
+
+            /*
+         * Make the selected start date the
+         * week_start_date.
+         */
+
+            $lookahead_data = [
+                'week_start_date' => $start_date,
+                'created_at'      => date('Y-m-d H:i:s'),
+            ];
+
+            $this->db->insert(
+                db_prefix() . '_wklookahead',
+                $lookahead_data
+            );
+
+            $lookahead_id = $this->db->insert_id();
+        } else {
+
+            $lookahead_id = $lookahead->id;
+        }
+
+
+        /*
+     * ---------------------------------------------------------
+     * 3. CALCULATE DAY_1 - DAY_21
+     * ---------------------------------------------------------
+     */
+
+        $lookahead_row = $this->db
+            ->where('id', $lookahead_id)
+            ->get(db_prefix() . '_wklookahead')
+            ->row();
+
+        $week_start_date = $lookahead_row->week_start_date;
+
+        $start_timestamp = strtotime($week_start_date);
+        $activity_timestamp = strtotime($start_date);
+
+        $day_difference = floor(
+            ($activity_timestamp - $start_timestamp) / 86400
+        );
+
+        /*
+     * Default all days to 0
+     */
+
+        $days = [];
+
+        for ($i = 1; $i <= 21; $i++) {
+            $days['day_' . $i] = 0;
+        }
+
+
+        /*
+     * Activity starts on this day.
+     *
+     * Example:
+     *
+     * difference = 0
+     * day_1 = 1
+     *
+     * difference = 1
+     * day_2 = 1
+     */
+
+        if ($day_difference >= 0 && $day_difference <= 20) {
+
+            $start_day = $day_difference + 1;
+
+            $days['day_' . $start_day] = 1;
+        }
+
+
+        /*
+     * ---------------------------------------------------------
+     * 4. INSERT ACTIVITY
+     * ---------------------------------------------------------
+     */
+
+        $activity_data = array_merge(
+            [
+                'lookahead_id' => $lookahead_id,
+                'activity'     => $activity,
+                'vendor_id'    => !empty($vendor_id)
+                    ? $vendor_id
+                    : null,
+                'due_date'     => !empty($due_date)
+                    ? $due_date
+                    : null,
+                'percentage'   => !empty($percentage)
+                    ? $percentage
+                    : 0,
+                'created_at'   => date('Y-m-d H:i:s'),
+                'updated_at'   => date('Y-m-d H:i:s'),
+            ],
+            $days
+        );
+
+
+        $this->db->insert(
+            db_prefix() . '_wklookahead_activities',
+            $activity_data
+        );
+
+
+        if (!$this->db->insert_id()) {
+
+            echo json_encode([
+                'success' => false,
+                'message' => 'Unable to create activity.'
+            ]);
+
+            return;
+        }
+
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Activity created successfully.',
+            'lookahead_id' => $lookahead_id
+        ]);
     }
 }

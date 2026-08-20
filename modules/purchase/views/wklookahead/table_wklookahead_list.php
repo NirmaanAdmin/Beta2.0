@@ -77,10 +77,51 @@ foreach ($rResult as $aRow) {
     /*
      * ACTIVITY
      */
-    $row[] = '<strong>' .
-        html_escape($aRow['activity']) .
-        '</strong>';
 
+    $numberOutput = '';
+
+    $numberOutput .= '<a href="' . admin_url('purchase/add_update_wklookahead/' . $aRow['id']) . '">'
+        .$aRow['activity']
+        . '</a>';
+
+
+    $numberOutput .= '<div class="row-options">';
+
+
+
+    $numberOutput .= ' <a href="' .
+        admin_url(
+            'purchase/add_update_wklookahead/' . $aRow['id']
+        ) .
+        '">' .
+        _l('view') .
+        '</a>';
+
+
+    $numberOutput .= ' | <a href="' .
+        admin_url(
+            'purchase/add_update_wklookahead/' . $aRow['id']
+        ) .
+        '">' .
+        _l('edit') .
+        '</a>';
+
+
+    $numberOutput .= ' | <a href="' .
+        admin_url(
+            'purchase/delete_activity/' . $aRow['id']
+        ) .
+        '" class="text-danger _delete">' .
+        _l('delete') .
+        '</a>';
+
+
+
+    $numberOutput .= '</div>';
+
+    $_data = $numberOutput;
+
+    $row[] = $_data;
     /*
      * VENDOR
      */
