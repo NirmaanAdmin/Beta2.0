@@ -18792,7 +18792,7 @@ class purchase extends AdminController
             die;
         }
 
-        $type = 'D';
+        $type = 'D'; 
 
         if ($this->input->get('output_type')) {
             $type = $this->input->get('output_type');
@@ -18803,5 +18803,10 @@ class purchase extends AdminController
         }
         $pdf_name = 'wklookahead.pdf';
         $pdf->Output($pdf_name, $type);
+    }
+
+    public function table_wklookahead_list()
+    {
+        $this->app->get_table_data(module_views_path('purchase', 'wklookahead/table_wklookahead_list'));
     }
 }

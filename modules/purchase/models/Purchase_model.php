@@ -29548,6 +29548,9 @@ class Purchase_model extends App_Model
                 $activity_data = [
                     'lookahead_id' => $lookahead_id,
                     'activity'     => trim($activity),
+                    'start_date'   => !empty($data['week_start_date'][$key])
+                        ? to_sql_date($data['week_start_date'][$key])
+                        : null,
                     'vendor_id'    => !empty($data['vendor_id'][$key])
                         ? $data['vendor_id'][$key]
                         : null,
