@@ -70,6 +70,16 @@
                   </div>
                 </div>
                 <div role="tabpanel" class="tab-pane ptop10 " id="tab_calendar">
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div class="panel_s">
+                        <div class="panel-body">
+                          <div class="dt-loader hide"></div>
+                          <div id="calendars"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 <div role="tabpanel" class="tab-pane ptop10 " id="tab_list">
 
@@ -107,188 +117,152 @@
       </div>
     </div>
   </div>
-  <div class="modal fade"
-    id="newActivityModal"
-    tabindex="-1"
-    role="dialog"
-    aria-labelledby="newActivityModalLabel">
-
+  <div class="modal fade" id="newActivityModal" tabindex="-1" role="dialog" aria-labelledby="newActivityModalLabel">
     <div class="modal-dialog" role="document">
-
       <div class="modal-content">
 
-        <?php echo form_open(
-          admin_url('purchase/add_wklookahead_activity'),
-          [
-            'id' => 'newActivityForm'
-          ]
-        ); ?>
+        <?php echo form_open(admin_url('purchase/add_wklookahead_activity'), [
+          'id' => 'newActivityForm'
+        ]); ?>
+
+        <!-- Hidden field for edit mode -->
+        <input type="hidden" name="activity_id" id="activity_id" value="">
 
         <div class="modal-header">
-
-          <button type="button"
-            class="close"
-            data-dismiss="modal">
-            <span>&times;</span>
-          </button>
-
+          <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
           <h4 class="modal-title" id="newActivityModalLabel">
-            <i class="fa fa-plus"></i>
-            <?php echo _l('New Activity'); ?>
+            <i class="fa fa-plus" id="modalIcon"></i>
+            <span id="modalTitle"><?php echo _l('New Activity'); ?></span>
           </h4>
-
         </div>
 
         <div class="modal-body">
-
+          <!-- Keep all your existing fields exactly the same -->
           <div class="form-group">
-
-            <label for="activity">
-              <?php echo _l('Activity'); ?>
-            </label>
-
-            <input type="text"
-              name="activity"
-              id="activity"
-              class="form-control"
-              required>
-
+            <label for="activity"><?php echo _l('Activity'); ?></label>
+            <input type="text" name="activity" id="activity" class="form-control" required>
           </div>
 
-
           <div class="form-group">
-
-            <label for="vendor_id">
-              <?php echo _l('Vendor'); ?>
-            </label>
-
-            <select name="vendor_id"
-              id="vendor_id"
-              class="form-control selectpicker"
-              data-live-search="true">
-
-              <option value="">
-                <?php echo _l('dropdown_non_selected_tex'); ?>
-              </option>
-
+            <label for="vendor_id"><?php echo _l('Vendor'); ?></label>
+            <select name="vendor_id" id="vendor_id" class="form-control selectpicker" data-live-search="true">
+              <option value=""><?php echo _l('dropdown_non_selected_tex'); ?></option>
               <?php
               $vendors = get_all_vendors();
-
               foreach ($vendors as $vendor) {
-              ?>
-
-                <option value="<?php echo $vendor['userid']; ?>">
-                  <?php echo html_escape($vendor['company']); ?>
-                </option>
-
-              <?php
+                echo '<option value="' . $vendor['userid'] . '">' . html_escape($vendor['company']) . '</option>';
               }
               ?>
-
             </select>
-
           </div>
-
 
           <div class="row">
-
             <div class="col-md-6">
-
               <div class="form-group">
-
-                <label for="start_date">
-                  <?php echo _l('Start Date'); ?>
-                </label>
-
-                <input type="date"
-                  name="start_date"
-                  id="start_date"
-                  class="form-control"
-                  required>
-
+                <label for="start_date"><?php echo _l('Start Date'); ?></label>
+                <input type="date" name="start_date" id="start_date" class="form-control" required>
               </div>
-
             </div>
-
-
             <div class="col-md-6">
-
               <div class="form-group">
-
-                <label for="due_date">
-                  <?php echo _l('Due Date'); ?>
-                </label>
-
-                <input type="date"
-                  name="due_date"
-                  id="due_date"
-                  class="form-control">
-
+                <label for="due_date"><?php echo _l('Due Date'); ?></label>
+                <input type="date" name="due_date" id="due_date" class="form-control">
               </div>
-
             </div>
-
           </div>
-
 
           <div class="form-group">
-
-            <label for="percentage">
-              <?php echo _l('Complete'); ?>
-            </label>
-
+            <label for="percentage"><?php echo _l('Complete'); ?></label>
             <div class="input-group">
-
-              <input type="number"
-                name="percentage"
-                id="percentage"
-                class="form-control"
-                min="0"
-                max="100"
-                value="0">
-
-              <span class="input-group-addon">
-                %
-              </span>
-
+              <input type="number" name="percentage" id="percentage" class="form-control" min="0" max="100" value="0">
+              <span class="input-group-addon">%</span>
             </div>
-
           </div>
 
-
           <div id="activity_form_message"></div>
-
         </div>
 
-
         <div class="modal-footer">
-
-          <button type="button"
-            class="btn btn-default"
-            data-dismiss="modal">
-            <?php echo _l('close'); ?>
-          </button>
-
-          <button type="submit"
-            class="btn btn-primary"
-            id="saveActivityBtn">
-
+          <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo _l('close'); ?></button>
+          <button type="submit" class="btn btn-primary" id="saveActivityBtn">
             <i class="fa fa-save"></i>
-            <?php echo _l('Save Activity'); ?>
-
+            <span id="saveBtnText"><?php echo _l('Save Activity'); ?></span>
           </button>
-
         </div>
 
         <?php echo form_close(); ?>
-
       </div>
-
     </div>
-
   </div>
+
   <?php init_tail(); ?>
   <script>
+    $(document).ready(function() {
+
+      // ========== RESET MODAL WHEN OPENING FOR "NEW" ==========
+      $('[data-target="#newActivityModal"]').not('.edit-activity').on('click', function() {
+        resetActivityModal();
+      });
+
+      // ========== EDIT BUTTON CLICK ==========
+      $(document).on('click', '.edit-activity', function(e) {
+        e.preventDefault();
+
+        var activityId = $(this).data('id');
+
+        // Change modal to Edit mode
+        $('#modalTitle').text('<?php echo _l("Edit Activity"); ?>');
+        $('#modalIcon').removeClass('fa-plus').addClass('fa-pencil');
+        $('#saveBtnText').text('<?php echo _l("Update Activity"); ?>');
+        $('#activity_id').val(activityId);
+
+        // Change form action to update
+        $('#newActivityForm').attr('action', admin_url + 'purchase/update_wklookahead_activity');
+
+        // Fetch data from database
+        $.ajax({
+          url: admin_url + 'purchase/get_wklookahead_activity/' + activityId,
+          type: 'GET',
+          dataType: 'json',
+          success: function(response) {
+            if (response.success) {
+              var data = response.data;
+
+              $('#activity').val(data.activity);
+              $('#vendor_id').selectpicker('val', data.vendor_id);
+              $('#start_date').val(data.start_date);
+              $('#due_date').val(data.due_date);
+              $('#percentage').val(data.percentage);
+
+              // Open modal
+              $('#newActivityModal').modal('show');
+            } else {
+              alert_float('danger', response.message || 'Failed to load activity');
+            }
+          },
+          error: function() {
+            alert_float('danger', 'Error loading activity data');
+          }
+        });
+      });
+
+      // ========== RESET FUNCTION ==========
+      function resetActivityModal() {
+        $('#modalTitle').text('<?php echo _l("New Activity"); ?>');
+        $('#modalIcon').removeClass('fa-pencil').addClass('fa-plus');
+        $('#saveBtnText').text('<?php echo _l("Save Activity"); ?>');
+        $('#activity_id').val('');
+        $('#newActivityForm')[0].reset();
+        $('#vendor_id').selectpicker('val', '');
+        $('#newActivityForm').attr('action', admin_url + 'purchase/add_wklookahead_activity');
+        $('#activity_form_message').html('');
+      }
+
+      // Optional: also reset when modal is closed
+      $('#newActivityModal').on('hidden.bs.modal', function() {
+        resetActivityModal();
+      });
+    });
     $(document).ready(function() {
       var table_wklookahead = $('.table-table_wklookahead');
       var Params = {
@@ -313,8 +287,12 @@
         });
       });
 
-
-
+      // Initialize calendar when calendar tab is clicked
+      $('a[href="#tab_calendar"]').on('shown.bs.tab', function(e) {
+        setTimeout(function() {
+          initializeCalendar();
+        }, 200);
+      });
 
     });
 
@@ -391,7 +369,119 @@
 
     });
   </script>
+  <script>
+    (function() {
+      "use strict";
 
+      var calendarInstance = null;
+
+      // Function to initialize the calendar
+      window.initializeCalendar = function() {
+        var calendar_selector = $('#calendars');
+
+        if (calendar_selector.length > 0) {
+          // Destroy existing instance if any
+          if (calendarInstance) {
+            calendarInstance.destroy();
+            calendarInstance = null;
+          }
+
+          // Check if FullCalendar is available
+          if (typeof FullCalendar === 'undefined') {
+            console.error('FullCalendar library not loaded');
+            return;
+          }
+
+          var calendar_settings = {
+            locale: app.locale,
+            headerToolbar: {
+              left: 'prev,next today',
+              center: 'title',
+              right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            },
+            editable: false,
+            dayMaxEventRows: parseInt(app.options.calendar_events_limit) + 1,
+            direction: (isRTL == 'true' ? 'rtl' : 'ltr'),
+            eventStartEditable: false,
+            firstDay: parseInt(app.options.calendar_first_day),
+            initialView: app.options.default_view_calendar,
+            timeZone: app.options.timezone,
+            loading: function(isLoading) {
+              !isLoading ? $('.dt-loader').addClass('hide') : $('.dt-loader').removeClass('hide');
+            },
+            events: function(info, successCallback, failureCallback) {
+              // Fetch events from your controller
+              $.ajax({
+                url: admin_url + 'purchase/get_calendar_events',
+                type: 'GET',
+                dataType: 'json',
+                data: {
+                  start: info.startStr,
+                  end: info.endStr
+                },
+                success: function(data) {
+                  successCallback(data);
+                },
+                error: function(xhr, status, error) {
+                  console.error('Error fetching calendar events:', error);
+                  failureCallback(error);
+                }
+              });
+            }
+          };
+
+          try {
+            calendarInstance = new FullCalendar.Calendar(calendar_selector[0], calendar_settings);
+            calendarInstance.render();
+            console.log('Calendar rendered successfully');
+          } catch (error) {
+            console.error('Error rendering calendar:', error);
+          }
+        }
+      };
+
+      // Initialize calendar when DOM is ready if calendar tab is active
+      $(document).ready(function() {
+        // Check if calendar tab is active by default
+        if ($('#tab_calendar').hasClass('active')) {
+          setTimeout(initializeCalendar, 300);
+        }
+      });
+
+      // Also initialize when modal or other elements might affect visibility
+      $(document).on('shown.bs.modal', function() {
+        if ($('#tab_calendar').hasClass('active')) {
+          setTimeout(initializeCalendar, 300);
+        }
+      });
+
+      // Trigger calendar initialization when window is fully loaded
+      $(window).on('load', function() {
+        if ($('#tab_calendar').hasClass('active')) {
+          setTimeout(initializeCalendar, 400);
+        }
+      });
+
+    })(jQuery);
+
+    // In your calendar initialization
+    $('#calendar').fullCalendar({
+      // ... other options
+      eventClick: function(event) {
+        // Open the edit modal with the event data
+        $('#newActivityModal').modal('show');
+
+        // Populate the modal fields
+        $('#activity_id').val(event.activity_id);
+        $('#activity').val(event.activity_name);
+        $('#vendor_id').val(event.vendor_id).selectpicker('refresh');
+        $('#due_date').val(event.due_date);
+        $('#percentage').val(event.percentage);
+        $('#start_date').val(event.start_date);
+        $('#lookahead_id').val(event.lookahead_id);
+      }
+    });
+  </script>
   </body>
 
   </html>

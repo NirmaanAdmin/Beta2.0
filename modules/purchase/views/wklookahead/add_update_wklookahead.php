@@ -32,6 +32,11 @@
                             ]
                         ); ?>
 
+                        <!-- Hidden field for lookahead ID if updating -->
+                        <?php if (!empty($lookahead)) : ?>
+                            <input type="hidden" name="lookahead_id" value="<?php echo $lookahead->id; ?>">
+                        <?php endif; ?>
+
                         <!-- PROJECT -->
                         <div class="row">
 
@@ -102,7 +107,9 @@
 
                                                 <?php foreach ($activities as $key => $row) : ?>
 
-                                                    <tr>
+                                                    <tr data-row-index="<?php echo $key; ?>">
+
+                                                        <input type="hidden" name="activity_id[]" value="<?php echo $row->id; ?>">
 
                                                         <td>
 
@@ -147,16 +154,30 @@
                                                         </td>
 
                                                         <?php for ($i = 1; $i <= 21; $i++) : ?>
-
-                                                            <td class="day-cell">
-
-                                                                <input
-                                                                    type="checkbox"
-                                                                    name="day_<?php echo $i; ?>[]"
-                                                                    value="1"
-                                                                    <?php echo !empty($row->{'day_' . $i}) ? 'checked' : ''; ?>>
-
-                                                            </td>
+                                                            
+                                                            <?php 
+                                                            $isSunday = ($i == 7 || $i == 14 || $i == 21);
+                                                            $fieldName = 'day_' . $i . '[' . $key . ']';
+                                                            ?>
+                                                            
+                                                            <?php if ($isSunday) : ?>
+                                                                
+                                                                <td class="text-center day-cell holiday-cell">
+                                                                    <strong>H</strong>
+                                                                    <input type="hidden" name="<?php echo $fieldName; ?>" value="0">
+                                                                </td>
+                                                                
+                                                            <?php else : ?>
+                                                                
+                                                                <td class="text-center day-cell">
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        name="<?php echo $fieldName; ?>"
+                                                                        value="1"
+                                                                        <?php echo !empty($row->{'day_' . $i}) ? 'checked' : ''; ?>>
+                                                                </td>
+                                                                
+                                                            <?php endif; ?>
 
                                                         <?php endfor; ?>
 
@@ -237,7 +258,7 @@
     $(function() {
 
         let existingRows = <?php echo !empty($activities) ? count($activities) : 0; ?>;
-
+        let rowCounter = existingRows;
 
         /*
          * FORMAT DATE
@@ -454,7 +475,13 @@
          * CREATE ACTIVITY ROW
          */
         function createRow() {
-            let row = $('<tr>');
+            let rowIndex = rowCounter++;
+            let row = $('<tr data-row-index="' + rowIndex + '">');
+
+            // Hidden field for activity ID (empty for new rows)
+            row.append(`
+                <input type="hidden" name="activity_id[]" value="">
+            `);
 
             /*
              * Activity
@@ -526,6 +553,7 @@
                     row.append(`
             <td class="text-center day-cell holiday-cell">
                 <strong>H</strong>
+                <input type="hidden" name="day_${i}[${rowIndex}]" value="0">
             </td>
         `);
 
@@ -536,7 +564,7 @@
 
                 <input
                     type="checkbox"
-                    name="day_${i}[]"
+                    name="day_${i}[${rowIndex}]"
                     value="1"
                 >
 
@@ -567,6 +595,7 @@
 
             $('#wklookahead-body').append(row);
 
+            // Initialize selectpicker for the new row
             $('.selectpicker').selectpicker('refresh');
         }
 

@@ -18698,6 +18698,8 @@ class purchase extends AdminController
     public function wklookahead()
     {
         $data['title'] = _l('3 WK Lookahead');
+        $data['google_calendar_api'] = get_option('google_calendar_api_key');
+        add_calendar_assets();
         $this->load->view('wklookahead/wklookahead', $data);
     }
 
@@ -18708,7 +18710,11 @@ class purchase extends AdminController
 
     public function add_update_wklookahead($id = '')
     {
-
+        if ($this->input->is_ajax_request() && $id) {
+            $activity = $this->purchase_model->get_activity($id);
+            echo json_encode($activity);
+            exit;
+        }
         if ($id != '') {
 
             $data['title'] = _l('Edit Weekly Lookahead');
@@ -18845,19 +18851,26 @@ class purchase extends AdminController
      * The activity can belong to a lookahead if the
      * start date falls between:
      *
-     * week_start_date
+     * week_start_date (Monday of that week)
      * and
      * week_start_date + 20 days
      */
 
+        // Get the Monday of the week for the start_date
+        $startDateObj = new DateTime($start_date);
+        $dayOfWeek = $startDateObj->format('N'); // 1 (Monday) to 7 (Sunday)
+        $daysToSubtract = $dayOfWeek - 1;
+        $startDateObj->modify("-$daysToSubtract days");
+        $mondayDate = $startDateObj->format('Y-m-d');
+
         $this->db->where(
             'week_start_date <=',
-            $start_date
+            $mondayDate
         );
 
         $this->db->where(
             'DATE_ADD(week_start_date, INTERVAL 20 DAY) >=',
-            $start_date
+            $mondayDate
         );
 
         $this->db->order_by(
@@ -18869,7 +18882,6 @@ class purchase extends AdminController
             ->get(db_prefix() . '_wklookahead')
             ->row();
 
-
         /*
      * ---------------------------------------------------------
      * 2. IF NO LOOKAHEAD EXISTS, CREATE ONE
@@ -18879,12 +18891,11 @@ class purchase extends AdminController
         if (!$lookahead) {
 
             /*
-         * Make the selected start date the
-         * week_start_date.
+         * Create a new lookahead with Monday as week_start_date
          */
-
             $lookahead_data = [
-                'week_start_date' => $start_date,
+                'week_start_date' => $mondayDate,
+                'project_id'      => $this->input->post('project_id') ?: null,
                 'created_at'      => date('Y-m-d H:i:s'),
             ];
 
@@ -18895,10 +18906,8 @@ class purchase extends AdminController
 
             $lookahead_id = $this->db->insert_id();
         } else {
-
             $lookahead_id = $lookahead->id;
         }
-
 
         /*
      * ---------------------------------------------------------
@@ -18913,6 +18922,7 @@ class purchase extends AdminController
 
         $week_start_date = $lookahead_row->week_start_date;
 
+        // Calculate the day difference from week_start_date (Monday)
         $start_timestamp = strtotime($week_start_date);
         $activity_timestamp = strtotime($start_date);
 
@@ -18923,33 +18933,25 @@ class purchase extends AdminController
         /*
      * Default all days to 0
      */
-
         $days = [];
 
         for ($i = 1; $i <= 21; $i++) {
             $days['day_' . $i] = 0;
         }
 
-
         /*
      * Activity starts on this day.
      *
      * Example:
-     *
-     * difference = 0
-     * day_1 = 1
-     *
-     * difference = 1
-     * day_2 = 1
+     * If week_start_date is Monday (2026-08-17)
+     * and start_date is Friday (2026-08-21)
+     * difference = 4
+     * day_5 = 1 (since day_1 is Monday)
      */
-
         if ($day_difference >= 0 && $day_difference <= 20) {
-
             $start_day = $day_difference + 1;
-
             $days['day_' . $start_day] = 1;
         }
-
 
         /*
      * ---------------------------------------------------------
@@ -18965,7 +18967,7 @@ class purchase extends AdminController
                     ? $vendor_id
                     : null,
                 'due_date'     => !empty($due_date)
-                    ? $due_date
+                    ? to_sql_date($due_date)
                     : null,
                 'percentage'   => !empty($percentage)
                     ? $percentage
@@ -18976,28 +18978,399 @@ class purchase extends AdminController
             $days
         );
 
-
         $this->db->insert(
             db_prefix() . '_wklookahead_activities',
             $activity_data
         );
 
-
         if (!$this->db->insert_id()) {
-
             echo json_encode([
                 'success' => false,
                 'message' => 'Unable to create activity.'
             ]);
-
             return;
         }
-
 
         echo json_encode([
             'success' => true,
             'message' => 'Activity created successfully.',
-            'lookahead_id' => $lookahead_id
+            'lookahead_id' => $lookahead_id,
+            'activity_id' => $this->db->insert_id()
         ]);
+    }
+
+    public function get_calendar_events()
+    {
+        // Get start and end dates from request
+        $start = $this->input->get('start');
+        $end = $this->input->get('end');
+
+        // Fetch activities with their lookahead data
+        $this->db->select('
+        tbl_wklookahead_activities.*,
+        tbl_wklookahead.week_start_date,
+        tbl_wklookahead.id as lookahead_id
+    ');
+        $this->db->from(db_prefix() . '_wklookahead_activities');
+        $this->db->join(
+            db_prefix() . '_wklookahead',
+            db_prefix() . '_wklookahead.id = ' . db_prefix() . '_wklookahead_activities.lookahead_id',
+            'left'
+        );
+
+        // Optional: filter by date range if needed
+        // Since we need to calculate dates from day columns, we'll filter in PHP
+        $activities = $this->db->get()->result_array();
+
+        $calendar_events = [];
+
+        foreach ($activities as $activity) {
+            // Calculate the actual start date based on week_start_date and day columns
+            $week_start = $activity['week_start_date'];
+
+            // Find which day column has value 1 (the activity start day)
+            $start_day = null;
+            for ($i = 1; $i <= 21; $i++) {
+                $day_column = 'day_' . $i;
+                if (isset($activity[$day_column]) && $activity[$day_column] == 1) {
+                    $start_day = $i;
+                    break;
+                }
+            }
+
+            // If no day is set, skip this activity
+            if ($start_day === null) {
+                continue;
+            }
+
+            // Calculate the actual start date
+            $start_timestamp = strtotime($week_start);
+            $activity_timestamp = strtotime('+' . ($start_day - 1) . ' days', $start_timestamp);
+            $activity_start_date = date('Y-m-d', $activity_timestamp);
+
+            // Filter by date range
+            if ($activity_start_date < $start || $activity_start_date > $end) {
+                continue;
+            }
+
+            // Get vendor name if available
+            $vendor_name = '';
+            if (!empty($activity['vendor_id'])) {
+                $vendor = $this->db->where('userid', $activity['vendor_id'])
+                    ->get(db_prefix() . 'clients')
+                    ->row();
+                if ($vendor) {
+                    $vendor_name = $vendor->company;
+                }
+            }
+
+            // Prepare event title
+            $title = $activity['activity'];
+            if (!empty($vendor_name)) {
+                $title .= ' - ' . $vendor_name;
+            }
+            if (!empty($activity['percentage'])) {
+                $title .= ' (' . $activity['percentage'] . '%)';
+            }
+
+            // Set color based on completion percentage
+            $backgroundColor = '#3a87ad'; // Default blue
+            $borderColor = '#3a87ad';
+
+            if (!empty($activity['percentage'])) {
+                if ($activity['percentage'] >= 100) {
+                    $backgroundColor = '#28a745'; // Green for complete
+                    $borderColor = '#28a745';
+                } elseif ($activity['percentage'] >= 50) {
+                    $backgroundColor = '#ffc107'; // Yellow for in progress
+                    $borderColor = '#ffc107';
+                } else {
+                    $backgroundColor = '#dc3545'; // Red for not started
+                    $borderColor = '#dc3545';
+                }
+            }
+
+            // Prepare event data
+            $event = [
+                'id' => $activity['id'],
+                'title' => $title,
+                'start' => $activity_start_date,
+                'backgroundColor' => $backgroundColor,
+                'borderColor' => $borderColor,
+                'allDay' => true,
+                // Add custom data for edit modal
+                'activity_id' => $activity['id'],
+                'activity_name' => $activity['activity'],
+                'vendor_id' => $activity['vendor_id'],
+                'vendor_name' => $vendor_name,
+                'due_date' => $activity['due_date'],
+                'percentage' => $activity['percentage'],
+                'lookahead_id' => $activity['lookahead_id'],
+                'start_date' => $activity_start_date,
+            ];
+
+            // Add due date if exists
+            if (!empty($activity['due_date'])) {
+                $event['end'] = $activity['due_date'];
+            }
+
+            $calendar_events[] = $event;
+        }
+
+        echo json_encode($calendar_events);
+    }
+
+    // Get single activity (for edit)
+    public function get_wklookahead_activity($id)
+    {
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+        }
+
+        $this->db->select([
+            db_prefix() . '_wklookahead_activities.*',
+            db_prefix() . '_wklookahead.week_start_date',
+        ]);
+
+        $this->db->from(db_prefix() . '_wklookahead_activities');
+        $this->db->join(
+            db_prefix() . '_wklookahead',
+            db_prefix() . '_wklookahead.id = ' . db_prefix() . '_wklookahead_activities.lookahead_id',
+            'left'
+        );
+
+        $this->db->where(db_prefix() . '_wklookahead_activities.id', $id);
+
+        $activity = $this->db->get()->row_array();
+
+        if ($activity) {
+
+            // ===== Calculate Start Date (same logic as DataTables) =====
+            $startDate = '';
+
+            if (!empty($activity['week_start_date'])) {
+
+                for ($day = 1; $day <= 21; $day++) {
+
+                    if (isset($activity['day_' . $day]) && (int) $activity['day_' . $day] === 1) {
+
+                        $startDate = date(
+                            'Y-m-d',
+                            strtotime($activity['week_start_date'] . ' +' . ($day - 1) . ' days')
+                        );
+                        break;
+                    }
+                }
+            }
+
+            // Add calculated start_date into the response
+            $activity['start_date'] = $startDate;
+
+            echo json_encode([
+                'success' => true,
+                'data'    => $activity
+            ]);
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Activity not found'
+            ]);
+        }
+    }
+
+    // Update activity
+    public function update_wklookahead_activity()
+    {
+        if ($this->input->post()) {
+            $id = $this->input->post('activity_id');
+
+            if (empty($id)) {
+                if ($this->input->is_ajax_request()) {
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Activity ID is required.'
+                    ]);
+                    return;
+                }
+                set_alert('danger', 'Activity ID is required.');
+                redirect(admin_url('purchase/wklookahead'));
+            }
+
+            $activity = trim($this->input->post('activity'));
+            $vendor_id = $this->input->post('vendor_id');
+            $due_date = $this->input->post('due_date');
+            $percentage = $this->input->post('percentage');
+            $start_date = $this->input->post('start_date');
+
+            // Validate activity name
+            if (empty($activity)) {
+                if ($this->input->is_ajax_request()) {
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Activity is required.'
+                    ]);
+                    return;
+                }
+                set_alert('danger', 'Activity is required.');
+                redirect(admin_url('purchase/wklookahead'));
+            }
+
+            // Get existing activity
+            $existing_activity = $this->db
+                ->where('id', $id)
+                ->get(db_prefix() . '_wklookahead_activities')
+                ->row();
+
+            if (!$existing_activity) {
+                if ($this->input->is_ajax_request()) {
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Activity not found.'
+                    ]);
+                    return;
+                }
+                set_alert('danger', 'Activity not found.');
+                redirect(admin_url('purchase/wklookahead'));
+            }
+
+            /*
+         * ---------------------------------------------------------
+         * 1. UPDATE START DATE IF PROVIDED
+         * ---------------------------------------------------------
+         * 
+         * If start_date is provided, we need to:
+         * - Find the correct lookahead (or create new one)
+         * - Update the day_X fields accordingly
+         */
+
+            $days = [];
+            $lookahead_id = $existing_activity->lookahead_id;
+
+            if (!empty($start_date)) {
+
+                // Get the Monday of the week for the start_date
+                $startDateObj = new DateTime($start_date);
+                $dayOfWeek = $startDateObj->format('N'); // 1 (Monday) to 7 (Sunday)
+                $daysToSubtract = $dayOfWeek - 1;
+                $startDateObj->modify("-$daysToSubtract days");
+                $mondayDate = $startDateObj->format('Y-m-d');
+
+                // Check if this date falls within any existing lookahead
+                $this->db->where(
+                    'week_start_date <=',
+                    $start_date
+                );
+                $this->db->where(
+                    'DATE_ADD(week_start_date, INTERVAL 20 DAY) >=',
+                    $start_date
+                );
+                $this->db->order_by('week_start_date', 'DESC');
+                $lookahead = $this->db
+                    ->get(db_prefix() . '_wklookahead')
+                    ->row();
+
+                if ($lookahead) {
+                    // Use existing lookahead
+                    $lookahead_id = $lookahead->id;
+                } else {
+                    // Check if there's a lookahead with the same Monday
+                    $this->db->where('week_start_date', $mondayDate);
+                    $existingLookahead = $this->db
+                        ->get(db_prefix() . '_wklookahead')
+                        ->row();
+
+                    if ($existingLookahead) {
+                        $lookahead_id = $existingLookahead->id;
+                    } else {
+                        // Create new lookahead
+                        $lookahead_data = [
+                            'week_start_date' => $mondayDate,
+                            'project_id'      => $this->input->post('project_id') ?: null,
+                            'created_at'      => date('Y-m-d H:i:s'),
+                        ];
+
+                        $this->db->insert(
+                            db_prefix() . '_wklookahead',
+                            $lookahead_data
+                        );
+                        $lookahead_id = $this->db->insert_id();
+                    }
+                }
+
+                // Get the lookahead week_start_date
+                $lookahead_row = $this->db
+                    ->where('id', $lookahead_id)
+                    ->get(db_prefix() . '_wklookahead')
+                    ->row();
+
+                if ($lookahead_row) {
+                    $week_start_date = $lookahead_row->week_start_date;
+
+                    // Calculate the day difference
+                    $start_timestamp = strtotime($week_start_date);
+                    $activity_timestamp = strtotime($start_date);
+                    $day_difference = floor(($activity_timestamp - $start_timestamp) / 86400);
+
+                    // Reset all days to 0
+                    for ($i = 1; $i <= 21; $i++) {
+                        $days['day_' . $i] = 0;
+                    }
+
+                    // Set the specific day to 1 if within range
+                    if ($day_difference >= 0 && $day_difference <= 20) {
+                        $start_day = $day_difference + 1;
+                        $days['day_' . $start_day] = 1;
+                    }
+                }
+            }
+
+            /*
+         * ---------------------------------------------------------
+         * 2. UPDATE ACTIVITY
+         * ---------------------------------------------------------
+         */
+
+            // Prepare base data
+            $update_data = [
+                'activity'   => $activity,
+                'vendor_id'  => !empty($vendor_id) ? $vendor_id : null,
+                'due_date'   => !empty($due_date) ? to_sql_date($due_date) : null,
+                'percentage' => !empty($percentage) ? $percentage : 0,
+                'updated_at' => date('Y-m-d H:i:s'),
+            ];
+
+            // If start_date was provided and we have days data
+            if (!empty($start_date) && !empty($days)) {
+                $update_data = array_merge($update_data, $days);
+            }
+
+            // If lookahead_id changed, update it
+            if ($lookahead_id != $existing_activity->lookahead_id) {
+                $update_data['lookahead_id'] = $lookahead_id;
+            }
+
+            // Update the activity
+            $this->db->where('id', $id);
+            $success = $this->db->update(db_prefix() . '_wklookahead_activities', $update_data);
+
+            /*
+         * ---------------------------------------------------------
+         * 3. RESPONSE
+         * ---------------------------------------------------------
+         */
+
+            if ($this->input->is_ajax_request()) {
+                echo json_encode([
+                    'success' => $success,
+                    'message' => $success ? _l('updated_successfully') : _l('problem_updating'),
+                    'lookahead_id' => $lookahead_id
+                ]);
+                return;
+            }
+
+            // Fallback for normal form submit
+            set_alert($success ? 'success' : 'danger', $success ? _l('updated_successfully') : _l('problem_updating'));
+            redirect(admin_url('purchase/wklookahead'));
+        }
     }
 }
