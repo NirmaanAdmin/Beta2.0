@@ -1,0 +1,141 @@
+.selection_toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background: #eef7fc;
+    border: 1px solid #d8ebf5;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+.timeline_month_group {
+    margin-bottom: 25px;
+}
+
+.timeline_month_title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #263238;
+    border-bottom: 1px solid #e5e9ed;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+}
+
+.timeline_grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+}
+
+.timeline_photo {
+    position: relative;
+    border: 1px solid #dfe5ea;
+    border-radius: 5px;
+    background: #fff;
+    overflow: hidden;
+    cursor: pointer;
+    transition: 0.15s;
+}
+
+.timeline_photo:hover {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.10);
+    transform: translateY(-1px);
+}
+
+.timeline_photo.selected {
+    border: 2px solid #03a9f4;
+}
+
+.timeline_photo img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    display: block;
+}
+
+.timeline_photo_check {
+    position: absolute;
+    left: 8px;
+    top: 8px;
+    z-index: 2;
+}
+
+.timeline_photo_check input {
+    width: 18px;
+    height: 18px;
+}
+
+.timeline_photo_info {
+    padding: 9px;
+}
+
+.timeline_photo_title {
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.empty_gallery {
+    text-align: center;
+    padding: 70px 20px;
+    color: #8a96a3;
+}
+
+.empty_gallery i {
+    font-size: 50px;
+}
+
+.dropzone {
+    border: 2px dashed #b8c5d1;
+    border-radius: 7px;
+    padding: 45px;
+    text-align: center;
+    color: #7d8995;
+    cursor: pointer;
+    background: #fafcfd;
+}
+
+.dropzone input {
+    display: none;
+}
+
+.preview_item {
+    margin-bottom: 10px;
+}
+
+.preview_item img {
+    height: 90px;
+    width: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.view_image {
+    margin: auto;
+    max-height: 650px;
+    object-fit: contain;
+}
+
+.file_meta {
+    font-size: 15px;
+}
+
+.file_meta strong {
+    font-weight: 700;
+}
+
+/* Responsive - Tablets / Small Desktops */
+@media (max-width: 1100px) {
+    .timeline_grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* Responsive - Mobile */
+@media (max-width: 800px) {
+    .timeline_grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
