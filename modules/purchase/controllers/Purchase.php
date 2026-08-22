@@ -18999,18 +18999,96 @@ class purchase extends AdminController
         ]);
     }
 
+    // public function get_calendar_events()
+    // {
+    //     // Get start and end dates from request
+    //     $start = $this->input->get('start');
+    //     $end = $this->input->get('end');
+
+    //     // Clean the dates - remove time component if exists
+    //     $start = date('Y-m-d', strtotime($start));
+    //     $end = date('Y-m-d', strtotime($end));
+
+    //     $calendar_events = [];
+
+    //     $this->db->select(
+    //         db_prefix() . 'tasks.name as title,' .
+    //             'id,' .
+    //             tasks_rel_name_select_query() . ' as rel_name,' .
+    //             'rel_id,status,milestone,' .
+    //             'CASE WHEN duedate IS NULL THEN startdate ELSE duedate END as date',
+    //         false
+    //     );
+    //     $this->db->from(db_prefix() . 'tasks');
+
+    //     // Updated WHERE clause with DATE() function
+    //     $this->db->where(
+    //         "CASE WHEN duedate IS NULL 
+    //      THEN (DATE(startdate) BETWEEN '$start' AND '$end') 
+    //      ELSE (DATE(duedate) BETWEEN '$start' AND '$end') END",
+    //         null,
+    //         false
+    //     );
+
+
+    //     $tasks = $this->db->get()->result_array();
+
+    //     foreach ($tasks as $task) {
+    //         $rel_showcase = '';
+
+    //         if (!empty($task['rel_id'])) {
+    //             $rel_showcase = ' (' . $task['rel_name'] . ')';
+    //         }
+
+    //         // Truncate task name for display
+    //         $name = mb_substr($task['title'], 0, 60);
+    //         if (strlen($task['title']) > 60) {
+    //             $name .= '...';
+    //         }
+
+    //         // Get task status color
+    //         $status = get_task_status_by_id($task['status']);
+    //         $color = $status['color'] ?? '#6c757d'; // Default gray if status not found
+
+    //         // Build task event
+    //         $task_event = [
+    //             'id' => 'task_' . $task['id'],
+    //             'title' => $name,
+    //             'start' => $task['date'],
+    //             'backgroundColor' => $color,
+    //             'borderColor' => $color,
+    //             'allDay' => true,
+    //             'className' => $task['milestone'] ? ['milestone-' . $task['milestone']] : [],
+    //             'tooltip' => _l('calendar_task') . ' - ' . $task['title'] . $rel_showcase,
+    //             // Custom data for task modal
+    //             'task_id' => $task['id'],
+    //             'task_name' => $task['title'],
+    //             'rel_id' => $task['rel_id'],
+    //             'rel_name' => $task['rel_name'],
+    //             'status' => $task['status'],
+    //             'milestone' => $task['milestone'],
+    //             'date' => $task['date'],
+    //             'onclick' => 'init_task_modal(' . $task['id'] . '); return false',
+    //             'url' => '#'
+    //         ];
+
+    //         $calendar_events[] = $task_event;
+    //     }
+
+    //     echo json_encode($calendar_events);
+    // }
+
     public function get_calendar_events()
     {
         // Get start and end dates from request
         $start = $this->input->get('start');
         $end = $this->input->get('end');
 
-        // Clean the dates - remove time component if exists
-        $start = date('Y-m-d', strtotime($start));
-        $end = date('Y-m-d', strtotime($end));
-
         $calendar_events = [];
 
+        // ============================================
+        // FETCH TASKS ONLY - No conditions applied
+        // ============================================
         $this->db->select(
             db_prefix() . 'tasks.name as title,' .
                 'id,' .
@@ -19021,15 +19099,12 @@ class purchase extends AdminController
         );
         $this->db->from(db_prefix() . 'tasks');
 
-        // Updated WHERE clause with DATE() function
+        // Date range filter
         $this->db->where(
-            "CASE WHEN duedate IS NULL 
-         THEN (DATE(startdate) BETWEEN '$start' AND '$end') 
-         ELSE (DATE(duedate) BETWEEN '$start' AND '$end') END",
+            "CASE WHEN duedate IS NULL THEN (startdate BETWEEN '$start' AND '$end') ELSE (duedate BETWEEN '$start' AND '$end') END",
             null,
             false
         );
-       
 
         $tasks = $this->db->get()->result_array();
 
