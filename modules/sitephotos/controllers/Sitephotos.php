@@ -57,9 +57,26 @@ class Sitephotos extends AdminController
 
     public function get_timeline_detail()
     {
-        $id = $this->input->post('id');
+        $id = (int) $this->input->post('id');
+        if (!$id) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Invalid photo ID.'
+            ]);
+            return;
+        }
         $timeline = $this->sitephotos_model->get_timeline_detail($id);
-        echo json_encode($timeline);
+        if (!$timeline) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Photo not found.'
+            ]);
+            return;
+        }
+        echo json_encode([
+            'success' => true,
+            'data'    => $timeline
+        ]);
     }
 
     public function update_timeline($id)
@@ -101,4 +118,162 @@ class Sitephotos extends AdminController
         $this->load->helper('download');
         force_download($photo->original_name, file_get_contents($path));
     }
+
+    public function get_timeline_comments()
+    {
+        $photo_id = (int) $this->input->post('photo_id');
+        if (!$photo_id) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Invalid photo ID.',
+                'data'    => []
+            ]);
+            return;
+        }
+        $comments = $this->sitephotos_model->get_timeline_comments($photo_id);
+        echo json_encode([
+            'success' => true,
+            'data'    => $comments
+        ]);
+    }
+
+    public function add_timeline_comment()
+    {
+        $photo_id = (int) $this->input->post('photo_id');
+        $comment  = trim($this->input->post('comment', false));
+        if (!$photo_id) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Invalid photo ID.'
+            ]);
+            return;
+        }
+        if ($comment === '') {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Please enter a comment.'
+            ]);
+            return;
+        }
+        $photo = $this->sitephotos_model->get_timeline_detail($photo_id);
+        if (!$photo) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Photo not found.'
+            ]);
+            return;
+        }
+        $data = [
+            'timeline_photo_id' => $photo_id,
+            'staffid'            => get_staff_user_id(),
+            'comment'            => $comment,
+            'created_at'         => date('Y-m-d H:i:s'),
+        ];
+        $comment_id = $this->sitephotos_model->add_timeline_comment($data);
+        if ($comment_id) {
+            echo json_encode([
+                'success' => true,
+                'message' => 'Comment added successfully.',
+                'id'      => $comment_id
+            ]);
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Unable to add comment.'
+            ]);
+        }
+    }
+
+    public function update_timeline_comment()
+    {
+        $comment_id = (int) $this->input->post('comment_id');
+        $comment    = trim($this->input->post('comment', false));
+        if (!$comment_id) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Invalid comment ID.'
+            ]);
+            return;
+        }
+        if ($comment === '') {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Please enter a comment.'
+            ]);
+            return;
+        }
+        $existing_comment = $this->sitephotos_model->get_timeline_comment($comment_id);
+        if (!$existing_comment) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Comment not found.'
+            ]);
+            return;
+        }
+        if ((int) $existing_comment->staffid !== (int) get_staff_user_id()) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'You are not allowed to edit this comment.'
+            ]);
+            return;
+        }
+        $updated = $this->sitephotos_model->update_timeline_comment(
+            $comment_id, [
+                'comment'    => $comment,
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]
+        );
+        if ($updated) {
+            echo json_encode([
+                'success' => true,
+                'message' => 'Comment updated successfully.'
+            ]);
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Unable to update comment.'
+            ]);
+        }
+    }
+
+    public function delete_timeline_comment()
+    {
+        $comment_id = (int) $this->input->post('comment_id');
+        if (!$comment_id) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Invalid comment ID.'
+            ]);
+            return;
+        }
+        $existing_comment = $this->sitephotos_model->get_timeline_comment($comment_id);
+        if (!$existing_comment) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Comment not found.'
+            ]);
+            return;
+        }
+        if ((int) $existing_comment->staffid !== (int) get_staff_user_id()) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'You are not allowed to delete this comment.'
+            ]);
+            return;
+        }
+        $deleted = $this->sitephotos_model->delete_timeline_comment($comment_id);
+        if ($deleted) {
+            echo json_encode([
+                'success' => true,
+                'message' => 'Comment deleted successfully.'
+            ]);
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Unable to delete comment.'
+            ]);
+        }
+    }
 }
+
+?>

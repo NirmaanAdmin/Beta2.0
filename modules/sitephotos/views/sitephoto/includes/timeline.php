@@ -144,8 +144,33 @@
                         <img id="view_image" src="" class="img-responsive view_image">
                     </div>
                     <div class="col-md-4">
-                        <h4>Comments</h4>
-                        <hr>
+                        <div class="timeline_comments_wrapper">
+                            <h4>Comments</h4>
+                            <hr>
+                            <div id="timeline_comments_list" class="timeline_comments_list">
+                                <div class="timeline_comments_loading">
+                                    <i class="fa fa-spinner fa-spin"></i>
+                                    Loading comments...
+                                </div>
+                            </div>
+                            <div class="timeline_add_comment">
+                                <form id="timeline_comment_form">
+                                    <input type="hidden" id="comment_photo_id" value="">
+                                    <div class="form-group">
+                                        <label for="timeline_comment">
+                                            Add Comment
+                                        </label>
+                                        <textarea id="timeline_comment" name="comment" class="form-control" rows="4" placeholder="Write a comment..."></textarea>
+                                    </div>
+                                    <div class="text-right">
+                                        <button type="submit" id="add_comment_btn" class="btn btn-primary">
+                                            <i class="fa fa-paper-plane"></i>
+                                            Add Comment
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

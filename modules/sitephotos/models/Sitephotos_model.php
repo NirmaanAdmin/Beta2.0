@@ -72,9 +72,12 @@ class Sitephotos_model extends App_Model
 
     public function get_timeline_detail($id)
     {
-        $this->db->where('id', $id);
+        $this->db->where('id', (int) $id);
         $timeline = $this->db->get(db_prefix() . 'site_timeline_photos')->row();
-        $timeline->uploaded_on = !empty($timeline->uploaded_at) ? date('d M, Y h:i A',strtotime($timeline->uploaded_at)) : '';
+        if (!$timeline) {
+            return null;
+        }
+        $timeline->uploaded_on = !empty($timeline->uploaded_at) ? date('d M, Y h:i A', strtotime($timeline->uploaded_at)) : '';
         $timeline->uploaded_by_name = !empty($timeline->uploaded_by) ? get_last_action_full_name($timeline->uploaded_by) : '';
         return $timeline;
     }
@@ -123,6 +126,63 @@ class Sitephotos_model extends App_Model
         }
         $this->db->where_in('id', $ids);
         $this->db->delete(db_prefix() . 'site_timeline_photos');
+        return $this->db->affected_rows() > 0;
+    }
+
+    public function get_timeline_comments($photo_id)
+    {
+        $current_staff_id = (int) get_staff_user_id();
+        $this->db->select('
+            c.id,
+            c.timeline_photo_id,
+            c.staffid,
+            c.comment,
+            c.created_at,
+            c.updated_at,
+            s.firstname,
+            s.lastname
+        ');
+        $this->db->from(db_prefix() . 'site_timeline_photo_comments c');
+        $this->db->join(db_prefix() . 'staff s', 's.staffid = c.staffid', 'left');
+        $this->db->where('c.timeline_photo_id', (int) $photo_id);
+        $this->db->order_by('c.created_at', 'ASC');
+        $comments = $this->db->get()->result();
+        foreach ($comments as &$comment) {
+            $comment->staff_name = trim($comment->firstname . ' ' . $comment->lastname);
+            $comment->can_edit = ((int) $comment->staffid === $current_staff_id);
+            $comment->can_delete = ((int) $comment->staffid === $current_staff_id);
+            $comment->created_on = !empty($comment->created_at) ? date('d M, Y h:i A', strtotime($comment->created_at)) : '';
+            $comment->updated_on = !empty($comment->updated_at) ? date('d M, Y h:i A', strtotime($comment->updated_at)) : '';
+        }
+        return $comments;
+    }
+
+    public function get_timeline_comment($comment_id)
+    {
+        $this->db->where('id', (int) $comment_id);
+        return $this->db->get(db_prefix() . 'site_timeline_photo_comments')->row();
+    }
+
+    public function add_timeline_comment($data)
+    {
+        $this->db->insert(db_prefix() . 'site_timeline_photo_comments', $data);
+        if ($this->db->affected_rows() > 0) {
+            return $this->db->insert_id();
+        }
+        return false;
+    }
+
+    public function update_timeline_comment($comment_id, $data)
+    {
+        $this->db->where('id', (int) $comment_id);
+        $this->db->update(db_prefix() . 'site_timeline_photo_comments', $data);
+        return $this->db->affected_rows() >= 0;
+    }
+
+    public function delete_timeline_comment($comment_id)
+    {
+        $this->db->where('id', (int) $comment_id);
+        $this->db->delete(db_prefix() . 'site_timeline_photo_comments');
         return $this->db->affected_rows() > 0;
     }
 }
