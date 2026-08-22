@@ -19005,116 +19005,74 @@ class purchase extends AdminController
         $start = $this->input->get('start');
         $end = $this->input->get('end');
 
-        // Fetch activities with their lookahead data
-        $this->db->select('
-        tbl_wklookahead_activities.*,
-        tbl_wklookahead.week_start_date,
-        tbl_wklookahead.id as lookahead_id
-    ');
-        $this->db->from(db_prefix() . '_wklookahead_activities');
-        $this->db->join(
-            db_prefix() . '_wklookahead',
-            db_prefix() . '_wklookahead.id = ' . db_prefix() . '_wklookahead_activities.lookahead_id',
-            'left'
-        );
-
-        // Optional: filter by date range if needed
-        // Since we need to calculate dates from day columns, we'll filter in PHP
-        $activities = $this->db->get()->result_array();
+        // Clean the dates - remove time component if exists
+        $start = date('Y-m-d', strtotime($start));
+        $end = date('Y-m-d', strtotime($end));
 
         $calendar_events = [];
 
-        foreach ($activities as $activity) {
-            // Calculate the actual start date based on week_start_date and day columns
-            $week_start = $activity['week_start_date'];
+        $this->db->select(
+            db_prefix() . 'tasks.name as title,' .
+                'id,' .
+                tasks_rel_name_select_query() . ' as rel_name,' .
+                'rel_id,status,milestone,' .
+                'CASE WHEN duedate IS NULL THEN startdate ELSE duedate END as date',
+            false
+        );
+        $this->db->from(db_prefix() . 'tasks');
 
-            // Find which day column has value 1 (the activity start day)
-            $start_day = null;
-            for ($i = 1; $i <= 21; $i++) {
-                $day_column = 'day_' . $i;
-                if (isset($activity[$day_column]) && $activity[$day_column] == 1) {
-                    $start_day = $i;
-                    break;
-                }
+        // Updated WHERE clause with DATE() function
+        $this->db->where(
+            "CASE WHEN duedate IS NULL 
+         THEN (DATE(startdate) BETWEEN '$start' AND '$end') 
+         ELSE (DATE(duedate) BETWEEN '$start' AND '$end') END",
+            null,
+            false
+        );
+       
+
+        $tasks = $this->db->get()->result_array();
+
+        foreach ($tasks as $task) {
+            $rel_showcase = '';
+
+            if (!empty($task['rel_id'])) {
+                $rel_showcase = ' (' . $task['rel_name'] . ')';
             }
 
-            // If no day is set, skip this activity
-            if ($start_day === null) {
-                continue;
+            // Truncate task name for display
+            $name = mb_substr($task['title'], 0, 60);
+            if (strlen($task['title']) > 60) {
+                $name .= '...';
             }
 
-            // Calculate the actual start date
-            $start_timestamp = strtotime($week_start);
-            $activity_timestamp = strtotime('+' . ($start_day - 1) . ' days', $start_timestamp);
-            $activity_start_date = date('Y-m-d', $activity_timestamp);
+            // Get task status color
+            $status = get_task_status_by_id($task['status']);
+            $color = $status['color'] ?? '#6c757d'; // Default gray if status not found
 
-            // Filter by date range
-            if ($activity_start_date < $start || $activity_start_date > $end) {
-                continue;
-            }
-
-            // Get vendor name if available
-            $vendor_name = '';
-            if (!empty($activity['vendor_id'])) {
-                $vendor = $this->db->where('userid', $activity['vendor_id'])
-                    ->get(db_prefix() . 'clients')
-                    ->row();
-                if ($vendor) {
-                    $vendor_name = $vendor->company;
-                }
-            }
-
-            // Prepare event title
-            $title = $activity['activity'];
-            if (!empty($vendor_name)) {
-                $title .= ' - ' . $vendor_name;
-            }
-            if (!empty($activity['percentage'])) {
-                $title .= ' (' . $activity['percentage'] . '%)';
-            }
-
-            // Set color based on completion percentage
-            $backgroundColor = '#3a87ad'; // Default blue
-            $borderColor = '#3a87ad';
-
-            if (!empty($activity['percentage'])) {
-                if ($activity['percentage'] >= 100) {
-                    $backgroundColor = '#28a745'; // Green for complete
-                    $borderColor = '#28a745';
-                } elseif ($activity['percentage'] >= 50) {
-                    $backgroundColor = '#ffc107'; // Yellow for in progress
-                    $borderColor = '#ffc107';
-                } else {
-                    $backgroundColor = '#dc3545'; // Red for not started
-                    $borderColor = '#dc3545';
-                }
-            }
-
-            // Prepare event data
-            $event = [
-                'id' => $activity['id'],
-                'title' => $title,
-                'start' => $activity_start_date,
-                'backgroundColor' => $backgroundColor,
-                'borderColor' => $borderColor,
+            // Build task event
+            $task_event = [
+                'id' => 'task_' . $task['id'],
+                'title' => $name,
+                'start' => $task['date'],
+                'backgroundColor' => $color,
+                'borderColor' => $color,
                 'allDay' => true,
-                // Add custom data for edit modal
-                'activity_id' => $activity['id'],
-                'activity_name' => $activity['activity'],
-                'vendor_id' => $activity['vendor_id'],
-                'vendor_name' => $vendor_name,
-                'due_date' => $activity['due_date'],
-                'percentage' => $activity['percentage'],
-                'lookahead_id' => $activity['lookahead_id'],
-                'start_date' => $activity_start_date,
+                'className' => $task['milestone'] ? ['milestone-' . $task['milestone']] : [],
+                'tooltip' => _l('calendar_task') . ' - ' . $task['title'] . $rel_showcase,
+                // Custom data for task modal
+                'task_id' => $task['id'],
+                'task_name' => $task['title'],
+                'rel_id' => $task['rel_id'],
+                'rel_name' => $task['rel_name'],
+                'status' => $task['status'],
+                'milestone' => $task['milestone'],
+                'date' => $task['date'],
+                'onclick' => 'init_task_modal(' . $task['id'] . '); return false',
+                'url' => '#'
             ];
 
-            // Add due date if exists
-            if (!empty($activity['due_date'])) {
-                $event['end'] = $activity['due_date'];
-            }
-
-            $calendar_events[] = $event;
+            $calendar_events[] = $task_event;
         }
 
         echo json_encode($calendar_events);

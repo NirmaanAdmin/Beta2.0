@@ -85,29 +85,57 @@
 
                   <div class="row mbot15">
                     <div class="col-md-12">
-                      <button type="button"
-                        class="btn btn-primary"
-                        data-toggle="modal"
-                        data-target="#newActivityModal">
-                        <i class="fa fa-plus"></i>
-                        <?php echo _l('New Activity'); ?>
-                      </button>
+                      <a href="#" onclick="new_task(<?php if ($this->input->get('project_id')) {
+                                                      echo "'" . admin_url('tasks/task?rel_id=' . $this->input->get('project_id') . '&rel_type=project') . "'";
+                                                    } ?>); return false;" class="btn btn-primary pull-left new">
+                        <i class="fa-regular fa-plus tw-mr-1"></i>
+                        <?php echo _l('new_task'); ?>
+                      </a>
                     </div>
                   </div>
 
                   <div class="clearfix"></div>
-                  <table class="dt-table-loading table table-table_wklookahead_list">
-                    <thead>
-                      <tr>
-                        <th><?php echo _l('Activity'); ?></th>
-                        <th><?php echo _l('Vendor'); ?></th>
-                        <th><?php echo _l('Start Date'); ?></th>
-                        <th><?php echo _l('Due Date'); ?></th>
-                        <th><?php echo _l('Complete'); ?></th>
-                      </tr>
-                    </thead>
-                    <tbody></tbody>
-                  </table>
+                  <?php
+
+                  defined('BASEPATH') or exit('No direct script access allowed');
+
+                  $table_data = [
+                    _l('the_number_sign'),
+                    _l('tasks_dt_name'),
+                    _l('task_status'),
+                    _l('tasks_dt_datestart'),
+                    [
+                      'name'     => _l('task_duedate'),
+                      'th_attrs' => ['class' => 'duedate'],
+                    ],
+                    _l('task_assigned'),
+                    _l('tags'),
+                    _l('tasks_list_priority'),
+                  ];
+
+                  array_unshift($table_data, [
+                    'name'     => '<span class="hide"> - </span><div class="checkbox mass_select_all_wrap"><input type="checkbox" id="mass_select_all" data-to-table="tasks"><label></label></div>',
+                    'th_attrs' => ['class' => (isset($bulk_actions) ? '' : 'not_visible')],
+                  ]);
+
+                  $custom_fields = get_custom_fields('tasks', [
+                    'show_on_table' => 1,
+                  ]);
+
+                  foreach ($custom_fields as $field) {
+                    array_push($table_data, [
+                      'name'     => $field['name'],
+                      'th_attrs' => ['data-type' => $field['type'], 'data-custom-field' => 1],
+                    ]);
+                  }
+
+                  $table_data = hooks()->apply_filters('tasks_table_columns', $table_data);
+
+                  render_datatable($table_data, 'tasks', ['number-index-' . isset($bulk_actions) ? 2 : 1], [
+                    'data-last-order-identifier' => 'tasks',
+                    'data-default-order'         => get_table_last_order('tasks'),
+                    'id' => $table_id ?? 'tasks'
+                  ]); ?>
                 </div>
               </div>
 
