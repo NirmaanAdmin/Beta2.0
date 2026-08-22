@@ -405,9 +405,11 @@
 
       // Function to initialize the calendar
       window.initializeCalendar = function() {
+
         var calendar_selector = $('#calendars');
 
         if (calendar_selector.length > 0) {
+
           // Destroy existing instance if any
           if (calendarInstance) {
             calendarInstance.destroy();
@@ -421,94 +423,182 @@
           }
 
           var calendar_settings = {
+
             locale: app.locale,
+
             headerToolbar: {
               left: 'prev,next today',
               center: 'title',
               right: 'dayGridMonth,timeGridWeek,timeGridDay'
             },
+
             editable: false,
+
             dayMaxEventRows: parseInt(app.options.calendar_events_limit) + 1,
+
             direction: (isRTL == 'true' ? 'rtl' : 'ltr'),
+
             eventStartEditable: false,
+
             firstDay: parseInt(app.options.calendar_first_day),
+
             initialView: app.options.default_view_calendar,
+
             timeZone: app.options.timezone,
+
             loading: function(isLoading) {
-              !isLoading ? $('.dt-loader').addClass('hide') : $('.dt-loader').removeClass('hide');
+              !isLoading
+                ?
+                $('.dt-loader').addClass('hide') :
+                $('.dt-loader').removeClass('hide');
             },
+
+            /*
+             * FETCH TASK EVENTS
+             */
             events: function(info, successCallback, failureCallback) {
-              // Fetch events from your controller
+
               $.ajax({
                 url: admin_url + 'purchase/get_calendar_events',
                 type: 'GET',
                 dataType: 'json',
+
                 data: {
                   start: info.startStr,
                   end: info.endStr
                 },
+
                 success: function(data) {
+
+                  console.log('Calendar events:', data);
+
                   successCallback(data);
                 },
+
                 error: function(xhr, status, error) {
-                  console.error('Error fetching calendar events:', error);
+
+                  console.error(
+                    'Error fetching calendar events:',
+                    error
+                  );
+
+                  console.error(
+                    'Response:',
+                    xhr.responseText
+                  );
+
                   failureCallback(error);
                 }
               });
+            },
+
+            /*
+             * TASK EVENT CLICK
+             */
+            eventClick: function(info) {
+
+              // Prevent default browser behaviour
+              info.jsEvent.preventDefault();
+
+              var event = info.event;
+
+              // Get task ID from extendedProps
+              var taskId = event.extendedProps.task_id;
+
+              console.log('Clicked task:', taskId);
+
+              if (!taskId) {
+                console.error('Task ID not found in event:', event);
+                return;
+              }
+
+              // Open Perfex task modal
+              if (typeof init_task_modal === 'function') {
+
+                init_task_modal(taskId);
+
+              } else {
+
+                console.error(
+                  'init_task_modal() function is not available'
+                );
+              }
+
+              return false;
             }
+
           };
 
           try {
-            calendarInstance = new FullCalendar.Calendar(calendar_selector[0], calendar_settings);
+
+            calendarInstance = new FullCalendar.Calendar(
+              calendar_selector[0],
+              calendar_settings
+            );
+
             calendarInstance.render();
+
             console.log('Calendar rendered successfully');
+
           } catch (error) {
-            console.error('Error rendering calendar:', error);
+
+            console.error(
+              'Error rendering calendar:',
+              error
+            );
           }
         }
       };
 
-      // Initialize calendar when DOM is ready if calendar tab is active
+
+      /*
+       * INITIALIZE WHEN DOM IS READY
+       */
       $(document).ready(function() {
-        // Check if calendar tab is active by default
+
         if ($('#tab_calendar').hasClass('active')) {
-          setTimeout(initializeCalendar, 300);
+
+          setTimeout(
+            initializeCalendar,
+            300
+          );
         }
+
       });
 
-      // Also initialize when modal or other elements might affect visibility
+
+      /*
+       * INITIALIZE WHEN MODAL IS SHOWN
+       */
       $(document).on('shown.bs.modal', function() {
+
         if ($('#tab_calendar').hasClass('active')) {
-          setTimeout(initializeCalendar, 300);
+
+          setTimeout(
+            initializeCalendar,
+            300
+          );
         }
+
       });
 
-      // Trigger calendar initialization when window is fully loaded
+
+      /*
+       * INITIALIZE WHEN WINDOW IS LOADED
+       */
       $(window).on('load', function() {
+
         if ($('#tab_calendar').hasClass('active')) {
-          setTimeout(initializeCalendar, 400);
+
+          setTimeout(
+            initializeCalendar,
+            400
+          );
         }
+
       });
 
     })(jQuery);
-
-    // In your calendar initialization
-    $('#calendar').fullCalendar({
-      // ... other options
-      eventClick: function(event) {
-        // Open the edit modal with the event data
-        $('#newActivityModal').modal('show');
-
-        // Populate the modal fields
-        $('#activity_id').val(event.activity_id);
-        $('#activity').val(event.activity_name);
-        $('#vendor_id').val(event.vendor_id).selectpicker('refresh');
-        $('#due_date').val(event.due_date);
-        $('#percentage').val(event.percentage);
-        $('#start_date').val(event.start_date);
-        $('#lookahead_id').val(event.lookahead_id);
-      }
-    });
   </script>
   </body>
 
