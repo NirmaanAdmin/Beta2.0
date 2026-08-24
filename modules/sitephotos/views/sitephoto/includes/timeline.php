@@ -3,6 +3,9 @@
 <link href="<?php echo module_dir_url(SITEPHOTOS_MODULE_NAME, 'assets/css/timeline.css'); ?>?v=<?php echo SITEPHOTO_REVISION; ?>" rel="stylesheet" type="text/css"/>
 
 <div class="row mtop20">
+    <?php
+    $areas = get_area_project_wise();
+    ?>
     <div class="col-md-3">
         <?php echo render_input('timeline_search', '', '', '', ['placeholder' => 'Search photos...']); ?>
     </div>
@@ -22,6 +25,21 @@
     </div>
     <div class="col-md-2 form-group custom_range_field hide">
         <?php echo render_date_input('timeline_to_date', '', '', ['placeholder' => 'To Date']); ?>
+    </div>
+    <div class="col-md-3 form-group">
+        <?php
+        echo render_select('timeline_area[]', $areas, array('id', 'area_name'), '', array(), array('data-width' => '100%', 'data-none-selected-text' => _l('Areas'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
+        ?>
+    </div>
+    <div class="col-md-3 form-group">
+        <?php
+        echo render_select('timeline_rfi[]', $rfis, array('ticketid', 'subject'), '', array(), array('data-width' => '100%', 'data-none-selected-text' => _l('RFI'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
+        ?>
+    </div>
+    <div class="col-md-3 form-group">
+        <?php
+        echo render_select('timeline_drawing[]', $drawings, array('id', 'name'), '', array(), array('data-width' => '100%', 'data-none-selected-text' => _l('Drawings'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
+        ?>
     </div>
     <div class="col-md-2 form-group">
         <button type="button" class="btn btn-primary" id="upload_timeline_photos">
@@ -80,6 +98,25 @@
                             <?php echo render_input('title', _l('Title'), '', 'text', array('placeholder' => 'Photo title')); ?>
                         </div>
 
+                        <div class="col-md-6">
+                            <?php
+                            echo render_select('area[]', $areas, array('id', 'area_name'), 'Area', array(), array('data-width' => '100%', 'data-none-selected-text' => _l('Areas'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
+                            ?>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <?php
+                            echo render_select('rfi[]', $rfis, array('ticketid', 'subject'), 'RFI', array(), array('data-width' => '100%', 'data-none-selected-text' => _l('RFI'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
+                            ?>
+                        </div>
+                        <div class="col-md-6">
+                            <?php
+                            echo render_select('drawing[]', $drawings, array('id', 'name'), 'Drawing', array(), array('data-width' => '100%', 'data-none-selected-text' => _l('Drawings'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
+                            ?>
+                        </div>
+                    </div>
+                    <div class="row mtop15">
                         <div class="col-md-12">
                             <?php echo render_textarea('description', _l('Description'), '', array('rows' => 3)); ?>
                         </div>
@@ -109,7 +146,7 @@
                         <h4>File Information</h4>
                         <hr>
                         <form id="edit_form">
-                            <input type="hidden" id="edit_id">
+                            <input type="hidden" name="edit_id" id="edit_id">
 
                             <div class="mtop10">
                                 <?php echo render_input('edit_title', _l('Title'), '', 'text', array('placeholder' => 'Photo title')); ?>
@@ -117,6 +154,24 @@
 
                             <div class="mtop15">
                                 <?php echo render_textarea('edit_description', _l('Description'), '', array('rows' => 5)); ?>
+                            </div>
+
+                            <div class="mtop15">
+                                <?php
+                                echo render_select('edit_area[]', $areas, array('id', 'area_name'), 'Area', array(), array('data-width' => '100%', 'data-none-selected-text' => _l('Areas'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
+                                ?>
+                            </div>
+
+                            <div class="mtop15">
+                                <?php
+                                echo render_select('edit_rfi[]', $rfis, array('ticketid', 'subject'), 'RFI', array(), array('data-width' => '100%', 'data-none-selected-text' => _l('RFI'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
+                                ?>
+                            </div>
+
+                            <div class="mtop15">
+                                <?php
+                                echo render_select('edit_drawing[]', $drawings, array('id', 'name'), 'Drawing', array(), array('data-width' => '100%', 'data-none-selected-text' => _l('Drawings'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
+                                ?>
                             </div>
 
                             <div class="mtop15 file_meta">

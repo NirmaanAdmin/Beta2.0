@@ -13,11 +13,33 @@ class Sitephotos_model extends App_Model
         $default_project = get_default_project();
         $upload_path = SITEPHOTOS_TIMELINE_UPLOAD_PATH;
         if (!is_dir($upload_path)) {
-            mkdir($upload_path, 0755, true);
+            if (!mkdir($upload_path, 0755, true)) {
+                return 0;
+            }
+        }
+        $areas = $this->input->post('area');
+        $rfis = $this->input->post('rfi');
+        $drawings = $this->input->post('drawing');
+        $areas = is_array($areas) ? $areas : [];
+        $rfis = is_array($rfis) ? $rfis : [];
+        $drawings = is_array($drawings) ? $drawings : [];
+        $area_value = !empty($areas) ? implode(',', array_map('intval', $areas)) : null;
+        $rfi_value = !empty($rfis) ? implode(',', array_map('intval', $rfis)) : null;
+        $drawing_value = !empty($drawings) ? implode(',', array_map('intval', $drawings)) : null;
+        $title = $this->input->post('title', true);
+        $description = $this->input->post('description', true);
+
+        if (!isset($_FILES['files']) || !isset($_FILES['files']['name']) || empty($_FILES['files']['name'])
+        ) {
+            return 0;
         }
         $count = count($_FILES['files']['name']);
         $uploaded = 0;
         for ($i = 0; $i < $count; $i++) {
+            if (empty($_FILES['files']['name'][$i]) || $_FILES['files']['error'][$i] != UPLOAD_ERR_OK
+            ) {
+                continue;
+            }
             $_FILES['single_file'] = [
                 'name'     => $_FILES['files']['name'][$i],
                 'type'     => $_FILES['files']['type'][$i],
@@ -35,16 +57,23 @@ class Sitephotos_model extends App_Model
             $this->upload->initialize($config);
             if ($this->upload->do_upload('single_file')) {
                 $file = $this->upload->data();
-                $this->db->insert(db_prefix() . 'site_timeline_photos', [
+                $photo_title = !empty($title) ? $title : $file['orig_name'];
+                $insert_data = [
                     'file_name'     => $file['file_name'],
                     'original_name' => $file['orig_name'],
-                    'title'         => $this->input->post('title', true) ?: $file['orig_name'],
-                    'description'   => $this->input->post('description', true),
+                    'title'         => $photo_title,
+                    'description'   => !empty($description) ? $description : null,
+                    'area'          => $area_value,
+                    'rfi'           => $rfi_value,
+                    'drawing'       => $drawing_value,
+                    'project_id'    => $default_project,
                     'uploaded_by'   => get_staff_user_id(),
                     'uploaded_at'   => date('Y-m-d H:i:s'),
-                    'project_id'    => $default_project,
-                ]);
-                $uploaded++;
+                ];
+                $this->db->insert(db_prefix() . 'site_timeline_photos', $insert_data);
+                if ($this->db->affected_rows() > 0) {
+                    $uploaded++;
+                }
             }
         }
         return $uploaded;
@@ -55,17 +84,40 @@ class Sitephotos_model extends App_Model
         $default_project = get_default_project();
         $data = $this->input->post();
         $search = !empty($data['search']) ? $data['search'] : NULL;
+        $areas = !empty($data['area']) && is_array($data['area']) ? $data['area'] : [];
+        $rfis = !empty($data['rfi']) && is_array($data['rfi']) ? $data['rfi'] : [];
+        $drawings = !empty($data['drawing']) && is_array($data['drawing']) ? $data['drawing'] : [];
+
+        $this->db->where('project_id', $default_project);
         if (!empty($search)) {
             $this->db->group_start()
             ->like('title', $search)
             ->or_like('original_name', $search)
             ->group_end();
         }
-        $this->db->where('project_id', $default_project);
-        return $this->db
-        ->order_by('uploaded_at', 'DESC')
-        ->get(db_prefix() . 'site_timeline_photos')
-        ->result_array();
+        if (!empty($areas)) {
+            $this->db->group_start();
+            foreach ($areas as $area) {
+                $this->db->or_where('FIND_IN_SET(' . $this->db->escape($area) . ', area) > 0', NULL, FALSE);
+            }
+            $this->db->group_end();
+        }
+        if (!empty($rfis)) {
+            $this->db->group_start();
+            foreach ($rfis as $rfi) {
+                $this->db->or_where('FIND_IN_SET(' . $this->db->escape($rfi) . ', rfi) > 0', NULL, FALSE);
+            }
+            $this->db->group_end();
+        }
+        if (!empty($drawings)) {
+            $this->db->group_start();
+            foreach ($drawings as $drawing) {
+                $this->db->or_where('FIND_IN_SET(' . $this->db->escape($drawing) . ', drawing) > 0', NULL, FALSE);
+            }
+            $this->db->group_end();
+        }
+        $this->db->order_by('uploaded_at', 'DESC');
+        return $this->db->get(db_prefix() . 'site_timeline_photos')->result_array();
     }
 
     public function get_timeline($id)
@@ -89,14 +141,19 @@ class Sitephotos_model extends App_Model
     public function update_timeline($id)
     {
         $input = $this->input->post();
-        $data['title'] = !empty($input['title']) ? $input['title'] : NULL;
-        $data['description'] = !empty($input['description']) ? $input['description'] : NULL;
+        $areas = !empty($input['edit_area']) && is_array($input['edit_area']) ? $input['edit_area'] : [];
+        $rfis = !empty($input['edit_rfi']) && is_array($input['edit_rfi']) ? $input['edit_rfi'] : [];
+        $drawings = !empty($input['edit_drawing']) && is_array($input['edit_drawing']) ? $input['edit_drawing'] : [];
+        $data = [
+            'title' => !empty($input['edit_title']) ? $input['edit_title'] : NULL,
+            'description' => !empty($input['edit_description']) ? $input['edit_description'] : NULL,
+            'area' => !empty($areas) ? implode(',', $areas) : NULL,
+            'rfi' => !empty($rfis) ? implode(',', $rfis) : NULL,
+            'drawing' => !empty($drawings) ? implode(',', $drawings) : NULL,
+        ];
         $this->db->where('id', $id);
         $this->db->update(db_prefix() . 'site_timeline_photos', $data);
-        if ($this->db->affected_rows() > 0) {
-            return true;
-        }
-        return false;
+        return $this->db->affected_rows() > 0;
     }
 
     public function delete_timeline($ids)
@@ -188,6 +245,15 @@ class Sitephotos_model extends App_Model
         $this->db->where('id', (int) $comment_id);
         $this->db->delete(db_prefix() . 'site_timeline_photo_comments');
         return $this->db->affected_rows() > 0;
+    }
+
+    public function get_rfis()
+    {
+        $default_project = get_default_project();
+        $this->db->select('ticketid, subject');
+        $this->db->where('project_id', $default_project);
+        $this->db->order_by('ticketid', 'DESC');
+        return $this->db->get(db_prefix() . 'tickets')->result_array();
     }
 }
 

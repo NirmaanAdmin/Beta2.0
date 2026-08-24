@@ -25,6 +25,12 @@ class Sitephotos extends AdminController
         $data['tab'][] = 'recycle_bin';
         $data['tabs']['view'] = 'sitephoto/includes/' . $group;
 
+        if($group == 'timeline') {
+            $this->load->model('tickets_model');
+            $data['rfis'] = $this->sitephotos_model->get_rfis();
+            $data['drawings'] = $this->tickets_model->get_dms_items();
+        }
+
         $this->load->view('sitephoto/manage_setting', $data);
     }
 
@@ -79,9 +85,10 @@ class Sitephotos extends AdminController
         ]);
     }
 
-    public function update_timeline($id)
+    public function update_timeline()
     {
-        $updated = $this->sitephotos_model->update_timeline((int) $id);
+        $id = (int) $this->input->post('edit_id');
+        $updated = $this->sitephotos_model->update_timeline($id);
         echo json_encode([
             'success' => $updated,
             'message' => $updated ? 'Photo information updated.' : 'Unable to update photo.',

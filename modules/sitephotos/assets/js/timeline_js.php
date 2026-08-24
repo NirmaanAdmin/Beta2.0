@@ -11,7 +11,10 @@ function loadPhotos() {
         search: $('#timeline_search').val(),
         interval: $('#timeline_interval').val(),
         from_date: $('#timeline_from_date').val(),
-        to_date: $('#timeline_to_date').val()
+        to_date: $('#timeline_to_date').val(),
+        area: $('select[name="timeline_area[]"]').val() || [],
+        rfi: $('select[name="timeline_rfi[]"]').val() || [],
+        drawing: $('select[name="timeline_drawing[]"]').val() || []
     }, function(response) {
         $('#gallery').empty();
         if (response.count > 0) {
@@ -38,15 +41,20 @@ $(document).on('click', '.timeline_photo', function(e) {
         }
         var photo = response.data;
         $('#view_title').text(photo.title || photo.original_name);
-        $('#view_image').attr('src', <?= json_encode(SITEPHOTOS_TIMELINE_URL_PATH); ?> +
-            encodeURIComponent(photo.file_name));
+        $('#view_image').attr('src', <?= json_encode(SITEPHOTOS_TIMELINE_URL_PATH); ?> + encodeURIComponent(photo.file_name));
         $('#edit_id').val(photo.id);
         $('#edit_title').val(photo.title || '');
         $('#edit_description').val(photo.description || '');
         $('#uploaded_on').text(photo.uploaded_on || '-');
         $('#uploaded_by_name').text(photo.uploaded_by_name || '-');
-        $('#single_download').attr('href', admin_url + 'sitephotos/download_timeline/'+photo.id);
+        $('#single_download').attr('href', admin_url + 'sitephotos/download_timeline/' + photo.id);
         $('#single_delete').attr('data-id', photo.id);
+        var areas = photo.area ? String(photo.area).split(',') : [];
+        $('select[name="edit_area[]"]').val(areas).selectpicker('refresh');
+        var rfis = photo.rfi ? String(photo.rfi).split(',') : [];
+        $('select[name="edit_rfi[]"]').val(rfis).selectpicker('refresh');
+        var drawings = photo.drawing ? String(photo.drawing).split(',') : [];
+        $('select[name="edit_drawing[]"]').val(drawings).selectpicker('refresh');
         $('#comment_photo_id').val(photo.id);
         $('#timeline_comment').val('');
         $('#view_modal').modal('show');
@@ -125,19 +133,30 @@ $('#upload_form').on('submit', function(e) {
 
 $('#edit_form').on('submit', function(e) {
     e.preventDefault();
-    var id = $('#edit_id').val();
-    $.post(admin_url + 'sitephotos/update_timeline/'+id, {
-        title: $('#edit_title').val(),
-        description: $('#edit_description').val()
-    }, function(response) {
-        if (response.success) {
-            alert_float('success', response.message);
-            $('#view_modal').modal('hide');
-            loadPhotos();
-        } else {
-            alert_float('danger', response.message);
+    var formData = new FormData(this);
+    if (<?php echo pur_check_csrf_protection(); ?>) {
+        formData.append(csrfData.token_name, csrfData.hash);
+    }
+    $.ajax({
+        url: admin_url + 'sitephotos/update_timeline/' + $('#edit_id').val(),
+        method: 'POST',
+        data: formData,
+        contentType: false,
+        processData: false,
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                $('#view_modal').modal('hide');
+                alert_float('success', response.message);
+                loadPhotos();
+            } else {
+                alert_float('danger', response.message || 'Update failed.');
+            }
+        },
+        error: function() {
+            alert_float('danger', 'Something went wrong while updating the photo.');
         }
-    }, 'json');
+    });
 });
 
 $(document).on('click', '#delete_selected', function(e) {
@@ -233,6 +252,10 @@ $(document).on('change', '#timeline_from_date, #timeline_to_date', function() {
     ) {
         loadPhotos();
     }
+});
+
+$(document).on('change', 'select[name="timeline_area[]"], select[name="timeline_rfi[]"], select[name="timeline_drawing[]"]', function() {
+    loadPhotos();
 });
 
 function escapeHtml(text) {
