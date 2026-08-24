@@ -10,6 +10,7 @@ class Sitephotos_model extends App_Model
 
     public function upload_timeline()
     {
+        $default_project = get_default_project();
         $upload_path = SITEPHOTOS_TIMELINE_UPLOAD_PATH;
         if (!is_dir($upload_path)) {
             mkdir($upload_path, 0755, true);
@@ -41,6 +42,7 @@ class Sitephotos_model extends App_Model
                     'description'   => $this->input->post('description', true),
                     'uploaded_by'   => get_staff_user_id(),
                     'uploaded_at'   => date('Y-m-d H:i:s'),
+                    'project_id'    => $default_project,
                 ]);
                 $uploaded++;
             }
@@ -50,6 +52,7 @@ class Sitephotos_model extends App_Model
 
     public function listing_timeline()
     {
+        $default_project = get_default_project();
         $data = $this->input->post();
         $search = !empty($data['search']) ? $data['search'] : NULL;
         if (!empty($search)) {
@@ -58,6 +61,7 @@ class Sitephotos_model extends App_Model
             ->or_like('original_name', $search)
             ->group_end();
         }
+        $this->db->where('project_id', $default_project);
         return $this->db
         ->order_by('uploaded_at', 'DESC')
         ->get(db_prefix() . 'site_timeline_photos')
