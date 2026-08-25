@@ -1841,4 +1841,10 @@ class Tickets_model extends App_Model
         }
         return $html;
     }
+
+    public function get_site_timeline_photos($ticketid)
+    {
+        $this->db->where("FIND_IN_SET({$ticketid}, rfi) > 0", null, false);
+        return $this->db->get(db_prefix() . 'site_timeline_photos')->result_array();
+    }
 }

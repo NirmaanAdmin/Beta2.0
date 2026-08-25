@@ -36,6 +36,7 @@ class Ticket_pdf extends App_pdf
             }
         }
         $this->reply_attachments  = $this->ci->tickets_model->get_ticket_reply_attachments($this->ticket->ticketid);
+        $this->ticket_site_timeline_photos = $this->ci->tickets_model->get_site_timeline_photos($this->ticket->ticketid);
 
         $this->SetTitle($this->subject);
     }
@@ -48,6 +49,7 @@ class Ticket_pdf extends App_pdf
             'ticket_replies' => $this->ticket_replies,
             'ticket_dms_items' => $this->ticket_dms_items,
             'reply_attachments' => $this->reply_attachments,
+            'ticket_site_timeline_photos' => $this->ticket_site_timeline_photos,
         ]);
 
         return $this->build();

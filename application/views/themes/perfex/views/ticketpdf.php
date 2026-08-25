@@ -109,6 +109,18 @@ if(!empty($ticket_dms_items)) {
         <td width="70%;">' . $dms_items_link . '</td>
     </tr>';
 }
+if(!empty($ticket_site_timeline_photos)) {
+    $dms_site_timeline_photos_link = '';
+    foreach ($ticket_site_timeline_photos as $spkey => $spvalue) {
+        $dms_site_timeline_photos_link .= $spkey > 0 ? '<br>' : '';
+        $dms_site_timeline_photos_link .= '<br><a href="'.site_url('download/file/site_timeline_photos/'.$spvalue['id']).'">'.$spvalue['original_name'].'</a>';
+    }
+    $tickethtml .= '
+    <tr style="font-size:13px;">
+        <td align="center" width="30%;"><b>' . _l('Site photos') . '</b></td>
+        <td width="70%;">' . $dms_site_timeline_photos_link . '</td>
+    </tr>';
+}
 $tickethtml .= '</tbody>';
 $tickethtml .= '</table>';
 

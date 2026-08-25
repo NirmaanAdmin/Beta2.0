@@ -319,6 +319,16 @@ class Download extends App_Controller
                 show_404();
             }
             $path = FCPATH . 'modules/drawing_management/uploads/files/' . $attachment->parent_id . '/' . $attachment->name;
+        } elseif ($folder_indicator == 'site_timeline_photos') {
+            if (!$attachmentid) {
+                show_404();
+            }
+            $this->db->where('id', $attachmentid);
+            $attachment = $this->db->get(db_prefix() . 'site_timeline_photos')->row();
+            if (!$attachment) {
+                show_404();
+            }
+            $path = FCPATH . 'modules/sitephotos/uploads/timeline/' . $attachment->file_name;
         } else {
             die('folder not specified');
         }
