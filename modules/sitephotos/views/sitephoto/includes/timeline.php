@@ -42,7 +42,7 @@
         ?>
     </div>
     <?php
-    if (has_permission('sitephotos_timeline', '', 'create') || is_admin()) { ?>
+    if (has_permission('sitephotos', '', 'create') || is_admin()) { ?>
         <div class="col-md-2 form-group">
             <button type="button" class="btn btn-primary" id="upload_timeline_photos">
                 <i class="fa fa-upload"></i> Upload Photos
@@ -60,7 +60,7 @@
                     <i class="fa fa-download"></i> Download
                 </button>
                 <?php
-                if (has_permission('sitephotos_timeline', '', 'delete') || is_admin()) { ?>
+                if (has_permission('sitephotos', '', 'delete') || is_admin()) { ?>
                     <button type="button" class="btn btn-danger btn-sm" id="delete_selected">
                         <i class="fa fa-trash"></i> Delete
                     </button>
@@ -192,14 +192,14 @@
 
                             <div class="mtop20">
                                 <?php
-                                if (has_permission('sitephotos_timeline', '', 'edit') || is_admin()) { ?>
+                                if (has_permission('sitephotos', '', 'edit') || is_admin()) { ?>
                                     <button type="submit" class="btn btn-primary">Save Changes</button>
                                 <?php } ?>
                                 <a id="single_download" href="#" class="btn btn-default">
                                     <i class="fa fa-download"></i> Download
                                 </a>
                                 <?php
-                                if (has_permission('sitephotos_timeline', '', 'delete') || is_admin()) { ?>
+                                if (has_permission('sitephotos', '', 'delete') || is_admin()) { ?>
                                     <a id="single_delete" href="#" class="btn btn-danger">
                                         <i class="fa fa-trash"></i> Delete
                                     </a>
