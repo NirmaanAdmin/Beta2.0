@@ -45,7 +45,7 @@ function sitephotos_permissions()
         'delete' => _l('permission_delete'),
     ];
 
-    register_staff_capabilities('sitephotos', $capabilities, _l('Sitephotos timeline'));
+    register_staff_capabilities('sitephotos', $capabilities, _l('Sitephotos'));
 }
 
 ?>
