@@ -41,11 +41,14 @@
         echo render_select('timeline_drawing[]', $drawings, array('id', 'name'), '', array(), array('data-width' => '100%', 'data-none-selected-text' => _l('Drawings'), 'multiple' => true, 'data-actions-box' => true), array(), 'no-mbot', '', false);
         ?>
     </div>
-    <div class="col-md-2 form-group">
-        <button type="button" class="btn btn-primary" id="upload_timeline_photos">
-            <i class="fa fa-upload"></i> Upload Photos
-        </button>
-    </div>
+    <?php
+    if (has_permission('sitephotos_timeline', '', 'create') || is_admin()) { ?>
+        <div class="col-md-2 form-group">
+            <button type="button" class="btn btn-primary" id="upload_timeline_photos">
+                <i class="fa fa-upload"></i> Upload Photos
+            </button>
+        </div>
+    <?php } ?>
 </div>
 
 <div class="row mtop20">
@@ -56,9 +59,12 @@
                 <button type="button" class="btn btn-default btn-sm" id="download_selected">
                     <i class="fa fa-download"></i> Download
                 </button>
-                <button type="button" class="btn btn-danger btn-sm" id="delete_selected">
-                    <i class="fa fa-trash"></i> Delete
-                </button>
+                <?php
+                if (has_permission('sitephotos_timeline', '', 'delete') || is_admin()) { ?>
+                    <button type="button" class="btn btn-danger btn-sm" id="delete_selected">
+                        <i class="fa fa-trash"></i> Delete
+                    </button>
+                <?php } ?>
             </div>
         </div>
     </div>
@@ -185,13 +191,19 @@
                             </div>
 
                             <div class="mtop20">
-                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                                <?php
+                                if (has_permission('sitephotos_timeline', '', 'edit') || is_admin()) { ?>
+                                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                                <?php } ?>
                                 <a id="single_download" href="#" class="btn btn-default">
                                     <i class="fa fa-download"></i> Download
                                 </a>
-                                <a id="single_delete" href="#" class="btn btn-danger">
-                                    <i class="fa fa-trash"></i> Delete
-                                </a>
+                                <?php
+                                if (has_permission('sitephotos_timeline', '', 'delete') || is_admin()) { ?>
+                                    <a id="single_delete" href="#" class="btn btn-danger">
+                                        <i class="fa fa-trash"></i> Delete
+                                    </a>
+                                <?php } ?>
                             </div>
                         </form>
                     </div>
