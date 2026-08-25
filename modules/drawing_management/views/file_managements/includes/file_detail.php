@@ -130,6 +130,23 @@
 						?>
 					</td>
 				</tr>
+				<tr>
+					<td class="text-nowrap"><?php echo _l('Site photos'); ?></td>
+					<td>
+						<?php
+						$dms_site_timeline_photos = get_dms_site_timeline_photos($item->id);
+						if (!empty($dms_site_timeline_photos)) {
+							foreach ($dms_site_timeline_photos as $spkey => $spvalue) { ?>
+								<a href="<?php echo site_url('download/file/site_timeline_photos/'.$spvalue['id']); ?>"><?php echo $spvalue['original_name']; ?></a>
+								<a href="<?php echo site_url('download/file/site_timeline_photos/'.$spvalue['id']); ?>" class="btn btn-primary btn-sm mleft5" title="Download">
+									<i class="fa fa-download"></i>
+								</a>
+								<br>
+						<?php }
+						}
+						?>
+					</td>
+				</tr>
 				<?php
 				if (strpos($item->name, '.pdf') !== false) { ?>
 					<tr>

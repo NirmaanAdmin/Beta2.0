@@ -921,3 +921,11 @@ function get_shared_by($item_id)
 	return '';
 
 }
+
+function get_dms_site_timeline_photos($id)
+{
+	$CI = &get_instance();
+	$CI->db->where('FIND_IN_SET(' . $CI->db->escape($id) . ', drawing) !=', 0, false);
+	$site_timeline_photos = $CI->db->get(db_prefix() . 'site_timeline_photos')->result_array();
+	return $site_timeline_photos;
+}
