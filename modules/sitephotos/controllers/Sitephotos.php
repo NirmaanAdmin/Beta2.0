@@ -27,8 +27,11 @@ class Sitephotos extends AdminController
 
         if($group == 'timeline') {
             $this->load->model('tickets_model');
+            $this->load->model('purchase/purchase_model');
             $data['rfis'] = $this->sitephotos_model->get_rfis();
             $data['drawings'] = $this->tickets_model->get_dms_items();
+            $data['staffs'] = $this->staff_model->get();
+            $data['vendors'] = $this->purchase_model->get_vendor('', db_prefix() . 'pur_contacts.id IS NOT NULL');
         }
 
         $this->load->view('sitephoto/manage_setting', $data);
@@ -280,6 +283,40 @@ class Sitephotos extends AdminController
                 'message' => 'Unable to delete comment.'
             ]);
         }
+    }
+
+    public function get_primary_vendors()
+    {
+        $response = '';
+        if (!empty($this->input->post('vendor'))) {
+            $data = $this->input->post('vendor');
+            $response = $this->sitephotos_model->get_primary_vendors($data);
+        }
+        echo $response;
+    }
+
+    public function share_timeline()
+    {
+        if ($this->input->post()) {
+            $data = $this->input->post();
+            $result = $this->sitephotos_model->share_timeline($data);
+            if ($result) {
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Email sent successfully.'
+                ]);
+            } else {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Failed to send email.'
+                ]);
+            }
+            return;
+        }
+        echo json_encode([
+            'success' => false,
+            'message' => 'Invalid request.'
+        ]);
     }
 }
 

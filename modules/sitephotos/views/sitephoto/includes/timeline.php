@@ -56,6 +56,9 @@
         <div class="selection_toolbar hide">
             <span><strong id="selected_count">0</strong> selected</span>
             <div>
+                <button type="button" class="btn btn-default btn-sm" id="email_selected">
+                    <i class="fa fa-envelope"></i> Email
+                </button>
                 <button type="button" class="btn btn-default btn-sm" id="download_selected">
                     <i class="fa fa-download"></i> Download
                 </button>
@@ -195,6 +198,9 @@
                                 if (has_permission('sitephotos', '', 'edit') || is_admin()) { ?>
                                     <button type="submit" class="btn btn-primary">Save Changes</button>
                                 <?php } ?>
+                                <a id="single_email" href="#" class="btn btn-default">
+                                    <i class="fa fa-envelope"></i> Email
+                                </a>
                                 <a id="single_download" href="#" class="btn btn-default">
                                     <i class="fa fa-download"></i> Download
                                 </a>
@@ -242,5 +248,47 @@
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+<div class="modal share_document" id="share_document_modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <?php echo form_open(admin_url('sitephotos/share_timeline'), array('id' => 'share_document_form')); ?>
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title add-title title1"><?php echo _l('Share file'); ?></h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <label for="share_to_staff" class="control-label clearfix"><?php echo _l('Share to') ?></label>
+                        <div class="radio-toolbar">
+                            <input type="radio" id="share_to_staff" name="share_to" value="staff" checked>
+                            <label for="share_to_staff"><i class="fa fa-user-circle"></i> <?php echo _l('Staff') ?></label>
+                            <input type="radio" id="share_to_vendor" name="share_to" value="vendor">
+                            <label for="share_to_vendor"><i class="fa fa-user-o"></i> <?php echo _l('Vendor') ?></label>
+                        </div>
+                    </div>
+                    <div class="col-md-12 staff_fr">
+                        <?php echo render_select('staff[]', $staffs, array('staffid', array('firstname', 'lastname')), '<small class="req text-danger">* </small>' . _l('Staff'), '', ['multiple' => 1, 'required' => true, 'data-actions-box' => true], [], '', '', false); ?>
+                    </div>
+                    <div class="col-md-12 vendor_fr hide">
+                        <?php echo render_select('vendor[]', $vendors, array('userid', 'company'), '<small class="req text-danger">* </small>' . _l('Vendor'), '', ['multiple' => 1, 'data-actions-box' => true], [], '', '', false); ?>
+                        <div class="vendor_basic_details"></div>
+                        <div class="col-md-12 vendor_contact"></div>
+                    </div>
+                    <div class="col-md-12">
+                        <?php echo render_textarea('message', 'Message'); ?>
+                    </div>
+                    <div id="share_document_ids"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo _l('close'); ?></button>
+                <button type="submit" class="btn btn-primary" id="share_document_submit"><i class="fa fa-paper-plane"></i> <?php echo _l('Share'); ?></button>
+            </div>
+        </div>
+        <?php echo form_close(); ?>
     </div>
 </div>

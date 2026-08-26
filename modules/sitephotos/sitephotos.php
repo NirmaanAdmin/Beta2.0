@@ -12,6 +12,7 @@ define('SITEPHOTO_REVISION', rand(100000, 999999));
 
 hooks()->add_action('admin_init', 'sitephotos_permissions');
 hooks()->add_action('admin_init', 'sitephoto_module_init_menu_items');
+register_merge_fields('sitephotos/merge_fields/share_timeline_merge_fields');
 
 register_activation_hook(SITEPHOTOS_MODULE_NAME, 'sitephotos_module_activation');
 

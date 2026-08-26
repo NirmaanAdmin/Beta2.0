@@ -255,6 +255,84 @@ class Sitephotos_model extends App_Model
         $this->db->order_by('ticketid', 'DESC');
         return $this->db->get(db_prefix() . 'tickets')->result_array();
     }
+
+    public function get_primary_vendors($data)
+    {
+        $response = '';
+        $this->db->select('id, email');
+        $this->db->where_in('userid', $data);
+        $pur_contacts = $this->db->get(db_prefix() . 'pur_contacts')->result_array();
+        if (!empty($pur_contacts)) {
+            $selected_contacts = array_column($pur_contacts, 'id');
+            $response = render_select('vendor_contact[]', $pur_contacts, array('id', 'email'), '' . _l('vendor_contact'), $selected_contacts, ['multiple' => 1, 'data-actions-box' => true], [], '', '', false);
+        }
+        return $response;
+    }
+
+    public function share_timeline($data)
+    {
+        if (empty($data['document_ids'])) {
+            return false;
+        }
+        $document_ids = array_map('intval', (array) $data['document_ids']);
+        $document_ids = array_filter($document_ids);
+        if (empty($document_ids)) {
+            return false;
+        }
+        $share_to = isset($data['share_to']) ? $data['share_to'] : '';
+        $message = isset($data['message']) ? $data['message'] : '';
+        $email_sent = false;
+        if ($share_to == 'staff') {
+            if (!empty($data['staff'])) {
+                $staff_ids = array_map('intval', (array) $data['staff']);
+                $staff_ids = array_filter($staff_ids);
+                $this->db->where_in('staffid', $staff_ids);
+                $staff_list = $this->db->get(db_prefix() . 'staff')->result_array();
+                foreach ($staff_list as $staff) {
+                    if (empty($staff['email'])) {
+                        continue;
+                    }
+                    foreach ($document_ids as $item_id) {
+                        $timeline = $this->get_timeline($item_id);
+                        $data_send_mail = new stdClass();
+                        $data_send_mail->email = trim($staff['email']);
+                        $data_send_mail->link = '<a href="'.site_url('download/file/site_timeline_photos/'.$timeline->id).'">' . $timeline->original_name . '</a>';
+                        $data_send_mail->message = $message;
+                        $template = mail_template('share_timeline', 'sitephotos', $data_send_mail);
+                        $template->send();
+                        $email_sent = true;
+                    }
+                }
+            }
+        }
+        if ($share_to == 'vendor') {
+            if (!empty($data['vendor_contact'])) {
+                $vendor_contacts = array_map('intval', (array) $data['vendor_contact']);
+                $vendor_contacts = array_filter($vendor_contacts);
+                $this->db->select('id, email');
+                $this->db->where_in('id', $vendor_contacts);
+                $contacts = $this->db->get(db_prefix() . 'pur_contacts')->result_array();
+                if (!empty($contacts)) {
+                    foreach ($contacts as $contact) {
+                        if (empty($contact['email'])) {
+                            continue;
+                        }
+                        foreach ($document_ids as $item_id) {
+                            $timeline = $this->get_timeline($item_id);
+                            $data_send_mail = new stdClass();
+                            $data_send_mail->email = trim($contact['email']);
+                            $data_send_mail->link = '<a href="'.site_url('download/file/site_timeline_photos/'.$timeline->id).'">' . $timeline->original_name . '</a>';
+                            $data_send_mail->message = $message;
+                            $template = mail_template('share_timeline', 'sitephotos', $data_send_mail);
+                            $template->send();
+                            $email_sent = true;
+                        }
+                    }
+                }
+            }
+        }
+        return $email_sent;
+    }
 }
 
 ?>

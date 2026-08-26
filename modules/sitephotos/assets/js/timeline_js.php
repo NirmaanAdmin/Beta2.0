@@ -48,6 +48,7 @@ $(document).on('click', '.timeline_photo', function(e) {
         $('#uploaded_on').text(photo.uploaded_on || '-');
         $('#uploaded_by_name').text(photo.uploaded_by_name || '-');
         $('#single_download').attr('href', admin_url + 'sitephotos/download_timeline/' + photo.id);
+        $('#single_email').attr('data-id', photo.id);
         $('#single_delete').attr('data-id', photo.id);
         var areas = photo.area ? String(photo.area).split(',') : [];
         $('select[name="edit_area[]"]').val(areas).selectpicker('refresh');
@@ -224,6 +225,166 @@ $(document).on('click', '#download_selected', function(e) {
             '_blank'
         );
     });
+});
+
+var shareDocumentIds = [];
+
+function setShareDocumentIds(ids) {
+    $('#share_document_ids').html('');
+    $.each(ids, function(index, id) {
+        if (id) {
+            $('#share_document_ids').append(
+                '<input type="hidden" name="document_ids[]" value="' + id + '">'
+            );
+        }
+    });
+}
+
+function openShareDocumentModal(ids) {
+    if (!ids || ids.length === 0) {
+        alert_float('warning', 'Please select at least one document.');
+        return;
+    }
+    shareDocumentIds = ids.slice();
+    setShareDocumentIds(shareDocumentIds);
+    $('#share_document_form select[name="staff[]"]').val([]).selectpicker('refresh');
+    $('#share_document_form select[name="vendor[]"]').val([]).selectpicker('refresh');
+    $('#share_document_form textarea[name="message"]').val('');
+    $('#share_to_staff').prop('checked', true).trigger('change');
+    $('#share_document_modal').modal('show');
+}
+
+$(document).on('click', '#email_selected', function(e) {
+    e.preventDefault();
+    if (typeof selected === 'undefined' || selected.length === 0) {
+        alert_float('warning', 'Please select at least one document.');
+        return;
+    }
+    openShareDocumentModal(selected);
+});
+
+$(document).on('click', '#single_email', function(e) {
+    e.preventDefault();
+    var id = $(this).attr('data-id');
+    if (!id) {
+        alert_float('danger', 'Photo ID is missing.');
+        return;
+    }
+    openShareDocumentModal([id]);
+});
+
+$(document).on('change', 'input[name="share_to"]', function(e) {
+    var val = $(this).val();
+    $('select[name="staff[]"]').removeAttr('required');
+    $('select[name="vendor[]"]').removeAttr('required');
+    $('.staff_fr').addClass('hide');
+    $('.vendor_fr').addClass('hide');
+    if (val === 'staff') {
+        $('.staff_fr').removeClass('hide');
+        $('select[name="staff[]"]').attr('required', 'required');
+    } else if (val === 'vendor') {
+        $('.vendor_fr').removeClass('hide');
+        $('select[name="vendor[]"]').attr('required', 'required');
+    }
+});
+
+$('input[name="share_to"]:checked').trigger('change');
+
+$(document).on('change', 'select[name="vendor[]"]', function(e) {
+    e.preventDefault();
+    var vendor = $(this).val();
+    if (!empty(vendor)) {
+        $.ajax({
+            url: admin_url + 'sitephotos/get_primary_vendors',
+            method: 'post',
+            data: {
+                vendor: vendor
+            }
+        }).done(function(response) {
+            if (!empty(response)) {
+                $('.vendor_contact').html(response);
+                init_selectpicker();
+            } else {
+                $('.vendor_contact').html('');
+            }
+        });
+    } else {
+        $('.vendor_contact').html('');
+    }
+});
+
+$(document).on('submit', '#share_document_form', function(e) {
+    e.preventDefault();
+    var form = $(this);
+    var button = $('#share_document_submit');
+    if (!shareDocumentIds || shareDocumentIds.length === 0) {
+        alert_float('danger', 'No document selected.');
+        return false;
+    }
+    setShareDocumentIds(shareDocumentIds);
+    var shareTo = form.find('input[name="share_to"]:checked').val();
+    if (shareTo === 'staff') {
+        var staff = form.find('select[name="staff[]"]').val();
+        if (!staff || staff.length === 0) {
+            alert_float('warning', 'Please select at least one staff member.');
+            return false;
+        }
+    }
+    if (shareTo === 'vendor') {
+        var vendor = form.find('select[name="vendor[]"]').val();
+        if (!vendor || vendor.length === 0) {
+            alert_float('warning', 'Please select at least one vendor.');
+            return false;
+        }
+    }
+    button.prop('disabled', true);
+    button.html('<i class="fa fa-spinner fa-spin"></i> Sharing...');
+    $.ajax({
+        url: form.attr('action'),
+        method: 'POST',
+        data: form.serialize(),
+        dataType: 'json',
+        success: function(response) {
+            if (typeof response === 'string') {
+                response = JSON.parse(response);
+            }
+            if (response.success) {
+                alert_float('success', response.message || 'Document(s) shared successfully.');
+                $('#share_document_modal').modal('hide');
+                form[0].reset();
+                form.find('select[name="staff[]"]').val([]).selectpicker('refresh');
+                form.find('select[name="vendor[]"]').val([]).selectpicker('refresh');
+                $('.vendor_contact').html('');
+                shareDocumentIds = [];
+                $('#share_document_ids').html('');
+            } else {
+                alert_float('danger', response.message || 'Unable to share document(s).');
+            }
+        },
+        error: function(xhr) {
+            var message = 'Something went wrong while sharing the document.';
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                message = xhr.responseJSON.message;
+            }
+            alert_float('danger', message);
+        },
+        complete: function() {
+            button.prop('disabled', false);
+            button.html('<i class="fa fa-paper-plane"></i> Share');
+        }
+    });
+    return false;
+});
+
+$('#share_document_modal').on('hidden.bs.modal', function() {
+    var form = $('#share_document_form');
+    form[0].reset();
+    shareDocumentIds = [];
+    $('#share_document_ids').html('');
+    form.find('select[name="staff[]"]').val([]).selectpicker('refresh');
+    form.find('select[name="vendor[]"]').val([]).selectpicker('refresh');
+    $('.vendor_contact').html('');
+    $('#share_to_staff').prop('checked', true).trigger('change');
 });
 
 var timer;
