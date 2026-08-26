@@ -29970,4 +29970,46 @@ class Purchase_model extends App_Model
         return app_pdf('wklookahead', module_dir_path(PURCHASE_MODULE_NAME, 'libraries/pdf/Wklookahead_pdf'), $wklookahead);
     }
 
+    public function get_wo_order_by_vendor($vendor)
+    {
+        $this->db->where('vendor', $vendor);
+        return $this->db->get(db_prefix() . 'wo_orders')->result_array();
+    }
+
+    public function get_payment_certificate_by_vendor($id)
+    {
+        $this->db->where('vendor', $id);
+        return $this->db->get(db_prefix() . 'payment_certificate')->result_array();
+    }
+
+
+
+public function get_pur_bills_by_vendor($vendor_id)
+{
+    $this->db->select('
+        ' . db_prefix() . 'pur_bills.id,
+        ' . db_prefix() . 'pur_bills.bill_number,
+        ' . db_prefix() . 'pur_bills.date_add,
+        ' . db_prefix() . 'pur_bills.total,
+        ' . db_prefix() . 'pur_bills.approve_status,
+        ' . db_prefix() . 'pur_bills.vendor,
+        ' . db_prefix() . 'pur_bills.pur_order,
+        ' . db_prefix() . 'pur_bills.wo_order
+    ');
+
+    $this->db->from(db_prefix() . 'pur_bills');
+
+    $this->db->where(
+        db_prefix() . 'pur_bills.vendor',
+        $vendor_id
+    );
+
+    $this->db->order_by(
+        db_prefix() . 'pur_bills.id',
+        'DESC'
+    );
+
+    return $this->db->get()->result_array();
+}
+
 }

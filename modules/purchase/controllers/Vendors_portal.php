@@ -896,34 +896,33 @@ class Vendors_portal extends App_Controller
         $this->view('vendor_portal/pur_order');
         $this->layout();
     }
+    public function work_order()
+    {
+        if (!is_vendor_logged_in() && !is_staff_logged_in()) {
+
+            redirect(site_url('purchase/authentication_vendor/login'));
+        }
+
+        $data['title']            = _l('wo_order');
+
+        $data['pur_order'] = $this->purchase_model->get_wo_order_by_vendor(get_vendor_user_id());
+
+        $this->data($data);
+        $this->view('vendor_portal/work_order');
+        $this->layout();
+    }
+
     public function wo_order($id, $hash = '')
     {
         if (!is_vendor_logged_in()) {
-            check_wo_order_restrictions($id, $hash);
+            check_pur_order_restrictions($id, $hash);
         }
 
         $data['pur_order_detail'] = $this->purchase_model->get_wo_order_detail($id);
         $data['pur_order'] = $this->purchase_model->get_wo_order($id);
-        $title = _l('wo_order_detail');
+        $title = _l('pur_order_detail');
 
-        if ($this->input->post()) {
-            $action = $this->input->post('action');
 
-            switch ($action) {
-                case 'wo_comment':
-                    // comment is blank
-                    if (!$this->input->post('content')) {
-                        redirect($this->uri->uri_string());
-                    }
-                    $data_cmt = $this->input->post();
-                    $data_cmt['rel_id'] = $id;
-                    $data_cmt['rel_type'] = 'wo_order';
-                    $this->purchase_model->add_comment_wo($data_cmt, true);
-                    redirect($this->uri->uri_string() . '?tab=discussion');
-
-                    break;
-            }
-        }
 
         $files = $this->purchase_model->get_wo_order_files($id);
         $data['files'] = $files;
@@ -932,7 +931,7 @@ class Vendors_portal extends App_Controller
         $data['base_currency'] = $this->currencies_model->get_base_currency();
 
         $data['tax_data'] = $this->purchase_model->get_html_tax_pur_order($id);
-        $data['comments'] = $this->purchase_model->get_comments_wo($id, 'wo_order');
+        // $data['comments'] = $this->purchase_model->get_comments($id, 'pur_order');
         $data['taxes'] = $this->purchase_model->get_taxes();
         $data['staff']             = $this->staff_model->get('', ['active' => 1]);
         $data['vendors'] = $this->purchase_model->get_vendor();
@@ -940,7 +939,8 @@ class Vendors_portal extends App_Controller
         $data['units'] = $this->purchase_model->get_units();
         $data['items'] = $this->purchase_model->get_items();
         $data['title'] = $title;
-
+        $data['attachments'] = $this->purchase_model->get_purchase_attachments('pur_order', $id);
+        $data['qor'] = $this->purchase_model->get_qor_by_wo($id);
         $this->data($data);
         $this->view('vendor_portal/wo_order');
         $this->layout();
@@ -2597,11 +2597,11 @@ class Vendors_portal extends App_Controller
             }
         }
         $data['projects'] = $this->projects_model->get_items();
-        
+
         $data['form_listing'] = $this->forms_model->get_form_listing();
         $agency = get_vendor_user_id();
         $data['ven_project_ids'] = vendor_project_list($agency);
-        $dpr_row_template = $this->purchase_model->create_dpr_row_template('','',$agency);
+        $dpr_row_template = $this->purchase_model->create_dpr_row_template('', '', $agency);
         $data['isedit'] = false;
         if ($form_id != 0) {
             $dpr_form = $this->forms_model->get_dpr_form($form_id);
@@ -2658,5 +2658,369 @@ class Vendors_portal extends App_Controller
         $item_key = $this->input->post('item_key');
 
         echo $this->purchase_model->create_dpr_row_template($name, $location, $agency, $type, $sub_type, $work_execute, $material_consumption, $male, $female, $total, $machinery, $total_machinery, false, $item_key);
+    }
+
+    public function payment_certificate()
+    {
+        if (!is_vendor_logged_in() && !is_staff_logged_in()) {
+
+            redirect(site_url('purchase/authentication_vendor/login'));
+        }
+
+        $data['title']            = _l('payment_certificate');
+
+        $data['payment_certificate'] = $this->purchase_model->get_payment_certificate_by_vendor(get_vendor_user_id());
+        $this->data($data);
+        $this->view('vendor_portal/payment_certificate');
+        $this->layout();
+    }
+    public function pur_bills()
+    {
+        if (!is_vendor_logged_in() && !is_staff_logged_in()) {
+
+            redirect(site_url('purchase/authentication_vendor/login'));
+        }
+
+        $data['title']            = _l('Bill Bifurcation');
+
+        $data['payment_certificate'] = $this->purchase_model->get_pur_bills_by_vendor(get_vendor_user_id());
+        $this->data($data);
+        $this->view('vendor_portal/pur_bills');
+        $this->layout();
+    }
+
+    public function payment_certificate_pdf($id)
+    {
+        if (!$id) {
+            redirect(admin_url('purchase/purchase_order'));
+        }
+
+        $fpdiBase = APPPATH . 'third_party/fpdi/';
+
+        if (file_exists($fpdiBase . 'src/autoload.php')) {
+
+            require_once $fpdiBase . 'src/autoload.php';
+        } elseif (file_exists($fpdiBase . 'autoload.php')) {
+
+            require_once $fpdiBase . 'autoload.php';
+        } else {
+
+            if (file_exists($fpdiBase . 'fpdi.php')) {
+                require_once $fpdiBase . 'fpdi.php';
+            }
+
+            if (file_exists($fpdiBase . 'tcpdf_fpdi.php')) {
+                require_once $fpdiBase . 'tcpdf_fpdi.php';
+            }
+
+            if (file_exists($fpdiBase . 'fpdi_tcpdf.php')) {
+                require_once $fpdiBase . 'fpdi_tcpdf.php';
+            }
+        }
+
+        $html = $this->purchase_model->get_paymentcertificate_pdf_html($id);
+
+        $baseTcpdf = $this->purchase_model->paymentcertificate_pdf($html, $id);
+
+        $basePdfString = $baseTcpdf->Output('', 'S');
+
+        $extraFiles = [];
+
+        $attachments = $this->purchase_model->get_payment_certificate_attachments($id);
+
+        if (!empty($attachments)) {
+
+            foreach ($attachments as $key => $value) {
+
+                if ($value['filetype'] == 'application/pdf') {
+
+                    $extraFiles[] =
+                        FCPATH .
+                        'uploads/purchase/payment_certificate/' .
+                        $value['rel_id'] .
+                        '/' .
+                        $value['file_name'];
+                }
+            }
+        }
+
+        try {
+
+            if (class_exists('\setasign\Fpdi\Tcpdf\Fpdi')) {
+
+                $pdf = new \setasign\Fpdi\Tcpdf\Fpdi(
+                    'P',
+                    'mm',
+                    'A4',
+                    true,
+                    'UTF-8',
+                    false
+                );
+
+                $pdf->setPrintHeader(false);
+                $pdf->setPrintFooter(false);
+
+                $src = \setasign\Fpdi\PdfParser\StreamReader::createByString($basePdfString);
+
+                $pageCount = $pdf->setSourceFile($src);
+
+                for ($p = 1; $p <= $pageCount; $p++) {
+
+                    $tplId = $pdf->importPage($p);
+
+                    $size  = $pdf->getTemplateSize($tplId);
+
+                    $orientation = ($size['width'] > $size['height']) ? 'L' : 'P';
+
+                    $pdf->AddPage(
+                        $orientation,
+                        [$size['width'], $size['height']]
+                    );
+
+                    $pdf->useTemplate(
+                        $tplId,
+                        0,
+                        0,
+                        $size['width'],
+                        $size['height'],
+                        true
+                    );
+                }
+
+                /*
+            |-------------------------------------------------------
+            | ATTACH EXTRA PDF FILES
+            |-------------------------------------------------------
+            | Skip compressed/encrypted/corrupted PDFs
+            */
+
+                foreach ($extraFiles as $file) {
+
+                    if (!is_file($file)) {
+                        continue;
+                    }
+
+                    try {
+
+                        // Check readable PDF
+                        $pageCount = $pdf->setSourceFile($file);
+
+                        // Skip invalid/compressed PDFs
+                        if (!$pageCount || $pageCount <= 0) {
+                            continue;
+                        }
+
+                        for ($p = 1; $p <= $pageCount; $p++) {
+
+                            try {
+
+                                $tplId = $pdf->importPage($p);
+
+                                $size = $pdf->getTemplateSize($tplId);
+
+                                $orientation =
+                                    ($size['width'] > $size['height'])
+                                    ? 'L'
+                                    : 'P';
+
+                                $pdf->AddPage(
+                                    $orientation,
+                                    [$size['width'], $size['height']]
+                                );
+
+                                $pdf->useTemplate(
+                                    $tplId,
+                                    0,
+                                    0,
+                                    $size['width'],
+                                    $size['height'],
+                                    true
+                                );
+                            } catch (Exception $e) {
+
+                                // Skip broken page
+                                continue;
+                            }
+                        }
+                    } catch (Exception $e) {
+
+                        // Skip compressed/encrypted/corrupted PDF
+                        continue;
+                    }
+                }
+            } else {
+
+                $tmpDir = sys_get_temp_dir();
+
+                $tmpBase = tempnam($tmpDir, 'pcert_') . '.pdf';
+
+                file_put_contents($tmpBase, $basePdfString);
+
+                if (class_exists('TCPDF_FPDI')) {
+
+                    $pdf = new \TCPDF_FPDI(
+                        'P',
+                        'mm',
+                        'A4',
+                        true,
+                        'UTF-8',
+                        false
+                    );
+                } elseif (class_exists('FPDI')) {
+
+                    $pdf = new \FPDI(
+                        'P',
+                        'mm',
+                        'A4',
+                        true,
+                        'UTF-8',
+                        false
+                    );
+                } else {
+
+                    throw new Exception(
+                        'FPDI library not found/loaded from application/third_party/fpdi.'
+                    );
+                }
+
+                $pdf->setPrintHeader(false);
+                $pdf->setPrintFooter(false);
+
+                $pageCount = $pdf->setSourceFile($tmpBase);
+
+                for ($p = 1; $p <= $pageCount; $p++) {
+
+                    $tplId = $pdf->importPage($p);
+
+                    $size = method_exists($pdf, 'getTemplateSize')
+                        ? $pdf->getTemplateSize($tplId)
+                        : ['width' => 210, 'height' => 297];
+
+                    $orientation =
+                        ($size['width'] > $size['height'])
+                        ? 'L'
+                        : 'P';
+
+                    $pdf->AddPage(
+                        $orientation,
+                        [$size['width'], $size['height']]
+                    );
+
+                    $pdf->useTemplate(
+                        $tplId,
+                        0,
+                        0,
+                        $size['width'],
+                        $size['height'],
+                        true
+                    );
+                }
+
+                /*
+            |-------------------------------------------------------
+            | ATTACH EXTRA PDF FILES
+            |-------------------------------------------------------
+            | Skip compressed/encrypted/corrupted PDFs
+            */
+
+                foreach ($extraFiles as $file) {
+
+                    if (!is_file($file)) {
+                        continue;
+                    }
+
+                    try {
+
+                        $pageCount = $pdf->setSourceFile($file);
+
+                        if (!$pageCount || $pageCount <= 0) {
+                            continue;
+                        }
+
+                        for ($p = 1; $p <= $pageCount; $p++) {
+
+                            try {
+
+                                $tplId = $pdf->importPage($p);
+
+                                $size = method_exists($pdf, 'getTemplateSize')
+                                    ? $pdf->getTemplateSize($tplId)
+                                    : ['width' => 210, 'height' => 297];
+
+                                $orientation =
+                                    ($size['width'] > $size['height'])
+                                    ? 'L'
+                                    : 'P';
+
+                                $pdf->AddPage(
+                                    $orientation,
+                                    [$size['width'], $size['height']]
+                                );
+
+                                $pdf->useTemplate(
+                                    $tplId,
+                                    0,
+                                    0,
+                                    $size['width'],
+                                    $size['height'],
+                                    true
+                                );
+                            } catch (Exception $e) {
+
+                                continue;
+                            }
+                        }
+                    } catch (Exception $e) {
+
+                        // Skip compressed/encrypted/corrupted PDF
+                        continue;
+                    }
+                }
+
+                @unlink($tmpBase);
+            }
+        } catch (Exception $e) {
+
+            echo pur_html_entity_decode($e->getMessage());
+            die;
+        }
+
+        $type = 'D';
+
+        if ($this->input->get('output_type')) {
+            $type = $this->input->get('output_type');
+        }
+
+        if ($this->input->get('print')) {
+            $type = 'I';
+        }
+
+        $pdf->SetTitle(_l('payment_certificate'));
+
+        $pdf_name = _l('payment_certificate') . '.pdf';
+
+        $pdf->Output($pdf_name, $type);
+    }
+
+    public function bill_bifurcation_pdf($id)
+    {
+        if (!$id) {
+            redirect(admin_url('purchase/list_pur_bills'));
+        }
+        $bill_bifurcation = $this->purchase_model->get_bill_bifurcation_pdf_html($id);
+        try {
+            $pdf = $this->purchase_model->bill_bifurcation_pdf($bill_bifurcation);
+        } catch (Exception $e) {
+            echo pur_html_entity_decode($e->getMessage());
+            die;
+        }
+        $type = 'D';
+        if ($this->input->get('output_type')) {
+            $type = $this->input->get('output_type');
+        }
+        if ($this->input->get('print')) {
+            $type = 'I';
+        }
+        $pdf->Output('bill_bifurcation.pdf', $type);
     }
 }

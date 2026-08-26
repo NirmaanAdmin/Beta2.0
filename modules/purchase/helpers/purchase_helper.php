@@ -7609,3 +7609,28 @@ function vendor_project_list($vendor_id)
         ->get()
         ->result_array();
 }
+
+function get_po_name_by_id($po_id){
+    $CI = &get_instance();
+    $CI->db->select('pur_order_number,pur_order_name');
+    $CI->db->from(db_prefix() . 'pur_orders');
+    $CI->db->where('id', $po_id);
+    return $CI->db->get()->row()->pur_order_number;
+}
+
+function get_wo_name_by_id($wo_id){
+    $CI = &get_instance();
+    $CI->db->select('wo_order_number,wo_order_name');
+    $CI->db->from(db_prefix() . 'wo_orders');
+    $CI->db->where('id', $wo_id);
+    return $CI->db->get()->row()->wo_order_number;
+}
+
+function get_ot_name_by_id($ot_id){
+    $CI = &get_instance();
+    $CI->db->select('pur_order_name');
+    $CI->db->from(db_prefix() . 'pur_order_tracker');
+    $CI->db->where('id', $ot_id);
+    return $CI->db->get()->row()->pur_order_name;
+}
+

@@ -63,7 +63,31 @@
                   <a href="<?php echo site_url('purchase/vendors_portal/purchase_order'); ?>">
                      <?php
 
-                     echo _l('purchase_order');
+                     echo _l('Orders');
+                     ?>
+                  </a>
+               </li>
+               <li class="customers-nav-item-items">
+                  <a href="<?php echo site_url('purchase/vendors_portal/work_order'); ?>">
+                     <?php
+
+                     echo _l('Work Order');
+                     ?>
+                  </a>
+               </li>
+               <li class="customers-nav-item-items">
+                  <a href="<?php echo site_url('purchase/vendors_portal/payment_certificate'); ?>">
+                     <?php
+
+                     echo _l('Payment Certificate');
+                     ?>
+                  </a>
+               </li>
+               <li class="customers-nav-item-items">
+                  <a href="<?php echo site_url('purchase/vendors_portal/pur_bills'); ?>">
+                     <?php
+
+                     echo _l('Bill Bifurcation');
                      ?>
                   </a>
                </li>
