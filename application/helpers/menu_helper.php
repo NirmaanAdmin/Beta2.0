@@ -28,7 +28,7 @@ function app_init_admin_sidebar_menu_items()
             'badge'    => [],
         ]);
     }
-    $base = base_url(); 
+    $base = base_url();
 
     if (
         strpos($base, 'localhost/betacrm2new') !== false ||
@@ -175,13 +175,16 @@ function app_init_admin_sidebar_menu_items()
         'badge'    => [],
     ]);
 
-    $CI->app_menu->add_sidebar_menu_item('module_wklookhead', [
-        'name'     => _l('3 WK Lookahead'),
-        'href'     => admin_url('purchase/wklookahead'),
-        'icon'     => 'fa-solid fa-line-chart',
-        'position' => 20,
-        'badge'    => [],
-    ]);
+    if (has_permission('wklookahead', '', 'view')) {
+        $CI->app_menu->add_sidebar_menu_item('module_wklookhead', [
+            'name'     => _l('3 WK Lookahead'),
+            'href'     => admin_url('purchase/wklookahead'),
+            'icon'     => 'fa-solid fa-line-chart',
+            'position' => 20,
+            'badge'    => [],
+        ]);
+    }
+
 
     if (staff_can('view',  'contracts') || staff_can('view_own',  'contracts')) {
         $CI->app_menu->add_sidebar_menu_item('contracts', [

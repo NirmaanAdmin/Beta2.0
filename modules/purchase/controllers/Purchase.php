@@ -19406,4 +19406,273 @@ class purchase extends AdminController
             redirect(admin_url('purchase/wklookahead'));
         }
     }
+
+    // public function export_wklookahead_excel($lookahead_id)
+    // {
+    //     // Clear any output buffers
+    //     ob_end_clean();
+
+    //     header('Content-Type: text/csv; charset=UTF-8');
+    //     header('Content-Disposition: attachment; filename="3_Week_Lookahead_Export.csv"');
+    //     header('Pragma: no-cache');
+    //     header('Expires: 0');
+
+    //     $output = fopen('php://output', 'w');
+
+    //     // Add BOM for UTF-8 to handle special characters
+    //     fwrite($output, "\xEF\xBB\xBF");
+
+    //     /*
+    //     * Get Lookahead
+    //     */
+    //     $lookahead = $this->purchase_model->lookahead_get($lookahead_id);
+
+    //     if (empty($lookahead)) {
+    //         fputcsv($output, ['No data found']);
+    //         fclose($output);
+    //         exit;
+    //     }
+
+    //     /*
+    //     * Get Activities
+    //     */
+    //     $activities = $this->purchase_model->get_activities($lookahead_id);
+
+    //     /*
+    //     * Start Date
+    //     */
+    //     $start_date = $lookahead->week_start_date;
+
+    //     /*
+    //     * Make sure start date is Monday
+    //     */
+    //     $day_number = date('N', strtotime($start_date));
+    //     if ($day_number != 1) {
+    //         $start_date = date('Y-m-d', strtotime('monday this week', strtotime($start_date)));
+    //     }
+
+    //     $total_days = 21;
+
+    //     /*
+    //     * Build Headers
+    //     */
+    //     $headers = ['Activities', 'Vendor'];
+
+    //     for ($i = 1; $i <= $total_days; $i++) {
+    //         $current_date = date('Y-m-d', strtotime('+' . ($i - 1) . ' days', strtotime($start_date)));
+    //         $day_name = date('D', strtotime($current_date));
+    //         $day_date = date('d M', strtotime($current_date));
+
+    //         // Create header with day and date
+    //         $headers[] = $day_name . ' ' . $day_date;
+    //     }
+
+    //     fputcsv($output, $headers);
+
+    //     /*
+    //     * Write Data
+    //     */
+    //     if (!empty($activities)) {
+    //         foreach ($activities as $activity) {
+    //             $row = [];
+
+    //             /*
+    //         * Activity
+    //         */
+    //             $row[] = $activity->activity ?? '';
+
+    //             /*
+    //         * Vendor
+    //         */
+    //             $vendor_name = '';
+    //             if (!empty($activity->vendor_id)) {
+    //                 $vendor = $this->get_vendor($activity->vendor_id);
+    //                 if (!empty($vendor)) {
+    //                     if (is_object($vendor)) {
+    //                         $vendor_name = $vendor->company ?? $vendor->name ?? '';
+    //                     } elseif (is_array($vendor)) {
+    //                         $vendor_name = $vendor['company'] ?? $vendor['name'] ?? '';
+    //                     }
+    //                 }
+    //             }
+    //             $row[] = $vendor_name;
+
+    //             /*
+    //             * 21 Days Data
+    //             */
+    //             for ($i = 1; $i <= $total_days; $i++) {
+    //                 $current_date = date('Y-m-d', strtotime('+' . ($i - 1) . ' days', strtotime($start_date)));
+    //                 $day_name = date('D', strtotime($current_date));
+
+    //                 // If Sunday = "H" (Holiday), otherwise check if activity is scheduled
+    //                 if ($day_name == 'Sun') {
+    //                     $cell_value = 'H';
+    //                 } else {
+    //                     $field = 'day_' . $i;
+    //                     $cell_value = (!empty($activity->{$field})) ? 'X' : '';
+    //                 }
+
+    //                 $row[] = $cell_value;
+    //             }
+
+    //             fputcsv($output, $row);
+    //         }
+    //     } else {
+    //         /*
+    //     * No Activities
+    //     */
+    //         $row = ['No activities found'];
+    //         for ($i = 1; $i <= $total_days; $i++) {
+    //             $row[] = '';
+    //         }
+    //         fputcsv($output, $row);
+    //     }
+
+    //     fclose($output);
+    //     exit;
+    // }
+
+    public function export_wklookahead_excel($lookahead_id)
+    {
+        // Turn on error reporting temporarily so you can see the real problem
+        // Remove these 2 lines after it works
+        error_reporting(E_ALL);
+        ini_set('display_errors', 1);
+
+        // Clear ALL output buffers (very important in CodeIgniter)
+        while (ob_get_level()) {
+            ob_end_clean();
+        }
+
+        // Force no caching
+        header('Content-Type: text/csv; charset=UTF-8');
+        header('Content-Disposition: attachment; filename="3_Week_Lookahead_Export.csv"');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Content-Transfer-Encoding: binary');
+
+        $output = fopen('php://output', 'w');
+
+        // UTF-8 BOM for Excel
+        fwrite($output, "\xEF\xBB\xBF");
+
+        // -------------------------------------------------
+        // 1. Get Lookahead
+        // -------------------------------------------------
+        $lookahead = $this->purchase_model->lookahead_get($lookahead_id);
+
+        if (empty($lookahead)) {
+            fputcsv($output, ['No Lookahead found']);
+            fclose($output);
+            exit;
+        }
+
+        // -------------------------------------------------
+        // 2. Get Activities
+        // -------------------------------------------------
+        $activities = $this->purchase_model->get_activities($lookahead_id);
+
+        // -------------------------------------------------
+        // 3. Calculate start date (force Monday)
+        // -------------------------------------------------
+        $start_date = !empty($lookahead->week_start_date)
+            ? $lookahead->week_start_date
+            : date('Y-m-d');
+
+        // Make sure it is a valid date
+        if (strtotime($start_date) === false) {
+            $start_date = date('Y-m-d');
+        }
+
+        // Force to Monday of that week
+        $day_number = date('N', strtotime($start_date));
+        if ($day_number != 1) {
+            $start_date = date('Y-m-d', strtotime('monday this week', strtotime($start_date)));
+        }
+
+        $total_days = 21;
+
+        // -------------------------------------------------
+        // 4. Headers
+        // -------------------------------------------------
+        $headers = ['Activities', 'Vendor'];
+
+        for ($i = 1; $i <= $total_days; $i++) {
+            $current_date = date('Y-m-d', strtotime('+' . ($i - 1) . ' days', strtotime($start_date)));
+            $day_name     = date('D', strtotime($current_date));
+            $day_date     = date('d M', strtotime($current_date));
+            $headers[]    = $day_name . ' ' . $day_date;
+        }
+
+        fputcsv($output, $headers);
+
+        // -------------------------------------------------
+        // 5. Data rows
+        // -------------------------------------------------
+        if (!empty($activities) && is_array($activities)) {
+
+            foreach ($activities as $activity) {
+
+                // Support both object and array
+                $act = is_object($activity) ? (array) $activity : $activity;
+
+                $row = [];
+
+                // Activity name
+                $row[] = $act['activity'] ?? $act['name'] ?? $act['activity_name'] ?? '';
+
+                // Vendor
+                $vendor_name = '';
+                $vendor_id   = $act['vendor_id'] ?? null;
+
+                if (!empty($vendor_id)) {
+                    // Try common ways to get vendor
+                    if (method_exists($this, 'get_vendor')) {
+                        $vendor = $this->get_vendor($vendor_id);
+                    } elseif (method_exists($this->purchase_model, 'get_vendor')) {
+                        $vendor = $this->purchase_model->get_vendor($vendor_id);
+                    } else {
+                        $vendor = null;
+                    }
+
+                    if (!empty($vendor)) {
+                        $v = is_object($vendor) ? (array) $vendor : $vendor;
+                        $vendor_name = $v['company'] ?? $v['name'] ?? $v['vendor_name'] ?? '';
+                    }
+                }
+                $row[] = $vendor_name;
+
+                // 21 days
+                for ($i = 1; $i <= $total_days; $i++) {
+                    $current_date = date('Y-m-d', strtotime('+' . ($i - 1) . ' days', strtotime($start_date)));
+                    $day_name     = date('D', strtotime($current_date));
+
+                    if ($day_name === 'Sun') {
+                        $row[] = 'H';
+                    } else {
+                        // Try all common column name patterns
+                        $val = $act['day_' . $i]
+                            ?? $act['day' . $i]
+                            ?? $act['d' . $i]
+                            ?? $act['day_' . str_pad($i, 2, '0', STR_PAD_LEFT)]
+                            ?? $act['Day_' . $i]
+                            ?? '';
+
+                        $row[] = !empty($val) ? 'X' : '';
+                    }
+                }
+
+                fputcsv($output, $row);
+            }
+        } else {
+            // No activities
+            $empty_row = array_fill(0, count($headers), '');
+            $empty_row[0] = 'No activities found';
+            fputcsv($output, $empty_row);
+        }
+
+        fclose($output);
+        exit;
+    }
 }

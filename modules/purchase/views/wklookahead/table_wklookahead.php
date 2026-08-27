@@ -152,11 +152,18 @@ foreach ($rResult as $aRow) {
             </a>
         </li>
 
+        <li role="separator" class="divider"></li>
     </ul>
 
     </div>';
-    $row[] = $option;
+    // Separate Excel Export Button
+    $option .= '<a href="' . admin_url('purchase/export_wklookahead_excel/' . $aRow['id'] . '   ') .'"
+        class="btn btn-default pull-right mright5"
+        aria-haspopup="true"
+        aria-expanded="false">
+        <i class="fa fa-file-excel"></i>';
 
+    
     $row[] = $option;
 
 
