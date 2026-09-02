@@ -11270,8 +11270,8 @@ class Changee_model extends App_Model
         $name_total = 'total';
         $name_remarks = 'remarks';
         $name_serial_no = 'serial_no';
-        $array_rate_attr = ['min' => '0.0', 'step' => 'any'];
-        $array_qty_attr = ['min' => '0.0', 'step' => 'any'];
+        $array_rate_attr = ['step' => 'any'];
+        $array_qty_attr = ['step' => 'any'];
         $array_subtotal_attr = ['readonly' => true];
         $name_area = 'area';
 
@@ -11314,9 +11314,9 @@ class Changee_model extends App_Model
             $name_variation = $name . '[variation]';
             $name_serial_no = $name . '[serial_no]';
             $name_area = $name . '[area][]';
-            $array_rate_attr = ['onblur' => 'pur_calculate_total();', 'onchange' => 'pur_calculate_total();', 'min' => '0.0', 'step' => 'any', 'data-amount' => 'invoice', 'placeholder' => _l('unit_price')];
+            $array_rate_attr = ['onblur' => 'pur_calculate_total();', 'onchange' => 'pur_calculate_total();', 'step' => 'any', 'data-amount' => 'invoice', 'placeholder' => _l('unit_price')];
 
-            $array_qty_attr = ['onblur' => 'pur_calculate_total();', 'onchange' => 'pur_calculate_total();', 'min' => '0.0', 'step' => 'any',  'data-quantity' => (float)$quantity];
+            $array_qty_attr = ['onblur' => 'pur_calculate_total();', 'onchange' => 'pur_calculate_total();', 'step' => 'any',  'data-quantity' => (float)$quantity];
 
             $tax_money = 0;
             $tax_rate_value = 0;
