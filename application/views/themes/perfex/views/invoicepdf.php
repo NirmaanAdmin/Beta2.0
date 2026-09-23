@@ -128,6 +128,22 @@ $amount_to_word = amount_to_word($rounded_amount);
 $decimal_part = $amount - $rounded_amount;
 $decimal_part = number_format(abs($decimal_part), 2);
 
+$cgst_tax_format = '';
+$sgst_tax_format = '';
+if($invoice->cgst_type == 1) {
+$cgst_tax_format = ' (' . 
+(($invoice->cgst_percentage == intval($invoice->cgst_percentage)) 
+    ? intval($invoice->cgst_percentage) 
+    : number_format($invoice->cgst_percentage, 2)) 
+. '%)';
+}
+if($invoice->sgst_type == 1) {
+$sgst_tax_format = ' (' . 
+(($invoice->sgst_percentage == intval($invoice->sgst_percentage)) 
+    ? intval($invoice->sgst_percentage) 
+    : number_format($invoice->sgst_percentage, 2)) 
+. '%)';
+}
 $tblinvoicehtml .= '<table width="100%" cellspacing="0" cellpadding="6" border="1">';
 $tblinvoicehtml .= '
 <thead>
@@ -136,8 +152,8 @@ $tblinvoicehtml .= '
      <th width="23%" align="center">Description of Material / Services</th>
      <th width="12%" align="center">HSN / SAC Code</th>
      <th width="16%" align="center">Taxable</th>
-     <th width="13%" align="center">'._l('cgst_tax'). ' (' .(($invoice->cgst == intval($invoice->cgst)) ? intval($invoice->cgst) : number_format($invoice->cgst, 2)). '%)</th>
-     <th width="13%" align="center">'._l('sgst_tax'). ' (' .(($invoice->sgst == intval($invoice->sgst)) ? intval($invoice->sgst) : number_format($invoice->sgst, 2)). '%)</th>
+     <th width="13%" align="center">'._l('cgst_tax').$cgst_tax_format.'</th>
+     <th width="13%" align="center">'._l('sgst_tax').$sgst_tax_format.'</th>
      <th width="17%" align="right">Grand Total</th>
   </tr>
 </thead>';

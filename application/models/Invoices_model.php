@@ -815,6 +815,21 @@ class Invoices_model extends App_Model
 
         unset($data['items'], $data['newitems'], $data['custom_fields'], $data['tags']);
 
+        if (isset($data['cgst_type'])) {
+            if ($data['cgst_type'] == 1) {
+                $data['cgst_amount'] = 0;
+            } elseif ($data['cgst_type'] == 2) {
+                $data['cgst_percentage'] = 0;
+            }
+        }
+        if (isset($data['sgst_type'])) {
+            if ($data['sgst_type'] == 1) {
+                $data['sgst_amount'] = 0;
+            } elseif ($data['sgst_type'] == 2) {
+                $data['sgst_percentage'] = 0;
+            }
+        }
+
         $hook = apply_filters_deprecated('before_invoice_updated', [[
             'data' => array_merge($data, [
                 'tags'          => $tags ?? null,
@@ -1944,9 +1959,6 @@ class Invoices_model extends App_Model
         $this->db->where('id', $invoiceid);
         $invoice = $this->db->get(db_prefix() . 'invoices')->row();
         $items = get_items_by_type('invoice', $invoiceid, $ignore_management_fess);
-        $cgst_tax = !empty($invoice->cgst) ? $invoice->cgst : 0;
-        $sgst_tax = !empty($invoice->sgst) ? $invoice->sgst : 0;
-        $total_tax = $cgst_tax + $sgst_tax;
 
         $indexa = array();
         $final_invoice = array();
@@ -1982,9 +1994,21 @@ class Invoices_model extends App_Model
             $final_invoice['description'] = $invoice->final_inv_desc;
             $final_invoice['qty'] = 1;
             $final_invoice['subtotal'] += $value['subtotal'];
-            $final_invoice['tax'] = $final_invoice['subtotal'] * ($total_tax / 100);
-            $final_invoice['cgst_tax'] = $final_invoice['subtotal'] * ($cgst_tax / 100);
-            $final_invoice['sgst_tax'] = $final_invoice['subtotal'] * ($sgst_tax / 100);
+            if($invoice->cgst_type == 1) {
+                $final_invoice['cgst_tax'] = $final_invoice['subtotal'] * ($invoice->cgst_percentage / 100);
+            } else if($invoice->cgst_type == 2) {
+                $final_invoice['cgst_tax'] = $invoice->cgst_amount;
+            } else {
+                $final_invoice['cgst_tax'] = 0;
+            }
+            if($invoice->sgst_type == 1) {
+                $final_invoice['sgst_tax'] = $final_invoice['subtotal'] * ($invoice->sgst_percentage / 100);
+            } else if($invoice->sgst_type == 2) {
+                $final_invoice['sgst_tax'] = $invoice->sgst_amount;
+            } else {
+                $final_invoice['sgst_tax'] = 0;
+            }
+            $final_invoice['tax'] = $final_invoice['cgst_tax'] + $final_invoice['sgst_tax'];
             $final_invoice['amount'] = $final_invoice['subtotal'] + $final_invoice['tax'];
             $final_invoice['remarks'] = $invoice->remarks;
             if ($value['annexure'] != 17) {
@@ -2214,6 +2238,23 @@ class Invoices_model extends App_Model
         $invoice = $this->get($invoiceid);
         $basic_invoice = $this->get_annexure_invoice_details($invoiceid);
 
+        $cgst_tax_format = '';
+        $sgst_tax_format = '';
+        if($invoice->cgst_type == 1) {
+        $cgst_tax_format = ' (' . 
+        (($invoice->cgst_percentage == intval($invoice->cgst_percentage)) 
+            ? intval($invoice->cgst_percentage) 
+            : number_format($invoice->cgst_percentage, 2)) 
+        . '%)';
+        }
+        if($invoice->sgst_type == 1) {
+        $sgst_tax_format = ' (' . 
+        (($invoice->sgst_percentage == intval($invoice->sgst_percentage)) 
+            ? intval($invoice->sgst_percentage) 
+            : number_format($invoice->sgst_percentage, 2)) 
+        . '%)';
+        }
+
         // Final invoice
         $tblfinvoicehtml = '';
         $tblfinvoicehtml .= '<table>';
@@ -2224,8 +2265,8 @@ class Invoices_model extends App_Model
             <th>' . _l('description_of_services') . '</th>
             <th>HSN/SAC</th>
             <th>' . _l('rate_without_tax') . '</th>
-            <th>'._l('cgst_tax'). ' (' .(($invoice->cgst == intval($invoice->cgst)) ? intval($invoice->cgst) : number_format($invoice->cgst, 2)). '%)</th>
-            <th>'._l('sgst_tax'). ' (' .(($invoice->sgst == intval($invoice->sgst)) ? intval($invoice->sgst) : number_format($invoice->sgst, 2)). '%)</th>
+            <th>'._l('cgst_tax').$cgst_tax_format.'</th>
+            <th>'._l('sgst_tax').$sgst_tax_format.'</th>
             <th>' . _l('invoice_table_amount_heading') . '</th>
             <th>' . _l('remarks') . '</th>
           </tr>';

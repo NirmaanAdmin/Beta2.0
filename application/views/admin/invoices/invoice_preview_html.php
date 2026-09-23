@@ -220,21 +220,29 @@ if (isset($invoice->scheduled_email) && $invoice->scheduled_email) { ?>
                                     <th width="25%" align="left"><?php echo _l('description_of_services'); ?></th>
                                     <th width="15%" align="right"><?php echo _l('rate_without_tax'); ?></th>
                                     <th width="15%" align="right">
-                                      <?php 
-                                        echo _l('cgst_tax') . ' (' . 
-                                        (($invoice->cgst == intval($invoice->cgst)) 
-                                            ? intval($invoice->cgst) 
-                                            : number_format($invoice->cgst, 2)) 
-                                        . '%)'; 
+                                      <?php
+                                      $cgst_tax_format = '';
+                                      if($invoice->cgst_type == 1) {
+                                        $cgst_tax_format = ' (' . 
+                                        (($invoice->cgst_percentage == intval($invoice->cgst_percentage)) 
+                                            ? intval($invoice->cgst_percentage) 
+                                            : number_format($invoice->cgst_percentage, 2)) 
+                                        . '%)';
+                                      }
+                                        echo _l('cgst_tax').$cgst_tax_format;
                                       ?>
                                     </th>
                                     <th width="15%" align="right">
-                                      <?php 
-                                        echo _l('sgst_tax') . ' (' . 
-                                        (($invoice->sgst == intval($invoice->sgst)) 
-                                            ? intval($invoice->sgst) 
-                                            : number_format($invoice->sgst, 2)) 
-                                        . '%)'; 
+                                      <?php
+                                      $sgst_tax_format = '';
+                                      if($invoice->sgst_type == 1) {
+                                        $sgst_tax_format = ' (' . 
+                                        (($invoice->sgst_percentage == intval($invoice->sgst_percentage)) 
+                                            ? intval($invoice->sgst_percentage) 
+                                            : number_format($invoice->sgst_percentage, 2)) 
+                                        . '%)';
+                                      }
+                                        echo _l('sgst_tax').$sgst_tax_format;
                                       ?>
                                     </th>
                                     <th width="15%" align="right"><?php echo _l('invoice_table_amount_heading'); ?></th>
@@ -283,13 +291,7 @@ if (isset($invoice->scheduled_email) && $invoice->scheduled_email) { ?>
                                 <tr id="total_tax">
                                     <td>
                                         <span class="bold tw-text-neutral-700">
-                                            <?php 
-                                                echo _l('cgst_tax') . ' (' . 
-                                                (($invoice->cgst == intval($invoice->cgst)) 
-                                                    ? intval($invoice->cgst) 
-                                                    : number_format($invoice->cgst, 2)) 
-                                                . '%)'; 
-                                            ?> :
+                                            <?php echo _l('cgst_tax').$cgst_tax_format; ?> :
                                         </span>
                                     </td>
                                     <td>
@@ -299,13 +301,7 @@ if (isset($invoice->scheduled_email) && $invoice->scheduled_email) { ?>
                                 <tr id="total_tax">
                                     <td>
                                         <span class="bold tw-text-neutral-700">
-                                            <?php 
-                                                echo _l('sgst_tax') . ' (' . 
-                                                (($invoice->sgst == intval($invoice->sgst)) 
-                                                    ? intval($invoice->sgst) 
-                                                    : number_format($invoice->sgst, 2)) 
-                                                . '%)'; 
-                                            ?> :
+                                            <?php echo _l('sgst_tax').$sgst_tax_format; ?> :
                                         </span>
                                     </td>
                                     <td>

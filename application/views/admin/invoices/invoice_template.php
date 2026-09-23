@@ -576,14 +576,66 @@
                                 </select>
                             </div>
                         </div>
+                        
                         <div class="col-md-6">
-                            <?php $cgst = (isset($invoice) && $invoice->cgst != '' ? $invoice->cgst : 0); ?>
-                            <?php echo render_input('cgst', 'cgst_tax', $cgst) ?>
+                            <div class="form-group">
+                                <label for="cgst" class="control-label">CGST</label>
+                                <div style="display: flex; gap: 10px;">
+                                    <?php
+                                    $cgst_type = 1;
+                                    $cgst_percentage = 0;
+                                    $cgst_amount = 0;
+                                    if (isset($invoice)) {
+                                        if(!empty($invoice->cgst_type)) {
+                                            $cgst_type = $invoice->cgst_type;
+                                        }
+                                        if(!empty($invoice->cgst_percentage)) {
+                                            $cgst_percentage = $invoice->cgst_percentage;
+                                        }
+                                        if(!empty($invoice->cgst_amount)) {
+                                            $cgst_amount = $invoice->cgst_amount;
+                                        }
+                                    }
+                                    ?>
+                                    <select id="cgst_type" name="cgst_type" class="form-control" style="width: 20%;">
+                                        <option value="1" <?php echo ($cgst_type == 1) ? 'selected' : ''; ?>>%</option>
+                                        <option value="2" <?php echo ($cgst_type == 2) ? 'selected' : ''; ?>>₹</option>
+                                    </select>
+                                    <input type="text" id="cgst_percentage_wrapper" name="cgst_percentage" class="form-control" value="<?php echo $cgst_percentage; ?>" placeholder="CGST Percentage">
+                                    <input type="text" id="cgst_amount_wrapper" name="cgst_amount" class="form-control" value="<?php echo $cgst_amount; ?>" placeholder="CGST Amount">
+                                </div>
+                            </div>
                         </div>
                         <div class="col-md-6">
-                            <?php $sgst = (isset($invoice) && $invoice->sgst != '' ? $invoice->sgst : 0); ?>
-                            <?php echo render_input('sgst', 'sgst_tax', $sgst) ?>
+                            <div class="form-group">
+                                <label for="sgst" class="control-label">SGST</label>
+                                <div style="display: flex; gap: 10px;">
+                                    <?php
+                                    $sgst_type = 1;
+                                    $sgst_percentage = 0;
+                                    $sgst_amount = 0;
+                                    if (isset($invoice)) {
+                                        if(!empty($invoice->sgst_type)) {
+                                            $sgst_type = $invoice->sgst_type;
+                                        }
+                                        if(!empty($invoice->sgst_percentage)) {
+                                            $sgst_percentage = $invoice->sgst_percentage;
+                                        }
+                                        if(!empty($invoice->sgst_amount)) {
+                                            $sgst_amount = $invoice->sgst_amount;
+                                        }
+                                    }
+                                    ?>
+                                    <select id="sgst_type" name="sgst_type" class="form-control" style="width: 20%;">
+                                        <option value="1" <?php echo ($sgst_type == 1) ? 'selected' : ''; ?>>%</option>
+                                        <option value="2" <?php echo ($sgst_type == 2) ? 'selected' : ''; ?>>₹</option>
+                                    </select>
+                                    <input type="text" id="sgst_percentage_wrapper" name="sgst_percentage" class="form-control" value="<?php echo $sgst_percentage; ?>" placeholder="SGST Percentage">
+                                    <input type="text" id="sgst_amount_wrapper" name="sgst_amount" class="form-control" value="<?php echo $sgst_amount; ?>" placeholder="SGST Amount">
+                                </div>
+                            </div>
                         </div>
+
                     </div>
 
                 </div>
@@ -666,21 +718,29 @@
                                 <?php /* <th width="10%" align="right" class="qty"><?php echo e($qty_heading); ?></th> */ ?>
                                 <th width="15%" align="right"><?php echo _l('rate_without_tax'); ?></th>
                                 <th width="15%" align="right">
-                                  <?php 
-                                    echo _l('cgst_tax') . ' (' . 
-                                    (($invoice->cgst == intval($invoice->cgst)) 
-                                        ? intval($invoice->cgst) 
-                                        : number_format($invoice->cgst, 2)) 
-                                    . '%)'; 
+                                  <?php
+                                  $cgst_tax_format = '';
+                                  if($invoice->cgst_type == 1) {
+                                    $cgst_tax_format = ' (' . 
+                                    (($invoice->cgst_percentage == intval($invoice->cgst_percentage)) 
+                                        ? intval($invoice->cgst_percentage) 
+                                        : number_format($invoice->cgst_percentage, 2)) 
+                                    . '%)';
+                                  }
+                                    echo _l('cgst_tax').$cgst_tax_format;
                                   ?>
                                 </th>
                                 <th width="15%" align="right">
-                                  <?php 
-                                    echo _l('sgst_tax') . ' (' . 
-                                    (($invoice->sgst == intval($invoice->sgst)) 
-                                        ? intval($invoice->sgst) 
-                                        : number_format($invoice->sgst, 2)) 
-                                    . '%)'; 
+                                  <?php
+                                  $sgst_tax_format = '';
+                                  if($invoice->sgst_type == 1) {
+                                    $sgst_tax_format = ' (' . 
+                                    (($invoice->sgst_percentage == intval($invoice->sgst_percentage)) 
+                                        ? intval($invoice->sgst_percentage) 
+                                        : number_format($invoice->sgst_percentage, 2)) 
+                                    . '%)';
+                                  }
+                                    echo _l('sgst_tax').$sgst_tax_format;
                                   ?>
                                 </th>
                                 <th width="15%" align="right"><?php echo _l('invoice_table_amount_heading'); ?></th>
@@ -791,13 +851,7 @@
                             <tr id="total_tax">
                                 <td>
                                     <span class="bold tw-text-neutral-700">
-                                        <?php 
-                                            echo _l('cgst_tax') . ' (' . 
-                                            (($invoice->cgst == intval($invoice->cgst)) 
-                                                ? intval($invoice->cgst) 
-                                                : number_format($invoice->cgst, 2)) 
-                                            . '%)'; 
-                                        ?> :
+                                        <?php echo _l('cgst_tax').$cgst_tax_format; ?> :
                                     </span>
                                 </td>
                                 <td>
@@ -807,13 +861,7 @@
                             <tr id="total_tax">
                                 <td>
                                     <span class="bold tw-text-neutral-700">
-                                        <?php 
-                                            echo _l('sgst_tax') . ' (' . 
-                                            (($invoice->sgst == intval($invoice->sgst)) 
-                                                ? intval($invoice->sgst) 
-                                                : number_format($invoice->sgst, 2)) 
-                                            . '%)'; 
-                                        ?> :
+                                        <?php echo _l('sgst_tax').$sgst_tax_format; ?> :
                                     </span>
                                 </td>
                                 <td>
