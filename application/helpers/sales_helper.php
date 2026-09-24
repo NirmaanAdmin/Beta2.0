@@ -1080,9 +1080,11 @@ function get_items_by_annexure($id)
 
 function get_all_applied_invoices()
 {
+    $default_project = get_default_project();
     $CI = &get_instance();
     $CI->db->select('id, title');
     $CI->db->from('tblinvoices');
+    $CI->db->where('project_id', $default_project);
     $CI->db->order_by('id', 'desc');
     return $CI->db->get()->result_array();
 }

@@ -17688,8 +17688,10 @@ class Purchase_model extends App_Model
      */
     public function get_billing_invoices()
     {
+        $default_project = get_default_project();
         $this->db->select('id, title');
         $this->db->from(db_prefix() . 'invoices');
+        $this->db->where('project_id', $default_project);
         $this->db->order_by('id', 'desc');
         $query = $this->db->get();
         $billing_invoices = $query->result_array();
