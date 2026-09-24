@@ -34,6 +34,35 @@ $(function() {
     init_ajax_project_search_by_customer_id();
     // Maybe items ajax search
     init_ajax_search('items', '#item_select.ajax-search', undefined, admin_url + 'items/search');
+
+    toggle_invoice_cgst();
+    toggle_invoice_sgst();
+    $("body").on("change", "#cgst_type", function (e) {
+      toggle_invoice_cgst();
+    });
+    $("body").on("change", "#sgst_type", function (e) {
+      toggle_invoice_sgst();
+    });
+    function toggle_invoice_cgst() {
+      var cgst_type = $('#cgst_type').val();
+      if (cgst_type == '1') {
+        $('#cgst_percentage_wrapper').show();
+        $('#cgst_amount_wrapper').hide();
+      } else if (cgst_type == '2') {
+        $('#cgst_percentage_wrapper').hide();
+        $('#cgst_amount_wrapper').show();
+      }
+    }
+    function toggle_invoice_sgst() {
+      var sgst_type = $('#sgst_type').val();
+      if (sgst_type == '1') {
+        $('#sgst_percentage_wrapper').show();
+        $('#sgst_amount_wrapper').hide();
+      } else if (sgst_type == '2') {
+        $('#sgst_percentage_wrapper').hide();
+        $('#sgst_amount_wrapper').show();
+      }
+    }
 });
 </script>
 </body>
