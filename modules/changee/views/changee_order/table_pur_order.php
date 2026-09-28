@@ -29,9 +29,9 @@ $aColumns = [
     'department',
     'pur_order_name',
     'approve_status',
-    'subtotal',
+    '(subtotal - discount_total) as subtotal',
     'total_tax',
-    'total',
+    '(total - discount_total) as total',
     '(SELECT GROUP_CONCAT(name SEPARATOR ",") FROM ' . db_prefix() . 'taggables JOIN ' . db_prefix() . 'tags ON ' . db_prefix() . 'taggables.tag_id = ' . db_prefix() . 'tags.id WHERE rel_id = ' . db_prefix() . 'co_orders.id and rel_type="pur_order" ORDER by tag_order ASC) as tags',
     
     // 'delivery_date',
@@ -43,7 +43,7 @@ $aColumns = [
 if (isset($vendor) || isset($project)) {
     $aColumns = [
         'pur_order_number',
-        'total',
+        '(total - discount_total) as total',
         'total_tax',
         'vendor',
         'order_date',
@@ -240,7 +240,7 @@ foreach ($rResult as $aRow) {
 
         $currency_name = $aRow['currency_name'];
 
-        if ($aColumns[$i] == 'total') {
+        if ($aColumns[$i] == '(total - discount_total) as total') {
             $_data = app_format_money($aRow['total'], $currency_name);
         } elseif ($aColumns[$i] == 'pur_order_number') {
 
@@ -287,7 +287,7 @@ foreach ($rResult as $aRow) {
             $_data = render_tags($aRow['tags']);
         } elseif ($aColumns[$i] == 'type') {
             $_data = _l($aRow['type']);
-        } elseif ($aColumns[$i] == 'subtotal') {
+        } elseif ($aColumns[$i] == '(subtotal - discount_total) as subtotal') {
             $_data = app_format_money($aRow['subtotal'], $currency_name);
         } elseif ($aColumns[$i] == db_prefix() . 'projects.name as project_name') {
             $_data = $aRow['project_name'];
