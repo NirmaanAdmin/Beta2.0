@@ -2195,9 +2195,11 @@ class Invoices_model extends App_Model
 
     public function get_previous_billing_amount($invoice)
     {
+        $default_project = get_default_project();
         $this->db->select('id');
         $this->db->where('id !=', $invoice->id);
         $this->db->where('date <=', $invoice->date);
+        $this->db->where('project_id', $default_project);
         $result = $this->db->get(db_prefix() . 'invoices')->result_array();
 
         $all_indexes = [];
