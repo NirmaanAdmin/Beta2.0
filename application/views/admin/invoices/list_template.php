@@ -146,7 +146,7 @@
                                         <?php if (in_array($invoice['id'], $invoices_filter_val)) {
                                             echo 'selected';
                                         } ?>>
-                                        <?php echo format_invoice_number($invoice['id']); ?>
+                                        <?php echo format_invoice_number($invoice['id']) . (!empty($invoice['title']) ? ' (' . $invoice['title'] . ')' : ''); ?>
                                     </option>
                                 <?php } ?>
                             </select>
