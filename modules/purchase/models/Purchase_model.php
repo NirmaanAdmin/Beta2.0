@@ -18453,6 +18453,7 @@ class Purchase_model extends App_Model
 
         $all_co_orders = $this->db->select('id, subtotal, co_value, total_tax')
         ->where('po_order_id', $po_id)
+        ->where('subtotal >', 0)
         ->get(db_prefix() . 'co_orders')
         ->result_array();
         if(!empty($all_co_orders)) {
