@@ -689,7 +689,11 @@
                               if (!empty($changes)) {
                                  $grand_total = 0;
                                  foreach ($changes as $ckey => $cvalue) {
-                                    $taxRate = (($cvalue['total_tax'] - $cvalue['subtotal']) / $cvalue['subtotal']) * 100;
+                                    if ($cvalue['subtotal'] != 0) {
+                                       $taxRate = (($cvalue['total_tax'] - $cvalue['subtotal']) / $cvalue['subtotal']) * 100;
+                                    } else {
+                                       $taxRate = 0;
+                                    }
                                     $taxRate = round($taxRate);
                                     $taxRate = (100 + (float)$taxRate) / 100;
                                     $total_co_value = $cvalue['co_value'] + ($cvalue['co_value'] * $taxRate) + $cvalue['non_tender_total'];
