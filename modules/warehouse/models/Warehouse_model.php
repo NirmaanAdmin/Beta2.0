@@ -21402,13 +21402,16 @@ class Warehouse_model extends App_Model
 				foreach ($result as $mkey => $mvalue) {
 					$html .= '
 						<tr>
-							<td colspan="7" class="vendor-name-title">
+							<td colspan="8" class="vendor-name-title">
 								' . get_vendor_company_name($mkey) . '
 							</td>
 						</tr>
 						<tr>
+							<td class="vendor-report-title" style="width: 9%">
+								' . _l('stock_export_new') . '
+							</td>
 							<td class="vendor-report-title" style="width: 13%">
-								' . _l('po_name') . '
+								PO / WO
 							</td>
 							<td class="vendor-report-title">
 								' . _l('item_name') . '
@@ -21417,7 +21420,7 @@ class Warehouse_model extends App_Model
 								' . _l('item_description') . '
 							</td>
 							<td class="vendor-report-title" style="width: 9%">
-								' . _l('stock_export_new') . '
+								Issued Qty
 							</td>
 							<td class="vendor-report-title" style="width: 9%">
 								' . _l('issued_date') . '
@@ -21432,8 +21435,11 @@ class Warehouse_model extends App_Model
 					foreach ($mvalue as $skey => $svalue) {
 						$html .= '
 							<tr>
+								<td align="center">
+									' . $svalue['goods_delivery_code'] . '
+								</td>
 								<td>
-									' . $svalue['pur_order_number'] . '
+									' . $svalue['order_number'] . '
 								</td>
 								<td>
 									' . $svalue['item_name'] . '
@@ -21469,8 +21475,11 @@ class Warehouse_model extends App_Model
 				<tbody>';
 
 				$html .= '<tr>
-					<td class="vendor-report-title">
-						' . _l('po_name') . '
+					<td class="vendor-report-title" style="width: 9%">
+						' . _l('stock_export_new') . '
+					</td>
+					<td class="vendor-report-title" style="width: 13%">
+						PO / WO
 					</td>
 					<td class="vendor-report-title">
 						' . _l('item_name') . '
@@ -21479,7 +21488,7 @@ class Warehouse_model extends App_Model
 						' . _l('item_description') . '
 					</td>
 					<td class="vendor-report-title" style="width: 9%">
-						' . _l('stock_export_new') . '
+						Issued Qty
 					</td>
 					<td class="vendor-report-title" style="width: 9%">
 						' . _l('issued_date') . '
@@ -21492,7 +21501,7 @@ class Warehouse_model extends App_Model
 					</td>
 				</tr>';
 				$html .= '<tr>
-					<td colspan="7">
+					<td colspan="8">
 						No entries found
 					</td>
 				</tr>';
@@ -21508,10 +21517,6 @@ class Warehouse_model extends App_Model
 				if (!empty($company_logo)) {
 					$logo = '<img src="' . base_url('uploads/company/' . $company_logo) . '" width="230" height="100">';
 				}
-				$from_date = $data['from_date'];
-				$to_date = $data['to_date'];
-				$from_date_html =  date('F', strtotime($from_date)) . ', ' . date('d', strtotime($from_date)) . ' ' . date('Y', strtotime($from_date));
-				$to_date_html = date('F', strtotime($to_date)) . ', ' . date('d', strtotime($to_date)) . ' ' . date('Y', strtotime($to_date));
 
 				$html = '';
 				$html .= '<table class="table">
@@ -21526,9 +21531,6 @@ class Warehouse_model extends App_Model
       			</table>
       			<br>';
 
-				$html .= '<p class="align_cen">' . _l('from_date') . ' :  <span class="fstyle">' . $from_date_html . '</p>
-				<p class="align_cen">' . _l('to_date') . ' :  <span class="fstyle">' . $to_date_html . '</p>';
-
 				$html .= ' <p><h2 class="bold align_cen text-center">' . mb_strtoupper(_l('vendor_allocation_report')) . '</h2></p>
 				<br>
 				<table class="table" style="width: 100%" border="1">
@@ -21537,38 +21539,44 @@ class Warehouse_model extends App_Model
 				foreach ($result as $mkey => $mvalue) {
 					$html .= '
 						<tr>
-							<td colspan="7" class="vendor-name-title-pdf">
+							<td colspan="8" class="vendor-name-title-pdf">
 								<h3>' . get_vendor_company_name($mkey) . '</h3>
 							</td>
 						</tr>
 						<tr>
-							<td class="vendor-report-title-pdf" style="width: 14%">
-								' . _l('po_name') . '
-							</td>
-							<td class="vendor-report-title-pdf" style="width: 16%">
-								' . _l('item_name') . '
-							</td>
-							<td class="vendor-report-title-pdf" style="width: 22%">
-								' . _l('item_description') . '
-							</td>
-							<td class="vendor-report-title-pdf" style="width: 12%">
+							<td class="vendor-report-title-pdf" style="width: 11%">
 								' . _l('stock_export_new') . '
 							</td>
 							<td class="vendor-report-title-pdf" style="width: 12%">
+								PO / WO
+							</td>
+							<td class="vendor-report-title-pdf" style="width: 14%">
+								' . _l('item_name') . '
+							</td>
+							<td class="vendor-report-title-pdf" style="width: 19%">
+								' . _l('item_description') . '
+							</td>
+							<td class="vendor-report-title-pdf" style="width: 11%">
+								Issued Qty
+							</td>
+							<td class="vendor-report-title-pdf" style="width: 11%">
 								' . _l('issued_date') . '
 							</td>
-							<td class="vendor-report-title-pdf" style="width: 12%">
+							<td class="vendor-report-title-pdf" style="width: 11%">
 								' . _l('lot_number') . '
 							</td>
-							<td class="vendor-report-title-pdf" style="width: 12%">
+							<td class="vendor-report-title-pdf" style="width: 11%">
 								' . _l('project_name') . '
 							</td>
 						</tr>';
 					foreach ($mvalue as $skey => $svalue) {
 						$html .= '
 							<tr>
+								<td align="center">
+									' . $svalue['goods_delivery_code'] . '
+								</td>
 								<td>
-									' . $svalue['pur_order_number'] . '
+									' . $svalue['order_number'] . '
 								</td>
 								<td>
 									' . $svalue['item_name'] . '
@@ -21599,10 +21607,6 @@ class Warehouse_model extends App_Model
 				if (!empty($company_logo)) {
 					$logo = '<img src="' . base_url('uploads/company/' . $company_logo) . '" width="230" height="100">';
 				}
-				$from_date = $data['from_date'];
-				$to_date = $data['to_date'];
-				$from_date_html =  date('F', strtotime($from_date)) . ', ' . date('d', strtotime($from_date)) . ' ' . date('Y', strtotime($from_date));
-				$to_date_html = date('F', strtotime($to_date)) . ', ' . date('d', strtotime($to_date)) . ' ' . date('Y', strtotime($to_date));
 
 				$html = '';
 				$html .= '<table class="table">
@@ -21617,40 +21621,40 @@ class Warehouse_model extends App_Model
       			</table>
       			<br>';
 
-				$html .= '<p class="align_cen">' . _l('from_date') . ' :  <span class="fstyle">' . $from_date_html . '</p>
-				<p class="align_cen">' . _l('to_date') . ' :  <span class="fstyle">' . $to_date_html . '</p>';
-
 				$html .= ' <p><h2 class="bold align_cen text-center">' . mb_strtoupper(_l('vendor_allocation_report')) . '</h2></p>
 				<br>
 				<table class="table" style="width: 100%" border="1">
 				<tbody>';
 
 				$html .= '<tr>
-					<td class="vendor-report-title-pdf" style="width: 14%">
-						' . _l('po_name') . '
-					</td>
-					<td class="vendor-report-title-pdf" style="width: 16%">
-						' . _l('item_name') . '
-					</td>
-					<td class="vendor-report-title-pdf" style="width: 22%">
-						' . _l('item_description') . '
-					</td>
-					<td class="vendor-report-title-pdf" style="width: 12%">
+					<td class="vendor-report-title-pdf" style="width: 11%">
 						' . _l('stock_export_new') . '
 					</td>
 					<td class="vendor-report-title-pdf" style="width: 12%">
+						PO / WO
+					</td>
+					<td class="vendor-report-title-pdf" style="width: 14%">
+						' . _l('item_name') . '
+					</td>
+					<td class="vendor-report-title-pdf" style="width: 19%">
+						' . _l('item_description') . '
+					</td>
+					<td class="vendor-report-title-pdf" style="width: 11%">
+						Issued Qty
+					</td>
+					<td class="vendor-report-title-pdf" style="width: 11%">
 						' . _l('issued_date') . '
 					</td>
-					<td class="vendor-report-title-pdf" style="width: 12%">
+					<td class="vendor-report-title-pdf" style="width: 11%">
 						' . _l('lot_number') . '
 					</td>
-					<td class="vendor-report-title-pdf" style="width: 12%">
+					<td class="vendor-report-title-pdf" style="width: 11%">
 						' . _l('project_name') . '
 					</td>
 				</tr>';
 
 				$html .= '<tr>
-					<td colspan="7">
+					<td colspan="8">
 						No entries found
 					</td>
 				</tr>';
@@ -21666,22 +21670,11 @@ class Warehouse_model extends App_Model
 
 	public function get_vendor_allocation_report_data($data)
 	{
-		$from_date = $data['from_date'];
-		$to_date = $data['to_date'];
-
-		if (!$this->check_format_date($from_date)) {
-			$from_date = to_sql_date($from_date);
-		}
-		if (!$this->check_format_date($to_date)) {
-			$to_date = to_sql_date($to_date);
-		}
-
-		$this->db->select('gdd.id as item_id, gdd.quantities_json, gdd.lot_number, gdd.issued_date, po.pur_order_name, po.pur_order_number, gdd.commodity_name, gdd.description, gdd.warehouse_id');
+		$this->db->select('gd.goods_delivery_code, gdd.id as item_id, gdd.quantities_json, gdd.lot_number, gdd.issued_date, po.pur_order_name, po.pur_order_number, wo.wo_order_name, wo.wo_order_number, gdd.commodity_name, gdd.description, gdd.warehouse_id');
 		$this->db->from(db_prefix() . 'goods_delivery_detail gdd');
 		$this->db->join(db_prefix() . 'goods_delivery gd', 'gdd.goods_delivery_id = gd.id', 'inner');
-		$this->db->join(db_prefix() . 'pur_orders po', 'gd.pr_order_id = po.id', 'inner');
-		$this->db->where('gd.date_add >=', $from_date);
-		$this->db->where('gd.date_add <=', $to_date);
+		$this->db->join(db_prefix() . 'pur_orders po', 'gd.pr_order_id = po.id AND gd.pr_order_id IS NOT NULL AND gd.pr_order_id != 0', 'left');
+		$this->db->join(db_prefix() . 'wo_orders wo', 'gd.wo_order_id = wo.id AND gd.wo_order_id IS NOT NULL AND gd.wo_order_id != 0', 'left');
 		$query = $this->db->get();
 		$goods_delivery_detail = $query->result_array();
 
@@ -21695,11 +21688,20 @@ class Warehouse_model extends App_Model
 					if (!empty($quantities_json)) {
 						foreach ($quantities_json as $qkey => $qvalue) {
 							$item_line = array();
+							$item_line['goods_delivery_code'] = $value['goods_delivery_code'];
 							$item_line['item_id'] = $value['item_id'];
 							$item_line['vendor_id'] = $qkey;
 							$item_line['vendor_name'] = get_vendor_company_name($qkey);
-							$item_line['pur_order_name'] = $value['pur_order_name'];
-							$item_line['pur_order_number'] = $value['pur_order_number'];
+							$item_line['order_name'] = NULL;
+							$item_line['order_number'] = NULL;
+							if(!empty($value['pur_order_name'])) {
+								$item_line['order_name'] = $value['pur_order_name'];
+								$item_line['order_number'] = $value['pur_order_number'];
+							}
+							if(!empty($value['wo_order_name'])) {
+								$item_line['order_name'] = $value['wo_order_name'];
+								$item_line['order_number'] = $value['wo_order_number'];
+							}
 							$item_line['item_name'] = $value['commodity_name'];
 							$item_line['item_description'] = $value['description'];
 							$item_line['project_name'] = get_project_name_by_id($value['warehouse_id']);
@@ -21715,11 +21717,20 @@ class Warehouse_model extends App_Model
 					if (!empty($lot_number)) {
 						foreach ($lot_number as $lkey => $lvalue) {
 							$item_line = array();
+							$item_line['goods_delivery_code'] = $value['goods_delivery_code'];
 							$item_line['item_id'] = $value['item_id'];
 							$item_line['vendor_id'] = $lkey;
 							$item_line['vendor_name'] = get_vendor_company_name($lkey);
-							$item_line['pur_order_name'] = $value['pur_order_name'];
-							$item_line['pur_order_number'] = $value['pur_order_number'];
+							$item_line['order_name'] = NULL;
+							$item_line['order_number'] = NULL;
+							if(!empty($value['pur_order_name'])) {
+								$item_line['order_name'] = $value['pur_order_name'];
+								$item_line['order_number'] = $value['pur_order_number'];
+							}
+							if(!empty($value['wo_order_name'])) {
+								$item_line['order_name'] = $value['wo_order_name'];
+								$item_line['order_number'] = $value['wo_order_number'];
+							}
 							$item_line['item_name'] = $value['commodity_name'];
 							$item_line['item_description'] = $value['description'];
 							$item_line['project_name'] = get_project_name_by_id($value['warehouse_id']);
@@ -21735,11 +21746,20 @@ class Warehouse_model extends App_Model
 					if (!empty($issued_date)) {
 						foreach ($issued_date as $ikey => $ivalue) {
 							$item_line = array();
+							$item_line['goods_delivery_code'] = $value['goods_delivery_code'];
 							$item_line['item_id'] = $value['item_id'];
 							$item_line['vendor_id'] = $ikey;
 							$item_line['vendor_name'] = get_vendor_company_name($ikey);
-							$item_line['pur_order_name'] = $value['pur_order_name'];
-							$item_line['pur_order_number'] = $value['pur_order_number'];
+							$item_line['order_name'] = NULL;
+							$item_line['order_number'] = NULL;
+							if(!empty($value['pur_order_name'])) {
+								$item_line['order_name'] = $value['pur_order_name'];
+								$item_line['order_number'] = $value['pur_order_number'];
+							}
+							if(!empty($value['wo_order_name'])) {
+								$item_line['order_name'] = $value['wo_order_name'];
+								$item_line['order_number'] = $value['wo_order_number'];
+							}
 							$item_line['item_name'] = $value['commodity_name'];
 							$item_line['item_description'] = $value['description'];
 							$item_line['project_name'] = get_project_name_by_id($value['warehouse_id']);
@@ -21774,7 +21794,14 @@ class Warehouse_model extends App_Model
 			}
 		}
 
-		return $transformedArray;
+		$vendors = !empty($data['vendors']) ? array_filter(array_map('trim', explode(',', $data['vendors'])), 'strlen') : array();
+		if (!empty($vendors)) {
+		    $filteredArray = array_intersect_key($transformedArray, array_flip($vendors));
+		} else {
+		    $filteredArray = $transformedArray;
+		}
+
+		return $filteredArray;
 	}
 
 	/**
