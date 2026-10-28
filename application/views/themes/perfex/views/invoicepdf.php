@@ -384,22 +384,9 @@ if (!empty($indexa)) {
         $invoice_items = $invoice->items;
         $inv = 1;
         // $invoice_tax = get_annexurewise_tax($invoice->id);
+        $sorted_items = [];
         foreach ($invoice_items as $item) {
             if ($item['annexure'] == $avalue['annexure']) {
-                if (!is_numeric($item['qty'])) {
-                    $item['qty'] = 1;
-                }
-                $amount = ($item['rate'] * $item['qty']) + $item['tax'];
-                $total_tax = $item['tax'];
-                $annexure = $item['annexure'];
-                $itemid = $item['id'];
-                // if(!empty($invoice_tax)) {
-                //     $item_tax_array = array_filter($invoice_tax, function ($item) use ($annexure, $itemid) {
-                //         return ($item['annexure'] == $annexure && $item['item_id'] == $itemid);
-                //     });
-                //     $item_tax_array = !empty($item_tax_array) ? array_values($item_tax_array) : array();
-                //     $total_tax = !empty($item_tax_array) ? $item_tax_array[0]['total_tax'] : 0;
-                // }
                 $vendor_name = '';
                 $invoice_no = '';
                 $invoice_date = '';
@@ -422,20 +409,46 @@ if (!empty($indexa)) {
                     $invoice_no = $pur_invoices->vendor_invoice_number;
                     $invoice_date = _d($pur_invoices->invoice_date);
                 }
-                $tblannexurehtml .= '
-                <tr style="font-size:11px;">
-                    <td width="5%;" align="center">' . $inv . '</td>
-                    <td width="12%" align="left;"><span style="font-size:11px;"><strong>' . clear_textarea_breaks($item['description']) . '</strong></span></td>
-                    <td width="12%" align="left"><span style="color:#424242;">' . clear_textarea_breaks($item['long_description']) . '</span></td>
-                    <td width="16%" align="left">' . $vendor_name . '</td>
-                    <td width="10%" align="left">'.$invoice_date.'</td>
-                    <td width="11%" align="left">' . $invoice_no . '</td>
-                    <td width="11%" align="right">' . app_format_money($item['rate']) . '</td>
-                    <td width="11%" align="right">' . app_format_money($total_tax) . '</td>
-                    <td width="12%" align="right">' . app_format_money($amount) . '</td>
-                </tr>';
-                $inv++;
+                $item['_vendor_name'] = $vendor_name;
+                $item['_invoice_no'] = $invoice_no;
+                $item['_invoice_date'] = $invoice_date;
+                $sorted_items[] = $item;
             }
+        }
+        usort($sorted_items, function ($a, $b) {
+            return strcasecmp($a['_vendor_name'], $b['_vendor_name']);
+        });
+        foreach ($sorted_items as $item) {
+            if (!is_numeric($item['qty'])) {
+                $item['qty'] = 1;
+            }
+            $amount = ($item['rate'] * $item['qty']) + $item['tax'];
+            $total_tax = $item['tax'];
+            $annexure = $item['annexure'];
+            $itemid = $item['id'];
+            // if(!empty($invoice_tax)) {
+            //     $item_tax_array = array_filter($invoice_tax, function ($item) use ($annexure, $itemid) {
+            //         return ($item['annexure'] == $annexure && $item['item_id'] == $itemid);
+            //     });
+            //     $item_tax_array = !empty($item_tax_array) ? array_values($item_tax_array) : array();
+            //     $total_tax = !empty($item_tax_array) ? $item_tax_array[0]['total_tax'] : 0;
+            // }
+            $vendor_name = $item['_vendor_name'];
+            $invoice_no = $item['_invoice_no'];
+            $invoice_date = $item['_invoice_date'];
+            $tblannexurehtml .= '
+            <tr style="font-size:11px;">
+                <td width="5%;" align="center">' . $inv . '</td>
+                <td width="12%" align="left;"><span style="font-size:11px;"><strong>' . clear_textarea_breaks($item['description']) . '</strong></span></td>
+                <td width="12%" align="left"><span style="color:#424242;">' . clear_textarea_breaks($item['long_description']) . '</span></td>
+                <td width="16%" align="left">' . $vendor_name . '</td>
+                <td width="10%" align="left">' . $invoice_date . '</td>
+                <td width="11%" align="left">' . $invoice_no . '</td>
+                <td width="11%" align="right">' . app_format_money($item['rate']) . '</td>
+                <td width="11%" align="right">' . app_format_money($total_tax) . '</td>
+                <td width="12%" align="right">' . app_format_money($amount) . '</td>
+            </tr>';
+            $inv++;
         }
         $tblannexurehtml .= '</tbody>';
         $tblannexurehtml .= '</table>';

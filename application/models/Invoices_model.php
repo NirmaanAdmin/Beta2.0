@@ -2382,15 +2382,9 @@ class Invoices_model extends App_Model
                   </tr>';
                 $invoice_items = $invoice->items;
                 $inv = 1;
+                $sorted_items = [];
                 foreach ($invoice_items as $item) {
                     if ($item['annexure'] == $avalue['annexure']) {
-                        if (!is_numeric($item['qty'])) {
-                            $item['qty'] = 1;
-                        }
-                        $amount = ($item['rate'] * $item['qty']) + $item['tax'];
-                        $total_tax = $item['tax'];
-                        $annexure = $item['annexure'];
-                        $itemid = $item['id'];
                         $vendor_name = '';
                         $invoice_no = '';
                         $invoice_date = '';
@@ -2401,21 +2395,40 @@ class Invoices_model extends App_Model
                             $invoice_no = $pur_invoices->vendor_invoice_number;
                             $invoice_date = date('d M, Y', strtotime($pur_invoices->invoice_date)); 
                         }
-                        $tblannexurehtml .= '
-                        <tr>
-                            <td>' . $inv . '</td>
-                            <td>' . clear_textarea_breaks($item['description']) . '</td>
-                            <td>' . clear_textarea_breaks($item['long_description']) . '</td>
-                            <td>' . $vendor_name . '</td>
-                            <td>' . $invoice_no . '</td>
-                            <td>' . $invoice_date. '</td>
-                            <td>' . str_replace(',', '', app_format_number($item['rate'])) . '</td>
-                            <td>' . str_replace(',', '', app_format_number($total_tax)) . '</td>
-                            <td>' . str_replace(',', '', app_format_number($amount)) . '</td>
-                            <td>' . clear_textarea_breaks($item['remarks']) . '</td>
-                        </tr>';
-                        $inv++;
+                        $item['_vendor_name'] = $vendor_name;
+                        $item['_invoice_no'] = $invoice_no;
+                        $item['_invoice_date'] = $invoice_date;
+                        $sorted_items[] = $item;
                     }
+                }
+                usort($sorted_items, function ($a, $b) {
+                    return strcasecmp($a['_vendor_name'], $b['_vendor_name']);
+                });
+                foreach ($sorted_items as $item) {
+                    if (!is_numeric($item['qty'])) {
+                        $item['qty'] = 1;
+                    }
+                    $amount = ($item['rate'] * $item['qty']) + $item['tax'];
+                    $total_tax = $item['tax'];
+                    $annexure = $item['annexure'];
+                    $itemid = $item['id'];
+                    $vendor_name = $item['_vendor_name'];
+                    $invoice_no = $item['_invoice_no'];
+                    $invoice_date = $item['_invoice_date'];
+                    $tblannexurehtml .= '
+                    <tr>
+                        <td>' . $inv . '</td>
+                        <td>' . clear_textarea_breaks($item['description']) . '</td>
+                        <td>' . clear_textarea_breaks($item['long_description']) . '</td>
+                        <td>' . $vendor_name . '</td>
+                        <td>' . $invoice_no . '</td>
+                        <td>' . $invoice_date . '</td>
+                        <td>' . str_replace(',', '', app_format_number($item['rate'])) . '</td>
+                        <td>' . str_replace(',', '', app_format_number($total_tax)) . '</td>
+                        <td>' . str_replace(',', '', app_format_number($amount)) . '</td>
+                        <td>' . clear_textarea_breaks($item['remarks']) . '</td>
+                    </tr>';
+                    $inv++;
                 }
                 $tblannexurehtml .= '
                   <tr>
