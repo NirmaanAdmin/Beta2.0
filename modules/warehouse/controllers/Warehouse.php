@@ -878,7 +878,8 @@ class warehouse extends AdminController
 
 		$data['goods_receipt_detail'] = $this->warehouse_model->get_goods_receipt_detail($id);
 
-		$data['goods_receipt'] = $this->warehouse_model->get_goods_receipt($id);
+		$goods_receipt = $this->warehouse_model->get_goods_receipt($id);
+		$data['goods_receipt'] = $goods_receipt;
 
 		$data['tax_data'] = $this->warehouse_model->get_html_tax_receip($id);
 
@@ -893,6 +894,15 @@ class warehouse extends AdminController
 
 		$data['attachments_new'] = $this->warehouse_model->get_inventory_attachments('goods_receipt_checkl', $id);
 		$data['goods_documentitions'] = $this->warehouse_model->get_inventory_documents($id);
+
+		$data['changes'] = array();
+		$this->load->model('purchase/purchase_model');
+		if(!empty($goods_receipt->pr_order_id) && $goods_receipt->pr_order_id != 0) {
+			$data['changes'] = $this->purchase_model->get_po_changes($goods_receipt->pr_order_id);
+		}
+		if(!empty($goods_receipt->wo_order_id) && $goods_receipt->wo_order_id != 0) {
+			$data['changes'] = $this->purchase_model->get_change_wo_order($goods_receipt->wo_order_id);
+		}
 
 		$this->load->view('manage_goods_receipt/view_purchase', $data);
 	}
@@ -1882,7 +1892,8 @@ class warehouse extends AdminController
 
 		$data['goods_delivery_detail'] = $this->warehouse_model->get_goods_delivery_detail($id);
 
-		$data['goods_delivery'] = $this->warehouse_model->get_goods_delivery($id);
+		$goods_delivery = $this->warehouse_model->get_goods_delivery($id);
+		$data['goods_delivery'] = $goods_delivery;
 		$data['activity_log'] = $this->warehouse_model->wh_get_activity_log($id, 'delivery');
 		$data['packing_lists'] = $this->warehouse_model->get_packing_list_by_deivery_note($id);
 
@@ -1895,6 +1906,14 @@ class warehouse extends AdminController
 		$data['base_currency'] = $base_currency;
 		$data['attachments'] = $this->warehouse_model->get_inventory_attachments('goods_delivery', $id);
 
+		$data['changes'] = array();
+		$this->load->model('purchase/purchase_model');
+		if(!empty($goods_delivery->pr_order_id) && $goods_delivery->pr_order_id != 0) {
+			$data['changes'] = $this->purchase_model->get_po_changes($goods_delivery->pr_order_id);
+		}
+		if(!empty($goods_delivery->wo_order_id) && $goods_delivery->wo_order_id != 0) {
+			$data['changes'] = $this->purchase_model->get_change_wo_order($goods_delivery->wo_order_id);
+		}
 
 		$this->load->view('manage_goods_delivery/view_delivery', $data);
 	}

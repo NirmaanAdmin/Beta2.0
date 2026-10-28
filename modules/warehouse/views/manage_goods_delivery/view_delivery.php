@@ -47,6 +47,12 @@
               </a>
             </li>
 
+            <li role="presentation">
+             <a href="#changes" aria-controls="changes" role="tab" data-toggle="tab">
+                <?php echo _l('changes'); ?>
+             </a>
+            </li>
+
             <li role="presentation" class="tab-separator">
               <a href="#attachment" aria-controls="attachment" role="tab" data-toggle="tab">
                 <?php echo _l('attachment'); ?>
@@ -673,6 +679,14 @@
               </div>
             </div>
             <div class="clearfix"></div>
+          </div>
+        </div>
+
+        <div role="tabpanel" class="tab-pane" id="changes">
+          <div class="col-md-12">
+            <div class="table-responsive">
+              <?php $this->load->view('purchase/list_order_co', array('changes' => $changes)); ?>
+            </div>
           </div>
         </div>
 
