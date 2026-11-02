@@ -18761,18 +18761,42 @@ class Purchase_model extends App_Model
         $po_no_title = '';
         $wo_date_title = '';
         $wo_description_title = '';
+        $change_order = '';
         if (!empty($payment_certificate->po_id)) {
             $po_no_title = _l('po_no');
             $wo_date_title = _l('po_date');
             $wo_description_title = _l('po_description');
+            $order = $this->db->select('id, pur_order_number')
+            ->from(db_prefix() . 'co_orders')
+            ->where('approve_status', 2)
+            ->where('po_order_id', (int)$payment_certificate->po_id)
+            ->order_by('id', 'DESC')
+            ->limit(1)
+            ->get()
+            ->row();
+            if ($order) {
+                $change_order = $order->pur_order_number;
+            }
         } else if (!empty($payment_certificate->wo_id)) {
             $po_no_title = _l('wo_no');
             $wo_date_title = _l('wo_date');
             $wo_description_title = _l('wo_description');
+            $order = $this->db->select('id, pur_order_number')
+            ->from(db_prefix() . 'co_orders')
+            ->where('approve_status', 2)
+            ->where('wo_order_id', (int)$payment_certificate->wo_id)
+            ->order_by('id', 'DESC')
+            ->limit(1)
+            ->get()
+            ->row();
+            if ($order) {
+                $change_order = $order->pur_order_number;
+            }
         } else if (!empty($payment_certificate->ot_id)) {
             $po_no_title = _l('Order Tracker Name');
             $wo_date_title = _l('order_date');
             $wo_description_title = _l('Order Tracker Description');
+            $change_order = '';
         }
 
         $html .= '<table class="table" style="width: 100%" border="1" style="font-size:13px">
@@ -18798,20 +18822,20 @@ class Purchase_model extends App_Model
                 <tr>
                   <td class="cert_title">' . _l('project') . '</td>
                   <td>' . get_project_name_by_id($pur_order->project) . '</td>
+                  <td class="cert_title">' . _l('change_order') . '</td>
+                  <td>' . $change_order . '</td>
+                </tr>
+                <tr>
                   <td class="cert_title">' . _l('Location') . '</td>
                   <td>' . $pay_cert_data->location . '</td>
-                </tr>
-                <tr>
                   <td class="cert_title">' . _l('invoice_ref') . '</td>
                   <td>' . $pay_cert_data->invoice_ref . '</td>
-                  <td class="cert_title">' . _l('bill_period_upto') . '</td>
-                  <td>' . _d($pay_cert_data->bill_period_upto) . '</td>
                 </tr>
                 <tr>
+                  <td class="cert_title">' . _l('bill_period_upto') . '</td>
+                  <td>' . _d($pay_cert_data->bill_period_upto) . '</td>
                   <td class="cert_title">' . _l('bill_received_on') . '</td>
                   <td>' . _d($pay_cert_data->bill_received_on) . '</td>
-                  <td class="cert_title"></td>
-                  <td></td>
                 </tr>
             </tbody>
         </table>
