@@ -18630,13 +18630,18 @@ class Purchase_model extends App_Model
         $pay_cert_data = $this->db->get(db_prefix() . 'payment_certificate')->result_array();
         $result = !empty($pay_cert_data) ? $pay_cert_data[0] : array();
 
-        if (!empty($result['wo_id'])) {
-            $po_contract_data = $this->get_wo_contract_data($result['wo_id'], '', 0);
-            $po_contract_data['po_contract_amount'] = $po_contract_data['wo_contract_amount'];
-        } else {
+        if (!empty($result['po_id'])) {
             $po_contract_data = $this->get_po_contract_data($result['po_id'], '', 0);
+            $po_contract_amount = $po_contract_data['po_contract_amount'];
+        } else if (!empty($result['wo_id'])) {
+            $wo_contract_data = $this->get_wo_contract_data($result['wo_id'], '', 0);
+            $po_contract_amount = $wo_contract_data['wo_contract_amount'];
+        } else if (!empty($result['ot_id'])) {
+            $ot_contract_data = $this->get_ot_contract_data($result['ot_id'], '', 0);
+            $po_contract_amount = $ot_contract_data['ot_contract_amount'];
+        } else {
+            $po_contract_amount = 0;
         }
-        $po_contract_amount = $po_contract_data['po_contract_amount'];
 
         $cgst_tax = !empty($result['cgst_tax']) ? str_replace("%", "", $result['cgst_tax']) : 0;
         $sgst_tax = !empty($result['sgst_tax']) ? str_replace("%", "", $result['sgst_tax']) : 0;
